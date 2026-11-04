@@ -1,0 +1,18 @@
+{
+  "request": {
+    "as": "regional.manager",
+    "method": "GET",
+    "path": "/api/org/units/30000000-0000-4000-8000-000000000004"
+  },
+  "response": {
+    "status": 404,
+    "body": {
+      "type": "urn:budgetflow:problem:not-found",
+      "title": "Not found",
+      "status": 404,
+      "code": "NOT_FOUND",
+      "detail": "The org unit does not exist or you cannot see it.",
+      "instance": "/api/org/units/30000000-0000-4000-8000-000000000004"
+    }
+  }
+}

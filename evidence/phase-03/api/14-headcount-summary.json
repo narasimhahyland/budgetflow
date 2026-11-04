@@ -1,0 +1,144 @@
+{
+  "request": {
+    "as": "finance.admin",
+    "method": "GET",
+    "path": "/api/org/headcount?asOf=2026-11-04"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "scope": "tenant",
+      "snapshot": {
+        "id": "32000000-0000-4000-8000-000000000100",
+        "asOfDate": "2026-11-01",
+        "source": "hr-file",
+        "createdAt": "2026-11-04T17:37:06.655Z",
+        "lineCount": 17,
+        "totalHeadcount": 460
+      },
+      "total": 460,
+      "locations": [
+        {
+          "code": "BLR",
+          "headcount": 140,
+          "previousHeadcount": 130,
+          "byType": {
+            "employee": 124,
+            "contractor": 12,
+            "intern": 4
+          },
+          "teams": [
+            {
+              "code": "BLR-ENG-CS",
+              "headcount": 42
+            },
+            {
+              "code": "BLR-SUP",
+              "headcount": 52
+            },
+            {
+              "code": "BLR-ENG-PLAT",
+              "headcount": 46
+            }
+          ]
+        },
+        {
+          "code": "BER",
+          "headcount": 27,
+          "previousHeadcount": 0,
+          "byType": {
+            "employee": 24,
+            "contractor": 0,
+            "intern": 3
+          },
+          "teams": [
+            {
+              "code": "BER-ENG-INT",
+              "headcount": 27
+            }
+          ]
+        },
+        {
+          "code": "HYD",
+          "headcount": 90,
+          "previousHeadcount": 86,
+          "byType": {
+            "employee": 84,
+            "contractor": 0,
+            "intern": 6
+          },
+          "teams": [
+            {
+              "code": "HYD-ENG-CLOUD",
+              "headcount": 34
+            },
+            {
+              "code": "HYD-FIN",
+              "headcount": 22
+            },
+            {
+              "code": "HYD-ENG-QE",
+              "headcount": 34
+            }
+          ]
+        },
+        {
+          "code": "LON",
+          "headcount": 18,
+          "previousHeadcount": 0,
+          "byType": {
+            "employee": 18,
+            "contractor": 0,
+            "intern": 0
+          },
+          "teams": [
+            {
+              "code": "LON-SALES",
+              "headcount": 18
+            }
+          ]
+        },
+        {
+          "code": "NYC",
+          "headcount": 35,
+          "previousHeadcount": 0,
+          "byType": {
+            "employee": 30,
+            "contractor": 5,
+            "intern": 0
+          },
+          "teams": [
+            {
+              "code": "NYC-CS",
+              "headcount": 35
+            }
+          ]
+        },
+        {
+          "code": "WLK",
+          "headcount": 150,
+          "previousHeadcount": 0,
+          "byType": {
+            "employee": 150,
+            "contractor": 0,
+            "intern": 0
+          },
+          "teams": [
+            {
+              "code": "WLK-FIN",
+              "headcount": 25
+            },
+            {
+              "code": "WLK-PM",
+              "headcount": 55
+            },
+            {
+              "code": "WLK-SALES",
+              "headcount": 70
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

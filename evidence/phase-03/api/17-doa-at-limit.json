@@ -1,0 +1,40 @@
+{
+  "request": {
+    "as": "finance.controller",
+    "method": "GET",
+    "path": "/api/finance/doa/lookup?role=location-manager&spendType=team_lunch&legalEntityId=20000000-0000-4000-8000-000000000002&amountMinor=100000&currency=USD"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "withinLimit": true,
+      "code": null,
+      "message": "Within this approver\u2019s delegation-of-authority limit.",
+      "date": "2026-11-04",
+      "amount": {
+        "amountMinor": 100000,
+        "currency": "USD"
+      },
+      "limit": {
+        "id": "64000000-0000-4000-8000-000000000103",
+        "role": "location-manager",
+        "personId": null,
+        "personName": null,
+        "spendType": "team_lunch",
+        "legalEntityId": null,
+        "legalEntityCode": null,
+        "limit": {
+          "amountMinor": 100000,
+          "currency": "USD"
+        },
+        "validFrom": "2026-01-01",
+        "validTo": null
+      },
+      "approver": {
+        "personId": null,
+        "displayName": null,
+        "roles": ["location-manager"]
+      }
+    }
+  }
+}

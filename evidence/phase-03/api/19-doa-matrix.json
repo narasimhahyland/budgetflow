@@ -1,0 +1,263 @@
+{
+  "request": {
+    "as": "finance.controller",
+    "method": "GET",
+    "path": "/api/finance/doa"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "version": {
+        "id": "63000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "status": "active",
+        "validFrom": "2026-01-01",
+        "validTo": null,
+        "approvedByName": "Morgan Lee"
+      },
+      "spendTypes": ["*", "employee_events", "marketing", "team_lunch", "travel"],
+      "items": [
+        {
+          "id": "64000000-0000-4000-8000-000000000107",
+          "role": "ceo",
+          "personId": null,
+          "personName": null,
+          "spendType": "marketing",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 50000000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000001",
+          "role": "ceo",
+          "personId": null,
+          "personName": null,
+          "spendType": "*",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 25000000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000002",
+          "role": "finance-admin",
+          "personId": null,
+          "personName": null,
+          "spendType": "*",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 10000000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000003",
+          "role": "finance-controller",
+          "personId": null,
+          "personName": null,
+          "spendType": "*",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 10000000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000100",
+          "role": "department-head",
+          "personId": null,
+          "personName": null,
+          "spendType": "employee_events",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 2500000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000106",
+          "role": "finance-controller",
+          "personId": null,
+          "personName": null,
+          "spendType": "travel",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 2500000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000101",
+          "role": "regional-manager",
+          "personId": null,
+          "personName": null,
+          "spendType": "employee_events",
+          "legalEntityId": "20000000-0000-4000-8000-000000000002",
+          "legalEntityCode": "HYL-IN",
+          "limit": {
+            "amountMinor": 2000000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000102",
+          "role": "budget-owner",
+          "personId": null,
+          "personName": null,
+          "spendType": "employee_events",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 1500000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000004",
+          "role": "budget-owner",
+          "personId": null,
+          "personName": null,
+          "spendType": "*",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 1000000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000006",
+          "role": "regional-manager",
+          "personId": null,
+          "personName": null,
+          "spendType": "*",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 1000000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000005",
+          "role": "department-head",
+          "personId": null,
+          "personName": null,
+          "spendType": "*",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 1000000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000104",
+          "role": "location-manager",
+          "personId": null,
+          "personName": null,
+          "spendType": "employee_events",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 500000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000108",
+          "role": null,
+          "personId": "40000000-0000-4000-8000-000000000008",
+          "personName": "Ananya Iyer",
+          "spendType": "travel",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 500000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000007",
+          "role": "location-manager",
+          "personId": null,
+          "personName": null,
+          "spendType": "*",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 250000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000105",
+          "role": "event-organizer",
+          "personId": null,
+          "personName": null,
+          "spendType": "employee_events",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 100000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        },
+        {
+          "id": "64000000-0000-4000-8000-000000000103",
+          "role": "location-manager",
+          "personId": null,
+          "personName": null,
+          "spendType": "team_lunch",
+          "legalEntityId": null,
+          "legalEntityCode": null,
+          "limit": {
+            "amountMinor": 100000,
+            "currency": "USD"
+          },
+          "validFrom": "2026-01-01",
+          "validTo": null
+        }
+      ]
+    }
+  }
+}

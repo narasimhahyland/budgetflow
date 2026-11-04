@@ -1,0 +1,39 @@
+{
+  "request": {
+    "as": "org.admin",
+    "method": "POST",
+    "path": "/api/org/headcount/imports",
+    "body": {
+      "csv": "location_code,team_code,employment_type,headcount\nXXX,,employee,3\nHYD,,freelancer,2\nBLR,HYD-ENG-QE,employee,4",
+      "asOfDate": "2654-02-01"
+    }
+  },
+  "response": {
+    "status": 422,
+    "body": {
+      "type": "urn:budgetflow:problem:import-invalid",
+      "title": "Import invalid",
+      "status": 422,
+      "code": "IMPORT_INVALID",
+      "detail": "The file has 3 problem(s); nothing was imported.",
+      "instance": "/api/org/headcount/imports",
+      "params": {
+        "issues": 3
+      },
+      "errors": [
+        {
+          "path": "line 2.location_code",
+          "message": "\"XXX\" is not a location code."
+        },
+        {
+          "path": "line 3.employment_type",
+          "message": "Employment type must be employee, contractor or intern."
+        },
+        {
+          "path": "line 4.team_code",
+          "message": "Team HYD-ENG-QE is not part of location BLR."
+        }
+      ]
+    }
+  }
+}

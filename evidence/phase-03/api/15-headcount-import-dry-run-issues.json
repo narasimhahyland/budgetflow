@@ -1,0 +1,42 @@
+{
+  "request": {
+    "as": "org.admin",
+    "method": "POST",
+    "path": "/api/org/headcount/imports",
+    "body": {
+      "csv": "location_code,team_code,employment_type,headcount\nXXX,,employee,3\nHYD,,freelancer,2\nBLR,HYD-ENG-QE,employee,4",
+      "asOfDate": "2654-02-01",
+      "dryRun": true
+    }
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "dryRun": true,
+      "accepted": false,
+      "snapshotId": null,
+      "asOfDate": "2654-02-01",
+      "lineCount": 0,
+      "totalHeadcount": 0,
+      "previousTotal": 125,
+      "issues": [
+        {
+          "line": 2,
+          "field": "location_code",
+          "message": "\"XXX\" is not a location code."
+        },
+        {
+          "line": 3,
+          "field": "employment_type",
+          "message": "Employment type must be employee, contractor or intern."
+        },
+        {
+          "line": 4,
+          "field": "team_code",
+          "message": "Team HYD-ENG-QE is not part of location BLR."
+        }
+      ],
+      "units": []
+    }
+  }
+}

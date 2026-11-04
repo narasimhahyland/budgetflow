@@ -1,0 +1,39 @@
+{
+  "request": {
+    "as": "finance.admin",
+    "method": "GET",
+    "path": "/api/finance/exchange-rates/lookup?from=INR&to=USD&date=2026-11-16&type=plan&amountMinor=8325000"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "type": "plan",
+      "date": "2026-11-16",
+      "applied": {
+        "type": "plan",
+        "from": "INR",
+        "to": "USD",
+        "value": "0.012012012012",
+        "rateIds": ["24000000-0000-4000-8000-000000000100"]
+      },
+      "sources": [
+        {
+          "rateId": "24000000-0000-4000-8000-000000000100",
+          "quoteCurrency": "INR",
+          "rate": "83.250000000000",
+          "effectiveDate": "2026-01-01",
+          "fiscalYearLabel": "FY2026",
+          "locked": true
+        }
+      ],
+      "amount": {
+        "amountMinor": 8325000,
+        "currency": "INR"
+      },
+      "converted": {
+        "amountMinor": 100000,
+        "currency": "USD"
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "request": {
+    "as": "finance.admin",
+    "method": "POST",
+    "path": "/api/finance/exchange-rates",
+    "body": {
+      "rateType": "plan",
+      "quoteCurrency": "GBP",
+      "rate": "0.8",
+      "effectiveDate": "2026-02-01",
+      "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+      "source": "Evidence"
+    }
+  },
+  "response": {
+    "status": 409,
+    "body": {
+      "type": "urn:budgetflow:problem:plan-rate-locked",
+      "title": "Plan rate locked",
+      "status": 409,
+      "code": "PLAN_RATE_LOCKED",
+      "detail": "FY2026 plan rates are locked and cannot change.",
+      "instance": "/api/finance/exchange-rates",
+      "params": {
+        "fiscalYear": "FY2026"
+      }
+    }
+  }
+}

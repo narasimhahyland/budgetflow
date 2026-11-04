@@ -1,0 +1,20 @@
+         who          |   spend_type    | entity |     limit      
+----------------------+-----------------+--------+----------------
+ ceo                  | marketing       | any    | USD 500,000.00
+ ceo                  | *               | any    | USD 250,000.00
+ finance-admin        | *               | any    | USD 100,000.00
+ finance-controller   | *               | any    | USD 100,000.00
+ department-head      | employee_events | any    | USD 25,000.00
+ finance-controller   | travel          | any    | USD 25,000.00
+ regional-manager     | employee_events | HYL-IN | USD 20,000.00
+ budget-owner         | employee_events | any    | USD 15,000.00
+ budget-owner         | *               | any    | USD 10,000.00
+ department-head      | *               | any    | USD 10,000.00
+ regional-manager     | *               | any    | USD 10,000.00
+ Ananya Iyer (person) | travel          | any    | USD 5,000.00
+ location-manager     | employee_events | any    | USD 5,000.00
+ location-manager     | *               | any    | USD 2,500.00
+ event-organizer      | employee_events | any    | USD 1,000.00
+ location-manager     | team_lunch      | any    | USD 1,000.00
+(16 rows)
+

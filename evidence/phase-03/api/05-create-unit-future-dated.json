@@ -1,0 +1,48 @@
+{
+  "request": {
+    "as": "org.admin",
+    "method": "POST",
+    "path": "/api/org/units",
+    "body": {
+      "code": "EV-2231AA",
+      "name": "Evidence team 2231AA",
+      "kind": "team",
+      "parentId": "30000000-0000-4000-8000-000000000110",
+      "effectiveFrom": "2654-01-01",
+      "reason": "Evidence"
+    }
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "id": "b4a06c6c-0b72-4bad-b019-831803ad663d",
+      "code": "EV-2231AA",
+      "name": "Evidence team 2231AA",
+      "ancestorIds": [
+        "30000000-0000-4000-8000-000000000001",
+        "30000000-0000-4000-8000-000000000003",
+        "30000000-0000-4000-8000-000000000006",
+        "30000000-0000-4000-8000-000000000110",
+        "b4a06c6c-0b72-4bad-b019-831803ad663d"
+      ],
+      "validFrom": "2654-01-01",
+      "validTo": null,
+      "versions": [
+        {
+          "validFrom": "2654-01-01",
+          "validTo": null,
+          "changeKind": "created",
+          "name": "Evidence team 2231AA",
+          "parentId": "30000000-0000-4000-8000-000000000110",
+          "parentName": "Engineering Bengaluru",
+          "managerPersonId": null,
+          "managerName": null,
+          "legalEntityId": "20000000-0000-4000-8000-000000000002",
+          "timezone": "Asia/Kolkata",
+          "reason": "Evidence",
+          "createdAt": "2026-11-04T17:51:59.901Z"
+        }
+      ]
+    }
+  }
+}
