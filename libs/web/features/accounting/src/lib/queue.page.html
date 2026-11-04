@@ -1,0 +1,523 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Unmatched actuals</h1>
+    <p class="bf-page__subtitle">
+      Spend lines awaiting reconciliation against approved commitments and budget lines.
+    </p>
+  </div>
+</header>
+
+<bf-actuals-tabs [queueCount]="queueCount()" />
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="queue-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+
+<section class="bf-card bf-filters" aria-label="Filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Entity</mat-label>
+    <mat-select [ngModel]="entity()" (ngModelChange)="entity.set($event)">
+      <mat-option value="all">All</mat-option>
+      @for (e of valueOf(entities)?.items ?? []; track e.id) {
+        <mat-option [value]="e.id">{{ e.code }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Currency</mat-label>
+    <mat-select [ngModel]="currency()" (ngModelChange)="currency.set($event)">
+      <mat-option value="all">All</mat-option>
+      @for (c of currencies(); track c) {
+        <mat-option [value]="c">{{ c }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="bf-filters__search">
+    <mat-label>Filter by vendor, description or reference</mat-label>
+    <input
+      matInput
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+      data-testid="queue-search"
+    />
+  </mat-form-field>
+</section>
+
+<div class="bf-queue">
+  <section class="bf-card" aria-labelledby="queue-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="queue-title">Lines to resolve</h2>
+      <button mat-icon-button type="button" aria-label="Refresh" (click)="list.reload()">
+        <mat-icon svgIcon="refresh" aria-hidden="true" />
+      </button>
+    </div>
+    @if (list.isLoading() && !valueOf(list)) {
+      <bf-load-state [loading]="true" what="the unmatched queue" />
+    } @else if (list.error()) {
+      <bf-load-state [error]="list.error()" what="the unmatched queue" (retry)="list.reload()" />
+    } @else if (items().length === 0) {
+      <sat-empty-state>
+        <h2 satEmptyStateHeadline>Nothing to match</h2>
+        <p satEmptyStateDescription>
+          Every imported line is matched or marked not budget-relevant.
+        </p>
+      </sat-empty-state>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="items()" aria-label="Unmatched actuals">
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let a" class="bf-nowrap">
+              {{ a.transactionDate | date: 'd MMM' }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="vendor">
+            <th mat-header-cell *matHeaderCellDef>Vendor</th>
+            <td mat-cell *matCellDef="let a">
+              <span class="bf-cell__primary">{{ a.vendorName ?? a.merchant ?? '—' }}</span>
+              <span class="bf-cell__secondary">{{ a.legalEntityCode }} · {{ a.sourceRef }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let a">
+              <span class="bf-cell__primary">{{ a.memo ?? '—' }}</span>
+              <sat-status-tag [status]="status(a).tone">{{ status(a).text }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="transaction">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Transaction amount</th>
+            <td mat-cell *matCellDef="let a" class="bf-num">
+              <bf-money
+                [amountMinor]="a.transaction.amountMinor"
+                [currency]="a.transaction.currency"
+              />
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="reporting">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">USD at plan rate</th>
+            <td mat-cell *matCellDef="let a" class="bf-num">
+              <bf-money [amountMinor]="a.reporting.amountMinor" [currency]="a.reporting.currency" />
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="suggestion">
+            <th mat-header-cell *matHeaderCellDef>Suggested match</th>
+            <td mat-cell *matCellDef="let a">
+              @if (a.suggestion; as s) {
+                <span class="bf-cell__primary bf-nowrap">{{
+                  s.commitmentReference ?? s.budgetName
+                }}</span>
+                <span class="bf-cell__secondary">{{ s.confidence }}% confidence</span>
+              } @else {
+                <span class="bf-muted">No suggestion</span>
+              }
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: columns"
+            class="bf-row--clickable"
+            [class.bf-row--selected]="row.id === selectedId()"
+            tabindex="0"
+            (click)="select(row)"
+            (keydown.enter)="select(row)"
+            [attr.data-testid]="'queue-row-' + row.sourceRef"
+          ></tr>
+        </table>
+      </div>
+      <p class="bf-card__body bf-muted">
+        Showing {{ items().length | number }} of {{ queueCount() | number }} unmatched lines
+      </p>
+    }
+  </section>
+
+  @if (selectedId()) {
+    <section class="bf-card" aria-labelledby="drawer-title" data-testid="match-drawer">
+      @if (detail.isLoading() && !valueOf(detail)) {
+        <bf-load-state [loading]="true" what="the actual" />
+      } @else if (detail.error()) {
+        <bf-load-state [error]="detail.error()" what="the actual" (retry)="detail.reload()" />
+      } @else if (valueOf(detail); as d) {
+        <div class="bf-drawer">
+          <div class="bf-drawer__head">
+            <div>
+              <h2 class="bf-card__title" id="drawer-title">Match actual</h2>
+              <p class="bf-card__hint">
+                {{ d.actual.vendorName ?? d.actual.merchant ?? d.actual.sourceRef }} —
+                <bf-money
+                  [amountMinor]="d.actual.transaction.amountMinor"
+                  [currency]="d.actual.transaction.currency"
+                />
+              </p>
+            </div>
+            <button mat-button type="button" (click)="close()">Close</button>
+          </div>
+
+          @if (failure()) {
+            <sat-banner variant="important" data-testid="match-error"
+              ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+            >
+          }
+          @if (d.actual.note) {
+            <sat-banner [variant]="d.actual.duplicateOfActualId ? 'important' : 'warning'"
+              ><sat-banner-message>{{ d.actual.note }}</sat-banner-message></sat-banner
+            >
+          }
+
+          <div>
+            <div class="bf-card__header bf-sr-pad">
+              <h3 class="bf-card__title">Currency and FX reconciliation</h3>
+              @if (d.actual.transaction.currency !== d.actual.reporting.currency) {
+                <sat-status-tag status="neutral" [hideIcon]="true">Plan rate locked</sat-status-tag>
+              }
+            </div>
+            <dl class="bf-fx">
+              <div>
+                <dt>Transaction</dt>
+                <dd>
+                  <bf-money
+                    [amountMinor]="d.actual.transaction.amountMinor"
+                    [currency]="d.actual.transaction.currency"
+                  />
+                </dd>
+              </div>
+              <div>
+                <dt>Budget ({{ d.actual.reporting.currency }}) at plan</dt>
+                <dd data-testid="fx-plan">
+                  <bf-money
+                    [amountMinor]="d.actual.reporting.amountMinor"
+                    [currency]="d.actual.reporting.currency"
+                  />
+                </dd>
+              </div>
+              <div>
+                <dt>
+                  {{ d.actual.actualRate?.type === 'spot' ? 'Spot' : 'Month-end' }} rate value
+                </dt>
+                <dd>
+                  @if (d.actual.actualReporting; as ar) {
+                    <bf-money [amountMinor]="ar.amountMinor" [currency]="ar.currency" />
+                  } @else {
+                    —
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>FX effect</dt>
+                <dd data-testid="fx-effect">
+                  <bf-money
+                    [amountMinor]="d.actual.fxEffect.amountMinor"
+                    [currency]="d.actual.fxEffect.currency"
+                  />
+                </dd>
+              </div>
+            </dl>
+            <p class="bf-note">FX effect is reported separately and does not consume budget.</p>
+          </div>
+
+          @if (canManage() && d.actual.status !== 'matched' && d.actual.status !== 'excluded') {
+            @switch (mode()) {
+              @case ('match') {
+                <div>
+                  <h3 class="bf-card__title">Candidate match target</h3>
+                  <mat-radio-group
+                    class="bf-actions-col"
+                    aria-label="Match target"
+                    [ngModel]="target()?.kind === 'commitment' ? 'c:' + target()!.id : 'budget'"
+                    (ngModelChange)="
+                      target.set(
+                        $event === 'budget'
+                          ? { kind: 'budget', id: '' }
+                          : { kind: 'commitment', id: $event.slice(2) }
+                      )
+                    "
+                  >
+                    @for (c of d.candidates; track c.commitmentId) {
+                      <div
+                        class="bf-candidate"
+                        [class.bf-candidate--chosen]="target()?.id === c.commitmentId"
+                      >
+                        <span class="bf-candidate__body">
+                          <mat-radio-button
+                            [value]="'c:' + c.commitmentId"
+                            [attr.data-testid]="'candidate-' + c.reference"
+                          >
+                            <span class="bf-candidate__title"
+                              >{{ c.reference }} — {{ c.description }}</span
+                            >
+                          </mat-radio-button>
+                          @if (c.confidence !== null) {
+                            <sat-status-tag status="success"
+                              >{{ c.confidence }}% confidence</sat-status-tag
+                            >
+                          }
+                          <span class="bf-muted">
+                            {{ c.budgetName }} · Encumbered
+                            <bf-money
+                              [amountMinor]="c.remaining.amountMinor"
+                              [currency]="c.remaining.currency"
+                            />
+                            · Difference
+                            <bf-money
+                              [amountMinor]="c.differenceMinor"
+                              [currency]="c.remaining.currency"
+                            />
+                          </span>
+                          <span class="bf-note">{{ fitText(c.fit) }}</span>
+                        </span>
+                      </div>
+                    }
+                    <div
+                      class="bf-candidate"
+                      [class.bf-candidate--chosen]="target()?.kind === 'budget'"
+                    >
+                      <span class="bf-candidate__body">
+                        <mat-radio-button value="budget" data-testid="candidate-budget">
+                          <span class="bf-candidate__title">Charge to budget directly</span>
+                        </mat-radio-button>
+                        <span class="bf-muted"
+                          >No commitment; consumes the budget's available amount.</span
+                        >
+                        @if (target()?.kind === 'budget') {
+                          <mat-form-field appearance="outline">
+                            <mat-label>Budget</mat-label>
+                            <mat-select
+                              [ngModel]="directBudget()"
+                              (ngModelChange)="directBudget.set($event)"
+                              data-testid="direct-budget"
+                            >
+                              @for (b of entityBudgets(); track b.id) {
+                                <mat-option [value]="b.id">{{ b.name }}</mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
+                        }
+                      </span>
+                    </div>
+                  </mat-radio-group>
+                </div>
+                <div class="bf-form bf-sr-pad">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Amount to match ({{ d.actual.transaction.currency }})</mat-label>
+                    <input
+                      matInput
+                      inputmode="decimal"
+                      [ngModel]="amount()"
+                      (ngModelChange)="amount.set($event)"
+                    />
+                    <mat-hint
+                      >Leave empty for all that is left:
+                      {{ money(left(d.actual), d.actual.transaction.currency) }}</mat-hint
+                    >
+                  </mat-form-field>
+                </div>
+                @if (chosen()) {
+                  <mat-checkbox [ngModel]="final()" (ngModelChange)="final.set($event)"
+                    >Final invoice: release what is left on the commitment</mat-checkbox
+                  >
+                  <mat-checkbox
+                    [ngModel]="prepaid()"
+                    (ngModelChange)="prepaid.set($event)"
+                    data-testid="prepaid-toggle"
+                    >Deposit or prepayment, consumed in the service period</mat-checkbox
+                  >
+                  @if (prepaid()) {
+                    <div class="bf-form bf-sr-pad">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Service starts</mat-label>
+                        <input
+                          matInput
+                          type="date"
+                          [ngModel]="serviceStart()"
+                          (ngModelChange)="serviceStart.set($event)"
+                        />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Service ends</mat-label>
+                        <input
+                          matInput
+                          type="date"
+                          [ngModel]="serviceEnd()"
+                          (ngModelChange)="serviceEnd.set($event)"
+                        />
+                      </mat-form-field>
+                    </div>
+                  }
+                }
+                @if (d.actual.duplicateOfActualId) {
+                  <mat-checkbox
+                    [ngModel]="confirmDuplicate()"
+                    (ngModelChange)="confirmDuplicate.set($event)"
+                    >I checked: this is not a duplicate</mat-checkbox
+                  >
+                }
+                <div class="bf-actions-col">
+                  @if (
+                    chosen()?.fit === 'over_tolerance' &&
+                    d.actual.overBudgetRequest?.status !== 'approved'
+                  ) {
+                    @if (d.actual.overBudgetRequest?.status === 'pending_approval') {
+                      <sat-banner variant="info"
+                        ><sat-banner-message
+                          >Over-budget request for
+                          {{
+                            money(
+                              d.actual.overBudgetRequest!.amount.amountMinor,
+                              d.actual.overBudgetRequest!.amount.currency
+                            )
+                          }}
+                          is waiting for approval.</sat-banner-message
+                        ></sat-banner
+                      >
+                    } @else {
+                      <button
+                        mat-flat-button
+                        type="button"
+                        (click)="mode.set('over-budget')"
+                        data-testid="request-over-budget"
+                      >
+                        Request over-budget approval
+                      </button>
+                    }
+                  } @else {
+                    <button
+                      mat-flat-button
+                      type="button"
+                      [disabled]="busy()"
+                      (click)="match()"
+                      data-testid="match-button"
+                    >
+                      {{ chosen() ? 'Match to ' + chosen()!.reference : 'Charge to budget' }}
+                    </button>
+                  }
+                  <div class="bf-chip-row">
+                    <button mat-stroked-button type="button" (click)="mode.set('split')">
+                      Split across budgets
+                    </button>
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="mode.set('exclude')"
+                      data-testid="not-relevant"
+                    >
+                      Not budget-relevant
+                    </button>
+                  </div>
+                </div>
+                <p class="bf-note">
+                  <mat-icon svgIcon="lock" aria-hidden="true" />
+                  Matching moves the amount from encumbered to actual at the locked plan rate; one
+                  immutable audit entry is recorded.
+                </p>
+              }
+              @case ('split') {
+                <div>
+                  <h3 class="bf-card__title">Split across budgets</h3>
+                  <p class="bf-muted">Leave the last amount empty to take what is left.</p>
+                  @for (s of splits(); track $index) {
+                    <div class="bf-split">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Commitment or budget {{ $index + 1 }}</mat-label>
+                        <mat-select
+                          [ngModel]="s.target"
+                          (ngModelChange)="setSplit($index, 'target', $event)"
+                        >
+                          @for (c of d.candidates; track c.commitmentId) {
+                            <mat-option [value]="'c:' + c.commitmentId"
+                              >{{ c.reference }} · {{ c.budgetName }}</mat-option
+                            >
+                          }
+                          @for (b of entityBudgets(); track b.id) {
+                            <mat-option [value]="'b:' + b.id">{{ b.name }} (direct)</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Amount ({{ d.actual.transaction.currency }})</mat-label>
+                        <input
+                          matInput
+                          inputmode="decimal"
+                          [ngModel]="s.amount"
+                          (ngModelChange)="setSplit($index, 'amount', $event)"
+                        />
+                      </mat-form-field>
+                    </div>
+                  }
+                  <div class="bf-chip-row">
+                    <button mat-button type="button" (click)="addSplit()">Add a line</button>
+                    <button mat-button type="button" (click)="mode.set('match')">Back</button>
+                    <button mat-flat-button type="button" [disabled]="busy()" (click)="split()">
+                      Split and match
+                    </button>
+                  </div>
+                </div>
+              }
+              @case ('exclude') {
+                <div class="bf-actions-col">
+                  <h3 class="bf-card__title">Not budget-relevant</h3>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Reason</mat-label>
+                    <textarea
+                      matInput
+                      rows="3"
+                      [ngModel]="reason()"
+                      (ngModelChange)="reason.set($event)"
+                      data-testid="exclude-reason"
+                    ></textarea>
+                    <mat-hint>For example: personal spend recovered from the employee.</mat-hint>
+                  </mat-form-field>
+                  <div class="bf-chip-row">
+                    <button mat-button type="button" (click)="mode.set('match')">Back</button>
+                    <button
+                      mat-flat-button
+                      type="button"
+                      [disabled]="busy() || reason().trim().length < 5"
+                      (click)="exclude()"
+                      data-testid="confirm-exclude"
+                    >
+                      Mark not budget-relevant
+                    </button>
+                  </div>
+                </div>
+              }
+              @case ('over-budget') {
+                <div class="bf-actions-col">
+                  <h3 class="bf-card__title">Request over-budget approval</h3>
+                  <p class="bf-muted">
+                    The difference above the commitment plus its tolerance goes to an approver
+                    within their delegation-of-authority limit; you cannot approve your own request.
+                  </p>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Why is the actual higher?</mat-label>
+                    <textarea
+                      matInput
+                      rows="3"
+                      [ngModel]="reason()"
+                      (ngModelChange)="reason.set($event)"
+                      data-testid="over-budget-purpose"
+                    ></textarea>
+                  </mat-form-field>
+                  <div class="bf-chip-row">
+                    <button mat-button type="button" (click)="mode.set('match')">Back</button>
+                    <button
+                      mat-flat-button
+                      type="button"
+                      [disabled]="busy() || reason().trim().length < 5"
+                      (click)="requestOverBudget()"
+                      data-testid="send-over-budget"
+                    >
+                      Send for approval
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

@@ -1,0 +1,430 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Actuals import</h1>
+    <p class="bf-page__subtitle">
+      @if (periodLabel()) {
+        Period <strong>{{ periodLabel() }} (open)</strong> ·
+      }
+      budgets in USD; local currency converted at the locked plan rate
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    <button mat-stroked-button type="button" (click)="downloadTemplate()">
+      <mat-icon svgIcon="download" aria-hidden="true" /> Download template
+    </button>
+  </div>
+</header>
+
+<bf-actuals-tabs [queueCount]="queueCount()" />
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="import-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="import-error"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+<section class="bf-card" aria-label="Import steps">
+  <ol class="bf-steps">
+    @for (s of steps; track s.n) {
+      <li
+        class="bf-step"
+        [class.bf-step--done]="s.n < stepIndex() || (s.n === 4 && shown()?.status === 'posted')"
+        [class.bf-step--current]="
+          s.n === stepIndex() && !(s.n === 4 && shown()?.status === 'posted')
+        "
+        [attr.aria-current]="s.n === stepIndex() ? 'step' : null"
+      >
+        <span class="bf-step__dot">
+          @if (s.n < stepIndex() || (s.n === 4 && shown()?.status === 'posted')) {
+            <mat-icon svgIcon="check" aria-hidden="true" />
+          } @else {
+            {{ s.n }}
+          }
+        </span>
+        <span class="bf-step__label">
+          {{ s.n }}. {{ s.label }}
+          <span class="bf-step__hint">{{ s.hint }}</span>
+        </span>
+      </li>
+    }
+  </ol>
+</section>
+
+@if (step() === 'upload' && canManage() && (composing() || (!shown() && !imports.isLoading()))) {
+  <section class="bf-card" aria-labelledby="upload-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="upload-title">Upload an actuals file</h2>
+        <p class="bf-card__hint">
+          One row per spend line. Amounts in the transaction currency; negative lines are refunds or
+          credit notes.
+        </p>
+      </div>
+    </div>
+    <div class="bf-card__body">
+      <mat-form-field appearance="outline">
+        <mat-label>Source</mat-label>
+        <mat-select
+          name="source"
+          [ngModel]="source()"
+          (ngModelChange)="source.set($event)"
+          data-testid="import-source"
+        >
+          @for (s of sources; track s.value) {
+            <mat-option [value]="s.value">{{ s.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <bf-file-input
+        [(value)]="content"
+        [(fileName)]="fileName"
+        label="Actuals CSV file"
+        hint="Required columns: source reference, transaction date, amount, currency, legal entity."
+      />
+    </div>
+    <div class="bf-form__actions">
+      <button mat-flat-button type="button" [disabled]="!content().trim()" (click)="toMap()">
+        Continue to column mapping
+      </button>
+    </div>
+  </section>
+}
+
+@if (step() === 'map') {
+  <section class="bf-card" aria-labelledby="map-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="map-title">Map columns</h2>
+        <p class="bf-card__hint">
+          {{ fileName() ?? 'Pasted file' }} · {{ lineCount() | number }} lines · columns matched by
+          header name; adjust where your export differs.
+        </p>
+      </div>
+    </div>
+    <div class="bf-form">
+      @for (f of fields; track f) {
+        <mat-form-field appearance="outline">
+          <mat-label>{{ fieldLabel[f] }}{{ required.has(f) ? ' (required)' : '' }}</mat-label>
+          <mat-select
+            [ngModel]="mapping()[f] ?? null"
+            (ngModelChange)="setField(f, $event)"
+            [attr.data-testid]="'map-' + f"
+          >
+            <mat-option [value]="null">Not in this file</mat-option>
+            @for (h of headers(); track h) {
+              <mat-option [value]="h">{{ h }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+    </div>
+    @if (missing().length) {
+      <sat-banner variant="warning" class="bf-banner"
+        ><sat-banner-message
+          >Map a column for: {{ missing().map(fieldText).join(', ') }}.</sat-banner-message
+        ></sat-banner
+      >
+    }
+    <div class="bf-form__actions">
+      <button mat-button type="button" (click)="step.set('upload')">Back</button>
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="busy() || missing().length > 0"
+        (click)="upload()"
+      >
+        Review {{ lineCount() | number }} lines
+      </button>
+    </div>
+  </section>
+}
+
+@if (step() !== 'map') {
+  @if (imports.isLoading() && !shown()) {
+    <section class="bf-card"><bf-load-state [loading]="true" what="imports" /></section>
+  } @else if (imports.error() && !shown()) {
+    <section class="bf-card">
+      <bf-load-state [error]="imports.error()" what="imports" (retry)="imports.reload()" />
+    </section>
+  } @else if (shown(); as b) {
+    <section class="bf-card bf-file" aria-label="Imported file">
+      <div class="bf-chip-row">
+        <mat-icon svgIcon="document" aria-hidden="true" />
+        <strong data-testid="batch-file">{{ b.fileName }}</strong>
+        <span class="bf-muted">{{ b.lineCount | number }} lines</span>
+        <sat-status-tag status="neutral" [hideIcon]="true"
+          >source {{ sourceLabel(b.source) }}</sat-status-tag
+        >
+        <sat-status-tag
+          [status]="b.status === 'posted' ? 'success' : 'info'"
+          data-testid="batch-status"
+          >{{ b.status === 'posted' ? 'Posted' : 'In review' }}</sat-status-tag
+        >
+      </div>
+      <div class="bf-chip-row">
+        <span class="bf-muted"
+          >Uploaded {{ b.createdAt | bfDateTime: timezone()
+          }}{{ b.createdByName ? ' by ' + b.createdByName : '' }}</span
+        >
+        @if (canManage()) {
+          <button mat-button type="button" (click)="startOver()" data-testid="import-another">
+            Import another file
+          </button>
+        }
+      </div>
+    </section>
+
+    @if (b.summary; as s) {
+      <div class="bf-kpis" data-testid="import-kpis">
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Lines read</p>
+          <p class="bf-kpi__value" data-testid="kpi-read">{{ s.linesRead | number }}</p>
+          <p class="bf-kpi__delta">
+            {{ s.rejected ? s.rejected + ' rejected (see below)' : 'All lines valid' }}
+          </p>
+        </div>
+        <div class="bf-kpi bf-kpi--success">
+          <p class="bf-kpi__label">Auto-matched</p>
+          <p class="bf-kpi__value bf-kpi__value--success" data-testid="kpi-auto">
+            {{ s.autoMatched | number }}
+          </p>
+          <p class="bf-kpi__delta">
+            {{ share(s.autoMatched) | number: '1.0-1' }}% · exact rule match
+          </p>
+        </div>
+        <div class="bf-kpi bf-kpi--info">
+          <p class="bf-kpi__label">Partially matched</p>
+          <p class="bf-kpi__value bf-kpi__value--info" data-testid="kpi-partial">
+            {{ s.partiallyMatched | number }}
+          </p>
+          <p class="bf-kpi__delta">Within 1% tolerance, or part of a commitment</p>
+        </div>
+        <div class="bf-kpi bf-kpi--warning">
+          <p class="bf-kpi__label">Unmatched</p>
+          <p class="bf-kpi__value bf-kpi__value--warning" data-testid="kpi-unmatched">
+            {{ s.unmatched | number }}
+          </p>
+          <p class="bf-kpi__delta">
+            <a routerLink="/finance/actuals/queue">Go to queue</a> · needs a manual match
+          </p>
+        </div>
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Duplicates skipped</p>
+          <p class="bf-kpi__value" data-testid="kpi-duplicates">
+            {{ s.duplicatesSkipped | number }}
+          </p>
+          <p class="bf-kpi__delta">
+            {{
+              s.crossSourceDuplicates
+                ? s.crossSourceDuplicates + ' flagged as cross-source duplicates'
+                : 'Same reference already imported'
+            }}
+          </p>
+        </div>
+      </div>
+
+      <div class="bf-two-col">
+        <section class="bf-card" aria-labelledby="currency-title">
+          <div class="bf-card__header">
+            <h2 class="bf-card__title" id="currency-title">By transaction currency</h2>
+            <span class="bf-muted">{{ s.byCurrency.length }} currencies</span>
+          </div>
+          <div class="bf-table-scroll">
+            <table
+              mat-table
+              [dataSource]="s.byCurrency"
+              aria-label="Imported lines by transaction currency"
+            >
+              <ng-container matColumnDef="currency">
+                <th mat-header-cell *matHeaderCellDef>Currency</th>
+                <td mat-cell *matCellDef="let c">
+                  <strong>{{ c.currency }}</strong>
+                </td>
+                <td mat-footer-cell *matFooterCellDef>Total</td>
+              </ng-container>
+              <ng-container matColumnDef="lines">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Lines</th>
+                <td mat-cell *matCellDef="let c" class="bf-num">{{ c.lines | number }}</td>
+                <td mat-footer-cell *matFooterCellDef class="bf-num">{{ s.imported | number }}</td>
+              </ng-container>
+              <ng-container matColumnDef="transaction">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Transaction amount</th>
+                <td mat-cell *matCellDef="let c" class="bf-num">
+                  <bf-money [amountMinor]="c.transactionMinor" [currency]="c.currency" />
+                </td>
+                <td mat-footer-cell *matFooterCellDef class="bf-num">—</td>
+              </ng-container>
+              <ng-container matColumnDef="rate">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">
+                  Locked plan rate (per {{ s.reportingCurrency }})
+                </th>
+                <td mat-cell *matCellDef="let c" class="bf-num">{{ rate(c.planRate) }}</td>
+                <td mat-footer-cell *matFooterCellDef class="bf-num">—</td>
+              </ng-container>
+              <ng-container matColumnDef="reporting">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">
+                  {{ s.reportingCurrency }} at plan rate
+                </th>
+                <td mat-cell *matCellDef="let c" class="bf-num">
+                  <bf-money [amountMinor]="c.reportingMinor" [currency]="s.reportingCurrency" />
+                </td>
+                <td mat-footer-cell *matFooterCellDef class="bf-num">
+                  <strong
+                    ><bf-money
+                      [amountMinor]="s.reportingTotalMinor"
+                      [currency]="s.reportingCurrency"
+                  /></strong>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="currencyColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: currencyColumns"></tr>
+              <tr mat-footer-row *matFooterRowDef="currencyColumns" class="bf-total-row"></tr>
+            </table>
+          </div>
+          <sat-banner variant="info" class="bf-banner">
+            <sat-banner-message>
+              <strong>Budget consumption uses the locked plan rate.</strong> The difference to the
+              month-end rate is reported separately as FX effect and never consumes budget.
+            </sat-banner-message>
+          </sat-banner>
+        </section>
+
+        <section class="bf-card" aria-labelledby="rules-title">
+          <div class="bf-card__header">
+            <h2 class="bf-card__title" id="rules-title">Matching rules applied</h2>
+            <sat-status-tag status="success">{{ matchedCount() | number }} matched</sat-status-tag>
+          </div>
+          <div class="bf-card__body">
+            <p class="bf-chip-row">
+              Matched total ({{ matchedCount() | number }} of {{ s.imported | number }})
+              <strong>{{ s.matchRateBps / 100 | number: '1.0-1' }}% matched</strong>
+            </p>
+            <div
+              class="bf-meter"
+              role="img"
+              [attr.aria-label]="
+                s.autoMatched +
+                ' auto, ' +
+                s.partiallyMatched +
+                ' partial, ' +
+                s.unmatched +
+                ' unmatched'
+              "
+            >
+              <span class="bf-meter__part--auto" [style.width.%]="share(s.autoMatched)"></span>
+              <span
+                class="bf-meter__part--partial"
+                [style.width.%]="share(s.partiallyMatched)"
+              ></span>
+              <span class="bf-meter__part--unmatched" [style.width.%]="share(s.unmatched)"></span>
+            </div>
+            <p class="bf-legend">
+              <span
+                ><span class="bf-swatch bf-meter__part--auto"></span>Auto: {{ s.autoMatched }}</span
+              >
+              <span
+                ><span class="bf-swatch bf-meter__part--partial"></span>Partial:
+                {{ s.partiallyMatched }}</span
+              >
+              <span
+                ><span class="bf-swatch bf-meter__part--unmatched"></span>Unmatched:
+                {{ s.unmatched }}</span
+              >
+            </p>
+            <ul class="bf-rules">
+              @for (r of s.rules; track r.rule) {
+                <li class="bf-rule">
+                  <span>
+                    <span class="bf-cell__primary"
+                      >{{ ruleLabel(r.rule).title }}
+                      @if (ruleLabel(r.rule).tag) {
+                        <sat-status-tag status="neutral" [hideIcon]="true">{{
+                          ruleLabel(r.rule).tag
+                        }}</sat-status-tag>
+                      }
+                    </span>
+                    <span class="bf-cell__secondary">{{ ruleLabel(r.rule).hint }}</span>
+                  </span>
+                  <span class="bf-rule__count"
+                    >{{ r.lines | number }}<span class="bf-cell__secondary">lines</span></span
+                  >
+                </li>
+              } @empty {
+                <li class="bf-muted">No line matched a rule.</li>
+              }
+            </ul>
+          </div>
+        </section>
+      </div>
+    }
+
+    @if (b.issues.length) {
+      <section class="bf-card" aria-labelledby="issues-title">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" id="issues-title">Rejected lines</h2>
+          <span class="bf-muted">Fix these in the source file and import them again.</span>
+        </div>
+        <div class="bf-table-scroll">
+          <table mat-table [dataSource]="b.issues" aria-label="Rejected lines">
+            <ng-container matColumnDef="line">
+              <th mat-header-cell *matHeaderCellDef>Line</th>
+              <td mat-cell *matCellDef="let i">{{ i.line }}</td>
+            </ng-container>
+            <ng-container matColumnDef="field">
+              <th mat-header-cell *matHeaderCellDef>Column</th>
+              <td mat-cell *matCellDef="let i">{{ i.field ? fieldText(i.field) : '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="message">
+              <th mat-header-cell *matHeaderCellDef>Problem</th>
+              <td mat-cell *matCellDef="let i">{{ i.message }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="issueColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: issueColumns"></tr>
+          </table>
+        </div>
+      </section>
+    }
+
+    <section class="bf-card bf-footer" aria-label="Post">
+      <p class="bf-footer__note">
+        @if (b.status === 'review') {
+          Posting creates actual journals in the open period and one audit entry per batch;
+          {{ b.summary.unmatched | number }} lines go to the unmatched queue.
+        } @else {
+          Posted {{ b.postedAt | bfDateTime: timezone()
+          }}{{ b.postedByName ? ' by ' + b.postedByName : '' }}:
+          {{ b.summary.posted?.matched ?? 0 | number }} lines to
+          {{ b.summary.posted?.period?.label ?? 'the open period' }},
+          {{ b.summary.posted?.toQueue ?? 0 | number }} to the unmatched queue.
+        }
+      </p>
+      <div class="bf-page__actions">
+        @if (b.status === 'review' && canManage()) {
+          <button mat-button type="button" (click)="startOver()">Back</button>
+          <button
+            mat-flat-button
+            type="button"
+            [disabled]="busy()"
+            (click)="post()"
+            data-testid="post-import"
+          >
+            Post {{ matchedCount() | number }} matched lines
+          </button>
+        } @else if (b.status === 'posted') {
+          <a mat-stroked-button routerLink="/finance/actuals/queue">Go to unmatched queue</a>
+        }
+      </div>
+    </section>
+  } @else if (step() === 'upload') {
+    <section class="bf-card">
+      <p class="bf-empty">
+        No actuals imported yet. Upload a file from your ERP, card or expense tool.
+      </p>
+    </section>
+  }
+}

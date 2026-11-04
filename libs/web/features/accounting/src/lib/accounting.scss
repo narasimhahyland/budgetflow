@@ -1,0 +1,127 @@
+// Accounting additions ---------------------------------------------------------------------------
+
+.bf-kpi--success {
+  border-color: var(--sat-sys-success-icon);
+}
+
+.bf-kpi--info {
+  border-color: var(--sat-sys-info-icon);
+}
+
+.bf-kpi--warning {
+  border-color: var(--sat-sys-warning-icon);
+  background: var(--sat-sys-warning-container);
+}
+
+.bf-kpi__value--success {
+  color: var(--sat-sys-success-icon);
+}
+
+.bf-kpi__value--info {
+  color: var(--sat-sys-info-icon);
+}
+
+.bf-kpi__value--warning {
+  color: var(--sat-sys-on-warning-container);
+}
+
+.bf-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .bf-two-col {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.bf-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.bf-footer__note {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-medium);
+}
+
+.bf-total-row td {
+  background: var(--mat-sys-surface-container-low);
+  font: var(--mat-sys-title-small);
+}
+
+.bf-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bf-file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px 20px;
+}
+
+.bf-muted {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-row--selected td {
+  background: var(--mat-sys-secondary-container);
+}
+
+.bf-row--clickable {
+  cursor: pointer;
+}
+
+.bf-difference {
+  color: var(--sat-sys-on-warning-container);
+}
+
+.bf-note {
+  padding: 8px 12px;
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bf-sr-pad {
+  padding-inline: 0;
+}
+
+.bf-kpis {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+// Absolutely positioned labels (bf-sr) inside a table stay within its scroll container.
+.bf-table-scroll {
+  position: relative;
+}
+
+.bf-nowrap {
+  white-space: nowrap;
+}
+
+.bf-filters__search {
+  flex: 1 1 280px;
+}
