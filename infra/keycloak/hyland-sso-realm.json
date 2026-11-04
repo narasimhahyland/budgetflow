@@ -1,0 +1,44 @@
+{
+  "realm": "hyland-sso",
+  "displayName": "Hyland SSO (local stand-in)",
+  "enabled": true,
+  "sslRequired": "none",
+  "internationalizationEnabled": false,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "resetPasswordAllowed": false,
+  "clients": [
+    {
+      "clientId": "budgetflow-broker",
+      "name": "BudgetFlow (brokered sign-in)",
+      "publicClient": false,
+      "secret": "${BF_KC_BROKER_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:${BF_KEYCLOAK_PORT:8080}/realms/budgetflow/broker/hyland-sso/endpoint"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+  "users": [
+    {
+      "id": "51000000-0000-4000-8000-000000000001",
+      "username": "employee@example.test",
+      "email": "employee@example.test",
+      "emailVerified": true,
+      "firstName": "Arjun",
+      "lastName": "Das",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

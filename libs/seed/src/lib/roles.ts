@@ -141,7 +141,10 @@ export const ROLES = [
   user(14, 'analyst', 'analyst@example.test', 'Mei', 'Chen', ['analyst'], 'Financial analyst'),
 ] as const satisfies readonly SeedUser[];
 
-/** Users outside Acme Global for isolation and integrity scenarios (not role personas). */
+/**
+ * Users for scenarios rather than role personas: the scenario-only second tenant (isolation), the
+ * sandbox tenant (destructive integrity checks), and Hyland users for the MFA and password-reset journeys.
+ */
 export const EXTRA_USERS = [
   user(
     15,
@@ -163,7 +166,30 @@ export const EXTRA_USERS = [
     'Sandbox administrator',
     TENANTS.sandbox,
   ),
+  // Enrolled in TOTP (BF_E2E_TOTP_SECRET): sign-in always asks for the authenticator code.
+  user(
+    17,
+    'mfa-user',
+    'mfa.user@example.test',
+    'Noor',
+    'Saleh',
+    ['finance-controller'],
+    'Finance controller, Americas',
+  ),
+  // Used only by the forgot-password journey, which sets the same dev-only password again.
+  user(
+    18,
+    'reset-user',
+    'reset.user@example.test',
+    'Elif',
+    'Demir',
+    ['employee'],
+    'Office coordinator',
+  ),
 ] as const satisfies readonly SeedUser[];
+
+/** Signs in through the simulated corporate identity provider (Hyland SSO) as well as with a password. */
+export const SSO_LINKED_USERS: readonly SeedUserId[] = ['employee'];
 
 export type RoleId = (typeof ROLES)[number]['id'];
 export type SeedUserId = RoleId | (typeof EXTRA_USERS)[number]['id'];

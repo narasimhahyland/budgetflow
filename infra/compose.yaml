@@ -39,9 +39,16 @@ services:
       KC_HTTP_ENABLED: 'true'
       KC_HEALTH_ENABLED: 'true'
       BF_E2E_PASSWORD: ${BF_E2E_PASSWORD:?}
+      BF_E2E_TOTP_SECRET: ${BF_E2E_TOTP_SECRET:?}
       BF_KC_API_CLIENT_SECRET: ${BF_KC_API_CLIENT_SECRET:?}
+      BF_KC_BROKER_CLIENT_SECRET: ${BF_KC_BROKER_CLIENT_SECRET:?}
+      # Realm placeholders: web origin for redirects, public Keycloak URL for the SSO broker
+      BF_WEB_PORT: ${BF_WEB_PORT:-4200}
+      BF_KEYCLOAK_PORT: ${BF_KEYCLOAK_PORT:-8080}
     volumes:
       - ./keycloak/budgetflow-realm.json:/opt/keycloak/data/import/budgetflow-realm.json:ro
+      - ./keycloak/hyland-sso-realm.json:/opt/keycloak/data/import/hyland-sso-realm.json:ro
+      - ./keycloak/themes/budgetflow:/opt/keycloak/themes/budgetflow:ro
     ports:
       - '127.0.0.1:${BF_KEYCLOAK_PORT:-8080}:8080'
     healthcheck:

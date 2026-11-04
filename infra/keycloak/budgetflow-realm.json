@@ -3,18 +3,38 @@
   "displayName": "BudgetFlow",
   "enabled": true,
   "sslRequired": "none",
+  "loginTheme": "budgetflow",
+  "internationalizationEnabled": false,
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "rememberMe": false,
   "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 300,
+  "maxFailureWaitSeconds": 300,
+  "minimumQuickLoginWaitSeconds": 60,
+  "quickLoginCheckMilliSeconds": 200,
+  "maxDeltaTimeSeconds": 43200,
   "accessTokenLifespan": 900,
   "ssoSessionIdleTimeout": 1800,
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyDigits": 6,
   "otpPolicyPeriod": 30,
+  "otpPolicyLookAheadWindow": 1,
+  "otpPolicyCodeReusable": false,
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "no-reply@budgetflow.example.test",
+    "fromDisplayName": "BudgetFlow",
+    "auth": "false",
+    "ssl": "false",
+    "starttls": "false"
+  },
   "roles": {
     "realm": [
       {
@@ -86,12 +106,13 @@
       "redirectUris": [
         "http://localhost:4200/*",
         "http://localhost:4201/*",
-        "http://localhost:4202/*"
+        "http://localhost:4202/*",
+        "http://localhost:${BF_WEB_PORT:4200}/*"
       ],
       "webOrigins": ["+"],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:4200/*"
+        "post.logout.redirect.uris": "http://localhost:4200/*##http://localhost:4201/*##http://localhost:4202/*##http://localhost:${BF_WEB_PORT:4200}/*"
       },
       "protocolMappers": [
         {
@@ -137,6 +158,36 @@
           }
         }
       ]
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "hyland-sso",
+      "displayName": "Hyland SSO",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "storeToken": false,
+      "linkOnly": false,
+      "hideOnLogin": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "budgetflow-broker",
+        "clientSecret": "${BF_KC_BROKER_CLIENT_SECRET}",
+        "clientAuthMethod": "client_secret_post",
+        "issuer": "http://localhost:${BF_KEYCLOAK_PORT:8080}/realms/hyland-sso",
+        "authorizationUrl": "http://localhost:${BF_KEYCLOAK_PORT:8080}/realms/hyland-sso/protocol/openid-connect/auth",
+        "logoutUrl": "http://localhost:${BF_KEYCLOAK_PORT:8080}/realms/hyland-sso/protocol/openid-connect/logout",
+        "tokenUrl": "http://localhost:8080/realms/hyland-sso/protocol/openid-connect/token",
+        "userInfoUrl": "http://localhost:8080/realms/hyland-sso/protocol/openid-connect/userinfo",
+        "jwksUrl": "http://localhost:8080/realms/hyland-sso/protocol/openid-connect/certs",
+        "validateSignature": "true",
+        "useJwksUrl": "true",
+        "pkceEnabled": "true",
+        "pkceMethod": "S256",
+        "defaultScope": "openid email profile",
+        "syncMode": "LEGACY"
+      }
     }
   ],
   "users": [
@@ -325,7 +376,14 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["employee"]
+      "realmRoles": ["employee"],
+      "federatedIdentities": [
+        {
+          "identityProvider": "hyland-sso",
+          "userId": "51000000-0000-4000-8000-000000000001",
+          "userName": "employee@example.test"
+        }
+      ]
     },
     {
       "id": "50000000-0000-4000-8000-000000000012",
@@ -411,6 +469,46 @@
         }
       ],
       "realmRoles": ["finance-admin", "ceo"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000017",
+      "username": "mfa.user@example.test",
+      "email": "mfa.user@example.test",
+      "emailVerified": true,
+      "firstName": "Noor",
+      "lastName": "Saleh",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        },
+        {
+          "type": "otp",
+          "userLabel": "Authenticator app",
+          "secretData": "{\"value\":\"${BF_E2E_TOTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ],
+      "realmRoles": ["finance-controller"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000018",
+      "username": "reset.user@example.test",
+      "email": "reset.user@example.test",
+      "emailVerified": true,
+      "firstName": "Elif",
+      "lastName": "Demir",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["employee"]
     }
   ]
 }

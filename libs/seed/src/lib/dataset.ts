@@ -30,10 +30,10 @@ export function seedPeriodStatus(endDate: string): 'open' | 'soft_closed' | 'clo
 export const tenantsData = [
   {
     id: TENANTS.acme,
-    name: 'Acme Global',
-    slug: 'acme-global',
+    name: 'Hyland',
+    slug: 'hyland',
     reportingCurrency: 'USD',
-    defaultTimezone: 'UTC',
+    defaultTimezone: 'America/New_York',
   },
   {
     id: TENANTS.globex,
@@ -494,6 +494,18 @@ const PERSON_PLACEMENT: Partial<
     entity: LEGAL_ENTITIES.sandbox,
     costCenter: COST_CENTERS.sandbox,
     seniority: 7,
+  },
+  'mfa-user': {
+    location: ORG_UNITS.newYork,
+    entity: LEGAL_ENTITIES.acmeUs,
+    costCenter: COST_CENTERS.hq,
+    seniority: 6,
+  },
+  'reset-user': {
+    location: ORG_UNITS.berlin,
+    entity: LEGAL_ENTITIES.acmeEurope,
+    costCenter: COST_CENTERS.berlin,
+    seniority: 2,
   },
 };
 

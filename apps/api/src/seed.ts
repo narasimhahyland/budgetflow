@@ -10,7 +10,7 @@ import { NestFactory } from '@nestjs/core';
 import { SEED_EXTENSIONS } from './seed/extensions';
 import { seedReference } from './seed/reference';
 
-// Deterministic seed for the fictional Acme Global, Globex and Initech Sandbox tenants. Reference data is
+// Deterministic seed for the Hyland tenant and the scenario-only Globex and Initech Sandbox tenants. Reference data is
 // inserted with fixed ids; budgets and allocations go through the real commands with fixed idempotency
 // keys, so running the seed again changes nothing. Runs as the owner role (scripts/stack.sh seed).
 const ownerUrl = process.env.DATABASE_URL_OWNER;

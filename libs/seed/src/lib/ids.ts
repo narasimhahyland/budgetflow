@@ -1,5 +1,5 @@
 /**
- * Deterministic ids for the fictional seed (Acme Global, Globex, Initech Sandbox). Valid RFC 9562
+ * Deterministic ids for the seed (company Hyland; Globex and Initech Sandbox are scenario-only tenants). Valid RFC 9562
  * shapes (version 4 nibble, variant 8) so contract validation accepts them.
  */
 const id = (prefix: string, n: number | string) =>
