@@ -13,6 +13,8 @@ type ServerEventName = Exclude<AnalyticsEventName, 'session.started' | 'page.vie
 type Properties = Record<string, string | number | boolean>;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+/** Clock skew tolerated for client times in the future. */
+const SKEW_MS = 5 * 60 * 1000;
 
 /**
  * Row id derived from tenant, subject and the client's event id: retries store once, and an id
@@ -36,14 +38,15 @@ export class AnalyticsService {
   ): Promise<RecordAnalyticsResponse> {
     const rows = input.events.map((e) => {
       const client = e.occurredAt ? new Date(e.occurredAt) : null;
-      const trusted = client && Math.abs(client.getTime() - now.getTime()) <= DAY_MS;
+      const age = client ? now.getTime() - client.getTime() : NaN;
+      const trusted = client && age <= DAY_MS && age >= -SKEW_MS;
       return {
         id: rowId(actor.tenantId, actor.subject, e.id),
         tenantId: actor.tenantId,
         occurredAt: trusted ? client : now,
         actorPersonId: actor.personId,
         name: e.name,
-        properties: { ...(e.properties ?? {}), source: 'web' },
+        properties: { ...('properties' in e ? e.properties : {}), source: 'web' },
       };
     });
     const inserted = await withTenant(

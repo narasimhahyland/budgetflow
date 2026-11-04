@@ -20,15 +20,17 @@ export class AnalyticsTracker {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private connected = false;
 
-  track(name: ClientEvent['name'], properties?: ClientEvent['properties']): void {
+  track(name: 'session.started'): void;
+  track(name: 'page.viewed', properties: { route: string }): void;
+  track(name: ClientEvent['name'], properties?: { route: string }): void {
     if (this.session.state() !== 'ready' || this.session.me()?.platformOperator) return;
     this.connect();
-    this.queue.push({
-      id: crypto.randomUUID(),
-      name,
-      occurredAt: new Date().toISOString(),
-      ...(properties ? { properties } : {}),
-    });
+    const base = { id: crypto.randomUUID(), occurredAt: new Date().toISOString() };
+    this.queue.push(
+      name === 'page.viewed' && properties
+        ? { ...base, name, properties }
+        : { ...base, name: 'session.started' },
+    );
     if (this.queue.length >= 20) void this.flush();
     else this.timer ??= setTimeout(() => void this.flush(), 1500);
   }

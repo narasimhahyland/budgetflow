@@ -64,20 +64,20 @@ Domain failures map through `domainProblem` (`libs/api/core/src/lib/problem.ts`)
 
 ## Phase 1 endpoints
 
-| Method and path                                        | Purpose                                                                       | Permission                                   |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------- | -------------------------------------------- |
-| `GET /health`, `GET /health/ready`                     | Liveness; readiness (database, Keycloak JWKS)                                 | public                                       |
-| `GET /api/openapi.json`                                | Generated OpenAPI 3.1                                                         | public                                       |
-| `GET /api/me`                                          | User, tenant, roles, memberships, permissions, timezone, fiscal years (P2)    | any member (own identity)                    |
-| `GET /api/auth/config`                                 | Issuer and public web client for OIDC sign-in (P2)                            | public                                       |
-| `POST /api/analytics/events`                           | Product analytics from the web app; retry-safe by event id, no audit (P2)     | `tenant.read`                                |
-| `GET /api/budgets`                                     | Budgets visible to the user                                                   | `budget.read` (tenant or owned subtrees)     |
-| `POST /api/budgets`                                    | Root budget with original amount (posts `original_budget`), or an empty child | `budget.create_root` / `budget.create_child` |
-| `GET /api/budgets/{id}`                                | Budget with balances                                                          | `budget.read`                                |
-| `POST /api/budgets/{id}/allocations`                   | Allocate to a direct child at the locked plan rate                            | `budget.allocate`                            |
-| `GET /api/budgets/{id}/ledger`                         | Ledger lines of a budget                                                      | `ledger.read`                                |
-| `GET /api/ledger/journals/{id}`                        | Journal with lines and totals                                                 | `ledger.read` on a budget in it              |
-| `POST /api/ledger/journals`                            | Manual journal (opening balances, adjustments)                                | `ledger.manual_journal`                      |
-| `POST /api/ledger/journals/{id}/reversals`             | Linked reversal                                                               | `ledger.reverse`                             |
-| `POST /api/integrity/ledger-checks`, `GET .../{id}`    | Queue and read a ledger rebuild check                                         | `integrity.run` / `integrity.read`           |
-| `GET /api/audit/events`, `GET /api/audit/verification` | Audit events; chain verification                                              | `audit.read`                                 |
+| Method and path                                        | Purpose                                                                       | Permission                                                                                 |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `GET /health`, `GET /health/ready`                     | Liveness; readiness (database, Keycloak JWKS)                                 | public                                                                                     |
+| `GET /api/openapi.json`                                | Generated OpenAPI 3.1                                                         | public                                                                                     |
+| `GET /api/me`                                          | User, tenant, roles, memberships, permissions, timezone, fiscal years (P2)    | any member (own identity plus non-financial tenant settings: name, timezone, fiscal years) |
+| `GET /api/auth/config`                                 | Issuer and public web client for OIDC sign-in (P2)                            | public                                                                                     |
+| `POST /api/analytics/events`                           | Product analytics from the web app; retry-safe by event id, no audit (P2)     | `tenant.read`                                                                              |
+| `GET /api/budgets`                                     | Budgets visible to the user                                                   | `budget.read` (tenant or owned subtrees)                                                   |
+| `POST /api/budgets`                                    | Root budget with original amount (posts `original_budget`), or an empty child | `budget.create_root` / `budget.create_child`                                               |
+| `GET /api/budgets/{id}`                                | Budget with balances                                                          | `budget.read`                                                                              |
+| `POST /api/budgets/{id}/allocations`                   | Allocate to a direct child at the locked plan rate                            | `budget.allocate`                                                                          |
+| `GET /api/budgets/{id}/ledger`                         | Ledger lines of a budget                                                      | `ledger.read`                                                                              |
+| `GET /api/ledger/journals/{id}`                        | Journal with lines and totals                                                 | `ledger.read` on a budget in it                                                            |
+| `POST /api/ledger/journals`                            | Manual journal (opening balances, adjustments)                                | `ledger.manual_journal`                                                                    |
+| `POST /api/ledger/journals/{id}/reversals`             | Linked reversal                                                               | `ledger.reverse`                                                                           |
+| `POST /api/integrity/ledger-checks`, `GET .../{id}`    | Queue and read a ledger rebuild check                                         | `integrity.run` / `integrity.read`                                                         |
+| `GET /api/audit/events`, `GET /api/audit/verification` | Audit events; chain verification                                              | `audit.read`                                                                               |
