@@ -29,6 +29,10 @@
   background: var(--mat-sys-surface-container-lowest);
 }
 
+.bf-card--padded {
+  padding: 16px 24px 24px;
+}
+
 .bf-card--state {
   width: 100%;
   max-width: 720px;

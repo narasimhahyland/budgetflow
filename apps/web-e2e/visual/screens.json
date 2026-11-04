@@ -22,7 +22,8 @@
             {
               "click": "button[aria-label=\"Expand navigation\"]:visible, button[aria-label=\"Open navigation\"]:visible >> nth=-1"
             },
-            { "waitFor": "p.bf-shell__group >> nth=0" }
+            { "waitFor": "p.bf-shell__group >> nth=0" },
+            { "hover": "div.bf-shell__brand" }
           ]
         },
         {

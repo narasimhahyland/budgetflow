@@ -25,7 +25,12 @@ export const shellChildRoutes: Routes = [
   { path: '', pathMatch: 'full', component: HomePage, title: 'Home' },
   ...placeholderRoutes,
   { path: 'forbidden', component: ForbiddenPage, title: 'Access denied' },
-  { path: '**', component: NotFoundPage, title: 'Page not found' },
+  {
+    path: '**',
+    component: NotFoundPage,
+    title: 'Page not found',
+    data: { pageTitle: 'Page not found' },
+  },
 ];
 
 /** Document titles as "<page> | BudgetFlow". */

@@ -12,7 +12,7 @@ import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
     <header class="bf-page__header">
       <h1 class="bf-page__title">{{ pageTitle() }}</h1>
     </header>
-    <section class="bf-card">
+    <section class="bf-card bf-card--padded">
       <sat-empty-state>
         <h2 satEmptyStateHeadline>{{ pageTitle() }} is not open yet</h2>
         <p satEmptyStateDescription>
