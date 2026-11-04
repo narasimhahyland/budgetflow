@@ -15,29 +15,43 @@
       "role": "department-head",
       "waitFor": "role=heading[name=\"Welcome, Lena\"]",
       "states": [
-        { "state": "default" },
+        {
+          "state": "default"
+        },
         {
           "state": "nav-drawer-open",
           "actions": [
             {
               "click": "button[aria-label=\"Expand navigation\"]:visible, button[aria-label=\"Open navigation\"]:visible >> nth=-1"
             },
-            { "waitFor": "p.bf-shell__group >> nth=0" },
-            { "hover": "div.bf-shell__brand" }
+            {
+              "waitFor": "p.bf-shell__group >> nth=0"
+            },
+            {
+              "hover": "div.bf-shell__brand"
+            }
           ]
         },
         {
           "state": "notifications-open",
           "actions": [
-            { "click": "role=button[name=\"Notifications\"]" },
-            { "waitFor": "text=You are all caught up" }
+            {
+              "click": "role=button[name=\"Notifications\"]"
+            },
+            {
+              "waitFor": "text=You are all caught up"
+            }
           ]
         },
         {
           "state": "account-menu-open",
           "actions": [
-            { "click": "button.bf-header__avatar" },
-            { "waitFor": "role=menuitem[name=\"Sign out\"]" }
+            {
+              "click": "button.bf-header__avatar"
+            },
+            {
+              "waitFor": "role=menuitem[name=\"Sign out\"]"
+            }
           ]
         },
         {
@@ -54,8 +68,8 @@
         {
           "state": "placeholder",
           "role": "ceo",
-          "path": "/budgets",
-          "waitFor": "role=heading[name=\"Budget hierarchy is not open yet\"]"
+          "path": "/reports",
+          "waitFor": "role=heading[name=\"Reports is not open yet\"]"
         },
         {
           "state": "not-found",
@@ -75,11 +89,485 @@
       "path": "/signed-out",
       "waitFor": "role=heading[name=\"You have signed out\"]",
       "states": [
-        { "state": "signed-out" },
+        {
+          "state": "signed-out"
+        },
         {
           "state": "sign-in-problem",
           "path": "/sign-in-problem",
           "waitFor": "role=heading[name=\"We could not sign you in\"]"
+        }
+      ]
+    },
+    {
+      "id": "019-budget-list",
+      "path": "/budgets/list",
+      "role": "department-head",
+      "waitFor": "[data-testid=row-EX-EU]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "empty",
+          "actions": [
+            {
+              "fill": ["[data-testid=search]", "no budget like this"]
+            },
+            {
+              "waitFor": "role=heading[name=\"No budgets match\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "020-create-budget",
+      "path": "/budgets/new?parent=70000000-0000-4000-8000-000000000004",
+      "role": "department-head",
+      "waitFor": "role=heading[name=\"Create budget\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "fill": ["[data-testid=name]", "Europe Team Offsite"]
+            },
+            {
+              "fill": ["[data-testid=amount]", "2500"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "020a-budget-plan-import",
+      "path": "/budgets/plans",
+      "role": "finance-admin",
+      "waitFor": "[data-testid=tie-out]",
+      "mask": ["[data-testid=tie-out]", "[data-testid=version-lines]"],
+      "states": [
+        {
+          "state": "map-columns",
+          "actions": [
+            {
+              "click": "[data-testid=import-plan]"
+            },
+            {
+              "fill": [
+                "[data-testid=import-csv]",
+                "Program code,Program,Budget (USD),Entity\nEX-2027,Employee Experience FY2027,\"110,000.00\",HYL-US\nWB-2027,Wellbeing FY2027,abc,HYL-XX"
+              ]
+            }
+          ]
+        },
+        {
+          "state": "review",
+          "actions": [
+            {
+              "click": "[data-testid=import-plan]"
+            },
+            {
+              "fill": [
+                "[data-testid=import-csv]",
+                "Program code,Program,Budget (USD),Entity\nEX-2027,Employee Experience FY2027,\"110,000.00\",HYL-US\nWB-2027,Wellbeing FY2027,abc,HYL-XX"
+              ]
+            },
+            {
+              "click": "[data-testid=validate-import]"
+            },
+            {
+              "waitFor": "[data-testid=import-rows]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "020b-program-templates",
+      "path": "/budgets/templates",
+      "role": "finance-admin",
+      "waitFor": "[data-testid=template-PER-HEAD-ENGAGEMENT]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "021-budget-details",
+      "path": "/budgets/70000000-0000-4000-8000-000000000005",
+      "role": "location-manager",
+      "waitFor": "[data-testid=kpi-available]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "controls-drawer",
+          "role": "regional-manager",
+          "actions": [
+            {
+              "click": "[data-testid=more-actions]"
+            },
+            {
+              "waitFor": "[data-testid=freeze]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "022-budget-allocation-workspace",
+      "path": "/budgets/allocate?parent=70000000-0000-4000-8000-000000000002",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=grid-row-0]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "warning-block",
+          "actions": [
+            {
+              "fill": ["input[data-col=next] >> nth=0", "99000"]
+            },
+            {
+              "waitFor": "[data-testid=grid-blocked]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "022a-per-head-driver-allocation",
+      "path": "/budgets/70000000-0000-4000-8000-000000000006/per-head",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=breakdown]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "022b-allocation-grid-paste",
+      "path": "/budgets/allocate?parent=70000000-0000-4000-8000-000000000002",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=grid-row-0]",
+      "states": [
+        {
+          "state": "paste-preview",
+          "actions": [
+            {
+              "click": "text=Paste rows as text instead"
+            },
+            {
+              "fill": [
+                "[data-testid=paste-text]",
+                "Bengaluru Events\t12500\nPune Events\t1200\nChennai Wellbeing\t2000"
+              ]
+            },
+            {
+              "click": "[data-testid=apply-paste]"
+            },
+            {
+              "waitFor": "[data-testid=paste-banner]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "023-budget-hierarchy",
+      "path": "/budgets?root=70000000-0000-4000-8000-000000000002&budget=70000000-0000-4000-8000-000000000006",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=detail-panel]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "set-to-zero-dialog",
+          "actions": [
+            {
+              "click": "[data-testid=detail-panel] [data-testid=set-to-zero]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Set budget to zero\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "024-allocate-to-child",
+      "path": "/budgets/70000000-0000-4000-8000-000000000002",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=kpi-available]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "[data-testid=allocate]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Allocate budget to child unit\"]"
+            }
+          ]
+        },
+        {
+          "state": "blocked",
+          "actions": [
+            {
+              "click": "[data-testid=allocate]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Allocate budget to child unit\"]"
+            },
+            {
+              "fill": ["[data-testid=allocate-amount]", "999999"]
+            },
+            {
+              "waitFor": "[data-testid=over-allocation]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "025-transfer-budget",
+      "path": "/budgets/70000000-0000-4000-8000-000000000005",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=kpi-available]",
+      "states": [
+        {
+          "state": "dialog",
+          "actions": [
+            {
+              "click": "[data-testid=transfer]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Transfer budget\"]"
+            }
+          ]
+        },
+        {
+          "state": "blocked",
+          "actions": [
+            {
+              "click": "[data-testid=transfer]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Transfer budget\"]"
+            },
+            {
+              "fill": ["[data-testid=transfer-amount]", "999999"]
+            },
+            {
+              "waitFor": "[data-testid=transfer-blocked]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "026-reduce-budget",
+      "path": "/budgets/70000000-0000-4000-8000-000000000005",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=kpi-available]",
+      "states": [
+        {
+          "state": "dialog",
+          "actions": [
+            {
+              "click": "[data-testid=reduce]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Reduce budget\"]"
+            },
+            {
+              "fill": ["[data-testid=reduce-amount]", "2000"]
+            }
+          ]
+        },
+        {
+          "state": "below-floor",
+          "actions": [
+            {
+              "click": "[data-testid=reduce]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Reduce budget\"]"
+            },
+            {
+              "fill": ["[data-testid=reduce-amount]", "99999"]
+            },
+            {
+              "waitFor": "[data-testid=reduce-problem]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "027-freeze-budget",
+      "path": "/budgets/70000000-0000-4000-8000-000000000005",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=kpi-available]",
+      "states": [
+        {
+          "state": "dialog",
+          "actions": [
+            {
+              "click": "[data-testid=more-actions]"
+            },
+            {
+              "click": "[data-testid=freeze]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Freeze Bengaluru Events\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "028-set-to-zero",
+      "path": "/budgets/70000000-0000-4000-8000-000000000005",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=kpi-available]",
+      "states": [
+        {
+          "state": "dialog",
+          "actions": [
+            {
+              "click": "[data-testid=set-to-zero]"
+            },
+            {
+              "waitFor": "[data-testid=zero-floor]"
+            }
+          ]
+        },
+        {
+          "state": "validation",
+          "actions": [
+            {
+              "click": "[data-testid=set-to-zero]"
+            },
+            {
+              "waitFor": "[data-testid=zero-floor]"
+            },
+            {
+              "fill": ["[data-testid=confirm-text]", "Bangalore"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "029-revise-budget",
+      "path": "/budgets/70000000-0000-4000-8000-000000000005",
+      "role": "location-manager",
+      "waitFor": "[data-testid=kpi-available]",
+      "states": [
+        {
+          "state": "increase-request",
+          "actions": [
+            {
+              "click": "[data-testid=request-increase]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Request budget increase\"]"
+            },
+            {
+              "fill": ["[data-testid=increase-target]", "14000"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "029a-contingency-reserve-release",
+      "path": "/budgets/71000000-0000-4000-8000-000000000005",
+      "role": "ceo",
+      "waitFor": "[data-testid=request-panel]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "030-budget-version-history",
+      "path": "/budgets/70000000-0000-4000-8000-000000000005?tab=versions",
+      "role": "location-manager",
+      "waitFor": "[data-testid=version-compare]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "031-budget-comparison",
+      "path": "/budgets/70000000-0000-4000-8000-000000000002?tab=versions",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=version-compare]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "032-budget-calendar",
+      "path": "/budgets/70000000-0000-4000-8000-000000000002?tab=phasing",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=save-phasing]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "032a-period-phasing",
+      "path": "/budgets/70000000-0000-4000-8000-000000000002?tab=phasing",
+      "role": "regional-manager",
+      "waitFor": "[data-testid=save-phasing]",
+      "states": [
+        {
+          "state": "validation",
+          "actions": [
+            {
+              "click": "text=Manual"
+            },
+            {
+              "fill": [
+                "input[aria-label=\"Amount for December\"], input[aria-label^=\"Amount for\"] >> nth=-1",
+                "9000"
+              ]
+            },
+            {
+              "click": "[data-testid=save-phasing]"
+            },
+            {
+              "waitFor": "[data-testid=phasing-error]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "089-allocation-history",
+      "path": "/budgets/70000000-0000-4000-8000-000000000002?tab=history",
+      "role": "regional-manager",
+      "waitFor": "role=table[name=\"Allocation history\"]",
+      "states": [
+        {
+          "state": "default"
         }
       ]
     }
