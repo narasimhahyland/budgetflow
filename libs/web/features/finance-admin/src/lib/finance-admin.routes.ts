@@ -12,8 +12,8 @@ export const financeAdminRoutes: Routes = [
   },
   {
     path: 'finance/periods',
-    title: 'Fiscal calendars and periods',
-    data: { pageTitle: 'Fiscal calendars and periods', section: 'Finance' },
+    title: 'Fiscal calendar',
+    data: { pageTitle: 'Fiscal calendar', section: 'Finance' },
     canActivate: [requirePermission('tenant.read', 'Fiscal calendars')],
     loadComponent: () => import('./fiscal-calendars.page').then((m) => m.FiscalCalendarsPage),
   },

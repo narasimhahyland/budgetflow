@@ -1,17 +1,36 @@
 <header class="bf-page__header">
   <div class="bf-page__heading">
-    <h1 class="bf-page__title">Fiscal calendars and periods</h1>
+    <h1 class="bf-page__title">Fiscal calendar</h1>
     <p class="bf-page__subtitle">
-      Each legal entity follows a fiscal calendar mapped to the group year. Nothing posts to a
-      closed or locked period; periods close in order and reopen newest first, with a reason.
+      Periods control when postings are allowed. Used by
+      <span data-testid="calendar-entities">{{
+        entityCodes(valueOf(detail)?.legalEntities ?? [])
+      }}</span
+      >.
     </p>
   </div>
-  @if (canManage() && !creating()) {
-    <button mat-stroked-button type="button" (click)="creating.set(true); failure.set(null)">
-      New calendar
-    </button>
-  }
+  <div class="bf-page__actions">
+    @if (canManage() && nextYearLabel()) {
+      <button mat-stroked-button type="button" [disabled]="busy()" (click)="addYear()">
+        Add fiscal year
+      </button>
+    }
+    @if (canManage() && !creating()) {
+      <button mat-stroked-button type="button" (click)="creating.set(true); failure.set(null)">
+        New calendar
+      </button>
+    }
+  </div>
 </header>
+
+@if (closingHint(); as label) {
+  <sat-banner variant="warning" data-testid="closing-hint">
+    <sat-banner-message>
+      Closing {{ label }} blocks new postings dated in it. Corrections become reversals in the next
+      open period.
+    </sat-banner-message>
+  </sat-banner>
+}
 
 @if (notice()) {
   <sat-banner variant="success"
@@ -163,148 +182,219 @@
   </section>
 }
 
-<section class="bf-card" aria-labelledby="cal-title">
-  <div class="bf-card__header">
-    <h2 class="bf-card__title" id="cal-title">Calendar</h2>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bf-calendar-picker">
-      <mat-label>Calendar</mat-label>
-      <mat-select
-        [ngModel]="calendarId()"
-        (ngModelChange)="calendarId.set($event)"
-        data-testid="calendar-select"
-      >
-        @for (c of valueOf(calendars)?.items ?? []; track c.id) {
-          <mat-option [value]="c.id">{{ c.name }}</mat-option>
+<div class="bf-cal">
+  <section class="bf-card" aria-labelledby="cal-title">
+    <div class="bf-card__header">
+      <div class="bf-year-head">
+        <h2 class="bf-card__title" id="cal-title">{{ year()?.label ?? 'Calendar' }}</h2>
+        @if (year(); as y) {
+          <span class="bf-chip"
+            >{{ y.startDate | date: 'MMM y' : 'UTC' }} –
+            {{ y.endDate | date: 'MMM y' : 'UTC' }}</span
+          >
         }
-      </mat-select>
-    </mat-form-field>
-  </div>
-  <bf-load-state
-    [loading]="
-      (calendars.isLoading() && !calendars.hasValue()) || (detail.isLoading() && !detail.hasValue())
-    "
-    [error]="calendars.error() ?? detail.error()"
-    what="fiscal calendars"
-    (retry)="calendars.reload(); detail.reload()"
-  />
-  @if (valueOf(detail); as d) {
-    <dl class="bf-facts">
-      <div>
-        <dt>Type</dt>
-        <dd>{{ typeLabel[d.definition.type] }}</dd>
       </div>
-      <div>
-        <dt>Rule</dt>
-        <dd>{{ describe(d.definition) }}</dd>
-      </div>
-      <div>
-        <dt>Legal entities</dt>
-        <dd data-testid="calendar-entities">{{ entityCodes(d.legalEntities) }}</dd>
-      </div>
-      <div>
-        <dt>Maps to</dt>
-        <dd>{{ d.groupCalendarName ?? 'Group calendar' }}</dd>
-      </div>
-    </dl>
-    <div class="bf-years" role="group" aria-label="Fiscal years">
-      @for (y of d.fiscalYears; track y.id) {
-        <button
-          mat-stroked-button
-          type="button"
-          [class.bf-year--active]="y.id === yearId()"
-          [attr.aria-pressed]="y.id === yearId()"
-          (click)="yearId.set(y.id)"
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bf-calendar-picker">
+        <mat-label>Calendar</mat-label>
+        <mat-select
+          [ngModel]="calendarId()"
+          (ngModelChange)="calendarId.set($event)"
+          data-testid="calendar-select"
         >
-          {{ y.label }}
-        </button>
-      }
+          @for (c of valueOf(calendars)?.items ?? []; track c.id) {
+            <mat-option [value]="c.id">{{ c.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </div>
-    @if (year(); as y) {
-      <p class="bf-card__hint bf-year-hint" data-testid="year-summary">
-        {{ y.label }} runs {{ y.startDate | date: 'd MMM y' : 'UTC' }} to
-        {{ y.endDate | date: 'd MMM y' : 'UTC' }} ({{ days(y.startDate, y.endDate) }} days{{
-          y.weeks ? ', ' + y.weeks + ' weeks' : ''
-        }})
-        {{ y.groupFiscalYearLabel ? '· group year ' + y.groupFiscalYearLabel : '' }}
-        · plan rates {{ y.planRatesLockedAt ? 'locked' : 'not locked' }}
-      </p>
-      @if (pendingAction(); as pa) {
-        <form
-          class="bf-form"
-          aria-label="Reason for the status change"
-          (ngSubmit)="change(pa.period, pa.action, reason())"
-        >
-          <mat-form-field appearance="outline" class="bf-reason bf-form__wide">
-            <mat-label
-              >Reason to {{ actionLabel[pa.action].toLowerCase() }} {{ pa.period.label }}</mat-label
-            >
-            <input
-              matInput
-              required
-              name="reason"
-              [ngModel]="reason()"
-              (ngModelChange)="reason.set($event)"
-            />
-            <mat-hint>Reopening and unlocking are recorded in the audit trail.</mat-hint>
-          </mat-form-field>
-          <div class="bf-form__wide bf-form__actions">
-            <button mat-flat-button type="submit" [disabled]="busy() || !reason().trim()">
-              {{ actionLabel[pa.action] }}
-            </button>
-            <button mat-button type="button" (click)="pendingAction.set(null)">Cancel</button>
-          </div>
-        </form>
-      }
-      <div class="bf-table-scroll">
-        <table mat-table [dataSource]="y.periods" aria-label="Accounting periods">
-          <ng-container matColumnDef="period">
-            <th mat-header-cell *matHeaderCellDef>Period</th>
-            <td mat-cell *matCellDef="let p">
-              <span class="bf-cell__primary">{{ p.label }}</span>
-              <span class="bf-cell__secondary">Period {{ p.periodNumber }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="dates">
-            <th mat-header-cell *matHeaderCellDef>Dates</th>
-            <td mat-cell *matCellDef="let p">
-              {{ p.startDate | date: 'd MMM y' : 'UTC' }} –
-              {{ p.endDate | date: 'd MMM y' : 'UTC' }}
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="days">
-            <th mat-header-cell *matHeaderCellDef class="bf-num">Days</th>
-            <td mat-cell *matCellDef="let p" class="bf-num">{{ days(p.startDate, p.endDate) }}</td>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let p">
-              <sat-status-tag [status]="statusOf(p.status).tone">{{
-                statusOf(p.status).label
-              }}</sat-status-tag>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
-            <td mat-cell *matCellDef="let p">
-              <div class="bf-row-actions">
-                @for (a of p.allowedActions; track a) {
-                  <button
-                    mat-button
-                    type="button"
-                    [disabled]="busy()"
-                    (click)="ask(p, a)"
-                    [attr.aria-label]="labelOf(a) + ' ' + p.label"
-                  >
-                    {{ labelOf(a) }}
-                  </button>
-                }
-              </div>
-            </td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="columns"></tr>
-          <tr mat-row *matRowDef="let row; columns: columns"></tr>
-        </table>
+    <bf-load-state
+      [loading]="
+        (calendars.isLoading() && !calendars.hasValue()) ||
+        (detail.isLoading() && !detail.hasValue())
+      "
+      [error]="calendars.error() ?? detail.error()"
+      what="fiscal calendars"
+      (retry)="calendars.reload(); detail.reload()"
+    />
+    @if (valueOf(detail); as d) {
+      <dl class="bf-facts">
+        <div>
+          <dt>Type</dt>
+          <dd>{{ typeLabel[d.definition.type] }}</dd>
+        </div>
+        <div>
+          <dt>Rule</dt>
+          <dd>{{ describe(d.definition) }}</dd>
+        </div>
+        <div>
+          <dt>Maps to</dt>
+          <dd>{{ d.groupCalendarName ?? 'Group calendar' }}</dd>
+        </div>
+      </dl>
+      <div class="bf-years" role="group" aria-label="Fiscal years">
+        @for (y of d.fiscalYears; track y.id) {
+          <button
+            mat-stroked-button
+            type="button"
+            [class.bf-year--active]="y.id === yearId()"
+            [attr.aria-pressed]="y.id === yearId()"
+            (click)="yearId.set(y.id)"
+          >
+            {{ y.label }}
+          </button>
+        }
       </div>
+      @if (year(); as y) {
+        <p class="bf-card__hint bf-year-hint" data-testid="year-summary">
+          {{ y.label }} runs {{ y.startDate | date: 'd MMM y' : 'UTC' }} to
+          {{ y.endDate | date: 'd MMM y' : 'UTC' }} ({{ days(y.startDate, y.endDate) }} days{{
+            y.weeks ? ', ' + y.weeks + ' weeks' : ''
+          }})
+          {{ y.groupFiscalYearLabel ? '· group year ' + y.groupFiscalYearLabel : '' }}
+        </p>
+        @if (pendingAction(); as pa) {
+          <form
+            class="bf-form"
+            aria-label="Reason for the status change"
+            (ngSubmit)="change(pa.period, pa.action, reason())"
+          >
+            <mat-form-field appearance="outline" class="bf-reason bf-form__wide">
+              <mat-label
+                >Reason to {{ labelOf(pa.action).toLowerCase() }} {{ pa.period.label }}</mat-label
+              >
+              <input
+                matInput
+                required
+                name="reason"
+                [ngModel]="reason()"
+                (ngModelChange)="reason.set($event)"
+              />
+              <mat-hint>Reopening and unlocking are recorded in the audit trail.</mat-hint>
+            </mat-form-field>
+            <div class="bf-form__wide bf-form__actions">
+              <button mat-flat-button type="submit" [disabled]="busy() || !reason().trim()">
+                {{ labelOf(pa.action) }}
+              </button>
+              <button mat-button type="button" (click)="pendingAction.set(null)">Cancel</button>
+            </div>
+          </form>
+        }
+        <div class="bf-table-scroll">
+          <table mat-table [dataSource]="y.periods" aria-label="Accounting periods">
+            <ng-container matColumnDef="period">
+              <th mat-header-cell *matHeaderCellDef>Period</th>
+              <td mat-cell *matCellDef="let p">
+                <span class="bf-cell__primary">{{ p.label }}</span>
+                <span class="bf-cell__secondary">
+                  Period {{ p.periodNumber
+                  }}{{ p.startDate <= today && today <= p.endDate ? ' · current' : '' }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="start">
+              <th mat-header-cell *matHeaderCellDef>Start</th>
+              <td mat-cell *matCellDef="let p">{{ p.startDate | date: 'd MMM y' : 'UTC' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="end">
+              <th mat-header-cell *matHeaderCellDef>End</th>
+              <td mat-cell *matCellDef="let p">{{ p.endDate | date: 'd MMM y' : 'UTC' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let p">
+                <sat-status-tag [status]="statusOf(p.status).tone">{{
+                  statusOf(p.status).label
+                }}</sat-status-tag>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="closedBy">
+              <th mat-header-cell *matHeaderCellDef>Changed by</th>
+              <td mat-cell *matCellDef="let p">{{ p.statusChangedByName ?? '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
+              <td mat-cell *matCellDef="let p">
+                <div class="bf-row-actions">
+                  @for (a of p.allowedActions; track a) {
+                    @if (a === 'close') {
+                      <button
+                        mat-flat-button
+                        type="button"
+                        [disabled]="busy()"
+                        (click)="ask(p, a)"
+                        [attr.aria-label]="labelOf(a) + ' ' + p.label"
+                      >
+                        Close period
+                      </button>
+                    } @else {
+                      <button
+                        mat-button
+                        type="button"
+                        [disabled]="busy()"
+                        (click)="ask(p, a)"
+                        [attr.aria-label]="labelOf(a) + ' ' + p.label"
+                      >
+                        {{ labelOf(a) }}
+                      </button>
+                    }
+                  }
+                </div>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+          </table>
+        </div>
+      }
     }
-  }
-</section>
+  </section>
+  <aside class="bf-aside">
+    <section class="bf-card" aria-labelledby="year-end-title">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="year-end-title">Plan rate and year-end</h2>
+      </div>
+      @if (year(); as y) {
+        <p class="bf-aside__item" data-testid="plan-lock">
+          {{
+            y.planRatesLockedAt
+              ? y.label +
+                ' plan rates locked on ' +
+                (y.planRatesLockedAt | date: 'd MMM y') +
+                ' at plan approval'
+              : y.label + ' plan rates are not locked yet'
+          }}
+          <small><a routerLink="/finance/rates">Exchange rates</a></small>
+        </p>
+      }
+      @if (nextYearLabel(); as next) {
+        <p class="bf-aside__item">
+          Next year
+          <small
+            >{{ next }} is not generated yet{{
+              canManage() ? '; use Add fiscal year.' : '.'
+            }}</small
+          >
+        </p>
+      }
+    </section>
+    @if (canAudit()) {
+      <section class="bf-card" aria-labelledby="recent-title">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" id="recent-title">Recent changes</h2>
+        </div>
+        @if (recentItems().length === 0) {
+          <p class="bf-aside__item">No period status changes recorded yet.</p>
+        }
+        @for (e of recentItems(); track e.id) {
+          <p class="bf-aside__item">
+            {{ changeText(e) }}{{ e.reason ? ': ' + e.reason : '' }}
+            <small
+              >{{ e.occurredAt | date: 'd MMM y, HH:mm' : 'UTC' }} UTC ·
+              <span class="bf-hash">audited, hash {{ e.hash.slice(0, 8) }}</span></small
+            >
+          </p>
+        }
+      </section>
+    }
+  </aside>
+</div>

@@ -11,6 +11,14 @@
       <mat-label>As of</mat-label>
       <input matInput type="date" [ngModel]="asOf()" (ngModelChange)="asOf.set($event)" />
     </mat-form-field>
+    @if (canImport()) {
+      <button mat-stroked-button type="button" (click)="downloadTemplate()">
+        Download template
+      </button>
+      <button mat-stroked-button type="button" (click)="showHistory.set(true)">
+        Import history
+      </button>
+    }
     @if (canImport() && !importing()) {
       <button mat-flat-button type="button" (click)="startImport()">Import HR file</button>
     }
@@ -23,132 +31,225 @@
   >
 }
 
+@if (showHistory()) {
+  <section class="bf-card" aria-labelledby="history-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="history-title">Import history</h2>
+      <button mat-button type="button" (click)="showHistory.set(false)">Close</button>
+    </div>
+    @if (valueOf(history); as h) {
+      <ul class="bf-history">
+        @for (item of h.items; track item.id) {
+          <li>
+            As of {{ item.asOfDate | date: 'd MMM y' : 'UTC' }} ·
+            {{ item.totalHeadcount | number }} people on {{ item.lineCount }} lines · imported
+            {{ item.createdAt | date: 'd MMM y, HH:mm' }} ({{ item.source }})
+          </li>
+        }
+      </ul>
+    } @else {
+      <bf-load-state
+        [loading]="history.isLoading()"
+        [error]="history.error()"
+        what="import history"
+        [lines]="3"
+        (retry)="history.reload()"
+      />
+    }
+  </section>
+}
+
 @if (importing()) {
   <section class="bf-card" aria-labelledby="import-title">
     <div class="bf-card__header">
       <div>
-        <h2 class="bf-card__title" id="import-title">Import HR headcount</h2>
+        <h2 class="bf-card__title" id="import-title">HR headcount import</h2>
         <p class="bf-card__hint">
-          Validate first: nothing is saved until the file has no problems.
+          Headcount drives per-head allocations. Nothing is saved until the file has no problems.
         </p>
       </div>
     </div>
-    <div class="bf-card__body">
-      <mat-form-field appearance="outline">
-        <mat-label>Headcount as of</mat-label>
-        <input
-          matInput
-          type="date"
-          required
-          [ngModel]="importDate()"
-          (ngModelChange)="importDate.set($event)"
-          data-testid="import-date"
+    <ol class="bf-steps" aria-label="Import steps">
+      <li
+        [class.bf-steps--done]="step() > 1"
+        [class.bf-steps--current]="step() === 1"
+        [attr.aria-current]="step() === 1 ? 'step' : null"
+      >
+        <span class="bf-steps__n">1</span> Upload
+      </li>
+      <li
+        [class.bf-steps--current]="step() === 2"
+        [attr.aria-current]="step() === 2 ? 'step' : null"
+      >
+        <span class="bf-steps__n">2</span> Review
+      </li>
+      <li><span class="bf-steps__n">3</span> Apply</li>
+    </ol>
+    @if (step() === 1) {
+      <div class="bf-card__body">
+        <mat-form-field appearance="outline">
+          <mat-label>Effective date</mat-label>
+          <input
+            matInput
+            type="date"
+            required
+            [ngModel]="importDate()"
+            (ngModelChange)="importDate.set($event)"
+            data-testid="import-date"
+          />
+        </mat-form-field>
+        <bf-csv-input
+          [value]="csv()"
+          (valueChange)="csv.set($event); preview.set(null)"
+          [fileName]="fileName()"
+          (fileNameChange)="fileName.set($event)"
+          columns="location_code, team_code (optional), employment_type (employee, contractor, intern), headcount, prorated_headcount (optional)"
+          [example]="example"
         />
-      </mat-form-field>
-      <bf-csv-input
-        [value]="csv()"
-        (valueChange)="csv.set($event); preview.set(null)"
-        columns="location_code, team_code (optional), employment_type (employee, contractor, intern), headcount, prorated_headcount (optional)"
-        [example]="example"
-      />
-    </div>
+      </div>
+    }
     @if (failure()) {
       <sat-banner variant="important" class="bf-banner"
         ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
       >
     }
     @if (preview(); as p) {
-      @if (p.accepted) {
-        <sat-banner variant="info" class="bf-banner">
-          <sat-banner-message>
-            Ready to import {{ p.totalHeadcount }} people on {{ p.lineCount }} lines
-            @if (p.previousTotal !== null) {
-              (previous snapshot: {{ p.previousTotal }}).
-            }
-          </sat-banner-message>
-        </sat-banner>
-        <div class="bf-table-scroll">
-          <table mat-table [dataSource]="p.units" aria-label="Import preview">
-            <ng-container matColumnDef="unit">
-              <th mat-header-cell *matHeaderCellDef>Unit</th>
-              <td mat-cell *matCellDef="let u">
-                <span class="bf-cell__primary">{{ u.name }}</span>
-                <span class="bf-cell__secondary">{{ u.code }}</span>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="employees">
-              <th mat-header-cell *matHeaderCellDef class="bf-num">Employees</th>
-              <td mat-cell *matCellDef="let u" class="bf-num">{{ u.byType.employee | number }}</td>
-            </ng-container>
-            <ng-container matColumnDef="contractors">
-              <th mat-header-cell *matHeaderCellDef class="bf-num">Contractors</th>
-              <td mat-cell *matCellDef="let u" class="bf-num">
-                {{ u.byType.contractor | number }}
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="interns">
-              <th mat-header-cell *matHeaderCellDef class="bf-num">Interns</th>
-              <td mat-cell *matCellDef="let u" class="bf-num">{{ u.byType.intern | number }}</td>
-            </ng-container>
-            <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef class="bf-num">Total</th>
-              <td mat-cell *matCellDef="let u" class="bf-num">{{ u.headcount | number }}</td>
-            </ng-container>
-            <ng-container matColumnDef="change">
-              <th mat-header-cell *matHeaderCellDef class="bf-num">Change</th>
-              <td mat-cell *matCellDef="let u" class="bf-num">
-                {{ delta(u.headcount, u.previousHeadcount) }}
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="previewColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: previewColumns"></tr>
-          </table>
+      <div class="bf-card__body">
+        <p class="bf-file" data-testid="file-summary">
+          {{ fileName() ?? 'Pasted CSV' }} · {{ p.rowsRead | number }} rows · effective date
+          {{ p.asOfDate | date: 'd MMM y' : 'UTC' }}
+        </p>
+        <div class="bf-kpis" aria-label="File summary">
+          <div class="bf-kpi">
+            <p class="bf-kpi__label">Rows read</p>
+            <p class="bf-kpi__value">{{ p.rowsRead | number }}</p>
+          </div>
+          <div class="bf-kpi">
+            <p class="bf-kpi__label">Valid lines</p>
+            <p class="bf-kpi__value">{{ p.lineCount | number }}</p>
+          </div>
+          <div class="bf-kpi">
+            <p class="bf-kpi__label">Headcount</p>
+            <p class="bf-kpi__value">{{ p.totalHeadcount | number }}</p>
+            <p class="bf-kpi__delta">
+              {{
+                p.previousTotal !== null
+                  ? delta(p.totalHeadcount, p.previousTotal) + ' vs previous import'
+                  : 'First import'
+              }}
+            </p>
+          </div>
+          <div class="bf-kpi" [class.bf-kpi--error]="p.issues.length > 0">
+            <p class="bf-kpi__label">Rows with errors</p>
+            <p class="bf-kpi__value">{{ p.issues.length }}</p>
+            <p class="bf-kpi__delta">{{ p.issues.length ? 'Fix before importing' : 'None' }}</p>
+          </div>
         </div>
-      } @else {
-        <sat-banner variant="important" class="bf-banner">
-          <sat-banner-message
-            >The file has {{ p.issues.length }} problem(s). Fix them and validate
-            again.</sat-banner-message
-          >
-        </sat-banner>
-        <div class="bf-table-scroll">
-          <table mat-table [dataSource]="p.issues" aria-label="Problems in the file">
-            <ng-container matColumnDef="line">
-              <th mat-header-cell *matHeaderCellDef>Line</th>
-              <td mat-cell *matCellDef="let i">{{ i.line }}</td>
-            </ng-container>
-            <ng-container matColumnDef="field">
-              <th mat-header-cell *matHeaderCellDef>Column</th>
-              <td mat-cell *matCellDef="let i">{{ i.field ?? '—' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="message">
-              <th mat-header-cell *matHeaderCellDef>Problem</th>
-              <td mat-cell *matCellDef="let i">{{ i.message }}</td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="issueColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: issueColumns"></tr>
-          </table>
+        @if (p.accepted) {
+          <p class="bf-card__hint" data-testid="ready">
+            Ready to import {{ p.totalHeadcount }} people on {{ p.lineCount }} lines.
+          </p>
+        }
+      </div>
+      <div class="bf-review">
+        <div class="bf-review__main">
+          <h3 class="bf-review__title">Headcount change by location</h3>
+          <div class="bf-table-scroll">
+            <table mat-table [dataSource]="p.locations" aria-label="Headcount change by location">
+              <ng-container matColumnDef="location">
+                <th mat-header-cell *matHeaderCellDef>Location</th>
+                <td mat-cell *matCellDef="let r">{{ r.name }}</td>
+                <td mat-footer-cell *matFooterCellDef>Total</td>
+              </ng-container>
+              <ng-container matColumnDef="entity">
+                <th mat-header-cell *matHeaderCellDef>Legal entity</th>
+                <td mat-cell *matCellDef="let r">
+                  {{ r.legalEntityId ? (entityCode().get(r.legalEntityId) ?? '…') : '—' }}
+                </td>
+                <td mat-footer-cell *matFooterCellDef></td>
+              </ng-container>
+              <ng-container matColumnDef="previous">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Previous</th>
+                <td mat-cell *matCellDef="let r" class="bf-num">
+                  {{ r.previousHeadcount === null ? '—' : (r.previousHeadcount | number) }}
+                </td>
+                <td mat-footer-cell *matFooterCellDef class="bf-num">
+                  {{ locationTotals().hasPrevious ? (locationTotals().previous | number) : '—' }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="new">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">New</th>
+                <td mat-cell *matCellDef="let r" class="bf-num">{{ r.headcount | number }}</td>
+                <td mat-footer-cell *matFooterCellDef class="bf-num">
+                  {{ locationTotals().next | number }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="change">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Change</th>
+                <td mat-cell *matCellDef="let r" class="bf-num">
+                  {{ delta(r.headcount, r.previousHeadcount) }}
+                </td>
+                <td mat-footer-cell *matFooterCellDef class="bf-num">
+                  {{
+                    locationTotals().hasPrevious
+                      ? delta(locationTotals().next, locationTotals().previous)
+                      : '—'
+                  }}
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="locationColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: locationColumns"></tr>
+              <tr mat-footer-row *matFooterRowDef="locationColumns"></tr>
+            </table>
+          </div>
+          @if (p.locations.length === 0) {
+            <p class="bf-empty">No valid lines yet.</p>
+          }
         </div>
-      }
+        @if (p.issues.length) {
+          <div class="bf-review__errors">
+            <h3 class="bf-review__title">Rows with errors ({{ p.issues.length }})</h3>
+            <ul class="bf-errors" aria-label="Rows with errors">
+              @for (i of p.issues; track i.line + (i.field ?? '')) {
+                <li>
+                  <strong>Line {{ i.line }}</strong
+                  >{{ i.field ? ' · ' + i.field : '' }}
+                  <span>{{ i.message }}</span>
+                </li>
+              }
+            </ul>
+            <p class="bf-card__hint">
+              Fix these rows and validate again; nothing is imported while any row has an error.
+            </p>
+          </div>
+        }
+      </div>
     }
-    <div class="bf-form__actions">
-      <button
-        mat-stroked-button
-        type="button"
-        (click)="validate()"
-        [disabled]="busy() || !csv().trim()"
-      >
-        Validate
-      </button>
-      <button
-        mat-flat-button
-        type="button"
-        (click)="apply()"
-        [disabled]="busy() || !preview()?.accepted"
-      >
-        Import
-      </button>
-      <button mat-button type="button" (click)="importing.set(false)">Cancel</button>
+    <div class="bf-footer-bar">
+      <p class="bf-card__hint">One audit entry; owners of per-head budgets see the new counts.</p>
+      <div class="bf-form__actions">
+        @if (step() === 1) {
+          <button mat-button type="button" (click)="importing.set(false)">Cancel</button>
+          <button
+            mat-flat-button
+            type="button"
+            (click)="validate()"
+            [disabled]="busy() || !csv().trim()"
+          >
+            Validate
+          </button>
+        } @else {
+          <button mat-button type="button" (click)="preview.set(null)">Back</button>
+          <button
+            mat-flat-button
+            type="button"
+            (click)="apply()"
+            [disabled]="busy() || !preview()?.accepted"
+          >
+            Apply import
+          </button>
+        }
+      </div>
     </div>
   </section>
 }

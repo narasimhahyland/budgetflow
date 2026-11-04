@@ -23,6 +23,11 @@ import { LoadState } from './load-state';
 
 type RateType = ExchangeRate['rateType'];
 
+const previousMonthEnd = (): string => {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0)).toISOString().slice(0, 10);
+};
+
 const TYPE_LABEL: Record<RateType, string> = {
   plan: 'Plan (locked per fiscal year)',
   spot: 'Spot',
@@ -58,6 +63,65 @@ const TYPE_LABEL: Record<RateType, string> = {
     .bf-compare .bf-kpi__value {
       font: var(--mat-sys-title-large);
     }
+    .bf-context {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 12px 20px;
+    }
+    .bf-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid var(--mat-sys-outline-variant);
+      border-radius: var(--mat-sys-corner-small);
+      background: var(--mat-sys-surface-container-low);
+      font: var(--mat-sys-label-large);
+    }
+    .bf-context__note {
+      margin: 0;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+    }
+    .bf-section-title {
+      margin: 8px 0 0;
+      font: var(--mat-sys-title-medium);
+    }
+    .bf-tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .bf-tile {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+      border: 1px solid var(--mat-sys-outline-variant);
+      border-radius: var(--mat-sys-corner-large);
+      background: var(--mat-sys-surface-container-lowest);
+    }
+    .bf-tile__head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font: var(--mat-sys-title-small);
+    }
+    .bf-tile__body {
+      margin: 0;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+    }
+    .bf-tile__use {
+      margin: auto 0 0;
+      padding-top: 8px;
+      border-top: 1px solid var(--mat-sys-outline-variant);
+      font: var(--mat-sys-label-medium);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -88,13 +152,68 @@ export class RatesPage {
   protected readonly calendars = resource({ loader: () => data(this.api.listFiscalCalendars({})) });
   protected readonly groupCalendar = resource({
     params: () => {
-      const id = this.calendars
-        .value()
-        ?.items.find((c) => c.legalEntities.some((l) => l.code === 'HYL-US'))?.id;
+      const id = valueOf(this.calendars)?.items.find((c) =>
+        c.legalEntities.some((l) => l.code === 'HYL-US'),
+      )?.id;
       return id ? { id } : undefined;
     },
     loader: ({ params }) => data(this.api.getFiscalCalendar({ params: { calendarId: params.id } })),
   });
+
+  /** The group fiscal year containing today (plan rates belong to it). */
+  protected readonly currentYear = computed(() => {
+    const today = todayIso();
+    return (
+      valueOf(this.groupCalendar)?.fiscalYears.find(
+        (y) => y.startDate <= today && today <= y.endDate,
+      ) ?? null
+    );
+  });
+  private readonly planRates = resource({
+    params: () => {
+      const fy = this.currentYear();
+      return fy ? { rateType: 'plan' as const, fiscalYearId: fy.id, limit: 200 } : undefined;
+    },
+    loader: ({ params }) => data(this.api.listExchangeRates({ query: params })),
+  });
+  private readonly recentRates = resource({
+    loader: () => data(this.api.listExchangeRates({ query: { limit: 200 } })),
+  });
+
+  /** Rates per 1 USD for the current fiscal year: plan, latest month-end and latest monthly average. */
+  protected readonly matrix = computed(() => {
+    const today = todayIso();
+    const plan = valueOf(this.planRates)?.items ?? [];
+    const recent = (valueOf(this.recentRates)?.items ?? []).filter((r) => r.effectiveDate <= today);
+    const latest = (type: RateType, quote: string) =>
+      recent.find((r) => r.rateType === type && r.quoteCurrency === quote) ?? null;
+    return this.quotes()
+      .map((c) => {
+        const p = plan.find((r) => r.quoteCurrency === c.code) ?? null;
+        const monthEnd = latest('month_end', c.code);
+        const average = latest('monthly_average', c.code);
+        const updated = [p, monthEnd, average]
+          .map((r) => r?.effectiveDate ?? '')
+          .sort()
+          .at(-1);
+        return { currency: c, plan: p, monthEnd, average, updated: updated || null };
+      })
+      .filter((row) => row.plan || row.monthEnd || row.average);
+  });
+  protected readonly monthEndLabel = computed(
+    () => this.matrix().find((r) => r.monthEnd)?.monthEnd?.effectiveDate ?? null,
+  );
+  protected readonly averageLabel = computed(
+    () => this.matrix().find((r) => r.average)?.average?.effectiveDate ?? null,
+  );
+  protected readonly matrixColumns = [
+    'currency',
+    'plan',
+    'monthEnd',
+    'average',
+    'source',
+    'updated',
+  ];
 
   protected readonly canManage = computed(() => this.session.can('fx.manage'));
   protected readonly reporting = computed(
@@ -106,9 +225,9 @@ export class RatesPage {
 
   // Lookup
   protected readonly from = signal('INR');
-  protected readonly date = signal(todayIso());
+  protected readonly date = signal(previousMonthEnd());
   protected readonly amount = signal('100000');
-  protected readonly compareType = signal<RateType>('spot');
+  protected readonly compareType = signal<RateType>('month_end');
   protected readonly amountMinor = computed(() => {
     const exp = valueOf(this.currencies)?.items.find((c) => c.code === this.from())?.exponent ?? 2;
     const n = Number(this.amount());
@@ -152,6 +271,13 @@ export class RatesPage {
   // Lock
   protected readonly lockYearId = signal<string | null>(null);
   protected readonly lockReason = signal('');
+
+  /** A rate without trailing zeros (at least two decimals). */
+  protected rateText(value: string): string {
+    const [int, frac = ''] = value.split('.');
+    const trimmed = frac.replace(/0+$/, '');
+    return `${int}.${trimmed.padEnd(2, '0')}`;
+  }
 
   protected typeName(type: RateType): string {
     return TYPE_LABEL[type];

@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import type { CalendarDefinition, FiscalPeriod } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
@@ -76,6 +77,7 @@ const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
     MatInputModule,
     MatSelectModule,
     MatTableModule,
+    RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_TAG_IMPORTS,
   ],
@@ -93,6 +95,53 @@ const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
     }
     .bf-calendar-picker {
       min-width: min(360px, 100%);
+    }
+    .bf-cal {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) {
+      .bf-cal {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+    .bf-aside {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .bf-aside__item {
+      margin: 0;
+      padding: 12px 20px;
+      border-top: 1px solid var(--mat-sys-outline-variant);
+      font: var(--mat-sys-body-medium);
+    }
+    .bf-aside__item small {
+      display: block;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+    }
+    .bf-hash {
+      font: var(--mat-sys-label-small);
+      color: var(--mat-sys-on-surface-variant);
+    }
+    .bf-year-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 12px;
+    }
+    .bf-year-head .bf-card__title {
+      font: var(--mat-sys-title-large);
+    }
+    .bf-chip {
+      padding: 2px 10px;
+      border: 1px solid var(--mat-sys-outline-variant);
+      border-radius: var(--mat-sys-corner-small);
+      background: var(--mat-sys-surface-container-low);
+      font: var(--mat-sys-label-large);
     }
     .bf-year--active {
       background: var(--mat-sys-secondary-container);
@@ -114,7 +163,7 @@ export class FiscalCalendarsPage {
   protected readonly types = Object.keys(TYPE_LABEL) as CalendarType[];
   protected readonly months = MONTHS;
   protected readonly weekdays = WEEKDAYS;
-  protected readonly columns = ['period', 'dates', 'days', 'status', 'actions'];
+  protected readonly columns = ['period', 'start', 'end', 'status', 'closedBy', 'actions'];
 
   protected readonly calendars = resource({ loader: () => data(this.api.listFiscalCalendars({})) });
   /** Keeps the chosen calendar across reloads; defaults to the group calendar. */
@@ -150,6 +199,28 @@ export class FiscalCalendarsPage {
   );
 
   protected readonly canManage = computed(() => this.session.can('period.manage'));
+  protected readonly canAudit = computed(() => this.session.can('audit.read'));
+  protected readonly today = new Date().toISOString().slice(0, 10);
+
+  /** The next period a close would affect in the chosen year, for the warning banner. */
+  protected readonly closingHint = computed(() => {
+    const y = this.year();
+    const next = y?.periods.find((p) => p.allowedActions.includes('close'));
+    return next ? next.label : null;
+  });
+  protected readonly nextYearLabel = computed(() => {
+    const years = valueOf(this.detail)?.fiscalYears ?? [];
+    const last = years.at(-1);
+    return last ? `FY${Number(last.label.replace(/\D/g, '')) + 1}` : null;
+  });
+
+  protected readonly recent = resource({
+    params: () => (this.canAudit() ? { resourceType: 'fiscal_period', limit: 5 } : undefined),
+    loader: ({ params }) => data(this.api.listAuditEvents({ query: params })),
+  });
+  protected readonly recentItems = computed(() =>
+    [...(valueOf(this.recent)?.items ?? [])].sort((a, b) => b.seq - a.seq),
+  );
   protected readonly pendingAction = signal<{ period: FiscalPeriod; action: PeriodAction } | null>(
     null,
   );
@@ -198,6 +269,34 @@ export class FiscalCalendarsPage {
     if (def.type === 'non_calendar') return `Starts in ${MONTHS[(def.startMonth ?? 1) - 1]}`;
     if (def.type === 'calendar_year') return 'January to December';
     return `Ends the ${def.method === 'nearest' ? 'nearest' : 'last'} ${WEEKDAYS[def.endWeekday ?? 6]} of ${MONTHS[(def.endMonth ?? 12) - 1]}`;
+  }
+
+  protected changeText(e: { action: string; changes: Record<string, unknown> }): string {
+    const label = (e.changes['label'] as { to?: string } | undefined)?.to ?? 'A period';
+    const status = (e.changes['status'] as { to?: string } | undefined)?.to ?? '';
+    return `Period ${label} ${status.replace('_', '-')}`;
+  }
+
+  protected async addYear(): Promise<void> {
+    const cal = valueOf(this.detail);
+    const label = this.nextYearLabel();
+    if (!cal || !label) return;
+    this.busy.set(true);
+    this.failure.set(null);
+    try {
+      const updated = await data(
+        this.api.addFiscalYear({
+          params: { calendarId: cal.id },
+          body: { year: Number(label.replace(/\D/g, '')) },
+        }),
+      );
+      this.notice.set(`${label} is ready in ${updated.name}.`);
+      this.detail.reload();
+    } catch (e) {
+      this.failure.set(errorMessage(e));
+    } finally {
+      this.busy.set(false);
+    }
   }
 
   protected statusOf(status: FiscalPeriod['status']) {

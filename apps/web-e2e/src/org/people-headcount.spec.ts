@@ -67,10 +67,11 @@ test.describe('headcount', () => {
         'location_code,team_code,employment_type,headcount\nXXX,,employee,3\nHYD,,freelancer,2',
       );
     await page.getByRole('button', { name: 'Validate' }).click();
-    const problems = page.getByRole('table', { name: 'Problems in the file' });
-    await expect(problems.getByRole('row')).toHaveCount(3);
+    const problems = page.getByRole('list', { name: 'Rows with errors' });
+    await expect(problems.getByRole('listitem')).toHaveCount(2);
     await expect(problems).toContainText('"XXX" is not a location code.');
-    await expect(page.getByRole('button', { name: 'Import', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Apply import' })).toBeDisabled();
+    await page.getByRole('button', { name: 'Back' }).click();
     await page
       .getByTestId('csv-text')
       .fill(
@@ -78,7 +79,10 @@ test.describe('headcount', () => {
       );
     await page.getByRole('button', { name: 'Validate' }).click();
     await expect(page.getByText('Ready to import 60 people on 2 lines')).toBeVisible();
-    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await expect(page.getByRole('table', { name: 'Headcount change by location' })).toContainText(
+      'Bengaluru',
+    );
+    await page.getByRole('button', { name: 'Apply import' }).click();
     await expect(page.getByText(`Imported 60 people on 2 lines as of ${asOf}.`)).toBeVisible();
     await expect(page.getByTestId('headcount-total')).toHaveText('60');
   });

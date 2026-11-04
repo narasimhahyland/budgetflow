@@ -1,9 +1,9 @@
 <header class="bf-page__header">
   <div class="bf-page__heading">
-    <h1 class="bf-page__title">Currencies and exchange rates</h1>
+    <h1 class="bf-page__title">Exchange rates</h1>
     <p class="bf-page__subtitle">
-      Reporting currency {{ reporting() }}. Budgets are held in {{ reporting() }}; INR, EUR and GBP
-      transactions convert at the plan rate locked for the fiscal year. FX never consumes budget.
+      Budgets and reporting are in {{ reporting() }}. Local-currency transactions convert to
+      {{ reporting() }} at the locked plan rate.
     </p>
   </div>
   @if (canManage() && !adding()) {
@@ -24,142 +24,68 @@
   >
 }
 
-<section class="bf-card" aria-labelledby="lookup-title">
-  <div class="bf-card__header">
-    <div>
-      <h2 class="bf-card__title" id="lookup-title">Convert an amount</h2>
-      <p class="bf-card__hint">
-        The rate that applies on a date for each rate type, and the difference (FX effect).
-      </p>
-    </div>
-  </div>
-  <div class="bf-filters">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Amount</mat-label>
-      <input
-        matInput
-        type="number"
-        [ngModel]="amount()"
-        (ngModelChange)="amount.set($event)"
-        data-testid="lookup-amount"
-      />
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>From</mat-label>
-      <mat-select [ngModel]="from()" (ngModelChange)="from.set($event)" data-testid="lookup-from">
-        @for (c of quotes(); track c.code) {
-          <mat-option [value]="c.code">{{ c.code }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Date</mat-label>
-      <input
-        matInput
-        type="date"
-        [ngModel]="date()"
-        (ngModelChange)="date.set($event)"
-        data-testid="lookup-date"
-      />
-    </mat-form-field>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Compare with</mat-label>
-      <mat-select
-        [ngModel]="compareType()"
-        (ngModelChange)="compareType.set($event)"
-        data-testid="lookup-type"
-      >
-        @for (t of types; track t) {
-          @if (t !== 'plan') {
-            <mat-option [value]="t">{{ typeLabel[t] }}</mat-option>
-          }
-        }
-      </mat-select>
-    </mat-form-field>
-  </div>
-  <div class="bf-compare">
-    <div class="bf-kpi" data-testid="lookup-plan">
-      <p class="bf-kpi__label">Plan rate (budget control)</p>
-      @switch (planLookup.status()) {
-        @case ('error') {
-          <p class="bf-kpi__delta">No rate: {{ planLookup.error()?.message }}</p>
-        }
-        @case ('resolved') {
-          @if (valueOf(planLookup); as v) {
-            <p class="bf-kpi__value">
-              @if (v.converted) {
-                <bf-money
-                  [amountMinor]="v.converted.amountMinor"
-                  [currency]="v.converted.currency"
-                />
-              }
-            </p>
-            <p class="bf-kpi__delta">
-              1 {{ v.applied.from }} = {{ v.applied.value }} {{ v.applied.to }}
-              @for (s of v.sources; track s.rateId) {
-                · {{ s.quoteCurrency }} {{ s.rate }} from
-                {{ s.effectiveDate | date: 'd MMM y' : 'UTC'
-                }}{{
-                  s.fiscalYearLabel
-                    ? ' (' + s.fiscalYearLabel + (s.locked ? ', locked' : ', not locked') + ')'
-                    : ''
-                }}
-              }
-            </p>
-          }
-        }
-        @default {
-          <p class="bf-kpi__delta">Looking up…</p>
-        }
-      }
-    </div>
-    <div class="bf-kpi" data-testid="lookup-other">
-      <p class="bf-kpi__label">{{ typeName(compareType()) }}</p>
-      @switch (otherLookup.status()) {
-        @case ('error') {
-          <p class="bf-kpi__delta">No rate: {{ otherLookup.error()?.message }}</p>
-        }
-        @case ('resolved') {
-          @if (valueOf(otherLookup); as v) {
-            <p class="bf-kpi__value">
-              @if (v.converted) {
-                <bf-money
-                  [amountMinor]="v.converted.amountMinor"
-                  [currency]="v.converted.currency"
-                />
-              }
-            </p>
-            <p class="bf-kpi__delta">
-              1 {{ v.applied.from }} = {{ v.applied.value }} {{ v.applied.to }}
-              @for (s of v.sources; track s.rateId) {
-                · {{ s.quoteCurrency }} {{ s.rate }} from
-                {{ s.effectiveDate | date: 'd MMM y' : 'UTC'
-                }}{{
-                  s.fiscalYearLabel
-                    ? ' (' + s.fiscalYearLabel + (s.locked ? ', locked' : ', not locked') + ')'
-                    : ''
-                }}
-              }
-            </p>
-          }
-        }
-        @default {
-          <p class="bf-kpi__delta">Looking up…</p>
-        }
-      }
-    </div>
-    <div class="bf-kpi" data-testid="lookup-fx-effect">
-      <p class="bf-kpi__label">FX effect (reported separately)</p>
-      <p class="bf-kpi__value">
-        @if (fxEffect() !== null) {
-          <bf-money [amountMinor]="fxEffect()!" [currency]="reporting()" />
-        } @else {
-          —
-        }
-      </p>
-    </div>
-  </div>
+<section class="bf-card bf-context" aria-label="Currencies">
+  <span class="bf-chip">Reporting currency {{ reporting() }} (fixed)</span>
+  <span class="bf-chip">Budget currency {{ reporting() }} (all budgets)</span>
+  @if (currentYear(); as fy) {
+    <p class="bf-context__note" data-testid="plan-rate-state">
+      {{
+        fy.planRatesLockedAt
+          ? 'Locked plan rate active for ' + fy.label
+          : fy.label + ' plan rates are not locked yet'
+      }}
+    </p>
+  }
 </section>
+
+<h2 class="bf-section-title">Rate types and conversion rules</h2>
+<div class="bf-tiles">
+  <div class="bf-tile">
+    <div class="bf-tile__head">
+      Plan rate
+      <sat-status-tag [status]="currentYear()?.planRatesLockedAt ? 'info' : 'warning'">
+        {{ currentYear()?.planRatesLockedAt ? 'Locked for ' + currentYear()?.label : 'Not locked' }}
+      </sat-status-tag>
+    </div>
+    <p class="bf-tile__body">
+      Converts transactions to budget {{ reporting() }}. Budget control always uses it.
+    </p>
+    <p class="bf-tile__use">Used in: budget consumption</p>
+  </div>
+  <div class="bf-tile">
+    <div class="bf-tile__head">
+      Month-end <sat-status-tag status="neutral" [hideIcon]="true">FX reporting</sat-status-tag>
+    </div>
+    <p class="bf-tile__body">Period-end valuation for close and the general ledger.</p>
+    <p class="bf-tile__use">Used in: financial close and GL</p>
+  </div>
+  <div class="bf-tile">
+    <div class="bf-tile__head">
+      Monthly average
+      <sat-status-tag status="neutral" [hideIcon]="true">FX reporting</sat-status-tag>
+    </div>
+    <p class="bf-tile__body">Smooths movement within the month for trend reporting.</p>
+    <p class="bf-tile__use">Used in: trend reporting</p>
+  </div>
+  <div class="bf-tile">
+    <div class="bf-tile__head">
+      Spot <sat-status-tag status="neutral-quiet" [hideIcon]="true">Reference only</sat-status-tag>
+    </div>
+    <p class="bf-tile__body">Indicative daily rate for estimates; never used for budget control.</p>
+    <p class="bf-tile__use">Used in: request estimates</p>
+  </div>
+</div>
+
+<sat-banner variant="info">
+  <sat-banner-message>
+    Governance rule: plan rates lock at plan approval{{
+      currentYear()?.planRatesLockedAt
+        ? ' (' + (currentYear()?.planRatesLockedAt | date: 'd MMM y') + ')'
+        : ''
+    }}. A locked rate never changes and never restates posted journals; FX effects are reported
+    separately.
+  </sat-banner-message>
+</sat-banner>
 
 @if (adding()) {
   <section class="bf-card" aria-labelledby="add-title">
@@ -241,6 +167,214 @@
   </section>
 }
 
+<section class="bf-card" aria-labelledby="matrix-title">
+  <div class="bf-card__header">
+    <h2 class="bf-card__title" id="matrix-title">
+      Rates per 1 {{ reporting() }} — {{ currentYear()?.label ?? 'current year' }}
+    </h2>
+    <sat-status-tag status="neutral" [hideIcon]="true"
+      >{{ matrix().length }} currencies active</sat-status-tag
+    >
+  </div>
+  @if (matrix().length === 0) {
+    <p class="bf-empty">No rates for the current fiscal year yet.</p>
+  } @else {
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="matrix()" aria-labelledby="matrix-title">
+        <ng-container matColumnDef="currency">
+          <th mat-header-cell *matHeaderCellDef>Currency</th>
+          <td mat-cell *matCellDef="let r">
+            <span class="bf-cell__primary">{{ r.currency.code }} — {{ r.currency.name }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="plan">
+          <th mat-header-cell *matHeaderCellDef class="bf-num">
+            Plan rate {{ currentYear()?.label }}
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let r"
+            class="bf-num"
+            [attr.data-testid]="'plan-' + r.currency.code"
+          >
+            @if (r.plan) {
+              {{ rateText(r.plan.rate) }}{{ r.plan.locked ? ' (locked)' : '' }}
+            } @else {
+              —
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="monthEnd">
+          <th mat-header-cell *matHeaderCellDef class="bf-num">
+            {{
+              monthEndLabel()
+                ? (monthEndLabel() | date: 'MMM y' : 'UTC') + ' month-end'
+                : 'Month-end'
+            }}
+          </th>
+          <td mat-cell *matCellDef="let r" class="bf-num">
+            {{ r.monthEnd ? rateText(r.monthEnd.rate) : '—' }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="average">
+          <th mat-header-cell *matHeaderCellDef class="bf-num">
+            {{
+              averageLabel()
+                ? (averageLabel() | date: 'MMM y' : 'UTC') + ' average'
+                : 'Monthly average'
+            }}
+          </th>
+          <td mat-cell *matCellDef="let r" class="bf-num">
+            {{ r.average ? rateText(r.average.rate) : '—' }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="source">
+          <th mat-header-cell *matHeaderCellDef>Source</th>
+          <td mat-cell *matCellDef="let r">{{ r.plan?.source ?? r.monthEnd?.source ?? '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updated">
+          <th mat-header-cell *matHeaderCellDef>Updated</th>
+          <td mat-cell *matCellDef="let r">
+            {{ r.updated ? (r.updated | date: 'd MMM y' : 'UTC') : '—' }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="matrixColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: matrixColumns"></tr>
+      </table>
+    </div>
+  }
+</section>
+
+<section class="bf-card" aria-labelledby="lookup-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="lookup-title">FX effect</h2>
+      <p class="bf-card__hint">
+        An amount at the locked plan rate (budget control) and at another rate type; the difference
+        is the FX effect, reported separately and never consuming budget.
+      </p>
+    </div>
+  </div>
+  <div class="bf-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Amount</mat-label>
+      <input
+        matInput
+        type="number"
+        [ngModel]="amount()"
+        (ngModelChange)="amount.set($event)"
+        data-testid="lookup-amount"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <mat-select [ngModel]="from()" (ngModelChange)="from.set($event)" data-testid="lookup-from">
+        @for (c of quotes(); track c.code) {
+          <mat-option [value]="c.code">{{ c.code }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Date</mat-label>
+      <input
+        matInput
+        type="date"
+        [ngModel]="date()"
+        (ngModelChange)="date.set($event)"
+        data-testid="lookup-date"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Compare with</mat-label>
+      <mat-select
+        [ngModel]="compareType()"
+        (ngModelChange)="compareType.set($event)"
+        data-testid="lookup-type"
+      >
+        @for (t of types; track t) {
+          @if (t !== 'plan') {
+            <mat-option [value]="t">{{ typeLabel[t] }}</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="bf-compare">
+    <div class="bf-kpi" data-testid="lookup-plan">
+      <p class="bf-kpi__label">Plan rate valuation</p>
+      @switch (planLookup.status()) {
+        @case ('error') {
+          <p class="bf-kpi__delta">No rate: {{ planLookup.error()?.message }}</p>
+        }
+        @case ('resolved') {
+          @if (valueOf(planLookup); as v) {
+            <p class="bf-kpi__value">
+              @if (v.converted) {
+                <bf-money
+                  [amountMinor]="v.converted.amountMinor"
+                  [currency]="v.converted.currency"
+                />
+              }
+            </p>
+            <p class="bf-kpi__delta">
+              @for (s of v.sources; track s.rateId) {
+                Rate {{ rateText(s.rate)
+                }}{{
+                  s.fiscalYearLabel
+                    ? ' (' + s.fiscalYearLabel + (s.locked ? ', locked' : ', not locked') + ')'
+                    : ''
+                }}
+              }
+            </p>
+          }
+        }
+        @default {
+          <p class="bf-kpi__delta">Looking up…</p>
+        }
+      }
+    </div>
+    <div class="bf-kpi" data-testid="lookup-other">
+      <p class="bf-kpi__label">{{ typeName(compareType()) }} valuation</p>
+      @switch (otherLookup.status()) {
+        @case ('error') {
+          <p class="bf-kpi__delta">No rate: {{ otherLookup.error()?.message }}</p>
+        }
+        @case ('resolved') {
+          @if (valueOf(otherLookup); as v) {
+            <p class="bf-kpi__value">
+              @if (v.converted) {
+                <bf-money
+                  [amountMinor]="v.converted.amountMinor"
+                  [currency]="v.converted.currency"
+                />
+              }
+            </p>
+            <p class="bf-kpi__delta">
+              @for (s of v.sources; track s.rateId) {
+                Rate {{ rateText(s.rate) }} from {{ s.effectiveDate | date: 'd MMM y' : 'UTC' }}
+              }
+            </p>
+          }
+        }
+        @default {
+          <p class="bf-kpi__delta">Looking up…</p>
+        }
+      }
+    </div>
+    <div class="bf-kpi" data-testid="lookup-fx-effect">
+      <p class="bf-kpi__label">FX effect (reported separately)</p>
+      <p class="bf-kpi__value">
+        @if (fxEffect() !== null) {
+          <bf-money [amountMinor]="fxEffect()!" [currency]="reporting()" />
+        } @else {
+          —
+        }
+      </p>
+      <p class="bf-kpi__delta">Does not consume budget.</p>
+    </div>
+  </div>
+</section>
+
 <section class="bf-card" aria-labelledby="lock-title">
   <div class="bf-card__header">
     <div>
@@ -258,7 +392,7 @@
     (retry)="groupCalendar.reload()"
   />
   @if (valueOf(groupCalendar); as g) {
-    <div class="bf-filters">
+    <div class="bf-filters bf-lock-row">
       @for (y of g.fiscalYears; track y.id) {
         <sat-status-tag [status]="y.planRatesLockedAt ? 'info' : 'warning'">
           {{ y.label }}
@@ -300,7 +434,7 @@
 </section>
 
 <section class="bf-card" aria-labelledby="rates-title">
-  <div class="bf-card__header"><h2 class="bf-card__title" id="rates-title">Rates</h2></div>
+  <div class="bf-card__header"><h2 class="bf-card__title" id="rates-title">Rate history</h2></div>
   <div class="bf-filters">
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Rate type</mat-label>
@@ -343,7 +477,7 @@
           </ng-container>
           <ng-container matColumnDef="rate">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Rate</th>
-            <td mat-cell *matCellDef="let x" class="bf-num">{{ x.rate }}</td>
+            <td mat-cell *matCellDef="let x" class="bf-num">{{ rateText(x.rate) }}</td>
           </ng-container>
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>Effective</th>

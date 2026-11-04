@@ -20,6 +20,9 @@ test.describe('fiscal calendars', () => {
     await expect(periods.getByRole('row', { name: /Nov 2026/ }).getByRole('button')).toHaveText([
       'Soft-close',
     ]);
+    await expect(page.getByTestId('closing-hint')).toContainText(
+      'Closing Oct 2026 blocks new postings',
+    );
     await page.getByTestId('calendar-select').click();
     await page.getByRole('option', { name: /Hyland UK 4-4-5/ }).click();
     await page.getByRole('button', { name: 'FY2028', exact: true }).click();
@@ -66,11 +69,11 @@ test.describe('exchange rates', () => {
     page,
   }) => {
     await page.goto('/finance/rates');
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Currencies and exchange rates' }),
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Exchange rates' })).toBeVisible();
     await page.getByTestId('lookup-amount').fill('83250');
     await page.getByTestId('lookup-date').fill('2026-11-16');
+    await page.getByTestId('lookup-type').click();
+    await page.getByRole('option', { name: 'Spot' }).click();
     await expect(page.getByTestId('lookup-plan')).toContainText('USD 1,000.00');
     await expect(page.getByTestId('lookup-plan')).toContainText('FY2026, locked');
     await expect(page.getByTestId('lookup-other')).toContainText('USD 990.25');
@@ -78,6 +81,10 @@ test.describe('exchange rates', () => {
     await page.getByTestId('lookup-type').click();
     await page.getByRole('option', { name: 'Month-end' }).click();
     await expect(page.getByTestId('lookup-other')).toContainText('No rate');
+    await expect(page.getByTestId('plan-INR')).toContainText('83.25 (locked)');
+    await expect(page.getByTestId('plan-rate-state')).toContainText(
+      'Locked plan rate active for FY2026',
+    );
     await expect(page.getByRole('button', { name: 'Add rate' })).toHaveCount(0);
   });
 

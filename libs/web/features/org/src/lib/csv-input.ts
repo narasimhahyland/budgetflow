@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -69,7 +69,7 @@ export class CsvInput {
   readonly value = model('');
   readonly columns = input('');
   readonly example = input('');
-  protected readonly fileName = signal<string | null>(null);
+  readonly fileName = model<string | null>(null);
 
   protected async load(files: File[]): Promise<void> {
     const f = files[0];
