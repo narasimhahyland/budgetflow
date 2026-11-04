@@ -1,0 +1,34 @@
+{
+  "name": "db",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api/db/src",
+  "projectType": "library",
+  "tags": ["type:db", "scope:api"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p libs/api/db/tsconfig.lib.json --noEmit"
+      }
+    },
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate --config libs/api/db/drizzle.config.ts",
+        "env": {
+          "TSX_TSCONFIG_PATH": "libs/api/db/tsconfig.lib.json"
+        }
+      }
+    },
+    "db-check": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "node libs/api/db/scripts/db-check.mjs"
+      }
+    }
+  }
+}
