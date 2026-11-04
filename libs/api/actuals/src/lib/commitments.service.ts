@@ -84,7 +84,6 @@ export class CommitmentsService {
         .limit(500);
       const items = await this.items(tx, actor, rows, asOf);
       const open = items.filter((i) => OPEN.includes(i.status as CommitmentStatus));
-      const currency = open[0]?.encumbered.currency ?? actor.reportingCurrency;
       return {
         asOfDate: asOf,
         items,
@@ -92,15 +91,15 @@ export class CommitmentsService {
           open: open.length,
           prompts: open.filter((i) => i.releasePrompt).length,
           encumbered: {
-            amountMinor: open.reduce((s, i) => s + i.encumbered.amountMinor, 0),
-            currency,
+            amountMinor: open.reduce((s, i) => s + i.encumberedReporting.amountMinor, 0),
+            currency: actor.reportingCurrency,
           },
           byBucket: AGING_BUCKETS.map((bucket) => {
             const inBucket = open.filter((i) => i.agingBucket === bucket);
             return {
               bucket,
               count: inBucket.length,
-              encumberedMinor: inBucket.reduce((s, i) => s + i.encumbered.amountMinor, 0),
+              encumberedMinor: inBucket.reduce((s, i) => s + i.encumberedReporting.amountMinor, 0),
             };
           }),
         },
@@ -170,6 +169,10 @@ export class CommitmentsService {
         serviceEnd: c.serviceEnd,
         amount: { amountMinor: c.amountMinor, currency: c.currency },
         encumbered: { amountMinor: enc, currency: ccy },
+        encumberedReporting: {
+          amountMinor: bal.get(c.id)?.encumberedReportingMinor ?? 0,
+          currency: actor.reportingCurrency,
+        },
         consumed: { amountMinor: c.consumedMinor, currency: c.currency },
         released: { amountMinor: c.releasedMinor, currency: c.currency },
         fees: { amountMinor: c.feesMinor, currency: c.currency },

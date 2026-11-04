@@ -500,6 +500,9 @@ export const CommitmentHygieneItem = named(
       encumbered: Money.describe(
         'Still encumbered on the budget (budget currency, from the ledger).',
       ),
+      encumberedReporting: Money.describe(
+        'Still encumbered, in the reporting currency at the locked plan rate.',
+      ),
       consumed: Money,
       released: Money,
       fees: Money,
@@ -529,10 +532,14 @@ export const CommitmentHygieneList = named(
         .object({
           open: z.int(),
           prompts: z.int(),
-          encumbered: Money,
+          encumbered: Money.describe('Reporting currency at the locked plan rate.'),
           byBucket: z.array(
             z
-              .object({ bucket: AgingBucketName, count: z.int(), encumberedMinor: z.int() })
+              .object({
+                bucket: AgingBucketName,
+                count: z.int(),
+                encumberedMinor: z.int().describe('Reporting currency at the locked plan rate.'),
+              })
               .strict(),
           ),
         })

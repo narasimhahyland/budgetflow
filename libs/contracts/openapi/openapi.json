@@ -4050,6 +4050,10 @@
             "description": "Still encumbered on the budget (budget currency, from the ledger).",
             "$ref": "#/components/schemas/Money"
           },
+          "encumberedReporting": {
+            "description": "Still encumbered, in the reporting currency at the locked plan rate.",
+            "$ref": "#/components/schemas/Money"
+          },
           "consumed": {
             "$ref": "#/components/schemas/Money"
           },
@@ -4117,6 +4121,7 @@
           "serviceEnd",
           "amount",
           "encumbered",
+          "encumberedReporting",
           "consumed",
           "released",
           "fees",
@@ -4159,6 +4164,7 @@
                 "maximum": 9007199254740991
               },
               "encumbered": {
+                "description": "Reporting currency at the locked plan rate.",
                 "$ref": "#/components/schemas/Money"
               },
               "byBucket": {
@@ -4184,7 +4190,8 @@
                     "encumberedMinor": {
                       "type": "integer",
                       "minimum": -9007199254740991,
-                      "maximum": 9007199254740991
+                      "maximum": 9007199254740991,
+                      "description": "Reporting currency at the locked plan rate."
                     }
                   },
                   "required": [

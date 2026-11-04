@@ -60,6 +60,8 @@ export type CommitmentRow = typeof commitments.$inferSelect;
 export interface CommitmentBalance {
   budgetId: string;
   encumberedMinor: number;
+  /** Encumbered in the reporting currency at the locked plan rate. */
+  encumberedReportingMinor: number;
   accruedMinor: number;
 }
 
@@ -171,6 +173,7 @@ export class ActualsReads {
         budgetId: ledgerLines.budgetId,
         account: ledgerLines.account,
         total: sql<string>`sum(${ledgerLines.budgetAmountMinor})`,
+        reporting: sql<string>`sum(${ledgerLines.reportingAmountMinor})`,
       })
       .from(ledgerLines)
       .where(
@@ -183,9 +186,16 @@ export class ActualsReads {
       .groupBy(ledgerLines.commitmentId, ledgerLines.budgetId, ledgerLines.account);
     for (const r of rows) {
       const id = r.commitmentId!;
-      const b = out.get(id) ?? { budgetId: r.budgetId!, encumberedMinor: 0, accruedMinor: 0 };
-      if (r.account === 'encumbered') b.encumberedMinor += toSafeMinor(r.total);
-      else b.accruedMinor += toSafeMinor(r.total);
+      const b = out.get(id) ?? {
+        budgetId: r.budgetId!,
+        encumberedMinor: 0,
+        encumberedReportingMinor: 0,
+        accruedMinor: 0,
+      };
+      if (r.account === 'encumbered') {
+        b.encumberedMinor += toSafeMinor(r.total);
+        b.encumberedReportingMinor += toSafeMinor(r.reporting);
+      } else b.accruedMinor += toSafeMinor(r.total);
       out.set(id, b);
     }
     return out;
