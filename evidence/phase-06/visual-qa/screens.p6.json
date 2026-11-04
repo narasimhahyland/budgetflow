@@ -1,0 +1,137 @@
+{
+  "baseURL": "http://localhost:4200",
+  "authDir": "tmp/e2e-auth",
+  "themes": ["light"],
+  "freezeTime": "2026-11-16T09:00:00Z",
+  "mask": ["[data-testid=relative-time]"],
+  "ignore": { "console": [], "requests": [] },
+  "screens": [
+    {
+      "id": "080a-actuals-import",
+      "path": "/finance/actuals?file=erp-actuals-2026-11.csv",
+      "role": "finance-controller",
+      "waitFor": "[data-testid=kpi-auto]",
+      "states": [
+        { "state": "default" },
+        {
+          "state": "upload",
+          "actions": [
+            { "click": "[data-testid=import-another]" },
+            { "waitFor": "text=Upload an actuals file" }
+          ]
+        },
+        {
+          "state": "auditor-read-only",
+          "role": "auditor",
+          "waitFor": "[data-testid=kpi-auto]"
+        },
+        {
+          "state": "employee-forbidden",
+          "role": "employee",
+          "path": "/finance/actuals",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "path": "/finance/actuals/queue?file=erp-actuals-2026-11.csv",
+      "role": "finance-controller",
+      "waitFor": "[data-testid=queue-row-ERP-2611-0004]",
+      "states": [
+        { "state": "default" },
+        {
+          "state": "match-drawer-over-tolerance",
+          "actions": [
+            { "click": "[data-testid=queue-row-ERP-2611-0004]" },
+            { "waitFor": "[data-testid=fx-effect]" }
+          ]
+        },
+        {
+          "state": "match-drawer-no-rule",
+          "actions": [
+            { "click": "[data-testid=queue-row-ERP-2611-0009]" },
+            { "waitFor": "[data-testid=fx-effect]" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "path": "/finance/gl-tie-out",
+      "role": "finance-controller",
+      "waitFor": "[data-testid=signoff-card]",
+      "states": [
+        { "state": "default" },
+        {
+          "state": "drill-down",
+          "actions": [
+            { "click": "[data-testid=tieout-row-6140-CC-IN-HYD-210]" },
+            { "waitFor": "[data-testid=tieout-drill] >> text=Unmatched actuals" }
+          ]
+        },
+        {
+          "state": "finance-admin-blocked",
+          "role": "finance-admin",
+          "waitFor": "[data-testid=signoff-blocked]"
+        },
+        {
+          "state": "us-tied",
+          "actions": [
+            { "click": "[data-testid=entity-chip-HYL-US]" },
+            { "waitFor": "text=Every row tied" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "080d-accruals-prepaids",
+      "path": "/finance/actuals/accruals",
+      "role": "finance-controller",
+      "waitFor": "text=Prepaids and deposits",
+      "states": [{ "state": "default" }]
+    },
+    {
+      "id": "085a-commitment-hygiene",
+      "path": "/finance/actuals/commitments",
+      "role": "finance-controller",
+      "waitFor": "[data-testid=prompt-count]",
+      "states": [{ "state": "default" }]
+    },
+    {
+      "id": "053-event-reconciliation",
+      "path": "/finance/actuals/events",
+      "role": "finance-controller",
+      "waitFor": "[data-testid=event-NYC-OFFSITE-26]",
+      "states": [{ "state": "default" }]
+    },
+    {
+      "id": "054-close-event",
+      "path": "/finance/actuals/events/77000000-0000-4000-8000-000000000003",
+      "role": "finance-controller",
+      "waitFor": "[data-testid=close-card]",
+      "states": [
+        { "state": "blocked" },
+        {
+          "state": "hack-week-blocked",
+          "path": "/finance/actuals/events/77000000-0000-4000-8000-000000000002",
+          "waitFor": "[data-testid=blocker-EVENT_HAS_OPEN_COMMITMENTS]"
+        }
+      ]
+    },
+    {
+      "id": "080a-matched-actuals",
+      "path": "/finance/actuals/matched",
+      "role": "finance-controller",
+      "waitFor": "text=ERP-2611-0001",
+      "states": [{ "state": "default" }]
+    },
+    {
+      "id": "080a-mapping-rules",
+      "path": "/finance/actuals/rules",
+      "role": "finance-controller",
+      "waitFor": "text=Hyderabad ground transport to Hack Week",
+      "states": [{ "state": "default" }]
+    }
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "request": "GET /api/actuals/0af354d9-0f9a-4288-9f76-2ab2bccf66b2",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "actual": {
+      "id": "0af354d9-0f9a-4288-9f76-2ab2bccf66b2",
+      "batchId": "f314b0bd-3857-4d26-966d-6a5dcedfb902",
+      "lineNo": 5,
+      "source": "erp",
+      "sourceRef": "ERP-2611-0004",
+      "kind": "charge",
+      "status": "unmatched",
+      "transactionDate": "2026-11-03",
+      "accountingDate": "2026-11-03",
+      "legalEntityId": "20000000-0000-4000-8000-000000000002",
+      "legalEntityCode": "HYL-IN",
+      "costCenterId": "31000000-0000-4000-8000-000000000003",
+      "costCenterCode": "CC-IN-HYD-210",
+      "glAccountId": "25000000-0000-4000-8000-000000000205",
+      "glAccountCode": "6140",
+      "eventCode": "HYD-HACK-26",
+      "vendorId": null,
+      "vendorName": null,
+      "merchant": null,
+      "memo": "Hack Week team travel",
+      "reference": null,
+      "originalRef": null,
+      "cardProgram": null,
+      "transaction": {
+        "amountMinor": 4750000,
+        "currency": "INR"
+      },
+      "reporting": {
+        "amountMinor": 57057,
+        "currency": "USD"
+      },
+      "planRate": "0.012012012012",
+      "actualRate": {
+        "type": "spot",
+        "value": "0.011894849530"
+      },
+      "actualReporting": {
+        "amountMinor": 56501,
+        "currency": "USD"
+      },
+      "fxEffect": {
+        "amountMinor": -556,
+        "currency": "USD"
+      },
+      "matched": {
+        "amountMinor": 0,
+        "currency": "INR"
+      },
+      "budget": null,
+      "suggestion": {
+        "rule": "event_cost_center",
+        "confidence": 70,
+        "commitmentId": "78000000-0000-4000-8000-000000000004",
+        "commitmentReference": "CMT-00000004",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "",
+        "fit": null,
+        "differenceMinor": null
+      },
+      "note": "Above the commitment plus its tolerance. Request over-budget approval for the difference.",
+      "duplicateOfActualId": null,
+      "excludedReason": null,
+      "overBudgetRequest": null,
+      "matchedAt": null
+    },
+    "matches": [],
+    "candidates": [
+      {
+        "commitmentId": "78000000-0000-4000-8000-000000000004",
+        "reference": "CMT-00000004",
+        "description": "Hack Week team travel",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "India Region",
+        "eventCode": "HYD-HACK-26",
+        "vendorName": null,
+        "total": {
+          "amountMinor": 4000000,
+          "currency": "INR"
+        },
+        "remaining": {
+          "amountMinor": 2106000,
+          "currency": "INR"
+        },
+        "actualInBudget": {
+          "amountMinor": 4750000,
+          "currency": "INR"
+        },
+        "differenceMinor": 2644000,
+        "toleranceMinor": 40000,
+        "fit": "over_tolerance",
+        "confidence": 70,
+        "rule": "event_cost_center"
+      },
+      {
+        "commitmentId": "78000000-0000-4000-8000-000000000003",
+        "reference": "CMT-00000003",
+        "description": "Hack Week meals and venue",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "India Region",
+        "eventCode": "HYD-HACK-26",
+        "vendorName": "Garden City Catering Co.",
+        "total": {
+          "amountMinor": 8500000,
+          "currency": "INR"
+        },
+        "remaining": {
+          "amountMinor": 3300000,
+          "currency": "INR"
+        },
+        "actualInBudget": {
+          "amountMinor": 4750000,
+          "currency": "INR"
+        },
+        "differenceMinor": 1450000,
+        "toleranceMinor": 85000,
+        "fit": "over_tolerance",
+        "confidence": null,
+        "rule": null
+      },
+      {
+        "commitmentId": "a9381a41-6ec9-408c-b8ab-3b54abae8ead",
+        "reference": "CMT-ABAE8EAD",
+        "description": "Shared offsite venue",
+        "budgetId": "2e8b7fb0-44ac-4519-88cf-fb7017916e17",
+        "budgetName": "Scenario child USD 3f391924",
+        "eventCode": null,
+        "vendorName": "Riverside Retreats Q3D47262B",
+        "total": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "actualInBudget": {
+          "amountMinor": 57057,
+          "currency": "USD"
+        },
+        "differenceMinor": -2943,
+        "toleranceMinor": 600,
+        "fit": "partial",
+        "confidence": null,
+        "rule": null
+      },
+      {
+        "commitmentId": "06f286f7-21c0-420d-b0f2-1a98b8d38566",
+        "reference": "CMT-B8D38566",
+        "description": "Shared offsite venue",
+        "budgetId": "3f5cd780-6663-4536-92a8-da2b76dee581",
+        "budgetName": "Scenario child USD ef8cd508",
+        "eventCode": null,
+        "vendorName": "Riverside Retreats Q2B164801",
+        "total": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "actualInBudget": {
+          "amountMinor": 57057,
+          "currency": "USD"
+        },
+        "differenceMinor": -2943,
+        "toleranceMinor": 600,
+        "fit": "partial",
+        "confidence": null,
+        "rule": null
+      },
+      {
+        "commitmentId": "fe534776-7e07-41ce-8240-faeb35a4ea6e",
+        "reference": "CMT-35A4EA6E",
+        "description": "Scenario commitment",
+        "budgetId": "63af3c7f-321b-43bb-9ac7-f716a63105db",
+        "budgetName": "Scenario child USD 99c7d698",
+        "eventCode": null,
+        "vendorName": null,
+        "total": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "actualInBudget": {
+          "amountMinor": 57057,
+          "currency": "USD"
+        },
+        "differenceMinor": -12943,
+        "toleranceMinor": 700,
+        "fit": "partial",
+        "confidence": null,
+        "rule": null
+      },
+      {
+        "commitmentId": "a76f8756-f762-4da4-a5bc-1d98872f1128",
+        "reference": "CMT-872F1128",
+        "description": "Scenario commitment",
+        "budgetId": "5c96a950-4191-41e2-ae63-6e32bb7be5bc",
+        "budgetName": "Scenario child USD a4be311e",
+        "eventCode": null,
+        "vendorName": null,
+        "total": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "actualInBudget": {
+          "amountMinor": 57057,
+          "currency": "USD"
+        },
+        "differenceMinor": -12943,
+        "toleranceMinor": 700,
+        "fit": "partial",
+        "confidence": null,
+        "rule": null
+      },
+      {
+        "commitmentId": "eb54269b-0579-4010-a001-6514388c7112",
+        "reference": "CMT-388C7112",
+        "description": "Scenario commitment",
+        "budgetId": "5c96a950-4191-41e2-ae63-6e32bb7be5bc",
+        "budgetName": "Scenario child USD a4be311e",
+        "eventCode": null,
+        "vendorName": null,
+        "total": {
+          "amountMinor": 150000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 75000,
+          "currency": "USD"
+        },
+        "actualInBudget": {
+          "amountMinor": 57057,
+          "currency": "USD"
+        },
+        "differenceMinor": -17943,
+        "toleranceMinor": 1500,
+        "fit": "partial",
+        "confidence": null,
+        "rule": null
+      },
+      {
+        "commitmentId": "a8dd3a18-2685-4132-a68a-9d51b305a98b",
+        "reference": "CMT-B305A98B",
+        "description": "Scenario commitment",
+        "budgetId": "63af3c7f-321b-43bb-9ac7-f716a63105db",
+        "budgetName": "Scenario child USD 99c7d698",
+        "eventCode": null,
+        "vendorName": null,
+        "total": {
+          "amountMinor": 150000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 75000,
+          "currency": "USD"
+        },
+        "actualInBudget": {
+          "amountMinor": 57057,
+          "currency": "USD"
+        },
+        "differenceMinor": -17943,
+        "toleranceMinor": 1500,
+        "fit": "partial",
+        "confidence": null,
+        "rule": null
+      }
+    ]
+  }
+}

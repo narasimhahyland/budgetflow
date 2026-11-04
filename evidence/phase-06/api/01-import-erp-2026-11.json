@@ -1,0 +1,94 @@
+{
+  "request": "GET /api/actuals/imports/f314b0bd-3857-4d26-966d-6a5dcedfb902",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "id": "f314b0bd-3857-4d26-966d-6a5dcedfb902",
+    "source": "erp",
+    "fileName": "erp-actuals-2026-11.csv",
+    "status": "posted",
+    "lineCount": 9,
+    "importedCount": 9,
+    "rejectedCount": 0,
+    "duplicateCount": 0,
+    "columnMapping": {
+      "kind": "kind",
+      "memo": "memo",
+      "amount": "amount",
+      "vendor": "vendor",
+      "currency": "currency",
+      "merchant": null,
+      "reference": "reference",
+      "event_code": "event_code",
+      "gl_account": "gl_account",
+      "source_ref": "source_ref",
+      "cost_center": "cost_center",
+      "card_program": null,
+      "legal_entity": "legal_entity",
+      "original_ref": "original_ref",
+      "accounting_date": null,
+      "transaction_date": "transaction_date"
+    },
+    "summary": {
+      "rules": [
+        {
+          "rule": "reference",
+          "lines": 2
+        },
+        {
+          "rule": "event_cost_center",
+          "lines": 2
+        },
+        {
+          "rule": "original_reference",
+          "lines": 1
+        },
+        {
+          "rule": "mapping_rule",
+          "lines": 1
+        }
+      ],
+      "posted": {
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "matched": 6,
+        "toQueue": 3,
+        "journals": 16
+      },
+      "imported": 9,
+      "rejected": 0,
+      "linesRead": 9,
+      "unmatched": 3,
+      "byCurrency": [
+        {
+          "lines": 7,
+          "currency": "INR",
+          "planRate": "83.250000000000",
+          "reportingMinor": 382931,
+          "transactionMinor": 31879000
+        },
+        {
+          "lines": 2,
+          "currency": "USD",
+          "planRate": "1.000000000000",
+          "reportingMinor": 544000,
+          "transactionMinor": 544000
+        }
+      ],
+      "autoMatched": 3,
+      "matchRateBps": 6666,
+      "partiallyMatched": 3,
+      "duplicatesSkipped": 0,
+      "reportingCurrency": "USD",
+      "reportingTotalMinor": 926931,
+      "crossSourceDuplicates": 0
+    },
+    "issues": [],
+    "createdAt": "2026-11-04T22:56:48.477Z",
+    "createdByName": "Daniel Weber",
+    "postedAt": "2026-11-04T22:56:48.621Z",
+    "postedByName": "Daniel Weber"
+  }
+}

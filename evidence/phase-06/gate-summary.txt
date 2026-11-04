@@ -1,0 +1,17 @@
+Full gate: scripts/gate.sh (all modes) on feat/p6-actuals at b01a958, 2026-11-04T23:04Z
+Logs: tmp/gate/20261105-042459 (not committed)
+
+PASS  secrets  0s
+PASS  lint  1s
+PASS  styles  1s
+PASS  satori  13s
+PASS  typecheck  11s
+PASS  build  12s
+PASS  openapi  11s
+PASS  db  4s
+PASS  stack  53s
+PASS  functional-api  37s
+PASS  functional-e2e  38s
+PASS  visual  12s
+
+Counts (re-run with the list reporter, evidence/phase-06/functional/): API scenarios 193 passed (20 new in apps/api-e2e/src/actuals); journeys 172 passed, 20 skipped (host visual entries and mutating journeys on tablet and mobile); visual baselines 47 passed in the pinned image.

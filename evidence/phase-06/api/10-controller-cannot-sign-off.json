@@ -1,0 +1,13 @@
+{
+  "request": "POST /api/actuals/tie-outs/{id}/sign-off",
+  "user": "finance.controller@example.test",
+  "status": 403,
+  "response": {
+    "type": "urn:budgetflow:problem:forbidden",
+    "title": "Forbidden",
+    "status": 403,
+    "code": "FORBIDDEN",
+    "detail": "You do not have permission to do this.",
+    "instance": "/api/actuals/tie-outs/cf57b98e-aad6-44c7-96e8-c2dcd08233ec/sign-off"
+  }
+}

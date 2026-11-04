@@ -1,0 +1,129 @@
+{
+  "request": "GET /api/actuals/prepaids",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "items": [
+      {
+        "id": "8568c125-587c-4c5d-b493-47af9d1ea16e",
+        "commitmentId": "7eb94a71-2094-4f77-970d-44fea217ce5e",
+        "commitmentReference": "CMT-A217CE5E",
+        "actualId": "5735373c-1ceb-4297-bf06-b21c865bf4ad",
+        "budgetId": "5c96a950-4191-41e2-ae63-6e32bb7be5bc",
+        "budgetName": "Scenario child USD a4be311e",
+        "amount": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "recognized": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "serviceStart": "2026-12-01",
+        "serviceEnd": "2026-12-02",
+        "nonRefundable": true,
+        "recognizedThrough": "2026-11-04"
+      },
+      {
+        "id": "87f0ee35-c4a7-4d97-9a11-237a5b7f0c37",
+        "commitmentId": "38071fe5-cf09-4cda-b148-82ff1638dcd9",
+        "commitmentReference": "CMT-1638DCD9",
+        "actualId": "47166bab-d45c-4ef0-a9d2-6a7e6b540a67",
+        "budgetId": "63af3c7f-321b-43bb-9ac7-f716a63105db",
+        "budgetName": "Scenario child USD 99c7d698",
+        "amount": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "recognized": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "serviceStart": "2026-12-01",
+        "serviceEnd": "2026-12-02",
+        "nonRefundable": true,
+        "recognizedThrough": "2026-11-04"
+      },
+      {
+        "id": "6399a801-6481-401e-8663-a6c698f3a2bd",
+        "commitmentId": "78000000-0000-4000-8000-000000000002",
+        "commitmentReference": "CMT-00000002",
+        "actualId": "abcff9e0-8c72-4273-822b-dc90044396a0",
+        "budgetId": "70000000-0000-4000-8000-000000000005",
+        "budgetName": "Bengaluru Events",
+        "amount": {
+          "amountMinor": 6000000,
+          "currency": "INR"
+        },
+        "recognized": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "remaining": {
+          "amountMinor": 6000000,
+          "currency": "INR"
+        },
+        "serviceStart": "2026-12-05",
+        "serviceEnd": "2026-12-06",
+        "nonRefundable": true,
+        "recognizedThrough": null
+      },
+      {
+        "id": "d18cebb0-42f9-4f19-ae2e-d715d8a671c7",
+        "commitmentId": "7db86ce5-a671-4dd1-be66-a6566b42e84d",
+        "commitmentReference": "CMT-6B42E84D",
+        "actualId": "79b9dc90-cc30-465d-ad56-d75d9b9ab969",
+        "budgetId": "e7c3fb03-ab36-46aa-b795-77f9ed71a89a",
+        "budgetName": "Scenario child USD 5d6b2618",
+        "amount": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "recognized": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "serviceStart": "2026-12-05",
+        "serviceEnd": "2026-12-06",
+        "nonRefundable": true,
+        "recognizedThrough": "2026-12-06"
+      },
+      {
+        "id": "e10461de-2955-4296-a8b8-42ac95ab41b4",
+        "commitmentId": "bcafa952-a748-499c-ad51-3a69de7e894b",
+        "commitmentReference": "CMT-DE7E894B",
+        "actualId": "c87e5b45-1a15-4f40-8418-eb885f9f5bed",
+        "budgetId": "3ed57a18-60ee-4c60-9b4c-21b2252422df",
+        "budgetName": "Scenario child USD 60101f24",
+        "amount": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "recognized": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "remaining": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "serviceStart": "2026-12-05",
+        "serviceEnd": "2026-12-06",
+        "nonRefundable": true,
+        "recognizedThrough": "2026-12-06"
+      }
+    ]
+  }
+}
