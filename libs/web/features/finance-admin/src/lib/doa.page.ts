@@ -46,8 +46,8 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
         <h1 class="bf-page__title">Delegation of authority</h1>
         <p class="bf-page__subtitle">
           Who may approve what: role or person × spend type × legal entity × limit in USD. Approval
-          authority is separate from budget ownership. Read-only here; approvals enforce it from
-          Phase 5 and the matrix becomes editable in Phase 7.
+          authority is separate from budget ownership: owning a budget does not let you approve
+          spend from it. The matrix is read-only on this page.
         </p>
       </div>
     </header>

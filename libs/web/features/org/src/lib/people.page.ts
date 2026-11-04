@@ -57,7 +57,7 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Unit</mat-label>
           <mat-select [ngModel]="unitId()" (ngModelChange)="unitId.set($event); limit.set(50)">
-            <mat-option [value]="null">All units</mat-option>
+            <mat-option value="all">All units</mat-option>
             @for (u of valueOf(units)?.items ?? []; track u.id) {
               <mat-option [value]="u.id">{{ indent(u.depth) }}{{ u.name }}</mat-option>
             }
@@ -140,7 +140,7 @@ export class PeoplePage {
   private readonly api = injectApi();
   protected readonly columns = ['name', 'location', 'entity', 'type', 'manager'];
   protected readonly q = signal('');
-  protected readonly unitId = signal<string | null>(null);
+  protected readonly unitId = signal('all');
   protected readonly limit = signal(50);
   private readonly debounced = signal('');
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -150,7 +150,7 @@ export class PeoplePage {
   protected readonly page = resource({
     params: () => ({
       ...(this.debounced() ? { q: this.debounced() } : {}),
-      ...(this.unitId() ? { orgUnitId: this.unitId()! } : {}),
+      ...(this.unitId() !== 'all' ? { orgUnitId: this.unitId() } : {}),
       limit: this.limit(),
     }),
     loader: ({ params }) => data(this.api.listPeople({ query: params })),

@@ -143,7 +143,7 @@ export class OrgHierarchyPage {
   protected readonly newName = linkedSignal(() => valueOf(this.detail)?.name ?? '');
   protected readonly newParentId = signal<string | null>(null);
   protected readonly newManagerId = linkedSignal(
-    () => valueOf(this.detail)?.managerPersonId ?? null,
+    () => valueOf(this.detail)?.managerPersonId ?? 'none',
   );
   protected readonly reason = signal('');
 
@@ -209,7 +209,9 @@ export class OrgHierarchyPage {
       reason: this.reason(),
       ...(kind === 'rename' ? { name: this.newName() } : {}),
       ...(kind === 'move' && this.newParentId() ? { parentId: this.newParentId()! } : {}),
-      ...(kind === 'manager' ? { managerPersonId: this.newManagerId() } : {}),
+      ...(kind === 'manager'
+        ? { managerPersonId: this.newManagerId() === 'none' ? null : this.newManagerId() }
+        : {}),
       ...(kind === 'deactivate' ? { deactivate: true as const } : {}),
     };
     await this.run(async () => {

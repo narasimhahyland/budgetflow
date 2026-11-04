@@ -169,7 +169,7 @@ const STATUS: Record<
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Status</mat-label>
           <mat-select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
-            <mat-option [value]="null">All</mat-option>
+            <mat-option value="all">All</mat-option>
             @for (s of statuses; track s) {
               <mat-option [value]="s">{{ statusInfo[s].label }}</mat-option>
             }
@@ -242,7 +242,7 @@ export class VendorsPage {
   protected readonly q = signal('');
   private readonly debounced = signal('');
   private timer: ReturnType<typeof setTimeout> | undefined;
-  protected readonly statusFilter = signal<Status | null>(null);
+  protected readonly statusFilter = signal<Status | 'all'>('all');
   protected readonly adding = signal(false);
   protected readonly changing = signal<Vendor | null>(null);
   protected readonly name = signal('');
@@ -258,7 +258,7 @@ export class VendorsPage {
   protected readonly list = resource({
     params: () => ({
       ...(this.debounced() ? { q: this.debounced() } : {}),
-      ...(this.statusFilter() ? { status: this.statusFilter()! } : {}),
+      ...(this.statusFilter() !== 'all' ? { status: this.statusFilter() as Status } : {}),
       limit: 200,
     }),
     loader: ({ params }) => data(this.api.listVendors({ query: params })),

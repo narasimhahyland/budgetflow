@@ -69,8 +69,8 @@ export class RatesPage {
   protected readonly types = Object.keys(TYPE_LABEL) as RateType[];
   protected readonly columns = ['type', 'pair', 'rate', 'date', 'year', 'source', 'locked'];
 
-  protected readonly typeFilter = signal<RateType | null>(null);
-  protected readonly currencyFilter = signal<string | null>(null);
+  protected readonly typeFilter = signal<RateType | 'all'>('all');
+  protected readonly currencyFilter = signal('all');
   protected readonly limit = signal(100);
   protected readonly notice = signal<string | null>(null);
   protected readonly failure = signal<string | null>(null);
@@ -79,8 +79,8 @@ export class RatesPage {
   protected readonly currencies = resource({ loader: () => data(this.api.listCurrencies({})) });
   protected readonly rates = resource({
     params: () => ({
-      ...(this.typeFilter() ? { rateType: this.typeFilter()! } : {}),
-      ...(this.currencyFilter() ? { quoteCurrency: this.currencyFilter()! } : {}),
+      ...(this.typeFilter() !== 'all' ? { rateType: this.typeFilter() as RateType } : {}),
+      ...(this.currencyFilter() !== 'all' ? { quoteCurrency: this.currencyFilter() } : {}),
       limit: this.limit(),
     }),
     loader: ({ params }) => data(this.api.listExchangeRates({ query: params })),

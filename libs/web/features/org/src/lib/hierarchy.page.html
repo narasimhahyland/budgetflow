@@ -163,7 +163,7 @@
                   [ngModel]="newManagerId()"
                   (ngModelChange)="newManagerId.set($event)"
                 >
-                  <mat-option [value]="null">No manager</mat-option>
+                  <mat-option value="none">No manager</mat-option>
                   @for (p of valueOf(people)?.items ?? []; track p.id) {
                     <mat-option [value]="p.id">{{ p.displayName }} · {{ p.jobTitle }}</mat-option>
                   }

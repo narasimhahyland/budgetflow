@@ -33,12 +33,12 @@ const ACTION_LABEL: Record<PeriodAction, string> = {
 };
 const STATUS: Record<
   FiscalPeriod['status'],
-  { label: string; tone: 'success' | 'warning' | 'neutral' | 'important' }
+  { label: string; tone: 'success' | 'warning' | 'neutral' | 'info' }
 > = {
   open: { label: 'Open', tone: 'success' },
   soft_closed: { label: 'Soft-closed', tone: 'warning' },
   closed: { label: 'Closed', tone: 'neutral' },
-  locked: { label: 'Locked', tone: 'important' },
+  locked: { label: 'Locked', tone: 'info' },
 };
 const TYPE_LABEL: Record<CalendarType, string> = {
   calendar_year: 'Calendar year (Jan-Dec)',
@@ -90,6 +90,9 @@ const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
     }
     .bf-reason {
       min-width: 220px;
+    }
+    .bf-calendar-picker {
+      min-width: min(360px, 100%);
     }
     .bf-year--active {
       background: var(--mat-sys-secondary-container);

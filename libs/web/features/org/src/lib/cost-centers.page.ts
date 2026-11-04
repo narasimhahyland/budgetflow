@@ -103,7 +103,7 @@ import { LoadState } from './load-state';
             <mat-form-field appearance="outline">
               <mat-label>Org unit (optional)</mat-label>
               <mat-select name="unit" [ngModel]="unitId()" (ngModelChange)="unitId.set($event)">
-                <mat-option [value]="null">None</mat-option>
+                <mat-option value="none">None</mat-option>
                 @for (u of valueOf(units)?.items ?? []; track u.id) {
                   <mat-option [value]="u.id">{{ u.name }}</mat-option>
                 }
@@ -247,7 +247,7 @@ export class CostCentersPage {
   protected readonly code = signal('');
   protected readonly name = signal('');
   protected readonly entityId = signal<string | null>(null);
-  protected readonly unitId = signal<string | null>(null);
+  protected readonly unitId = signal('none');
   protected readonly date = signal(todayIso());
   protected readonly reason = signal('');
   protected readonly saving = signal(false);
@@ -279,7 +279,7 @@ export class CostCentersPage {
     this.code.set('');
     this.name.set('');
     this.entityId.set(null);
-    this.unitId.set(null);
+    this.unitId.set('none');
     this.date.set(todayIso());
     this.failure.set(null);
   }
@@ -303,7 +303,7 @@ export class CostCentersPage {
               code: this.code(),
               name: this.name(),
               legalEntityId: this.entityId() ?? '',
-              orgUnitId: this.unitId(),
+              orgUnitId: this.unitId() === 'none' ? null : this.unitId(),
               effectiveFrom: this.date(),
             },
           }),

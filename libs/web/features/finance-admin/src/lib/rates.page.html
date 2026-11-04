@@ -305,7 +305,7 @@
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Rate type</mat-label>
       <mat-select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)">
-        <mat-option [value]="null">All types</mat-option>
+        <mat-option value="all">All types</mat-option>
         @for (t of types; track t) {
           <mat-option [value]="t">{{ typeLabel[t] }}</mat-option>
         }
@@ -314,7 +314,7 @@
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Currency</mat-label>
       <mat-select [ngModel]="currencyFilter()" (ngModelChange)="currencyFilter.set($event)">
-        <mat-option [value]="null">All currencies</mat-option>
+        <mat-option value="all">All currencies</mat-option>
         @for (c of quotes(); track c.code) {
           <mat-option [value]="c.code">{{ c.code }}</mat-option>
         }
