@@ -122,9 +122,11 @@ function linkMap(page) {
 }
 const ignored = new Set((links.ignore ?? []).map(norm));
 
+// Each state is a shell page (screens/<id>.html: navigation bar plus an iframe) around a frame page
+// (frames/<id>.html: the Stitch HTML or exported image). Links inside frames open the next shell page in the top window.
 const pageHref = (id, fromIndex = false) => (fromIndex ? `screens/${id}.html` : `${id}.html`);
-const missingHref = (label, fromIndex = false) => `${fromIndex ? '' : '../'}index.html?missing=${encodeURIComponent(label)}`;
-const targetHref = (hit) => (hit.to ? pageHref(hit.to) : missingHref(hit.label));
+const missingHref = (label) => `../index.html?missing=${encodeURIComponent(label)}`;
+const targetHref = (hit) => (hit.to ? `../screens/${hit.to}.html` : missingHref(hit.label));
 
 // ---------- minimal HTML tree (enough for Stitch exports) ----------
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'stop']);
@@ -230,18 +232,18 @@ function rewriteHtml(page, html) {
     if (ignored.has(norm(label))) continue;
     let extra = null;
     if (hit) {
-      extra = n.tag === 'a' ? `href="${esc(targetHref(hit))}"` : `data-bf-href="${esc(targetHref(hit))}"`;
+      extra = n.tag === 'a' ? `href="${esc(targetHref(hit))}" target="_top"` : `data-bf-href="${esc(targetHref(hit))}"`;
       extra += hit.to ? ` data-bf-to="${hit.to}"` : ` data-bf-missing="${esc(hit.label)}"`;
       report.linked.push(`${label.slice(0, 50)} -> ${hit.to ?? 'not designed yet'}`);
     } else if (n.tag === 'a' && deadHref(n.attrs.href)) {
-      extra = `href="${esc(missingHref(label || 'This link'))}" data-bf-missing="${esc(label || 'This link')}"`;
+      extra = `href="${esc(missingHref(label || 'This link'))}" target="_top" data-bf-missing="${esc(label || 'This link')}"`;
       report.missing.push(`a: ${label.slice(0, 50)}`);
     } else if (n.tag !== 'tr' && n.tag !== 'a') {
       extra = `data-bf-missing="${esc(label.slice(0, 80) || 'This control')}"`;
       report.missing.push(`${n.tag}: ${label.slice(0, 50)}`);
     }
     if (!extra) continue;
-    const attrs = n.tag === 'a' ? n.attrsRaw.replace(/\s+href\s*=\s*("[^"]*"|'[^']*'|[^\s"'>]+)/i, '') : n.attrsRaw;
+    const attrs = n.tag === 'a' ? n.attrsRaw.replace(/\s+(href|target)\s*=\s*("[^"]*"|'[^']*'|[^\s"'>]+)/gi, '') : n.attrsRaw;
     edits.push({ start: n.start, end: n.openEnd, text: `<${n.tag}${attrs.replace(/\s*$/, '')} ${extra}${n.selfClose ? '/' : ''}>` });
   }
   edits.sort((a, b) => b.start - a.start);
@@ -249,7 +251,7 @@ function rewriteHtml(page, html) {
   for (const e of edits) out = out.slice(0, e.start) + e.text + out.slice(e.end);
   const head = '<link rel="stylesheet" href="../assets/overlay.css"/>';
   out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, `${head}</head>`) : head + out;
-  const tail = pageScript(page);
+  const tail = '<script src="../assets/frame.js"></script>';
   const bodyEnd = out.toLowerCase().lastIndexOf('</body>');
   out = bodyEnd < 0 ? out + tail : out.slice(0, bodyEnd) + tail + out.slice(bodyEnd);
   return { out, report };
@@ -319,7 +321,7 @@ function imagePage(page) {
   const anchors = [...uniq.values()]
     .map(
       (s) =>
-        `<a class="bf-hotspot" href="${esc(targetHref(s.hit))}" style="left:${pct(s.x, W)};top:${pct(s.y, H)};width:${pct(s.w, W)};height:${pct(s.h, H)}" title="${esc(s.hit.label)}" aria-label="${esc(s.hit.label)}"${s.hit.to ? ` data-bf-to="${s.hit.to}"` : ` data-bf-missing="${esc(s.hit.label)}"`}></a>`,
+        `<a class="bf-hotspot" href="${esc(targetHref(s.hit))}" target="_top" style="left:${pct(s.x, W)};top:${pct(s.y, H)};width:${pct(s.w, W)};height:${pct(s.h, H)}" title="${esc(s.hit.label)}" aria-label="${esc(s.hit.label)}"${s.hit.to ? ` data-bf-to="${s.hit.to}"` : ` data-bf-missing="${esc(s.hit.label)}"`}></a>`,
     )
     .join('\n');
   const maxW = page.viewport === 'desktop' ? W : W / scale;
@@ -336,14 +338,31 @@ function imagePage(page) {
 <img src="../images/${page.id}.png" width="${W / scale}" height="${H / scale}" alt="${esc(page.screen.title)}, ${esc(page.stateLabel)} (exported Stitch design)"/>
 ${anchors}
 </main>
-${pageScript(page)}
+<script src="../assets/frame.js"></script>
 </body>
 </html>
 `;
   return { out, report: { linked: [...uniq.values()].map((s) => `${s.hit.label} -> ${s.hit.to ?? 'not designed yet'}`), missing: [] } };
 }
 
-// ---------- overlay data ----------
+// ---------- shell page (navigation bar + frame) ----------
+function shellPage(page) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>${esc(page.screen.number)} ${esc(page.screen.title)} (${esc(page.stateLabel)}) - BudgetFlow design preview</title>
+<link rel="stylesheet" href="../assets/shell.css"/>
+</head>
+<body class="bf-shell">
+<iframe id="bf-frame" src="../frames/${page.id}.html" title="${esc(page.screen.number)} ${esc(page.screen.title)}, ${esc(page.stateLabel)}"></iframe>
+${pageScript(page)}
+</body>
+</html>
+`;
+}
+
 function pageScript(page) {
   const j = journey.indexOf(page.id);
   const step = (id) => (id ? { href: pageHref(id), title: `${pageById.get(id).screen.number} ${pageById.get(id).screen.title} (${pageById.get(id).stateLabel})` } : null);
@@ -445,13 +464,14 @@ function thumb(src, dest) {
 function build() {
   const out = resolve(opt('--out', join(here, 'dist')));
   rmSync(out, { recursive: true, force: true });
-  for (const d of ['screens', 'images', 'thumbs', 'assets']) mkdirSync(join(out, d), { recursive: true });
-  for (const f of ['overlay.js', 'overlay.css', 'index.css']) copyFileSync(join(here, 'assets', f), join(out, 'assets', f));
+  for (const d of ['screens', 'frames', 'images', 'thumbs', 'assets']) mkdirSync(join(out, d), { recursive: true });
+  for (const f of readdirSync(join(here, 'assets'))) copyFileSync(join(here, 'assets', f), join(out, 'assets', f));
   const summary = [];
   for (const page of pages) {
     const result = page.mode === 'html' ? rewriteHtml(page, readFileSync(page.html, 'utf8')) : imagePage(page);
     if (page.mode === 'image') copyFileSync(page.png, join(out, 'images', `${page.id}.png`));
-    writeFileSync(join(out, 'screens', `${page.id}.html`), result.out);
+    writeFileSync(join(out, 'frames', `${page.id}.html`), result.out);
+    writeFileSync(join(out, 'screens', `${page.id}.html`), shellPage(page));
     thumb(page.png, join(out, 'thumbs', `${page.id}.png`));
     summary.push({ page: page.id, mode: page.mode, linked: result.report.linked.length, notDesigned: result.report.missing.length });
   }

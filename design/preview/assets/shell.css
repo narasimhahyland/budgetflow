@@ -1,0 +1,23 @@
+/* Shell page of the clickable design preview: the design frame on top, the navigation bar docked below it. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+body.bf-shell {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #e8e7ee;
+}
+#bf-frame {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background: #fff;
+}
+#bf-preview-host {
+  flex: 0 0 auto;
+}

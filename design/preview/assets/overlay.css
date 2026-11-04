@@ -1,4 +1,4 @@
-/* Injected into every page of the clickable design preview; keeps the Stitch markup untouched otherwise. */
+/* Injected into every design frame of the clickable design preview; keeps the Stitch markup untouched otherwise. */
 [data-bf-to],
 [data-bf-href] {
   cursor: pointer;
@@ -15,7 +15,6 @@ html.bf-show-links [data-bf-missing] {
 
 body.bf-image-page {
   margin: 0;
-  padding: 0 0 88px;
   background: #e8e7ee;
 }
 .bf-canvas {
