@@ -1,0 +1,14 @@
+{
+  "screen": "027-freeze-budget",
+  "files": {
+    "dialog--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/23bb5e488964466aad7f6100c0e00bec",
+      "approved": null,
+      "size": [
+        2560,
+        2888
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

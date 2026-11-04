@@ -1,0 +1,14 @@
+{
+  "screen": "003-mfa-verification",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/abbf3942f7de440796aa71161c370099",
+      "approved": null,
+      "size": [
+        2560,
+        2048
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
