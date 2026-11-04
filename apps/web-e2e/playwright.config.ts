@@ -1,9 +1,14 @@
 // Standalone on purpose: no Nx preset, so it also runs inside the pinned Playwright image (scripts/visual/pw-docker.sh).
-// Phase 2 adds the `setup` project (src/auth.setup.ts from docs/ai-harness/templates/web-e2e/) once sign-in exists,
-// and makes desktop, tablet and mobile depend on it. Visual checks are light-only by default (dark theme deferred).
+// The `setup` project signs every role in once (src/auth.setup.ts); the other projects depend on it.
+// Visual checks are light-only by default (dark theme deferred).
 import { defineConfig, devices } from '@playwright/test';
+import { env } from './src/support/env';
 
-const baseURL = process.env.BASE_URL ?? `http://localhost:${process.env.BF_WEB_PORT ?? '4200'}`;
+// Journeys that sign in fresh sessions, change a password or trip lockout counters run once, on desktop.
+const SESSION_JOURNEYS = [/auth\//, /shell\/analytics\.spec\.ts/];
+
+// Port from the shell, then .env (worktrees run their own stack), then infra/.env.example.
+const baseURL = process.env.BASE_URL ?? `http://localhost:${env('BF_WEB_PORT')}`;
 const updating = process.argv.some((a) => a === '-u' || a.startsWith('--update-snapshots'));
 if (updating && process.env.PW_DOCKER !== '1') {
   throw new Error(
@@ -24,6 +29,8 @@ export default defineConfig({
     ['html', { outputFolder: '../../dist/.playwright/apps/web-e2e/report', open: 'never' }],
   ],
   expect: {
+    // Signed-in pages first pass through the OIDC redirect to Keycloak and back.
+    timeout: 15_000,
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.002,
       threshold: 0.2,
@@ -42,13 +49,30 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'desktop', testIgnore: /visual\//, use: { viewport: { width: 1440, height: 900 } } },
+    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    {
+      name: 'desktop',
+      dependencies: ['setup'],
+      testIgnore: /visual\//,
+      use: { viewport: { width: 1440, height: 900 } },
+    },
     {
       name: 'tablet',
-      testIgnore: /visual\//,
+      dependencies: ['setup'],
+      testIgnore: [/visual\//, ...SESSION_JOURNEYS],
       use: { viewport: { width: 834, height: 1112 }, hasTouch: true },
     },
-    { name: 'mobile', testIgnore: /visual\//, use: { ...devices['Pixel 7'] } },
-    { name: 'visual-light', testMatch: /visual\/.*\.spec\.ts/, use: { colorScheme: 'light' } },
+    {
+      name: 'mobile',
+      dependencies: ['setup'],
+      testIgnore: [/visual\//, ...SESSION_JOURNEYS],
+      use: { ...devices['Pixel 7'] },
+    },
+    {
+      name: 'visual-light',
+      dependencies: ['setup'],
+      testMatch: /visual\/.*\.spec\.ts/,
+      use: { colorScheme: 'light' },
+    },
   ],
 });

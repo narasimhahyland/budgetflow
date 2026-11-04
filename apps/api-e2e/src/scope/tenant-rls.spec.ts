@@ -38,7 +38,7 @@ test.describe('tenant isolation through the API', () => {
     );
     expect(me).toMatchObject({
       tenantId: acme,
-      tenantName: 'Acme Global',
+      tenantName: 'Hyland',
       reportingCurrency: 'USD',
       displayName: 'Morgan Lee',
       roles: ['ceo'],
