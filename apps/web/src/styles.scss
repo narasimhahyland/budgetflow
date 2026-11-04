@@ -1,0 +1,14 @@
+@use '@hylandsoftware/satori-ui/theme' as sat;
+
+// Light theme only for now (dark theme deferred): color-scheme pins Satori's light-dark() tokens to light.
+html {
+  color-scheme: light;
+  @include sat.theme;
+}
+
+body {
+  margin: 0;
+  background: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+}
