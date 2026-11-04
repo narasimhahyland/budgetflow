@@ -1,0 +1,32 @@
+---
+description: Functional verification is the definition of done - local stack with deterministic seed, API scenario tests in apps/api-e2e, Playwright journeys in apps/web-e2e, the core acceptance scenario, exploratory checks, performance with autocannon, evidence and the fix loop. Unit tests are not required.
+globs: apps/api-e2e/**, apps/web-e2e/**, infra/**, evidence/**, docs/testing/**
+alwaysApply: false
+---
+
+# Functional verification
+
+A feature is done when it is proven to work end to end on the running product, as the roles that use it. Unit tests are not required; never offer one as a substitute for a functional check. Procedure: `/functional-check`.
+
+## Stack and data
+- `scripts/stack.sh up && scripts/stack.sh reset` starts Docker Compose (Postgres 16, Keycloak, Mailpit, MinIO, API, worker, web) and loads the deterministic seed: fictional tenant Acme Global, one Keycloak user per role, fixed ids, amounts, rates and fiscal calendar, fixed clock for journeys.
+- Functional runs and CI use MinIO for documents (no in-memory document store) and the deterministic fake `AiProvider` (fixed answers per prompt fixture) for AI features.
+- Never point checks at shared or real environments.
+
+## Levels
+1. **API scenarios** — `apps/api-e2e` (Playwright test runner, `request` fixture), target `functional-api`. HTTP against the running API with real Keycloak tokens per role from the local realm. Parallel or isolated runs give each worker its own Postgres 16 Testcontainer with migrations applied and an API instance against it; migration checks (empty to head, previous release with seed data to head) also use Testcontainers. Every response is validated against its `libs/contracts` schema.
+2. **UI journeys** — `apps/web-e2e` (Playwright), target `functional-e2e`: user flows as the relevant role through `storageState` from the auth setup project, asserting the UI and the numbers the API reports.
+3. **Core acceptance scenario** — the plan's extended 10-step scenario as one journey (`apps/web-e2e/src/acceptance/`) with API assertions on every number; runs at every wave gate from Wave 2 onward and in Phase 19.
+4. **Exploratory** — the agent clicks through the changed flow with the Playwright MCP or browser tools: numbers, states, blocked, error and success messages; emails in Mailpit; worker jobs (pg-boss state, worker logs) when relevant.
+5. **Performance** — autocannon against the stack with a documented dataset size where a gate asks (P10 large dataset, P17); record p95 latency and throughput in evidence.
+
+## Assert business outcomes
+- Assert what a user, approver or finance would check: HTTP status and problem `code`, balances and bucket amounts in minor units, statuses, who can see or do what, audit entries, emails, worker outcomes. Never assert private functions, SQL text or DOM structure.
+- Every invariant maps to the API scenario that proves it: `docs/testing/invariant-scenarios.md`. A new or changed invariant updates that map and its scenario in the same change.
+- When the area is touched, these API scenarios are mandatory: over-allocation rejected with the right reason (incl. cross-currency at the locked plan rate); set to zero blocks new requests while existing commitments complete; partial contribution approval amounts and attribution; DoA routing and approval hygiene; idempotent retries post once; concurrent allocations never exceed the parent; ledger rebuild equals cached balances (and detects injected drift); tenant and role scope enforced (RLS holds even with a forged `X-Tenant-Id`; `PolicyService` denies out-of-scope roles).
+- Worker scenarios: idempotent jobs, retry to dead letter, tenant context, nightly rebuild check.
+- Journeys: `getByRole`, `getByLabel`, `getByText` selectors; `data-testid` only when nothing else is stable; never Satori or Material internal classes. Web-first assertions, no fixed sleeps. Order-independent: each test creates its data through the API or resets the seed.
+
+## Evidence and the fix loop
+- Evidence per change in `evidence/<phase>/<change>/functional/`: commands run, roles used, an outcome table (scenario, expected, actual, result), screenshots of key states, API responses with tokens redacted, relevant log excerpts, Mailpit subjects. Traces, videos, auth state and HAR files stay in `tmp/`.
+- A failing check is fixed and re-run until green, at most 5 iterations; then stop and report what still fails and why. Never mark done with failing checks; never skip, weaken or delete a check to make it pass.

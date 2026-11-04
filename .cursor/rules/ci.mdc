@@ -1,0 +1,15 @@
+---
+description: GitHub Actions and Dependabot rules for BudgetFlow CI
+globs: .github/**, scripts/gate.sh, scripts/stack.sh
+alwaysApply: false
+---
+
+# CI
+
+- CI stays green when `SATORI_PACKAGES_TOKEN` is absent (forks, or before the secret exists). A `preflight` job reports `has-token`; jobs that install `@hylandsoftware/*` run only when it is `true` and otherwise skip with a notice, never fail.
+- The token-free `harness` job always runs: secret scan, harness structure, shellcheck, hook tests and the visual tooling self-test (`scripts/validate-harness.sh` after `scripts/visual/setup-tools.sh --with-browser --with-deps`), plus the visual-baseline reason check on pull requests.
+- Install-dependent jobs also need the Nx workspace (`preflight` reports `has-workspace`): `static` (`scripts/gate.sh static`), `functional` (`scripts/gate.sh functional`: Compose stack with MinIO and the fake AI provider on the runner, Testcontainers for isolated API runs), `visual` (`scripts/gate.sh visual` in the pinned Playwright image). CI calls the same scripts as local gates, so a local pass predicts a CI pass.
+- Registry auth only through `actions/setup-node` with `registry-url: https://npm.pkg.github.com`, `scope: '@hylandsoftware'`, and `NODE_AUTH_TOKEN: ${{ secrets.SATORI_PACKAGES_TOKEN }}` on the install step. Never write the token to a file or log.
+- Least privilege: top-level `permissions: contents: read`; raise per job only when needed.
+- Pin actions to a major version (Dependabot keeps them current); prefer shell steps and official actions over third-party actions.
+- Artifacts: gate logs, API and journey Playwright reports, functional evidence, visual diffs and the visual HTML report, with short retention; never upload `.env`, auth state, HAR files or DB dumps.

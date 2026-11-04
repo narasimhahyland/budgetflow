@@ -1,0 +1,17 @@
+---
+description: Rules engine, policies, approval routing, delegation-of-authority limits, escalation and simulation
+globs: **/rules/**, **/approvals/**, **/policies/**, **/doa/**, libs/domain/**/rule*.ts, libs/domain/**/approval*.ts
+alwaysApply: false
+---
+
+# Rules engine and approvals
+
+- Rules are data: a condition AST over typed facts (amount in budget and reporting currency, remaining percent, category, seniority, employee count, location, legal entity, requester role), actions, priority and effective dates. Evaluation is pure, in `libs/domain`.
+- Rules are versioned and immutable once active; edits create a new version. Every decision records the rule versions and fact values that produced it.
+- Conflict resolution, highest first: block > freeze > union of required approvals > warn > auto-approve. Ties break by priority, then rule id, so outcomes are deterministic.
+- Every decision returns an explanation the UI shows: which rules matched, with which facts.
+- Routing builds the chain (budget owner, parent owner above thresholds, finance or giving director where required) and then applies **delegation-of-authority**: each step's approver must hold a DoA limit covering the action, amount and legal entity; otherwise the step escalates to the next authority. Ownership alone never satisfies an approval.
+- Delegations and substitutes are time-boxed, audited, bounded by the delegator's own limit; nobody approves their own request.
+- SLA timers and escalation run in the worker and are idempotent.
+- Simulation mode evaluates a request against draft rules with no side effects and returns the same explanation.
+- Tests: table-driven cases per rule, conflict ordering, DoA boundaries (exactly at the limit, one minor unit above), escalation, self-approval blocked, simulation equals real evaluation without writes.

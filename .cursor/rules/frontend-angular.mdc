@@ -1,0 +1,47 @@
+---
+description: Angular 22 component, routing, data-access, state, copy and money-formatting conventions, screen states and budget-safety visuals for apps/web and libs/web
+globs: apps/web/**/*.ts, apps/web/**/*.html, libs/web/**/*.ts, libs/web/**/*.html
+alwaysApply: false
+---
+
+# Angular conventions
+
+- Standalone components, `ChangeDetectionStrategy.OnPush`, `inject()`, signal inputs and outputs (`input()`, `output()`, `model()`), `computed()` for derived state. No NgModules, no `*ngIf`/`*ngFor`; use `@if`, `@for (...; track id)`, `@switch`.
+- Selector prefix `bf-`. Generate with Nx so file layout matches workspace defaults.
+- Feature libs export a `Routes` array, are lazy-loaded from `apps/web`, and never import each other.
+- Data comes from `libs/web/data-access`, built on the generated `libs/contracts` client. Components never call `HttpClient` directly, never hand-write request or response types, and never compute balances, availability or permissions; the API returns them.
+- Permissions shown in the UI come from the API for the current user and tenant. Hiding a button is convenience; the API is the enforcement.
+- Mutations send an idempotency key (data-access generates it per user action) and show the problem-details `detail` (plain English from the API) next to the field or in a banner, branching on `code` when the UI must react.
+- Typed reactive forms; validation messages are plain English; server-side validation errors map onto fields.
+
+## Every screen has all states
+| State | Satori piece |
+| --- | --- |
+| Loading | `sat-ghost` skeletons |
+| Empty | `sat-empty-state` with a next action |
+| Error | `sat-500-error-state` or an error `sat-banner` with retry |
+| Unauthenticated / forbidden | `sat-401-error-state` / `sat-403-error-state` |
+| Blocked (frozen, zero, closed, closed period) | `sat-banner` plus disabled actions that say why |
+| Success | snackbar, focus returned to the triggering control |
+
+## Budget-safety visual rules
+Each pair below has a distinct, consistent treatment on every screen (the visual QA loop and `ux-reviewer` check them):
+- allocated vs available; held / pre-encumbered vs encumbered vs actual vs accrued; current vs forecast; actual vs planned; pending vs approved;
+- soft warning (warning container, user can proceed) vs hard block (error container, action disabled with the reason);
+- frozen (lock icon, info tone) vs set to zero (important tone);
+- budget currency vs reporting currency, with the FX effect shown separately, never folded into consumption.
+
+## Financial actions
+Reduce, set to zero, freeze, approve, reject, reverse and period close go through the shared confirm-with-reason dialog with the impact preview the API returns. The set-to-zero dialog shows the impact, affected children, commitments, the floor (committed + actual + children), the destination for the cut money and the requests that will be blocked, and requires a reason code, a typed reason and confirmation. Amounts show the currency code with tabular numerals and, where relevant, the reporting-currency equivalent at the locked plan rate. The primary financial action uses `satImportantButton`.
+
+## Copy and formatting (no app translations)
+- App copy is plain English written in templates and components. Do not create app translation files, add translation keys, or use the `translate` pipe in app code.
+- `@ngx-translate/core` stays installed only because `@hylandsoftware/satori-ui` requires it as a peer dependency. Configure it once in `app.config.ts` with English defaults via `provideAndConfigureSatoriTranslations()` so Satori's own component strings render; nothing else uses it.
+- Money, numbers and dates use the Angular formatters with the `en` locale (`CurrencyPipe`, `DecimalPipe`, `DatePipe`, or `formatCurrency` in the shared money component): currency code shown, tabular numerals, amounts converted from integer minor units by the ISO 4217 exponent. Indian lakh/crore grouping (`en-IN`) only where the plan requires INR display. Timestamps render in the user's timezone with the tenant default.
+
+```html
+<!-- ❌ color-only status, hand-formatted money -->
+<span class="red">Frozen</span> <span>{{ amount / 100 }}</span>
+<!-- ✅ Satori status tag with text, shared money component -->
+<sat-status-tag status="info">Frozen</sat-status-tag> <bf-money [minor]="amountMinor" currency="INR" />
+```

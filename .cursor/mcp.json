@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.84",
+        "--headless",
+        "--isolated",
+        "--viewport-size",
+        "1440x900",
+        "--output-dir",
+        "${workspaceFolder}/tmp/playwright-mcp"
+      ]
+    },
+    "angular-cli": {
+      "command": "node",
+      "args": ["${workspaceFolder}/node_modules/@angular/cli/bin/ng.js", "mcp", "--read-only"]
+    },
+    "nx": {
+      "command": "npx",
+      "args": ["-y", "nx-mcp@0.25.3", "${workspaceFolder}", "--no-minimal", "--disableTelemetry"]
+    }
+  }
+}

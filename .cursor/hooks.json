@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "sh .cursor/hooks/node.sh .cursor/hooks/guard-shell.mjs",
+        "timeout": 30
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "sh .cursor/hooks/node.sh .cursor/hooks/guard-read.mjs",
+        "timeout": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "sh .cursor/hooks/node.sh .cursor/hooks/guard-tool.mjs",
+        "matcher": "Grep|Glob|Delete|Write|StrReplace|Edit",
+        "timeout": 10
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "sh .cursor/hooks/node.sh .cursor/hooks/guard-prompt.mjs",
+        "timeout": 5
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "sh .cursor/hooks/node.sh .cursor/hooks/format.mjs",
+        "timeout": 20
+      }
+    ],
+    "stop": [
+      {
+        "command": "sh .cursor/hooks/node.sh .cursor/hooks/stop-summary.mjs",
+        "timeout": 10,
+        "loop_limit": 1
+      }
+    ]
+  }
+}

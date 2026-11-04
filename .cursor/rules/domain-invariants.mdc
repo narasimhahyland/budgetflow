@@ -1,0 +1,45 @@
+---
+description: Budget lifecycle, controls, delegation-of-authority, approval hygiene, scope and tenancy, events and Inter-Director Budget Contribution Requests
+globs: libs/domain/**, libs/api/**, apps/api/**, apps/worker/**, libs/contracts/**
+alwaysApply: false
+---
+
+# Domain invariants
+
+A change that weakens one of these needs explicit user approval. Money, buckets, periods, currency and intercompany rules are in `ledger-accounting.mdc`; both are proven by API scenarios.
+
+## Budgets and allocation
+- Budgets form a hierarchy within a tenant; each has an owner (and optional co-owners), a legal entity, a cost center (required on leaf budgets), a budget currency with a locked plan rate, a category, a type, a control basis and mode, a status and a version.
+- Allocation posts allocated out on the parent and authorized on the child in one balanced journal, checked against the parent's available amount at the locked plan rate under ordered row locks (parent before children, then by id) with an idempotency key.
+- Over-allocation is a hard block with a reason; crossing an alert threshold (50/80/100%) or tolerance is a soft warning.
+- Budget versions are immutable snapshots with a reason. All 15 budget states live in the `libs/domain` state machine even where the UI shows a subset.
+
+## Controls
+- Frozen, set-to-zero, exhausted, expired and closed budgets reject new requests, allocations and contributions with a typed reason.
+- Existing commitments stay visible and can complete; controls never delete or hide history.
+- Reduce and set to zero require a reason code, a typed reason, a destination for the cut money (parent, savings, reallocation) and an impact preview first (affected children, commitments, pending requests that will be blocked). Set to zero is floored at committed + actual + children unless cascaded.
+
+## Authority is not ownership
+- Owning a budget grants visibility and the right to request and delegate within it. Approving spend, transfers and contributions is governed by the versioned, effective-dated **delegation-of-authority (DoA) matrix**: who × spend type × legal entity × limit (in the budget currency at the locked plan rate).
+- An approval step passes only when the approver is on the routed chain **and** within their DoA limit; otherwise it escalates.
+- Approval hygiene: no self-approval; an approver cannot be a beneficiary or attendee; delegations are time-boxed, audited and capped by the delegator's own limit and dates.
+
+## Authorization and tenancy
+- One decision point: `PolicyService.can(actor, action, resource)`, evaluated before every read and write. No role-name checks in controllers, components or jobs.
+- Tenant isolation is enforced by Postgres RLS on `tenant_id` (`app.tenant_id` set per transaction), with policy checks on top.
+- Director A never reads or mutates Director B's budget except through an Inter-Director Budget Contribution Request. AI answers, chat cards, widgets and connectors obey the same `PolicyService` scope.
+- Platform super-admins cannot read tenant financial data without an audited break-glass grant.
+
+## Events
+- Event lifecycle: Draft, Submitted, Approved, Funded, In progress, Completed, Reconciling, Closed (or Cancelled with fees consumed). Funding cap = own funds + contributions within estimate + tolerance.
+- Costs split by location, team and each attendee's employing entity and cost center. An event cannot close with unmatched actuals or a missing recharge; surplus returns to contributors by share.
+
+## Inter-Director Budget Contribution Request
+- Use this exact term in code, docs and the audit log. It is a controlled, approved and audited contribution, never uncontrolled or free-form budget sharing.
+- The giving director (within DoA) decides: approve full, approve a different amount, request changes, or reject with a reason. Never automatic.
+- Approved amounts become an earmark (default; held on the giver's budget) or a transfer to the event budget, with per-contributor attribution, ledger journals, intercompany handling per policy when entities differ, and audit events.
+
+## Commands
+Validate, authorize, lock (ordered), check idempotency, call the domain, post the journal, write the audit entry, enqueue outbox messages — one transaction. Business failures return `{ ok: false, error: { code, message, params } }` (plain-English message); they never throw.
+
+Every invariant maps to the API scenario in `apps/api-e2e` that proves it (happy path, exact boundary, rejection): `docs/testing/invariant-scenarios.md`. Update the map and the scenario with the rule. Use `/domain-change` (and `/ledger-change` for postings).

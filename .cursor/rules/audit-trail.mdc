@@ -1,0 +1,17 @@
+---
+description: Immutable SHA-256 hash-chained audit trail, audit events per mutation, verification and export
+globs: **/audit/**, libs/domain/**, libs/api/**, apps/worker/**
+alwaysApply: false
+---
+
+# Audit trail
+
+- Exactly one audit event per successful mutation, written in the same transaction: actor (and on-behalf-of for delegations), action, resource type and id, previous and new values (changed fields only), reason, request id, legal entity, timestamp UTC. Rejected commands write none.
+- Per-tenant hash chain: `hash = sha256(prevHash || canonicalJson(event))` with stable key ordering and a fixed genesis value. Concurrent writers serialize on the tenant chain head.
+- Audit rows are immutable (database trigger rejects `UPDATE` and `DELETE`) and readable only through the policy (auditor, finance roles).
+- Verification walks the chain and reports the first broken link. The nightly ledger rebuild check runs it; the UI integrity indicator shows the latest real result, never a constant.
+- Exports (CSV, scheduled) apply the same filters and permissions as the screen and record an audit event themselves.
+- AI-generated suggestions that a person accepts are audited with the suggestion id and model version; AI never writes audit events on its own behalf.
+- Never put secrets, tokens or unnecessary personal data in audit values; store references.
+
+Tests: tamper one row and verification fails at that row; one event per mutation and none on rejection; immutability trigger; export equals the filtered view.

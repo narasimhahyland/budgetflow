@@ -1,0 +1,38 @@
+---
+description: BudgetFlow core guardrails - scope discipline, secrets, public repo, contract-first, ledger integrity, Satori-only UI, functional verification and evidence
+alwaysApply: true
+---
+
+# Core guardrails
+
+## Scope discipline
+- Do only what the task asks. Before editing, know which files you own; if the work needs files outside that set, stop and say so.
+- No drive-by refactors, renames, formatting sweeps or dependency bumps. List follow-ups in your summary instead.
+- Shared surfaces change only when the task says so: `package.json`, `package-lock.json`, `nx.json`, `tsconfig.base.json`, `eslint.config.mjs`, `.stylelintrc.mjs`, `apps/web/project.json`, `libs/contracts/**`, `libs/api/db/**` (schema and migrations), `infra/**`, `.cursor/**`, `.github/**`.
+- Never force-push `main`, rewrite shared history, or delete files outside the repository.
+
+## Secrets and the public repo
+- The repository is public. Never commit, print or paste tokens, keys, passwords, real `.env` files, or anything from `~/.npmrc`. The registry token lives only in `~/.npmrc`; the repo `.npmrc` holds just `@hylandsoftware:registry=https://npm.pkg.github.com`.
+- Check registry auth with `npm whoami --registry=https://npm.pkg.github.com`, never by reading config files.
+- Secrets in config are references only (`${NODE_AUTH_TOKEN}`, `${{ secrets.X }}`, `${env:X}`); dev credentials are placeholders in `infra/.env.example`.
+- No internal company information: no wiki or ticket content, ticket keys, internal tool names, internal URLs, employee or customer names. Seed and fixture data are fictional (Acme Global).
+- If a hook blocks a command, do not rephrase it to get around the hook. Tell the user what you were trying to do.
+
+## Product integrity
+- Contract first: API shapes change in `libs/contracts`, then API and web.
+- Money is integer minor units with ISO 4217 codes; the ledger is append-only (reversals, never edits); authorization goes through `PolicyService.can`; tenant isolation is RLS. Details: `ledger-accounting.mdc`, `domain-invariants.mdc`.
+- AI features never take financial or approval actions on their own (`ai-features.mdc`).
+
+## UI and copy
+- Satori UI first, Angular Material second (themed by `sat.theme`), a custom component in `libs/web/ui` last. No Tailwind, PrimeNG, Bootstrap, Material Symbols or other UI kits. Style only with `--mat-sys-*` / `--sat-sys-*` tokens; read `node_modules/@hylandsoftware/satori-ui/types/` instead of guessing APIs.
+- App copy is plain English in templates; there are no app translation files (details in `frontend-angular.mdc`). Money, numbers and dates use the Angular formatters.
+
+## Quality
+- Done means the functionality is proven on the running product: `/functional-check` (local stack, deterministic seed, the feature end to end as the relevant roles, business outcomes asserted through API scenarios and UI journeys, evidence). Unit tests are not required. Details: `testing-functional.mdc`.
+- UI changes also pass `/visual-qa` with no blocking findings (`testing-visual.mdc`).
+- Failing checks are fixed and re-run (at most 5 iterations); never delete, skip or weaken a check to make it pass, and never report done while one fails.
+- While iterating run `scripts/gate.sh static --affected`; before handing off run `scripts/gate.sh` (all modes) and report the real result, including failures and skips.
+- Evidence (gate summary, functional outcome table, screenshots, API responses, logs) goes under `evidence/<phase>/`. Say where it is.
+
+## Final message
+List files changed, gates run with results, risks or open questions, and evidence paths.

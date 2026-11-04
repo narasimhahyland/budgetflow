@@ -1,0 +1,44 @@
+---
+description: Satori UI component choice, theming, tokens, icons and charts for all styles and templates
+globs: **/*.scss, apps/web/**/*.html, libs/web/**/*.html
+alwaysApply: false
+---
+
+# Satori styling
+
+## Component priority
+Satori component, then Angular Material themed by `sat.theme`, then a custom component in `libs/web/ui`. Common mapping:
+
+| Need | Use |
+| --- | --- |
+| Shell | `sat-platform-nav-container`, `sat-platform-nav` (+ `-menu`, `-switcher`, `-user`), `sat-app-header`, `sat-skip-to-content`, `sat-breadcrumbs` |
+| Page toolbar, tabs | `sat-header-bar`, `sat-action-bar`, `sat-split-button`, `sat-navigation-tabs` |
+| Tables | `mat-table` + `satTableWithRowStates`, `satRowState`, `sat-selection-bar`, `mat-sort`, `mat-paginator` |
+| Status, tags | `sat-status-tag`, `sat-category-tag`, `satInlineChip` |
+| Cards, KPIs | `sat-interactive-card`, `satCardSurfaceContainerLowest` |
+| Feedback | `sat-banner`, `sat-empty-state`, `sat-403-error-state`, `sat-ghost`, `sat-rich-tooltip` |
+| Layout, files | `sat-splitter`, `sat-nested-scrollviews`, `sat-upload-field` |
+| Gaps | Material dialog, stepper, form field, datepicker, tree, menu, snackbar |
+
+Check selectors and inputs in `node_modules/@hylandsoftware/satori-ui/types/*.d.ts`.
+
+## Theme and tokens
+- `html { @include sat.theme; }` lives only in `apps/web/src/styles.scss`. Dark mode is `color-scheme`; tokens resolve through `light-dark()`.
+- Colors: `var(--mat-sys-*)` (primary, surface, surface-container-*, on-surface, outline, error) and `var(--sat-sys-*)` (`info|success|warning|important|neutral` + `-container`, `on-*-container`, `-icon`; `cat-*`; `primary-loud`). No hex, rgb, hsl or named colors.
+- Type and shape: `var(--mat-sys-body-medium)`, `var(--mat-sys-title-large)`, `var(--mat-sys-corner-medium)`. Never declare `font-family`; Satori fonts are already loaded.
+- Never import `@hylandsoftware/satori-tokens/css/base`, `/light` or `/dark`. `css/dataviz` is allowed for charts only.
+- Style your own `bf-*` classes. Do not target `.mat-*`, `.mdc-*`, `.sat-*` or `.cdk-*` internals or redefine their custom properties (satori-lint `no-ds-internals-overrides`). Tune Material only through official `mat.<component>-overrides()` mixins.
+
+## Icons and charts
+- Satori icon sprite via `provideSatoriIcons()`; Material Icons only for gaps. No Material Symbols, no other icon sets.
+- Charts take colors only from `--categorical-data-viz-*` / `--sequential-data-viz-*` and always have a text alternative.
+
+## Gate
+`npm run lint:styles` and `npm run satori:check` must pass. Never silence a Satori lint finding without the user's approval and a comment explaining why.
+
+```scss
+// ❌
+.total { color: #322f86; font-family: Figtree; }
+// ✅
+.bf-total { color: var(--sat-sys-primary-loud); font: var(--mat-sys-title-large); }
+```

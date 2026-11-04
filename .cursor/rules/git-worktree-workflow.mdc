@@ -1,0 +1,29 @@
+---
+description: Git branching, commit messages, worktrees, merging parallel agent work and pull requests for BudgetFlow; use when committing, branching, creating or removing worktrees, merging, or opening a PR
+alwaysApply: false
+---
+
+# Git and worktree workflow
+
+## Branches
+- `main` is always releasable: gates green. Once the first PR exists, never commit directly to it; never force-push it.
+- Work branches: `feat/<scope>`, `fix/<scope>`, `chore/<scope>`, `docs/<scope>`.
+- Parallel waves: an integration branch `integrate/<wave>` from `main`, one agent branch per scope `agent/<wave>-<scope>` from it.
+
+## Commits
+- Conventional Commits with the project as scope: `feat(ledger): reject postings into closed periods`. Body explains why.
+- Stage named files only; never `git add -A` / `git add .` in a shared checkout. Never `--no-verify`.
+- One logical change per commit. Contract, migration, generated OpenAPI and the code using them land together.
+
+## Worktrees
+- Create with `scripts/worktree.sh new <wave>-<scope>` (or the Agents Window, which runs `.cursor/worktrees.json`). Each worktree gets its own `npm ci` and its own `.env` with a distinct `COMPOSE_PROJECT_NAME`; never symlink `node_modules`.
+- An agent edits only its assigned paths; `scripts/worktree.sh check <name> <globs...>` must pass before merge.
+- Remove with `scripts/worktree.sh remove <name>` (and `scripts/stack.sh down` in it first), never `rm -rf`.
+
+## Merging
+- Merge agent branches into the integration branch one at a time with `git merge --no-ff`, running `scripts/gate.sh static` after each and `scripts/gate.sh e2e` after the last.
+- Shared files belong to the integrator: `package.json`, lockfile, `libs/contracts/**`, `libs/api/db/**` (the integrator assigns migration order and regenerates the drizzle journal), `apps/web/project.json`, `apps/web` routes, `infra/**`.
+- Resolve conflicts by understanding both sides; never take "ours" or "theirs" wholesale for code. `git reset --hard` and `git clean -fdx` need the user's approval.
+
+## Pull requests
+Use the `pr-workflow` skill: PR template, gate table, evidence links, CI green or explained (install-dependent jobs skip until `SATORI_PACKAGES_TOKEN` exists).

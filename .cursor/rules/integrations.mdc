@@ -1,0 +1,18 @@
+---
+description: Integration connectors, adapters, webhooks, sync runs and DocumentStore
+globs: **/integrations/**, **/connectors/**, **/adapters/**, **/webhooks/**
+alwaysApply: false
+---
+
+# Integrations
+
+- BudgetFlow controls budgets; spend, cards and accounting come from integrations (ERP adapter first, then HR, calendar, identity and spend tools). Each connector implements the adapter interface for its capability (budgets, cost centers, actuals, commitments, people) and ships a mock implementation used in tests and local demos.
+- Adapters never write domain tables: they produce normalized records that flow through the same application services, policy checks, ledger postings and audit as user actions (an imported actual is a ledger posting with the source document reference).
+- Outbound calls run in the worker with timeouts, retries with backoff and jitter, and a dead-letter queue. Sync runs record status, counts, cursors and errors.
+- Inbound webhooks verify an HMAC signature with a per-connection secret and a timestamp window, then enqueue; handlers are idempotent on the provider event id.
+- Credentials are stored encrypted, referenced by id, never logged or returned by the API. API keys BudgetFlow issues are stored hashed.
+- Contract tests per adapter (`apps/api-e2e/src/integrations/`) run against the adapter's mock server built from recorded, scrubbed shapes; a live mode exists only behind an explicit env flag and never runs in CI.
+- Documents (receipts, quotations, approval evidence, exports) go through the `DocumentStore` interface: MinIO in Compose, in functional runs and in CI (no in-memory fake).
+- Name providers generically in docs and fixtures; no customer or internal system details.
+
+Use `/integration-adapter`.

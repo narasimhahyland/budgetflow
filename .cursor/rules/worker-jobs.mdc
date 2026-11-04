@@ -1,0 +1,15 @@
+---
+description: pg-boss worker, transactional outbox, scheduled jobs, retries and the nightly ledger rebuild check
+globs: apps/worker/**, **/jobs/**, **/outbox/**
+alwaysApply: false
+---
+
+# Worker and jobs
+
+- Side effects leave the request transaction through the outbox table (same transaction as the change); the worker drains it into pg-boss jobs. No direct email, webhook or integration calls from request handlers.
+- Jobs are idempotent: keyed by a business id, safe to repeat, safe after a crash mid-way. Record completion so a replay is a no-op.
+- Every job sets the tenant context before touching data; multi-tenant schedules iterate tenants explicitly.
+- Retries: exponential backoff with jitter, a max attempt count, then a dead-letter queue visible to admins. Errors are logged without payload secrets.
+- Jobs call application services (the same ones the API uses); they never write domain tables directly.
+- Scheduled work: approval SLA timers and escalation, notification digests, integration syncs, period-end accruals and reversals, retention, and the nightly ledger rebuild check (recompute bucket balances from entries, compare with cached balances, verify the audit hash chain, store the result, alert on drift, never auto-repair).
+- Worker scenarios in `apps/api-e2e/src/worker/`: idempotency (run twice, one effect), crash between steps, retry to dead letter, tenant context present, rebuild check detects injected drift.

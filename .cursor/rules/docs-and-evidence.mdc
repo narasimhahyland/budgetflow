@@ -1,0 +1,29 @@
+---
+description: Documentation, ADRs, AGENTS.md and evidence-pack conventions
+globs: docs/**, evidence/**, **/AGENTS.md, **/README.md
+alwaysApply: false
+---
+
+# Docs and evidence
+
+## Docs
+- Plain, short, task-oriented. Reference files and commands instead of copying code that will drift.
+- Docs describe what exists; mark planned work as planned. Never document a command that does not run.
+- Architecture lives in `docs/architecture/` (domain, ledger, API, state machines, authorization and DoA matrix); decisions as ADRs in `docs/adr/NNNN-title.md` (context, decision, consequences). A change that contradicts an ADR adds a new ADR.
+- UX specs live in `docs/ux/screens/NNN-slug.md`.
+- Public repo: fictional data only; no internal company content, URLs, ticket keys or names.
+- `AGENTS.md` files stay under about 80 lines; detail belongs in rules or skills. Area templates live in `docs/ai-harness/agents-md/`.
+
+## Evidence packs
+```text
+evidence/<phase-id>/
+  README.md        gate review (template: phase-gate-review skill)
+  gate-summary.txt scripts/gate.sh --evidence output
+  <change>/functional/  /functional-check: outcome table, screenshots, API responses, log excerpts
+  visual-qa/       /visual-qa: report.md, report.json, screens/, design-parity/, before-after/
+  api/             scrubbed request/response samples for the phase's key flows
+  db/              scrubbed query results proving invariants (balances, rebuild check, RLS)
+  perf/            autocannon results when the gate asks
+```
+- Raw traces, videos, HAR files, compose logs and DB dumps stay in `tmp/evidence/` (gitignored); they contain tokens and personal data. Only scrubbed summaries are committed.
+- Every claim in an evidence README points to a file or command output. Capture with `/functional-check` and `/visual-qa`, assemble with `/phase-review`.

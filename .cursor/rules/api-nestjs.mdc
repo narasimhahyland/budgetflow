@@ -1,0 +1,20 @@
+---
+description: NestJS API conventions - modules, controllers, services, auth, tenancy, idempotency, errors
+globs: apps/api/**, libs/api/**
+alwaysApply: false
+---
+
+# NestJS API
+
+- One Nest module per domain in `libs/api/<module>`; `apps/api` wires modules, config, middleware, health and OpenAPI. Modules interact through exported services, never through each other's tables.
+- Controllers are thin: parse with the zod schema from `libs/contracts`, call `PolicyService.can`, call one application service, return the contract response. No business logic, no SQL.
+- Business rules come from `libs/domain`. Services run one transaction: set tenant context, lock rows in a stable order, call the domain, post to the ledger, append the audit event, write outbox messages.
+- Auth: Keycloak JWT verified via JWKS (issuer, audience, expiry); tenant from `X-Tenant-Id` must be one of the actor's memberships; the DB session sets `app.tenant_id` so RLS applies to every query.
+- Mutations require an `Idempotency-Key` header; replays return the stored response and status.
+- Errors: domain failures map to RFC 9457 problem details with a stable `code` and a plain-English `detail`; validation errors list field paths; never leak stack traces, SQL or other tenants' identifiers.
+- Pagination is cursor-based with a server-side maximum; list endpoints filter in SQL under RLS, never in memory.
+- Config through zod-validated env with `infra/.env.example`; no secrets in code, tests or fixtures.
+- OpenAPI is generated from `libs/contracts`, never hand-written.
+- Performance-sensitive endpoints get an autocannon benchmark when the phase gate asks for it.
+
+Use `/api-endpoint` for new endpoints. Functional checks per `testing-functional.mdc`.

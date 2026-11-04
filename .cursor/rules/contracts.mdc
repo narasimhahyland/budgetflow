@@ -1,0 +1,15 @@
+---
+description: libs/contracts zod schemas, generated OpenAPI and typed client - the API contract owned by the integrator
+globs: libs/contracts/**
+alwaysApply: false
+---
+
+# Contracts
+
+- `libs/contracts` is the single source of truth for API shapes: zod schemas, inferred types, the generated OpenAPI document and the typed client used by `libs/web/data-access`.
+- During a parallel wave only the integrator edits contracts; feature agents put change requests in their report.
+- Additive changes only within a phase (optional fields, new endpoints). Removing or renaming a field needs a version bump and user approval.
+- Shapes: money `{ amountMinor: z.number().int().safe(), currency: z.string().length(3) }`; ledger amounts as the currency triplet plus rate reference; timestamps ISO 8601 UTC; ids opaque strings; enums closed.
+- Schemas are `.strict()`, carry `.describe()` text for OpenAPI, and define the problem-details error shape with a stable `code` and a plain-English `detail`.
+- Every schema change has tests: a valid sample parses, invalid samples fail at the expected path.
+- Regenerate OpenAPI and the client in the same change; the `openapi-check` target fails CI on drift.

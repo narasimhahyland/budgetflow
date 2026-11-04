@@ -1,0 +1,30 @@
+---
+description: Security rules for secrets, registry auth, authentication, authorization, tenancy, input handling, uploads and dependencies
+globs: .npmrc, **/.env*, scripts/**, .github/**, .cursor/hooks/**, **/auth/**, **/*.guard.ts, **/*.interceptor.ts, **/*upload*.ts, **/policy/**, infra/**
+alwaysApply: false
+---
+
+# Security
+
+## Secrets
+- Repo `.npmrc` contains exactly `@hylandsoftware:registry=https://npm.pkg.github.com`; auth lines never go in the repo.
+- CI reads the registry token from `SATORI_PACKAGES_TOKEN` through `NODE_AUTH_TOKEN`; cloud agents from a Cursor secret. Never echo either.
+- `infra/.env.example` holds dev placeholders only; real `.env` files stay untracked. Integration credentials are encrypted at rest and referenced by id.
+- `scripts/secret-scan.sh` runs on commit (git hook and agent hook) and in CI. Fix findings by removing the secret. A real secret that was ever committed must be rotated; tell the user.
+
+## Authentication and authorization
+- Keycloak OIDC: authorization code + PKCE for the SPA, short-lived access tokens, refresh in memory (no tokens in localStorage), TOTP MFA per realm policy. The API verifies issuer, audience, expiry and signature via JWKS.
+- Every endpoint and job authorizes through `PolicyService.can`; tenant isolation through RLS with `FORCE ROW LEVEL SECURITY`. Super-admin access to tenant financial data only through an audited break-glass grant.
+- Approvals check delegation-of-authority limits server-side; the UI never decides authority.
+
+## Input and output
+- Validate at the boundary with zod (`.strict()`); reject unknown fields. Problem-details errors never leak SQL, stack traces or other tenants' identifiers.
+- No `innerHTML` / `bypassSecurityTrust*` with user data. CSV exports neutralize formula injection (`=`, `+`, `-`, `@` prefixes).
+- Uploads: allowlist MIME types and size, scan the content type server-side, never trust the file name, store through `DocumentStore` with tenant-scoped keys and short-lived signed URLs.
+- Webhooks: HMAC signature plus timestamp window; outbound HTTP only to configured hosts.
+- Do not log tokens, authorization headers, or full bodies with personal data.
+
+## Dependencies
+Add a dependency only when the task needs it; prefer what the workspace already has; run `npm audit --omit=dev` for new runtime dependencies and report the result. No `curl | sh` in repo scripts except pinned, documented installers.
+
+Security-sensitive changes end with `/security-review-handoff`.

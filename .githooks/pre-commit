@@ -1,0 +1,27 @@
+#!/bin/sh
+# Installed by `npm install` (prepare script sets core.hooksPath=.githooks).
+# 1. Secret and public-repo hygiene scan of staged content.
+# 2. Prettier check of staged files that Prettier understands.
+set -eu
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+
+sh scripts/secret-scan.sh --staged --quiet || {
+  echo "pre-commit: blocked by secret scan (see above). Unstage the file or remove the value." >&2
+  exit 1
+}
+
+prettier="node_modules/.bin/prettier"
+[ -x "$prettier" ] || exit 0
+
+files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|mts|cts|js|mjs|cjs|json|html|scss|css|md|ya?ml)$' | grep -v -E '(^|/)package-lock\.json$' || true)
+[ -n "$files" ] || exit 0
+
+# shellcheck disable=SC2086
+if ! printf '%s\n' $files | xargs "$prettier" --check --log-level=warn >/dev/null 2>&1; then
+  echo "pre-commit: Prettier found unformatted staged files. Fix with:" >&2
+  # shellcheck disable=SC2086
+  echo "  npx prettier --write $(printf '%s ' $files)&& git add <files>" >&2
+  exit 1
+fi

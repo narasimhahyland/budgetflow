@@ -1,0 +1,17 @@
+---
+description: Rules for changing the Cursor harness itself (rules, skills, agents, hooks, MCP, worktree and cloud config, AGENTS.md templates)
+globs: .cursor/**, **/AGENTS.md, docs/ai-harness/**, scripts/validate-harness.*, scripts/install-agents-md.sh
+alwaysApply: false
+---
+
+# Changing the harness
+
+- Treat harness files as shared surfaces: change them only when the task is about the harness, and update the inventory in `docs/ai-harness/README.md` in the same change.
+- Rules: `.mdc` in `.cursor/rules/`, frontmatter `description`, `globs` (comma-separated), `alwaysApply`. One concern per rule, under about 60 lines, concrete examples. Only `00-core.mdc` is always on.
+- Skills: `.cursor/skills/<name>/SKILL.md`, `name` equal to the folder name, third-person `description` with trigger words. Slash commands are skills under `.cursor/skills/commands/` with `disable-model-invocation: true`. Anything that merges or fans out agents is `disable-model-invocation: true`.
+- Subagents: `.cursor/agents/<name>.md` with `name`, `description`, `model: inherit`; reviewers are `readonly: true`.
+- Area guides: templates in `docs/ai-harness/agents-md/<path>/AGENTS.md`; after generating a project, run `scripts/install-agents-md.sh` in the same change.
+- Hooks: fast, dependency-free Node or POSIX sh, invoked through `.cursor/hooks/node.sh`. Permission hooks always print valid JSON; internal errors exit 1 so the action fails open. Every new behavior gets a case in `.cursor/hooks/test-hooks.mjs`.
+- MCP servers in `.cursor/mcp.json`: secret-free, versions pinned, credentials (if ever) through `${env:NAME}`.
+- Validate before finishing: `sh scripts/validate-harness.sh`.
+- Prefer referencing a file or a built-in Cursor skill (`/review-security`, `/review-bugbot`, `/split-to-prs`, `/autopilot`, `/loop`) over duplicating it.

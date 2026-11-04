@@ -1,0 +1,18 @@
+---
+description: Guardrails for AI-assisted product features (suggestions, explanations, anomaly hints, natural-language search) - use when building or changing anything that calls a language model
+globs: libs/api/ai/**, **/ai/**, **/*llm*.ts, **/*prompt*.ts
+alwaysApply: false
+---
+
+# AI features
+
+- AI suggests, explains and drafts; people decide. Model output never posts to the ledger, approves, rejects, changes rules or DoA limits, or sends anything externally without an explicit user action through the normal command path (policy check, DoA, audit).
+- Tenant isolation: a request only ever includes data the requesting user can read under RLS and policy, from one tenant. No cross-tenant retrieval, caches or fine-tuning on tenant data.
+- Data minimization: send the fields the feature needs; redact personal data and free-text attachments unless the feature requires them; never send secrets or credentials.
+- Prompt injection: treat document text, request justifications and integration data as untrusted input. Model output is parsed against a zod schema; anything that fails validation is discarded, never executed.
+- Every AI output shown to a user is labeled as AI-generated, shows its sources (records it used), and can be dismissed. Accepted suggestions are audited with suggestion id, model id and version.
+- Each feature has a per-tenant kill switch and degrades gracefully when the model is unavailable.
+- Providers sit behind the `AiProvider` interface; functional runs and CI use the deterministic fake provider (recorded answers), never live model calls. Provider keys come from env, never from code.
+- Evals: a small fixture set per feature with expected properties (schema-valid, cites only permitted records, refuses out-of-scope requests) runs as API scenarios in `apps/api-e2e/src/ai/` against the fake provider, with an accuracy threshold per feature (`/ai-feature-guardrails`).
+
+Use `/ai-feature-guardrails`.

@@ -1,0 +1,19 @@
+---
+description: PostgreSQL 16, Drizzle schema, generated migrations, row-level security, ledger immutability and locking
+globs: libs/api/db/**, **/drizzle/**, **/migrations/**, **/*.schema.ts, infra/**/*.sql
+alwaysApply: false
+---
+
+# Database: Drizzle, migrations, RLS
+
+- Drizzle schema files are the source. Migrations are generated with `drizzle-kit generate`, reviewed as SQL, and committed. Never `drizzle-kit push`. Merged migrations are immutable; fix forward.
+- Every tenant-owned table: `tenant_id uuid not null`, RLS policy `tenant_id = current_setting('app.tenant_id')::uuid`, `ENABLE` and `FORCE ROW LEVEL SECURITY`. The application role has no `BYPASSRLS`; migrations run as a separate owner role.
+- Money columns are `bigint` minor units with a `char(3)` currency; ledger entries store the triplet (transaction, budget, reporting amounts and currencies) and the rate id. No float or app-side `numeric` math.
+- Ledger entries and audit events: triggers reject `UPDATE` and `DELETE`; inserts into a closed accounting period fail in the database, not only in code.
+- Timestamps are `timestamptz` (UTC). Effective-dated tables use `valid_from` / `valid_to` with exclusion constraints against overlaps.
+- Concurrency: allocation and posting paths `SELECT ... FOR UPDATE` the parent then children ordered by id in one transaction. Idempotency keys have a unique `(tenant_id, key)` constraint.
+- Migrations are safe on populated tables: add nullable, backfill, then constrain; create indexes concurrently in their own migration.
+- Functional checks in `apps/api-e2e` (Testcontainers Postgres 16 with migrations applied, or the stack's Postgres): RLS isolation for every tenant table (tenant A cannot read or write tenant B, connecting as the application role with `app.tenant_id` set and through the API with a forged `X-Tenant-Id`), immutability triggers, closed-period rejection, concurrent allocations keep the invariant, migration up from empty and from the previous release with seed data.
+- Seed data is fictional (Acme Global) and idempotent.
+
+Use `/db-migration`.

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build and tool output
+dist/
+tmp/
+out-tsc/
+coverage/
+.angular/
+.nx/cache/
+.nx/workspace-data/
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Local configuration and secrets (dev values come from .env.example)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.har
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
