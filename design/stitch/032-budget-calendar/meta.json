@@ -1,0 +1,11 @@
+{
+  "screen": "032-budget-calendar",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/041fd15b9d9f4137a416f3ccb4956fe8",
+      "approved": null,
+      "size": [2560, 2398],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

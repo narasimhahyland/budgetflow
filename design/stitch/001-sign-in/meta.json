@@ -1,0 +1,11 @@
+{
+  "screen": "001-sign-in",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/d6d327facf79447c8dbad4dd443ab76b",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

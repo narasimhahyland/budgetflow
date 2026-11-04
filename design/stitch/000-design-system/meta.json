@@ -2,12 +2,9 @@
   "screen": "000-design-system",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/5d02c6a4235a47d7968986b9629e76b9",
+      "stitchScreen": "projects/1643421514270618068/screens/d3cb9594125e44f88c5af43753f95591",
       "approved": null,
-      "size": [
-        2560,
-        12866
-      ],
+      "size": [2560, 12930],
       "status": "proposed - awaiting user review"
     }
   }

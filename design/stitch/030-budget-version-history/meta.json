@@ -1,0 +1,11 @@
+{
+  "screen": "030-budget-version-history",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/c21bd746b3ca4ae9aca03cf4a435979f",
+      "approved": null,
+      "size": [2560, 2106],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

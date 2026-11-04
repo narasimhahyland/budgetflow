@@ -72,7 +72,7 @@ Grid is a keyboard-navigable `role="grid"`; errors are announced and linked to t
 
 ## Related screens
 
-023 budget hierarchy, 021 budget details, 024 allocate to child, 024a per-head driver allocation, 024b HR headcount import, 059 approval inbox.
+023 budget hierarchy, 021 budget details, 024 allocate to child, 022a per-head driver allocation, 022c HR headcount import, 059 approval inbox.
 
 ## Navigation
 

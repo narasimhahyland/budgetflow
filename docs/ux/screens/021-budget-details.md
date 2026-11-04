@@ -9,6 +9,7 @@ Revised 2026-11-04 to the single-company decisions: Hyland only (static label, n
 | State                  | Image                                                          | Stitch screen                      |
 | ---------------------- | -------------------------------------------------------------- | ---------------------------------- |
 | default (overview tab) | `design/stitch/021-budget-details/default--desktop--light.png` | `cf9d2c2bddc748998e466c140f6e123f` |
+| controls-drawer        | `controls-drawer--desktop--light.png`                          | `f39bbb30c36c42a596813293d438f0f5` |
 
 The freeze dialog over this page is spec [027](027-freeze-budget.md).
 
@@ -29,6 +30,10 @@ Hierarchy (023), budget list (019), search, notifications, dashboard alerts.
 - Header: name, status and threshold tags, owner, legal entity, cost center, currency; Request increase, Transfer, menu (Reduce, Freeze, Set to zero), Create event.
 - Tabs: Overview, Commitments, Actuals, Requests, Children, Versions, Audit.
 - Overview: KPI cards (budget, committed, actual, available); budget bar with held, pre-encumbered, encumbered, actual, accrued, available; forecast with dashed line; currency card (budget and reporting currency, plan rate, FX effect); controls card (mode, thresholds, rules applying, DoA); recent commitments table; activity timeline from the audit log.
+
+## Budget controls drawer (Phase 4)
+
+Opened from the controls card or the menu ("Controls"). Right drawer (480px): which buckets count against available (pending requests, approved commitments, actual, accrued); mode (hard block, soft warning, track only); tolerance % (soft mode only); limits (per event, per person per event on planned attendance, per category per period, "+ Add limit"); owner alert thresholds 50/80/100% with email and in-app channels; "Inherited from India Region" with an Override toggle. Saving creates a new budget version and one audit entry. Requires `budget:configure-controls` (parent owner or Finance Admin); owners see the drawer read-only. Stitch drew the page behind the drawer on the Versions tab; the drawer is the design.
 
 ## Data and permissions
 

@@ -1,0 +1,11 @@
+{
+  "screen": "020b-program-templates",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/aca9b85e799040048dfa58a5976f7df9",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

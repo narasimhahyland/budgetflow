@@ -2,13 +2,13 @@
 
 Status: proposed - awaiting user review. Light theme only (dark deferred).
 
-Note 2026-11-04: the reference sheet was not regenerated. Where it shows a Share button, use the Export menu (CSV, XLSX, PDF) instead; budgets are USD, and INR/EUR appear only on transactions with the USD amount beside them.
+Regenerated 2026-11-05 as a variant of the original sheet: the Buttons section shows the Export menu (CSV, XLSX, PDF) instead of a Share sample, and no other share action remains. Budgets are USD; INR/EUR appear only on transactions with the USD amount at the plan rate beside them.
 
 ## Design
 
-| State   | Image                                                         | Stitch screen                      |
-| ------- | ------------------------------------------------------------- | ---------------------------------- |
-| default | `design/stitch/000-design-system/default--desktop--light.png` | `5d02c6a4235a47d7968986b9629e76b9` |
+| State   | Image                                                         | Stitch screen                                               |
+| ------- | ------------------------------------------------------------- | ----------------------------------------------------------- |
+| default | `design/stitch/000-design-system/default--desktop--light.png` | `d3cb9594125e44f88c5af43753f95591` (replaces `5d02c6a4...`) |
 
 ## Purpose
 

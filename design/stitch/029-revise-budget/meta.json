@@ -1,0 +1,11 @@
+{
+  "screen": "029-revise-budget",
+  "files": {
+    "increase-request--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/9f1caca0d4d446a8b6d2be9070232974",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

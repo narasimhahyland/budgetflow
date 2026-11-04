@@ -14,11 +14,11 @@ Load headcount by location, entity and cost center from an HR export so per-head
 
 ## Roles
 
-Organization Admin, Finance Admin. Owners of per-head budgets see the result in 024a.
+Organization Admin, Finance Admin. Owners of per-head budgets see the result in 022a.
 
 ## Entry points
 
-Settings > People data; 024a "View headcount import"; the HR integration (93) later replaces the file with a sync.
+Settings > People data; 022a "View headcount import"; the HR integration (93) later replaces the file with a sync.
 
 ## Content and actions
 
@@ -36,11 +36,11 @@ Stepper Upload, Map columns, Review, Apply. File chip and effective date. KPI ca
 | Map columns (step 2, not exported) | source column to field mapping with required fields marked       |
 | Review with errors                 | as designed; Apply allowed only with "skip error rows" checked   |
 | Blocked                            | errors above 5% of rows: Apply disabled with reason              |
-| Success                            | snackbar; true-up proposals appear in 024a                       |
+| Success                            | snackbar; true-up proposals appear in 022a                       |
 
 ## Budget safety and audit
 
-No money moves on import; the true-up creates proposals that owners apply in 024a. One audit entry per import with counts; affected owners notified.
+No money moves on import; the true-up creates proposals that owners apply in 022a. One audit entry per import with counts; affected owners notified.
 
 ## Responsive and accessibility
 
@@ -48,9 +48,9 @@ Desktop and tablet only for import; mobile shows a read-only summary. Tables hav
 
 ## Related screens and navigation
 
-024a per-head driver allocation, 038 employee directory, 041 cost centers, 093 HR integration.
+022a per-head driver allocation, 038 employee directory, 041 cost centers, 093 HR integration.
 
 ## Assumptions and open questions
 
-- Numbering: the inventory lists per-head allocation as 22a, but its design folder is `024a-per-head-driver-allocation`; this screen uses the inventory number 22c. Rename 024a to 022a?
+- Numbering: per-head allocation now uses its inventory number 22a (`022a-per-head-driver-allocation`, renamed from 024a on 2026-11-05).
 - Is the per-head rate monthly or per event? Assumed monthly for the impact column.

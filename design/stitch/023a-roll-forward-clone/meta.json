@@ -1,0 +1,11 @@
+{
+  "screen": "023a-roll-forward-clone",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/648988a008fb47d08301e57e8b39f61b",
+      "approved": null,
+      "size": [2560, 2310],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

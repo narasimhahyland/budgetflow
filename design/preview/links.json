@@ -8,7 +8,7 @@
     "021-budget-details": "Budget details",
     "022-budget-allocation-workspace": "Budget allocation workspace",
     "023-budget-hierarchy": "Budget hierarchy",
-    "024a-per-head-driver-allocation": "Per-head driver allocation",
+    "022a-per-head-driver-allocation": "Per-head driver allocation",
     "027-freeze-budget": "Freeze budget",
     "045-create-event-budget": "Create event budget",
     "059-approval-inbox": "Approval inbox",
@@ -33,7 +33,21 @@
     "080c-gl-tie-out": "GL tie-out and monthly sign-off",
     "082-utilization-report": "Utilization snapshot",
     "107-exchange-rates": "Exchange rates (FX admin)",
-    "108-fiscal-calendar": "Fiscal calendar admin"
+    "108-fiscal-calendar": "Fiscal calendar admin",
+    "001-sign-in": "Sign-in (with single sign-on)",
+    "019-budget-list": "Budget list",
+    "020a-budget-plan-import": "Budget-plan import",
+    "020b-program-templates": "Program templates",
+    "022b-allocation-grid-paste": "Allocation grid (paste from Excel)",
+    "023a-roll-forward-clone": "Roll forward last year's tree",
+    "025-transfer-budget": "Transfer budget",
+    "029-revise-budget": "Revise budget (increase request)",
+    "029a-contingency-reserve-release": "Contingency reserve release",
+    "030-budget-version-history": "Budget version history",
+    "031-budget-comparison": "Budget comparison",
+    "032-budget-calendar": "Budget calendar",
+    "032a-period-phasing": "Period phasing editor",
+    "089-allocation-history": "Allocation history"
   },
   "stateLabels": {
     "default": "Default",
@@ -47,7 +61,7 @@
     "notifications-open": "Notifications open",
     "search-open": "Search open",
     "user-menu-open": "User menu open",
-    "blocked": "Blocked (over limit)",
+    "blocked": "Blocked",
     "below-floor": "Below floor (blocked)",
     "dialog": "Dialog",
     "validation": "Validation",
@@ -56,12 +70,18 @@
     "decline": "Decline",
     "approve-part": "Approve part",
     "outside-doa": "Outside delegation of authority",
-    "export-menu-open": "Export menu open"
+    "export-menu-open": "Export menu open",
+    "empty": "Empty",
+    "map-columns": "Map columns",
+    "review": "Review (errors)",
+    "paste-preview": "Paste preview (blocked cells)",
+    "increase-request": "Increase request",
+    "controls-drawer": "Controls drawer"
   },
   "areas": [
     {
       "name": "Foundations and shell",
-      "screens": ["000-design-system", "000a-app-shell", "003-mfa-verification"]
+      "screens": ["000-design-system", "001-sign-in", "000a-app-shell", "003-mfa-verification"]
     },
     {
       "name": "Dashboards",
@@ -74,12 +94,24 @@
         "020-create-budget",
         "021-budget-details",
         "022-budget-allocation-workspace",
-        "024a-per-head-driver-allocation",
+        "022a-per-head-driver-allocation",
         "027-freeze-budget",
         "024-allocate-to-child",
         "026-reduce-budget",
         "028-set-to-zero",
-        "022c-hr-headcount-import"
+        "022c-hr-headcount-import",
+        "019-budget-list",
+        "020a-budget-plan-import",
+        "020b-program-templates",
+        "022b-allocation-grid-paste",
+        "023a-roll-forward-clone",
+        "025-transfer-budget",
+        "029-revise-budget",
+        "029a-contingency-reserve-release",
+        "030-budget-version-history",
+        "031-budget-comparison",
+        "032-budget-calendar",
+        "032a-period-phasing"
       ]
     },
     {
@@ -116,7 +148,7 @@
     },
     {
       "name": "Reports and audit",
-      "screens": ["088-audit-log", "082-utilization-report"]
+      "screens": ["088-audit-log", "082-utilization-report", "089-allocation-history"]
     }
   ],
   "journey": [
@@ -136,7 +168,7 @@
     "020-create-budget/default",
     "021-budget-details/default",
     "027-freeze-budget/dialog",
-    "024a-per-head-driver-allocation/default",
+    "022a-per-head-driver-allocation/default",
     "003-mfa-verification/default",
     "024-allocate-to-child/default",
     "024-allocate-to-child/blocked",
@@ -162,7 +194,25 @@
     "080c-gl-tie-out/default",
     "107-exchange-rates/default",
     "108-fiscal-calendar/default",
-    "082-utilization-report/export-menu-open"
+    "082-utilization-report/export-menu-open",
+    "019-budget-list/default",
+    "019-budget-list/empty",
+    "023a-roll-forward-clone/default",
+    "020a-budget-plan-import/map-columns",
+    "020a-budget-plan-import/review",
+    "020b-program-templates/default",
+    "022b-allocation-grid-paste/paste-preview",
+    "025-transfer-budget/dialog",
+    "025-transfer-budget/blocked",
+    "029-revise-budget/increase-request",
+    "029a-contingency-reserve-release/default",
+    "021-budget-details/controls-drawer",
+    "030-budget-version-history/default",
+    "031-budget-comparison/default",
+    "032-budget-calendar/default",
+    "032a-period-phasing/validation",
+    "089-allocation-history/default",
+    "001-sign-in/default"
   ],
   "ignore": ["Skip to main content"],
   "links": {
@@ -174,7 +224,7 @@
       "Hierarchy": "023-budget-hierarchy",
       "Budgets": "023-budget-hierarchy",
       "Allocation workspace": "022-budget-allocation-workspace",
-      "Budget list": null,
+      "Budget list": "019-budget-list",
       "Events": "046-event-details",
       "Approval inbox": "059-approval-inbox",
       "Approvals": "059-approval-inbox",
@@ -199,10 +249,19 @@
       "Freeze": "027-freeze-budget/dialog",
       "India Region": "023-budget-hierarchy",
       "row:Bengaluru Events": "021-budget-details",
-      "row:Hyderabad Events": "024a-per-head-driver-allocation",
+      "row:Hyderabad Events": "022a-per-head-driver-allocation",
       "Co-funding board": "046a-co-funding-board",
       "Fiscal calendar": "108-fiscal-calendar",
-      "Exchange rates": "107-exchange-rates"
+      "Exchange rates": "107-exchange-rates",
+      "Import plan": "020a-budget-plan-import/map-columns",
+      "Program templates": "020b-program-templates",
+      "Roll forward FY2026": "023a-roll-forward-clone",
+      "Allocation history": "089-allocation-history",
+      "Open allocation history": "089-allocation-history",
+      "Request increase": "029-revise-budget/increase-request",
+      "Compare versions": "031-budget-comparison",
+      "Edit phasing": "032a-period-phasing",
+      "Budget calendar": "032-budget-calendar"
     },
     "000-design-system": {
       "Allocate budget": "",
@@ -244,8 +303,8 @@
       "Reset filters": "011-executive-dashboard",
       "Retry": "011-executive-dashboard",
       "View comprehensive financial tie-out": null,
-      "Roll forward FY2026": null,
-      "Import budget plan": null
+      "Roll forward FY2026": "023a-roll-forward-clone",
+      "Import budget plan": "020a-budget-plan-import/map-columns"
     },
     "020-create-budget": {
       "Create budget": "021-budget-details",
@@ -253,11 +312,14 @@
     },
     "021-budget-details": {
       "Audit": "088-audit-log",
-      "Request increase": null,
+      "Request increase": "029-revise-budget/increase-request",
       "icon:lock": "027-freeze-budget/dialog",
       "icon:more_vert": "027-freeze-budget/dialog",
       "Reduce": "026-reduce-budget/dialog",
-      "Set to zero": "028-set-to-zero/dialog"
+      "Set to zero": "028-set-to-zero/dialog",
+      "Transfer": "025-transfer-budget/dialog",
+      "Controls": "021-budget-details/controls-drawer",
+      "Versions": "030-budget-version-history"
     },
     "027-freeze-budget/dialog": {
       "Cancel": "021-budget-details",
@@ -270,28 +332,28 @@
       "Submit": "059-approval-inbox",
       "Submit allocation": "059-approval-inbox",
       "Discard": "023-budget-hierarchy",
-      "Hyderabad": "024a-per-head-driver-allocation",
-      "Import from Excel": null,
-      "Clone FY2025": null
+      "Hyderabad": "022a-per-head-driver-allocation",
+      "Import from Excel": "022b-allocation-grid-paste",
+      "Clone FY2025": "023a-roll-forward-clone"
     },
     "022-budget-allocation-workspace/warning-block": {
       "Discard": "022-budget-allocation-workspace",
-      "Request increase": null,
+      "Request increase": "029-revise-budget/increase-request",
       "Submit": "",
       "Submit allocation": "",
       "Add Row": ""
     },
     "023-budget-hierarchy": {
       "row:India Region": "022-budget-allocation-workspace",
-      "Compare versions": null,
-      "Transfer": null,
+      "Compare versions": "031-budget-comparison",
+      "Transfer": "025-transfer-budget/dialog",
       "Allocate budget": "024-allocate-to-child"
     },
     "023-budget-hierarchy/set-to-zero-dialog": {
       "Cancel": "023-budget-hierarchy",
       "Set to zero": "023-budget-hierarchy"
     },
-    "024a-per-head-driver-allocation": {
+    "022a-per-head-driver-allocation": {
       "Apply true-up": "022-budget-allocation-workspace",
       "row:Submit true-up": "022-budget-allocation-workspace",
       "View policy details": "069-rule-builder",
@@ -344,7 +406,7 @@
       "All events": null
     },
     "000a-app-shell/user-menu-open": {
-      "Sign out": "003-mfa-verification",
+      "Sign out": "001-sign-in",
       "Profile and preferences": null,
       "Delegations": null,
       "Notification settings": null
@@ -352,7 +414,7 @@
     "024-allocate-to-child": {
       "Cancel": "023-budget-hierarchy",
       "Allocate USD 25,000.00": "023-budget-hierarchy",
-      "Per-head driver": "024a-per-head-driver-allocation",
+      "Per-head driver": "022a-per-head-driver-allocation",
       "Up to USD 180,000.00": "024-allocate-to-child/blocked"
     },
     "024-allocate-to-child/blocked": {
@@ -379,8 +441,8 @@
       "Set to zero": ""
     },
     "022c-hr-headcount-import": {
-      "Back": "024a-per-head-driver-allocation",
-      "Apply import": "024a-per-head-driver-allocation",
+      "Back": "022a-per-head-driver-allocation",
+      "Apply import": "022a-per-head-driver-allocation",
       "Download error rows": null,
       "Import history": null,
       "Download template": null
@@ -496,6 +558,93 @@
       "Exchange rates": "107-exchange-rates",
       "Close period": null,
       "Add fiscal year": null
+    },
+    "001-sign-in": {
+      "Continue with Hyland single sign-on": "003-mfa-verification",
+      "Sign in": "003-mfa-verification",
+      "Forgot password?": null
+    },
+    "019-budget-list": {
+      "row:Corporate contingency reserve": "029a-contingency-reserve-release",
+      "row:Westlake Team Activities": "025-transfer-budget/blocked",
+      "Export": null
+    },
+    "019-budget-list/empty": {
+      "Create budget": "020-create-budget"
+    },
+    "020a-budget-plan-import": {
+      "Continue to review": "020a-budget-plan-import/review",
+      "Back": "019-budget-list",
+      "Save draft": "019-budget-list",
+      "Replace file": null
+    },
+    "020a-budget-plan-import/review": {
+      "Back": "020a-budget-plan-import/map-columns",
+      "Download error rows": null,
+      "Submit plan for approval": ""
+    },
+    "020b-program-templates": {
+      "Apply to budgets": "019-budget-list",
+      "New template": null,
+      "Duplicate": null,
+      "Edit": null
+    },
+    "022b-allocation-grid-paste": {
+      "Discard paste": "022-budget-allocation-workspace",
+      "Save draft": "022-budget-allocation-workspace",
+      "Submit as one change": ""
+    },
+    "023a-roll-forward-clone": {
+      "Back": "019-budget-list/empty",
+      "Create 39 draft budgets": "019-budget-list"
+    },
+    "025-transfer-budget": {
+      "Cancel": "021-budget-details",
+      "Request transfer of USD 1,500.00": "089-allocation-history",
+      "icon:close": "021-budget-details",
+      "row:Hyderabad Events": "025-transfer-budget/blocked"
+    },
+    "025-transfer-budget/blocked": {
+      "Cancel": "025-transfer-budget/dialog",
+      "row:Westlake Team Activities": "025-transfer-budget/dialog",
+      "Request transfer of USD 1,500.00": "",
+      "row:Hyderabad Events": ""
+    },
+    "029-revise-budget": {
+      "Cancel": "021-budget-details",
+      "Submit increase request": "059-approval-inbox",
+      "icon:close": "021-budget-details"
+    },
+    "029a-contingency-reserve-release": {
+      "row:Approve release": "089-allocation-history",
+      "Reject": null,
+      "Approve part": null
+    },
+    "021-budget-details/controls-drawer": {
+      "Cancel": "021-budget-details",
+      "Save controls": "030-budget-version-history",
+      "icon:close": "021-budget-details"
+    },
+    "030-budget-version-history": {
+      "Overview": "021-budget-details",
+      "View in audit log": "088-audit-log",
+      "row:View journal": "089-allocation-history"
+    },
+    "031-budget-comparison": {
+      "row:Bengaluru Events": "030-budget-version-history"
+    },
+    "032-budget-calendar": {
+      "row:Bengaluru Events": "021-budget-details"
+    },
+    "032a-period-phasing": {
+      "Cancel": "032-budget-calendar",
+      "Reset to seasonal": "032-budget-calendar",
+      "Save phasing": ""
+    },
+    "089-allocation-history": {
+      "View in audit log": "088-audit-log",
+      "row:JRN-2026-01842": "088-audit-log",
+      "Export": null
     }
   },
   "hotspots": {

@@ -1,0 +1,17 @@
+{
+  "screen": "020a-budget-plan-import",
+  "files": {
+    "map-columns--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/8542c95359f342a8b163b5f700cc841a",
+      "approved": null,
+      "size": [2560, 2246],
+      "status": "proposed - awaiting user review"
+    },
+    "review--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/31e41681158045389fe905538171544f",
+      "approved": null,
+      "size": [2560, 2538],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
