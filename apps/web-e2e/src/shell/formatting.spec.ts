@@ -56,25 +56,44 @@ test.describe('regional manager in Bengaluru', () => {
   });
 });
 
-test.describe('finance controller in Berlin', () => {
-  test.use({ storageState: authFile('finance-controller') });
+// The US and Europe owners' budgets are never touched by API scenarios, so their Home lists stay fixed.
+const WESTERN: { role: RoleId; budget: string; timezone: string; offset: RegExp }[] = [
+  {
+    role: 'department-head',
+    budget: SEED.budgets.europe,
+    timezone: 'Europe/Berlin',
+    offset: /GMT\+1\b/,
+  },
+  {
+    role: 'budget-owner',
+    budget: SEED.budgets.unitedStates,
+    timezone: 'America/New_York',
+    offset: /\bEST\b/,
+  },
+];
 
-  test('USD and EUR use western grouping and times show the Berlin offset', async ({
-    page,
-    request,
-  }, testInfo) => {
-    const budgets = await budgetsFor('finance-controller', request);
-    await page.goto('/');
-    for (const id of [SEED.budgets.unitedStates, SEED.budgets.europe]) {
-      const b = budgets.find((x) => x.id === id)!;
+for (const w of WESTERN) {
+  test.describe(`${w.role} in ${w.timezone}`, () => {
+    test.use({ storageState: authFile(w.role) });
+
+    test('amounts use western grouping and times show the local offset', async ({
+      page,
+      request,
+    }, testInfo) => {
+      const b = (await budgetsFor(w.role, request)).find((x) => x.id === w.budget)!;
+      await page.goto('/');
       const row = page.getByRole('row').filter({ hasText: b.name });
       await expect(row).toContainText(
         money(b.balances.available.amountMinor, b.balances.available.currency),
       );
-    }
-    await expect(page.getByText('Times are shown in Europe/Berlin.')).toBeVisible();
-    if (testInfo.project.name !== 'mobile') {
-      await expect(page.getByLabel('Fiscal year FY2026')).toBeVisible();
-    }
+      if (b.balances.available.currency !== 'USD') {
+        await expect(row).toContainText(money(b.balances.availableReporting.amountMinor, 'USD'));
+      }
+      await expect(page.getByText(`Times are shown in ${w.timezone}.`)).toBeVisible();
+      if (testInfo.project.name !== 'mobile') {
+        await expect(row).toContainText(w.offset);
+        await expect(page.getByLabel('Fiscal year FY2026')).toBeVisible();
+      }
+    });
   });
-});
+}

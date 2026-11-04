@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
 import { env } from './src/support/env';
 
 // Journeys that sign in fresh sessions, change a password or trip lockout counters run once, on desktop.
-const SESSION_JOURNEYS = [/auth\//, /shell\/analytics\.spec\.ts/];
+const SESSION_JOURNEYS = [/src\/auth\//, /src\/shell\/analytics\.spec\.ts/];
 
 // Port from the shell, then .env (worktrees run their own stack), then infra/.env.example.
 const baseURL = process.env.BASE_URL ?? `http://localhost:${env('BF_WEB_PORT')}`;

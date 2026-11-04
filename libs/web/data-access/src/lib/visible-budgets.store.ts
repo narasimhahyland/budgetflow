@@ -13,7 +13,7 @@ export class VisibleBudgetsStore {
   readonly state = signal<LoadState>('idle');
   readonly problem = signal<ProblemDetails | null>(null);
 
-  async load(limit = 25): Promise<void> {
+  async load(limit = 100): Promise<void> {
     this.state.set('loading');
     this.problem.set(null);
     try {
