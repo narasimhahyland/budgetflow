@@ -1,0 +1,310 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Fiscal calendars and periods</h1>
+    <p class="bf-page__subtitle">
+      Each legal entity follows a fiscal calendar mapped to the group year. Nothing posts to a
+      closed or locked period; periods close in order and reopen newest first, with a reason.
+    </p>
+  </div>
+  @if (canManage() && !creating()) {
+    <button mat-stroked-button type="button" (click)="creating.set(true); failure.set(null)">
+      New calendar
+    </button>
+  }
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+@if (creating()) {
+  <section class="bf-card" aria-labelledby="new-cal-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="new-cal-title">New fiscal calendar</h2>
+        <p class="bf-card__hint">
+          The preview shows the generated periods of the first year before anything is saved.
+        </p>
+      </div>
+    </div>
+    <form class="bf-form" (ngSubmit)="create()">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input
+          matInput
+          required
+          name="name"
+          [ngModel]="newName()"
+          (ngModelChange)="newName.set($event)"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Calendar type</mat-label>
+        <mat-select name="type" [ngModel]="newType()" (ngModelChange)="newType.set($event)">
+          @for (t of types; track t) {
+            <mat-option [value]="t">{{ typeLabel[t] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (newType() === 'non_calendar') {
+        <mat-form-field appearance="outline">
+          <mat-label>First month</mat-label>
+          <mat-select
+            name="start"
+            [ngModel]="startMonth()"
+            (ngModelChange)="startMonth.set($event)"
+          >
+            @for (m of months; track m; let i = $index) {
+              @if (i > 0) {
+                <mat-option [value]="i + 1">{{ m }}</mat-option>
+              }
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      @if (newType() !== 'calendar_year' && newType() !== 'non_calendar') {
+        <mat-form-field appearance="outline">
+          <mat-label>Year ends in</mat-label>
+          <mat-select name="endMonth" [ngModel]="endMonth()" (ngModelChange)="endMonth.set($event)">
+            @for (m of months; track m; let i = $index) {
+              <mat-option [value]="i + 1">{{ m }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>On a</mat-label>
+          <mat-select
+            name="weekday"
+            [ngModel]="endWeekday()"
+            (ngModelChange)="endWeekday.set($event)"
+          >
+            @for (d of weekdays; track d; let i = $index) {
+              <mat-option [value]="i">{{ d }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Which one</mat-label>
+          <mat-select name="method" [ngModel]="method()" (ngModelChange)="method.set($event)">
+            <mat-option value="last">Last in the month</mat-option>
+            <mat-option value="nearest">Nearest the month end</mat-option>
+          </mat-select>
+        </mat-form-field>
+      }
+      <mat-form-field appearance="outline">
+        <mat-label>First fiscal year</mat-label>
+        <input
+          matInput
+          type="number"
+          required
+          name="first"
+          [ngModel]="firstYear()"
+          (ngModelChange)="firstYear.set(+$event)"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Number of years</mat-label>
+        <input
+          matInput
+          type="number"
+          min="1"
+          max="10"
+          required
+          name="count"
+          [ngModel]="yearCount()"
+          (ngModelChange)="yearCount.set(+$event)"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Group year mapping</mat-label>
+        <mat-select name="group" [ngModel]="mapToGroup()" (ngModelChange)="mapToGroup.set($event)">
+          <mat-option [value]="true">Map to the Hyland group calendar</mat-option>
+          <mat-option [value]="false">This is a group calendar</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="bf-form__wide">
+        <bf-load-state
+          [loading]="preview.isLoading()"
+          [error]="preview.error()"
+          what="the preview"
+          [lines]="3"
+          (retry)="preview.reload()"
+        />
+        @if (preview.value(); as p) {
+          <p class="bf-card__hint" data-testid="calendar-preview">
+            {{ p.label }}: {{ p.startDate | date: 'd MMM y' : 'UTC' }} to
+            {{ p.endDate | date: 'd MMM y' : 'UTC' }}, {{ p.periods.length }} periods{{
+              p.weeks ? ', ' + p.weeks + ' weeks' : ''
+            }}. Period lengths:
+            @for (pp of p.periods; track pp.number; let last = $last) {
+              {{ p.weeks ? pp.days / 7 + 'w' : pp.days + 'd' }}{{ last ? '' : ' · ' }}
+            }
+          </p>
+        }
+      </div>
+      <div class="bf-form__wide bf-form__actions">
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="busy() || !newName().trim() || !preview.hasValue()"
+        >
+          Create calendar
+        </button>
+        <button mat-button type="button" (click)="creating.set(false)">Cancel</button>
+      </div>
+    </form>
+  </section>
+}
+
+<section class="bf-card" aria-labelledby="cal-title">
+  <div class="bf-card__header">
+    <h2 class="bf-card__title" id="cal-title">Calendar</h2>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Calendar</mat-label>
+      <mat-select
+        [ngModel]="calendarId()"
+        (ngModelChange)="calendarId.set($event)"
+        data-testid="calendar-select"
+      >
+        @for (c of calendars.value()?.items ?? []; track c.id) {
+          <mat-option [value]="c.id">{{ c.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <bf-load-state
+    [loading]="
+      (calendars.isLoading() && !calendars.hasValue()) || (detail.isLoading() && !detail.hasValue())
+    "
+    [error]="calendars.error() ?? detail.error()"
+    what="fiscal calendars"
+    (retry)="calendars.reload(); detail.reload()"
+  />
+  @if (detail.value(); as d) {
+    <dl class="bf-facts">
+      <div>
+        <dt>Type</dt>
+        <dd>{{ typeLabel[d.definition.type] }}</dd>
+      </div>
+      <div>
+        <dt>Rule</dt>
+        <dd>{{ describe(d.definition) }}</dd>
+      </div>
+      <div>
+        <dt>Legal entities</dt>
+        <dd data-testid="calendar-entities">{{ entityCodes(d.legalEntities) }}</dd>
+      </div>
+      <div>
+        <dt>Maps to</dt>
+        <dd>{{ d.groupCalendarName ?? 'Group calendar' }}</dd>
+      </div>
+    </dl>
+    <div class="bf-years" role="group" aria-label="Fiscal years">
+      @for (y of d.fiscalYears; track y.id) {
+        <button
+          mat-stroked-button
+          type="button"
+          [class.bf-year--active]="y.id === yearId()"
+          [attr.aria-pressed]="y.id === yearId()"
+          (click)="yearId.set(y.id)"
+        >
+          {{ y.label }}
+        </button>
+      }
+    </div>
+    @if (year(); as y) {
+      <p class="bf-card__hint bf-year-hint" data-testid="year-summary">
+        {{ y.label }} runs {{ y.startDate | date: 'd MMM y' : 'UTC' }} to
+        {{ y.endDate | date: 'd MMM y' : 'UTC' }} ({{ days(y.startDate, y.endDate) }} days{{
+          y.weeks ? ', ' + y.weeks + ' weeks' : ''
+        }})
+        {{ y.groupFiscalYearLabel ? '· group year ' + y.groupFiscalYearLabel : '' }}
+        · plan rates {{ y.planRatesLockedAt ? 'locked' : 'not locked' }}
+      </p>
+      @if (pendingAction(); as pa) {
+        <form
+          class="bf-form"
+          aria-label="Reason for the status change"
+          (ngSubmit)="change(pa.period, pa.action, reason())"
+        >
+          <mat-form-field appearance="outline" class="bf-reason bf-form__wide">
+            <mat-label
+              >Reason to {{ actionLabel[pa.action].toLowerCase() }} {{ pa.period.label }}</mat-label
+            >
+            <input
+              matInput
+              required
+              name="reason"
+              [ngModel]="reason()"
+              (ngModelChange)="reason.set($event)"
+            />
+            <mat-hint>Reopening and unlocking are recorded in the audit trail.</mat-hint>
+          </mat-form-field>
+          <div class="bf-form__wide bf-form__actions">
+            <button mat-flat-button type="submit" [disabled]="busy() || !reason().trim()">
+              {{ actionLabel[pa.action] }}
+            </button>
+            <button mat-button type="button" (click)="pendingAction.set(null)">Cancel</button>
+          </div>
+        </form>
+      }
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="y.periods" aria-label="Accounting periods">
+          <ng-container matColumnDef="period">
+            <th mat-header-cell *matHeaderCellDef>Period</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="bf-cell__primary">{{ p.label }}</span>
+              <span class="bf-cell__secondary">Period {{ p.periodNumber }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="dates">
+            <th mat-header-cell *matHeaderCellDef>Dates</th>
+            <td mat-cell *matCellDef="let p">
+              {{ p.startDate | date: 'd MMM y' : 'UTC' }} –
+              {{ p.endDate | date: 'd MMM y' : 'UTC' }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="days">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Days</th>
+            <td mat-cell *matCellDef="let p" class="bf-num">{{ days(p.startDate, p.endDate) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let p">
+              <sat-status-tag [status]="status[p.status].tone">{{
+                status[p.status].label
+              }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
+            <td mat-cell *matCellDef="let p">
+              <div class="bf-row-actions">
+                @for (a of p.allowedActions; track a) {
+                  <button
+                    mat-button
+                    type="button"
+                    [disabled]="busy()"
+                    (click)="ask(p, a)"
+                    [attr.aria-label]="actionLabel[a] + ' ' + p.label"
+                  >
+                    {{ actionLabel[a] }}
+                  </button>
+                }
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+      </div>
+    }
+  }
+</section>

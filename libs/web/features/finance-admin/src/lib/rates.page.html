@@ -1,0 +1,350 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Currencies and exchange rates</h1>
+    <p class="bf-page__subtitle">
+      Reporting currency {{ reporting() }}. Budgets are held in {{ reporting() }}; INR, EUR and GBP
+      transactions convert at the plan rate locked for the fiscal year. FX never consumes budget.
+    </p>
+  </div>
+  @if (canManage() && !adding()) {
+    <button mat-flat-button type="button" (click)="adding.set(true); failure.set(null)">
+      Add rate
+    </button>
+  }
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+<section class="bf-card" aria-labelledby="lookup-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="lookup-title">Convert an amount</h2>
+      <p class="bf-card__hint">
+        The rate that applies on a date for each rate type, and the difference (FX effect).
+      </p>
+    </div>
+  </div>
+  <div class="bf-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Amount</mat-label>
+      <input
+        matInput
+        type="number"
+        [ngModel]="amount()"
+        (ngModelChange)="amount.set($event)"
+        data-testid="lookup-amount"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <mat-select [ngModel]="from()" (ngModelChange)="from.set($event)" data-testid="lookup-from">
+        @for (c of quotes(); track c.code) {
+          <mat-option [value]="c.code">{{ c.code }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Date</mat-label>
+      <input
+        matInput
+        type="date"
+        [ngModel]="date()"
+        (ngModelChange)="date.set($event)"
+        data-testid="lookup-date"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Compare with</mat-label>
+      <mat-select
+        [ngModel]="compareType()"
+        (ngModelChange)="compareType.set($event)"
+        data-testid="lookup-type"
+      >
+        @for (t of types; track t) {
+          @if (t !== 'plan') {
+            <mat-option [value]="t">{{ typeLabel[t] }}</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="bf-compare">
+    @for (
+      entry of [
+        { label: 'Plan rate (budget control)', res: planLookup },
+        { label: typeLabel[compareType()], res: otherLookup },
+      ];
+      track entry.label
+    ) {
+      <div
+        class="bf-kpi"
+        [attr.data-testid]="'lookup-' + (entry.res === planLookup ? 'plan' : 'other')"
+      >
+        <p class="bf-kpi__label">{{ entry.label }}</p>
+        @if (entry.res.error()) {
+          <p class="bf-kpi__delta">No rate: {{ entry.res.error()?.message }}</p>
+        } @else if (entry.res.value(); as v) {
+          <p class="bf-kpi__value">
+            @if (v.converted) {
+              <bf-money [amountMinor]="v.converted.amountMinor" [currency]="v.converted.currency" />
+            }
+          </p>
+          <p class="bf-kpi__delta">
+            1 {{ v.applied.from }} = {{ v.applied.value }} {{ v.applied.to }}
+            @for (s of v.sources; track s.rateId) {
+              · {{ s.quoteCurrency }} {{ s.rate }} from
+              {{ s.effectiveDate | date: 'd MMM y' : 'UTC'
+              }}{{
+                s.fiscalYearLabel
+                  ? ' (' + s.fiscalYearLabel + (s.locked ? ', locked' : ', not locked') + ')'
+                  : ''
+              }}
+            }
+          </p>
+        } @else {
+          <p class="bf-kpi__delta">Looking up…</p>
+        }
+      </div>
+    }
+    <div class="bf-kpi" data-testid="lookup-fx-effect">
+      <p class="bf-kpi__label">FX effect (reported separately)</p>
+      <p class="bf-kpi__value">
+        @if (fxEffect() !== null) {
+          <bf-money [amountMinor]="fxEffect()!" [currency]="reporting()" />
+        } @else {
+          —
+        }
+      </p>
+    </div>
+  </div>
+</section>
+
+@if (adding()) {
+  <section class="bf-card" aria-labelledby="add-title">
+    <div class="bf-card__header"><h2 class="bf-card__title" id="add-title">Add rate</h2></div>
+    <form class="bf-form" (ngSubmit)="addRate()">
+      <mat-form-field appearance="outline">
+        <mat-label>Rate type</mat-label>
+        <mat-select name="type" [ngModel]="newType()" (ngModelChange)="newType.set($event)">
+          @for (t of types; track t) {
+            <mat-option [value]="t">{{ typeLabel[t] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Currency</mat-label>
+        <mat-select name="quote" [ngModel]="newQuote()" (ngModelChange)="newQuote.set($event)">
+          @for (c of quotes(); track c.code) {
+            <mat-option [value]="c.code">{{ c.code }} · {{ c.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Units per 1 {{ reporting() }}</mat-label>
+        <input
+          matInput
+          required
+          name="rate"
+          inputmode="decimal"
+          [ngModel]="newRate()"
+          (ngModelChange)="newRate.set($event)"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Effective date</mat-label>
+        <input
+          matInput
+          type="date"
+          required
+          name="date"
+          [ngModel]="newDate()"
+          (ngModelChange)="newDate.set($event)"
+        />
+        @if (newType() === 'month_end') {
+          <mat-hint>The last day of the month.</mat-hint>
+        }
+      </mat-form-field>
+      @if (newType() === 'plan') {
+        <mat-form-field appearance="outline">
+          <mat-label>Fiscal year</mat-label>
+          <mat-select
+            required
+            name="year"
+            [ngModel]="newYearId()"
+            (ngModelChange)="newYearId.set($event)"
+          >
+            @for (y of groupCalendar.value()?.fiscalYears ?? []; track y.id) {
+              <mat-option [value]="y.id" [disabled]="!!y.planRatesLockedAt"
+                >{{ y.label }}{{ y.planRatesLockedAt ? ' (locked)' : '' }}</mat-option
+              >
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      <mat-form-field appearance="outline">
+        <mat-label>Source</mat-label>
+        <input
+          matInput
+          required
+          name="source"
+          [ngModel]="newSource()"
+          (ngModelChange)="newSource.set($event)"
+        />
+      </mat-form-field>
+      <div class="bf-form__wide bf-form__actions">
+        <button mat-flat-button type="submit" [disabled]="busy() || !newRate()">Add rate</button>
+        <button mat-button type="button" (click)="adding.set(false)">Cancel</button>
+      </div>
+    </form>
+  </section>
+}
+
+<section class="bf-card" aria-labelledby="lock-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="lock-title">Plan-rate lock</h2>
+      <p class="bf-card__hint">
+        Plan rates lock per group fiscal year at plan approval; budget control always uses them.
+      </p>
+    </div>
+  </div>
+  <bf-load-state
+    [loading]="groupCalendar.isLoading() && !groupCalendar.hasValue()"
+    [error]="groupCalendar.error()"
+    what="fiscal years"
+    [lines]="2"
+    (retry)="groupCalendar.reload()"
+  />
+  @if (groupCalendar.value(); as g) {
+    <div class="bf-filters">
+      @for (y of g.fiscalYears; track y.id) {
+        <sat-status-tag [status]="y.planRatesLockedAt ? 'info' : 'warning'">
+          {{ y.label }}
+          {{
+            y.planRatesLockedAt
+              ? 'locked ' + (y.planRatesLockedAt | date: 'd MMM y')
+              : 'open for planning'
+          }}
+        </sat-status-tag>
+        @if (canManage() && !y.planRatesLockedAt) {
+          <button mat-button type="button" (click)="lockYearId.set(y.id); lockReason.set('')">
+            Lock {{ y.label }}
+          </button>
+        }
+      }
+    </div>
+    @if (lockYearId()) {
+      <form class="bf-form" (ngSubmit)="lock()" aria-label="Lock plan rates">
+        <mat-form-field appearance="outline" class="bf-form__wide">
+          <mat-label>Reason (for example: plan approved)</mat-label>
+          <input
+            matInput
+            required
+            name="lockReason"
+            [ngModel]="lockReason()"
+            (ngModelChange)="lockReason.set($event)"
+          />
+          <mat-hint>Locked plan rates never change.</mat-hint>
+        </mat-form-field>
+        <div class="bf-form__wide bf-form__actions">
+          <button mat-flat-button type="submit" [disabled]="busy() || !lockReason().trim()">
+            Lock plan rates
+          </button>
+          <button mat-button type="button" (click)="lockYearId.set(null)">Cancel</button>
+        </div>
+      </form>
+    }
+  }
+</section>
+
+<section class="bf-card" aria-labelledby="rates-title">
+  <div class="bf-card__header"><h2 class="bf-card__title" id="rates-title">Rates</h2></div>
+  <div class="bf-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Rate type</mat-label>
+      <mat-select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)">
+        <mat-option [value]="null">All types</mat-option>
+        @for (t of types; track t) {
+          <mat-option [value]="t">{{ typeLabel[t] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Currency</mat-label>
+      <mat-select [ngModel]="currencyFilter()" (ngModelChange)="currencyFilter.set($event)">
+        <mat-option [value]="null">All currencies</mat-option>
+        @for (c of quotes(); track c.code) {
+          <mat-option [value]="c.code">{{ c.code }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <bf-load-state
+    [loading]="rates.isLoading() && !rates.hasValue()"
+    [error]="rates.error()"
+    what="exchange rates"
+    (retry)="rates.reload()"
+  />
+  @if (rates.value(); as r) {
+    @if (r.items.length === 0) {
+      <p class="bf-empty">No rates match these filters.</p>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="r.items" aria-labelledby="rates-title">
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let x">{{ typeLabel[x.rateType] }}</td>
+          </ng-container>
+          <ng-container matColumnDef="pair">
+            <th mat-header-cell *matHeaderCellDef>Pair</th>
+            <td mat-cell *matCellDef="let x">{{ x.baseCurrency }}/{{ x.quoteCurrency }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rate">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Rate</th>
+            <td mat-cell *matCellDef="let x" class="bf-num">{{ x.rate }}</td>
+          </ng-container>
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Effective</th>
+            <td mat-cell *matCellDef="let x">{{ x.effectiveDate | date: 'd MMM y' : 'UTC' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="year">
+            <th mat-header-cell *matHeaderCellDef>Fiscal year</th>
+            <td mat-cell *matCellDef="let x">{{ x.fiscalYearLabel ?? '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="source">
+            <th mat-header-cell *matHeaderCellDef>Source</th>
+            <td mat-cell *matCellDef="let x">{{ x.source }}</td>
+          </ng-container>
+          <ng-container matColumnDef="locked">
+            <th mat-header-cell *matHeaderCellDef>Lock</th>
+            <td mat-cell *matCellDef="let x">
+              @if (x.rateType === 'plan') {
+                <sat-status-tag [status]="x.locked ? 'info' : 'warning'">{{
+                  x.locked ? 'Locked' : 'Not locked'
+                }}</sat-status-tag>
+              }
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+      </div>
+      @if (r.nextCursor) {
+        <div class="bf-form__actions">
+          <button mat-stroked-button type="button" (click)="limit.set(limit() + 100)">
+            Show more
+          </button>
+        </div>
+      }
+    }
+  }
+</section>

@@ -1,0 +1,382 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Organization</h1>
+    <p class="bf-page__subtitle">Hyland's hierarchy as of the date you pick. {{ scopeText() }}</p>
+  </div>
+  <div class="bf-page__actions">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bf-asof">
+      <mat-label>As of</mat-label>
+      <input
+        matInput
+        type="date"
+        [ngModel]="asOf()"
+        (ngModelChange)="asOf.set($event)"
+        data-testid="as-of"
+      />
+    </mat-form-field>
+    @if (canImport()) {
+      <a mat-stroked-button routerLink="/org/import">Import org file</a>
+    }
+  </div>
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success" class="bf-notice">
+    <sat-banner-message>{{ notice() }}</sat-banner-message>
+  </sat-banner>
+}
+
+<div class="bf-org">
+  <section class="bf-card bf-org__tree" aria-labelledby="tree-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="tree-title">Hierarchy</h2>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bf-org__filter">
+        <mat-label>Find a unit</mat-label>
+        <input matInput [ngModel]="filter()" (ngModelChange)="filter.set($event)" />
+      </mat-form-field>
+    </div>
+    <bf-load-state
+      [loading]="units.isLoading() && !units.hasValue()"
+      [error]="units.error()"
+      what="the organization"
+      [lines]="8"
+      (retry)="units.reload()"
+    />
+    @if (units.hasValue()) {
+      @if (visibleUnits().length === 0) {
+        <p class="bf-empty">No units match. Clear the search or pick another date.</p>
+      } @else {
+        <ul class="bf-tree" role="tree" aria-labelledby="tree-title">
+          @for (u of visibleUnits(); track u.id) {
+            <li
+              role="treeitem"
+              [attr.aria-level]="u.depth + 1"
+              [attr.aria-selected]="u.id === detail.value()?.id"
+            >
+              <button
+                type="button"
+                class="bf-tree__item"
+                [class.bf-tree__item--selected]="u.id === detail.value()?.id"
+                [style.padding-inline-start.px]="12 + u.depth * 20"
+                (click)="select(u.id)"
+              >
+                <span class="bf-tree__name">{{ u.name }}</span>
+                <span class="bf-tree__meta">{{ kindLabel[u.kind] }} · {{ u.code }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <section class="bf-card bf-org__detail" aria-labelledby="detail-title">
+    <bf-load-state
+      [loading]="detail.isLoading() && !detail.hasValue()"
+      [error]="detail.error()"
+      what="this unit"
+      (retry)="detail.reload()"
+    />
+    @if (detail.value(); as d) {
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" id="detail-title">{{ d.name }}</h2>
+          <p class="bf-card__hint">
+            @for (a of d.ancestorIds.slice(0, -1); track a) {
+              {{ unitName().get(a) ?? '…' }} /
+            }
+            {{ d.code }}
+          </p>
+        </div>
+        <div class="bf-page__actions">
+          <sat-status-tag [status]="d.validTo ? 'neutral' : 'success'">
+            {{ kindLabel[d.kind]
+            }}{{ d.validTo ? ' · closes ' + (d.validTo | date: 'd MMM y' : 'UTC') : '' }}
+          </sat-status-tag>
+          @if (canManage() && mode() === 'view') {
+            <button mat-stroked-button type="button" (click)="startAdd()">Add unit below</button>
+            <button mat-flat-button type="button" (click)="startChange()">Change unit</button>
+          }
+        </div>
+      </div>
+
+      @if (mode() === 'change') {
+        <form class="bf-form" aria-label="Change unit" (ngSubmit)="saveChange()">
+          <mat-form-field appearance="outline">
+            <mat-label>Change</mat-label>
+            <mat-select
+              [ngModel]="changeKind()"
+              (ngModelChange)="changeKind.set($event)"
+              name="kind"
+            >
+              <mat-option value="rename">Rename</mat-option>
+              <mat-option value="move">Move under another unit</mat-option>
+              <mat-option value="manager">Change manager</mat-option>
+              <mat-option value="deactivate">Close the unit</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Effective from</mat-label>
+            <input
+              matInput
+              type="date"
+              required
+              name="effectiveFrom"
+              [ngModel]="effectiveFrom()"
+              (ngModelChange)="effectiveFrom.set($event)"
+            />
+            <mat-hint>History before this date stays as it was.</mat-hint>
+          </mat-form-field>
+          @switch (changeKind()) {
+            @case ('rename') {
+              <mat-form-field appearance="outline">
+                <mat-label>New name</mat-label>
+                <input
+                  matInput
+                  required
+                  name="name"
+                  [ngModel]="newName()"
+                  (ngModelChange)="newName.set($event)"
+                />
+              </mat-form-field>
+            }
+            @case ('move') {
+              <mat-form-field appearance="outline">
+                <mat-label>New parent unit</mat-label>
+                <mat-select
+                  required
+                  name="parent"
+                  [ngModel]="newParentId()"
+                  (ngModelChange)="newParentId.set($event)"
+                >
+                  @for (u of moveTargets(); track u.id) {
+                    <mat-option [value]="u.id">{{ u.name }} ({{ kindLabel[u.kind] }})</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+            @case ('manager') {
+              <mat-form-field appearance="outline">
+                <mat-label>Manager</mat-label>
+                <mat-select
+                  name="manager"
+                  [ngModel]="newManagerId()"
+                  (ngModelChange)="newManagerId.set($event)"
+                >
+                  <mat-option [value]="null">No manager</mat-option>
+                  @for (p of people.value()?.items ?? []; track p.id) {
+                    <mat-option [value]="p.id">{{ p.displayName }} · {{ p.jobTitle }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+            @case ('deactivate') {
+              <p class="bf-form__wide bf-card__hint">
+                The unit closes the day before the effective date. Move or close its units first.
+              </p>
+            }
+          }
+          <mat-form-field appearance="outline" class="bf-form__wide">
+            <mat-label>Reason</mat-label>
+            <input
+              matInput
+              required
+              name="reason"
+              [ngModel]="reason()"
+              (ngModelChange)="reason.set($event)"
+            />
+            <mat-hint>Recorded in the audit trail.</mat-hint>
+          </mat-form-field>
+          @if (failure()) {
+            <sat-banner variant="important" class="bf-form__wide">
+              <sat-banner-message>{{ failure() }}</sat-banner-message>
+            </sat-banner>
+          }
+          <div class="bf-form__wide bf-row">
+            <button mat-flat-button type="submit" [disabled]="saving() || !reason().trim()">
+              Save change
+            </button>
+            <button mat-button type="button" (click)="cancel()">Cancel</button>
+          </div>
+        </form>
+      }
+
+      @if (mode() === 'add') {
+        <form class="bf-form" aria-label="Add unit" (ngSubmit)="saveChild()">
+          <mat-form-field appearance="outline">
+            <mat-label>Kind</mat-label>
+            <mat-select
+              name="childKind"
+              [ngModel]="childKind()"
+              (ngModelChange)="childKind.set($event)"
+            >
+              @for (k of childKinds(); track k) {
+                <mat-option [value]="k">{{ kindLabel[k] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Code</mat-label>
+            <input
+              matInput
+              required
+              name="code"
+              [ngModel]="childCode()"
+              (ngModelChange)="childCode.set($event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input
+              matInput
+              required
+              name="childName"
+              [ngModel]="childName()"
+              (ngModelChange)="childName.set($event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Effective from</mat-label>
+            <input
+              matInput
+              type="date"
+              required
+              name="childFrom"
+              [ngModel]="effectiveFrom()"
+              (ngModelChange)="effectiveFrom.set($event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="bf-form__wide">
+            <mat-label>Reason (optional)</mat-label>
+            <input
+              matInput
+              name="childReason"
+              [ngModel]="reason()"
+              (ngModelChange)="reason.set($event)"
+            />
+          </mat-form-field>
+          @if (failure()) {
+            <sat-banner variant="important" class="bf-form__wide">
+              <sat-banner-message>{{ failure() }}</sat-banner-message>
+            </sat-banner>
+          }
+          <div class="bf-form__wide bf-row">
+            <button
+              mat-flat-button
+              type="submit"
+              [disabled]="saving() || !childCode() || !childName()"
+            >
+              Add unit
+            </button>
+            <button mat-button type="button" (click)="cancel()">Cancel</button>
+          </div>
+        </form>
+      }
+
+      <dl class="bf-facts">
+        <div>
+          <dt>Manager</dt>
+          <dd>{{ d.managerName ?? 'Not set' }}</dd>
+        </div>
+        <div>
+          <dt>Legal entity</dt>
+          <dd>{{ d.legalEntityId ? (entityCode().get(d.legalEntityId) ?? '…') : 'Not set' }}</dd>
+        </div>
+        <div>
+          <dt>Timezone</dt>
+          <dd>{{ d.timezone ?? 'Not set' }}</dd>
+        </div>
+        <div>
+          <dt>People here</dt>
+          <dd>{{ d.peopleCount }}</dd>
+        </div>
+        <div>
+          <dt>Headcount</dt>
+          <dd data-testid="unit-headcount">
+            @if (d.headcount; as h) {
+              {{ h.total }} ({{ h.byType.employee }} employees,
+              {{ h.byType.contractor }} contractors, {{ h.byType.intern }} interns) on
+              {{ h.asOfDate | date: 'd MMM y' : 'UTC' }}
+            } @else {
+              No headcount imported
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>Active</dt>
+          <dd>
+            {{ d.validFrom | date: 'd MMM y' : 'UTC' }} –
+            {{ d.validTo ? (d.validTo | date: 'd MMM y' : 'UTC') : 'open' }}
+          </dd>
+        </div>
+      </dl>
+
+      <div class="bf-card__body">
+        <h3 class="bf-section-title">Units below</h3>
+        @if (d.children.length) {
+          <ul class="bf-chips">
+            @for (c of d.children; track c.id) {
+              <li>
+                <button type="button" class="bf-chip" (click)="select(c.id)">
+                  {{ c.name }} <span class="bf-tree__meta">{{ kindLabel[c.kind] }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="bf-card__hint">No units below on this date.</p>
+        }
+        <h3 class="bf-section-title">Cost centers</h3>
+        @if (d.costCenters.length) {
+          <p class="bf-card__hint">
+            @for (c of d.costCenters; track c.id; let last = $last) {
+              {{ c.code }} {{ c.name }}{{ last ? '' : ', ' }}
+            }
+          </p>
+        } @else {
+          <p class="bf-card__hint">No cost center linked to this unit.</p>
+        }
+      </div>
+
+      <div class="bf-card__header">
+        <h3 class="bf-card__title">History</h3>
+      </div>
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="d.versions" aria-label="Unit history">
+          <ng-container matColumnDef="from">
+            <th mat-header-cell *matHeaderCellDef>From</th>
+            <td mat-cell *matCellDef="let v">{{ v.validFrom | date: 'd MMM y' : 'UTC' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="to">
+            <th mat-header-cell *matHeaderCellDef>To</th>
+            <td mat-cell *matCellDef="let v">
+              {{ v.validTo ? (v.validTo | date: 'd MMM y' : 'UTC') : 'Open' }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="change">
+            <th mat-header-cell *matHeaderCellDef>Change</th>
+            <td mat-cell *matCellDef="let v">{{ v.changeKind }}</td>
+          </ng-container>
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let v">{{ v.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="parent">
+            <th mat-header-cell *matHeaderCellDef>Parent</th>
+            <td mat-cell *matCellDef="let v">{{ v.parentName ?? '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="manager">
+            <th mat-header-cell *matHeaderCellDef>Manager</th>
+            <td mat-cell *matCellDef="let v">{{ v.managerName ?? '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="reason">
+            <th mat-header-cell *matHeaderCellDef>Reason</th>
+            <td mat-cell *matCellDef="let v">{{ v.reason ?? '—' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: historyColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+</div>
