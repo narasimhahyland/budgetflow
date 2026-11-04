@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BudgetFlow Satori - Budget Hierarchy</title>
+<!-- Material Symbols and Classic Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts: Plus Jakarta Sans for titles/headlines, Public Sans / Noto Sans for body/labels -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: '#5654ac',
+            'on-primary': '#ffffff',
+            'primary-container': '#e2dfff',
+            'on-primary-container': '#322f86',
+            'primary-loud': '#322f86',
+            secondary: '#5d5c72',
+            'on-secondary': '#ffffff',
+            'secondary-container': '#e2e0f9',
+            'on-secondary-container': '#45455a',
+            tertiary: '#006b61',
+            'on-tertiary': '#ffffff',
+            'tertiary-container': '#9df2e4',
+            'on-tertiary-container': '#005048',
+            error: '#b02b36',
+            'on-error': '#ffffff',
+            'error-container': '#ffdad9',
+            'on-error-container': '#8c1d29',
+            background: '#f4f3f7',
+            'on-background': '#1a1c1e',
+            surface: '#f9f9fc',
+            'surface-dim': '#dad9dd',
+            'surface-bright': '#f9f9fc',
+            'surface-container-lowest': '#ffffff',
+            'surface-container-low': '#f4f3f7',
+            'surface-container': '#eeedf1',
+            'surface-container-high': '#e8e7eb',
+            'surface-container-highest': '#e2e2e6',
+            'surface-variant': '#e4e1ef',
+            'on-surface': '#1a1c1e',
+            'on-surface-variant': '#474551',
+            'inverse-surface': '#2f3033',
+            'inverse-on-surface': '#f1f0f4',
+            'inverse-primary': '#c4c1ff',
+            outline: '#777683',
+            'outline-variant': '#c8c5d3',
+            success: '#4d9c4c',
+            'success-container': '#eef6e8',
+            'on-success-container': '#3d7231',
+            warning: '#967c39',
+            'warning-container': '#fbf3db',
+            'on-warning-container': '#7e651b',
+            info: '#5384f1',
+            'info-container': '#e5f3fc',
+            'on-info-container': '#3060c6',
+            important: '#c74f54',
+            'important-container': '#faeae9',
+            'on-important-container': '#ac4848'
+          },
+          borderRadius: {
+            xs: '4px',
+            sm: '8px',
+            md: '12px',
+            lg: '16px',
+            xl: '28px',
+            full: '9999px'
+          },
+          fontFamily: {
+            headline: ['Plus Jakarta Sans', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            body: ['Noto Sans', 'Public Sans', 'sans-serif'],
+            label: ['Noto Sans', 'Public Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased flex h-screen w-screen overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Left Sidebar (240px solid violet #5654ac) -->
+<aside class="w-60 bg-primary h-screen flex flex-col justify-between flex-shrink-0 select-none z-30 shadow-none border-r border-outline-variant/20">
+<!-- Top Brand & Hierarchy Switcher -->
+<div class="flex flex-col">
+<!-- Brand Logo Header -->
+<div class="h-16 px-5 flex items-center gap-3 border-b border-white/10">
+<div class="w-8 h-8 rounded-sm bg-white/20 flex items-center justify-center text-on-primary font-headline font-bold text-lg">
+<span class="material-symbols-outlined text-white" style="font-size: 22px;">account_balance</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline font-bold text-white text-base tracking-tight leading-tight">BudgetFlow</span>
+<span class="font-label text-xs text-white/70 tracking-wide">Enterprise Satori</span>
+</div>
+</div>
+<!-- Tenant & Org Switcher -->
+<div class="p-3 mx-3 my-2.5 rounded-sm bg-white/10 hover:bg-white/15 cursor-pointer transition duration-150 ease-in-out border border-white/10">
+<div class="flex items-center justify-between text-xs text-white/80 font-medium">
+<span>Acme Global</span>
+<span class="material-symbols-outlined text-white/70" style="font-size: 16px;">swap_vert</span>
+</div>
+<div class="text-sm font-semibold text-white truncate mt-0.5">
+          Employee Experience
+        </div>
+</div>
+<!-- Navigation Links Container -->
+<nav class="px-3 space-y-4 overflow-y-auto max-h-[calc(100vh-210px)] py-1 text-xs">
+<!-- Single Home -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/80 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">home</span>
+<span class="font-medium text-sm">Home</span>
+</a>
+<!-- GROUP: BUDGETS -->
+<div>
+<div class="px-3 pb-1.5 text-[11px] font-bold tracking-wider text-white/50 uppercase">Budgets</div>
+<div class="space-y-0.5">
+<!-- Active item -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm bg-white/20 text-white font-semibold shadow-sm transition duration-150" href="#">
+<span class="material-symbols-outlined text-white" style="font-size: 18px;">account_tree</span>
+<span class="text-sm">Budget hierarchy</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">grid_view</span>
+<span class="text-sm">Allocation workspace</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">format_list_bulleted</span>
+<span class="text-sm">Budget list</span>
+</a>
+</div>
+</div>
+<!-- GROUP: EVENTS -->
+<div>
+<div class="px-3 pb-1.5 text-[11px] font-bold tracking-wider text-white/50 uppercase">Events</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">event</span>
+<span class="text-sm">Events</span>
+</a>
+</div>
+</div>
+<!-- GROUP: REQUESTS -->
+<div>
+<div class="px-3 pb-1.5 text-[11px] font-bold tracking-wider text-white/50 uppercase">Requests</div>
+<div class="space-y-0.5">
+<a class="flex items-center justify-between px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" style="font-size: 18px;">assignment_ind</span>
+<span class="text-sm">Approval inbox</span>
+</div>
+<span class="bg-white/20 text-white font-bold px-1.5 py-0.5 rounded text-[11px]">7</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">send</span>
+<span class="text-sm">My requests</span>
+</a>
+</div>
+</div>
+<!-- GROUP: FINANCE -->
+<div>
+<div class="px-3 pb-1.5 text-[11px] font-bold tracking-wider text-white/50 uppercase">Finance</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">receipt_long</span>
+<span class="text-sm">Actuals and matching</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">balance</span>
+<span class="text-sm">GL tie-out</span>
+</a>
+</div>
+</div>
+<!-- GROUP: INSIGHTS -->
+<div>
+<div class="px-3 pb-1.5 text-[11px] font-bold tracking-wider text-white/50 uppercase">Insights</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">bar_chart</span>
+<span class="text-sm">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">history</span>
+<span class="text-sm">Audit log</span>
+</a>
+</div>
+</div>
+<!-- GROUP: ADMIN -->
+<div>
+<div class="px-3 pb-1.5 text-[11px] font-bold tracking-wider text-white/50 uppercase">Admin</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">gavel</span>
+<span class="text-sm">Rules and policies</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">hub</span>
+<span class="text-sm">Integrations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm text-white/75 hover:text-white hover:bg-white/10 transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+</div>
+</div>
+</nav>
+</div>
+<!-- User Profile Row at Bottom -->
+<div class="p-3 border-t border-white/10 bg-primary-loud/50 flex items-center justify-between">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-white/20 text-white font-semibold text-xs flex items-center justify-center flex-shrink-0">
+          DB
+        </div>
+<div class="min-w-0">
+<p class="text-xs font-semibold text-white truncate">Daniel Brooks</p>
+<p class="text-[11px] text-white/70 truncate">Department Head</p>
+</div>
+</div>
+<button class="text-white/70 hover:text-white p-1 rounded hover:bg-white/10 transition">
+<span class="material-symbols-outlined" style="font-size: 18px;">more_vert</span>
+</button>
+</div>
+</aside>
+<!-- Right Work Surface -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- Top Header Bar (64px, bg-white, border-b #c8c5d3) -->
+<header class="h-16 bg-surface-container-lowest border-b border-outline-variant flex items-center justify-between px-6 flex-shrink-0 z-20">
+<!-- Breadcrumbs & Search -->
+<div class="flex items-center gap-6">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-1.5 text-xs font-medium text-on-surface-variant">
+<span class="hover:text-primary cursor-pointer">Home</span>
+<span class="text-outline-variant">/</span>
+<span class="hover:text-primary cursor-pointer">Budgets</span>
+<span class="text-outline-variant">/</span>
+<span class="text-on-surface font-semibold">Budget hierarchy</span>
+</nav>
+<!-- Global Search Input with Ctrl K -->
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-lg">search</span>
+<input class="w-full h-9 pl-9 pr-14 bg-surface-container-low border border-outline-variant rounded-xs text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition" placeholder="Search budgets, events, requests, people" type="text"/>
+<div class="absolute right-2 top-2 px-1.5 py-0.5 border border-outline-variant/60 rounded text-[10px] text-outline font-medium bg-surface-container-lowest">
+            ⌘K
+          </div>
+</div>
+</div>
+<!-- Trailing Controls: Chips, Notifications, Avatar -->
+<div class="flex items-center gap-3">
+<!-- Header Badges -->
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 bg-surface-container text-on-surface-variant font-medium text-xs rounded-sm border border-outline-variant/60">
+            FY2026
+          </span>
+<span class="px-2.5 py-1 bg-surface-container text-on-surface-variant font-medium text-xs rounded-sm border border-outline-variant/60">
+            Reporting USD
+          </span>
+</div>
+<div class="h-5 w-[1px] bg-outline-variant mx-1"></div>
+<!-- Notification Bell with badge -->
+<button class="relative p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-full transition">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-4 h-4 bg-important text-white text-[9px] font-bold flex items-center justify-center rounded-full leading-none">
+            3
+          </span>
+</button>
+<!-- Help Icon -->
+<button class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-full transition">
+<span class="material-symbols-outlined text-xl">help_outline</span>
+</button>
+<!-- User Avatar Circle -->
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-semibold text-xs flex items-center justify-center cursor-pointer border border-primary/20">
+          DB
+        </div>
+</div>
+</header>
+<!-- Main Content Area (bg #f4f3f7, 24px margins, 16px gaps) -->
+<main class="flex-1 bg-background p-6 overflow-y-auto overflow-x-hidden flex flex-col gap-4">
+<!-- Page Header with actions -->
+<div class="flex items-center justify-between">
+<div>
+<h1 class="text-2xl font-bold font-headline text-on-surface tracking-tight">Budget hierarchy</h1>
+<p class="text-xs text-on-surface-variant font-medium mt-0.5">Employee Experience · FY2026</p>
+</div>
+<div class="flex items-center gap-2.5">
+<button class="px-4 py-2 bg-surface-container-lowest border border-outline-variant text-on-surface text-xs font-semibold rounded-full hover:bg-surface-container transition flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-sm">download</span>
+            Export
+          </button>
+<button class="px-4 py-2 bg-surface-container-lowest border border-outline-variant text-on-surface text-xs font-semibold rounded-full hover:bg-surface-container transition flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-sm">compare_arrows</span>
+            Compare versions
+          </button>
+<button class="px-4 py-2 bg-primary text-on-primary text-xs font-semibold rounded-full hover:bg-primary-loud transition shadow-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+            Allocate budget
+          </button>
+</div>
+</div>
+<!-- Toolbar Card (bg-white, 12px rounded, 1px #c8c5d3 border) -->
+<div class="bg-surface-container-lowest rounded-md border border-outline-variant p-3.5 flex items-center justify-between gap-4 shadow-sm">
+<div class="flex items-center gap-3">
+<!-- Filter Field -->
+<div class="relative w-56">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-outline text-base">filter_list</span>
+<input class="w-full h-8 pl-8 pr-3 bg-surface-container-low border border-outline-variant rounded-xs text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary" placeholder="Filter units..." type="text"/>
+</div>
+<!-- Select/Filter Chips -->
+<div class="flex items-center gap-2">
+<button class="h-8 px-3 rounded-sm border border-outline-variant bg-surface-container-low hover:bg-surface-container text-xs font-medium text-on-surface flex items-center gap-1.5 transition">
+<span>Status: <strong class="font-semibold">All</strong></span>
+<span class="material-symbols-outlined text-xs">expand_more</span>
+</button>
+<button class="h-8 px-3 rounded-sm border border-outline-variant bg-surface-container-low hover:bg-surface-container text-xs font-medium text-on-surface flex items-center gap-1.5 transition">
+<span>Category: <strong class="font-semibold">All</strong></span>
+<span class="material-symbols-outlined text-xs">expand_more</span>
+</button>
+</div>
+<!-- Toggle switch: Show commitments -->
+<div class="flex items-center gap-2 ml-2 pl-4 border-l border-outline-variant/60">
+<button class="w-8 h-4 bg-primary rounded-full relative transition flex items-center p-0.5 cursor-pointer" type="button">
+<div class="w-3 h-3 bg-white rounded-full shadow-sm transform translate-x-4"></div>
+</button>
+<span class="text-xs text-on-surface-variant font-medium">Show commitments</span>
+</div>
+</div>
+<!-- Segmented Control: Tree | Org chart -->
+<div class="bg-surface-container p-0.5 rounded-sm flex items-center border border-outline-variant/50">
+<button class="px-3 py-1 text-xs font-semibold bg-surface-container-lowest text-primary rounded-xs shadow-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">account_tree</span>
+            Tree
+          </button>
+<button class="px-3 py-1 text-xs font-medium text-on-surface-variant hover:text-on-surface rounded-xs flex items-center gap-1 transition">
+<span class="material-symbols-outlined text-sm">apartment</span>
+            Org chart
+          </button>
+</div>
+</div>
+<!-- Split Layout (62% Left, 38% Right, gap 16px) -->
+<div class="flex-1 flex gap-4 min-h-0">
+<!-- Left Panel (62% width - Tree Table Card) -->
+<div class="w-[62%] bg-surface-container-lowest rounded-md border border-outline-variant flex flex-col overflow-hidden shadow-sm">
+<!-- Table Container with scrolling -->
+<div class="flex-1 overflow-x-auto overflow-y-auto">
+<table class="w-full text-left text-xs border-collapse min-w-[900px]">
+<!-- Table Header -->
+<thead class="bg-surface-container-low/70 border-b border-outline-variant text-[11px] font-semibold text-on-surface-variant sticky top-0 uppercase tracking-wider select-none z-10">
+<tr class="h-[52px]">
+<th class="px-3.5 pl-4 w-52 font-semibold">Budget unit</th>
+<th class="px-3 font-semibold">Owner</th>
+<th class="px-2 font-semibold text-center">Curr</th>
+<th class="px-3 font-semibold text-right">Budget</th>
+<th class="px-3 font-semibold text-right">Allocated out</th>
+<th class="px-3 font-semibold text-right">Committed</th>
+<th class="px-3 font-semibold text-right">Actual</th>
+<th class="px-3 font-semibold text-right">Available</th>
+<th class="px-3 font-semibold text-center">Used %</th>
+<th class="px-3.5 pr-4 font-semibold text-right">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/40 font-normal">
+<!-- ROW 1: Root - Employee Experience -->
+<tr class="h-12 hover:bg-surface-container/50 transition-colors">
+<td class="px-3.5 pl-4">
+<div class="flex items-center gap-1.5 font-semibold text-on-surface">
+<span class="material-symbols-outlined text-outline text-base">expand_more</span>
+<span class="truncate">Employee Experience</span>
+</div>
+</td>
+<td class="px-3 text-on-surface truncate">Daniel Brooks</td>
+<td class="px-2 text-center text-outline font-medium">USD</td>
+<td class="px-3 text-right font-medium text-on-surface tabular-nums">100,000.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">97,000.00</td>
+<td class="px-3 text-right tabular-nums text-outline">—</td>
+<td class="px-3 text-right tabular-nums text-outline">—</td>
+<td class="px-3 text-right tabular-nums font-medium text-tertiary">3,000.00</td>
+<td class="px-3 text-center tabular-nums font-semibold">97%</td>
+<td class="px-3.5 pr-4 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-info-container text-on-info-container">
+                      Partially allocated
+                    </span>
+</td>
+</tr>
+<!-- ROW 2: Child level 1 - India Region (SELECTED ROW) -->
+<tr class="h-12 bg-primary-container/40 hover:bg-primary-container/60 transition-colors relative border-l-4 border-l-primary">
+<td class="px-3.5 pl-7">
+<div class="flex items-center gap-1.5 font-semibold text-primary-loud">
+<span class="material-symbols-outlined text-primary text-base">expand_more</span>
+<span class="truncate">India Region</span>
+</div>
+</td>
+<td class="px-3 text-on-surface truncate font-medium">Meera Iyer</td>
+<td class="px-2 text-center text-outline font-medium">INR</td>
+<td class="px-3 text-right font-semibold text-on-surface tabular-nums">USD 30,000.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">18,000.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">9,800.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">6,200.00</td>
+<td class="px-3 text-right tabular-nums font-semibold text-tertiary">14,000.00</td>
+<td class="px-3 text-center tabular-nums font-semibold text-on-surface">53%</td>
+<td class="px-3.5 pr-4 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-success-container text-on-success-container">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                      Active
+                    </span>
+</td>
+</tr>
+<!-- ROW 3: Child level 2 - Bengaluru Events -->
+<tr class="h-12 hover:bg-surface-container/50 transition-colors">
+<td class="px-3.5 pl-12">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="w-3.5"></span>
+<span class="truncate">Bengaluru Events</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant truncate">Anand Kumar</td>
+<td class="px-2 text-center text-outline font-medium">INR</td>
+<td class="px-3 text-right tabular-nums text-on-surface">10,000.00</td>
+<td class="px-3 text-right tabular-nums text-outline">—</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">5,400.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">2,612.00</td>
+<td class="px-3 text-right tabular-nums font-medium text-on-surface">1,988.00</td>
+<td class="px-3 text-center">
+<div class="flex items-center gap-1.5 justify-center">
+<div class="w-10 bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-warning h-full" style="width: 80%"></div>
+</div>
+<span class="tabular-nums font-medium text-[11px]">80%</span>
+</div>
+</td>
+<td class="px-3.5 pr-4 text-right">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[11px] font-medium bg-warning-container text-on-warning-container">
+<span class="material-symbols-outlined text-[12px]">warning</span>
+                      At 80%
+                    </span>
+</td>
+</tr>
+<!-- ROW 4: Child level 2 - Hyderabad Events (FROZEN with left info blue stripe) -->
+<tr class="h-12 hover:bg-surface-container/50 transition-colors border-l-4 border-l-info">
+<td class="px-3.5 pl-12">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="w-3.5"></span>
+<span class="truncate">Hyderabad Events</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant truncate">Suresh Menon</td>
+<td class="px-2 text-center text-outline font-medium">INR</td>
+<td class="px-3 text-right tabular-nums text-on-surface">8,000.00</td>
+<td class="px-3 text-right tabular-nums text-outline">—</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">4,400.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">3,588.00</td>
+<td class="px-3 text-right tabular-nums font-semibold text-outline">0.00</td>
+<td class="px-3 text-center tabular-nums font-semibold text-info">100%</td>
+<td class="px-3.5 pr-4 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-info-container text-on-info-container">
+<span class="material-symbols-outlined text-[13px]">lock</span>
+                      Frozen
+                    </span>
+</td>
+</tr>
+<!-- ROW 5: Child level 1 - United States Region -->
+<tr class="h-12 hover:bg-surface-container/50 transition-colors">
+<td class="px-3.5 pl-7">
+<div class="flex items-center gap-1.5 font-medium text-on-surface">
+<span class="material-symbols-outlined text-outline text-base">chevron_right</span>
+<span class="truncate">United States Region</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant truncate">Jordan Lee</td>
+<td class="px-2 text-center text-outline font-medium">USD</td>
+<td class="px-3 text-right tabular-nums font-medium text-on-surface">40,000.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">35,000.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">14,500.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">11,300.00</td>
+<td class="px-3 text-right tabular-nums font-semibold text-tertiary">14,200.00</td>
+<td class="px-3 text-center tabular-nums font-medium">64%</td>
+<td class="px-3.5 pr-4 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-success-container text-on-success-container">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                      Active
+                    </span>
+</td>
+</tr>
+<!-- ROW 6: Child level 1 - Europe Region -->
+<tr class="h-12 hover:bg-surface-container/50 transition-colors">
+<td class="px-3.5 pl-7">
+<div class="flex items-center gap-1.5 font-medium text-on-surface">
+<span class="material-symbols-outlined text-outline text-base">expand_more</span>
+<span class="truncate">Europe Region</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant truncate">Sophie Laurent</td>
+<td class="px-2 text-center text-outline font-medium">EUR</td>
+<td class="px-3 text-right tabular-nums font-medium text-on-surface">
+                    25,000.00 <span class="text-[10px] text-outline block">(USD 27,000)</span>
+</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">24,000.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">6,940.00</td>
+<td class="px-3 text-right tabular-nums text-on-surface-variant">4,680.00</td>
+<td class="px-3 text-right tabular-nums font-semibold text-tertiary">15,380.00</td>
+<td class="px-3 text-center tabular-nums font-medium">81%</td>
+<td class="px-3.5 pr-4 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-success-container text-on-success-container">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                      Active
+                    </span>
+</td>
+</tr>
+<!-- ROW 7: Child level 2 - Europe Wellbeing (SET TO ZERO, red left stripe) -->
+<tr class="h-12 hover:bg-surface-container/50 transition-colors border-l-4 border-l-important">
+<td class="px-3.5 pl-12">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="w-3.5"></span>
+<span class="truncate">Europe Wellbeing</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant truncate">Sophie Laurent</td>
+<td class="px-2 text-center text-outline font-medium">EUR</td>
+<td class="px-3 text-right tabular-nums text-outline">EUR 0.00</td>
+<td class="px-3 text-right tabular-nums text-outline">—</td>
+<td class="px-3 text-right tabular-nums text-outline">—</td>
+<td class="px-3 text-right tabular-nums text-outline">—</td>
+<td class="px-3 text-right tabular-nums text-outline">0.00</td>
+<td class="px-3 text-center tabular-nums text-outline">0%</td>
+<td class="px-3.5 pr-4 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-important-container text-on-important-container">
+                      Set to zero
+                    </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Bottom Paginator & Stats -->
+<div class="h-11 px-4 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between text-xs text-on-surface-variant flex-shrink-0">
+<div>Showing 7 budget units across 3 tiers</div>
+<div class="flex items-center gap-4">
+<span>Rows per page: <strong>10</strong></span>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-surface-container disabled:opacity-40 text-on-surface">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<span class="font-medium">1 - 7 of 7</span>
+<button class="p-1 rounded hover:bg-surface-container disabled:opacity-40 text-on-surface">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Panel (38% width - Detail Inspector Panel) -->
+<div class="w-[38%] bg-surface-container-lowest rounded-md border border-outline-variant p-5 flex flex-col gap-4 overflow-y-auto shadow-sm">
+<!-- Header Area -->
+<div class="border-b border-outline-variant pb-4">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-xl font-headline font-bold text-on-surface">India Region</h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-success-container text-on-success-container">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                    Active
+                  </span>
+</div>
+<div class="flex items-center gap-3 text-xs text-on-surface-variant mt-1.5 font-medium">
+<span>Cost Center: <strong class="text-on-surface">IN-EX-100</strong></span>
+<span>•</span>
+<span>Legal entity: <strong class="text-on-surface">Acme India Pvt Ltd</strong></span>
+</div>
+</div>
+<button class="text-outline hover:text-on-surface p-1 rounded hover:bg-surface-container transition">
+<span class="material-symbols-outlined text-lg">open_in_new</span>
+</button>
+</div>
+<!-- Metadata Grid -->
+<div class="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-outline-variant/60 text-xs">
+<div>
+<span class="text-on-surface-variant block text-[11px]">Owner / Co-owner</span>
+<span class="font-semibold text-on-surface mt-0.5 block">Meera Iyer · Daniel Brooks</span>
+</div>
+<div>
+<span class="text-on-surface-variant block text-[11px]">Budget currency</span>
+<span class="font-semibold text-on-surface mt-0.5 block">INR (Indian Rupee)</span>
+</div>
+<div class="col-span-2 bg-surface-container-low px-2.5 py-1.5 rounded-xs border border-outline-variant/50 text-[11px] text-on-surface-variant flex items-center justify-between">
+<span>Plan exchange rate</span>
+<span class="font-semibold text-on-surface">USD 1.00 = INR 83.50 (locked FY2026)</span>
+</div>
+</div>
+</div>
+<!-- Budget Safety Visuals: Multi-segment Stacked Bar -->
+<div class="space-y-2.5">
+<div class="flex items-center justify-between text-xs">
+<span class="font-semibold font-headline text-on-surface">Budget lifecycle utilization</span>
+<span class="tabular-nums font-semibold text-on-surface">INR 25,05,000 total</span>
+</div>
+<!-- Stacked Segment Bar -->
+<div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden flex shadow-inner">
+<!-- Allocated Out: 60% (15,03,000) -->
+<div class="h-full bg-primary" style="width: 42%" title="Allocated out: 42%"></div>
+<!-- Encumbered: 20% -->
+<div class="h-full bg-tertiary" style="width: 18%" title="Encumbered: 18%"></div>
+<!-- Actual Spend: 15% -->
+<div class="h-full bg-info" style="width: 15%" title="Actual spend: 15%"></div>
+<!-- Available: remaining -->
+<div class="h-full bg-success/40" style="width: 25%" title="Available: 25%"></div>
+</div>
+<!-- Legend Items Grid -->
+<div class="grid grid-cols-3 gap-y-2 gap-x-1 text-[11px] pt-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-on-surface-variant">Allocated out (42%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-on-surface-variant">Encumbered (18%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-info"></span>
+<span class="text-on-surface-variant">Actual (15%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-warning"></span>
+<span class="text-on-surface-variant">Held / Committed</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant">Accrued</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+<span class="text-on-surface-variant font-medium">Available (25%)</span>
+</div>
+</div>
+</div>
+<!-- Structured Amount List (INR with USD reporting equivalents) -->
+<div class="bg-surface-container-low/70 rounded-sm border border-outline-variant p-3 space-y-2 text-xs">
+<div class="flex items-center justify-between pb-1.5 border-b border-outline-variant/60">
+<span class="text-on-surface-variant font-medium">Allocated Budget</span>
+<div class="text-right">
+<span class="font-bold text-on-surface tabular-nums">INR 25,05,000</span>
+<span class="text-[11px] text-outline block tabular-nums">USD 30,000.00</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant">Allocated out</span>
+<div class="text-right tabular-nums">
+<span class="font-medium text-on-surface">INR 15,03,000</span>
+<span class="text-[11px] text-outline block">USD 18,000.00</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant">Committed</span>
+<div class="text-right tabular-nums">
+<span class="font-medium text-on-surface">INR 8,18,300</span>
+<span class="text-[11px] text-outline block">USD 9,800.00</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant">Actual spend</span>
+<div class="text-right tabular-nums">
+<span class="font-medium text-on-surface">INR 5,17,700</span>
+<span class="text-[11px] text-outline block">USD 6,200.00</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1.5 border-t border-outline-variant/60">
+<span class="text-tertiary font-semibold">Available for delegation</span>
+<div class="text-right tabular-nums">
+<span class="font-bold text-tertiary">INR 11,69,000</span>
+<span class="text-[11px] text-tertiary/80 block">USD 14,000.00</span>
+</div>
+</div>
+<div class="pt-1 text-[11px] text-outline flex items-center justify-between">
+<span>FX effect</span>
+<span class="font-medium">None (fixed plan rate)</span>
+</div>
+</div>
+<!-- Action Buttons Bar -->
+<div class="flex items-center gap-2 pt-1">
+<button class="flex-1 h-9 px-3 bg-primary text-on-primary font-semibold text-xs rounded-full hover:bg-primary-loud transition shadow-sm flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sm">subdirectory_arrow_right</span>
+              Allocate to child
+            </button>
+<button class="h-9 px-3.5 bg-surface-container-lowest border border-outline-variant text-on-surface font-semibold text-xs rounded-full hover:bg-surface-container transition flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-sm">swap_horiz</span>
+              Transfer
+            </button>
+<!-- Danger/Control Actions Dropdown Simulation -->
+<div class="flex items-center gap-1 border-l border-outline-variant pl-1">
+<button class="h-9 w-9 rounded-full border border-outline-variant text-on-surface-variant hover:text-info hover:border-info flex items-center justify-center transition" title="Freeze">
+<span class="material-symbols-outlined text-base">lock</span>
+</button>
+<button class="h-9 w-9 rounded-full border border-important/40 text-important hover:bg-important-container flex items-center justify-center transition" title="Set to zero">
+<span class="material-symbols-outlined text-base">remove_circle_outline</span>
+</button>
+</div>
+</div>
+<!-- Section: Delegation Governance -->
+<div class="space-y-1.5 pt-2 border-t border-outline-variant">
+<span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Delegation authority</span>
+<div class="p-3 bg-surface-container-low rounded-sm border border-outline-variant/60 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5">verified_user</span>
+<div class="text-xs">
+<p class="font-semibold text-on-surface">Delegated by Daniel Brooks on 3 Jan 2026</p>
+<p class="text-on-surface-variant text-[11px] mt-0.5">Approval limit: <span class="font-medium text-on-surface">USD 5,000 (DoA Tier 2)</span> · Requires second approval beyond limit.</p>
+</div>
+</div>
+</div>
+<!-- Section: Recent Activity / Audit Trail -->
+<div class="space-y-2 pt-2 border-t border-outline-variant">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Recent activity</span>
+<a class="text-[11px] text-primary font-medium hover:underline" href="#">Full log</a>
+</div>
+<div class="space-y-2 text-xs">
+<div class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success mt-1.5 flex-shrink-0"></span>
+<div class="flex-1">
+<p class="text-on-surface">Sub-allocation to Hyderabad approved</p>
+<p class="text-[10px] text-outline">2h ago by Meera Iyer</p>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 flex-shrink-0"></span>
+<div class="flex-1">
+<p class="text-on-surface">Bengaluru Events reached 80% threshold</p>
+<p class="text-[10px] text-outline">Yesterday, 14:20 · Automated alert</p>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-outline mt-1.5 flex-shrink-0"></span>
+<div class="flex-1">
+<p class="text-on-surface">Plan rate locked at INR 83.50</p>
+<p class="text-[10px] text-outline">12 Oct 2025 · System Finance Admin</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-inverse-surface/60 backdrop-blur-sm overflow-y-auto"><div class="relative w-full max-w-[640px] my-8 rounded-xl bg-white border border-outline-variant/30 text-on-surface shadow-2xl p-7 max-h-[90vh] overflow-y-auto flex flex-col"><div class="flex items-start justify-between"><div class="flex flex-col"><h2 class="font-headline font-semibold text-2xl text-on-surface tracking-tight leading-tight">Set Bengaluru Events to zero</h2><p class="font-body text-sm text-on-surface-variant mt-1">Owner Anand Kumar · budget currency INR</p></div><button class="p-1 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors" type="button"><span class="material-symbols-outlined text-xl">close</span></button></div><div class="mt-5 flex items-start gap-3 rounded-lg border border-important/40 bg-important-container p-3.5 text-on-important-container"><span class="material-symbols-outlined text-important text-xl mt-0.5 flex-shrink-0">warning</span><p class="text-sm font-medium leading-snug">New requests against this budget will be blocked. Existing commitments can still complete.</p></div><div class="mt-5 rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-4 space-y-2.5 text-sm"><div class="flex items-center justify-between"><span class="text-on-surface-variant">Current budget</span><span class="tabular-nums font-medium text-on-surface">USD 10,000.00</span></div><div class="flex items-center justify-between"><span class="text-on-surface-variant">Committed (encumbered + pre-encumbered)</span><span class="tabular-nums font-medium text-on-surface">USD 5,400.00</span></div><div class="flex items-center justify-between"><span class="text-on-surface-variant">Actual</span><span class="tabular-nums font-medium text-on-surface">USD 2,612.00</span></div><div class="flex items-center justify-between"><span class="text-on-surface-variant">Child budgets</span><span class="tabular-nums font-medium text-on-surface">USD 0.00 (none)</span></div><div class="border-t border-outline-variant/40 pt-2 flex items-center justify-between"><span class="font-semibold text-on-surface">Floor (committed + actual + children)</span><span class="tabular-nums font-semibold text-on-surface">USD 8,012.00</span></div><div class="flex items-center justify-between pt-1"><span class="text-on-surface-variant font-medium">Amount that can be cut</span><span class="tabular-nums font-semibold text-important">USD 1,988.00 <span class="text-xs font-normal text-outline">(INR 1,66,000)</span></span></div><p class="text-xs text-on-surface-variant italic pt-1 border-t border-outline-variant/30">The budget is reduced to its floor now and reaches zero as commitments close.</p></div><div class="mt-4"><label class="block text-xs font-medium text-on-surface mb-1.5">Send cut money to</label><select class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-xs text-xs text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"><option selected="">India Region (parent)</option><option>Employee Experience (root)</option></select></div><div class="mt-4 rounded-lg border border-outline-variant/40 bg-surface-container-low/70 p-3 space-y-2 text-xs"><div class="font-semibold text-on-surface flex items-center gap-1.5"><span class="material-symbols-outlined text-sm text-outline">rule</span><span>Affected</span></div><div class="flex items-start gap-2"><span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-warning-container text-on-warning-container flex-shrink-0">3 open commitments</span><span class="text-on-surface-variant">Diwali venue deposit, Catering PO, Decor PO</span></div><div class="flex items-start gap-2"><span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-important-container text-on-important-container flex-shrink-0">2 pending requests rejected</span><span class="text-on-surface-variant">REQ-2026-0142 (USD 2,500.00), REQ-2026-0150 (USD 300.00)</span></div></div><div class="mt-4 space-y-3"><div class="space-y-1"><label class="block text-xs font-medium text-on-surface">Reason code</label><select class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-xs text-xs text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"><option selected="">RC-07 Mid-year reprioritisation</option><option>RC-02 Project cancellation</option><option>RC-11 Budget reorganisation</option></select></div><div class="space-y-1"><label class="block text-xs font-medium text-on-surface">Reason</label><textarea class="w-full p-2.5 bg-surface-container-low border border-outline-variant rounded-xs text-xs text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" rows="2">Reallocation of unencumbered Q3/Q4 event funds back to regional pool per executive directive #092.</textarea></div><div class="flex items-center justify-between pt-1"><label class="flex items-center gap-2 cursor-pointer"><input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/><span class="text-xs font-medium text-on-surface">Notify Anand Kumar and requesters</span></label><span class="text-[11px] text-outline">This action is recorded in the audit log.</span></div><div class="space-y-1 pt-1"><label class="block text-xs font-semibold text-on-surface">Type ZERO to confirm</label><input class="w-full h-9 px-3 bg-surface-container-lowest border border-important/40 rounded-xs text-xs font-semibold text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" type="text" value="ZERO"/></div></div><div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-end gap-3"><button class="px-5 py-2 rounded-full text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" type="button">Cancel</button><button class="px-6 py-2 rounded-full bg-important text-white font-semibold text-xs hover:bg-important/90 shadow-sm flex items-center gap-1.5 transition-colors" type="button"><span class="material-symbols-outlined text-sm">remove_circle_outline</span>Set to zero</button></div></div></div></body></html>

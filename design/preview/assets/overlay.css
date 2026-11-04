@@ -1,0 +1,54 @@
+/* Injected into every page of the clickable design preview; keeps the Stitch markup untouched otherwise. */
+[data-bf-to],
+[data-bf-href] {
+  cursor: pointer;
+}
+/* Amber stays visible on the violet sidebar and on violet buttons as well as on white surfaces. */
+html.bf-show-links [data-bf-to] {
+  outline: 2px solid #f2a900 !important;
+  outline-offset: 2px;
+}
+html.bf-show-links [data-bf-missing] {
+  outline: 1px dashed #9a98a6 !important;
+  outline-offset: 1px;
+}
+
+body.bf-image-page {
+  margin: 0;
+  padding: 0 0 88px;
+  background: #e8e7ee;
+}
+.bf-canvas {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 0 0 1px #c8c5d3;
+}
+.bf-canvas img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.bf-hotspot {
+  position: absolute;
+  display: block;
+  border-radius: 6px;
+  transition:
+    background-color 0.15s,
+    box-shadow 0.15s;
+}
+.bf-hotspot:hover,
+.bf-hotspot:focus-visible,
+.bf-flash .bf-hotspot,
+html.bf-show-links .bf-hotspot {
+  background: rgba(242, 169, 0, 0.16);
+  box-shadow: 0 0 0 2px #f2a900;
+  outline: none;
+}
+.bf-hotspot[data-bf-missing]:hover,
+.bf-flash .bf-hotspot[data-bf-missing],
+html.bf-show-links .bf-hotspot[data-bf-missing] {
+  background: transparent;
+  box-shadow: 0 0 0 1px #9a98a6;
+}

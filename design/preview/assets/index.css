@@ -1,0 +1,173 @@
+/* Index page of the clickable design preview. */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #f4f3f7;
+  color: #1a1c1e;
+  font:
+    14px/1.5 'Noto Sans',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+a {
+  color: #5654ac;
+}
+.hero {
+  background: #5654ac;
+  color: #fff;
+  padding: 40px 32px 36px;
+}
+.hero > div,
+main {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+  line-height: 1.2;
+}
+.lede {
+  max-width: 760px;
+  margin: 0 0 20px;
+  opacity: 0.92;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+}
+.primary {
+  display: inline-block;
+  padding: 11px 22px;
+  border-radius: 999px;
+  background: #fff;
+  color: #322f86;
+  font-weight: 700;
+  text-decoration: none;
+}
+.primary:hover {
+  background: #e2dfff;
+}
+.hint {
+  font-size: 13px;
+  opacity: 0.85;
+}
+main {
+  padding: 8px 32px 48px;
+}
+h2 {
+  margin: 32px 0 12px;
+  font-size: 18px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 16px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #c8c5d3;
+  border-radius: 12px;
+  background: #fff;
+}
+.thumb {
+  display: block;
+  height: 170px;
+  overflow: hidden;
+  border-bottom: 1px solid #e4e1ef;
+  background: #eeedf1;
+}
+.thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+}
+.meta {
+  padding: 12px 14px 14px;
+}
+h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+h3 a {
+  color: #1a1c1e;
+  text-decoration: none;
+}
+h3 a:hover {
+  color: #5654ac;
+}
+.num {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #e2dfff;
+  color: #322f86;
+  font-size: 12px;
+}
+.flow {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #eef6e8;
+  color: #3d7231;
+  font-size: 11px;
+  font-weight: 600;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  padding: 3px 10px;
+  border: 1px solid #c8c5d3;
+  border-radius: 999px;
+  color: #1a1c1e;
+  font-size: 12px;
+  text-decoration: none;
+}
+.chip:hover {
+  border-color: #5654ac;
+  color: #322f86;
+}
+.notes p {
+  max-width: 860px;
+}
+.small {
+  color: #474551;
+  font-size: 13px;
+}
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 10;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #2f3033;
+  color: #f1f0f4;
+  box-shadow: 0 10px 30px rgba(26, 28, 30, 0.3);
+  transform: translateX(-50%);
+}

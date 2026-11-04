@@ -1,0 +1,248 @@
+{
+  "titles": {
+    "000-design-system": "Design system",
+    "000a-app-shell": "Application shell",
+    "003-mfa-verification": "MFA verification",
+    "011-executive-dashboard": "Executive dashboard",
+    "020-create-budget": "Create budget",
+    "021-budget-details": "Budget details",
+    "022-budget-allocation-workspace": "Budget allocation workspace",
+    "023-budget-hierarchy": "Budget hierarchy",
+    "024a-per-head-driver-allocation": "Per-head driver allocation",
+    "027-freeze-budget": "Freeze budget",
+    "045-create-event-budget": "Create event budget",
+    "059-approval-inbox": "Approval inbox",
+    "069-rule-builder": "Rule builder",
+    "088-audit-log": "Audit log",
+    "115-employee-dashboard": "Employee dashboard"
+  },
+  "stateLabels": {
+    "default": "Default",
+    "set-to-zero-dialog": "Set to zero dialog",
+    "warning-block": "Warning and block",
+    "delegated-escalated": "Delegated and escalated",
+    "conflict-simulation": "Conflict and simulation",
+    "chain-broken": "Chain broken",
+    "nav-drawer-open": "Mobile nav drawer",
+    "employee-forbidden": "Employee forbidden (403)",
+    "switcher-open": "Tenant switcher open",
+    "notifications-open": "Notifications open",
+    "search-open": "Search open"
+  },
+  "areas": [
+    { "name": "Foundations and shell", "screens": ["000-design-system", "000a-app-shell", "003-mfa-verification"] },
+    { "name": "Dashboards", "screens": ["011-executive-dashboard", "115-employee-dashboard"] },
+    {
+      "name": "Budgets",
+      "screens": ["023-budget-hierarchy", "020-create-budget", "021-budget-details", "022-budget-allocation-workspace", "024a-per-head-driver-allocation", "027-freeze-budget"]
+    },
+    { "name": "Events", "screens": ["045-create-event-budget"] },
+    { "name": "Approvals and rules", "screens": ["059-approval-inbox", "069-rule-builder"] },
+    { "name": "Audit", "screens": ["088-audit-log"] }
+  ],
+  "journey": [
+    "000a-app-shell/default",
+    "011-executive-dashboard/default",
+    "023-budget-hierarchy/default",
+    "023-budget-hierarchy/set-to-zero-dialog",
+    "022-budget-allocation-workspace/default",
+    "022-budget-allocation-workspace/warning-block",
+    "045-create-event-budget/default",
+    "045-create-event-budget/validation",
+    "059-approval-inbox/default",
+    "069-rule-builder/default",
+    "088-audit-log/default",
+    "115-employee-dashboard/default",
+    "020-create-budget/default",
+    "021-budget-details/default",
+    "027-freeze-budget/dialog",
+    "024a-per-head-driver-allocation/default",
+    "003-mfa-verification/default"
+  ],
+  "ignore": ["Skip to main content"],
+  "links": {
+    "*": {
+      "Home": "011-executive-dashboard",
+      "Dashboard": "011-executive-dashboard",
+      "Executive dashboard": "011-executive-dashboard",
+      "Budget hierarchy": "023-budget-hierarchy",
+      "Hierarchy": "023-budget-hierarchy",
+      "Budgets": "023-budget-hierarchy",
+      "Allocation workspace": "022-budget-allocation-workspace",
+      "Budget list": null,
+      "Events": null,
+      "Approval inbox": "059-approval-inbox",
+      "Approvals": "059-approval-inbox",
+      "Open approval inbox": "059-approval-inbox",
+      "My requests": null,
+      "Actuals and matching": null,
+      "GL tie-out": null,
+      "Finance": null,
+      "Reports": null,
+      "Audit log": "088-audit-log",
+      "Full log": "088-audit-log",
+      "Rules and policies": "069-rule-builder",
+      "Integrations": null,
+      "Settings": null,
+      "Admin": null,
+      "Acme Global": "000a-app-shell/switcher-open",
+      "icon:notifications": "000a-app-shell/notifications-open",
+      "Allocate budget": "022-budget-allocation-workspace",
+      "Allocate to child": "022-budget-allocation-workspace",
+      "Create budget": "020-create-budget",
+      "Create event": "045-create-event-budget",
+      "Set to zero": "023-budget-hierarchy/set-to-zero-dialog",
+      "Freeze": "027-freeze-budget/dialog",
+      "India Region": "023-budget-hierarchy",
+      "row:Bengaluru Events": "021-budget-details",
+      "row:Hyderabad Events": "024a-per-head-driver-allocation"
+    },
+    "000-design-system": {
+      "Allocate budget": "",
+      "Create budget": "",
+      "Set to zero": "",
+      "Freeze": "",
+      "row:Bengaluru Events": "",
+      "row:Hyderabad Events": ""
+    },
+    "000a-app-shell": {
+      "Change scope": "000a-app-shell/switcher-open",
+      "row:Search budgets": "000a-app-shell/search-open"
+    },
+    "000a-app-shell/switcher-open": {
+      "Close": "000a-app-shell",
+      "Acme Global": "000a-app-shell",
+      "Employee Experience": "000a-app-shell"
+    },
+    "000a-app-shell/notifications-open": {
+      "Review": "059-approval-inbox",
+      "row:Approval needed": "059-approval-inbox",
+      "Mark all as read": "000a-app-shell",
+      "View all notifications": null
+    },
+    "000a-app-shell/search-open": {
+      "Esc to close": "000a-app-shell",
+      "row:REQ-2026-0142": "059-approval-inbox",
+      "Bengaluru Diwali celebration": null
+    },
+    "000a-app-shell/employee-forbidden": {
+      "Home": "115-employee-dashboard",
+      "Go to Home": "115-employee-dashboard",
+      "Acme Global": "",
+      "Request access": null,
+      "My budgets": null,
+      "Request funds": null,
+      "Notifications": null
+    },
+    "003-mfa-verification": {
+      "Verify": "115-employee-dashboard",
+      "Use a recovery code": null,
+      "Need help?": null
+    },
+    "011-executive-dashboard": {
+      "View as table": "023-budget-hierarchy",
+      "Reset filters": "011-executive-dashboard",
+      "Retry": "011-executive-dashboard",
+      "View comprehensive financial tie-out": null,
+      "Roll forward FY2026": null,
+      "Import budget plan": null
+    },
+    "020-create-budget": {
+      "Create budget": "021-budget-details",
+      "Cancel": "023-budget-hierarchy"
+    },
+    "021-budget-details": {
+      "Audit": "088-audit-log",
+      "Request increase": null,
+      "icon:lock": "027-freeze-budget/dialog",
+      "icon:more_vert": "027-freeze-budget/dialog"
+    },
+    "027-freeze-budget/dialog": {
+      "Cancel": "021-budget-details",
+      "Close": "021-budget-details",
+      "Freeze budget": "021-budget-details",
+      "icon:close": "021-budget-details"
+    },
+    "022-budget-allocation-workspace": {
+      "Add Row": "022-budget-allocation-workspace/warning-block",
+      "Submit": "059-approval-inbox",
+      "Submit allocation": "059-approval-inbox",
+      "Discard": "023-budget-hierarchy",
+      "Hyderabad": "024a-per-head-driver-allocation",
+      "Import from Excel": null,
+      "Clone FY2025": null
+    },
+    "022-budget-allocation-workspace/warning-block": {
+      "Discard": "022-budget-allocation-workspace",
+      "Request increase": null,
+      "Submit": "",
+      "Submit allocation": "",
+      "Add Row": ""
+    },
+    "023-budget-hierarchy": {
+      "row:India Region": "022-budget-allocation-workspace",
+      "Compare versions": null,
+      "Transfer": null
+    },
+    "023-budget-hierarchy/set-to-zero-dialog": {
+      "Cancel": "023-budget-hierarchy",
+      "Set to zero": "023-budget-hierarchy"
+    },
+    "024a-per-head-driver-allocation": {
+      "Apply true-up": "022-budget-allocation-workspace",
+      "row:Submit true-up": "022-budget-allocation-workspace",
+      "View policy details": "069-rule-builder",
+      "View headcount import": null
+    },
+    "045-create-event-budget": {
+      "Continue to funding": "045-create-event-budget/validation",
+      "Add cost line": "045-create-event-budget/validation",
+      "Cancel": "021-budget-details",
+      "Back": "021-budget-details",
+      "Save draft": null
+    },
+    "045-create-event-budget/validation": {
+      "Back": "045-create-event-budget",
+      "Continue to funding": "",
+      "Add cost line": "",
+      "Request contribution": null
+    },
+    "059-approval-inbox": {
+      "Assigned to me": "059-approval-inbox",
+      "Delegated to me": "059-approval-inbox/delegated-escalated",
+      "Escalated": "059-approval-inbox/delegated-escalated",
+      "Approve": "059-approval-inbox/empty",
+      "Approve as delegate": "059-approval-inbox/empty",
+      "Completed": null,
+      "View completed approvals": null
+    },
+    "069-rule-builder": {
+      "Simulate": "069-rule-builder/conflict-simulation",
+      "Narrow scope": "069-rule-builder",
+      "Version history": null,
+      "View backtest report": null
+    },
+    "088-audit-log": {
+      "Set to zero": "",
+      "Freeze": "",
+      "Verify chain": "088-audit-log/chain-broken",
+      "View break": "088-audit-log/chain-broken",
+      "Download verification report": null
+    },
+    "115-employee-dashboard": {
+      "Home": "115-employee-dashboard",
+      "Acme Global": "",
+      "My budgets": null,
+      "Request funds": null,
+      "Notifications": null,
+      "Upload receipt": null,
+      "View all allowances": null,
+      "All events": null
+    }
+  },
+  "hotspots": {
+    "000a-app-shell/default": [{ "label": "Notifications", "box": [1092, 12, 40, 40], "to": "000a-app-shell/notifications-open" }],
+    "000a-app-shell/notifications-open": [{ "label": "Close notifications", "box": [1092, 12, 40, 40], "to": "000a-app-shell" }],
+    "000a-app-shell/search-open": [{ "label": "Clear search", "box": [826, 12, 40, 40], "to": "000a-app-shell" }]
+  }
+}

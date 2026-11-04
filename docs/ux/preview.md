@@ -37,3 +37,11 @@ Core journey first (shell, executive dashboard, budget hierarchy, allocation, cr
 - Could not rename screens, so main-project screens keep Stitch's automatic titles; use this table for numbering.
 - Could not link screens together or add interactions: the MCP has no hotspot, link or flow tool. Previews are static screens, not a click-through flow; move between them with the links above.
 - Could not change project visibility or sharing, and `list_screens` returns nothing for the new project type.
+
+## Clickable design preview
+The exported screens and states above are also published as a clickable design preview: sidebar items, primary buttons, table rows and dialog triggers open the matching screen or state, and a bar on every page switches states and steps through the core journey. It is built from `design/preview/` from the Stitch exports and published with GitHub Pages; the address and details are in [design/preview/README.md](../../design/preview/README.md). States whose HTML could not be saved from Stitch are shown as their exported image with hotspots.
+
+To rebuild and republish when new screens merge into `design/stitch/`:
+1. Save each new state's Stitch HTML: `get_screen`, then `download_file` on `htmlCode.name`, then `node design/preview/build.mjs import --from <result file> --screen <NNN-slug> --state <state>`. For states without HTML, record label positions on macOS with `swift design/preview/ocr.swift <exported png> design/preview/ocr/<NNN-slug>--<state>.json`.
+2. Add the screen to `areas`, `journey` and `links` in `design/preview/links.json`; `node design/preview/build.mjs report` lists what each page links to.
+3. Run `design/preview/deploy.sh`; it builds `design/preview/dist`, publishes only that folder and enables Pages if needed.
