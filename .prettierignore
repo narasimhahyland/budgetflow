@@ -9,3 +9,9 @@ package-lock.json
 # Generated
 libs/contracts/openapi/openapi.json
 libs/api/db/migrations/meta/
+
+# Generated design artifacts: Stitch exports, saved Stitch HTML, OCR output, preview build
+design/stitch/*/
+design/preview/html/
+design/preview/ocr/
+design/preview/dist/
