@@ -1,0 +1,350 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/budgets/c55492c1-fe45-4852-b61f-899dfc4c8f8c/allocations",
+    "as": "ceo@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "childBudgetId": "d2870a5f-ccbd-415e-b309-8f9836ecccf6",
+      "amount": {
+        "amountMinor": 124,
+        "currency": "INR"
+      }
+    }
+  },
+  "status": 201,
+  "body": {
+    "journal": {
+      "id": "e9dbda87-df8d-41d1-8488-2b36959f1c5e",
+      "type": "allocation",
+      "transactionCurrency": "INR",
+      "reportingCurrency": "USD",
+      "accountingDate": "2026-11-04",
+      "periodId": "23000000-0000-4000-8000-012026110000",
+      "periodLabel": "Nov 2026",
+      "late": false,
+      "originalPeriodId": null,
+      "reversalOfJournalId": null,
+      "reversedByJournalId": null,
+      "reasonCode": null,
+      "reason": null,
+      "actorPersonId": "40000000-0000-4000-8000-000000000003",
+      "createdAt": "2026-11-04T17:40:49.765Z",
+      "totals": {
+        "debitTransactionMinor": 124,
+        "creditTransactionMinor": 124,
+        "debitReportingMinor": 1,
+        "creditReportingMinor": 1
+      },
+      "balanced": true,
+      "lines": [
+        {
+          "id": "5aba544c-f36e-4235-b6e5-1bb3262df948",
+          "journalId": "e9dbda87-df8d-41d1-8488-2b36959f1c5e",
+          "lineNo": 1,
+          "budgetId": "c55492c1-fe45-4852-b61f-899dfc4c8f8c",
+          "account": "allocated_out",
+          "legalEntityId": "20000000-0000-4000-8000-000000000001",
+          "costCenterId": null,
+          "glAccountId": null,
+          "eventCode": null,
+          "periodId": "23000000-0000-4000-8000-012026110000",
+          "accountingDate": "2026-11-04",
+          "transaction": {
+            "amountMinor": 124,
+            "currency": "INR"
+          },
+          "budget": {
+            "amountMinor": 2,
+            "currency": "USD"
+          },
+          "reporting": {
+            "amountMinor": 1,
+            "currency": "USD"
+          },
+          "budgetRate": {
+            "type": "plan",
+            "from": "INR",
+            "to": "USD",
+            "value": "0.012012012012",
+            "rateIds": ["24000000-0000-4000-8000-000000000100"]
+          },
+          "reportingRate": {
+            "type": "plan",
+            "from": "INR",
+            "to": "USD",
+            "value": "0.012012012012",
+            "rateIds": ["24000000-0000-4000-8000-000000000100"]
+          },
+          "planVersionId": null,
+          "reversalOfLineId": null
+        },
+        {
+          "id": "9a191974-7758-429e-a39d-e43405cb55f0",
+          "journalId": "e9dbda87-df8d-41d1-8488-2b36959f1c5e",
+          "lineNo": 2,
+          "budgetId": "d2870a5f-ccbd-415e-b309-8f9836ecccf6",
+          "account": "authorized",
+          "legalEntityId": "20000000-0000-4000-8000-000000000002",
+          "costCenterId": null,
+          "glAccountId": null,
+          "eventCode": null,
+          "periodId": "23000000-0000-4000-8000-022027080000",
+          "accountingDate": "2026-11-04",
+          "transaction": {
+            "amountMinor": -124,
+            "currency": "INR"
+          },
+          "budget": {
+            "amountMinor": -124,
+            "currency": "INR"
+          },
+          "reporting": {
+            "amountMinor": -1,
+            "currency": "USD"
+          },
+          "budgetRate": {
+            "type": "plan",
+            "from": "INR",
+            "to": "INR",
+            "value": "1.000000000000",
+            "rateIds": []
+          },
+          "reportingRate": {
+            "type": "plan",
+            "from": "INR",
+            "to": "USD",
+            "value": "0.012012012012",
+            "rateIds": ["24000000-0000-4000-8000-000000000100"]
+          },
+          "planVersionId": null,
+          "reversalOfLineId": null
+        }
+      ]
+    },
+    "parent": {
+      "id": "c55492c1-fe45-4852-b61f-899dfc4c8f8c",
+      "parentId": null,
+      "path": "/c55492c1-fe45-4852-b61f-899dfc4c8f8c/",
+      "name": "Evidence root",
+      "code": null,
+      "status": "active",
+      "allocationBadge": "partially_allocated",
+      "budgetType": "operating",
+      "categoryCode": null,
+      "legalEntityId": "20000000-0000-4000-8000-000000000001",
+      "costCenterId": null,
+      "orgUnitId": null,
+      "ownerPersonId": "40000000-0000-4000-8000-000000000003",
+      "currency": "USD",
+      "reportingCurrency": "USD",
+      "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+      "planVersionId": "61000000-0000-4000-8000-000000000001",
+      "control": {
+        "basis": ["allocated_out", "held", "pre_encumbered", "encumbered", "actual"],
+        "mode": "hard",
+        "toleranceBps": 0
+      },
+      "alertThresholdsPct": [50, 80, 100],
+      "balances": {
+        "budgetCurrency": {
+          "authorized": {
+            "amountMinor": 10000,
+            "currency": "USD"
+          },
+          "allocatedOut": {
+            "amountMinor": 9002,
+            "currency": "USD"
+          },
+          "held": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "preEncumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "encumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "actual": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "accrued": {
+            "amountMinor": 0,
+            "currency": "USD"
+          }
+        },
+        "reporting": {
+          "authorized": {
+            "amountMinor": 10000,
+            "currency": "USD"
+          },
+          "allocatedOut": {
+            "amountMinor": 9001,
+            "currency": "USD"
+          },
+          "held": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "preEncumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "encumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "actual": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "accrued": {
+            "amountMinor": 0,
+            "currency": "USD"
+          }
+        },
+        "available": {
+          "amountMinor": 998,
+          "currency": "USD"
+        },
+        "availableReporting": {
+          "amountMinor": 999,
+          "currency": "USD"
+        },
+        "allocationAvailable": {
+          "amountMinor": 998,
+          "currency": "USD"
+        }
+      },
+      "version": 1,
+      "allowedActions": [
+        "budget.read",
+        "budget.create_child",
+        "budget.allocate",
+        "budget.control",
+        "ledger.read",
+        "request.create",
+        "contribution.request"
+      ],
+      "createdAt": "2026-11-04T17:40:49.688Z"
+    },
+    "child": {
+      "id": "d2870a5f-ccbd-415e-b309-8f9836ecccf6",
+      "parentId": "c55492c1-fe45-4852-b61f-899dfc4c8f8c",
+      "path": "/c55492c1-fe45-4852-b61f-899dfc4c8f8c/d2870a5f-ccbd-415e-b309-8f9836ecccf6/",
+      "name": "Scenario child INR d786350d",
+      "code": null,
+      "status": "active",
+      "allocationBadge": "unallocated",
+      "budgetType": "operating",
+      "categoryCode": null,
+      "legalEntityId": "20000000-0000-4000-8000-000000000002",
+      "costCenterId": null,
+      "orgUnitId": null,
+      "ownerPersonId": "40000000-0000-4000-8000-000000000003",
+      "currency": "INR",
+      "reportingCurrency": "USD",
+      "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+      "planVersionId": null,
+      "control": {
+        "basis": ["allocated_out", "held", "pre_encumbered", "encumbered", "actual"],
+        "mode": "hard",
+        "toleranceBps": 0
+      },
+      "alertThresholdsPct": [50, 80, 100],
+      "balances": {
+        "budgetCurrency": {
+          "authorized": {
+            "amountMinor": 749374,
+            "currency": "INR"
+          },
+          "allocatedOut": {
+            "amountMinor": 0,
+            "currency": "INR"
+          },
+          "held": {
+            "amountMinor": 0,
+            "currency": "INR"
+          },
+          "preEncumbered": {
+            "amountMinor": 0,
+            "currency": "INR"
+          },
+          "encumbered": {
+            "amountMinor": 0,
+            "currency": "INR"
+          },
+          "actual": {
+            "amountMinor": 0,
+            "currency": "INR"
+          },
+          "accrued": {
+            "amountMinor": 0,
+            "currency": "INR"
+          }
+        },
+        "reporting": {
+          "authorized": {
+            "amountMinor": 9001,
+            "currency": "USD"
+          },
+          "allocatedOut": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "held": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "preEncumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "encumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "actual": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "accrued": {
+            "amountMinor": 0,
+            "currency": "USD"
+          }
+        },
+        "available": {
+          "amountMinor": 749374,
+          "currency": "INR"
+        },
+        "availableReporting": {
+          "amountMinor": 9001,
+          "currency": "USD"
+        },
+        "allocationAvailable": {
+          "amountMinor": 749374,
+          "currency": "INR"
+        }
+      },
+      "version": 1,
+      "allowedActions": [
+        "budget.read",
+        "budget.create_child",
+        "budget.allocate",
+        "budget.control",
+        "ledger.read",
+        "request.create",
+        "contribution.request"
+      ],
+      "createdAt": "2026-11-04T17:40:49.713Z"
+    }
+  }
+}

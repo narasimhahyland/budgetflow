@@ -1,0 +1,26 @@
+{
+  "id": "99f485ff-acc2-413b-8b71-06cdd3f685ee",
+  "kind": "ledger_rebuild",
+  "status": "clean",
+  "requestedAt": "2026-11-04T17:41:26.023Z",
+  "startedAt": "2026-11-04T17:41:27.522Z",
+  "finishedAt": "2026-11-04T17:41:27.553Z",
+  "flagsRaised": 0,
+  "summary": {
+    "auditChain": {
+      "valid": true,
+      "checked": 662,
+      "firstBrokenSeq": null
+    },
+    "linesChecked": 1026,
+    "balanceDrifts": [],
+    "budgetsChecked": 296,
+    "journalsChecked": 489,
+    "negativeBuckets": [],
+    "planTieMismatches": [],
+    "tripletMismatches": [],
+    "unbalancedJournals": [],
+    "hierarchyMismatches": [],
+    "overAllocatedBudgets": []
+  }
+}
