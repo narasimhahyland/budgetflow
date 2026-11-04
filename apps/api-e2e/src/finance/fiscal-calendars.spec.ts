@@ -9,7 +9,7 @@ import {
   FiscalPeriod,
   FiscalYearPreview,
 } from '@bf/contracts';
-import { ORG_SEED, SEED } from '@bf/seed';
+import { ORG_SEED, SEED, userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
@@ -275,6 +275,7 @@ test.describe('period status changes', () => {
     expect(closeP2.detail).toContain('P01 FY2027');
     for (const action of ['soft_close', 'close', 'lock']) {
       const p = await expectContract(await change(request, p1.id, action), 201, FiscalPeriod);
+      expect(p.statusChangedByName).toBe(userById('finance-controller').displayName);
       expect(p.status).toBe({ soft_close: 'soft_closed', close: 'closed', lock: 'locked' }[action]);
     }
     await expectContract(await change(request, p2.id, 'close'), 201, FiscalPeriod);

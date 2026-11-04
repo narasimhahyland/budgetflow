@@ -138,6 +138,7 @@ export const FiscalPeriod = named(
       endDate: IsoDate,
       status: PeriodStatus,
       statusChangedAt: IsoDateTime.nullable(),
+      statusChangedByName: z.string().nullable().describe('Who last changed the status.'),
       allowedActions: z.array(PeriodAction).describe('Status changes the caller may make now.'),
     })
     .strict(),

@@ -106,9 +106,16 @@ test.describe('HR headcount import', () => {
       accepted: true,
       dryRun: true,
       snapshotId: null,
+      rowsRead: 5,
       lineCount: 5,
       totalHeadcount: 125,
     });
+    expect(dry.locations.map((l) => [l.code, l.headcount])).toEqual([
+      ['BLR', 97],
+      ['HYD', 8],
+      ['LON', 20],
+    ]);
+    expect(dry.locations[0].legalEntityId).toBe(ORG_SEED.entities.india);
     const applied = await expectContract(
       await request.post('/api/org/headcount/imports', {
         headers: await mutate('org-admin'),

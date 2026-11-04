@@ -322,6 +322,7 @@ export const HeadcountUnitSummary = named(
       code: z.string(),
       name: z.string(),
       kind: OrgUnitKind,
+      legalEntityId: Id.nullable(),
       headcount: z.int(),
       proratedHeadcountMilli: z.int().describe('Prorated headcount in thousandths.'),
       byType: HeadcountByType,
@@ -393,11 +394,15 @@ export const HeadcountImportResult = named(
       accepted: z.boolean().describe('False when any line has an issue; nothing is saved then.'),
       snapshotId: Id.nullable(),
       asOfDate: IsoDate,
+      rowsRead: z.int().describe('Data rows in the file (valid and invalid).'),
       lineCount: z.int(),
       totalHeadcount: z.int(),
       previousTotal: z.int().nullable(),
       issues: z.array(ImportIssue),
       units: z.array(HeadcountUnitSummary),
+      locations: z
+        .array(HeadcountUnitSummary)
+        .describe('Totals per location in the file, with the previous snapshot.'),
     })
     .strict(),
 );

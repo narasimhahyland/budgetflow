@@ -2340,6 +2340,13 @@
               }
             ]
           },
+          "statusChangedByName": {
+            "description": "Who last changed the status.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "allowedActions": {
             "type": "array",
             "items": {
@@ -2364,6 +2371,7 @@
           "endDate",
           "status",
           "statusChangedAt",
+          "statusChangedByName",
           "allowedActions"
         ],
         "additionalProperties": false
@@ -2828,6 +2836,12 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
             "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
           },
+          "rowsRead": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Data rows in the file (valid and invalid)."
+          },
           "lineCount": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -2861,6 +2875,13 @@
             "items": {
               "$ref": "#/components/schemas/HeadcountUnitSummary"
             }
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HeadcountUnitSummary"
+            },
+            "description": "Totals per location in the file, with the previous snapshot."
           }
         },
         "required": [
@@ -2868,11 +2889,13 @@
           "accepted",
           "snapshotId",
           "asOfDate",
+          "rowsRead",
           "lineCount",
           "totalHeadcount",
           "previousTotal",
           "issues",
-          "units"
+          "units",
+          "locations"
         ],
         "additionalProperties": false
       },
@@ -2902,6 +2925,19 @@
               "team"
             ],
             "description": "Kind of org unit."
+          },
+          "legalEntityId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "headcount": {
             "type": "integer",
@@ -2942,6 +2978,7 @@
           "code",
           "name",
           "kind",
+          "legalEntityId",
           "headcount",
           "proratedHeadcountMilli",
           "byType",
@@ -3080,6 +3117,19 @@
             ],
             "description": "Kind of org unit."
           },
+          "legalEntityId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "headcount": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -3113,6 +3163,7 @@
           "code",
           "name",
           "kind",
+          "legalEntityId",
           "headcount",
           "proratedHeadcountMilli",
           "byType",

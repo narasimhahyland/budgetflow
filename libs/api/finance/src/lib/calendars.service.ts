@@ -13,6 +13,7 @@ import {
   fiscalPeriods,
   fiscalYears,
   legalEntities,
+  people,
   withTenant,
   type Db,
   type Tx,
@@ -28,7 +29,7 @@ import {
   type PeriodEvent,
 } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 import { assertTenant, invalid, tenantOf, type CommandContext } from './finance-base';
 
 type CalendarRow = typeof fiscalCalendars.$inferSelect;
@@ -268,7 +269,7 @@ export class CalendarsService {
           },
         });
         const after = all.map((p) => (p.id === periodId ? updated : p));
-        return this.periodDto(actor, updated, after);
+        return this.periodDto(actor, updated, after, await this.changerNames(tx, [updated]));
       },
     );
   }
@@ -400,6 +401,7 @@ export class CalendarsService {
       .orderBy(asc(fiscalPeriods.startDate));
     const labels = new Map(years.map((y) => [y.id, y.label]));
     const weekly = WEEKLY.includes(cal.calendarType);
+    const names = await this.changerNames(tx, periods);
     return {
       ...this.summary(cal, cals, years, les),
       fiscalYears: years
@@ -417,7 +419,7 @@ export class CalendarsService {
           planRatesLockedAt: y.planRatesLockedAt?.toISOString() ?? null,
           periods: periods
             .filter((p) => p.fiscalYearId === y.id)
-            .map((p) => this.periodDto(actor, p, periods)),
+            .map((p) => this.periodDto(actor, p, periods, names)),
         })),
     };
   }
@@ -445,7 +447,24 @@ export class CalendarsService {
     };
   }
 
-  private periodDto(actor: RequestActor, p: PeriodRow, calendarPeriods: PeriodRow[]): FiscalPeriod {
+  private async changerNames(tx: Tx, periods: PeriodRow[]): Promise<Map<string, string>> {
+    const ids = [
+      ...new Set(periods.map((p) => p.statusChangedBy).filter((i): i is string => Boolean(i))),
+    ];
+    if (!ids.length) return new Map();
+    const rows = await tx
+      .select({ id: people.id, name: people.displayName })
+      .from(people)
+      .where(inArray(people.id, ids));
+    return new Map(rows.map((r) => [r.id, r.name]));
+  }
+
+  private periodDto(
+    actor: RequestActor,
+    p: PeriodRow,
+    calendarPeriods: PeriodRow[],
+    names: Map<string, string>,
+  ): FiscalPeriod {
     const manage = this.policy.can(actor, 'period.manage', tenantOf(actor)).allowed;
     return {
       id: p.id,
@@ -456,6 +475,7 @@ export class CalendarsService {
       endDate: p.endDate,
       status: p.status,
       statusChangedAt: p.statusChangedAt?.toISOString() ?? null,
+      statusChangedByName: p.statusChangedBy ? (names.get(p.statusChangedBy) ?? null) : null,
       allowedActions: manage ? allowedPeriodEvents(calendarPeriods, p.id) : [],
     };
   }

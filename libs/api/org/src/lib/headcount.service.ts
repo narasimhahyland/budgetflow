@@ -79,6 +79,7 @@ export class HeadcountService {
           code: u.code,
           name: u.name,
           kind: u.kind,
+          legalEntityId: u.legalEntityId,
           headcount: t.headcount,
           proratedHeadcountMilli: t.prorated,
           byType: t.byType,
@@ -171,21 +172,32 @@ export class HeadcountService {
           add(t, { orgUnitId: l.unitId, ...l });
           tallies.set(l.unitId, t);
         }
+        const summarize = (id: string, t: Tally) => {
+          const u = units.get(id)!;
+          return {
+            orgUnitId: id,
+            code: u.code,
+            name: u.name,
+            kind: u.kind,
+            legalEntityId: u.legalEntityId,
+            headcount: t.headcount,
+            proratedHeadcountMilli: t.prorated,
+            byType: t.byType,
+            previousHeadcount: before ? (before.get(id)?.headcount ?? 0) : null,
+          };
+        };
         const unitSummaries = [...tallies.entries()]
-          .map(([id, t]) => {
-            const u = units.get(id)!;
-            return {
-              orgUnitId: id,
-              code: u.code,
-              name: u.name,
-              kind: u.kind,
-              headcount: t.headcount,
-              proratedHeadcountMilli: t.prorated,
-              byType: t.byType,
-              previousHeadcount: before ? (before.get(id)?.headcount ?? 0) : null,
-            };
-          })
+          .map(([id, t]) => summarize(id, t))
           .sort((a, b) => a.code.localeCompare(b.code));
+        const byLocation = new Map<string, Tally>();
+        for (const l of lines) {
+          const t = byLocation.get(l.locationId) ?? emptyTally();
+          add(t, { orgUnitId: l.locationId, ...l });
+          byLocation.set(l.locationId, t);
+        }
+        const locationSummaries = [...byLocation.entries()]
+          .map(([id, t]) => summarize(id, t))
+          .sort((a, b) => a.name.localeCompare(b.name));
         const totalHeadcount = lines.reduce((s, l) => s + l.headcount, 0);
         const previousTotal = prior
           ? (await this.lines(tx, prior.id)).reduce((s, l) => s + l.headcount, 0)
@@ -233,11 +245,13 @@ export class HeadcountService {
           accepted: issues.length === 0,
           snapshotId,
           asOfDate: req.asOfDate,
+          rowsRead: parsed.rows.length,
           lineCount: lines.length,
           totalHeadcount,
           previousTotal,
           issues,
           units: unitSummaries,
+          locations: locationSummaries,
         };
       },
     );
