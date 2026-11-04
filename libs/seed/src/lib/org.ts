@@ -362,8 +362,8 @@ const PEOPLE: [
 ][] = [
   [
     1,
-    'Ananya',
-    'Iyer',
+    'Deepika',
+    'Srinivasan',
     'Engineering manager',
     6,
     ORG_UNITS.bengaluru,
@@ -1073,7 +1073,7 @@ export const ukFiscalYearId = (year: number) => fiscalYearId(UK_CALENDAR.index, 
 /** Expected figures for scenarios and journeys. */
 export const ORG_SEED = {
   units: ORG,
-  people: { ananya: P(1), sneha: P(10), olivia: P(20), lena: P(40), amelia: P(50) },
+  people: { deepika: P(1), sneha: P(10), olivia: P(20), lena: P(40), amelia: P(50) },
   entities: HYLAND_ENTITIES,
   ukCalendar: UK_CALENDAR.id,
   headcountAsOf: '2026-11-01',

@@ -103,6 +103,7 @@ export class FinanceController {
   }
 
   @Post('fiscal-calendars/preview')
+  @HttpCode(200)
   previewCalendar(@CurrentActor() actor: RequestActor, @Body() body: unknown) {
     return this.calendars.preview(actor, parseWith(PreviewFiscalCalendarRequest, body));
   }
