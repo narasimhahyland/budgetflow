@@ -1,0 +1,20 @@
+           k            |                                                                                     v                                                                                      
+------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ tenant                 | Hyland (reporting USD)
+ org units              | 28 (business_unit, company, department, location, region, team)
+ org units by kind      | business_unit=1, company=1, department=12, location=6, region=3, team=5
+ org unit versions      | 28
+ people                 | 47
+ people by type         | employee=41, contractor=2, intern=4
+ reporting lines        | 40
+ legal entities         | HYL-DE EUR (Hyland Europe GmbH); HYL-IN INR (Hyland Technologies India Private Limited); HYL-UK GBP (Hyland Solutions UK Limited); HYL-US USD (Hyland North America, Inc.)
+ fiscal calendars       | Hyland group calendar (Jan-Dec); Hyland India (Apr-Mar); Hyland UK 4-4-5 (52/53 weeks, ends last Saturday of December)
+ cost centers           | 11
+ gl accounts / mappings | 48 / 88
+ vendors                | approved=6, preferred=4, blocked=2, unknown=2
+ reason codes           | 16
+ exchange rates         | plan=8, spot=7, month_end=6, monthly_average=6
+ headcount snapshots    | 2026-10-31 total 216; 2026-11-01 total 460
+ doa limits             | 16
+(16 rows)
+

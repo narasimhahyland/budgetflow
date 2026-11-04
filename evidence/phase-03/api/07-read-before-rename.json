@@ -1,0 +1,14 @@
+{
+  "request": {
+    "as": "org.admin",
+    "method": "GET",
+    "path": "/api/org/units/b4a06c6c-0b72-4bad-b019-831803ad663d?asOf=2654-05-31"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "name": "Evidence team 2231AA",
+      "asOf": "2654-05-31"
+    }
+  }
+}

@@ -51,3 +51,7 @@ Mobile read-only list of periods with status. Status tags use icon plus text.
 ## Assumptions and open questions
 
 - One calendar for all entities (as designed) or per entity? The plan allows variants per tenant; assumed one per company for now.
+
+## Implementation
+
+Built in Phase 3 at `/finance/periods`. Deviations from this design: `evidence/phase-03/visual-qa/design-parity/design-parity.md`.

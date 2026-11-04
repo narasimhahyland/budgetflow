@@ -1,0 +1,184 @@
+{
+  "request": {
+    "as": "finance.admin",
+    "method": "GET",
+    "path": "/api/org/units"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "asOf": "2026-11-04",
+      "scope": "tenant",
+      "items": [
+        {
+          "code": "HYL",
+          "name": "Hyland",
+          "kind": "company",
+          "depth": 0
+        },
+        {
+          "code": "EX",
+          "name": "Employee Experience",
+          "kind": "business_unit",
+          "depth": 1
+        },
+        {
+          "code": "EX-PEOPLE",
+          "name": "People Operations",
+          "kind": "department",
+          "depth": 2
+        },
+        {
+          "code": "EX-WORKPLACE",
+          "name": "Workplace and Events",
+          "kind": "department",
+          "depth": 2
+        },
+        {
+          "code": "EU",
+          "name": "Europe",
+          "kind": "region",
+          "depth": 1
+        },
+        {
+          "code": "BER",
+          "name": "Berlin",
+          "kind": "location",
+          "depth": 2
+        },
+        {
+          "code": "BER-ENG",
+          "name": "Engineering Berlin",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "BER-ENG-INT",
+          "name": "Integrations Team",
+          "kind": "team",
+          "depth": 4
+        },
+        {
+          "code": "LON",
+          "name": "London",
+          "kind": "location",
+          "depth": 2
+        },
+        {
+          "code": "LON-SALES",
+          "name": "Sales EMEA",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "IN",
+          "name": "India",
+          "kind": "region",
+          "depth": 1
+        },
+        {
+          "code": "BLR",
+          "name": "Bengaluru",
+          "kind": "location",
+          "depth": 2
+        },
+        {
+          "code": "BLR-SUP",
+          "name": "Customer Support Bengaluru",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "BLR-ENG",
+          "name": "Engineering Bengaluru",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "BLR-ENG-CS",
+          "name": "Content Services Team",
+          "kind": "team",
+          "depth": 4
+        },
+        {
+          "code": "BLR-ENG-PLAT",
+          "name": "Platform Team",
+          "kind": "team",
+          "depth": 4
+        },
+        {
+          "code": "HYD",
+          "name": "Hyderabad",
+          "kind": "location",
+          "depth": 2
+        },
+        {
+          "code": "HYD-ENG",
+          "name": "Engineering Hyderabad",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "HYD-ENG-CLOUD",
+          "name": "Cloud Operations Team",
+          "kind": "team",
+          "depth": 4
+        },
+        {
+          "code": "HYD-ENG-QE",
+          "name": "Quality Engineering Team",
+          "kind": "team",
+          "depth": 4
+        },
+        {
+          "code": "HYD-FIN",
+          "name": "Finance Shared Services",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "US",
+          "name": "United States",
+          "kind": "region",
+          "depth": 1
+        },
+        {
+          "code": "NYC",
+          "name": "New York",
+          "kind": "location",
+          "depth": 2
+        },
+        {
+          "code": "NYC-CS",
+          "name": "Customer Success East",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "WLK",
+          "name": "Westlake",
+          "kind": "location",
+          "depth": 2
+        },
+        {
+          "code": "WLK-FIN",
+          "name": "Corporate Finance",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "WLK-PM",
+          "name": "Product Management",
+          "kind": "department",
+          "depth": 3
+        },
+        {
+          "code": "WLK-SALES",
+          "name": "Sales North America",
+          "kind": "department",
+          "depth": 3
+        }
+      ]
+    }
+  }
+}

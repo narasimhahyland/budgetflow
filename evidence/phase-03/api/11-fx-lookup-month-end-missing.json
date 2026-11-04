@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "finance.admin",
+    "method": "GET",
+    "path": "/api/finance/exchange-rates/lookup?from=EUR&to=USD&date=2026-11-10&type=month_end"
+  },
+  "response": {
+    "status": 422,
+    "body": {
+      "type": "urn:budgetflow:problem:rate-missing",
+      "title": "Rate missing",
+      "status": 422,
+      "code": "RATE_MISSING",
+      "detail": "No month-end rate from USD to EUR for the month ending 2026-11-30.",
+      "instance": "/api/finance/exchange-rates/lookup",
+      "params": {
+        "type": "month_end",
+        "base": "USD",
+        "quote": "EUR",
+        "date": "2026-11-10"
+      }
+    }
+  }
+}

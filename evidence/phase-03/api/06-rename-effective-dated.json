@@ -1,0 +1,49 @@
+{
+  "request": {
+    "as": "org.admin",
+    "method": "POST",
+    "path": "/api/org/units/b4a06c6c-0b72-4bad-b019-831803ad663d/changes",
+    "body": {
+      "effectiveFrom": "2654-06-01",
+      "name": "Renamed evidence team 2231AA",
+      "reason": "Evidence rename"
+    }
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "name": "Renamed evidence team 2231AA",
+      "asOf": "2654-06-01",
+      "versions": [
+        {
+          "validFrom": "2654-06-01",
+          "validTo": null,
+          "changeKind": "renamed",
+          "name": "Renamed evidence team 2231AA",
+          "parentId": "30000000-0000-4000-8000-000000000110",
+          "parentName": "Engineering Bengaluru",
+          "managerPersonId": null,
+          "managerName": null,
+          "legalEntityId": "20000000-0000-4000-8000-000000000002",
+          "timezone": "Asia/Kolkata",
+          "reason": "Evidence rename",
+          "createdAt": "2026-11-04T17:51:59.918Z"
+        },
+        {
+          "validFrom": "2654-01-01",
+          "validTo": "2654-05-31",
+          "changeKind": "created",
+          "name": "Evidence team 2231AA",
+          "parentId": "30000000-0000-4000-8000-000000000110",
+          "parentName": "Engineering Bengaluru",
+          "managerPersonId": null,
+          "managerName": null,
+          "legalEntityId": "20000000-0000-4000-8000-000000000002",
+          "timezone": "Asia/Kolkata",
+          "reason": "Evidence",
+          "createdAt": "2026-11-04T17:51:59.901Z"
+        }
+      ]
+    }
+  }
+}

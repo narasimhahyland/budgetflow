@@ -1,0 +1,112 @@
+{
+  "request": {
+    "as": "finance.controller",
+    "method": "POST",
+    "path": "/api/finance/fiscal-calendars/preview",
+    "body": {
+      "definition": {
+        "type": "4-4-5",
+        "endMonth": 12,
+        "endWeekday": 6,
+        "method": "last"
+      },
+      "year": 2028
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "label": "FY2028",
+      "startDate": "2027-12-26",
+      "endDate": "2028-12-30",
+      "weeks": 53,
+      "days": 371,
+      "periods": [
+        {
+          "number": 1,
+          "label": "P01 FY2028",
+          "startDate": "2027-12-26",
+          "endDate": "2028-01-22",
+          "days": 28
+        },
+        {
+          "number": 2,
+          "label": "P02 FY2028",
+          "startDate": "2028-01-23",
+          "endDate": "2028-02-19",
+          "days": 28
+        },
+        {
+          "number": 3,
+          "label": "P03 FY2028",
+          "startDate": "2028-02-20",
+          "endDate": "2028-03-25",
+          "days": 35
+        },
+        {
+          "number": 4,
+          "label": "P04 FY2028",
+          "startDate": "2028-03-26",
+          "endDate": "2028-04-22",
+          "days": 28
+        },
+        {
+          "number": 5,
+          "label": "P05 FY2028",
+          "startDate": "2028-04-23",
+          "endDate": "2028-05-20",
+          "days": 28
+        },
+        {
+          "number": 6,
+          "label": "P06 FY2028",
+          "startDate": "2028-05-21",
+          "endDate": "2028-06-24",
+          "days": 35
+        },
+        {
+          "number": 7,
+          "label": "P07 FY2028",
+          "startDate": "2028-06-25",
+          "endDate": "2028-07-22",
+          "days": 28
+        },
+        {
+          "number": 8,
+          "label": "P08 FY2028",
+          "startDate": "2028-07-23",
+          "endDate": "2028-08-19",
+          "days": 28
+        },
+        {
+          "number": 9,
+          "label": "P09 FY2028",
+          "startDate": "2028-08-20",
+          "endDate": "2028-09-23",
+          "days": 35
+        },
+        {
+          "number": 10,
+          "label": "P10 FY2028",
+          "startDate": "2028-09-24",
+          "endDate": "2028-10-21",
+          "days": 28
+        },
+        {
+          "number": 11,
+          "label": "P11 FY2028",
+          "startDate": "2028-10-22",
+          "endDate": "2028-11-18",
+          "days": 28
+        },
+        {
+          "number": 12,
+          "label": "P12 FY2028",
+          "startDate": "2028-11-19",
+          "endDate": "2028-12-30",
+          "days": 42
+        }
+      ]
+    }
+  }
+}

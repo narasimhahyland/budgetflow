@@ -25,6 +25,8 @@ export const orgUnits = pgTable(
     parentId: uuid('parent_id'),
     legalEntityId: uuid('legal_entity_id').references(() => legalEntities.id),
     timezone: text('timezone'),
+    /** Current manager (head of the unit); history lives in org_unit_versions. */
+    managerPersonId: uuid('manager_person_id'),
     validFrom: validFrom(),
     validTo: validTo(),
     createdAt: createdAt(),
@@ -34,6 +36,33 @@ export const orgUnits = pgTable(
     uniqueIndex('org_units_tenant_code_from').on(t.tenantId, t.code, t.validFrom),
     unique('org_units_tenant_id_key').on(t.tenantId, t.id),
   ],
+);
+
+/**
+ * Effective-dated attributes of an org unit (name, parent, manager, entity, timezone). One row per
+ * change; ranges never overlap (exclusion constraint). `org_units` holds the identity and current values.
+ */
+export const orgUnitVersions = pgTable(
+  'org_unit_versions',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    orgUnitId: uuid('org_unit_id')
+      .notNull()
+      .references(() => orgUnits.id),
+    name: text('name').notNull(),
+    parentId: uuid('parent_id').references(() => orgUnits.id),
+    managerPersonId: uuid('manager_person_id').references(() => people.id),
+    legalEntityId: uuid('legal_entity_id').references(() => legalEntities.id),
+    timezone: text('timezone'),
+    changeKind: varchar('change_kind', { length: 20 }).notNull(),
+    reason: text('reason'),
+    validFrom: validFrom(),
+    validTo: validTo(),
+    createdBy: uuid('created_by'),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('org_unit_versions_unit_from').on(t.tenantId, t.orgUnitId, t.validFrom)],
 );
 
 /** Effective-dated closure table for subtree scope queries. */
@@ -91,6 +120,8 @@ export const people = pgTable(
     timezone: text('timezone'),
     employingEntityId: uuid('employing_entity_id').references(() => legalEntities.id),
     costCenterId: uuid('cost_center_id').references(() => costCenters.id),
+    /** Department or team the person works in (headcount by team). */
+    orgUnitId: uuid('org_unit_id').references(() => orgUnits.id),
     employmentType: employmentType('employment_type').notNull().default('employee'),
     startDate: day('start_date'),
     endDate: day('end_date'),

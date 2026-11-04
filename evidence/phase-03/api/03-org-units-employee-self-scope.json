@@ -1,0 +1,28 @@
+{
+  "request": {
+    "as": "employee",
+    "method": "GET",
+    "path": "/api/org/units"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "asOf": "2026-11-04",
+      "scope": "self",
+      "items": [
+        {
+          "code": "HYD",
+          "name": "Hyderabad",
+          "kind": "location",
+          "depth": 2
+        },
+        {
+          "code": "HYD-ENG-QE",
+          "name": "Quality Engineering Team",
+          "kind": "team",
+          "depth": 4
+        }
+      ]
+    }
+  }
+}

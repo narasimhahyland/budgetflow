@@ -1,0 +1,39 @@
+{
+  "request": {
+    "as": "finance.admin",
+    "method": "GET",
+    "path": "/api/finance/exchange-rates/lookup?from=INR&to=USD&date=2026-11-16&type=spot&amountMinor=8325000"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "type": "spot",
+      "date": "2026-11-16",
+      "applied": {
+        "type": "spot",
+        "from": "INR",
+        "to": "USD",
+        "value": "0.011894849530",
+        "rateIds": ["24000000-0000-4000-8000-000000000300"]
+      },
+      "sources": [
+        {
+          "rateId": "24000000-0000-4000-8000-000000000300",
+          "quoteCurrency": "INR",
+          "rate": "84.070000000000",
+          "effectiveDate": "2026-11-02",
+          "fiscalYearLabel": null,
+          "locked": false
+        }
+      ],
+      "amount": {
+        "amountMinor": 8325000,
+        "currency": "INR"
+      },
+      "converted": {
+        "amountMinor": 99025,
+        "currency": "USD"
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "request": {
+    "as": "org.admin",
+    "method": "POST",
+    "path": "/api/org/units/b4a06c6c-0b72-4bad-b019-831803ad663d/changes",
+    "body": {
+      "effectiveFrom": "2654-03-01",
+      "name": "Backdated",
+      "reason": "Evidence"
+    }
+  },
+  "response": {
+    "status": 409,
+    "body": {
+      "type": "urn:budgetflow:problem:effective-date-conflict",
+      "title": "Effective date conflict",
+      "status": 409,
+      "code": "EFFECTIVE_DATE_CONFLICT",
+      "detail": "This unit already has a change effective 2654-06-01; date the new change after it.",
+      "instance": "/api/org/units/b4a06c6c-0b72-4bad-b019-831803ad663d/changes",
+      "params": {
+        "effectiveFrom": "2654-03-01",
+        "latestChangeFrom": "2654-06-01"
+      }
+    }
+  }
+}

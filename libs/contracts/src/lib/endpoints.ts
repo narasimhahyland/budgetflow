@@ -2,10 +2,12 @@ import { ProblemDetails } from './common';
 import { analyticsEndpoints } from './domains/analytics';
 import { auditEndpoints } from './domains/audit';
 import { budgetEndpoints } from './domains/budgets';
+import { financeEndpoints } from './domains/finance';
 import { healthEndpoints } from './domains/health';
 import { identityEndpoints } from './domains/identity';
 import { integrityEndpoints } from './domains/integrity';
 import { ledgerEndpoints } from './domains/ledger';
+import { orgEndpoints } from './domains/org';
 
 export type { Endpoint } from './endpoint';
 
@@ -20,6 +22,8 @@ export const endpoints = {
   ...ledgerEndpoints,
   ...integrityEndpoints,
   ...auditEndpoints,
+  ...orgEndpoints,
+  ...financeEndpoints,
   ...analyticsEndpoints,
 } as const;
 

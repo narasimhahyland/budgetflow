@@ -4,6 +4,8 @@ All 124 specified screens plus the screens added by the product and finance revi
 
 "Stitch" marks screens with an existing design in the original Stitch project (start screens are redesigned first as Satori variants). Status for every screen: not built (Phase 1 builds the backend foundation only).
 
+Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 107, 107a, 108 and 108a as 13 pages (`/org/*` and `/finance/*`). Screens 22c, 107 and 108 follow their proposed Stitch designs (parity notes in `evidence/phase-03/visual-qa/design-parity.md`); the others were built from the design system without a Stitch design and await design review. Specs: `docs/ux/screens/` (022c-hr-headcount-import, 033, 038, 039, 041, 042, 102a, 104a, 106a, 106b, 106c, 107-exchange-rates, 108-fiscal-calendar).
+
 ## Group 1: Authentication and onboarding
 
 | #   | Screen                                  | Build phase | Primary roles                       | Notes        |

@@ -1,0 +1,494 @@
+{
+  "phase": "p3-org-master-data",
+  "iterations": 3,
+  "stopReason": "no blocking findings",
+  "themes": ["light"],
+  "designParity": {
+    "compared": ["022c-hr-headcount-import", "107-exchange-rates", "108-fiscal-calendar"],
+    "report": "design-parity/design-parity.md",
+    "blocking": 0
+  },
+  "blockingFindings": 0,
+  "screens": [
+    {
+      "screen": "022c-headcount",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/022c-headcount--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/022c-headcount--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/022c-headcount--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "022c-headcount-import-review",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/022c-headcount-import-review--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/022c-headcount-import-review--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/022c-headcount-import-review--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "033-org-hierarchy",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/033-org-hierarchy--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/033-org-hierarchy--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/033-org-hierarchy--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "033-org-hierarchy-regional-manager",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/033-org-hierarchy-regional-manager--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/033-org-hierarchy-regional-manager--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/033-org-hierarchy-regional-manager--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "038-people",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/038-people--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/038-people--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/038-people--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "039-person",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/039-person--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/039-person--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/039-person--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "041-cost-centers",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/041-cost-centers--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/041-cost-centers--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/041-cost-centers--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "042-org-import",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/042-org-import--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/042-org-import--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/042-org-import--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "102a-legal-entities",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/102a-legal-entities--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/102a-legal-entities--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/102a-legal-entities--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "104a-doa",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/104a-doa--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/104a-doa--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/104a-doa--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "106a-gl-mapping",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/106a-gl-mapping--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/106a-gl-mapping--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/106a-gl-mapping--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "106b-reason-codes",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/106b-reason-codes--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/106b-reason-codes--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/106b-reason-codes--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "106c-vendors",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/106c-vendors--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/106c-vendors--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/106c-vendors--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "107-exchange-rates",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/107-exchange-rates--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/107-exchange-rates--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/107-exchange-rates--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "108-fiscal-calendars",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/108-fiscal-calendars--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/108-fiscal-calendars--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/108-fiscal-calendars--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    }
+  ]
+}

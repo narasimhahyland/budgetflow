@@ -33,6 +33,8 @@ export const vendors = pgTable(
     name: text('name').notNull(),
     status: vendorStatus('status').notNull().default('unknown'),
     erpVendorId: varchar('erp_vendor_id', { length: 100 }),
+    category: varchar('category', { length: 50 }),
+    country: varchar('country', { length: 2 }),
     createdAt: createdAt(),
   },
   (t) => [index('vendors_tenant_name').on(t.tenantId, t.name)],

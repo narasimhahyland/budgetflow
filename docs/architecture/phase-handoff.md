@@ -44,7 +44,7 @@ Not in Phase 2 (need designs or later phases): global search, notifications data
 9. **Web.** Phase 2 creates `libs/web/ui`, `libs/web/data-access` (on `createApiClient`) and `libs/web/shell`. Each screen group is `libs/web/features/<group>` (tags `type:feature`, `scope:web`) exporting `Routes`; features never import each other; the integrator wires lazy routes in `apps/web`. Light theme only.
 10. **Done** means `/functional-check` and `scripts/gate.sh` green, evidence under `evidence/<phase-id>/`.
 
-Reserved seed id prefixes: `10`-`24` tenancy and finance, `30`-`35` org, `40`-`42` people and memberships, `50` Keycloak subjects, `51` subjects in the Hyland SSO stand-in realm, `60`-`68` categories, plan, reason codes, DoA, flags, templates, `70` budgets. Next free: `71` (P4), `72`-`76` (P5), `77`-`79` (P6), `80`+ later phases.
+Reserved seed id prefixes: `10`-`24` tenancy and finance, `25`-`27` GL accounts, GL mappings and vendors (P3), `30`-`36` org (`36` org unit versions, P3), `40`-`42` people and memberships, `50` Keycloak subjects, `51` subjects in the Hyland SSO stand-in realm, `60`-`68` categories, plan, reason codes, DoA, flags, templates, `70` budgets. Phase 3 rows inside earlier prefixes start at n = 100 (n = 1000 for rates and closure rows) so Phase 1 ids never collide. Next free: `71` (P4), `72`-`76` (P5), `77`-`79` (P6), `80`+ later phases.
 
 ## Phase map
 
