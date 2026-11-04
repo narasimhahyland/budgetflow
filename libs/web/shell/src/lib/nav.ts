@@ -58,6 +58,20 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    label: 'Organization',
+    items: [
+      { label: 'Organization', path: '/org', icon: 'graph_org', permission: 'org.read' },
+      { label: 'People', path: '/org/people', icon: 'users', permission: 'org.read' },
+      { label: 'Headcount', path: '/org/headcount', icon: 'user_group', permission: 'org.read' },
+      {
+        label: 'Cost centers',
+        path: '/org/cost-centers',
+        icon: 'tag',
+        permission: 'master_data.manage',
+      },
+    ],
+  },
+  {
     label: 'Finance',
     items: [
       {
@@ -84,6 +98,31 @@ export const NAV: NavGroup[] = [
         icon: 'currency_dollar',
         permission: 'fx.manage',
       },
+      {
+        label: 'Legal entities',
+        path: '/finance/legal-entities',
+        icon: 'globe',
+        permission: 'master_data.manage',
+      },
+      { label: 'GL accounts', path: '/finance/gl', icon: 'book', permission: 'master_data.manage' },
+      {
+        label: 'Reason codes',
+        path: '/finance/reason-codes',
+        icon: 'list_bullet',
+        permission: 'master_data.manage',
+      },
+      {
+        label: 'Vendors',
+        path: '/finance/vendors',
+        icon: 'user_square',
+        permission: 'master_data.manage',
+      },
+      {
+        label: 'Delegation of authority',
+        path: '/finance/doa',
+        icon: 'gavel',
+        permission: 'doa.read',
+      },
     ],
   },
   {
@@ -96,7 +135,7 @@ export const NAV: NavGroup[] = [
   {
     label: 'Admin',
     items: [
-      { label: 'Organization', path: '/admin/org', icon: 'graph_org', permission: 'org.manage' },
+      { label: 'Org import', path: '/org/import', icon: 'upload', permission: 'org.manage' },
       { label: 'Users and roles', path: '/admin/users', icon: 'users', permission: 'users.manage' },
       {
         label: 'Rules and policies',

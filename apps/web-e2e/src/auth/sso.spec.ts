@@ -17,5 +17,12 @@ test('signing in with Hyland SSO lands in BudgetFlow as the linked employee', as
   await expectShell(page);
   await expect(page.getByRole('heading', { level: 1, name: 'Welcome, Arjun' })).toBeVisible();
   const nav = page.getByRole('navigation', { name: 'Platform Navigation' });
-  await expect(nav.getByRole('menuitem')).toHaveText(['Home', 'Request funds', 'My requests']);
+  await expect(nav.getByRole('menuitem')).toHaveText([
+    'Home',
+    'Request funds',
+    'My requests',
+    'Organization',
+    'People',
+    'Headcount',
+  ]);
 });
