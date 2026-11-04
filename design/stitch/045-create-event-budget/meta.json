@@ -1,0 +1,23 @@
+{
+  "screen": "045-create-event-budget",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/bd913fe9a61c407bb2da75de0b33b6fa",
+      "approved": null,
+      "size": [
+        2560,
+        2670
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "validation--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/7424a64b08144c8395b312a6a0952352",
+      "approved": null,
+      "size": [
+        2560,
+        3452
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
