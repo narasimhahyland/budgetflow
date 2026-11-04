@@ -9,7 +9,7 @@ alwaysApply: false
 A feature is done when it is proven to work end to end on the running product, as the roles that use it. Unit tests are not required; never offer one as a substitute for a functional check. Procedure: `/functional-check`.
 
 ## Stack and data
-- `scripts/stack.sh up && scripts/stack.sh reset` starts Docker Compose (Postgres 16, Keycloak, Mailpit, MinIO, API, worker, web) and loads the deterministic seed: fictional tenant Acme Global, one Keycloak user per role, fixed ids, amounts, rates and fiscal calendar, fixed clock for journeys.
+- `scripts/stack.sh up && scripts/stack.sh reset` starts Docker Compose (Postgres 16, Keycloak, Mailpit, MinIO, API, worker, web) and loads the deterministic seed: tenant Hyland (all other seed data fictional), one Keycloak user per role, fixed ids, amounts, rates and fiscal calendar, fixed clock for journeys.
 - Functional runs and CI use MinIO for documents (no in-memory document store) and the deterministic fake `AiProvider` (fixed answers per prompt fixture) for AI features.
 - Never point checks at shared or real environments.
 

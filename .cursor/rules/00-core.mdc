@@ -15,7 +15,7 @@ alwaysApply: true
 - The repository is public. Never commit, print or paste tokens, keys, passwords, real `.env` files, or anything from `~/.npmrc`. The registry token lives only in `~/.npmrc`; the repo `.npmrc` holds just `@hylandsoftware:registry=https://npm.pkg.github.com`.
 - Check registry auth with `npm whoami --registry=https://npm.pkg.github.com`, never by reading config files.
 - Secrets in config are references only (`${NODE_AUTH_TOKEN}`, `${{ secrets.X }}`, `${env:X}`); dev credentials are placeholders in `infra/.env.example`.
-- No internal company information: no wiki or ticket content, ticket keys, internal tool names, internal URLs, employee or customer names. Seed and fixture data are fictional (Acme Global).
+- No internal company information: no wiki or ticket content, ticket keys, internal tool names, internal URLs, employee or customer names. Seed and fixture data: company Hyland; all other seed data fictional (no real employee names, internal figures or tools).
 - If a hook blocks a command, do not rephrase it to get around the hook. Tell the user what you were trying to do.
 
 ## Product integrity
