@@ -1,0 +1,11 @@
+{
+  "screen": "061a-actionable-approval-email",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/b6f2af8727d44e13bd908a22a110ced0",
+      "approved": null,
+      "size": [2560, 2450],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

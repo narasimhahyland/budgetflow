@@ -1,0 +1,11 @@
+{
+  "screen": "080c-gl-tie-out",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/46e46ef7925049a580e5b430cf3243f6",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

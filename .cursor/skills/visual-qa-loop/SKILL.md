@@ -74,3 +74,7 @@ Write `<out>/report.md`:
 ```
 
 Then give `<out>` and the screen list to the `ux-reviewer` subagent and include its verdict. Final message: embed 2-4 before/after or representative screenshots, the stop reason, and the evidence path.
+
+## Design exports
+
+After exporting new designs to `design/stitch/`, update `design/preview/links.json` (titles, areas, journey, links) and run `design/preview/deploy.sh`, then open the new pages on the live design preview (https://narasimhahyland.github.io/budgetflow/) and check their links. Details: `design/preview/README.md`.

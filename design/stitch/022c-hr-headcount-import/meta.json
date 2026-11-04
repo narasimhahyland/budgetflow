@@ -1,0 +1,11 @@
+{
+  "screen": "022c-hr-headcount-import",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/2bbc03b0659b40a692b6c393d0a4cced",
+      "approved": null,
+      "size": [2560, 2570],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

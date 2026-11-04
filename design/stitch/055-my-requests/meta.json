@@ -1,0 +1,11 @@
+{
+  "screen": "055-my-requests",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/9a68bf191d9a4cbc98ea610f89adfaae",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "screen": "024-allocate-to-child",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/3788f697dcb04f20b3e427041214c05a",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    },
+    "blocked--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/159aa5cd95bf4007870ce6a9eb4c7fff",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

@@ -1,0 +1,336 @@
+{
+  "height": 2048,
+  "lines": [
+    {
+      "box": [112, 37, 183, 35],
+      "text": "BudgetFlow",
+      "words": [{ "box": [112, 37, 183, 35], "t": "BudgetFlow" }]
+    },
+    {
+      "box": [115, 71, 134, 22],
+      "text": "ENTERPRISE",
+      "words": [{ "box": [115, 71, 134, 22], "t": "ENTERPRISE" }]
+    },
+    {
+      "box": [89, 163, 101, 31],
+      "text": "Hyland",
+      "words": [{ "box": [89, 163, 101, 31], "t": "Hyland" }]
+    },
+    {
+      "box": [100, 256, 82, 28],
+      "text": "Home",
+      "words": [{ "box": [100, 256, 82, 28], "t": "Home" }]
+    },
+    {
+      "box": [37, 338, 108, 23],
+      "text": "BUDGETS",
+      "words": [{ "box": [37, 338, 108, 23], "t": "BUDGETS" }]
+    },
+    {
+      "box": [89, 391, 239, 33],
+      "text": "Budget hierarchy",
+      "words": [
+        { "box": [89, 391, 105, 30], "t": "Budget" },
+        { "box": [197, 393, 131, 31], "t": "hierarchy" }
+      ]
+    },
+    {
+      "box": [93, 468, 275, 26],
+      "text": "Allocation workspace",
+      "words": [
+        { "box": [93, 468, 133, 26], "t": "Allocation" },
+        { "box": [229, 468, 139, 26], "t": "workspace" }
+      ]
+    },
+    {
+      "box": [96, 541, 146, 33],
+      "text": "Budget list",
+      "words": [
+        { "box": [96, 541, 95, 32], "t": "Budget" },
+        { "box": [194, 543, 48, 31], "t": "list" }
+      ]
+    },
+    {
+      "box": [37, 624, 86, 19],
+      "text": "EVENTS",
+      "words": [{ "box": [37, 624, 86, 19], "t": "EVENTS" }]
+    },
+    {
+      "box": [100, 680, 86, 22],
+      "text": "Events",
+      "words": [{ "box": [100, 680, 86, 22], "t": "Events" }]
+    },
+    {
+      "box": [100, 755, 223, 26],
+      "text": "Co-funding board",
+      "words": [
+        { "box": [100, 755, 139, 26], "t": "Co" },
+        { "box": [100, 755, 139, 26], "t": "funding" },
+        { "box": [243, 755, 81, 26], "t": "board" }
+      ]
+    },
+    {
+      "box": [37, 836, 119, 22],
+      "text": "REQUESTS",
+      "words": [{ "box": [37, 836, 119, 22], "t": "REQUESTS" }]
+    },
+    {
+      "box": [97, 892, 197, 26],
+      "text": "Approval inbox",
+      "words": [
+        { "box": [97, 892, 117, 26], "t": "Approval" },
+        { "box": [217, 892, 77, 26], "t": "inbox" }
+      ]
+    },
+    {
+      "box": [41, 963, 216, 26],
+      "text": "Y My requests",
+      "words": [
+        { "box": [41, 963, 52, 26], "t": "Y" },
+        { "box": [96, 963, 42, 26], "t": "My" },
+        { "box": [142, 963, 115, 26], "t": "requests" }
+      ]
+    },
+    {
+      "box": [37, 1044, 100, 19],
+      "text": "FINANCE",
+      "words": [{ "box": [37, 1044, 100, 19], "t": "FINANCE" }]
+    },
+    {
+      "box": [100, 1096, 269, 35],
+      "text": "Actuals and matching",
+      "words": [
+        { "box": [100, 1096, 91, 31], "t": "Actuals" },
+        { "box": [194, 1097, 51, 30], "t": "and" },
+        { "box": [249, 1099, 120, 32], "t": "matching" }
+      ]
+    },
+    {
+      "box": [100, 1173, 127, 29],
+      "text": "GL tie-out",
+      "words": [
+        { "box": [100, 1175, 33, 27], "t": "GL" },
+        { "box": [136, 1173, 91, 28], "t": "tie" },
+        { "box": [136, 1173, 91, 28], "t": "out" }
+      ]
+    },
+    {
+      "box": [37, 1256, 104, 19],
+      "text": "INSIGHTS",
+      "words": [{ "box": [37, 1256, 104, 19], "t": "INSIGHTS" }]
+    },
+    {
+      "box": [100, 1312, 104, 26],
+      "text": "Reports",
+      "words": [{ "box": [100, 1312, 104, 26], "t": "Reports" }]
+    },
+    {
+      "box": [99, 1377, 122, 36],
+      "text": "Audit log",
+      "words": [
+        { "box": [99, 1377, 73, 33], "t": "Audit" },
+        { "box": [173, 1383, 48, 31], "t": "log" }
+      ]
+    },
+    {
+      "box": [37, 1468, 78, 19],
+      "text": "ADMIN",
+      "words": [{ "box": [37, 1468, 78, 19], "t": "ADMIN" }]
+    },
+    {
+      "box": [82, 1524, 242, 26],
+      "text": "Rules and policies",
+      "words": [
+        { "box": [82, 1524, 88, 26], "t": "Rules" },
+        { "box": [173, 1524, 49, 26], "t": "and" },
+        { "box": [225, 1524, 99, 26], "t": "policies" }
+      ]
+    },
+    {
+      "box": [37, 1595, 223, 37],
+      "text": "e Integrations",
+      "words": [
+        { "box": [37, 1595, 51, 37], "t": "e" },
+        { "box": [92, 1595, 168, 37], "t": "Integrations" }
+      ]
+    },
+    {
+      "box": [93, 1671, 113, 30],
+      "text": "Settings",
+      "words": [{ "box": [93, 1671, 113, 30], "t": "Settings" }]
+    },
+    {
+      "box": [528, 52, 465, 30],
+      "text": "Home \/ Budgets \/ Budget hierarchy",
+      "words": [
+        { "box": [528, 52, 78, 30], "t": "Home" },
+        { "box": [629, 52, 112, 30], "t": "Budgets" },
+        { "box": [764, 52, 94, 30], "t": "Budget" },
+        { "box": [862, 52, 132, 30], "t": "hierarchy" }
+      ]
+    },
+    {
+      "box": [1071, 52, 544, 32],
+      "text": "Q Search budgets, events, requests, people",
+      "words": [
+        { "box": [1071, 52, 39, 29], "t": "Q" },
+        { "box": [1113, 52, 84, 29], "t": "Search" },
+        { "box": [1201, 53, 112, 29], "t": "budgets" },
+        { "box": [1316, 54, 88, 29], "t": "events" },
+        { "box": [1407, 54, 112, 29], "t": "requests" },
+        { "box": [1523, 55, 92, 29], "t": "people" }
+      ]
+    },
+    {
+      "box": [1786, 52, 86, 22],
+      "text": "ctrl K",
+      "words": [
+        { "box": [1786, 52, 58, 22], "t": "ctrl" },
+        { "box": [1847, 52, 25, 22], "t": "K" }
+      ]
+    },
+    {
+      "box": [2028, 52, 93, 23],
+      "text": "FY2026",
+      "words": [{ "box": [2028, 52, 93, 23], "t": "FY2026" }]
+    },
+    {
+      "box": [543, 193, 387, 49],
+      "text": "Budget hierarchy",
+      "words": [
+        { "box": [543, 193, 171, 49], "t": "Budget" },
+        { "box": [721, 193, 210, 49], "t": "hierarchy" }
+      ]
+    },
+    {
+      "box": [543, 249, 473, 30],
+      "text": "Hyland \/ Employee Experience - FY2026",
+      "words": [
+        { "box": [543, 249, 86, 30], "t": "Hyland" },
+        { "box": [648, 249, 124, 30], "t": "Employee" },
+        { "box": [775, 249, 131, 30], "t": "Experience" },
+        { "box": [925, 249, 90, 30], "t": "FY2026" }
+      ]
+    },
+    {
+      "box": [2006, 193, 45, 26],
+      "text": "PR",
+      "words": [{ "box": [2006, 193, 45, 26], "t": "PR" }]
+    },
+    {
+      "box": [2091, 169, 175, 33],
+      "text": "Priya Raman",
+      "words": [
+        { "box": [2091, 171, 69, 31], "t": "Priya" },
+        { "box": [2163, 169, 103, 32], "t": "Raman" }
+      ]
+    },
+    {
+      "box": [2091, 208, 208, 22],
+      "text": "Finance Controller",
+      "words": [
+        { "box": [2091, 208, 85, 22], "t": "Finance" },
+        { "box": [2179, 208, 121, 22], "t": "Controller" }
+      ]
+    },
+    {
+      "box": [2090, 235, 217, 35],
+      "text": "Hyland - Bengaluru",
+      "words": [
+        { "box": [2090, 235, 78, 31], "t": "Hyland" },
+        { "box": [2185, 237, 123, 32], "t": "Bengaluru" }
+      ]
+    },
+    {
+      "box": [2091, 282, 242, 19],
+      "text": "Timezone: Asia\/Kolkata",
+      "words": [
+        { "box": [2091, 282, 104, 19], "t": "Timezone" },
+        { "box": [2198, 282, 135, 19], "t": "Asia" },
+        { "box": [2198, 282, 135, 19], "t": "Kolkata" }
+      ]
+    },
+    {
+      "box": [2050, 364, 283, 30],
+      "text": "Profile and preferences",
+      "words": [
+        { "box": [2050, 364, 79, 30], "t": "Profile" },
+        { "box": [2132, 364, 49, 30], "t": "and" },
+        { "box": [2185, 364, 148, 30], "t": "preferences" }
+      ]
+    },
+    {
+      "box": [2050, 438, 149, 27],
+      "text": "Delegations",
+      "words": [{ "box": [2050, 438, 149, 27], "t": "Delegations" }]
+    },
+    {
+      "box": [2050, 502, 251, 38],
+      "text": "Notification settings",
+      "words": [
+        { "box": [2050, 502, 142, 34], "t": "Notification" },
+        { "box": [2194, 507, 106, 33], "t": "settings" }
+      ]
+    },
+    {
+      "box": [2050, 584, 234, 22],
+      "text": "Help and shortcuts",
+      "words": [
+        { "box": [2050, 584, 58, 22], "t": "Help" },
+        { "box": [2111, 584, 47, 22], "t": "and" },
+        { "box": [2160, 584, 125, 22], "t": "shortcuts" }
+      ]
+    },
+    {
+      "box": [2050, 687, 108, 28],
+      "text": "Sign out",
+      "words": [
+        { "box": [2050, 687, 52, 27], "t": "Sign" },
+        { "box": [2105, 688, 53, 27], "t": "out" }
+      ]
+    },
+    {
+      "box": [86, 1877, 193, 22],
+      "text": "Collapse sidebar",
+      "words": [
+        { "box": [86, 1877, 99, 22], "t": "Collapse" },
+        { "box": [188, 1877, 91, 22], "t": "sidebar" }
+      ]
+    },
+    {
+      "box": [48, 1966, 37, 22],
+      "text": "PR",
+      "words": [{ "box": [48, 1966, 37, 22], "t": "PR" }]
+    },
+    {
+      "box": [115, 1955, 153, 26],
+      "text": "Priya Raman",
+      "words": [
+        { "box": [115, 1955, 61, 26], "t": "Priya" },
+        { "box": [180, 1955, 88, 26], "t": "Raman" }
+      ]
+    },
+    {
+      "box": [115, 1985, 182, 19],
+      "text": "Finance Controller",
+      "words": [
+        { "box": [115, 1985, 78, 19], "t": "Finance" },
+        { "box": [196, 1985, 102, 19], "t": "Controller" }
+      ]
+    },
+    {
+      "box": [2404, 52, 37, 30],
+      "text": "PR",
+      "words": [{ "box": [2404, 52, 37, 30], "t": "PR" }]
+    },
+    {
+      "box": [2389, 580, 78, 23],
+      "text": "Ctrl K",
+      "words": [
+        { "box": [2389, 580, 55, 23], "t": "Ctrl" },
+        { "box": [2447, 580, 20, 22], "t": "K" }
+      ]
+    }
+  ],
+  "width": 2560
+}

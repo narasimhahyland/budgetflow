@@ -1,0 +1,11 @@
+{
+  "screen": "080a-actuals-import",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/a87718de9fa74e5f939189b730d8c344",
+      "approved": null,
+      "size": [2560, 2220],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

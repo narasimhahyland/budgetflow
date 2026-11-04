@@ -1,0 +1,17 @@
+{
+  "screen": "061-approval-decision",
+  "files": {
+    "approve-part--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/6ad82b20f691476b90d0b66fd3ea9114",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    },
+    "outside-doa--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/7ebc14825373495c904e4617a2bcce54",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

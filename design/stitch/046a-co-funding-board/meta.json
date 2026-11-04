@@ -1,0 +1,11 @@
+{
+  "screen": "046a-co-funding-board",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/7514232b50e44649a2bf5ec564378463",
+      "approved": null,
+      "size": [2560, 3070],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

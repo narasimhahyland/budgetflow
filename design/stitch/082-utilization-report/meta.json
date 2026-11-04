@@ -1,0 +1,11 @@
+{
+  "screen": "082-utilization-report",
+  "files": {
+    "export-menu-open--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/59e534643729460eb19c1ca5c8e475f1",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

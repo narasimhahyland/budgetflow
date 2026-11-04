@@ -1,0 +1,23 @@
+{
+  "screen": "056a-inter-director-contribution-request",
+  "files": {
+    "partial--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/15f6ffcd419b494c85228e0c6305479c",
+      "approved": null,
+      "size": [2560, 3110],
+      "status": "proposed - awaiting user review"
+    },
+    "decline--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/734b811f946c47f5babecdffeeaeca3b",
+      "approved": null,
+      "size": [2560, 2628],
+      "status": "proposed - awaiting user review"
+    },
+    "full--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/108efc41af254da09c17f4eef27029c2",
+      "approved": null,
+      "size": [2560, 2830],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
