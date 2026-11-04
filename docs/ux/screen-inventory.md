@@ -6,6 +6,8 @@ All 124 specified screens plus the screens added by the product and finance revi
 
 Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 107, 107a, 108 and 108a as 13 pages (`/org/*` and `/finance/*`). Screens 22c, 107 and 108 follow their proposed Stitch designs (parity notes in `evidence/phase-03/visual-qa/design-parity.md`); the others were built from the design system without a Stitch design and await design review. Specs: `docs/ux/screens/` (022c-hr-headcount-import, 033, 038, 039, 041, 042, 102a, 104a, 106a, 106b, 106c, 107-exchange-rates, 108-fiscal-calendar).
 
+Phase 8 and 9 screens are specified spec-first in `docs/ux/screens/` (images pending a later Stitch session; status in [review-log.md](review-log.md)). Screens 47e, 59b, 59c, 61d and 61e were added with that batch for plan features of Phases 8 and 9 that had no screen.
+
 ## Group 1: Authentication and onboarding
 
 | #   | Screen                                  | Build phase | Primary roles                       | Notes        |
@@ -109,6 +111,7 @@ Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 10
 | 47b | Attendee needs (dietary, accessibility, travel, photo consent) | P9          | EO, EMP                       | review-added    |
 | 47c | QR or mobile check-in                                          | P15         | EO                            | review-added    |
 | 47d | Remote and hybrid participation                                | P15         | EO                            | review-added    |
+| 47e | Attendance and per-head recalculation                          | P9          | EO, contributing owners       | review-added    |
 | 48  | Event budget request                                           | P5          | EO, LM, RM; owners scoped; FC | Stitch, start 6 |
 | 49  | Cross-location cost allocation                                 | P5          | EO, LM, RM; owners scoped; FC | Stitch          |
 | 50  | Event approval workflow                                        | P5          | EO, LM, RM; owners scoped; FC |                 |
@@ -132,12 +135,16 @@ Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 10
 | 58  | Create over-budget request                                        | P5          | All requesters; approvers within DoA               |                                             |
 | 59  | Approval inbox                                                    | P5          | Approvers within DoA (CEO, FA, FC, BO, DH, RM, LM) | Stitch, start 7                             |
 | 59a | Mobile web approvals (installable app)                            | P8          | Approvers                                          | review-added                                |
+| 59b | Mobile balance check and camera receipts                          | P8          | Owners, EO, EMP                                    | review-added                                |
+| 59c | Notification channels and push settings                           | P8          | All roles (own settings)                           | review-added                                |
 | 60  | Request details                                                   | P5          | All requesters; approvers within DoA               | Stitch                                      |
 | 60a | Comments, mentions, follow and watch                              | P8          | All roles within scope                             | review-added                                |
 | 61  | Approval decision screen                                          | P5          | Approvers within DoA                               | Stitch                                      |
 | 61a | Actionable approval email                                         | P5          | Approvers                                          | review-added                                |
 | 61b | Slack approval card                                               | P8          | Approvers                                          | review-added                                |
 | 61c | Microsoft Teams approval card                                     | P8          | Approvers                                          | review-added                                |
+| 61d | Slack and Teams: balance check, quick request and alerts          | P8          | Owners, requesters, approvers                      | review-added                                |
+| 61e | Slack and Teams app setup and account linking                     | P8          | IA; OA, FA read; all users link                    | review-added                                |
 | 62  | Delegated approval screen                                         | P7          | Delegates                                          |                                             |
 | 63  | Escalated approval screen                                         | P7          | Escalation approvers (FC, CEO)                     |                                             |
 | 64  | Request history                                                   | P5          | All requesters; approvers within DoA               | Stitch                                      |
@@ -281,8 +288,8 @@ Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 10
 | P5    | 29                                   |
 | P6    | 7                                    |
 | P7    | 22                                   |
-| P8    | 6                                    |
-| P9    | 8                                    |
+| P8    | 10                                   |
+| P9    | 9                                    |
 | P10   | 24                                   |
 | P11   | 4                                    |
 | P12   | 13                                   |
@@ -290,7 +297,7 @@ Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 10
 | P14   | 14                                   |
 | P15   | 11                                   |
 | P16   | 7                                    |
-| Total | 210 (124 specified, 86 review-added) |
+| Total | 215 (124 specified, 91 review-added) |
 
 ## Role-to-screen matrix
 
