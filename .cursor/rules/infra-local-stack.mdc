@@ -10,7 +10,7 @@ alwaysApply: false
 - Host ports come from env with defaults (`BF_PG_PORT`, `BF_API_PORT`, `BF_KEYCLOAK_PORT`, `BF_MAILPIT_PORT`, `BF_MINIO_PORT`, `BF_WEB_PORT`) and bind to `127.0.0.1`.
 - All credentials are dev-only placeholders in `infra/.env.example`, copied to a gitignored `.env`. Never real values; never reuse them elsewhere.
 - Keycloak realm export in `infra/keycloak/`: public SPA client with PKCE, confidential API client, a local-only `budgetflow-e2e` client with direct grant for API scenario tokens, roles, TOTP policy, fictional seeded users per role (including a TOTP user for MFA tests). Regenerate it from a running instance.
-- Seed scripts are idempotent and create the Acme Global tenant, legal entities, fiscal periods, plan rates, org hierarchy and the reference budgets used by API scenarios, journeys and visual baselines (fixed ids, amounts and clock). `scripts/stack.sh reset` drops and reseeds only this checkout's stack.
+- Seed scripts are idempotent and create the Hyland tenant (all other seed data fictional), legal entities, fiscal periods, plan rates, org hierarchy and the reference budgets used by API scenarios, journeys and visual baselines (fixed ids, amounts and clock). `scripts/stack.sh reset` drops and reseeds only this checkout's stack.
 - Pin image versions (no `latest`). Containers run as non-root where the image allows.
 - Phase evidence (compose logs, API responses, DB snapshots) goes to `tmp/evidence/` first; only scrubbed summaries move into `evidence/`.
 

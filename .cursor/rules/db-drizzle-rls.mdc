@@ -14,6 +14,6 @@ alwaysApply: false
 - Concurrency: allocation and posting paths `SELECT ... FOR UPDATE` the parent then children ordered by id in one transaction. Idempotency keys have a unique `(tenant_id, key)` constraint.
 - Migrations are safe on populated tables: add nullable, backfill, then constrain; create indexes concurrently in their own migration.
 - Functional checks in `apps/api-e2e` (Testcontainers Postgres 16 with migrations applied, or the stack's Postgres): RLS isolation for every tenant table (tenant A cannot read or write tenant B, connecting as the application role with `app.tenant_id` set and through the API with a forged `X-Tenant-Id`), immutability triggers, closed-period rejection, concurrent allocations keep the invariant, migration up from empty and from the previous release with seed data.
-- Seed data is fictional (Acme Global) and idempotent.
+- Seed data: company Hyland, everything else fictional; idempotent.
 
 Use `/db-migration`.

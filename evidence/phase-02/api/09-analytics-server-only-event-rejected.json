@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/analytics/events",
+    "as": "analyst",
+    "body": {
+      "events": [
+        {
+          "id": "81e9feaa-049e-4037-a4a7-3b33dc5059b2",
+          "name": "allocation.created"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "body": {
+      "type": "urn:budgetflow:problem:validation-failed",
+      "title": "Validation failed",
+      "status": 400,
+      "code": "VALIDATION_FAILED",
+      "detail": "Some fields are missing or invalid.",
+      "instance": "/api/analytics/events",
+      "errors": [
+        {
+          "path": "events.0.name",
+          "message": "Invalid option: expected one of \"session.started\"|\"page.viewed\""
+        }
+      ]
+    }
+  }
+}

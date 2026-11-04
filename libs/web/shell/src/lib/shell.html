@@ -1,0 +1,178 @@
+@if (session.state() === 'not-member') {
+  <main class="bf-full-page">
+    <sat-403-error-state>
+      <h1 satErrorStateHeadline>Your account is not set up in BudgetFlow</h1>
+      <p satErrorStateDescription>
+        You signed in, but this account has no access to BudgetFlow. Ask your administrator to add
+        you, then sign in again.
+      </p>
+      <button mat-flat-button satErrorStateAction type="button" (click)="signOut()">
+        Sign out
+      </button>
+    </sat-403-error-state>
+  </main>
+} @else {
+  <sat-platform-nav-container>
+    <sat-platform-nav>
+      @if (!navState.collapsed()) {
+        <div class="bf-shell__brand">
+          <span class="bf-shell__product">BudgetFlow</span>
+          <span class="bf-shell__company" data-testid="company-name">{{ me()?.tenantName }}</span>
+        </div>
+      }
+      @for (group of nav(); track group.label) {
+        @if (group.label && !navState.collapsed()) {
+          <p class="bf-shell__group" aria-hidden="true">{{ group.label }}</p>
+        }
+        <sat-platform-nav-menu [attr.aria-label]="group.label ?? 'Home'">
+          @for (item of group.items; track item.path) {
+            <a
+              satPlatformNavMenuItem
+              [routerLink]="item.path"
+              routerLinkActive
+              #rla="routerLinkActive"
+              [routerLinkActiveOptions]="{ exact: true }"
+              [active]="rla.isActive"
+              [attr.aria-current]="rla.isActive ? 'page' : null"
+            >
+              <sat-platform-nav-avatar [item]="item" />
+              {{ item.label }}
+            </a>
+          }
+        </sat-platform-nav-menu>
+      }
+      <sat-platform-nav-user>
+        <button
+          satPlatformNavUserProfile
+          type="button"
+          [matMenuTriggerFor]="sidebarAccount"
+          [attr.aria-label]="'Account menu for ' + (me()?.displayName ?? '')"
+        >
+          <sat-avatar [initials]="me()?.displayName ?? '' | satPlatformNavInitials" />
+          {{ me()?.displayName }}
+        </button>
+        <mat-menu #sidebarAccount="matMenu" satPlatformNavUserMenu>
+          <div class="bf-account">
+            <span class="bf-account__name">{{ me()?.displayName }}</span>
+            <span class="bf-account__meta">{{ userSubtitle() }}</span>
+          </div>
+          <button mat-menu-item type="button" (click)="signOut()">
+            <mat-icon svgIcon="logout" aria-hidden="true" />
+            Sign out
+          </button>
+        </mat-menu>
+      </sat-platform-nav-user>
+    </sat-platform-nav>
+
+    <sat-platform-nav-main-content>
+      <sat-app-header>
+        <button
+          satAppHeaderPlatformNavMobileTrigger
+          mat-icon-button
+          type="button"
+          aria-label="Open navigation"
+          (click)="navState.toggleCollapsed()"
+        >
+          <mat-icon svgIcon="menu" aria-hidden="true" />
+        </button>
+        <div satAppHeaderTitle class="bf-header__title">
+          <span class="bf-header__brand">
+            <span class="bf-header__product">BudgetFlow</span>
+            <span class="bf-header__company" data-testid="header-company">{{
+              me()?.tenantName
+            }}</span>
+          </span>
+          <sat-breadcrumbs class="bf-header__crumbs" [items]="crumbs()" />
+          <span class="bf-header__page">{{ pageTitle() }}</span>
+        </div>
+        <div satAppHeaderActions class="bf-header__actions">
+          @if (fiscalYear(); as fy) {
+            <span class="bf-chip bf-chip--primary" [attr.aria-label]="'Fiscal year ' + fy">{{
+              fy
+            }}</span>
+          }
+          @if (me(); as m) {
+            <span class="bf-chip" [attr.aria-label]="'Reporting currency ' + m.reportingCurrency"
+              >Reporting {{ m.reportingCurrency }}</span
+            >
+          }
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Notifications"
+            [matMenuTriggerFor]="notifications"
+          >
+            <mat-icon svgIcon="bell" aria-hidden="true" />
+          </button>
+          <mat-menu #notifications="matMenu" class="bf-notifications" xPosition="before">
+            <div class="bf-notifications__panel" role="region" aria-label="Notifications">
+              <p class="bf-notifications__title">Notifications</p>
+              <p class="bf-notifications__empty">You are all caught up</p>
+              <p class="bf-notifications__hint">
+                Approvals, budget alerts and changes to your budgets will appear here.
+              </p>
+            </div>
+          </mat-menu>
+          <button
+            type="button"
+            class="bf-header__avatar"
+            [attr.aria-label]="'Account menu for ' + (me()?.displayName ?? '')"
+            [matMenuTriggerFor]="account"
+          >
+            <sat-avatar
+              category="purple"
+              size="36"
+              [initials]="me()?.displayName ?? '' | satPlatformNavInitials"
+            />
+          </button>
+          <mat-menu #account="matMenu" xPosition="before">
+            <div class="bf-account">
+              <span class="bf-account__name">{{ me()?.displayName }}</span>
+              <span class="bf-account__meta">{{ userSubtitle() }}</span>
+              <span class="bf-account__meta">{{ me()?.tenantName }}</span>
+            </div>
+            <button mat-menu-item type="button" (click)="signOut()">
+              <mat-icon svgIcon="logout" aria-hidden="true" />
+              Sign out
+            </button>
+          </mat-menu>
+        </div>
+      </sat-app-header>
+
+      <div class="bf-content">
+        @if (auth.status() === 'expired') {
+          <sat-401-error-state>
+            <h1 satErrorStateHeadline>Your session has ended</h1>
+            <p satErrorStateDescription>Sign in again to continue where you left off.</p>
+            <button mat-flat-button satErrorStateAction type="button" (click)="signInAgain()">
+              Sign in again
+            </button>
+          </sat-401-error-state>
+        } @else {
+          @switch (session.state()) {
+            @case ('ready') {
+              <router-outlet />
+            }
+            @case ('error') {
+              <sat-500-error-state>
+                <h1 satErrorStateHeadline>Something went wrong</h1>
+                <p satErrorStateDescription>
+                  BudgetFlow could not load your account. Your data is safe; try again in a moment.
+                </p>
+                <button mat-flat-button satErrorStateAction type="button" (click)="retry()">
+                  Try again
+                </button>
+              </sat-500-error-state>
+            }
+            @default {
+              <div class="bf-content__loading" aria-label="Loading" aria-busy="true">
+                <sat-ghost [height]="32" [width]="280" />
+                <sat-ghost [height]="160" fitContainer />
+              </div>
+            }
+          }
+        }
+      </div>
+    </sat-platform-nav-main-content>
+  </sat-platform-nav-container>
+}

@@ -1,0 +1,87 @@
+{
+  "baseURL": "http://localhost:4200",
+  "authDir": "tmp/e2e-auth",
+  "themes": ["light"],
+  "freezeTime": "2026-11-16T09:00:00Z",
+  "mask": ["[data-testid=relative-time]"],
+  "ignore": {
+    "console": [],
+    "requests": []
+  },
+  "screens": [
+    {
+      "id": "000a-app-shell",
+      "path": "/",
+      "role": "department-head",
+      "waitFor": "role=heading[name=\"Welcome, Lena\"]",
+      "states": [
+        { "state": "default" },
+        {
+          "state": "nav-drawer-open",
+          "actions": [
+            {
+              "click": "button[aria-label=\"Expand navigation\"]:visible, button[aria-label=\"Open navigation\"]:visible >> nth=-1"
+            },
+            { "waitFor": "p.bf-shell__group >> nth=0" },
+            { "hover": "div.bf-shell__brand" }
+          ]
+        },
+        {
+          "state": "notifications-open",
+          "actions": [
+            { "click": "role=button[name=\"Notifications\"]" },
+            { "waitFor": "text=You are all caught up" }
+          ]
+        },
+        {
+          "state": "account-menu-open",
+          "actions": [
+            { "click": "button.bf-header__avatar" },
+            { "waitFor": "role=menuitem[name=\"Sign out\"]" }
+          ]
+        },
+        {
+          "state": "employee-forbidden",
+          "role": "employee",
+          "path": "/audit-log",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        },
+        {
+          "state": "employee-home",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"Nothing to show here yet\"]"
+        },
+        {
+          "state": "placeholder",
+          "role": "ceo",
+          "path": "/budgets",
+          "waitFor": "role=heading[name=\"Budget hierarchy is not open yet\"]"
+        },
+        {
+          "state": "not-found",
+          "role": "employee",
+          "path": "/no-such-page",
+          "waitFor": "role=heading[name=\"Page not found\"]"
+        },
+        {
+          "state": "platform-operator",
+          "role": "super-admin",
+          "waitFor": "text=You are signed in as a platform operator."
+        }
+      ]
+    },
+    {
+      "id": "000b-sign-in-pages",
+      "path": "/signed-out",
+      "waitFor": "role=heading[name=\"You have signed out\"]",
+      "states": [
+        { "state": "signed-out" },
+        {
+          "state": "sign-in-problem",
+          "path": "/sign-in-problem",
+          "waitFor": "role=heading[name=\"We could not sign you in\"]"
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 // Scenarios create their own budgets through the API, so they are order-independent and repeatable
 // without a reset; destructive integrity checks run only in the Initech Sandbox tenant and restore it.
 import { defineConfig } from '@playwright/test';
+import { env } from './src/support/env';
 
 export default defineConfig({
   testDir: './src',
@@ -16,7 +17,8 @@ export default defineConfig({
     ['html', { outputFolder: '../../dist/.playwright/apps/api-e2e/report', open: 'never' }],
   ],
   use: {
-    baseURL: process.env.API_URL ?? `http://localhost:${process.env.BF_API_PORT ?? '3000'}`,
+    // Port from the shell, then .env (worktrees run their own stack), then infra/.env.example.
+    baseURL: process.env.API_URL ?? `http://localhost:${env('BF_API_PORT')}`,
     extraHTTPHeaders: { accept: 'application/json' },
   },
 });

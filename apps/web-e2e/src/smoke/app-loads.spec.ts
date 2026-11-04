@@ -1,8 +1,12 @@
-// Smoke journey for the Phase 1 placeholder: the web app served by the stack loads with the Satori light
-// theme, without console errors or failed requests. Phase 2 replaces it with sign-in and shell journeys.
+// Smoke journey: the signed-in shell loads with the Satori light theme, without console errors or failed
+// requests, and unknown routes fall back to the app (single-page routing).
 import { expect, test } from '@playwright/test';
+import { expectShell } from '../support/auth';
+import { authFile } from '../support/roles';
 
-test('the web app loads with the Satori light theme and no errors', async ({ page }) => {
+test.use({ storageState: authFile('ceo') });
+
+test('the shell loads with the Satori light theme and no errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
   page.on('requestfailed', (r) =>
@@ -11,9 +15,9 @@ test('the web app loads with the Satori light theme and no errors', async ({ pag
   page.on('response', (r) => r.status() >= 400 && errors.push(`${r.status()} ${r.url()}`));
 
   await page.goto('/');
-  await expect(page).toHaveTitle('BudgetFlow');
-  await expect(page.getByRole('heading', { level: 1, name: 'BudgetFlow' })).toBeVisible();
-  await expect(page.getByRole('main')).toContainText('Corporate budget delegation and control');
+  await expectShell(page);
+  await expect(page).toHaveTitle('Home | BudgetFlow');
+  await expect(page.getByRole('heading', { level: 1, name: 'Welcome, Morgan' })).toBeVisible();
 
   const theme = await page.evaluate(() => {
     const s = getComputedStyle(document.documentElement);
@@ -27,5 +31,6 @@ test('the web app loads with the Satori light theme and no errors', async ({ pag
 test('unknown routes fall back to the app (single-page routing)', async ({ page }) => {
   const res = await page.goto('/budgets/does-not-exist-yet');
   expect(res?.status()).toBe(200);
-  await expect(page.getByRole('heading', { level: 1, name: 'BudgetFlow' })).toBeVisible();
+  await expectShell(page);
+  await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
 });

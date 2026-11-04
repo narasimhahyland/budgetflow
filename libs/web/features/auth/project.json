@@ -1,0 +1,18 @@
+{
+  "name": "web-feature-auth",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/web/features/auth/src",
+  "projectType": "library",
+  "prefix": "bf",
+  "tags": ["type:feature", "scope:web"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p libs/web/features/auth/tsconfig.lib.json --noEmit"
+      }
+    }
+  }
+}

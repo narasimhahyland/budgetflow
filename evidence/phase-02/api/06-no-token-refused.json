@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/me",
+    "as": "anonymous"
+  },
+  "response": {
+    "status": 401,
+    "body": {
+      "type": "urn:budgetflow:problem:unauthenticated",
+      "title": "Unauthenticated",
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "detail": "Sign in to continue.",
+      "instance": "/api/me"
+    }
+  }
+}

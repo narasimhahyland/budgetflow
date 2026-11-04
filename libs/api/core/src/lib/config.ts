@@ -14,6 +14,10 @@ const EnvSchema = z.object({
     .optional()
     .describe('Where the API fetches signing keys (inside Compose: the keycloak service).'),
   KEYCLOAK_AUDIENCE: z.string().default('budgetflow-api'),
+  KEYCLOAK_WEB_CLIENT_ID: z
+    .string()
+    .default('budgetflow-web')
+    .describe('Public OIDC client the web app signs in with (served by /api/auth/config).'),
   AI_PROVIDER: z.enum(['fake']).default('fake'),
 });
 

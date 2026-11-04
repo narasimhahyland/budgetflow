@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/me",
+    "as": "ceo",
+    "x-tenant-id": "10000000-0000-4000-8000-000000000002"
+  },
+  "response": {
+    "status": 403,
+    "body": {
+      "type": "urn:budgetflow:problem:tenant-not-member",
+      "title": "Tenant not member",
+      "status": 403,
+      "code": "TENANT_NOT_MEMBER",
+      "detail": "You are not a member of that tenant.",
+      "instance": "/api/me"
+    }
+  }
+}

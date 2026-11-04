@@ -1,0 +1,14 @@
+{
+  "request": {
+    "grant": "password",
+    "user": "mfa.user@example.test",
+    "totp": "omitted"
+  },
+  "response": {
+    "status": 401,
+    "body": {
+      "error": "invalid_grant",
+      "error_description": "Invalid user credentials"
+    }
+  }
+}

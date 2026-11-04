@@ -1,0 +1,150 @@
+/*
+ * BudgetFlow sign-in theme. Keycloak renders these pages outside the Angular app, so the Satori token CSS
+ * is not available here: the values below mirror the Satori light palette (primary, primary-loud, page
+ * background, surface, outline, error) and the app's fonts fall back to system sans-serif when absent.
+ */
+:root {
+  --bf-primary: #5654ac;
+  --bf-primary-loud: #322f86;
+  --bf-on-primary: #ffffff;
+  --bf-page: #f4f3f7;
+  --bf-surface: #ffffff;
+  --bf-outline: #c9c5d4;
+  --bf-on-surface: #1b1b21;
+  --bf-on-surface-variant: #47464f;
+  --bf-error: #b02b36;
+  --keycloak-card-top-color: var(--bf-primary);
+  --pf-v5-global--primary-color--100: var(--bf-primary);
+  --pf-v5-global--primary-color--200: var(--bf-primary-loud);
+  --pf-v5-global--link--Color: var(--bf-primary);
+  --pf-v5-global--link--Color--hover: var(--bf-primary-loud);
+  --pf-v5-global--danger-color--100: var(--bf-error);
+  --pf-v5-global--FontFamily--text: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --pf-v5-global--FontFamily--heading: 'Figtree', 'Noto Sans', system-ui, -apple-system, sans-serif;
+}
+
+.login-pf body.bf-login {
+  display: grid;
+  grid-template-columns: minmax(320px, 42%) 1fr;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bf-page);
+  color: var(--bf-on-surface);
+}
+
+.bf-login__brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 48px;
+  background: var(--bf-primary);
+  color: var(--bf-on-primary);
+}
+
+.bf-login__logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bf-login__mark {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--bf-on-primary);
+  color: var(--bf-primary);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.bf-login__product {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--pf-v5-global--FontFamily--heading);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.bf-login__product small {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bf-login__headline {
+  max-width: 16ch;
+  margin: 0 0 12px;
+  font-family: var(--pf-v5-global--FontFamily--heading);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.bf-login__lede {
+  max-width: 44ch;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.bf-login__company {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bf-login__panel.pf-v5-c-login {
+  min-height: 100vh;
+  background: var(--bf-page);
+}
+
+.bf-login__panel #kc-header {
+  display: none;
+}
+
+.bf-login__panel .pf-v5-c-login__main {
+  border: 1px solid var(--bf-outline);
+  border-radius: 16px;
+  box-shadow: none;
+  background: var(--bf-surface);
+  overflow: hidden;
+}
+
+.bf-login__panel .pf-v5-c-login__main-header {
+  border-top: 0;
+}
+
+.bf-login__panel .pf-v5-c-title {
+  font-family: var(--pf-v5-global--FontFamily--heading);
+  font-weight: 700;
+}
+
+.bf-login__panel .pf-v5-c-button.pf-m-primary,
+.bf-login__panel .pf-v5-c-button.pf-m-secondary {
+  border-radius: 999px;
+}
+
+@media (max-width: 768px) {
+  .login-pf body.bf-login {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .bf-login__brand {
+    padding: 16px 20px;
+  }
+
+  .bf-login__pitch,
+  .bf-login__company {
+    display: none;
+  }
+
+  .bf-login__panel.pf-v5-c-login {
+    min-height: auto;
+  }
+}

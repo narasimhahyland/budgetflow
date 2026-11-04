@@ -1,0 +1,106 @@
+<header class="bf-page__header">
+  <h1 class="bf-page__title">Welcome, {{ session.firstName() }}</h1>
+  @if (subtitle()) {
+    <p class="bf-page__subtitle">{{ subtitle() }}</p>
+  }
+</header>
+
+@if (me()?.platformOperator) {
+  <sat-banner variant="info">
+    <sat-banner-message>
+      You are signed in as a platform operator. Budgets and other financial data of
+      {{ me()?.tenantName }} need an audited break-glass grant.
+    </sat-banner-message>
+  </sat-banner>
+} @else if (canSeeBudgets()) {
+  <section class="bf-card" aria-labelledby="bf-budgets-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="bf-budgets-title">Budgets you can see</h2>
+      <p class="bf-card__hint">
+        Available in each budget's currency, with the {{ me()?.reportingCurrency }} equivalent at
+        the locked plan rate. Times are shown in {{ session.timezone() }}.
+      </p>
+    </div>
+    @switch (budgets.state()) {
+      @case ('error') {
+        <sat-banner variant="warning">
+          <sat-banner-message>
+            We could not load your budgets.
+            {{ budgets.problem()?.detail ?? 'Check your connection and try again.' }}
+          </sat-banner-message>
+          <button mat-button satBannerAction type="button" (click)="retry()">Try again</button>
+        </sat-banner>
+      }
+      @case ('ready') {
+        @if (budgets.items().length === 0) {
+          <sat-empty-state>
+            <h3 satEmptyStateHeadline>No budgets yet</h3>
+            <p satEmptyStateDescription>Budgets you own or that are shared with you appear here.</p>
+          </sat-empty-state>
+        } @else {
+          <div class="bf-table-scroll">
+            <table mat-table [dataSource]="budgets.items()" aria-label="Budgets you can see">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Budget</th>
+                <td mat-cell *matCellDef="let b">
+                  <span class="bf-cell__primary">{{ b.name }}</span>
+                  @if (b.code) {
+                    <span class="bf-cell__secondary">{{ b.code }}</span>
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let b"><bf-budget-status [status]="b.status" /></td>
+              </ng-container>
+              <ng-container matColumnDef="available">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Available</th>
+                <td mat-cell *matCellDef="let b" class="bf-num">
+                  <bf-money
+                    class="bf-cell__primary"
+                    [amountMinor]="b.balances.available.amountMinor"
+                    [currency]="b.balances.available.currency"
+                  />
+                  @if (b.balances.available.currency !== b.balances.availableReporting.currency) {
+                    <span class="bf-cell__secondary">
+                      Reporting
+                      <bf-money
+                        [amountMinor]="b.balances.availableReporting.amountMinor"
+                        [currency]="b.balances.availableReporting.currency"
+                      />
+                    </span>
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef class="bf-col--wide">Created</th>
+                <td mat-cell *matCellDef="let b" class="bf-col--wide" data-testid="relative-time">
+                  {{ b.createdAt | bfDateTime: session.timezone() }}
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="columns"></tr>
+              <tr mat-row *matRowDef="let row; columns: columns"></tr>
+            </table>
+          </div>
+        }
+      }
+      @default {
+        <div class="bf-card__loading" aria-busy="true" aria-label="Loading budgets">
+          <sat-ghost [height]="24" fitContainer />
+          <sat-ghost [height]="24" fitContainer />
+          <sat-ghost [height]="24" fitContainer />
+        </div>
+      }
+    }
+  </section>
+} @else {
+  <section class="bf-card bf-card--padded">
+    <sat-empty-state>
+      <h2 satEmptyStateHeadline>Nothing to show here yet</h2>
+      <p satEmptyStateDescription>
+        Your requests and your team's budget will appear here as these areas open in BudgetFlow. Use
+        the navigation to reach what your role can do today.
+      </p>
+    </sat-empty-state>
+  </section>
+}

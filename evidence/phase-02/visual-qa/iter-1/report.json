@@ -1,0 +1,308 @@
+{
+  "generatedAt": "2026-11-04T17:56:51.038Z",
+  "base": "http://localhost:4210",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 36,
+  "blocking": 1,
+  "warnings": 0,
+  "results": [
+    {
+      "id": "000a-app-shell",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "nav-expanded",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--nav-expanded--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "nav-expanded",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--nav-expanded--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "nav-expanded",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--nav-expanded--mobile--light.png",
+      "findings": [
+        {
+          "type": "wait-timeout",
+          "severity": "blocking",
+          "message": "locator.click: Timeout 30000ms exceeded."
+        }
+      ]
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "notifications-open",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--notifications-open--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "notifications-open",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--notifications-open--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "notifications-open",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--notifications-open--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "account-menu-open",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--account-menu-open--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "account-menu-open",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--account-menu-open--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "account-menu-open",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--account-menu-open--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "employee-forbidden",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--employee-forbidden--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "employee-forbidden",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--employee-forbidden--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "employee-forbidden",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--employee-forbidden--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "employee-home",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--employee-home--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "employee-home",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--employee-home--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "employee-home",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--employee-home--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "india-home",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--india-home--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "india-home",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--india-home--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "india-home",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--india-home--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "placeholder",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--placeholder--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "placeholder",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--placeholder--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "placeholder",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--placeholder--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "not-found",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--not-found--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "not-found",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--not-found--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "not-found",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--not-found--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "platform-operator",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--platform-operator--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "platform-operator",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--platform-operator--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000a-app-shell",
+      "state": "platform-operator",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000a-app-shell--platform-operator--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000b-sign-in-pages",
+      "state": "signed-out",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000b-sign-in-pages--signed-out--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000b-sign-in-pages",
+      "state": "signed-out",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000b-sign-in-pages--signed-out--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000b-sign-in-pages",
+      "state": "signed-out",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000b-sign-in-pages--signed-out--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000b-sign-in-pages",
+      "state": "sign-in-problem",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000b-sign-in-pages--sign-in-problem--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000b-sign-in-pages",
+      "state": "sign-in-problem",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000b-sign-in-pages--sign-in-problem--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000b-sign-in-pages",
+      "state": "sign-in-problem",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-02/visual-qa/iter-1/screens/000b-sign-in-pages--sign-in-problem--mobile--light.png",
+      "findings": []
+    }
+  ]
+}
