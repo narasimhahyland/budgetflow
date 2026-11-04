@@ -404,6 +404,8 @@ export class ChangeRequests {
         }),
       );
       this.note = '';
+      // Keep the decided request in view with its new status.
+      this.status.set('all');
       this.list.reload();
       this.changed.emit();
     } catch (e) {

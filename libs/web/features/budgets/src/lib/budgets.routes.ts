@@ -1,7 +1,18 @@
-import type { Routes } from '@angular/router';
+import type { Routes, UrlMatcher } from '@angular/router';
 import { requirePermission } from '@bf/web/data-access';
 
 const page = (title: string) => ({ pageTitle: title, section: 'Budgets' });
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** `/budgets/<uuid>[/<suffix>]`; anything else falls through to the shell's Page not found. */
+const budgetPath =
+  (suffix?: string): UrlMatcher =>
+  (segments) => {
+    if (segments.length !== (suffix ? 2 : 1) || !UUID.test(segments[0].path)) return null;
+    if (suffix && segments[1].path !== suffix) return null;
+    return { consumed: segments, posParams: { budgetId: segments[0] } };
+  };
 
 /** Budget screens, lazy-loaded under /budgets by apps/web. The API enforces scope on every call. */
 export const budgetsRoutes: Routes = [
@@ -56,14 +67,14 @@ export const budgetsRoutes: Routes = [
     loadComponent: () => import('./templates.page').then((m) => m.TemplatesPage),
   },
   {
-    path: ':budgetId',
+    matcher: budgetPath(),
     title: 'Budget details',
     data: page('Budget details'),
     canActivate: [requirePermission('budget.read', 'Budget details')],
     loadComponent: () => import('./detail.page').then((m) => m.BudgetDetailPage),
   },
   {
-    path: ':budgetId/per-head',
+    matcher: budgetPath('per-head'),
     title: 'Per-head allocation',
     data: page('Per-head allocation'),
     canActivate: [requirePermission('budget.allocate', 'Per-head allocation')],

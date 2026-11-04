@@ -370,10 +370,13 @@ export class BudgetsService {
           'A root budget needs an approved plan version and an original amount.',
         );
       }
+      // Locked before the journal references it, so concurrent roots of one plan version queue here
+      // instead of deadlocking on the line-number lock.
       const [pv] = await tx
         .select()
         .from(planVersions)
-        .where(eq(planVersions.id, req.planVersionId));
+        .where(eq(planVersions.id, req.planVersionId))
+        .for('update');
       if (!pv || pv.status !== 'approved' || pv.fiscalYearId !== fy.id) {
         throw new ApiProblem(
           422,
