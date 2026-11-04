@@ -12,24 +12,6 @@
     "notDesigned": 0
   },
   {
-    "page": "000a-app-shell--switcher-open",
-    "mode": "image",
-    "linked": 20,
-    "notDesigned": 0
-  },
-  {
-    "page": "000a-app-shell--notifications-open",
-    "mode": "image",
-    "linked": 29,
-    "notDesigned": 0
-  },
-  {
-    "page": "000a-app-shell--search-open",
-    "mode": "image",
-    "linked": 26,
-    "notDesigned": 0
-  },
-  {
     "page": "000a-app-shell--employee-forbidden",
     "mode": "image",
     "linked": 11,
@@ -42,6 +24,24 @@
     "notDesigned": 0
   },
   {
+    "page": "000a-app-shell--notifications-open",
+    "mode": "image",
+    "linked": 28,
+    "notDesigned": 0
+  },
+  {
+    "page": "000a-app-shell--search-open",
+    "mode": "image",
+    "linked": 24,
+    "notDesigned": 0
+  },
+  {
+    "page": "000a-app-shell--user-menu-open",
+    "mode": "image",
+    "linked": 25,
+    "notDesigned": 0
+  },
+  {
     "page": "003-mfa-verification--default",
     "mode": "image",
     "linked": 4,
@@ -50,32 +50,32 @@
   {
     "page": "011-executive-dashboard--default",
     "mode": "html",
-    "linked": 21,
-    "notDesigned": 8
+    "linked": 20,
+    "notDesigned": 9
   },
   {
     "page": "011-executive-dashboard--loading",
     "mode": "html",
-    "linked": 21,
-    "notDesigned": 8
+    "linked": 20,
+    "notDesigned": 9
   },
   {
     "page": "011-executive-dashboard--empty",
     "mode": "image",
-    "linked": 22,
+    "linked": 21,
     "notDesigned": 0
   },
   {
     "page": "011-executive-dashboard--error",
     "mode": "html",
-    "linked": 23,
-    "notDesigned": 8
+    "linked": 22,
+    "notDesigned": 9
   },
   {
     "page": "020-create-budget--default",
     "mode": "html",
-    "linked": 20,
-    "notDesigned": 17
+    "linked": 19,
+    "notDesigned": 18
   },
   {
     "page": "021-budget-details--default",
@@ -86,11 +86,17 @@
   {
     "page": "022-budget-allocation-workspace--default",
     "mode": "image",
-    "linked": 23,
+    "linked": 22,
     "notDesigned": 0
   },
   {
     "page": "022-budget-allocation-workspace--warning-block",
+    "mode": "image",
+    "linked": 21,
+    "notDesigned": 0
+  },
+  {
+    "page": "022c-hr-headcount-import--default",
     "mode": "image",
     "linked": 22,
     "notDesigned": 0
@@ -98,19 +104,43 @@
   {
     "page": "023-budget-hierarchy--default",
     "mode": "html",
-    "linked": 28,
-    "notDesigned": 12
+    "linked": 27,
+    "notDesigned": 13
   },
   {
     "page": "023-budget-hierarchy--set-to-zero-dialog",
     "mode": "html",
-    "linked": 30,
-    "notDesigned": 13
+    "linked": 29,
+    "notDesigned": 14
+  },
+  {
+    "page": "024-allocate-to-child--default",
+    "mode": "image",
+    "linked": 5,
+    "notDesigned": 0
+  },
+  {
+    "page": "024-allocate-to-child--blocked",
+    "mode": "image",
+    "linked": 3,
+    "notDesigned": 0
   },
   {
     "page": "024a-per-head-driver-allocation--default",
     "mode": "image",
-    "linked": 20,
+    "linked": 19,
+    "notDesigned": 0
+  },
+  {
+    "page": "026-reduce-budget--dialog",
+    "mode": "image",
+    "linked": 18,
+    "notDesigned": 0
+  },
+  {
+    "page": "026-reduce-budget--below-floor",
+    "mode": "image",
+    "linked": 17,
     "notDesigned": 0
   },
   {
@@ -120,15 +150,75 @@
     "notDesigned": 18
   },
   {
+    "page": "028-set-to-zero--dialog",
+    "mode": "image",
+    "linked": 20,
+    "notDesigned": 0
+  },
+  {
+    "page": "028-set-to-zero--validation",
+    "mode": "image",
+    "linked": 19,
+    "notDesigned": 0
+  },
+  {
     "page": "045-create-event-budget--default",
     "mode": "image",
-    "linked": 27,
+    "linked": 26,
     "notDesigned": 0
   },
   {
     "page": "045-create-event-budget--validation",
     "mode": "image",
-    "linked": 27,
+    "linked": 26,
+    "notDesigned": 0
+  },
+  {
+    "page": "046-event-details--default",
+    "mode": "image",
+    "linked": 26,
+    "notDesigned": 0
+  },
+  {
+    "page": "046a-co-funding-board--default",
+    "mode": "image",
+    "linked": 30,
+    "notDesigned": 0
+  },
+  {
+    "page": "047-event-participants--default",
+    "mode": "image",
+    "linked": 23,
+    "notDesigned": 0
+  },
+  {
+    "page": "055-my-requests--default",
+    "mode": "image",
+    "linked": 22,
+    "notDesigned": 0
+  },
+  {
+    "page": "056a-inter-director-contribution-request--partial",
+    "mode": "image",
+    "linked": 23,
+    "notDesigned": 0
+  },
+  {
+    "page": "056a-inter-director-contribution-request--decline",
+    "mode": "image",
+    "linked": 24,
+    "notDesigned": 0
+  },
+  {
+    "page": "056a-inter-director-contribution-request--full",
+    "mode": "image",
+    "linked": 24,
+    "notDesigned": 0
+  },
+  {
+    "page": "057-additional-fund-request--default",
+    "mode": "image",
+    "linked": 24,
     "notDesigned": 0
   },
   {
@@ -140,7 +230,7 @@
   {
     "page": "059-approval-inbox--empty",
     "mode": "image",
-    "linked": 22,
+    "linked": 21,
     "notDesigned": 0
   },
   {
@@ -150,27 +240,87 @@
     "notDesigned": 21
   },
   {
+    "page": "060-request-details--default",
+    "mode": "image",
+    "linked": 22,
+    "notDesigned": 0
+  },
+  {
+    "page": "061-approval-decision--approve-part",
+    "mode": "image",
+    "linked": 4,
+    "notDesigned": 0
+  },
+  {
+    "page": "061-approval-decision--outside-doa",
+    "mode": "image",
+    "linked": 4,
+    "notDesigned": 0
+  },
+  {
+    "page": "061a-actionable-approval-email--default",
+    "mode": "image",
+    "linked": 5,
+    "notDesigned": 0
+  },
+  {
     "page": "069-rule-builder--default",
     "mode": "image",
-    "linked": 16,
+    "linked": 15,
     "notDesigned": 0
   },
   {
     "page": "069-rule-builder--conflict-simulation",
     "mode": "html",
-    "linked": 16,
-    "notDesigned": 16
+    "linked": 15,
+    "notDesigned": 17
+  },
+  {
+    "page": "080a-actuals-import--default",
+    "mode": "image",
+    "linked": 26,
+    "notDesigned": 0
+  },
+  {
+    "page": "080b-unmatched-actuals--default",
+    "mode": "image",
+    "linked": 13,
+    "notDesigned": 0
+  },
+  {
+    "page": "080c-gl-tie-out--default",
+    "mode": "image",
+    "linked": 25,
+    "notDesigned": 0
+  },
+  {
+    "page": "082-utilization-report--export-menu-open",
+    "mode": "image",
+    "linked": 21,
+    "notDesigned": 0
   },
   {
     "page": "088-audit-log--default",
     "mode": "image",
-    "linked": 19,
+    "linked": 18,
     "notDesigned": 0
   },
   {
     "page": "088-audit-log--chain-broken",
     "mode": "image",
-    "linked": 21,
+    "linked": 20,
+    "notDesigned": 0
+  },
+  {
+    "page": "107-exchange-rates--default",
+    "mode": "image",
+    "linked": 7,
+    "notDesigned": 0
+  },
+  {
+    "page": "108-fiscal-calendar--default",
+    "mode": "image",
+    "linked": 22,
     "notDesigned": 0
   },
   {
