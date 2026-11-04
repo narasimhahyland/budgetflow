@@ -139,6 +139,23 @@ export class DoaService {
     });
   }
 
+  /** Active limits on a date for approval routing (Phase 5); the caller's transaction sets the tenant. */
+  async limitsAsOf(tx: Tx, date: string): Promise<DomainLimit[]> {
+    const version = await this.activeVersion(tx, date);
+    if (!version) return [];
+    return (await this.limits(tx, version.id, date)).map((r) => ({
+      id: r.id,
+      personId: r.personId,
+      role: r.role,
+      spendType: r.spendType,
+      legalEntityId: r.legalEntityId ?? '*',
+      limitMinor: r.limitMinor,
+      currency: r.currency,
+      validFrom: r.validFrom,
+      validTo: r.validTo,
+    }));
+  }
+
   private async activeVersion(tx: Tx, date: string) {
     const [v] = await tx
       .select()

@@ -1,0 +1,17 @@
+{
+  "name": "api-events",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api/events/src",
+  "projectType": "library",
+  "tags": ["type:api-module", "scope:api"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p libs/api/events/tsconfig.lib.json --noEmit"
+      }
+    }
+  }
+}

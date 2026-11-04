@@ -1,6 +1,8 @@
+import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
 import { DB } from '@bf/api/core';
 import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
 import { LEDGER_CHECK_TOPIC, RebuildService } from '@bf/api/integrity';
+import { EMAIL_TOPIC, NotificationsService, type EmailPayload } from '@bf/api/notifications';
 import {
   Inject,
   Injectable,
@@ -34,6 +36,8 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
   constructor(
     @Inject(DB) private readonly db: Db,
     private readonly rebuild: RebuildService,
+    private readonly notifications: NotificationsService,
+    private readonly controls: BudgetControlConsumer,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -62,6 +66,20 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
         this.log.log(`ledger check ${job.data.checkRunId}: ${outcome}`);
       }
     });
+    for (const topic of [EMAIL_TOPIC, BUDGET_CONTROL_TOPIC]) {
+      await boss.createQueue(topic, {
+        retryLimit: 5,
+        retryDelay: 5,
+        retryBackoff: true,
+        deadLetter: DEAD_LETTER,
+      });
+    }
+    await boss.work<EmailPayload>(EMAIL_TOPIC, async (jobs) => {
+      for (const job of jobs) await this.notifications.deliver(job.data);
+    });
+    await boss.work<{ tenantId: string; budgetId: string }>(BUDGET_CONTROL_TOPIC, async (jobs) => {
+      for (const job of jobs) await this.controls.handle(job.data.tenantId, job.data.budgetId);
+    });
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();
       this.log.log(`nightly ledger rebuild check ran for ${n} tenant(s)`);
@@ -78,7 +96,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       Number(process.env.OUTBOX_POLL_MS ?? 1000),
     );
     this.ready = true;
-    this.log.log('worker ready: outbox drain and integrity jobs running');
+    this.log.log('worker ready: outbox drain, email, budget-control and integrity jobs running');
   }
 
   async onApplicationShutdown(): Promise<void> {
@@ -103,7 +121,11 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
             .for('update', { skipLocked: true });
           for (const m of pending) {
             try {
-              await this.boss!.send(m.topic, m.payload as object, { singletonKey: m.id });
+              await this.boss!.send(
+                m.topic,
+                { tenantId: m.tenantId, ...(m.payload as object) },
+                { singletonKey: m.id },
+              );
               await tx
                 .update(outboxMessages)
                 .set({ publishedAt: new Date(), attempts: sql`${outboxMessages.attempts} + 1` })

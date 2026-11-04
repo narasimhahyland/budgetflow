@@ -9,7 +9,7 @@ import {
   type StoredAuditEvent,
 } from '@bf/domain';
 import { Injectable } from '@nestjs/common';
-import { asc, eq, gt, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, or, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 
 export interface AuditEntry {
@@ -133,6 +133,27 @@ export class AuditService {
       };
     }
     return chain;
+  }
+
+  /** Entries for the given resources, newest first (activity timelines; the caller authorizes). */
+  async forResources(
+    tx: Tx,
+    resources: readonly { type: string; id: string }[],
+    limit = 200,
+  ): Promise<AuditRow[]> {
+    if (!resources.length) return [];
+    return tx
+      .select()
+      .from(auditEvents)
+      .where(
+        or(
+          ...resources.map((r) =>
+            and(eq(auditEvents.resourceType, r.type), eq(auditEvents.resourceId, r.id)),
+          ),
+        ),
+      )
+      .orderBy(desc(auditEvents.seq))
+      .limit(limit);
   }
 
   async count(tx: Tx): Promise<number> {

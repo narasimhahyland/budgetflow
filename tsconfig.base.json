@@ -35,7 +35,13 @@
       "@bf/web/features/finance-admin": ["./libs/web/features/finance-admin/src/index.ts"],
       "@bf/web/features/org": ["./libs/web/features/org/src/index.ts"],
       "@bf/web/shell": ["./libs/web/shell/src/index.ts"],
-      "@bf/web/ui": ["./libs/web/ui/src/index.ts"]
+      "@bf/web/ui": ["./libs/web/ui/src/index.ts"],
+      "@bf/api/notifications": ["./libs/api/notifications/src/index.ts"],
+      "@bf/api/approvals": ["./libs/api/approvals/src/index.ts"],
+      "@bf/api/documents": ["./libs/api/documents/src/index.ts"],
+      "@bf/api/spend": ["./libs/api/spend/src/index.ts"],
+      "@bf/api/contributions": ["./libs/api/contributions/src/index.ts"],
+      "@bf/api/events": ["./libs/api/events/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

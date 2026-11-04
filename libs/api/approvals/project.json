@@ -1,0 +1,17 @@
+{
+  "name": "api-approvals",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api/approvals/src",
+  "projectType": "library",
+  "tags": ["type:api-module", "scope:api"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p libs/api/approvals/tsconfig.lib.json --noEmit"
+      }
+    }
+  }
+}
