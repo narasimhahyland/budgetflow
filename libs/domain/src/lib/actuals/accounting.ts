@@ -209,7 +209,7 @@ export function commitmentAging(input: {
 }
 
 /** Days after the service end without actuals from which BudgetFlow prompts the owner to release. */
-export const AUTO_RELEASE_PROMPT_DAYS = 30;
+export const AUTO_RELEASE_PROMPT_DAYS = 7;
 
 /** Accrual proposals: commitments past their service end with encumbrance left and no live accrual. */
 export function needsAccrual(input: {

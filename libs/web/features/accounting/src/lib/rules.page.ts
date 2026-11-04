@@ -42,8 +42,8 @@ import { LoadState } from './load-state';
       <div class="bf-page__heading">
         <h1 class="bf-page__title">Mapping rules</h1>
         <p class="bf-page__subtitle">
-          Applied after commitment reference, event code and vendor matching, in priority order. A
-          rule sends matching lines to a budget or to an event's open commitments.
+          Rules run in priority order after reference and event-code matching. The first rule that
+          fits proposes the match.
         </p>
       </div>
       @if (canManage() && !adding()) {

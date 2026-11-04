@@ -124,7 +124,7 @@ test.describe('accruals, commitment hygiene and event close', () => {
     const row = page
       .getByRole('table', { name: 'Open commitments' })
       .getByRole('row', { name: /Quarterly team lunch/ });
-    await expect(row).toContainText('Release prompt');
+    await expect(row).toContainText('Release suggested');
     await expect(row).toContainText('USD 2,000.00');
   });
 

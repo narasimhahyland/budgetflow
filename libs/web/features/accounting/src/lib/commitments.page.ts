@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
 import type { CommitmentHygieneItem } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
@@ -32,6 +33,7 @@ import { LoadState } from './load-state';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSlideToggleModule,
     MatTableModule,
     Money,
     SAT_BANNER_IMPORTS,
@@ -74,7 +76,7 @@ import { LoadState } from './load-state';
         <div class="bf-kpi bf-kpi--warning">
           <p class="bf-kpi__label">Release prompts</p>
           <p class="bf-kpi__value" data-testid="prompt-count">{{ l.totals.prompts }}</p>
-          <p class="bf-kpi__delta">30+ days past service end, not accrued</p>
+          <p class="bf-kpi__delta">A week past service end, not accrued</p>
         </div>
         @for (b of l.totals.byBucket; track b.bucket) {
           <div class="bf-kpi">
@@ -92,6 +94,14 @@ import { LoadState } from './load-state';
         }
       </div>
     }
+    <section class="bf-card bf-filters" aria-label="Filters">
+      <mat-slide-toggle
+        [checked]="promptsOnly()"
+        (change)="promptsOnly.set($event.checked)"
+        data-testid="prompts-only"
+        >Release prompts only</mat-slide-toggle
+      >
+    </section>
     <section class="bf-card" aria-label="Open commitments">
       @if (list.isLoading() && !valueOf(list)) {
         <bf-load-state [loading]="true" what="commitments" />
@@ -143,7 +153,7 @@ import { LoadState } from './load-state';
               <td mat-cell *matCellDef="let c">
                 <span class="bf-chip-row">
                   @if (c.releasePrompt) {
-                    <sat-status-tag status="warning">Release prompt</sat-status-tag>
+                    <sat-status-tag status="warning">Release suggested</sat-status-tag>
                   }
                   @if (c.accrued.amountMinor) {
                     <sat-status-tag status="info"
@@ -262,10 +272,11 @@ export class CommitmentsPage {
   protected readonly list = resource({
     loader: () => data(this.api.listCommitmentHygiene({ query: {} })),
   });
+  protected readonly promptsOnly = signal(false);
   protected readonly items = computed(() =>
-    [...(valueOf(this.list)?.items ?? [])].sort(
-      (a, b) => Number(b.releasePrompt) - Number(a.releasePrompt) || b.daysPast - a.daysPast,
-    ),
+    [...(valueOf(this.list)?.items ?? [])]
+      .filter((c) => !this.promptsOnly() || c.releasePrompt)
+      .sort((a, b) => Number(b.releasePrompt) - Number(a.releasePrompt) || b.daysPast - a.daysPast),
   );
   protected readonly acting = signal<{ id: string; kind: 'release' | 'cancel' } | null>(null);
   protected readonly reason = signal('');

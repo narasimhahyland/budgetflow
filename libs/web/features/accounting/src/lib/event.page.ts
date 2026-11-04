@@ -10,12 +10,13 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { formatMoney, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
@@ -32,6 +33,7 @@ import { LoadState } from './load-state';
     FormsModule,
     LoadState,
     MatButtonModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     MatTableModule,
@@ -141,15 +143,22 @@ import { LoadState } from './load-state';
                   data-testid="close-reason"
                 />
               </mat-form-field>
+              <mat-checkbox
+                [checked]="confirmed()"
+                (change)="confirmed.set($event.checked)"
+                data-testid="close-confirm"
+              >
+                I confirm the final cost of {{ money(r.spent.amountMinor, r.spent.currency) }}
+              </mat-checkbox>
               <button
                 mat-flat-button
                 satImportantButton
                 type="button"
-                [disabled]="busy() || !r.canClose || reason().trim().length < 5"
+                [disabled]="busy() || !r.canClose || !confirmed() || reason().trim().length < 5"
                 (click)="close()"
                 data-testid="close-event"
               >
-                Close event and return surplus
+                Close event and return {{ money(r.surplus.amountMinor, r.surplus.currency) }}
               </button>
               @if (!r.canClose) {
                 <p class="bf-muted">Resolve the items above first.</p>
@@ -298,9 +307,14 @@ export class EventPage {
     loader: ({ params }) => data(this.api.getEventReconciliation({ params })),
   });
   protected readonly reason = signal('');
+  protected readonly confirmed = signal(false);
   protected readonly busy = signal(false);
   protected readonly notice = signal<string | null>(null);
   protected readonly failure = signal<string | null>(null);
+
+  protected money(minor: number, currency: string): string {
+    return formatMoney(minor, currency);
+  }
 
   protected statusText(s: string): string {
     return s.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());

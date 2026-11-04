@@ -89,13 +89,19 @@ const STATUS: Record<
           Run auto-reversals
         </button>
         <button mat-stroked-button type="button" [disabled]="busy()" (click)="exportFile()">
-          Export posted accruals (CSV)
+          Export accrual journal (CSV)
         </button>
         <button mat-stroked-button type="button" [disabled]="busy()" (click)="recognize()">
           Recognize prepaids
         </button>
       </section>
     }
+    <sat-banner variant="info">
+      <sat-banner-message>
+        Accruals record cost already incurred. They never consume budget and reverse automatically
+        when the invoice arrives or when the next period starts.
+      </sat-banner-message>
+    </sat-banner>
     <div class="bf-kpis">
       <div class="bf-kpi bf-kpi--warning">
         <p class="bf-kpi__label">Proposed</p>
