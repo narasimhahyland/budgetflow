@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture: broken screen</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        font: 16px/1.5 system-ui, sans-serif;
+        background: Canvas;
+        color: CanvasText;
+      }
+      main {
+        padding: 16px 24px;
+      }
+      .panel {
+        height: 70vh;
+        background: ButtonFace;
+      }
+      .wide {
+        width: 2400px;
+        height: 24px;
+        background: GrayText;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Broken screen</h1>
+      <div id="spacer"></div>
+      <div class="panel">Panel that moves when the spacer grows.</div>
+      <button type="button">
+        <svg width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6" /></svg>
+      </button>
+      <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="40" height="40" />
+      <div class="wide"></div>
+      <p>{{ budget.name }}</p>
+      <p>Content below the shifting block.</p>
+      <p>More content that moves when the spacer grows.</p>
+    </main>
+    <script>
+      console.error('fixture: simulated failure');
+      fetch('/missing.json').catch(() => {});
+      setTimeout(() => {
+        document.getElementById('spacer').style.height = '600px';
+      }, 300);
+    </script>
+  </body>
+</html>

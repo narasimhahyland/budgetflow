@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture: budget hierarchy</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        font: 16px/1.5 system-ui, sans-serif;
+        background: Canvas;
+        color: CanvasText;
+      }
+      header,
+      main {
+        padding: 16px 24px;
+      }
+      .card {
+        border: 1px solid GrayText;
+        border-radius: 8px;
+        padding: 16px;
+        max-width: 640px;
+      }
+      button {
+        font: inherit;
+        padding: 8px 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav aria-label="Primary"><a href="#main">Budgets</a></nav>
+    </header>
+    <main id="main">
+      <h1>Budget hierarchy</h1>
+      <section class="card" aria-labelledby="india">
+        <h2 id="india">India</h2>
+        <p>Available: INR 12,00,000</p>
+        <button type="button">Allocate</button>
+      </section>
+    </main>
+  </body>
+</html>
