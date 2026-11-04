@@ -339,6 +339,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Allocate budget to child unit\"]"
+            },
+            {
+              "waitFor": "mat-dialog-container bf-money:has-text(\"USD\")"
             }
           ]
         },
@@ -350,6 +353,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Allocate budget to child unit\"]"
+            },
+            {
+              "waitFor": "mat-dialog-container bf-money:has-text(\"USD\")"
             },
             {
               "waitFor": "[data-testid=allocate-amount]"
@@ -378,6 +384,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Transfer budget\"]"
+            },
+            {
+              "waitFor": "mat-dialog-container bf-money:has-text(\"USD\")"
             }
           ]
         },
@@ -389,6 +398,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Transfer budget\"]"
+            },
+            {
+              "waitFor": "mat-dialog-container bf-money:has-text(\"USD\")"
             },
             {
               "waitFor": "[data-testid=transfer-amount]"
@@ -419,6 +431,9 @@
               "waitFor": "role=heading[name=\"Reduce budget\"]"
             },
             {
+              "waitFor": "mat-dialog-container bf-money:has-text(\"USD\")"
+            },
+            {
               "waitFor": "[data-testid=reduce-amount]"
             },
             {
@@ -434,6 +449,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Reduce budget\"]"
+            },
+            {
+              "waitFor": "mat-dialog-container bf-money:has-text(\"USD\")"
             },
             {
               "waitFor": "[data-testid=reduce-amount]"
@@ -520,6 +538,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Request budget increase\"]"
+            },
+            {
+              "waitFor": "mat-dialog-container bf-money:has-text(\"USD\")"
             },
             {
               "waitFor": "[data-testid=increase-target]"

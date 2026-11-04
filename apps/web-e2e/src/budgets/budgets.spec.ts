@@ -12,6 +12,9 @@ import { allocate, createChild, createRoot, getBudget } from './api';
 const usd = (minor: number) =>
   `USD ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(minor / 100)}`;
 const dialog = (page: Page) => page.getByRole('dialog');
+// Static dialog text renders before the first binding pass; input typed earlier is dropped.
+const dialogBound = (page: Page) =>
+  expect(dialog(page).locator('bf-money').first()).toContainText('USD');
 const desktopOnly = (name: string) =>
   test.skip(name !== 'desktop', 'mutating journey runs once, on desktop');
 
@@ -107,6 +110,7 @@ test.describe('finance admin controls a program', () => {
 
     await page.goto(`/budgets/${other.id}`);
     await page.getByTestId('reduce').click();
+    await dialogBound(page);
     await dialog(page).getByTestId('reduce-amount').fill('3500');
     await expect(dialog(page).getByTestId('reduce-problem')).toContainText('cannot go below');
     await dialog(page).getByTestId('reduce-amount').fill('500');
@@ -181,6 +185,7 @@ test.describe('increase request', () => {
     const p1 = await lm.newPage();
     await p1.goto(`/budgets/${child.id}`);
     await p1.getByTestId('request-increase').click();
+    await dialogBound(p1);
     await p1.getByRole('dialog').getByTestId('increase-target').fill('1500');
     await p1
       .getByRole('dialog')
