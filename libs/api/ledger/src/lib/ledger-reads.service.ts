@@ -2,6 +2,7 @@ import {
   budgets,
   exchangeRates,
   fiscalPeriods,
+  fiscalYears,
   ledgerBalances,
   legalEntities,
   type Tx,
@@ -13,6 +14,7 @@ import {
   emptyBalances,
   NORMAL_SIGN,
   resolvePostingPeriod,
+  toSafeMinor,
   type BucketBalances,
   type BudgetBucket,
   type BudgetRef,
@@ -85,6 +87,23 @@ export class LedgerReads {
         sql`, `,
       )}) order by depth, id for update`,
     );
+  }
+
+  async fiscalYear(
+    tx: Tx,
+    id: string,
+  ): Promise<{ id: string; label: string; startDate: string; endDate: string }> {
+    const [fy] = await tx
+      .select({
+        id: fiscalYears.id,
+        label: fiscalYears.label,
+        startDate: fiscalYears.startDate,
+        endDate: fiscalYears.endDate,
+      })
+      .from(fiscalYears)
+      .where(eq(fiscalYears.id, id));
+    if (!fy) throw new ApiProblem(422, 'VALIDATION_FAILED', 'The fiscal year does not exist.');
+    return fy;
   }
 
   async planRates(tx: Tx, fiscalYearId: string): Promise<FxRate[]> {
@@ -163,8 +182,8 @@ export class LedgerReads {
       if (!(BUDGET_BUCKETS as readonly string[]).includes(row.bucket)) continue;
       const pair = out.get(row.budgetId)!;
       const bucket = row.bucket as BudgetBucket;
-      pair.budget[bucket] = NORMAL_SIGN[bucket] * Number(row.b);
-      pair.reporting[bucket] = NORMAL_SIGN[bucket] * Number(row.r);
+      pair.budget[bucket] = NORMAL_SIGN[bucket] * toSafeMinor(row.b);
+      pair.reporting[bucket] = NORMAL_SIGN[bucket] * toSafeMinor(row.r);
     }
     return out;
   }

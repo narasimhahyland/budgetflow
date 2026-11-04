@@ -1,6 +1,6 @@
 import type { CurrencyCode } from '../money/currency';
 import { requirePositive, type Money } from '../money/money';
-import type { FxRate } from '../money/rate';
+import type { FxRate, Rounding } from '../money/rate';
 import { buildTriplet, type CurrencyTriplet } from '../money/triplet';
 import { err, ok, type Result } from '../result';
 import { isBudgetBucket, type LedgerAccount } from './accounts';
@@ -86,16 +86,51 @@ function counterLine(
   };
 }
 
+/**
+ * Budget-currency rounding per line. On hierarchy buckets the budget giving value up (a debit:
+ * allocated out on the parent, authorized on a child returning money) rounds away from zero and the
+ * budget receiving it (a credit) rounds toward zero, so children never hold more than their parent
+ * gave up at the locked plan rate. Every other line rounds half-even. The rebuild check re-verifies
+ * stored amounts with this rule.
+ */
+export function budgetRoundingFor(
+  account: LedgerAccount,
+  signedTransactionMinor: number,
+): Rounding {
+  if (account !== 'authorized' && account !== 'allocated_out') return 'half_even';
+  return signedTransactionMinor > 0 ? 'up' : 'down';
+}
+
 function triplet(
   amount: Money,
   budgetCurrency: CurrencyCode,
   ctx: PostingContext,
+  budgetRounding: Rounding = 'half_even',
 ): Result<CurrencyTriplet> {
   return buildTriplet(amount, {
     budgetCurrency,
     reportingCurrency: ctx.reportingCurrency,
     rates: ctx.rates,
+    budgetRounding,
   });
+}
+
+function hierarchyTriplet(
+  amount: Money,
+  budgetCurrency: CurrencyCode,
+  account: 'authorized' | 'allocated_out',
+  side: Side,
+  ctx: PostingContext,
+): Result<CurrencyTriplet> {
+  const t = triplet(amount, budgetCurrency, ctx, budgetRoundingFor(account, side));
+  if (t.ok && t.value.budget.amountMinor === 0) {
+    return err(
+      'AMOUNT_ROUNDS_TO_ZERO',
+      `The amount converts to less than one minor unit of ${budgetCurrency} at the locked plan rate; enter a larger amount.`,
+      { currency: budgetCurrency },
+    );
+  }
+  return t;
 }
 
 function draft(
@@ -146,6 +181,8 @@ export interface AllocationInput {
 /**
  * Allocation: Dr parent allocated out / Cr child authorized, one balanced journal. The parent's
  * available is checked at the locked plan rate in the parent's currency (hard block, no tolerance).
+ * Across currencies the parent is charged rounding up and the child credited rounding down; an
+ * amount worth less than one minor unit of either budget currency is rejected.
  */
 export function postAllocation(
   input: AllocationInput,
@@ -174,9 +211,9 @@ export function postAllocation(
       { currency: input.amount.currency },
     );
   }
-  const pt = triplet(input.amount, input.parent.currency, ctx);
+  const pt = hierarchyTriplet(input.amount, input.parent.currency, 'allocated_out', 1, ctx);
   if (!pt.ok) return pt;
-  const ct = triplet(input.amount, input.child.currency, ctx);
+  const ct = hierarchyTriplet(input.amount, input.child.currency, 'authorized', -1, ctx);
   if (!ct.ok) return ct;
   const check = checkAllocation(
     input.parent.balances,
@@ -219,6 +256,12 @@ export interface ManualLineInput {
   legalEntityId: string;
 }
 
+/**
+ * Manual journal (opening balances, adjustments): budget lines only exchange amounts with counter
+ * accounts, so all budget lines sit on one side; no bucket may go below zero. Each line converts
+ * half-even; if that leaves the reporting view unbalanced, a rounding line to `fx_variance` absorbs
+ * the difference (at most half a minor unit per line).
+ */
 export function postManualJournal(
   input: {
     transactionCurrency: CurrencyCode;
@@ -266,6 +309,28 @@ export function postManualJournal(
         : counterLine(l.account, l.legalEntityId, side, t.value),
     );
   }
+  const budgetSides = new Set(input.lines.filter((l) => l.budget).map((l) => l.side));
+  if (budgetSides.size > 1) {
+    return err(
+      'MANUAL_JOURNAL_NEEDS_COUNTER_ACCOUNT',
+      'A manual journal cannot move amounts between budgets or buckets: put every budget line on the same side and offset it with counter accounts. Allocations and commitments have their own commands.',
+    );
+  }
+  const sum = (view: 'transaction' | 'reporting') =>
+    lines.reduce((acc, l) => acc + l[view].amountMinor, 0);
+  const reportingDifference = sum('reporting');
+  if (lines.length > 0 && sum('transaction') === 0 && reportingDifference !== 0) {
+    lines.push({
+      budgetId: null,
+      account: 'fx_variance',
+      legalEntityId: lines[0].legalEntityId,
+      transaction: { amountMinor: 0, currency: input.transactionCurrency },
+      budget: null,
+      reporting: { amountMinor: -reportingDifference, currency: ctx.reportingCurrency },
+      budgetRate: null,
+      reportingRate: lines[0].reportingRate,
+    });
+  }
   const built = draft(
     'manual',
     { amountMinor: 0, currency: input.transactionCurrency },
@@ -311,12 +376,18 @@ export function postReduction(
       'REDUCTION_DESTINATION_REQUIRED',
       'A root budget cannot return money to a parent; choose savings.',
     );
-  const t = triplet(input.amount, input.budget.currency, ctx);
+  const t = hierarchyTriplet(input.amount, input.budget.currency, 'authorized', 1, ctx);
   if (!t.ok) return t;
   const counter =
     input.destination === 'parent'
       ? (() => {
-          const pt = triplet(input.amount, input.parent!.currency, ctx);
+          const pt = hierarchyTriplet(
+            input.amount,
+            input.parent!.currency,
+            'allocated_out',
+            -1,
+            ctx,
+          );
           return pt.ok ? ok(budgetLine(input.parent!, 'allocated_out', -1, pt.value)) : pt;
         })()
       : ok(counterLine('savings', input.budget.legalEntityId, -1, t.value));

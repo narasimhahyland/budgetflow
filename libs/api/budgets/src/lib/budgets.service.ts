@@ -11,8 +11,11 @@ import { AuditService } from '@bf/api/audit';
 import {
   budgetCategories,
   budgets,
+  costCenters,
   fiscalYears,
   legalEntities,
+  orgUnits,
+  people,
   planVersions,
   withTenant,
   type Db,
@@ -154,6 +157,18 @@ export class BudgetsService {
       },
       async (tx) => {
         const id = ctx.fixedId ?? randomUUID();
+        let parent: BudgetRow | undefined;
+        if (req.parentId) {
+          parent = (await this.reads.budgetRows(tx, [req.parentId])).get(req.parentId);
+          if (!parent) throw ApiProblem.notFound('parent budget');
+          this.policy.assert(actor, 'budget.create_child', budgetResource(parent), 'parent budget');
+        } else {
+          this.policy.assert(actor, 'budget.create_root', {
+            kind: 'tenant',
+            tenantId: actor.tenantId,
+          });
+        }
+        await this.assertTenantReferences(tx, req);
         const [entity] = await tx
           .select()
           .from(legalEntities)
@@ -199,11 +214,7 @@ export class BudgetsService {
           toleranceBps: DEFAULT_CONTROL.toleranceBps,
         };
         const accountingDate = req.accountingDate ?? todayUtc();
-        let parent: BudgetRow | undefined;
-        if (req.parentId) {
-          parent = (await this.reads.budgetRows(tx, [req.parentId])).get(req.parentId);
-          if (!parent) throw ApiProblem.notFound('parent budget');
-          this.policy.assert(actor, 'budget.create_child', budgetResource(parent), 'parent budget');
+        if (parent) {
           unwrap(acceptsNewActivity(parent.status));
           if (req.originalAmount || req.planVersionId) {
             throw new ApiProblem(
@@ -222,10 +233,6 @@ export class BudgetsService {
             );
           await this.reads.lockBudgets(tx, [parent.id]);
         } else {
-          this.policy.assert(actor, 'budget.create_root', {
-            kind: 'tenant',
-            tenantId: actor.tenantId,
-          });
           if (!req.planVersionId || !req.originalAmount) {
             throw new ApiProblem(
               422,
@@ -294,6 +301,7 @@ export class BudgetsService {
           journalId = await this.ledger.post(tx, draft, {
             actor,
             command: 'budgets.create',
+            fiscalYearId: fy.id,
             requestId: ctx.requestId,
             idempotencyKey: ctx.idempotencyKey,
           });
@@ -374,6 +382,7 @@ export class BudgetsService {
         const journalId = await this.ledger.post(tx, result.journal, {
           actor,
           command: 'budgets.allocate',
+          fiscalYearId: parent.fiscalYearId,
           requestId: ctx.requestId,
           idempotencyKey: ctx.idempotencyKey,
         });
@@ -404,6 +413,26 @@ export class BudgetsService {
         };
       },
     );
+  }
+
+  /** Referenced master data must exist in the actor's tenant; lookups run under RLS, so other tenants' ids are not found. */
+  private async assertTenantReferences(tx: Tx, req: CreateBudgetRequest): Promise<void> {
+    const refs = [
+      { field: 'costCenterId', id: req.costCenterId, table: costCenters, what: 'cost center' },
+      { field: 'orgUnitId', id: req.orgUnitId, table: orgUnits, what: 'org unit' },
+      { field: 'ownerPersonId', id: req.ownerPersonId, table: people, what: 'owner' },
+    ] as const;
+    for (const ref of refs) {
+      if (!ref.id) continue;
+      const [found] = await tx
+        .select({ id: ref.table.id })
+        .from(ref.table)
+        .where(eq(ref.table.id, ref.id));
+      if (!found)
+        throw new ApiProblem(422, 'VALIDATION_FAILED', `The ${ref.what} does not exist.`, {
+          field: ref.field,
+        });
+    }
   }
 
   private async categoryCodes(tx: Tx, rows: BudgetRow[]): Promise<Map<string, string>> {

@@ -1,7 +1,7 @@
 import { fiscalPeriods, ledgerBalances, ledgerJournals, ledgerLines, type Tx } from '@bf/api/db';
 import { unwrap, type RequestActor } from '@bf/api/core';
 import type { Journal } from '@bf/contracts';
-import { buildJournal, journalTotals, type JournalDraft } from '@bf/domain';
+import { buildJournal, checkAccountingDate, journalTotals, type JournalDraft } from '@bf/domain';
 import { Injectable } from '@nestjs/common';
 import { asc, eq, inArray, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
@@ -10,6 +10,8 @@ import { LedgerReads } from './ledger-reads.service';
 export interface PostOptions {
   actor: Pick<RequestActor, 'tenantId' | 'personId' | 'subject'>;
   command: string;
+  /** Fiscal year of the journal's budgets; the accounting date must fall inside it (null: no budget lines). */
+  fiscalYearId: string | null;
   requestId?: string | null;
   idempotencyKey?: string | null;
   /** Finance adjustments (reversals, manual journals) may land in a soft-closed period. */
@@ -30,6 +32,10 @@ export class LedgerService {
 
   async post(tx: Tx, draft: JournalDraft, opts: PostOptions): Promise<string> {
     const journal = unwrap(buildJournal(draft));
+    if (opts.fiscalYearId) {
+      const fy = await this.reads.fiscalYear(tx, opts.fiscalYearId);
+      unwrap(checkAccountingDate(journal.accountingDate, fy));
+    }
     const periods = await this.reads.postingPeriods(
       tx,
       journal.lines.map((l) => l.legalEntityId),

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Id, IsoDateTime } from '../common';
+import { CurrencyCode, Id, IsoDateTime } from '../common';
 import type { Endpoint } from '../endpoint';
 import { named } from '../registry';
 
@@ -40,8 +40,33 @@ export const IntegrityCheckRun = named(
             z
               .object({
                 parentId: Id,
-                allocatedOutReportingMinor: z.int(),
-                childrenAuthorizedReportingMinor: z.int(),
+                currency: CurrencyCode,
+                allocatedOutMinor: z.int(),
+                childrenAuthorizedAtPlanMinor: z
+                  .int()
+                  .describe(
+                    "Children's authorized valued in the parent currency at the locked plan rate.",
+                  ),
+                roundingAllowanceMinor: z.int(),
+              })
+              .strict(),
+          ),
+          negativeBuckets: z.array(
+            z.object({ budgetId: Id, bucket: z.string(), balanceMinor: z.int() }).strict(),
+          ),
+          overAllocatedBudgets: z.array(
+            z
+              .object({ budgetId: Id, authorizedMinor: z.int(), allocatedOutMinor: z.int() })
+              .strict(),
+          ),
+          tripletMismatches: z.array(
+            z
+              .object({
+                lineId: Id,
+                journalId: Id,
+                view: z.enum(['budget', 'reporting', 'rounding', 'reversal']),
+                expectedMinor: z.int().nullable(),
+                storedMinor: z.int(),
               })
               .strict(),
           ),
@@ -63,7 +88,7 @@ export const IntegrityCheckRun = named(
     })
     .strict()
     .describe(
-      'A ledger rebuild check run by the worker: rebuilt balances versus cached ones, journal balance, hierarchy, plan tie-out and the audit chain.',
+      'A ledger rebuild check run by the worker: rebuilt balances versus cached ones, journal balance, non-negative buckets, allocated out within authorized, per-line currency triplets, hierarchy at the plan rate, plan tie-out and the audit chain.',
     ),
 );
 

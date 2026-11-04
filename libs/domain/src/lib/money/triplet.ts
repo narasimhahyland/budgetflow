@@ -1,7 +1,14 @@
 import { err, ok, type Result } from '../result';
 import type { CurrencyCode } from './currency';
 import type { Money } from './money';
-import { convert, crossRate, type AppliedRate, type FxRate, type RateType } from './rate';
+import {
+  convert,
+  crossRate,
+  type AppliedRate,
+  type FxRate,
+  type RateType,
+  type Rounding,
+} from './rate';
 
 /**
  * Every ledger amount carries the transaction, budget and reporting amounts, each in integer minor
@@ -20,6 +27,8 @@ export interface TripletContext {
   reportingCurrency: CurrencyCode;
   rates: readonly FxRate[];
   rateType?: RateType;
+  /** Rounding of the budget-currency amount; the reporting amount always rounds half-even. */
+  budgetRounding?: Rounding;
 }
 
 export function buildTriplet(transaction: Money, ctx: TripletContext): Result<CurrencyTriplet> {
@@ -40,7 +49,7 @@ export function buildTriplet(transaction: Money, ctx: TripletContext): Result<Cu
     type,
   );
   if (!rr.ok) return rr;
-  const budget = convert(transaction, br.value);
+  const budget = convert(transaction, br.value, ctx.budgetRounding);
   if (!budget.ok) return budget;
   const reporting = convert(transaction, rr.value);
   if (!reporting.ok) return reporting;
@@ -53,17 +62,33 @@ export function buildTriplet(transaction: Money, ctx: TripletContext): Result<Cu
   });
 }
 
-/** Verifies that stored triplet amounts equal a re-conversion with the stored rates. */
-export function verifyTriplet(t: CurrencyTriplet): Result<true> {
-  const b = convert(t.transaction, t.budgetRate);
+/**
+ * Verifies that stored triplet amounts equal a re-conversion with the stored rates (the budget amount
+ * with the rounding its line was posted with). Counter-account lines carry no budget amount.
+ */
+export function verifyTriplet(
+  t: Omit<CurrencyTriplet, 'budget' | 'budgetRate'> & {
+    budget: Money | null;
+    budgetRate: AppliedRate | null;
+  },
+  opts: { budgetRounding?: Rounding } = {},
+): Result<true> {
   const r = convert(t.transaction, t.reportingRate);
-  if (!b.ok) return b;
   if (!r.ok) return r;
-  if (
-    b.value.amountMinor !== t.budget.amountMinor ||
-    r.value.amountMinor !== t.reporting.amountMinor
-  ) {
-    return err('VALIDATION_FAILED', 'Stored amounts do not match the stored rates.');
-  }
+  if (r.value.amountMinor !== t.reporting.amountMinor || r.value.currency !== t.reporting.currency)
+    return err('VALIDATION_FAILED', 'The reporting amount does not match the stored rate.', {
+      view: 'reporting',
+      expectedMinor: r.value.amountMinor,
+      storedMinor: t.reporting.amountMinor,
+    });
+  if (!t.budget || !t.budgetRate) return ok(true);
+  const b = convert(t.transaction, t.budgetRate, opts.budgetRounding);
+  if (!b.ok) return b;
+  if (b.value.amountMinor !== t.budget.amountMinor || b.value.currency !== t.budget.currency)
+    return err('VALIDATION_FAILED', 'The budget amount does not match the stored rate.', {
+      view: 'budget',
+      expectedMinor: b.value.amountMinor,
+      storedMinor: t.budget.amountMinor,
+    });
   return ok(true);
 }

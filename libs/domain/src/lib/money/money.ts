@@ -43,6 +43,14 @@ function assertSafe(n: number): number {
   return n;
 }
 
+/** Minor units read from a database `bigint` (string, number or bigint); throws rather than lose precision. */
+export function toSafeMinor(value: string | number | bigint | null | undefined): number {
+  const n = Number(value ?? 0);
+  if (!Number.isSafeInteger(n))
+    throw new RangeError(`Minor-unit value is not a safe integer: ${value}`);
+  return n;
+}
+
 export function addMinor(...values: number[]): number {
   return assertSafe(values.reduce((a, b) => a + b, 0));
 }

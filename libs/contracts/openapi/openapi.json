@@ -984,12 +984,21 @@
                           "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                           "description": "Opaque identifier (UUID)."
                         },
-                        "allocatedOutReportingMinor": {
+                        "currency": {
+                          "$ref": "#/components/schemas/CurrencyCode"
+                        },
+                        "allocatedOutMinor": {
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
                         },
-                        "childrenAuthorizedReportingMinor": {
+                        "childrenAuthorizedAtPlanMinor": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Children's authorized valued in the parent currency at the locked plan rate."
+                        },
+                        "roundingAllowanceMinor": {
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
@@ -997,8 +1006,122 @@
                       },
                       "required": [
                         "parentId",
-                        "allocatedOutReportingMinor",
-                        "childrenAuthorizedReportingMinor"
+                        "currency",
+                        "allocatedOutMinor",
+                        "childrenAuthorizedAtPlanMinor",
+                        "roundingAllowanceMinor"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "negativeBuckets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "budgetId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "Opaque identifier (UUID)."
+                        },
+                        "bucket": {
+                          "type": "string"
+                        },
+                        "balanceMinor": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "budgetId",
+                        "bucket",
+                        "balanceMinor"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "overAllocatedBudgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "budgetId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "Opaque identifier (UUID)."
+                        },
+                        "authorizedMinor": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "allocatedOutMinor": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "budgetId",
+                        "authorizedMinor",
+                        "allocatedOutMinor"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "tripletMismatches": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "lineId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "Opaque identifier (UUID)."
+                        },
+                        "journalId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                          "description": "Opaque identifier (UUID)."
+                        },
+                        "view": {
+                          "type": "string",
+                          "enum": [
+                            "budget",
+                            "reporting",
+                            "rounding",
+                            "reversal"
+                          ]
+                        },
+                        "expectedMinor": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "storedMinor": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "lineId",
+                        "journalId",
+                        "view",
+                        "expectedMinor",
+                        "storedMinor"
                       ],
                       "additionalProperties": false
                     }
@@ -1072,6 +1195,9 @@
                   "unbalancedJournals",
                   "balanceDrifts",
                   "hierarchyMismatches",
+                  "negativeBuckets",
+                  "overAllocatedBudgets",
+                  "tripletMismatches",
                   "planTieMismatches",
                   "auditChain"
                 ],
@@ -1094,7 +1220,7 @@
           "summary"
         ],
         "additionalProperties": false,
-        "description": "A ledger rebuild check run by the worker: rebuilt balances versus cached ones, journal balance, hierarchy, plan tie-out and the audit chain."
+        "description": "A ledger rebuild check run by the worker: rebuilt balances versus cached ones, journal balance, non-negative buckets, allocated out within authorized, per-line currency triplets, hierarchy at the plan rate, plan tie-out and the audit chain."
       },
       "Journal": {
         "type": "object",
@@ -1773,7 +1899,11 @@
               "ACTUAL_ALREADY_MATCHED",
               "EVENT_HAS_UNMATCHED_ACTUALS",
               "EVENT_MISSING_RECHARGE",
-              "ROOT_REQUIRES_PLAN_VERSION"
+              "ROOT_REQUIRES_PLAN_VERSION",
+              "AMOUNT_ROUNDS_TO_ZERO",
+              "NEGATIVE_BUCKET_BALANCE",
+              "MANUAL_JOURNAL_NEEDS_COUNTER_ACCOUNT",
+              "ACCOUNTING_DATE_OUTSIDE_FISCAL_YEAR"
             ],
             "description": "Stable machine-readable code; the UI branches on it."
           },

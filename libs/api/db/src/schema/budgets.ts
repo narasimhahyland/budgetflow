@@ -1,10 +1,12 @@
 import {
   boolean,
+  foreignKey,
   index,
   integer,
   jsonb,
   pgTable,
   text,
+  unique,
   uniqueIndex,
   uuid,
   varchar,
@@ -116,9 +118,9 @@ export const budgets = pgTable(
     legalEntityId: uuid('legal_entity_id')
       .notNull()
       .references(() => legalEntities.id),
-    costCenterId: uuid('cost_center_id').references(() => costCenters.id),
-    orgUnitId: uuid('org_unit_id').references(() => orgUnits.id),
-    ownerPersonId: uuid('owner_person_id').references(() => people.id),
+    costCenterId: uuid('cost_center_id'),
+    orgUnitId: uuid('org_unit_id'),
+    ownerPersonId: uuid('owner_person_id'),
     currency: ccy('currency')
       .notNull()
       .references(() => currencies.code),
@@ -145,6 +147,29 @@ export const budgets = pgTable(
     index('budgets_tenant_parent').on(t.tenantId, t.parentId),
     index('budgets_tenant_path').on(t.tenantId, t.path),
     index('budgets_tenant_owner').on(t.tenantId, t.ownerPersonId),
+    unique('budgets_tenant_id_key').on(t.tenantId, t.id),
+    // Foreign keys are checked without row-level security, so references to tenant-owned rows
+    // include tenant_id: a budget can never point at another tenant's parent or master data.
+    foreignKey({
+      name: 'budgets_parent_same_tenant_fk',
+      columns: [t.tenantId, t.parentId],
+      foreignColumns: [t.tenantId, t.id],
+    }),
+    foreignKey({
+      name: 'budgets_cost_center_same_tenant_fk',
+      columns: [t.tenantId, t.costCenterId],
+      foreignColumns: [costCenters.tenantId, costCenters.id],
+    }),
+    foreignKey({
+      name: 'budgets_org_unit_same_tenant_fk',
+      columns: [t.tenantId, t.orgUnitId],
+      foreignColumns: [orgUnits.tenantId, orgUnits.id],
+    }),
+    foreignKey({
+      name: 'budgets_owner_same_tenant_fk',
+      columns: [t.tenantId, t.ownerPersonId],
+      foreignColumns: [people.tenantId, people.id],
+    }),
   ],
 );
 

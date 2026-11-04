@@ -118,6 +118,9 @@ export const integrityFlagKind = pgEnum('integrity_flag_kind', [
   'hierarchy_mismatch',
   'plan_tie_mismatch',
   'audit_chain_broken',
+  'negative_bucket',
+  'over_allocated',
+  'triplet_mismatch',
 ]);
 export const integrityFlagStatus = pgEnum('integrity_flag_status', [
   'open',

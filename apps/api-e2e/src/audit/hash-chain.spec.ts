@@ -1,9 +1,11 @@
 // Invariant 19: exactly one hash-chained audit event per successful mutation, none on rejection; audit rows
-// are immutable; verification finds the first tampered row (sandbox tenant only, restored afterwards).
+// are immutable; verification finds the first tampered row and a chain cut short of its head (sandbox
+// tenant only, restored afterwards).
 import { expect, test } from '@playwright/test';
-import { AuditEventList, AuditVerification } from '@bf/contracts';
+import { AuditEventList, AuditVerification, Journal } from '@bf/contracts';
 import { SEED } from '@bf/seed';
-import { as } from '../support/auth';
+import { randomUUID } from 'node:crypto';
+import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { asAppRole, asOwner, pgError } from '../support/db';
 import { allocate, allocateOk, createChild, createRoot } from '../support/factory';
@@ -68,6 +70,122 @@ test.describe('audit trail', () => {
       const e = await pgError(asAppRole(SEED.tenants.acme, (c) => c.query(sql)));
       expect(e?.code, sql).toBe('42501');
     }
+  });
+
+  test('exactly one event per successful mutation across command types, none for rejections or replays', async ({
+    request,
+  }) => {
+    const checked = async () =>
+      (
+        await expectContract(
+          await request.get('/api/audit/verification', { headers: await as('auditor') }),
+          200,
+          AuditVerification,
+        )
+      ).checked;
+    const before = await checked();
+    const root = await createRoot(request, { amountMinor: 20_000 }); // +1
+    const child = await createChild(request, root.id, { currency: 'USD' }); // +1
+    const key = randomUUID();
+    await allocateOk(request, root.id, child.id, { amountMinor: 5_000, currency: 'USD' }); // +1
+    const first = await allocate(
+      request,
+      root.id,
+      child.id,
+      { amountMinor: 1_000, currency: 'USD' },
+      { key },
+    ); // +1
+    const replay = await allocate(
+      request,
+      root.id,
+      child.id,
+      { amountMinor: 1_000, currency: 'USD' },
+      { key },
+    );
+    expect([first.status(), replay.status(), replay.headers()['idempotent-replayed']]).toEqual([
+      201,
+      201,
+      'true',
+    ]);
+    await expectProblem(
+      await allocate(request, root.id, child.id, { amountMinor: 14_001, currency: 'USD' }),
+      409,
+      'OVER_ALLOCATION',
+    );
+    const journal = async (debitMinor: number, creditMinor: number) =>
+      request.post('/api/ledger/journals', {
+        headers: await mutate('finance-admin'),
+        data: {
+          transactionCurrency: 'USD',
+          reasonCode: 'ADJ-OPENING',
+          reason: 'Opening encumbrance',
+          lines: [
+            { budgetId: root.id, account: 'encumbered', side: 'debit', amountMinor: debitMinor },
+            {
+              budgetId: null,
+              account: 'obligations',
+              side: 'credit',
+              amountMinor: creditMinor,
+              legalEntityId: SEED.legalEntities.acmeUs,
+            },
+          ],
+        },
+      });
+    const manual = await expectContract(await journal(1_000, 1_000), 201, Journal); // +1
+    await expectProblem(await journal(1_000, 999), 422, 'JOURNAL_UNBALANCED');
+    const reverse = async () =>
+      request.post(`/api/ledger/journals/${manual.id}/reversals`, {
+        headers: await mutate('finance-admin'),
+        data: { reasonCode: 'REV-ERROR', reason: 'Posted twice' },
+      });
+    expect((await reverse()).status()).toBe(201); // +1
+    await expectProblem(await reverse(), 409, 'ALREADY_REVERSED');
+    expect((await checked()) - before).toBe(6);
+  });
+
+  test('deleting the newest event fails verification against the chain head', async ({
+    request,
+  }) => {
+    const verify = async () =>
+      expectContract(
+        await request.get('/api/audit/verification', { headers: await as('sandbox-admin') }),
+        200,
+        AuditVerification,
+      );
+    const before = await verify();
+    expect(before.valid).toBe(true);
+    const newest = await asOwner(
+      async (c) =>
+        (
+          await c.query(
+            `select row_to_json(a)::text as row, id, seq::int as seq from audit_events a where tenant_id = $1 order by seq desc limit 1`,
+            [SEED.tenants.sandbox],
+          )
+        ).rows[0] as { row: string; id: string; seq: number },
+    );
+    await asOwner(async (c) => {
+      await c.query('begin');
+      await c.query('alter table audit_events disable trigger audit_events_append_only');
+      await c.query('delete from audit_events where id = $1', [newest.id]);
+      await c.query('alter table audit_events enable trigger audit_events_append_only');
+      await c.query('commit');
+    });
+    try {
+      expect(await verify()).toMatchObject({
+        valid: false,
+        checked: newest.seq - 1,
+        firstBrokenSeq: newest.seq,
+        reason: `the chain ends at ${newest.seq - 1} but its head records ${newest.seq}`,
+      });
+    } finally {
+      await asOwner((c) =>
+        c.query(
+          `insert into audit_events select * from json_populate_record(null::audit_events, $1::json)`,
+          [newest.row],
+        ),
+      );
+    }
+    expect(await verify()).toMatchObject({ valid: true, checked: before.checked });
   });
 
   test('tampering with one stored event breaks verification at that event', async ({ request }) => {

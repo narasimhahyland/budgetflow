@@ -78,14 +78,27 @@ export function committedOf(b: BucketBalances): number {
   return b.held + b.pre_encumbered + b.encumbered;
 }
 
-/** Over-allocation is a hard block naming the remaining amount. */
+/** Buckets whose natural-sign balance is below zero; every bucket is non-negative in a sound ledger. */
+export function negativeBuckets(b: BucketBalances): BudgetBucket[] {
+  return BUDGET_BUCKETS.filter((bucket) => b[bucket] < 0);
+}
+
+/**
+ * Over-allocation is a hard block naming the remaining amount. A negative consuming bucket never
+ * adds headroom, and allocated out plus the request may never exceed authorized.
+ */
 export function checkAllocation(
   parent: BucketBalances,
   control: ControlSettings,
   requestedMinor: number,
   currency: string,
 ): Result<{ availableAfterMinor: number }> {
-  const available = allocationAvailable(parent, control);
+  const floored = { ...parent };
+  for (const bucket of CONSUMING_BUCKETS) floored[bucket] = Math.max(parent[bucket], 0);
+  const available = Math.min(
+    allocationAvailable(floored, control),
+    parent.authorized - floored.allocated_out,
+  );
   if (requestedMinor > available) {
     return err(
       'OVER_ALLOCATION',
@@ -124,8 +137,9 @@ export function checkSpend(
 }
 
 /**
- * After a posting (reversal, manual journal), a hard-mode budget's available may not go negative,
- * and authorized may never drop below what has already been allocated out to children.
+ * After a posting (reversal, manual journal), no bucket may go below zero, authorized may never drop
+ * below what has already been allocated out to children, and a hard-mode budget's available may not
+ * go negative.
  */
 export function checkNotOverdrawn(
   after: BucketBalances,
@@ -133,12 +147,20 @@ export function checkNotOverdrawn(
   budgetId: string,
   code: 'REVERSAL_WOULD_OVERDRAW' | 'INSUFFICIENT_AVAILABLE',
 ): Result<true> {
+  const negative = negativeBuckets(after);
+  if (negative.length > 0) {
+    return err(
+      'NEGATIVE_BUCKET_BALANCE',
+      `This would leave the budget's ${negative[0].replace(/_/g, ' ')} below zero.`,
+      { budgetId, bucket: negative[0], balanceMinor: after[negative[0]] },
+    );
+  }
   const allocAvail = allocationAvailable(after, control);
   const spendAvail = availableOf(after, control.basis);
   const toleranceMinor = Math.floor(
     (Math.max(after.authorized, 0) * control.toleranceBps) / 10_000,
   );
-  if (allocAvail < 0 && after.allocated_out > after.authorized) {
+  if (after.allocated_out > after.authorized) {
     return err(code, 'This would leave the budget with more allocated to children than it holds.', {
       budgetId,
       availableMinor: allocAvail,

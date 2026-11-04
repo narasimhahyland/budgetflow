@@ -39,6 +39,26 @@ export function acceptsPostings(status: PeriodStatus, allowSoftClosed = false): 
   return status === 'open' || (allowSoftClosed && status === 'soft_closed');
 }
 
+/** A journal posts within its budgets' fiscal year: the accounting date must fall inside that year. */
+export function checkAccountingDate(
+  accountingDate: string,
+  fiscalYear: { label: string; startDate: string; endDate: string },
+): Result<true> {
+  if (accountingDate < fiscalYear.startDate || accountingDate > fiscalYear.endDate) {
+    return err(
+      'ACCOUNTING_DATE_OUTSIDE_FISCAL_YEAR',
+      `${accountingDate} is outside ${fiscalYear.label} (${fiscalYear.startDate} to ${fiscalYear.endDate}); post within the budget's fiscal year.`,
+      {
+        accountingDate,
+        fiscalYear: fiscalYear.label,
+        startDate: fiscalYear.startDate,
+        endDate: fiscalYear.endDate,
+      },
+    );
+  }
+  return ok(true);
+}
+
 /**
  * Resolves where a posting with this accounting date lands. Nothing posts to a Closed or Locked
  * period: late items go to the next open period, flagged, with the original period referenced.

@@ -15,6 +15,13 @@
       "when": 1793808590826,
       "tag": "0001_security_rls_ledger_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793813404466,
+      "tag": "0002_ledger_hardening",
+      "breakpoints": true
     }
   ]
 }

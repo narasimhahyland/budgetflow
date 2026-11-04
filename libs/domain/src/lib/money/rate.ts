@@ -45,16 +45,32 @@ export function formatRate(scaled: bigint): string {
   return `${int}.${frac}`;
 }
 
-/** Integer division of a signed numerator by a positive denominator, rounding half to even. */
-export function divRoundHalfEven(numerator: bigint, denominator: bigint): bigint {
+/**
+ * How a conversion rounds the magnitude of an amount: `half_even` is the default for every line;
+ * `up` (away from zero) and `down` (toward zero) are used on hierarchy lines so value never grows
+ * when money moves between budgets in different currencies.
+ */
+export type Rounding = 'half_even' | 'up' | 'down';
+
+/** Integer division of a signed numerator by a positive denominator with the given rounding of the magnitude. */
+export function divRound(numerator: bigint, denominator: bigint, rounding: Rounding): bigint {
   if (denominator <= 0n) throw new RangeError('denominator must be positive');
   const sign = numerator < 0n ? -1n : 1n;
   const abs = numerator < 0n ? -numerator : numerator;
   let q = abs / denominator;
   const r = abs % denominator;
-  const twice = r * 2n;
-  if (twice > denominator || (twice === denominator && q % 2n === 1n)) q += 1n;
+  if (rounding === 'up') {
+    if (r > 0n) q += 1n;
+  } else if (rounding === 'half_even') {
+    const twice = r * 2n;
+    if (twice > denominator || (twice === denominator && q % 2n === 1n)) q += 1n;
+  }
   return sign * q;
+}
+
+/** Integer division of a signed numerator by a positive denominator, rounding half to even. */
+export function divRoundHalfEven(numerator: bigint, denominator: bigint): bigint {
+  return divRound(numerator, denominator, 'half_even');
 }
 
 function toSafeNumber(v: bigint): Result<number> {
@@ -99,8 +115,12 @@ export function crossRate(
   return ok({ type, from, to, value: formatRate(scaled), rateIds });
 }
 
-/** Converts once, rounding half-even at the line: minor(to) = minor(from) × rate × 10^(expTo − expFrom). */
-export function convert(amount: Money, rate: AppliedRate): Result<Money> {
+/** Converts once, rounding at the line (half-even unless told otherwise): minor(to) = minor(from) × rate × 10^(expTo − expFrom). */
+export function convert(
+  amount: Money,
+  rate: AppliedRate,
+  rounding: Rounding = 'half_even',
+): Result<Money> {
   if (amount.currency !== rate.from) {
     return err('CURRENCY_MISMATCH', `Rate converts from ${rate.from}, not ${amount.currency}.`);
   }
@@ -111,6 +131,6 @@ export function convert(amount: Money, rate: AppliedRate): Result<Money> {
   const expTo = BigInt(exponentOf(rate.to));
   const numerator = BigInt(amount.amountMinor) * scaled.value * 10n ** expTo;
   const denominator = RATE_SCALE * 10n ** expFrom;
-  const n = toSafeNumber(divRoundHalfEven(numerator, denominator));
+  const n = toSafeNumber(divRound(numerator, denominator, rounding));
   return n.ok ? ok({ amountMinor: n.value, currency: rate.to }) : n;
 }
