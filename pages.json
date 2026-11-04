@@ -264,6 +264,12 @@
     "notDesigned": 0
   },
   {
+    "page": "044-event-list--default",
+    "mode": "image",
+    "linked": 22,
+    "notDesigned": 0
+  },
+  {
     "page": "045-create-event-budget--default",
     "mode": "image",
     "linked": 26,
@@ -278,7 +284,7 @@
   {
     "page": "046-event-details--default",
     "mode": "image",
-    "linked": 26,
+    "linked": 28,
     "notDesigned": 0
   },
   {
@@ -290,13 +296,49 @@
   {
     "page": "047-event-participants--default",
     "mode": "image",
+    "linked": 25,
+    "notDesigned": 0
+  },
+  {
+    "page": "049-cross-location-cost-split--default",
+    "mode": "image",
     "linked": 23,
+    "notDesigned": 0
+  },
+  {
+    "page": "050-event-approval-workflow--default",
+    "mode": "image",
+    "linked": 22,
+    "notDesigned": 0
+  },
+  {
+    "page": "051-event-commitments--default",
+    "mode": "image",
+    "linked": 21,
+    "notDesigned": 0
+  },
+  {
+    "page": "052-event-documents--default",
+    "mode": "image",
+    "linked": 24,
+    "notDesigned": 0
+  },
+  {
+    "page": "053a-intercompany-recharge-schedule--default",
+    "mode": "image",
+    "linked": 18,
     "notDesigned": 0
   },
   {
     "page": "055-my-requests--default",
     "mode": "image",
     "linked": 22,
+    "notDesigned": 0
+  },
+  {
+    "page": "056-create-budget-request--default",
+    "mode": "image",
+    "linked": 10,
     "notDesigned": 0
   },
   {
@@ -321,6 +363,12 @@
     "page": "057-additional-fund-request--default",
     "mode": "image",
     "linked": 24,
+    "notDesigned": 0
+  },
+  {
+    "page": "058-over-budget-request--default",
+    "mode": "image",
+    "linked": 19,
     "notDesigned": 0
   },
   {
@@ -363,6 +411,12 @@
     "page": "061a-actionable-approval-email--default",
     "mode": "image",
     "linked": 5,
+    "notDesigned": 0
+  },
+  {
+    "page": "064-request-history--default",
+    "mode": "image",
+    "linked": 10,
     "notDesigned": 0
   },
   {
