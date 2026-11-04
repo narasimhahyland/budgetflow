@@ -1,0 +1,32 @@
+{
+  "screen": "069-rule-builder",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/23a0914bf31148888f529dc0debad0b8",
+      "approved": null,
+      "size": [
+        2560,
+        2854
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "conflict-simulation--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/1ca57659dc784b79a69e2df2134f8cf5",
+      "approved": null,
+      "size": [
+        2560,
+        3122
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "simulation-conflict--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/9d851e6c01a640eb818539ec3d6f834d",
+      "approved": null,
+      "size": [
+        2560,
+        2854
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
