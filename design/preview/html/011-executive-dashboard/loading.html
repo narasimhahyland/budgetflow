@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Executive Dashboard - BudgetFlow Enterprise</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&amp;family=Public+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+    tailwind.config = {theme: {extend: {colors: {primary: "#5654ac", "primary-loud": "#322f86", "primary-container": "#e2dfff", "on-primary-container": "#322f86", surface: "#f9f9fc", "surface-low": "#f4f3f7", "surface-lowest": "#ffffff", outline: "#777683", "outline-variant": "#c8c5d3", "on-surface": "#1a1c1e", "on-surface-variant": "#474551", success: "#4d9c4c", "success-container": "#eef6e8", "on-success-container": "#3d7231", warning: "#967c39", "warning-container": "#fbf3db", "on-warning-container": "#7e651b", info: "#5384f1", "info-container": "#e5f3fc", "on-info-container": "#3060c6", important: "#c74f54", "important-container": "#faeae9", "on-important-container": "#ac4848", error: "#b02b36", "error-container": "#ffdad9", "on-error-container": "#8c1d29", tertiary: "#006b61", "background-light": "#f6f6f7", "background-dark": "#16151d"}, fontFamily: {headline: ["Plus Jakarta Sans"], body: ["Public Sans"], display: ["Plus Jakarta Sans"], label: ["Public Sans"]}, fontSize: {}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}}
+  </script>
+<style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #f4f3f7;
+      color: #1a1c1e;
+    }
+    .font-num {
+      font-feature-settings: 'tnum' 1, 'lnum' 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c8c5d3;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex antialiased bg-[#f4f3f7] text-[#1a1c1e]">
+<!-- Left Sidebar (240px solid violet #5654ac) -->
+<aside class="w-[240px] flex-shrink-0 bg-[#5654ac] text-white flex flex-col justify-between select-none shadow-md z-20">
+<div class="flex flex-col h-full overflow-y-auto custom-scrollbar">
+<!-- Brand & Header -->
+<div class="px-5 pt-5 pb-4 border-b border-white/10 flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white flex-shrink-0"><span class="material-icons text-[20px]">account_balance_wallet</span></div><div><div class="font-headline font-bold text-base leading-tight tracking-tight">BudgetFlow</div><div class="text-[10px] tracking-wider uppercase opacity-75 font-semibold">ENTERPRISE</div></div></div>
+<!-- Tenant & Org Switcher -->
+<div class="px-3 py-3 border-b border-white/10">
+<div class="bg-black/15 hover:bg-black/25 transition-colors rounded-lg p-2.5 cursor-pointer">
+<div class="flex items-center justify-between text-xs font-semibold mb-1 text-white">
+<span class="flex items-center gap-1.5 truncate">
+<span class="material-icons text-[15px] opacity-80">business</span>
+              Acme Global
+            </span>
+<span class="material-icons text-[14px] opacity-70">unfold_more</span>
+</div>
+<div class="flex items-center justify-between text-[11px] text-white/80">
+<span class="truncate">Employee Experience</span>
+<span class="material-icons text-[13px] opacity-70">swap_horiz</span>
+</div>
+</div>
+</div>
+<!-- Nav Items -->
+<nav class="flex-1 px-3 py-3 space-y-4 text-xs">
+<!-- Home / Overview Group -->
+<div>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full bg-white/20 text-white font-semibold shadow-sm transition-all" href="#">
+<span class="material-icons text-[18px]">home</span>
+<span>Home</span>
+</a>
+</div>
+<!-- BUDGETS -->
+<div>
+<div class="px-3 mb-1.5 text-[10px] uppercase font-bold tracking-wider text-white/60">Budgets</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">account_tree</span>
+<span>Budget hierarchy</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">dashboard_customize</span>
+<span>Allocation workspace</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">format_list_bulleted</span>
+<span>Budget list</span>
+</a>
+</div>
+</div>
+<!-- EVENTS -->
+<div>
+<div class="px-3 mb-1.5 text-[10px] uppercase font-bold tracking-wider text-white/60">Events</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">event</span>
+<span>Events</span>
+</a>
+</div>
+</div>
+<!-- REQUESTS -->
+<div>
+<div class="px-3 mb-1.5 text-[10px] uppercase font-bold tracking-wider text-white/60">Requests</div>
+<div class="space-y-0.5">
+<a class="flex items-center justify-between px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-icons text-[18px]">how_to_reg</span>
+<span>Approval inbox</span>
+</div>
+<span class="bg-white text-[#5654ac] font-bold text-[10px] px-1.5 py-0.5 rounded-full font-num">7</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">mark_email_read</span>
+<span>My requests</span>
+</a>
+</div>
+</div>
+<!-- FINANCE -->
+<div>
+<div class="px-3 mb-1.5 text-[10px] uppercase font-bold tracking-wider text-white/60">Finance</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">receipt_long</span>
+<span>Actuals and matching</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">balance</span>
+<span>GL tie-out</span>
+</a>
+</div>
+</div>
+<!-- INSIGHTS -->
+<div>
+<div class="px-3 mb-1.5 text-[10px] uppercase font-bold tracking-wider text-white/60">Insights</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">bar_chart</span>
+<span>Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">history</span>
+<span>Audit log</span>
+</a>
+</div>
+</div>
+<!-- ADMIN -->
+<div>
+<div class="px-3 mb-1.5 text-[10px] uppercase font-bold tracking-wider text-white/60">Admin</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">gavel</span>
+<span>Rules and policies</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">hub</span>
+<span>Integrations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full text-white/85 hover:bg-white/10 hover:text-white transition-colors" href="#">
+<span class="material-icons text-[18px]">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- Sidebar User Footer -->
+<div class="p-3 border-t border-white/10 mt-auto bg-black/10">
+<div class="flex items-center justify-between p-2 rounded-lg bg-white/10">
+<div class="flex items-center gap-2.5 truncate">
+<div class="w-8 h-8 rounded-full bg-white text-[#5654ac] font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-sm font-headline">
+              OG
+            </div>
+<div class="truncate leading-tight">
+<div class="text-xs font-semibold text-white truncate">Olivia Grant</div>
+<div class="text-[11px] text-white/70 truncate">CEO</div>
+</div>
+</div>
+<button class="text-white/70 hover:text-white flex items-center justify-center p-1 rounded hover:bg-white/10">
+<span class="material-icons text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+<!-- White 64px Top Header -->
+<header class="h-16 bg-white border-b border-[#c8c5d3] px-6 flex items-center justify-between flex-shrink-0 sticky top-0 z-10 shadow-sm">
+<div class="flex items-center gap-4">
+<!-- Breadcrumbs -->
+<nav class="flex items-center text-xs font-medium text-[#474551] gap-1.5">
+<span class="hover:text-primary cursor-pointer">Home</span>
+<span class="text-[#c8c5d3]">/</span>
+<span class="text-[#1a1c1e] font-semibold">Executive dashboard</span>
+</nav>
+</div>
+<!-- Center / Search -->
+<div class="flex-1 max-w-md mx-6">
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[#777683]">search</span>
+<input class="w-full pl-9 pr-14 py-1.5 text-xs bg-[#f4f3f7] border border-[#c8c5d3] rounded-full focus:outline-none focus:border-primary focus:bg-white transition-all text-[#1a1c1e] placeholder-[#777683]" placeholder="Search budgets, events, requests, people" type="text"/>
+<span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-[#777683] bg-white px-1.5 py-0.5 rounded border border-[#c8c5d3] font-num">Ctrl K</span>
+</div>
+</div>
+<!-- Right Header Actions -->
+<div class="flex items-center gap-3">
+<!-- Fiscal Year Chip -->
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#e2dfff] text-[#322f86] font-num">
+          FY2026
+        </span>
+<!-- Reporting Currency Chip -->
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f4f3f7] border border-[#c8c5d3] text-[#474551] font-num">
+          Reporting USD
+        </span>
+<div class="h-5 w-[1px] bg-[#c8c5d3] mx-1"></div>
+<!-- Notifications Bell -->
+<button class="relative p-2 rounded-full text-[#474551] hover:bg-[#f4f3f7] transition-colors" title="Notifications">
+<span class="material-icons text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-4 h-4 bg-[#b02b36] text-white text-[9px] font-bold rounded-full flex items-center justify-center font-num">3</span>
+</button>
+<!-- Help -->
+<button class="p-2 rounded-full text-[#474551] hover:bg-[#f4f3f7] transition-colors" title="Help &amp; Support">
+<span class="material-icons text-[20px]">help_outline</span>
+</button>
+<!-- User Avatar in Header -->
+<div class="w-8 h-8 rounded-full bg-[#5654ac] text-white text-xs font-semibold flex items-center justify-center font-headline shadow-sm cursor-pointer ml-1">
+          OG
+        </div>
+</div>
+</header>
+<!-- Page Body Container (background #f4f3f7, 24px margins, 16px gutters) -->
+<main class="p-6 space-y-6">
+<!-- Header Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-1">
+<div>
+<div class="flex items-center gap-3">
+<h1 class="font-headline font-bold text-2xl text-[#1a1c1e] tracking-tight">Executive dashboard</h1>
+</div>
+<p class="text-xs text-[#474551] mt-0.5">Acme Global • FY2026 • as of 4 Nov 2026</p>
+</div>
+<div class="flex items-center gap-2.5">
+<button class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium bg-white text-[#1a1c1e] border border-[#777683] hover:bg-[#f4f3f7] shadow-sm transition-all">
+<span class="material-icons text-[16px]">file_download</span>
+<span>Export</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#5654ac] text-white hover:bg-[#322f86] shadow-sm transition-all">
+<span class="material-icons text-[16px]">share</span>
+<span>Share</span>
+</button>
+</div>
+</div>
+<!-- Filter Chips Row -->
+<div class="flex items-center flex-wrap gap-2 text-xs">
+<span class="text-xs font-medium text-[#777683] mr-1">Active filters:</span>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#c8c5d3] text-[#1a1c1e] shadow-sm">
+<span class="text-[#777683]">Period:</span>
+<span class="font-semibold">FY2026 YTD</span>
+<span class="material-icons text-[14px] text-[#777683] cursor-pointer hover:text-black">close</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#c8c5d3] text-[#1a1c1e] shadow-sm">
+<span class="text-[#777683]">Scope:</span>
+<span class="font-semibold">All units</span>
+<span class="material-icons text-[14px] text-[#777683] cursor-pointer hover:text-black">arrow_drop_down</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#c8c5d3] text-[#1a1c1e] shadow-sm">
+<span class="text-[#777683]">Currency:</span>
+<span class="font-semibold">USD reporting</span>
+<span class="material-icons text-[14px] text-[#777683] cursor-pointer hover:text-black">arrow_drop_down</span>
+</div>
+<button class="text-xs text-primary font-medium hover:underline ml-2">Reset filters</button>
+</div>
+<!-- KPI Row (5 cards, 12px radius, 1px #c8c5d3 border, white cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+<!-- Card 1: Total Budget -->
+<div class="bg-white rounded-xl p-4 border border-[#c8c5d3] shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-xs text-[#474551] mb-2">
+<span class="font-medium">Total budget</span>
+<span class="material-icons text-[16px] text-[#777683]">account_balance</span>
+</div>
+<div><div class="h-7 w-36 rounded skeleton-shimmer mb-2"></div><div class="flex items-center justify-between mt-1"><div class="h-3 w-16 rounded skeleton-shimmer"></div><div class="h-3 w-8 rounded skeleton-shimmer"></div></div><div class="w-full bg-[#f4f3f7] h-1.5 rounded-full overflow-hidden mt-2"><div class="h-full w-full rounded-full skeleton-shimmer"></div></div></div>
+</div>
+<!-- Card 2: Allocated -->
+<div class="bg-white rounded-xl p-4 border border-[#c8c5d3] shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-xs text-[#474551] mb-2">
+<span class="font-medium">Allocated</span>
+<span class="material-icons text-[16px] text-primary">pie_chart</span>
+</div>
+<div><div class="h-7 w-36 rounded skeleton-shimmer mb-2"></div><div class="flex items-center justify-between mt-1"><div class="h-3 w-24 rounded skeleton-shimmer"></div><div class="h-3 w-8 rounded skeleton-shimmer"></div></div><div class="w-full bg-[#f4f3f7] h-1.5 rounded-full overflow-hidden mt-2"><div class="h-full w-full rounded-full skeleton-shimmer"></div></div></div>
+</div>
+<!-- Card 3: Committed -->
+<div class="bg-white rounded-xl p-4 border border-[#c8c5d3] shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-xs text-[#474551] mb-2">
+<span class="font-medium">Committed</span>
+<span class="material-icons text-[16px] text-[#967c39]">lock_clock</span>
+</div>
+<div><div class="h-7 w-36 rounded skeleton-shimmer mb-2"></div><div class="flex items-center justify-between mt-1"><div class="h-3 w-32 rounded skeleton-shimmer"></div><div class="h-3 w-10 rounded skeleton-shimmer"></div></div><div class="w-full bg-[#f4f3f7] h-1.5 rounded-full overflow-hidden mt-2"><div class="h-full w-full rounded-full skeleton-shimmer"></div></div></div>
+</div>
+<!-- Card 4: Actual Spend -->
+<div class="bg-white rounded-xl p-4 border border-[#c8c5d3] shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-xs text-[#474551] mb-2">
+<span class="font-medium">Actual spend</span>
+<span class="material-icons text-[16px] text-tertiary">payments</span>
+</div>
+<div><div class="h-7 w-36 rounded skeleton-shimmer mb-2"></div><div class="flex items-center justify-between mt-1"><div class="h-3 w-28 rounded skeleton-shimmer"></div><div class="h-3 w-10 rounded skeleton-shimmer"></div></div><div class="w-full bg-[#f4f3f7] h-1.5 rounded-full overflow-hidden mt-2"><div class="h-full w-full rounded-full skeleton-shimmer"></div></div></div>
+</div>
+<!-- Card 5: Available -->
+<div class="bg-white rounded-xl p-4 border border-[#c8c5d3] shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-xs text-[#474551] mb-2">
+<span class="font-medium">Available</span>
+<span class="material-icons text-[16px] text-success">savings</span>
+</div>
+<div><div class="h-7 w-36 rounded skeleton-shimmer mb-2"></div><div class="h-3 w-28 rounded skeleton-shimmer mt-1"></div><div class="h-3 w-40 rounded skeleton-shimmer mt-2 pt-1 border-t border-[#f4f3f7]"></div></div>
+</div>
+</div>
+<!-- Main Grid: Left 2/3 and Right 1/3 -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left 2/3: Charts & Tables -->
+<div class="lg:col-span-2 space-y-6">
+<!-- Card: Budget vs actual by region (Grouped Bar Chart) -->
+<div class="bg-white rounded-xl border border-[#c8c5d3] p-5 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h2 class="font-headline font-semibold text-base text-[#1a1c1e]">Budget vs actual by region</h2>
+<p class="text-xs text-[#474551]">Comparative breakdown of authorized budget, commitments, and actual expenditures.</p>
+</div>
+<button class="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+<span class="material-icons text-[15px]">table_chart</span>
+                View as table
+              </button>
+</div>
+<!-- Chart Legend -->
+<div class="flex items-center flex-wrap gap-5 text-xs text-[#474551] mb-5 pb-3 border-b border-[#f4f3f7]">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-[#5654ac]"></span>
+<span class="font-medium">Budget</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-[#967c39]"></span>
+<span class="font-medium">Committed</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-[#006b61]"></span>
+<span class="font-medium">Actual</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-0.5 border-t-2 border-dashed border-[#b02b36]"></span>
+<span class="font-medium">Forecast (Year-end)</span>
+</div>
+</div>
+<!-- Bar Chart Visualization -->
+<div class="space-y-6 pt-2"><div class="space-y-6"><div class="space-y-2"><div class="flex justify-between items-center"><div class="h-4 w-28 rounded skeleton-shimmer"></div><div class="h-3 w-48 rounded skeleton-shimmer"></div></div><div class="space-y-2 bg-[#f9f9fc] p-3 rounded-lg border border-[#eeedf1]"><div class="flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="flex-1 h-3.5 rounded skeleton-shimmer"></div></div><div class="flex-1 flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="w-1/3 h-3.5 rounded skeleton-shimmer"></div></div><div class="flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="w-1/5 h-3.5 rounded skeleton-shimmer"></div></div></div></div><div class="space-y-2"><div class="flex justify-between items-center"><div class="h-4 w-36 rounded skeleton-shimmer"></div><div class="h-3 w-48 rounded skeleton-shimmer"></div></div><div class="space-y-2 bg-[#f9f9fc] p-3 rounded-lg border border-[#eeedf1]"><div class="flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="flex-1 h-3.5 rounded skeleton-shimmer"></div></div><div class="flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="w-2/5 h-3.5 rounded skeleton-shimmer"></div></div><div class="flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="w-1/4 h-3.5 rounded skeleton-shimmer"></div></div></div></div><div class="space-y-2"><div class="flex justify-between items-center"><div class="h-4 w-28 rounded skeleton-shimmer"></div><div class="h-3 w-48 rounded skeleton-shimmer"></div></div><div class="space-y-2 bg-[#f9f9fc] p-3 rounded-lg border border-[#eeedf1]"><div class="flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="w-3/4 h-3.5 rounded skeleton-shimmer"></div></div><div class="flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="w-1/4 h-3.5 rounded skeleton-shimmer"></div></div><div class="flex items-center gap-2"><div class="w-16 h-3 rounded skeleton-shimmer"></div><div class="w-1/6 h-3.5 rounded skeleton-shimmer"></div></div></div></div></div></div>
+</div>
+<!-- Card: Regions Dense Data Table -->
+<div class="bg-white rounded-xl border border-[#c8c5d3] overflow-hidden shadow-sm">
+<div class="p-4 border-b border-[#c8c5d3] flex items-center justify-between">
+<div>
+<h2 class="font-headline font-semibold text-base text-[#1a1c1e]">Regions</h2>
+<p class="text-xs text-[#474551]">Breakdown of budget authority, downstream allocation, commitments, and threshold status.</p>
+</div>
+<span class="text-xs font-semibold px-2 py-0.5 rounded bg-[#f4f3f7] text-[#474551] font-num">3 Regions Active</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs border-collapse">
+<thead>
+<tr class="bg-[#f9f9fc] border-b border-[#c8c5d3] text-[#474551] font-semibold h-[48px]">
+<th class="py-3 px-3.5">Region</th>
+<th class="py-3 px-3">Owner</th>
+<th class="py-3 px-2 text-center">Curr.</th>
+<th class="py-3 px-3 text-right">Budget</th>
+<th class="py-3 px-3 text-right">Allocated</th>
+<th class="py-3 px-3 text-right">Committed</th>
+<th class="py-3 px-3 text-right">Actual</th>
+<th class="py-3 px-3 text-right">Available</th>
+<th class="py-3 px-3 text-center w-28">Utilization</th>
+<th class="py-3 px-3.5 text-center">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#eeedf1]"><tr class="h-[48px]"><td class="py-3 px-3.5"><div class="h-4 w-24 rounded skeleton-shimmer"></div></td><td class="py-3 px-3"><div class="flex items-center gap-1.5"><div class="w-5 h-5 rounded-full skeleton-shimmer"></div><div class="h-3.5 w-20 rounded skeleton-shimmer"></div></div></td><td class="py-3 px-2 text-center"><div class="h-3.5 w-7 mx-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-20 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-14 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3"><div class="h-2 w-full rounded-full skeleton-shimmer"></div></td><td class="py-3 px-3.5 text-center"><div class="h-5 w-16 mx-auto rounded-full skeleton-shimmer"></div></td></tr><tr class="h-[48px]"><td class="py-3 px-3.5"><div class="h-4 w-28 rounded skeleton-shimmer"></div></td><td class="py-3 px-3"><div class="flex items-center gap-1.5"><div class="w-5 h-5 rounded-full skeleton-shimmer"></div><div class="h-3.5 w-18 rounded skeleton-shimmer"></div></div></td><td class="py-3 px-2 text-center"><div class="h-3.5 w-7 mx-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-20 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-14 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3"><div class="h-2 w-full rounded-full skeleton-shimmer"></div></td><td class="py-3 px-3.5 text-center"><div class="h-5 w-16 mx-auto rounded-full skeleton-shimmer"></div></td></tr><tr class="h-[48px]"><td class="py-3 px-3.5"><div class="h-4 w-24 rounded skeleton-shimmer"></div></td><td class="py-3 px-3"><div class="flex items-center gap-1.5"><div class="w-5 h-5 rounded-full skeleton-shimmer"></div><div class="h-3.5 w-22 rounded skeleton-shimmer"></div></div></td><td class="py-3 px-2 text-center"><div class="h-3.5 w-7 mx-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-20 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-14 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3 text-right"><div class="h-3.5 w-16 ml-auto rounded skeleton-shimmer"></div></td><td class="py-3 px-3"><div class="h-2 w-full rounded-full skeleton-shimmer"></div></td><td class="py-3 px-3.5 text-center"><div class="h-5 w-20 mx-auto rounded-full skeleton-shimmer"></div></td></tr></tbody>
+</table>
+</div>
+<!-- Table Footer -->
+<div class="px-4 py-3 bg-[#f9f9fc] border-t border-[#eeedf1] flex items-center justify-between text-xs text-[#777683]">
+<span>Showing 3 of 3 operational regions</span>
+<a class="font-semibold text-primary hover:underline" href="#">View comprehensive financial tie-out →</a>
+</div>
+</div>
+</div>
+<!-- Right 1/3: Alerts, Pending Approvals, Forecast -->
+<div class="space-y-6">
+<!-- Card 1: Alerts and Exceptions -->
+<div class="bg-white rounded-xl border border-[#c8c5d3] p-5 shadow-sm">
+<div class="flex items-center justify-between mb-3.5">
+<h2 class="font-headline font-semibold text-base text-[#1a1c1e]">Alerts and exceptions</h2>
+<span class="w-5 h-5 rounded-full bg-[#ffdad9] text-[#8c1d29] text-[11px] font-bold flex items-center justify-center font-num">4</span>
+</div>
+<div class="space-y-2.5"><div class="p-3 rounded-lg border border-[#eeedf1] bg-[#f9f9fc] flex items-start gap-2.5"><div class="w-4 h-4 rounded-full skeleton-shimmer mt-0.5 flex-shrink-0"></div><div class="flex-1 space-y-1.5"><div class="h-3.5 w-4/5 rounded skeleton-shimmer"></div><div class="h-3 w-3/5 rounded skeleton-shimmer"></div></div></div><div class="p-3 rounded-lg border border-[#eeedf1] bg-[#f9f9fc] flex items-start gap-2.5"><div class="w-4 h-4 rounded-full skeleton-shimmer mt-0.5 flex-shrink-0"></div><div class="flex-1 space-y-1.5"><div class="h-3.5 w-3/4 rounded skeleton-shimmer"></div><div class="h-3 w-1/2 rounded skeleton-shimmer"></div></div></div><div class="p-3 rounded-lg border border-[#eeedf1] bg-[#f9f9fc] flex items-start gap-2.5"><div class="w-4 h-4 rounded-full skeleton-shimmer mt-0.5 flex-shrink-0"></div><div class="flex-1 space-y-1.5"><div class="h-3.5 w-2/3 rounded skeleton-shimmer"></div><div class="h-3 w-3/5 rounded skeleton-shimmer"></div></div></div><div class="p-3 rounded-lg border border-[#eeedf1] bg-[#f9f9fc] flex items-start gap-2.5"><div class="w-4 h-4 rounded-full skeleton-shimmer mt-0.5 flex-shrink-0"></div><div class="flex-1 space-y-1.5"><div class="h-3.5 w-5/6 rounded skeleton-shimmer"></div><div class="h-3 w-2/3 rounded skeleton-shimmer"></div></div></div></div>
+</div>
+<!-- Card 2: Pending Approvals -->
+<div class="bg-white rounded-xl border border-[#c8c5d3] p-5 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<h2 class="font-headline font-semibold text-base text-[#1a1c1e]">Pending approvals</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#e2dfff] text-[#322f86] font-num">
+                7 waiting
+              </span>
+</div>
+<!-- Overdue subhead tag -->
+<div class="flex items-center gap-1.5 text-xs text-[#b02b36] font-semibold mb-3"><div class="h-3.5 w-52 rounded skeleton-shimmer"></div></div>
+<!-- Top 3 items list -->
+<div class="divide-y divide-[#eeedf1] text-xs"><div class="py-2.5 flex items-center justify-between"><div class="space-y-1.5 flex-1 pr-4"><div class="h-3.5 w-48 rounded skeleton-shimmer"></div><div class="h-3 w-32 rounded skeleton-shimmer"></div></div><div class="space-y-1.5 text-right"><div class="h-3.5 w-18 ml-auto rounded skeleton-shimmer"></div><div class="h-2.5 w-14 ml-auto rounded skeleton-shimmer"></div></div></div><div class="py-2.5 flex items-center justify-between"><div class="space-y-1.5 flex-1 pr-4"><div class="h-3.5 w-40 rounded skeleton-shimmer"></div><div class="h-3 w-28 rounded skeleton-shimmer"></div></div><div class="space-y-1.5 text-right"><div class="h-3.5 w-18 ml-auto rounded skeleton-shimmer"></div><div class="h-2.5 w-14 ml-auto rounded skeleton-shimmer"></div></div></div><div class="py-2.5 flex items-center justify-between"><div class="space-y-1.5 flex-1 pr-4"><div class="h-3.5 w-44 rounded skeleton-shimmer"></div><div class="h-3 w-36 rounded skeleton-shimmer"></div></div><div class="space-y-1.5 text-right"><div class="h-3.5 w-18 ml-auto rounded skeleton-shimmer"></div><div class="h-2.5 w-14 ml-auto rounded skeleton-shimmer"></div></div></div></div>
+<!-- Action Button -->
+<div class="mt-4 pt-3 border-t border-[#f4f3f7]">
+<button class="w-full py-2 px-3 rounded-full bg-[#5654ac] hover:bg-[#322f86] text-white text-xs font-semibold shadow-sm transition-colors flex items-center justify-center gap-1.5">
+<span>Open approval inbox</span>
+<span class="material-icons text-[15px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Forecast Card -->
+<div class="bg-white rounded-xl border border-[#c8c5d3] p-5 shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<h2 class="font-headline font-semibold text-base text-[#1a1c1e]">Forecast</h2>
+<span class="material-icons text-[18px] text-primary">auto_graph</span>
+</div>
+<p class="text-xs text-[#474551] mb-3">Projected year-end utilization based on current run rates and approved commitments.</p>
+<div class="p-3.5 rounded-lg bg-[#f9f9fc] border border-[#eeedf1]"><div class="h-3 w-44 rounded skeleton-shimmer mb-2"></div><div class="flex items-baseline gap-2 mt-1"><div class="h-6 w-32 rounded skeleton-shimmer"></div><div class="h-4 w-24 rounded skeleton-shimmer"></div></div><div class="h-3.5 w-56 rounded skeleton-shimmer mt-2"></div><div class="mt-3 pt-2 border-t border-[#eeedf1]"><div class="flex justify-between mb-2"><div class="h-2.5 w-12 rounded skeleton-shimmer"></div><div class="h-2.5 w-12 rounded skeleton-shimmer"></div><div class="h-2.5 w-12 rounded skeleton-shimmer"></div><div class="h-2.5 w-14 rounded skeleton-shimmer"></div></div><div class="h-10 w-full rounded skeleton-shimmer"></div></div></div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
