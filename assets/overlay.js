@@ -1,8 +1,10 @@
-// Navigation layer injected into every page of the clickable design preview. Reads window.BF_PAGE (written by build.mjs).
+// Navigation bar of the clickable design preview, docked below the design frame on every shell page.
+// Reads window.BF_PAGE (written by build.mjs); frame.js calls window.bfToast and window.bfKey from inside the frame.
 (() => {
   const P = window.BF_PAGE;
   if (!P) return;
   const KEY = 'bf-preview-collapsed';
+  const frame = document.getElementById('bf-frame');
 
   const host = document.createElement('div');
   host.id = 'bf-preview-host';
@@ -22,10 +24,9 @@
   style.textContent = `
     :host { all: initial; }
     * { box-sizing: border-box; font-family: "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
-    .bar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 2147483000;
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
-      max-width: calc(100vw - 24px); padding: 8px 10px; border-radius: 16px; background: #ffffff; color: #1a1c1e;
-      border: 1px solid #c8c5d3; box-shadow: 0 10px 30px rgba(26, 28, 30, 0.22); font-size: 13px; line-height: 1.2; }
+    .bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+      padding: 8px 14px; background: #ffffff; color: #1a1c1e; border-top: 1px solid #c8c5d3;
+      box-shadow: 0 -4px 16px rgba(26, 28, 30, 0.08); font-size: 13px; line-height: 1.2; }
     a, button { font: inherit; color: inherit; text-decoration: none; cursor: pointer; }
     .brand { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #5654ac; padding: 4px 6px; border-radius: 8px; }
     .brand:hover { background: #f1f0fa; }
@@ -69,9 +70,19 @@
   const go = (href) => {
     if (href) location.href = href;
   };
+  let linksOn = false;
+  const applyLinks = () => {
+    try {
+      frame?.contentDocument?.documentElement.classList.toggle('bf-show-links', linksOn);
+    } catch {
+      /* frame not ready */
+    }
+  };
+  frame?.addEventListener('load', applyLinks);
   const toggleLinks = () => {
-    const on = document.documentElement.classList.toggle('bf-show-links');
-    linksBtn.setAttribute('aria-pressed', String(on));
+    linksOn = !linksOn;
+    applyLinks();
+    linksBtn.setAttribute('aria-pressed', String(linksOn));
   };
 
   const linksBtn = el('button', { class: 'btn', type: 'button', 'aria-pressed': 'false', title: 'Highlight clickable areas (L)', on: { click: toggleLinks } }, 'Show links');
@@ -120,42 +131,18 @@
   }
   setCollapsed(collapsed);
 
-  document.addEventListener(
-    'click',
-    (e) => {
-      if (e.composedPath().includes(host)) return;
-      const target = e.target instanceof Element ? e.target.closest('[data-bf-to], [data-bf-href], [data-bf-missing]') : null;
-      if (!target) {
-        const canvas = document.querySelector('.bf-canvas');
-        if (canvas && canvas.contains(e.target)) {
-          canvas.classList.remove('bf-flash');
-          void canvas.offsetWidth;
-          canvas.classList.add('bf-flash');
-          setTimeout(() => canvas.classList.remove('bf-flash'), 900);
-        }
-        return;
-      }
-      const href = target.getAttribute('data-bf-href') ?? (target.tagName === 'A' ? target.getAttribute('href') : null);
-      if (href) {
-        e.preventDefault();
-        e.stopPropagation();
-        go(href);
-        return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      toast(`"${(target.getAttribute('data-bf-missing') || 'This control').slice(0, 60)}" is not designed yet.`);
-    },
-    true,
-  );
-  document.addEventListener('submit', (e) => e.preventDefault(), true);
+  const handleKey = (key) => {
+    if (key === 'ArrowRight' && P.next) go(P.next.href);
+    else if (key === 'ArrowLeft' && P.prev) go(P.prev.href);
+    else if (key === 'l' || key === 'L') toggleLinks();
+    else if (key === 'Escape') setCollapsed(!bar.hidden);
+    else return false;
+    return true;
+  };
+  window.bfToast = toast;
+  window.bfKey = handleKey;
   document.addEventListener('keydown', (e) => {
-    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-    const t = e.target;
-    if (t instanceof Element && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) return;
-    if (e.key === 'ArrowRight' && P.next) go(P.next.href);
-    else if (e.key === 'ArrowLeft' && P.prev) go(P.prev.href);
-    else if (e.key === 'l' || e.key === 'L') toggleLinks();
-    else if (e.key === 'Escape') setCollapsed(!bar.hidden);
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.composedPath().includes(host)) return;
+    if (handleKey(e.key)) e.preventDefault();
   });
 })();

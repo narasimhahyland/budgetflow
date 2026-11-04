@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BudgetFlow Enterprise - Satori Design System Reference Sheet</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Material Icons (filled style) -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#5654ac',
+            'on-primary': '#ffffff',
+            'primary-container': '#e2dfff',
+            'on-primary-container': '#322f86',
+            'primary-loud': '#322f86',
+            secondary: '#5d5c72',
+            tertiary: '#006b61',
+            error: '#b02b36',
+            'error-container': '#ffdad9',
+            'on-error-container': '#8c1d29',
+            surface: '#f9f9fc',
+            'surface-dim': '#dad9dd',
+            'surface-bright': '#faf9fd',
+            'surface-container-low': '#f4f3f7',
+            'surface-container-lowest': '#ffffff',
+            'surface-container': '#eeedf1',
+            'surface-container-high': '#e8e7eb',
+            'on-surface': '#1a1c1e',
+            'on-surface-variant': '#474551',
+            outline: '#777683',
+            'outline-variant': '#c8c5d3',
+            // Status tones
+            success: '#4d9c4c',
+            'success-container': '#eef6e8',
+            'on-success-container': '#3d7231',
+            warning: '#967c39',
+            'warning-container': '#fbf3db',
+            'on-warning-container': '#7e651b',
+            info: '#5384f1',
+            'info-container': '#e5f3fc',
+            'on-info-container': '#3060c6',
+            important: '#c74f54',
+            'important-container': '#faeae9',
+            'on-important-container': '#ac4848',
+          },
+          fontFamily: {
+            headline: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Noto Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #f4f3f7;
+      color: #1a1c1e;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4, .font-headline {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .num-tabular {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+      vertical-align: middle;
+    }
+    .card-border {
+      border: 1px solid #c8c5d3;
+    }
+    /* Custom scrollbar for preview areas */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c8c5d3;
+      border-radius: 4px;
+    }
+  </style>
+<link rel="stylesheet" href="../assets/overlay.css"/></head>
+<body class="min-h-screen bg-[#f4f3f7] flex">
+
+  <!-- Persistent Left Sidebar (240px) -->
+  <aside class="w-[240px] flex-shrink-0 bg-[#5654ac] text-white min-h-screen flex flex-col fixed top-0 bottom-0 left-0 z-40 select-none shadow-md">
+    <!-- Brand / System Title -->
+    <div class="p-6 border-b border-white/10 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center font-headline font-bold text-white text-lg shadow-inner">
+        <span class="material-icons text-white text-xl">account_balance_wallet</span>
+      </div>
+      <div>
+        <div class="text-xs uppercase tracking-wider text-white/70 font-semibold">BudgetFlow</div>
+        <div class="text-base font-bold font-headline leading-tight">Design System</div>
+      </div>
+    </div>
+
+    <!-- System Navigation Links -->
+    <nav class="flex-1 py-6 px-3 space-y-1">
+      <div class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-white/50">Core Satori M3</div>
+      
+      <a href="#foundations" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-white/15 text-white shadow-sm hover:bg-white/20 transition-colors">
+        <span class="material-icons text-lg">palette</span>
+        <span>Foundations</span>
+      </a>
+
+      <a href="#components" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors">
+        <span class="material-icons text-lg">widgets</span>
+        <span>Components</span>
+      </a>
+
+      <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors" href="../index.html?missing=Patterns" target="_top" data-bf-missing="Patterns">
+        <span class="material-icons text-lg">dashboard_customize</span>
+        <span>Patterns</span>
+      </a>
+
+      <a href="#budget-safety" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors">
+        <span class="material-icons text-lg">verified_user</span>
+        <span>Budget Safety</span>
+      </a>
+
+      <div class="pt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-white/50">Quick Jump</div>
+      <a href="#sec-color" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>1. Color Palette</span>
+      </a>
+      <a href="#sec-typography" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>2. Typography & Money</span>
+      </a>
+      <a href="#sec-spacing" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>3. Spacing & Radii</span>
+      </a>
+      <a href="#sec-buttons" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>4. Buttons & Actions</span>
+      </a>
+      <a href="#sec-tags" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>5. Status Tags</span>
+      </a>
+      <a href="#sec-table" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>6. Dense Data Table</span>
+      </a>
+      <a href="#sec-forms" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>7. Material Form Fields</span>
+      </a>
+      <a href="#sec-banners" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>8. Full-Width Banners</span>
+      </a>
+      <a href="#sec-kpi" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>9. KPI Metric Cards</span>
+      </a>
+      <a href="#sec-budget-legend" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>10. Budget Bar Segment Legend</span>
+      </a>
+      <a href="#sec-overlays" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>11. Dialog, Drawer & Toast</span>
+      </a>
+      <a href="#sec-empty" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>12. Empty & Error States</span>
+      </a>
+      <a href="#sec-charts" class="flex items-center gap-2.5 px-3 py-1.5 text-xs text-white/70 hover:text-white">
+        <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        <span>13. Satori Chart Sample</span>
+      </a>
+    </nav>
+
+    <!-- Version Footer -->
+    <div class="p-4 border-t border-white/10 text-xs text-white/60">
+      <div class="font-semibold text-white/80">Satori Theme v2.4</div>
+      <div>Angular Material 3 Light Mode</div>
+    </div>
+  </aside>
+
+  <!-- Main Content Canvas (Desktop 1440px target, margin-left 240px for sidebar) -->
+  <main class="ml-[240px] flex-1 min-w-[1200px] max-w-[1440px] p-8 space-y-8">
+
+    <!-- Top App Bar / Documentation Header -->
+    <header class="bg-white rounded-[12px] card-border p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
+          <span>BudgetFlow Enterprise</span>
+          <span>&bull;</span>
+          <span>Satori Design System</span>
+          <span>&bull;</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-primary-container text-on-primary-container font-bold">M3 Light Theme</span>
+        </div>
+        <h1 class="text-3xl font-bold font-headline text-on-surface">Design System Reference Sheet</h1>
+        <p class="text-sm text-on-surface-variant mt-1">Calm, precise, trustworthy enterprise budget governance tokens, UI components, and budget safety visual standards.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant bg-white text-on-surface text-sm font-medium hover:bg-surface-container-low transition-colors" data-bf-missing="Export DESIGN.md">
+          <span class="material-icons text-base">download</span>
+          <span>Export DESIGN.md</span>
+        </button>
+        <button class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary-loud shadow-sm transition-colors" data-bf-missing="Inspect Tokens">
+          <span class="material-icons text-base">palette</span>
+          <span>Inspect Tokens</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Section Anchor: Foundations -->
+    <div id="foundations" class="pt-2">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary">Category 01</span>
+        <div class="h-px bg-outline-variant flex-1"></div>
+        <span class="text-xs font-semibold text-on-surface-variant">Design Foundations & Tokens</span>
+      </div>
+    </div>
+
+    <!-- 1) COLOR SECTION -->
+    <section id="sec-color" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            1. Color Tokens & Swatch Matrix
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Primary violet hierarchy, neutral cool-gray surfaces, outline strokes, and triple-token status pairs.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">17 Core Palette Tokens</span>
+      </div>
+
+      <!-- Core Brand & Surface Palette Swatches -->
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3">Brand & Surface Palette</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          <!-- primary -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#5654ac] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-white/80">#5654ac</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">primary</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#5654ac</div>
+            </div>
+          </div>
+
+          <!-- on-primary -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#ffffff] border-b border-surface-container flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-on-surface-variant">#ffffff</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">on-primary</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#ffffff</div>
+            </div>
+          </div>
+
+          <!-- primary-container -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#e2dfff] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-on-primary-container">#e2dfff</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">primary-container</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#e2dfff</div>
+            </div>
+          </div>
+
+          <!-- primary-loud -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#322f86] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-white/80">#322f86</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">primary-loud</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#322f86</div>
+            </div>
+          </div>
+
+          <!-- tertiary -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#006b61] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-white/80">#006b61</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">tertiary</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#006b61</div>
+            </div>
+          </div>
+
+          <!-- error -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#b02b36] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-white/80">#b02b36</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">error</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#b02b36</div>
+            </div>
+          </div>
+
+          <!-- surface -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#f9f9fc] border-b border-surface-container flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-on-surface-variant">#f9f9fc</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">surface</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#f9f9fc</div>
+            </div>
+          </div>
+
+          <!-- surface-container-low -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#f4f3f7] border-b border-surface-container flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-on-surface-variant">#f4f3f7</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">surface-container-low</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#f4f3f7</div>
+            </div>
+          </div>
+
+          <!-- surface-container-lowest -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#ffffff] border-b border-surface-container flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-on-surface-variant">#ffffff</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">surface-lowest</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#ffffff</div>
+            </div>
+          </div>
+
+          <!-- on-surface -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#1a1c1e] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-white/80">#1a1c1e</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">on-surface</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#1a1c1e</div>
+            </div>
+          </div>
+
+          <!-- on-surface-variant -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#474551] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-white/80">#474551</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">on-surface-variant</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#474551</div>
+            </div>
+          </div>
+
+          <!-- outline -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#777683] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-white/80">#777683</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">outline</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#777683</div>
+            </div>
+          </div>
+
+          <!-- outline-variant -->
+          <div class="rounded-lg border border-outline-variant overflow-hidden flex flex-col">
+            <div class="h-16 w-full bg-[#c8c5d3] flex items-end p-2 justify-between">
+              <span class="text-[10px] font-mono text-on-surface">#c8c5d3</span>
+            </div>
+            <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+              <div class="text-xs font-bold text-on-surface">outline-variant</div>
+              <div class="text-[11px] text-on-surface-variant font-mono">#c8c5d3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Token Triples (base / container / text) -->
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3">Status Semantic Triads (Token / Container / On-Container)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- SUCCESS -->
+          <div class="p-4 rounded-lg border border-[#c8c5d3] bg-[#eef6e8] flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-[#3d7231] uppercase tracking-wider">Success</span>
+              <span class="w-3.5 h-3.5 rounded-full bg-[#4d9c4c]"></span>
+            </div>
+            <div class="text-xs font-medium text-[#3d7231]">Approved &bull; Active &bull; Matched</div>
+            <div class="pt-2 border-t border-[#4d9c4c]/20 text-[11px] font-mono space-y-1">
+              <div class="flex justify-between"><span>success:</span> <span class="font-bold">#4d9c4c</span></div>
+              <div class="flex justify-between"><span>container:</span> <span>#eef6e8</span></div>
+              <div class="flex justify-between"><span>on-container:</span> <span>#3d7231</span></div>
+            </div>
+          </div>
+
+          <!-- WARNING -->
+          <div class="p-4 rounded-lg border border-[#c8c5d3] bg-[#fbf3db] flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-[#7e651b] uppercase tracking-wider">Warning</span>
+              <span class="w-3.5 h-3.5 rounded-full bg-[#967c39]"></span>
+            </div>
+            <div class="text-xs font-medium text-[#7e651b]">Pending Approval &bull; Soft Warning</div>
+            <div class="pt-2 border-t border-[#967c39]/20 text-[11px] font-mono space-y-1">
+              <div class="flex justify-between"><span>warning:</span> <span class="font-bold">#967c39</span></div>
+              <div class="flex justify-between"><span>container:</span> <span>#fbf3db</span></div>
+              <div class="flex justify-between"><span>on-container:</span> <span>#7e651b</span></div>
+            </div>
+          </div>
+
+          <!-- INFO -->
+          <div class="p-4 rounded-lg border border-[#c8c5d3] bg-[#e5f3fc] flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-[#3060c6] uppercase tracking-wider">Info</span>
+              <span class="w-3.5 h-3.5 rounded-full bg-[#5384f1]"></span>
+            </div>
+            <div class="text-xs font-medium text-[#3060c6]">Frozen &bull; Partially Allocated</div>
+            <div class="pt-2 border-t border-[#5384f1]/20 text-[11px] font-mono space-y-1">
+              <div class="flex justify-between"><span>info:</span> <span class="font-bold">#5384f1</span></div>
+              <div class="flex justify-between"><span>container:</span> <span>#e5f3fc</span></div>
+              <div class="flex justify-between"><span>on-container:</span> <span>#3060c6</span></div>
+            </div>
+          </div>
+
+          <!-- IMPORTANT -->
+          <div class="p-4 rounded-lg border border-[#c8c5d3] bg-[#faeae9] flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-[#ac4848] uppercase tracking-wider">Important</span>
+              <span class="w-3.5 h-3.5 rounded-full bg-[#c74f54]"></span>
+            </div>
+            <div class="text-xs font-medium text-[#ac4848]">Set to Zero &bull; Override Required</div>
+            <div class="pt-2 border-t border-[#c74f54]/20 text-[11px] font-mono space-y-1">
+              <div class="flex justify-between"><span>important:</span> <span class="font-bold">#c74f54</span></div>
+              <div class="flex justify-between"><span>container:</span> <span>#faeae9</span></div>
+              <div class="flex justify-between"><span>on-container:</span> <span>#ac4848</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2) TYPOGRAPHY SCALE SECTION -->
+    <section id="sec-typography" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            2. Typography Scale & Currency Formatting
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Headlines in Plus Jakarta Sans (600/700), body/labels in Noto Sans, right-aligned tabular numerals with ISO currency codes.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">Plus Jakarta Sans & Noto Sans</span>
+      </div>
+
+      <!-- Type Hierarchy Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-outline-variant text-[11px] font-semibold uppercase text-on-surface-variant">
+              <th class="py-2.5 pr-4">Token</th>
+              <th class="py-2.5 px-4">Font Family</th>
+              <th class="py-2.5 px-4">Size / Line Height</th>
+              <th class="py-2.5 px-4">Weight</th>
+              <th class="py-2.5 pl-4">Live Sample: "Employee Experience budget"</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container text-sm">
+            <tr>
+              <td class="py-3 pr-4 font-mono text-xs text-primary font-bold">headline-lg</td>
+              <td class="py-3 px-4 text-xs text-on-surface-variant">Plus Jakarta Sans</td>
+              <td class="py-3 px-4 text-xs font-mono">32px / 40px</td>
+              <td class="py-3 px-4 text-xs">SemiBold 600</td>
+              <td class="py-3 pl-4 font-headline text-[32px] leading-[40px] font-semibold text-on-surface">Employee Experience budget</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-mono text-xs text-primary font-bold">headline-md</td>
+              <td class="py-3 px-4 text-xs text-on-surface-variant">Plus Jakarta Sans</td>
+              <td class="py-3 px-4 text-xs font-mono">28px / 36px</td>
+              <td class="py-3 px-4 text-xs">SemiBold 600</td>
+              <td class="py-3 pl-4 font-headline text-[28px] leading-[36px] font-semibold text-on-surface">Employee Experience budget</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-mono text-xs text-primary font-bold">headline-sm</td>
+              <td class="py-3 px-4 text-xs text-on-surface-variant">Plus Jakarta Sans</td>
+              <td class="py-3 px-4 text-xs font-mono">24px / 32px</td>
+              <td class="py-3 px-4 text-xs">SemiBold 600</td>
+              <td class="py-3 pl-4 font-headline text-[24px] leading-[32px] font-semibold text-on-surface">Employee Experience budget</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-mono text-xs text-primary font-bold">title-lg</td>
+              <td class="py-3 px-4 text-xs text-on-surface-variant">Plus Jakarta Sans</td>
+              <td class="py-3 px-4 text-xs font-mono">22px / 28px</td>
+              <td class="py-3 px-4 text-xs">SemiBold 600</td>
+              <td class="py-3 pl-4 font-headline text-[22px] leading-[28px] font-semibold text-on-surface">Employee Experience budget</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-mono text-xs text-primary font-bold">title-md</td>
+              <td class="py-3 px-4 text-xs text-on-surface-variant">Noto Sans</td>
+              <td class="py-3 px-4 text-xs font-mono">16px / 24px</td>
+              <td class="py-3 px-4 text-xs">Medium 500</td>
+              <td class="py-3 pl-4 font-sans text-[16px] leading-[24px] font-medium text-on-surface">Employee Experience budget</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-mono text-xs text-primary font-bold">body-md</td>
+              <td class="py-3 px-4 text-xs text-on-surface-variant">Noto Sans</td>
+              <td class="py-3 px-4 text-xs font-mono">14px / 20px</td>
+              <td class="py-3 px-4 text-xs">Regular 400</td>
+              <td class="py-3 pl-4 font-sans text-[14px] leading-[20px] text-on-surface">Employee Experience budget</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-mono text-xs text-primary font-bold">body-sm</td>
+              <td class="py-3 px-4 text-xs text-on-surface-variant">Noto Sans</td>
+              <td class="py-3 px-4 text-xs font-mono">12px / 16px</td>
+              <td class="py-3 px-4 text-xs">Regular 400</td>
+              <td class="py-3 pl-4 font-sans text-[12px] leading-[16px] text-on-surface-variant">Employee Experience budget</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-mono text-xs text-primary font-bold">label</td>
+              <td class="py-3 px-4 text-xs text-on-surface-variant">Noto Sans</td>
+              <td class="py-3 px-4 text-xs font-mono">12px / 16px</td>
+              <td class="py-3 px-4 text-xs">Medium 500</td>
+              <td class="py-3 pl-4 font-sans text-[12px] leading-[16px] font-medium tracking-wide uppercase text-on-surface-variant">Employee Experience budget</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tabular Numerals and Currency Standards -->
+      <div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Financial Currency & Tabular Numerals Standard</span>
+          <span class="text-[11px] font-mono text-primary font-semibold">ISO 4217 Currency Prefix + font-variant-numeric: tabular-nums</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white p-3 rounded border border-outline-variant flex items-center justify-between">
+            <span class="text-xs text-on-surface-variant font-medium">US Dollar (USD)</span>
+            <span class="font-sans font-bold text-lg text-on-surface num-tabular">USD 100,000.00</span>
+          </div>
+          <div class="bg-white p-3 rounded border border-outline-variant flex items-center justify-between">
+            <span class="text-xs text-on-surface-variant font-medium">Indian Rupee (INR)</span>
+            <span class="font-sans font-bold text-lg text-on-surface num-tabular">INR 8,30,000.00</span>
+          </div>
+          <div class="bg-white p-3 rounded border border-outline-variant flex items-center justify-between">
+            <span class="text-xs text-on-surface-variant font-medium">Euro (EUR)</span>
+            <span class="font-sans font-bold text-lg text-on-surface num-tabular">EUR 25,000.00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3) SPACING, RADII & 12-COLUMN GRID SECTION -->
+    <section id="sec-spacing" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            3. Spacing, Radii & 12-Column Grid
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">4px base rhythm, strict Material 3 corner roundness tokens, and responsive 12-column content grid.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">4px Base Unit</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Spacing Scale -->
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3">Spacing System (4 / 8 / 16 / 24 / 32 px)</h3>
+          <div class="space-y-2.5">
+            <div class="flex items-center gap-4">
+              <span class="w-16 font-mono text-xs text-on-surface-variant">4px (xs)</span>
+              <div class="h-6 bg-primary/20 border border-primary text-[10px] font-mono flex items-center justify-center text-primary-loud rounded" style="width: 4px;"></div>
+              <span class="text-xs text-on-surface-variant">Micro spacing, input padding offset</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="w-16 font-mono text-xs text-on-surface-variant">8px (sm)</span>
+              <div class="h-6 bg-primary/20 border border-primary text-[10px] font-mono flex items-center justify-center text-primary-loud rounded" style="width: 8px;"></div>
+              <span class="text-xs text-on-surface-variant">Chip gaps, compact element padding</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="w-16 font-mono text-xs text-on-surface-variant">16px (md)</span>
+              <div class="h-6 bg-primary/20 border border-primary text-[10px] font-mono flex items-center justify-center text-primary-loud rounded" style="width: 16px;"></div>
+              <span class="text-xs text-on-surface-variant">Default gutters, table cell padding</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="w-16 font-mono text-xs text-on-surface-variant">24px (lg)</span>
+              <div class="h-6 bg-primary/20 border border-primary text-[10px] font-mono flex items-center justify-center text-primary-loud rounded" style="width: 24px;"></div>
+              <span class="text-xs text-on-surface-variant">Card padding, section margin rhythm</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="w-16 font-mono text-xs text-on-surface-variant">32px (xl)</span>
+              <div class="h-6 bg-primary/20 border border-primary text-[10px] font-mono flex items-center justify-center text-primary-loud rounded" style="width: 32px;"></div>
+              <span class="text-xs text-on-surface-variant">Major layout gaps, container margins</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Radii Scale -->
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3">Corner Radii Tokens (4 / 8 / 12 / 16 / 28 px & Pill)</h3>
+          <div class="flex flex-wrap gap-4 items-center">
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-12 h-12 bg-surface-container border border-primary rounded-[4px] flex items-center justify-center font-mono text-xs font-bold text-primary">4px</div>
+              <span class="text-[10px] text-on-surface-variant">Inputs, tables</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-12 h-12 bg-surface-container border border-primary rounded-[8px] flex items-center justify-center font-mono text-xs font-bold text-primary">8px</div>
+              <span class="text-[10px] text-on-surface-variant">Status tags, chips</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-12 h-12 bg-surface-container border border-primary rounded-[12px] flex items-center justify-center font-mono text-xs font-bold text-primary">12px</div>
+              <span class="text-[10px] text-on-surface-variant">Cards, panels</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-12 h-12 bg-surface-container border border-primary rounded-[16px] flex items-center justify-center font-mono text-xs font-bold text-primary">16px</div>
+              <span class="text-[10px] text-on-surface-variant">Drawers, modals</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-12 h-12 bg-surface-container border border-primary rounded-[28px] flex items-center justify-center font-mono text-xs font-bold text-primary">28px</div>
+              <span class="text-[10px] text-on-surface-variant">M3 Dialogs</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-14 h-12 bg-surface-container border border-primary rounded-full flex items-center justify-center font-mono text-xs font-bold text-primary">pill</div>
+              <span class="text-[10px] text-on-surface-variant">Buttons</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12-Column Grid Diagram -->
+      <div class="pt-4 border-t border-surface-container">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">12-Column Responsive Desktop Grid (16px Gutters, 24px Outer Margin)</span>
+          <span class="text-[11px] font-mono text-on-surface-variant">Col width: ~84px | 1440px viewport</span>
+        </div>
+        <div class="grid grid-cols-12 gap-4 p-3 bg-surface-container-low rounded-lg border border-outline-variant">
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">1</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">2</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">3</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">4</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">5</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">6</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">7</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">8</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">9</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">10</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">11</div>
+          <div class="h-10 bg-primary/10 border border-primary/30 rounded flex items-center justify-center text-[11px] font-mono font-bold text-primary">12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Anchor: Components -->
+    <div id="components" class="pt-2">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary">Category 02</span>
+        <div class="h-px bg-outline-variant flex-1"></div>
+        <span class="text-xs font-semibold text-on-surface-variant">Core UI Components & Controls</span>
+      </div>
+    </div>
+
+    <!-- 4) BUTTONS SECTION -->
+    <section id="sec-buttons" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            4. Buttons & Interactive States
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Fully rounded pills (9999px), Material 3 elevations, tonal icon actions, destructive treatments, and disabled tooltips.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">Material Pill Variants</span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4">
+        <!-- Filled pill: Allocate budget -->
+        <button class="px-6 py-2.5 rounded-full bg-primary text-white font-medium text-sm hover:bg-primary-loud shadow-sm hover:shadow transition-all flex items-center gap-2" data-bf-missing="Allocate budget">
+          <span class="material-icons text-sm">add_circle_outline</span>
+          <span>Allocate budget</span>
+        </button>
+
+        <!-- Outlined pill: Export -->
+        <button class="px-6 py-2.5 rounded-full border border-outline-variant bg-white text-on-surface font-medium text-sm hover:bg-surface-container-low transition-colors flex items-center gap-2" data-bf-missing="Export">
+          <span class="material-icons text-sm">file_download</span>
+          <span>Export</span>
+        </button>
+
+        <!-- Text button: Cancel -->
+        <button class="px-4 py-2.5 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-medium text-sm transition-colors" data-bf-missing="Cancel">
+          Cancel
+        </button>
+
+        <!-- Tonal icon buttons -->
+        <div class="flex items-center gap-2">
+          <button class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center hover:bg-primary-container/80 transition-colors" title="Filter Records" data-bf-missing="Filter Records">
+            <span class="material-icons">filter_list</span>
+          </button>
+          <button class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-surface-container-highest transition-colors" title="Refresh Sync" data-bf-missing="Refresh Sync">
+            <span class="material-icons">refresh</span>
+          </button>
+          <button class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center hover:bg-surface-container-highest transition-colors" title="More Options" data-bf-missing="More Options">
+            <span class="material-icons">more_vert</span>
+          </button>
+        </div>
+
+        <!-- Destructive: Set to zero in error red -->
+        <button class="px-5 py-2.5 rounded-full bg-error text-white font-medium text-sm hover:bg-error/90 shadow-sm transition-colors flex items-center gap-2" data-bf-missing="Set to zero">
+          <span class="material-icons text-sm">delete_forever</span>
+          <span>Set to zero</span>
+        </button>
+
+        <!-- Disabled button with tooltip: Budget is frozen -->
+        <div class="relative group inline-block">
+          <button disabled class="px-6 py-2.5 rounded-full bg-surface-container text-outline cursor-not-allowed font-medium text-sm flex items-center gap-2" data-bf-missing="Request Transfer">
+            <span class="material-icons text-sm">lock</span>
+            <span>Request Transfer</span>
+          </button>
+          <!-- Tooltip -->
+          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-inverse-surface text-inverse-on-surface text-xs whitespace-nowrap shadow-lg z-50">
+            <span class="material-icons text-xs text-info">lock</span>
+            <span>Budget is frozen</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5) STATUS TAGS SECTION -->
+    <section id="sec-tags" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            5. Status Tags & Semantic Chips
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Rounded 8px tags with filled Material Icons + text on high-contrast container tints. Never color alone.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">15 Official Statuses</span>
+      </div>
+
+      <div class="flex flex-wrap gap-2.5">
+        <!-- Draft -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-surface-container text-on-surface-variant text-xs font-medium border border-outline-variant/60">
+          <span class="material-icons text-[16px]">edit_note</span>
+          <span>Draft</span>
+        </span>
+
+        <!-- Submitted -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-surface-container text-on-surface-variant text-xs font-medium border border-outline-variant/60">
+          <span class="material-icons text-[16px]">send</span>
+          <span>Submitted</span>
+        </span>
+
+        <!-- Pending approval (warning) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-warning-container text-on-warning-container text-xs font-medium border border-warning/30">
+          <span class="material-icons text-[16px]">schedule</span>
+          <span>Pending approval</span>
+        </span>
+
+        <!-- Approved (success) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-success-container text-on-success-container text-xs font-medium border border-success/30">
+          <span class="material-icons text-[16px]">check_circle</span>
+          <span>Approved</span>
+        </span>
+
+        <!-- Active (success) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-success-container text-on-success-container text-xs font-medium border border-success/30">
+          <span class="material-icons text-[16px]">verified</span>
+          <span>Active</span>
+        </span>
+
+        <!-- Partially allocated (info) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-info-container text-on-info-container text-xs font-medium border border-info/30">
+          <span class="material-icons text-[16px]">pie_chart</span>
+          <span>Partially allocated</span>
+        </span>
+
+        <!-- Fully allocated (neutral) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-surface-container text-on-surface-variant text-xs font-medium border border-outline-variant/60">
+          <span class="material-icons text-[16px]">donut_large</span>
+          <span>Fully allocated</span>
+        </span>
+
+        <!-- Frozen (info with lock icon) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-info-container text-on-info-container text-xs font-medium border border-info/30">
+          <span class="material-icons text-[16px]">lock</span>
+          <span>Frozen</span>
+        </span>
+
+        <!-- Reduced (warning) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-warning-container text-on-warning-container text-xs font-medium border border-warning/30">
+          <span class="material-icons text-[16px]">trending_down</span>
+          <span>Reduced</span>
+        </span>
+
+        <!-- Set to zero (important) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-important-container text-on-important-container text-xs font-medium border border-important/30">
+          <span class="material-icons text-[16px]">exposure_zero</span>
+          <span>Set to zero</span>
+        </span>
+
+        <!-- Exhausted (error) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-error-container text-on-error-container text-xs font-medium border border-error/30">
+          <span class="material-icons text-[16px]">error</span>
+          <span>Exhausted</span>
+        </span>
+
+        <!-- Expired (neutral grey) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-surface-container text-on-surface-variant text-xs font-medium border border-outline-variant/60">
+          <span class="material-icons text-[16px]">event_busy</span>
+          <span>Expired</span>
+        </span>
+
+        <!-- Closed (neutral grey) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-surface-container text-on-surface-variant text-xs font-medium border border-outline-variant/60">
+          <span class="material-icons text-[16px]">folder_off</span>
+          <span>Closed</span>
+        </span>
+
+        <!-- Revised (neutral grey) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-surface-container text-on-surface-variant text-xs font-medium border border-outline-variant/60">
+          <span class="material-icons text-[16px]">history</span>
+          <span>Revised</span>
+        </span>
+
+        <!-- Cancelled (neutral grey) -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-surface-container text-on-surface-variant text-xs font-medium border border-outline-variant/60">
+          <span class="material-icons text-[16px]">cancel</span>
+          <span>Cancelled</span>
+        </span>
+      </div>
+    </section>
+
+    <!-- 6) DENSE TABLE SAMPLE -->
+    <section id="sec-table" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            6. Dense Data Table Specification
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">52px header, 48px rows, state stripes on the left (blue info / rose important), right-aligned tabular numbers.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant" data-bf-missing="This control"><span class="material-icons text-base">filter_list</span></button>
+          <button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant" data-bf-missing="This control"><span class="material-icons text-base">density_medium</span></button>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="rounded-lg border border-outline-variant overflow-hidden">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant h-[52px]">
+              <th class="w-2 px-0 py-0"></th><!-- Status stripe spacer -->
+              <th class="py-3 px-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Budget</th>
+              <th class="py-3 px-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Owner</th>
+              <th class="py-3 px-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Currency</th>
+              <th class="py-3 px-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-right">Allocated</th>
+              <th class="py-3 px-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-right">Available</th>
+              <th class="py-3 px-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-center">Status</th>
+              <th class="py-3 px-3 text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container">
+            <!-- Row 1: India Region Priya Raman Active -->
+            <tr class="h-[48px] hover:bg-surface-container-low transition-colors">
+              <td class="w-1.5 p-0 bg-transparent"></td>
+              <td class="py-3 px-4 font-medium text-on-surface">India Region</td>
+              <td class="py-3 px-4 text-on-surface-variant flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-primary-container text-on-primary-container text-[11px] font-bold flex items-center justify-center">PR</div>
+                <span>Priya Raman</span>
+              </td>
+              <td class="py-3 px-4 font-mono text-xs text-on-surface-variant">USD</td>
+              <td class="py-3 px-4 text-right font-medium num-tabular">USD 30,000.00</td>
+              <td class="py-3 px-4 text-right font-semibold text-success num-tabular">USD 12,000.00</td>
+              <td class="py-3 px-4 text-center">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[8px] bg-success-container text-on-success-container text-xs font-medium border border-success/30">
+                  <span class="material-icons text-sm">verified</span>
+                  <span>Active</span>
+                </span>
+              </td>
+              <td class="py-3 px-3 text-right">
+                <button class="text-on-surface-variant hover:text-primary p-1 rounded" data-bf-missing="This control"><span class="material-icons text-base">more_horiz</span></button>
+              </td>
+            </tr>
+
+            <!-- Row 2: Bengaluru Events Frozen with left blue stripe -->
+            <tr class="h-[48px] hover:bg-surface-container-low transition-colors bg-[#e5f3fc]/20">
+              <td class="w-1.5 p-0 bg-info"></td>
+              <td class="py-3 px-4 font-medium text-on-surface flex items-center gap-2">
+                <span>Bengaluru Events</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-info-container text-on-info-container font-mono">CC-892</span>
+              </td>
+              <td class="py-3 px-4 text-on-surface-variant flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-surface-container text-on-surface-variant text-[11px] font-bold flex items-center justify-center">AK</div>
+                <span>Anand Kumar</span>
+              </td>
+              <td class="py-3 px-4 font-mono text-xs text-on-surface-variant">USD</td>
+              <td class="py-3 px-4 text-right font-medium num-tabular">USD 10,000.00</td>
+              <td class="py-3 px-4 text-right font-semibold text-info num-tabular">USD 2,450.00</td>
+              <td class="py-3 px-4 text-center">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[8px] bg-info-container text-on-info-container text-xs font-medium border border-info/30">
+                  <span class="material-icons text-sm">lock</span>
+                  <span>Frozen</span>
+                </span>
+              </td>
+              <td class="py-3 px-3 text-right">
+                <button class="text-on-surface-variant hover:text-primary p-1 rounded" data-bf-missing="This control"><span class="material-icons text-base">more_horiz</span></button>
+              </td>
+            </tr>
+
+            <!-- Row 3: Hyderabad Events Set to zero with left rose stripe -->
+            <tr class="h-[48px] hover:bg-surface-container-low transition-colors bg-[#faeae9]/20">
+              <td class="w-1.5 p-0 bg-important"></td>
+              <td class="py-3 px-4 font-medium text-on-surface flex items-center gap-2">
+                <span>Hyderabad Events</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-important-container text-on-important-container font-mono">CC-894</span>
+              </td>
+              <td class="py-3 px-4 text-on-surface-variant flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-surface-container text-on-surface-variant text-[11px] font-bold flex items-center justify-center">SM</div>
+                <span>Suresh Menon</span>
+              </td>
+              <td class="py-3 px-4 font-mono text-xs text-on-surface-variant">USD</td>
+              <td class="py-3 px-4 text-right font-medium num-tabular">USD 8,000.00</td>
+              <td class="py-3 px-4 text-right font-semibold text-important num-tabular">USD 0.00</td>
+              <td class="py-3 px-4 text-center">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[8px] bg-important-container text-on-important-container text-xs font-medium border border-important/30">
+                  <span class="material-icons text-sm">exposure_zero</span>
+                  <span>Set to zero</span>
+                </span>
+              </td>
+              <td class="py-3 px-3 text-right">
+                <button class="text-on-surface-variant hover:text-primary p-1 rounded" data-bf-missing="This control"><span class="material-icons text-base">more_horiz</span></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Table Paginator Footer -->
+        <div class="bg-surface-container-low px-4 py-3 border-t border-outline-variant flex items-center justify-between text-xs text-on-surface-variant">
+          <div class="flex items-center gap-2">
+            <span>Rows per page:</span>
+            <select class="bg-white border border-outline-variant rounded px-2 py-0.5 text-xs text-on-surface">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="font-medium">1-3 of 3</span>
+            <div class="flex items-center gap-1">
+              <button disabled class="p-1 rounded text-outline cursor-not-allowed" data-bf-missing="This control"><span class="material-icons text-base">chevron_left</span></button>
+              <button disabled class="p-1 rounded text-outline cursor-not-allowed" data-bf-missing="This control"><span class="material-icons text-base">chevron_right</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7) FORM FIELDS SECTION -->
+    <section id="sec-forms" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            7. Outlined Material Form Fields
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Floating labels, internal currency prefix (USD), helper text, and high-visibility error validations.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">Material Form Tokens</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Amount with prefix USD and value 5,000.00 -->
+        <div class="relative">
+          <div class="relative border border-primary rounded-[4px] px-3 pt-4 pb-2 bg-white focus-within:ring-2 focus-within:ring-primary/20">
+            <label class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-semibold text-primary">Amount</label>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-xs font-bold text-on-surface-variant select-none">USD</span>
+              <input type="text" value="5,000.00" class="w-full font-sans text-sm font-semibold text-on-surface outline-none num-tabular bg-transparent">
+            </div>
+          </div>
+          <span class="text-[11px] text-on-surface-variant mt-1 block">ISO standard reporting amount</span>
+        </div>
+
+        <!-- Reason code select -->
+        <div class="relative">
+          <div class="relative border border-outline-variant rounded-[4px] px-3 pt-3.5 pb-2 bg-white focus-within:border-primary">
+            <label class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-medium text-on-surface-variant">Reason code</label>
+            <select class="w-full text-sm text-on-surface outline-none bg-transparent appearance-none pr-6 cursor-pointer">
+              <option selected>RC-204: Cross-Department Transfer</option>
+              <option>RC-102: Emergency Travel Earmark</option>
+              <option>RC-301: Unused Year-End Reconciliation</option>
+            </select>
+            <span class="material-icons absolute right-2.5 top-3.5 text-on-surface-variant pointer-events-none text-base">arrow_drop_down</span>
+          </div>
+          <span class="text-[11px] text-on-surface-variant mt-1 block">Mandatory enterprise audit categorization</span>
+        </div>
+
+        <!-- Reason textarea with error text 'Reason is required' -->
+        <div class="relative">
+          <div class="relative border border-error rounded-[4px] px-3 pt-3.5 pb-2 bg-white">
+            <label class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-semibold text-error">Reason</label>
+            <textarea rows="2" placeholder="Provide justification..." class="w-full text-sm text-on-surface outline-none bg-transparent resize-none"></textarea>
+          </div>
+          <div class="flex items-center gap-1 text-[11px] text-error font-medium mt-1">
+            <span class="material-icons text-xs">error</span>
+            <span>Reason is required</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8) BANNERS FULL WIDTH SECTION -->
+    <section id="sec-banners" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            8. Full-Width Notification & Governance Banners
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">High-priority inline alerts with icons, explicit action triggers, and semantic tint containers.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">Inline Banners</span>
+      </div>
+
+      <div class="space-y-3">
+        <!-- INFO BANNER -->
+        <div class="p-4 rounded-lg bg-info-container border border-info/30 text-on-info-container flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="material-icons text-info text-2xl">info</span>
+            <div>
+              <div class="font-bold text-xs uppercase tracking-wide text-info">Informational Freeze</div>
+              <div class="text-sm font-medium">This budget is frozen. Existing commitments can complete.</div>
+            </div>
+          </div>
+          <button class="px-3.5 py-1.5 rounded-full bg-white text-on-info-container border border-info/30 font-medium text-xs hover:bg-info/10 transition-colors" data-bf-missing="View Freeze Details">
+            View Freeze Details
+          </button>
+        </div>
+
+        <!-- WARNING BANNER -->
+        <div class="p-4 rounded-lg bg-warning-container border border-warning/30 text-on-warning-container flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="material-icons text-warning text-2xl">warning</span>
+            <div>
+              <div class="font-bold text-xs uppercase tracking-wide text-warning">Soft Warning</div>
+              <div class="text-sm font-medium">Soft warning: this allocation uses 92% of India Region available.</div>
+            </div>
+          </div>
+          <button class="px-3.5 py-1.5 rounded-full bg-white text-on-warning-container border border-warning/30 font-medium text-xs hover:bg-warning/10 transition-colors" data-bf-missing="Acknowledge &amp; Proceed">
+            Acknowledge & Proceed
+          </button>
+        </div>
+
+        <!-- ERROR BANNER -->
+        <div class="p-4 rounded-lg bg-error-container border border-error/30 text-on-error-container flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="material-icons text-error text-2xl">block</span>
+            <div>
+              <div class="font-bold text-xs uppercase tracking-wide text-error">Hard Block</div>
+              <div class="text-sm font-medium">Blocked: allocation exceeds parent available by USD 2,000.00.</div>
+            </div>
+          </div>
+          <button class="px-3.5 py-1.5 rounded-full bg-error text-white font-medium text-xs hover:bg-error/90 transition-colors shadow-sm" data-bf-missing="Request Top-up">
+            Request Top-up
+          </button>
+        </div>
+
+        <!-- SUCCESS BANNER -->
+        <div class="p-4 rounded-lg bg-success-container border border-success/30 text-on-success-container flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="material-icons text-success text-2xl">check_circle</span>
+            <div>
+              <div class="font-bold text-xs uppercase tracking-wide text-success">Submission Confirmed</div>
+              <div class="text-sm font-medium">Allocation submitted for approval.</div>
+            </div>
+          </div>
+          <button class="px-3.5 py-1.5 rounded-full bg-white text-on-success-container border border-success/30 font-medium text-xs hover:bg-success/10 transition-colors" data-bf-missing="Track in Inbox">
+            Track in Inbox
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9) KPI CARDS SECTION -->
+    <section id="sec-kpi" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            9. KPI Metric Cards
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">12px radius, tabular figures with currency code, delta chips, and thin progress indicators.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">4 Metric Cards</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Total budget USD 100,000.00 -->
+        <div class="bg-surface-container-lowest p-5 rounded-[12px] border border-outline-variant flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Total budget</span>
+              <span class="material-icons text-primary text-lg">account_balance</span>
+            </div>
+            <div class="text-2xl font-bold font-headline text-on-surface num-tabular mt-1">USD 100,000.00</div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-surface-container">
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1.5">
+              <span>Overall Cap</span>
+              <span class="font-bold text-primary">100%</span>
+            </div>
+            <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+              <div class="bg-primary h-1.5 rounded-full" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Allocated USD 78,000.00 -->
+        <div class="bg-surface-container-lowest p-5 rounded-[12px] border border-outline-variant flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Allocated</span>
+              <span class="material-icons text-primary-loud text-lg">account_tree</span>
+            </div>
+            <div class="text-2xl font-bold font-headline text-on-surface num-tabular mt-1">USD 78,000.00</div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-surface-container">
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1.5">
+              <span>Downstream Share</span>
+              <span class="font-bold text-on-surface">78.0%</span>
+            </div>
+            <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+              <div class="bg-primary-loud h-1.5 rounded-full" style="width: 78%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Available USD 22,000.00 -->
+        <div class="bg-surface-container-lowest p-5 rounded-[12px] border border-outline-variant flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Available</span>
+              <span class="material-icons text-success text-lg">savings</span>
+            </div>
+            <div class="text-2xl font-bold font-headline text-success num-tabular mt-1">USD 22,000.00</div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-surface-container">
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1.5">
+              <span>Uncommitted Pool</span>
+              <span class="font-bold text-success">22.0%</span>
+            </div>
+            <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+              <div class="bg-success h-1.5 rounded-full" style="width: 22%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Committed USD 31,200.00 -->
+        <div class="bg-surface-container-lowest p-5 rounded-[12px] border border-outline-variant flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Committed</span>
+              <span class="material-icons text-warning text-lg">pending_actions</span>
+            </div>
+            <div class="text-2xl font-bold font-headline text-on-surface num-tabular mt-1">USD 31,200.00</div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-surface-container">
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1.5">
+              <span>Consumption Ratio</span>
+              <span class="font-bold text-warning">31.2%</span>
+            </div>
+            <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+              <div class="bg-warning h-1.5 rounded-full" style="width: 31.2%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Anchor: Budget Safety Patterns -->
+    <div id="budget-safety" class="pt-2">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary">Category 03</span>
+        <div class="h-px bg-outline-variant flex-1"></div>
+        <span class="text-xs font-semibold text-on-surface-variant">Budget Safety & Governance Patterns</span>
+      </div>
+    </div>
+
+    <!-- 10) BUDGET BAR LEGEND SECTION -->
+    <section id="sec-budget-legend" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            10. Budget Safety Bar Segment Legend
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Strict distinction between encumbrance phases, actual consumption, uncommitted available liquidity, and projected forecast.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">7 Segments + Forecast Outline</span>
+      </div>
+
+      <!-- Live Stacked Horizontal Bar -->
+      <div class="space-y-4 bg-surface-container-low p-5 rounded-lg border border-outline-variant">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold text-on-surface">Budget Allocation Lifecycle ($100,000.00 USD Basis)</span>
+          <span class="font-mono text-on-surface-variant">100% Total Accounting Pool</span>
+        </div>
+
+        <!-- The Bar with segmented colors and dashed forecast -->
+        <div class="relative pt-1 pb-3">
+          <div class="w-full h-7 rounded-lg overflow-hidden flex shadow-inner bg-surface-container-high border border-outline-variant">
+            <!-- 1. Allocated out (#322f86, 25%) -->
+            <div class="bg-[#322f86] h-full flex items-center justify-center text-[10px] text-white font-bold" style="width: 25%;" title="Allocated out: $25,000">25%</div>
+            <!-- 2. Held (#777683, 10%) -->
+            <div class="bg-[#777683] h-full flex items-center justify-center text-[10px] text-white font-bold" style="width: 10%;" title="Held: $10,000">10%</div>
+            <!-- 3. Pre-encumbered (#5384f1, 15%) -->
+            <div class="bg-[#5384f1] h-full flex items-center justify-center text-[10px] text-white font-bold" style="width: 15%;" title="Pre-encumbered: $15,000">15%</div>
+            <!-- 4. Encumbered (#967c39, 12%) -->
+            <div class="bg-[#967c39] h-full flex items-center justify-center text-[10px] text-white font-bold" style="width: 12%;" title="Encumbered: $12,000">12%</div>
+            <!-- 5. Actual (#006b61, 10%) -->
+            <div class="bg-[#006b61] h-full flex items-center justify-center text-[10px] text-white font-bold" style="width: 10%;" title="Actual: $10,000">10%</div>
+            <!-- 6. Accrued (#5d5c72, 8%) -->
+            <div class="bg-[#5d5c72] h-full flex items-center justify-center text-[10px] text-white font-bold" style="width: 8%;" title="Accrued: $8,000">8%</div>
+            <!-- 7. Available (#4d9c4c, 20%) -->
+            <div class="bg-[#4d9c4c] h-full flex items-center justify-center text-[10px] text-white font-bold" style="width: 20%;" title="Available: $20,000">20%</div>
+          </div>
+
+          <!-- Forecast as a dashed outline box overlapping -->
+          <div class="mt-2 flex items-center gap-2">
+            <div class="h-3 w-16 border-2 border-dashed border-[#5654ac] bg-primary/10 rounded"></div>
+            <span class="text-xs text-on-surface-variant font-medium">Forecast projection (dashed overlay) &bull; Projected Q4 burn (+8.5%)</span>
+          </div>
+        </div>
+
+        <!-- Legend Swatches Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 pt-3 border-t border-outline-variant">
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-[#322f86] flex-shrink-0"></span>
+            <div>
+              <div class="text-xs font-bold text-on-surface">Allocated Out</div>
+              <div class="text-[10px] text-on-surface-variant font-mono">#322f86 &bull; 25%</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-[#777683] flex-shrink-0"></span>
+            <div>
+              <div class="text-xs font-bold text-on-surface">Held</div>
+              <div class="text-[10px] text-on-surface-variant font-mono">#777683 &bull; 10%</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-[#5384f1] flex-shrink-0"></span>
+            <div>
+              <div class="text-xs font-bold text-on-surface">Pre-encumb.</div>
+              <div class="text-[10px] text-on-surface-variant font-mono">#5384f1 &bull; 15%</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-[#967c39] flex-shrink-0"></span>
+            <div>
+              <div class="text-xs font-bold text-on-surface">Encumbered</div>
+              <div class="text-[10px] text-on-surface-variant font-mono">#967c39 &bull; 12%</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-[#006b61] flex-shrink-0"></span>
+            <div>
+              <div class="text-xs font-bold text-on-surface">Actual</div>
+              <div class="text-[10px] text-on-surface-variant font-mono">#006b61 &bull; 10%</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-[#5d5c72] flex-shrink-0"></span>
+            <div>
+              <div class="text-xs font-bold text-on-surface">Accrued</div>
+              <div class="text-[10px] text-on-surface-variant font-mono">#5d5c72 &bull; 8%</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded bg-[#4d9c4c] flex-shrink-0"></span>
+            <div>
+              <div class="text-xs font-bold text-on-surface">Available</div>
+              <div class="text-[10px] text-on-surface-variant font-mono">#4d9c4c &bull; 20%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11) OVERLAYS: DIALOG, DRAWER & SNACKBAR SECTION -->
+    <section id="sec-overlays" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            11. Overlays: Dialog (28px radius), Drawer (16px radius) & Toast
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">High-fidelity preview of modal dialog confirmation, right-hand governance drawer sheet, and dark bottom snackbar.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">Overlay Specifications</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Dialog Preview (Col 1-6) -->
+        <div class="lg:col-span-6 bg-surface-container-low p-6 rounded-[16px] border border-outline-variant flex flex-col justify-center">
+          <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3 flex items-center gap-2">
+            <span class="material-icons text-base">picture_in_picture</span>
+            <span>Dialog Preview &bull; 28px Radius &bull; Elevation Level 3</span>
+          </div>
+
+          <!-- The Dialog Container -->
+          <div class="bg-white rounded-[28px] border border-outline-variant shadow-xl p-6 space-y-4">
+            <div class="flex items-center gap-3 text-error">
+              <div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center">
+                <span class="material-icons text-error">warning</span>
+              </div>
+              <div>
+                <h3 class="font-headline font-bold text-lg text-on-surface">Set budget to zero</h3>
+                <p class="text-xs text-on-surface-variant">Irreversible governance override</p>
+              </div>
+            </div>
+
+            <!-- Impact summary -->
+            <div class="p-3.5 bg-important-container/40 rounded-lg border border-important/30 text-xs text-on-important-container space-y-1">
+              <div class="font-bold flex items-center gap-1.5">
+                <span class="material-icons text-sm">report_problem</span>
+                <span>Financial Impact Summary</span>
+              </div>
+              <p>Immediately freezes all uncommitted balances (<strong class="num-tabular">USD 8,000.00</strong>). Sub-nodes under Bengaluru Events will receive hard block signals.</p>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-medium text-on-surface-variant">Mandatory justification reason</label>
+              <input type="text" value="Q4 Restructuring Directive #892" class="w-full px-3 py-2 text-xs border border-outline-variant rounded-[4px] bg-surface-container-low text-on-surface font-medium outline-none">
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-3">
+              <button class="px-5 py-2 rounded-full text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors" data-bf-missing="Cancel">
+                Cancel
+              </button>
+              <button class="px-5 py-2 rounded-full bg-error text-white text-xs font-medium hover:bg-error/90 shadow transition-colors flex items-center gap-1.5" data-bf-missing="Set to zero">
+                <span class="material-icons text-sm">delete_forever</span>
+                <span>Set to zero</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drawer Preview (Col 7-12) -->
+        <div class="lg:col-span-6 bg-surface-container-low p-6 rounded-[16px] border border-outline-variant flex flex-col justify-center">
+          <div class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3 flex items-center gap-2">
+            <span class="material-icons text-base">vertical_split</span>
+            <span>Side Sheet Drawer &bull; 16px Radius &bull; 480px Spec</span>
+          </div>
+
+          <!-- Drawer Box Mockup -->
+          <div class="bg-white rounded-[16px] border border-outline-variant shadow-lg flex flex-col h-[320px] overflow-hidden">
+            <!-- Drawer Header -->
+            <div class="p-4 border-b border-surface-container flex items-center justify-between bg-surface-container-lowest">
+              <div>
+                <h4 class="font-headline font-bold text-sm text-on-surface">Budget Line Audit Drawer</h4>
+                <div class="text-[11px] font-mono text-on-surface-variant">#BL-2024-901-NA</div>
+              </div>
+              <button class="p-1 rounded-full hover:bg-surface-container text-on-surface-variant" data-bf-missing="This control"><span class="material-icons text-base">close</span></button>
+            </div>
+
+            <!-- Drawer Body -->
+            <div class="flex-1 p-4 overflow-y-auto text-xs space-y-3">
+              <div class="flex justify-between py-1 border-b border-surface-container">
+                <span class="text-on-surface-variant">Allocating Director:</span>
+                <span class="font-medium text-on-surface">Sarah Jenkins (Marketing)</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-surface-container">
+                <span class="text-on-surface-variant">Receiving Entity:</span>
+                <span class="font-medium text-on-surface">Sales Engineering (Marcus Vance)</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-surface-container">
+                <span class="text-on-surface-variant">Transfer Mode:</span>
+                <span class="font-medium text-primary">Controlled Earmark (50/50)</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-surface-container">
+                <span class="text-on-surface-variant">Cryptographic Hash:</span>
+                <span class="font-mono text-[10px] text-on-surface-variant">0x8f9b2c4e1a7d...</span>
+              </div>
+            </div>
+
+            <!-- Drawer Footer Sticky Actions -->
+            <div class="p-3 border-t border-surface-container bg-surface-container-low flex items-center justify-between">
+              <span class="text-[11px] text-on-surface-variant">Dual sign-off verified</span>
+              <div class="flex gap-2">
+                <button class="px-3 py-1.5 rounded-full bg-white border border-outline-variant text-[11px] font-medium" data-bf-missing="Export Log">Export Log</button>
+                <button class="px-3 py-1.5 rounded-full bg-primary text-white text-[11px] font-medium" data-bf-missing="Approve Line">Approve Line</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dark Inverse-Surface Toast / Snackbar Mockup -->
+      <div class="pt-2 border-t border-surface-container flex flex-col items-center">
+        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">Dark Inverse-Surface Toast (Material 3 Bottom Center)</span>
+        <div class="w-full max-w-md bg-[#2f3033] text-[#f1f0f4] px-4 py-3 rounded-lg shadow-xl flex items-center justify-between border border-white/10">
+          <div class="flex items-center gap-2.5">
+            <span class="material-icons text-[#4d9c4c] text-sm">check_circle</span>
+            <span class="text-xs font-medium">Allocation saved</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="text-xs font-bold text-[#c4c1ff] hover:text-white uppercase tracking-wider" data-bf-missing="Undo">Undo</button>
+            <button class="text-white/60 hover:text-white" data-bf-missing="This control"><span class="material-icons text-sm">close</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12) EMPTY & ERROR STATES SECTION -->
+    <section id="sec-empty" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            12. Empty State & Error Recovery State
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Illustration-free centered icons, concise one-sentence description, single primary action.</p>
+        </div>
+        <span class="text-xs font-mono px-2 py-1 bg-surface-container text-on-surface-variant rounded">State Card Patterns</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Empty State Card: 'No budgets yet' -->
+        <div class="bg-surface-container-low p-8 rounded-[12px] border border-outline-variant flex flex-col items-center justify-center text-center">
+          <div class="w-14 h-14 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant mb-3">
+            <span class="material-icons text-3xl">account_balance_wallet</span>
+          </div>
+          <h3 class="font-headline font-bold text-base text-on-surface">No budgets yet</h3>
+          <p class="text-xs text-on-surface-variant max-w-xs mt-1 mb-5">Create a hierarchical corporate budget to begin delegating allocation pools.</p>
+          <button class="px-5 py-2.5 rounded-full bg-primary text-white text-xs font-medium hover:bg-primary-loud shadow-sm transition-colors flex items-center gap-1.5" data-bf-missing="Create budget">
+            <span class="material-icons text-sm">add</span>
+            <span>Create budget</span>
+          </button>
+        </div>
+
+        <!-- Error State Card: 'Something went wrong' -->
+        <div class="bg-surface-container-low p-8 rounded-[12px] border border-outline-variant flex flex-col items-center justify-center text-center">
+          <div class="w-14 h-14 rounded-full bg-error-container flex items-center justify-center text-error mb-3">
+            <span class="material-icons text-3xl">sync_problem</span>
+          </div>
+          <h3 class="font-headline font-bold text-base text-on-surface">Something went wrong</h3>
+          <p class="text-xs text-on-surface-variant max-w-xs mt-1 mb-5">Unable to synchronize ledger allocation nodes with the central compliance engine.</p>
+          <button class="px-5 py-2.5 rounded-full bg-white border border-outline-variant text-on-surface text-xs font-medium hover:bg-surface-container-high transition-colors flex items-center gap-1.5" data-bf-missing="Retry">
+            <span class="material-icons text-sm">refresh</span>
+            <span>Retry</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13) CHART SAMPLE SECTION -->
+    <section id="sec-charts" class="bg-white rounded-[12px] card-border p-6 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-surface-container pb-4">
+        <div>
+          <h2 class="text-xl font-bold font-headline text-on-surface flex items-center gap-2">
+            <span class="w-2.5 h-6 bg-primary rounded-full inline-block"></span>
+            13. Satori Chart Sample & Data Visualization
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Satori multi-tint palette (violet #5654ac, teal #006b61, blue #5384f1, amber #967c39) with accessible table alternative.</p>
+        </div>
+        <a href="#sec-table" class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-loud underline">
+          <span class="material-icons text-sm">table_chart</span>
+          <span>View as table</span>
+        </a>
+      </div>
+
+      <!-- Small Bar Chart Visualization -->
+      <div class="bg-surface-container-low p-6 rounded-[12px] border border-outline-variant">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h4 class="font-headline font-bold text-sm text-on-surface">Quarterly Allocation by Department</h4>
+            <div class="text-[11px] text-on-surface-variant">Values represented in USD thousands (k)</div>
+          </div>
+          <div class="flex items-center gap-4 text-xs">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-[#5654ac]"></span> Engineering</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-[#006b61]"></span> Marketing</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-[#5384f1]"></span> Operations</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-[#967c39]"></span> Sales</span>
+          </div>
+        </div>
+
+        <!-- Chart Grid Graphic -->
+        <div class="h-48 flex items-end justify-between gap-6 px-4 border-b border-outline-variant/60 pb-2 relative">
+          <!-- Horizontal Grid Lines -->
+          <div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-30">
+            <div class="border-b border-dashed border-outline"></div>
+            <div class="border-b border-dashed border-outline"></div>
+            <div class="border-b border-dashed border-outline"></div>
+            <div class="border-b border-dashed border-outline"></div>
+          </div>
+
+          <!-- Q1 Cluster -->
+          <div class="flex-1 flex flex-col items-center gap-2 z-10">
+            <div class="w-full flex items-end justify-center gap-1.5 h-36">
+              <div class="w-5 bg-[#5654ac] rounded-t hover:opacity-90 transition-all" style="height: 75%;" title="Engineering: $75k"></div>
+              <div class="w-5 bg-[#006b61] rounded-t hover:opacity-90 transition-all" style="height: 50%;" title="Marketing: $50k"></div>
+              <div class="w-5 bg-[#5384f1] rounded-t hover:opacity-90 transition-all" style="height: 60%;" title="Operations: $60k"></div>
+              <div class="w-5 bg-[#967c39] rounded-t hover:opacity-90 transition-all" style="height: 85%;" title="Sales: $85k"></div>
+            </div>
+            <span class="text-xs font-semibold text-on-surface">Q1 Actual</span>
+          </div>
+
+          <!-- Q2 Cluster -->
+          <div class="flex-1 flex flex-col items-center gap-2 z-10">
+            <div class="w-full flex items-end justify-center gap-1.5 h-36">
+              <div class="w-5 bg-[#5654ac] rounded-t hover:opacity-90 transition-all" style="height: 80%;" title="Engineering: $80k"></div>
+              <div class="w-5 bg-[#006b61] rounded-t hover:opacity-90 transition-all" style="height: 65%;" title="Marketing: $65k"></div>
+              <div class="w-5 bg-[#5384f1] rounded-t hover:opacity-90 transition-all" style="height: 70%;" title="Operations: $70k"></div>
+              <div class="w-5 bg-[#967c39] rounded-t hover:opacity-90 transition-all" style="height: 90%;" title="Sales: $90k"></div>
+            </div>
+            <span class="text-xs font-semibold text-on-surface">Q2 Actual</span>
+          </div>
+
+          <!-- Q3 Cluster -->
+          <div class="flex-1 flex flex-col items-center gap-2 z-10">
+            <div class="w-full flex items-end justify-center gap-1.5 h-36">
+              <div class="w-5 bg-[#5654ac] rounded-t hover:opacity-90 transition-all" style="height: 95%;" title="Engineering: $95k"></div>
+              <div class="w-5 bg-[#006b61] rounded-t hover:opacity-90 transition-all" style="height: 55%;" title="Marketing: $55k"></div>
+              <div class="w-5 bg-[#5384f1] rounded-t hover:opacity-90 transition-all" style="height: 75%;" title="Operations: $75k"></div>
+              <div class="w-5 bg-[#967c39] rounded-t hover:opacity-90 transition-all" style="height: 100%;" title="Sales: $100k"></div>
+            </div>
+            <span class="text-xs font-semibold text-on-surface">Q3 Actual</span>
+          </div>
+
+          <!-- Q4 Forecast Cluster (dashed borders) -->
+          <div class="flex-1 flex flex-col items-center gap-2 z-10">
+            <div class="w-full flex items-end justify-center gap-1.5 h-36">
+              <div class="w-5 bg-[#5654ac]/40 border-2 border-dashed border-[#5654ac] rounded-t" style="height: 85%;" title="Engineering Forecast: $85k"></div>
+              <div class="w-5 bg-[#006b61]/40 border-2 border-dashed border-[#006b61] rounded-t" style="height: 60%;" title="Marketing Forecast: $60k"></div>
+              <div class="w-5 bg-[#5384f1]/40 border-2 border-dashed border-[#5384f1] rounded-t" style="height: 68%;" title="Operations Forecast: $68k"></div>
+              <div class="w-5 bg-[#967c39]/40 border-2 border-dashed border-[#967c39] rounded-t" style="height: 92%;" title="Sales Forecast: $92k"></div>
+            </div>
+            <span class="text-xs font-semibold text-on-surface">Q4 Forecast</span>
+          </div>
+        </div>
+
+        <!-- Chart Footnote -->
+        <div class="mt-4 flex items-center justify-between text-xs text-on-surface-variant">
+          <span>Chart accessibility: Tabular numeric backup configured under Section 6.</span>
+          <span class="font-mono text-[11px]">Rendered with Satori M3 Data-Viz Tokens</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer Documentation Meta -->
+    <footer class="text-center py-6 text-xs text-on-surface-variant border-t border-outline-variant/60">
+      <div class="font-semibold text-on-surface">BudgetFlow Enterprise Design System Reference Sheet</div>
+      <div class="mt-1">Built to Angular Material 3 / Satori Specifications &bull; Light Theme &bull; Standard Desktop 1440px Viewport</div>
+    </footer>
+
+  </main>
+<script src="../assets/frame.js"></script></body>
+</html>
