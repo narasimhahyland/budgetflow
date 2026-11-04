@@ -1,4 +1,5 @@
 import { ProblemDetails } from './common';
+import { analyticsEndpoints } from './domains/analytics';
 import { auditEndpoints } from './domains/audit';
 import { budgetEndpoints } from './domains/budgets';
 import { healthEndpoints } from './domains/health';
@@ -19,6 +20,7 @@ export const endpoints = {
   ...ledgerEndpoints,
   ...integrityEndpoints,
   ...auditEndpoints,
+  ...analyticsEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;
