@@ -5,7 +5,7 @@ Status: proposed - awaiting user review. Light theme only. Start screen 10 (todo
 ## Design
 | State | Image | Stitch screen |
 | --- | --- | --- |
-| default | `design/stitch/115-employee-dashboard/default--desktop--light.png` | `aa20c4f997c44ee4bc67a99eba9db261` |
+| default | `design/stitch/115-employee-dashboard/default--desktop--light.png` | `b42ff3f7211c4f85bd165d75d9aa1e8f` |
 | blocked (frozen and zero budgets) | `blocked--desktop--light.png` | `d71c1e3f197e4e8eb829f64c7bdd171f` |
 
 ## Purpose

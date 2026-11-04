@@ -2,11 +2,11 @@
   "screen": "088-audit-log",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/eebc55c8836040c88b30341326f8a837",
+      "stitchScreen": "projects/1643421514270618068/screens/eb69eed067bf4f34a1dcba6b01ccd962",
       "approved": null,
       "size": [
         2560,
-        2492
+        2048
       ],
       "status": "proposed - awaiting user review"
     },
