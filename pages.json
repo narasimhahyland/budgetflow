@@ -1,0 +1,188 @@
+[
+  {
+    "page": "000-design-system--default",
+    "mode": "html",
+    "linked": 0,
+    "notDesigned": 31
+  },
+  {
+    "page": "000a-app-shell--default",
+    "mode": "image",
+    "linked": 23,
+    "notDesigned": 0
+  },
+  {
+    "page": "000a-app-shell--switcher-open",
+    "mode": "image",
+    "linked": 20,
+    "notDesigned": 0
+  },
+  {
+    "page": "000a-app-shell--notifications-open",
+    "mode": "image",
+    "linked": 29,
+    "notDesigned": 0
+  },
+  {
+    "page": "000a-app-shell--search-open",
+    "mode": "image",
+    "linked": 26,
+    "notDesigned": 0
+  },
+  {
+    "page": "000a-app-shell--employee-forbidden",
+    "mode": "image",
+    "linked": 11,
+    "notDesigned": 0
+  },
+  {
+    "page": "000a-app-shell--nav-drawer-open",
+    "mode": "image",
+    "linked": 15,
+    "notDesigned": 0
+  },
+  {
+    "page": "003-mfa-verification--default",
+    "mode": "image",
+    "linked": 4,
+    "notDesigned": 0
+  },
+  {
+    "page": "011-executive-dashboard--default",
+    "mode": "html",
+    "linked": 21,
+    "notDesigned": 8
+  },
+  {
+    "page": "011-executive-dashboard--loading",
+    "mode": "html",
+    "linked": 21,
+    "notDesigned": 8
+  },
+  {
+    "page": "011-executive-dashboard--empty",
+    "mode": "image",
+    "linked": 22,
+    "notDesigned": 0
+  },
+  {
+    "page": "011-executive-dashboard--error",
+    "mode": "html",
+    "linked": 23,
+    "notDesigned": 8
+  },
+  {
+    "page": "020-create-budget--default",
+    "mode": "html",
+    "linked": 20,
+    "notDesigned": 17
+  },
+  {
+    "page": "021-budget-details--default",
+    "mode": "html",
+    "linked": 22,
+    "notDesigned": 14
+  },
+  {
+    "page": "022-budget-allocation-workspace--default",
+    "mode": "image",
+    "linked": 23,
+    "notDesigned": 0
+  },
+  {
+    "page": "022-budget-allocation-workspace--warning-block",
+    "mode": "image",
+    "linked": 22,
+    "notDesigned": 0
+  },
+  {
+    "page": "023-budget-hierarchy--default",
+    "mode": "html",
+    "linked": 28,
+    "notDesigned": 12
+  },
+  {
+    "page": "023-budget-hierarchy--set-to-zero-dialog",
+    "mode": "html",
+    "linked": 30,
+    "notDesigned": 13
+  },
+  {
+    "page": "024a-per-head-driver-allocation--default",
+    "mode": "image",
+    "linked": 20,
+    "notDesigned": 0
+  },
+  {
+    "page": "027-freeze-budget--dialog",
+    "mode": "html",
+    "linked": 21,
+    "notDesigned": 18
+  },
+  {
+    "page": "045-create-event-budget--default",
+    "mode": "image",
+    "linked": 27,
+    "notDesigned": 0
+  },
+  {
+    "page": "045-create-event-budget--validation",
+    "mode": "image",
+    "linked": 27,
+    "notDesigned": 0
+  },
+  {
+    "page": "059-approval-inbox--default",
+    "mode": "html",
+    "linked": 24,
+    "notDesigned": 25
+  },
+  {
+    "page": "059-approval-inbox--empty",
+    "mode": "image",
+    "linked": 22,
+    "notDesigned": 0
+  },
+  {
+    "page": "059-approval-inbox--delegated-escalated",
+    "mode": "html",
+    "linked": 22,
+    "notDesigned": 21
+  },
+  {
+    "page": "069-rule-builder--default",
+    "mode": "image",
+    "linked": 16,
+    "notDesigned": 0
+  },
+  {
+    "page": "069-rule-builder--conflict-simulation",
+    "mode": "html",
+    "linked": 16,
+    "notDesigned": 16
+  },
+  {
+    "page": "088-audit-log--default",
+    "mode": "image",
+    "linked": 19,
+    "notDesigned": 0
+  },
+  {
+    "page": "088-audit-log--chain-broken",
+    "mode": "image",
+    "linked": 21,
+    "notDesigned": 0
+  },
+  {
+    "page": "115-employee-dashboard--default",
+    "mode": "image",
+    "linked": 13,
+    "notDesigned": 0
+  },
+  {
+    "page": "115-employee-dashboard--blocked",
+    "mode": "image",
+    "linked": 13,
+    "notDesigned": 0
+  }
+]
