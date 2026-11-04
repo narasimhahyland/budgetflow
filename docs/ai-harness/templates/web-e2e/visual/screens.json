@@ -1,0 +1,28 @@
+{
+  "baseURL": "http://localhost:4200",
+  "authDir": "tmp/e2e-auth",
+  "freezeTime": "2026-01-15T09:00:00Z",
+  "mask": ["[data-testid=relative-time]"],
+  "ignore": { "console": [], "requests": [] },
+  "screens": [
+    {
+      "id": "004-budget-hierarchy",
+      "path": "/budgets",
+      "role": "regional-manager",
+      "waitFor": "role=heading[name=\"Budget hierarchy\"]",
+      "states": [
+        { "state": "default" },
+        {
+          "state": "set-to-zero-dialog",
+          "actions": [
+            { "click": "role=button[name=\"Actions for Hyderabad Events\"]" },
+            { "click": "role=menuitem[name=\"Set to zero\"]" },
+            { "waitFor": "role=dialog[name=\"Set budget to zero\"]" }
+          ]
+        },
+        { "state": "frozen", "path": "/budgets/frozen-demo", "waitFor": "role=heading[name=\"Frozen demo budget\"]" },
+        { "state": "forbidden", "role": "employee", "path": "/budgets/india", "waitFor": "role=heading[name=\"Access denied\"]", "allowRequests": ["/api/budgets/india"] }
+      ]
+    }
+  ]
+}
