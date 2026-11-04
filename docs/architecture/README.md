@@ -2,17 +2,17 @@
 
 BudgetFlow Enterprise is a multi-tenant corporate budget delegation and control platform. This folder describes what exists after Phase 1 and the conventions later phases extend. Planned work is marked as planned.
 
-| Document                                                               | What it covers                                                                             |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| [domain-model.md](domain-model.md)                                     | Entities and tables by area, invariants and where each one is enforced                     |
-| [ledger.md](ledger.md)                                                 | Buckets, counter accounts, posting tables, periods, currency triplet, rebuild check        |
-| [state-machines.md](state-machines.md)                                 | Budget, commitment, event, request, contribution, period, forecast and recharge lifecycles |
-| [authorization.md](authorization.md)                                   | The 14 roles, the action matrix behind `PolicyService.can`, scopes, DoA versus ownership   |
-| [api-conventions.md](api-conventions.md)                               | Paths, auth, tenancy, idempotency, problem details, contracts and OpenAPI                  |
-| [phase-handoff.md](phase-handoff.md)                                   | Where Phases 2-16 extend: modules, contracts, tables, seed hooks, owned paths              |
-| [../adr/](../adr/)                                                     | Architecture decisions                                                                     |
-| [../ux/screen-inventory.md](../ux/screen-inventory.md)                 | 124 specified plus review-added screens, build phase per screen, role-to-screen matrix     |
-| [../testing/invariant-scenarios.md](../testing/invariant-scenarios.md) | Invariant-to-scenario map                                                                  |
+| Document                                                               | What it covers                                                                                                       |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [domain-model.md](domain-model.md)                                     | Entities and tables by area, invariants and where each one is enforced                                               |
+| [ledger.md](ledger.md)                                                 | Buckets, counter accounts, posting tables, periods, currency triplet, rebuild check                                  |
+| [state-machines.md](state-machines.md)                                 | Budget, commitment, event, request, contribution, period, forecast and recharge lifecycles                           |
+| [authorization.md](authorization.md)                                   | The 14 roles, the action matrix behind `PolicyService.can`, scopes, DoA versus ownership                             |
+| [api-conventions.md](api-conventions.md)                               | Paths, auth, tenancy, idempotency, problem details, contracts and OpenAPI                                            |
+| [phase-handoff.md](phase-handoff.md)                                   | Where Phases 2-16 extend: modules, contracts, tables, seed hooks, owned paths                                        |
+| [../adr/](../adr/)                                                     | Architecture decisions (Nov 2026 product decisions: [0006](../adr/0006-single-company-usd-reporting-export-only.md)) |
+| [../ux/screen-inventory.md](../ux/screen-inventory.md)                 | 124 specified plus review-added screens, build phase per screen, role-to-screen matrix                               |
+| [../testing/invariant-scenarios.md](../testing/invariant-scenarios.md) | Invariant-to-scenario map                                                                                            |
 
 ## Components
 
@@ -33,7 +33,7 @@ flowchart LR
 
 - `apps/api` wires the domain modules in `libs/api/*` behind the HTTP edge: Keycloak JWT verification (JWKS, issuer, audience, expiry), tenant resolution against memberships, problem-details errors, health and the generated OpenAPI document (`GET /api/openapi.json`).
 - `apps/worker` drains the transactional outbox into pg-boss queues and runs jobs with explicit tenant context: the ledger rebuild check on request and nightly (02:00 UTC). It reuses the API's application services.
-- `apps/web` is a placeholder with the Satori theme wired in (light theme only; dark theme deferred). Phase 2 builds the shell and sign-in.
+- `apps/web` is the Satori shell (light theme only; dark theme deferred): OIDC sign-in with PKCE in `libs/web/data-access`, role-aware navigation from `GET /api/me` permissions in `libs/web/shell`, shared money and date formatting in `libs/web/ui`, public sign-in pages in `libs/web/features/auth`.
 - `libs/domain` holds every business rule as pure functions; `libs/contracts` holds the zod API shapes; `libs/api/db` holds the Drizzle schema, migrations and RLS.
 
 ## Request path
