@@ -7,6 +7,7 @@ import { LedgerModule } from '@bf/api/ledger';
 import { budgetSteps, SEED_ACCOUNTING_DATE, userById } from '@bf/seed';
 import { Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { SEED_EXTENSIONS } from './seed/extensions';
 import { seedReference } from './seed/reference';
 
 // Deterministic seed for the fictional Acme Global, Globex and Initech Sandbox tenants. Reference data is
@@ -69,6 +70,10 @@ async function main(): Promise<void> {
         );
         if (!r.replayed) allocated++;
       }
+    }
+    for (const extension of SEED_EXTENSIONS) {
+      await extension.run(app);
+      console.log(`seed: ${extension.phase} ${extension.name} ready`);
     }
     console.log(
       `seed: reference data ready; ${created} budget(s) created and ${allocated} allocation(s) posted (0 means already seeded)`,
