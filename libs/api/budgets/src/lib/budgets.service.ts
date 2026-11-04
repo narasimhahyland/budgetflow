@@ -403,6 +403,8 @@ export class BudgetsService {
         name: req.name,
         code: req.code ?? null,
         status: req.draft ? 'draft' : 'active',
+        // The creation snapshot below makes this version 1.
+        version: 0,
         budgetType: req.budgetType ?? defaults.budgetType ?? 'operating',
         categoryId,
         legalEntityId: entity.id,

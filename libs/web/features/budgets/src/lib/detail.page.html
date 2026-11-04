@@ -211,6 +211,11 @@
           </div>
         </section>
 
+        @if (b.budgetType === 'contingency') {
+          <section aria-label="Reserve releases">
+            <bf-change-requests [budgetId]="b.id" (changed)="reload()" />
+          </section>
+        }
         <section class="bf-card" aria-labelledby="spectrum-title">
           <div class="bf-card__header">
             <div>
@@ -341,11 +346,6 @@
             </div>
           </section>
         </div>
-        @if (b.budgetType === 'contingency') {
-          <section aria-label="Reserve releases">
-            <bf-change-requests [budgetId]="b.id" (changed)="reload()" />
-          </section>
-        }
       }
     }
     @case ('children') {

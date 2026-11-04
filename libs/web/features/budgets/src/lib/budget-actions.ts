@@ -16,7 +16,7 @@ export class BudgetActions {
       data,
       width,
       maxWidth: '96vw',
-      autoFocus: 'first-tabbable',
+      autoFocus: 'dialog',
     });
     return firstValueFrom(ref.afterClosed()).then((r) => r === true);
   }

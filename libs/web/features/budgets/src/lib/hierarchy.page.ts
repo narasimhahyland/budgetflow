@@ -17,6 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { BudgetDetail } from '@bf/contracts';
+import { SessionStore } from '@bf/web/data-access';
 import { BudgetStatus, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
@@ -66,6 +67,8 @@ export class BudgetHierarchyPage {
   protected readonly can = can;
   protected readonly balancesOf = balancesOf;
   protected readonly valueOf = valueOf;
+  private readonly session = inject(SessionStore);
+  protected readonly canAllocate = computed(() => this.session.can('budget.allocate'));
 
   protected readonly tops = resource({
     loader: async () =>

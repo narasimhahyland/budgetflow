@@ -19,7 +19,7 @@ import type { BudgetDetail, ControlImpact } from '@bf/contracts';
 import { Money } from '@bf/web/ui';
 import { BudgetStatus } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { balancesOf, data, errorMessage, injectApi, toMinor, valueOf } from './api';
+import { balancesOf, data, errorMessage, injectApi, sameTree, toMinor, valueOf } from './api';
 
 export interface BudgetDialogData {
   budget: BudgetDetail;
@@ -57,9 +57,8 @@ function reasonCodes(categories: string[]) {
 function treeBudgets(budget: () => BudgetDetail) {
   const api = injectApi();
   return resource({
-    params: () => ({ rootId: budget().path.split('/').filter(Boolean)[0], self: budget().id }),
-    loader: async ({ params }) =>
-      (await data(api.listBudgets({ query: { rootId: params.rootId, limit: 500 } }))).items,
+    params: () => ({ b: budget() }),
+    loader: ({ params }) => sameTree(api, params.b),
   });
 }
 

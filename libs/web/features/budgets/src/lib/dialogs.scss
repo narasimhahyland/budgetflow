@@ -109,6 +109,7 @@
 
 .bf-field {
   width: 100%;
+  margin-bottom: 8px;
 }
 
 .bf-destinations {
@@ -169,18 +170,17 @@
 }
 
 .bf-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  display: block;
   margin: 8px 0 0;
   color: var(--mat-sys-on-surface-variant);
   font: var(--mat-sys-body-small);
 }
 
 .bf-note mat-icon {
-  flex: none;
   width: 16px;
   height: 16px;
+  margin-inline-end: 6px;
+  vertical-align: text-bottom;
 }
 
 .bf-delta {

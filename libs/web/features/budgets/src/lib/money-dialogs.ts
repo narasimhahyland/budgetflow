@@ -18,7 +18,7 @@ import { Router } from '@angular/router';
 import type { BudgetDetail } from '@bf/contracts';
 import { Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { balancesOf, data, errorMessage, injectApi, toMinor, valueOf } from './api';
+import { balancesOf, data, errorMessage, injectApi, sameTree, toMinor, valueOf } from './api';
 
 const COMMON = [
   FormsModule,
@@ -389,16 +389,7 @@ export class TransferDialog {
   protected reason = '';
   protected readonly amountMinor = computed(() => toMinor(this.amount()));
   protected readonly over = computed(() => (this.amountMinor() ?? 0) > this.sourceMax);
-  private readonly treeRes = resource({
-    loader: async () =>
-      (
-        await data(
-          this.api.listBudgets({
-            query: { rootId: this.b.path.split('/').filter(Boolean)[0], limit: 500 },
-          }),
-        )
-      ).items,
-  });
+  private readonly treeRes = resource({ loader: () => sameTree(this.api, this.b) });
   protected readonly targets = computed(() =>
     (valueOf(this.treeRes) ?? []).filter(
       (t) => t.id !== this.b.id && ['active', 'reduced'].includes(t.status) && t.parentId,
@@ -641,16 +632,7 @@ export class ReleaseDialog {
   protected readonly amount = signal('');
   protected readonly amountMinor = computed(() => toMinor(this.amount()));
   protected reason = '';
-  private readonly treeRes = resource({
-    loader: async () =>
-      (
-        await data(
-          this.api.listBudgets({
-            query: { rootId: this.b.path.split('/').filter(Boolean)[0], limit: 500 },
-          }),
-        )
-      ).items,
-  });
+  private readonly treeRes = resource({ loader: () => sameTree(this.api, this.b) });
   protected readonly targets = computed(() =>
     (valueOf(this.treeRes) ?? []).filter(
       (t) => t.id !== this.b.id && t.parentId && ['active', 'reduced'].includes(t.status),

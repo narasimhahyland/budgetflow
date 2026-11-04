@@ -4,9 +4,12 @@
     <p class="bf-page__subtitle">
       {{ root()?.name ?? 'Budgets' }} · {{ root()?.display?.fiscalYearLabel ?? '' }} · all amounts
       in USD
+    </p>
+    <p class="bf-page__subtitle bf-summary-line" data-testid="company-available">
       @if (valueOf(summary); as s) {
-        · company-wide Available
-        <bf-money [amountMinor]="s.available.amountMinor" [currency]="s.currency" />
+        Company-wide Available
+        <bf-money [amountMinor]="s.available.amountMinor" [currency]="s.currency" /> (child
+        allocations counted once)
       }
     </p>
   </div>
@@ -14,21 +17,28 @@
     <button mat-stroked-button type="button" (click)="export()" [disabled]="!items().length">
       <mat-icon svgIcon="download" aria-hidden="true" />Export
     </button>
-    @if (selected(); as b) {
-      <a mat-stroked-button [routerLink]="['/budgets', b.id]" [queryParams]="{ tab: 'versions' }"
-        >Compare versions</a
+    <!-- Always rendered (disabled until the tree loads) so the header does not reflow. -->
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="!selected()"
+      (click)="router.navigate(['/budgets', selected()!.id], { queryParams: { tab: 'versions' } })"
+    >
+      Compare versions
+    </button>
+    @if (canAllocate()) {
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="!root()"
+        (click)="
+          router.navigate(['/budgets/allocate'], {
+            queryParams: { parent: selected()?.id ?? root()!.id },
+          })
+        "
       >
-    }
-    @if (root(); as r) {
-      @if (can(r, 'budget.allocate')) {
-        <a
-          mat-flat-button
-          [routerLink]="['/budgets/allocate']"
-          [queryParams]="{ parent: selected()?.id ?? r.id }"
-        >
-          <mat-icon svgIcon="plus_small" aria-hidden="true" />Allocate budget
-        </a>
-      }
+        <mat-icon svgIcon="plus_small" aria-hidden="true" />Allocate budget
+      </button>
     }
   </div>
 </header>

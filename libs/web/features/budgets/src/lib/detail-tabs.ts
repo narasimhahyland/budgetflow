@@ -199,8 +199,21 @@ export class ChildrenTab {
       (retry)="res.reload()"
     />
     @if (valueOf(res); as p) {
-      @if (problem(); as msg) {
+      @if (mismatch(); as diff) {
         <sat-banner variant="important" data-testid="phasing-error"
+          ><sat-banner-message
+            >Phasing is
+            <bf-money [amountMinor]="diff > 0 ? diff : -diff" [currency]="p.currency" />
+            {{ diff > 0 ? 'over' : 'under' }} the authorized amount. Change a period so the total
+            equals
+            <bf-money
+              [amountMinor]="p.authorizedMinor"
+              [currency]="p.currency"
+            />.</sat-banner-message
+          ></sat-banner
+        >
+      } @else if (problem(); as msg) {
+        <sat-banner variant="important"
           ><sat-banner-message>{{ msg }}</sat-banner-message></sat-banner
         >
       } @else if (p.outOfDate) {
@@ -301,7 +314,7 @@ export class ChildrenTab {
           <button
             mat-flat-button
             type="button"
-            [disabled]="busy()"
+            [disabled]="busy() || mismatch() !== 0"
             (click)="save()"
             data-testid="save-phasing"
           >
@@ -342,6 +355,12 @@ export class PhasingTab {
   protected readonly manualTotal = computed(() => {
     if (this.method() !== 'manual') return null;
     return this.amounts().reduce((s, a) => s + (toMinor(a) ?? 0), 0);
+  });
+  /** Manual amounts minus authorized (0 when they add up or the method is not manual). */
+  protected readonly mismatch = computed(() => {
+    const total = this.manualTotal();
+    const p = valueOf(this.res);
+    return total === null || !p ? 0 : total - p.authorizedMinor;
   });
 
   protected setWeight(i: number, v: number): void {

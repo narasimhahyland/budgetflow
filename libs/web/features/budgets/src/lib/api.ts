@@ -80,6 +80,19 @@ export const BUDGET_TYPE_LABEL: Record<string, string> = {
   contingency: 'Contingency',
 };
 
+/**
+ * Budgets of the same tree the user can see, from the highest one they can read (the program root for
+ * leadership and finance, the top of their own subtree for an owner).
+ */
+export async function sameTree(
+  api: ReturnType<typeof injectApi>,
+  budget: BudgetDetail,
+): Promise<BudgetDetail[]> {
+  const tops = (await data(api.listBudgets({ query: { topLevel: 'true', limit: 500 } }))).items;
+  const top = tops.find((t) => budget.path.startsWith(t.path)) ?? budget;
+  return (await data(api.listBudgets({ query: { rootId: top.id, limit: 500 } }))).items;
+}
+
 export const can = (b: BudgetDetail | undefined, action: string): boolean =>
   !!b && b.allowedActions.includes(action);
 

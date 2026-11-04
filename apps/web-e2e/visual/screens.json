@@ -327,6 +327,9 @@
               "waitFor": "role=heading[name=\"Allocate budget to child unit\"]"
             },
             {
+              "waitFor": "[data-testid=allocate-amount]"
+            },
+            {
               "fill": ["[data-testid=allocate-amount]", "999999"]
             },
             {
@@ -363,6 +366,9 @@
               "waitFor": "role=heading[name=\"Transfer budget\"]"
             },
             {
+              "waitFor": "[data-testid=transfer-amount]"
+            },
+            {
               "fill": ["[data-testid=transfer-amount]", "999999"]
             },
             {
@@ -388,6 +394,9 @@
               "waitFor": "role=heading[name=\"Reduce budget\"]"
             },
             {
+              "waitFor": "[data-testid=reduce-amount]"
+            },
+            {
               "fill": ["[data-testid=reduce-amount]", "2000"]
             }
           ]
@@ -400,6 +409,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Reduce budget\"]"
+            },
+            {
+              "waitFor": "[data-testid=reduce-amount]"
             },
             {
               "fill": ["[data-testid=reduce-amount]", "99999"]
@@ -460,6 +472,9 @@
               "waitFor": "[data-testid=zero-floor]"
             },
             {
+              "waitFor": "[data-testid=confirm-text]"
+            },
+            {
               "fill": ["[data-testid=confirm-text]", "Bangalore"]
             }
           ]
@@ -480,6 +495,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Request budget increase\"]"
+            },
+            {
+              "waitFor": "[data-testid=increase-target]"
             },
             {
               "fill": ["[data-testid=increase-target]", "14000"]
@@ -545,13 +563,7 @@
               "click": "text=Manual"
             },
             {
-              "fill": [
-                "input[aria-label=\"Amount for December\"], input[aria-label^=\"Amount for\"] >> nth=-1",
-                "9000"
-              ]
-            },
-            {
-              "click": "[data-testid=save-phasing]"
+              "fill": ["input[aria-label^=\"Amount for\"] >> nth=-1", "9000"]
             },
             {
               "waitFor": "[data-testid=phasing-error]"
