@@ -25,6 +25,9 @@ export const ACTIONS = [
   'tenant.read',
   'tenant.settings.manage',
   'org.manage',
+  'org.read',
+  'headcount.import',
+  'master_data.manage',
   'users.manage',
   'budget.read',
   'budget.create_root',
@@ -37,6 +40,7 @@ export const ACTIONS = [
   'period.manage',
   'fx.manage',
   'doa.manage',
+  'doa.read',
   'request.create',
   'request.approve',
   'contribution.request',
@@ -61,6 +65,7 @@ type Grants = Partial<Record<Action, Scope>>;
 
 const OWNER: Grants = {
   'tenant.read': 'tenant',
+  'org.read': 'owned',
   'budget.read': 'owned',
   'budget.create_child': 'owned',
   'budget.allocate': 'owned',
@@ -81,6 +86,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'tenant.read': 'tenant',
     'tenant.settings.manage': 'tenant',
     'org.manage': 'tenant',
+    'org.read': 'tenant',
+    'headcount.import': 'tenant',
     'users.manage': 'tenant',
   },
   ceo: {
@@ -90,6 +97,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'budget.create_root': 'tenant',
     'report.read': 'tenant',
     'audit.read': 'tenant',
+    'org.read': 'tenant',
+    'doa.read': 'tenant',
   },
   'finance-admin': {
     ...OWNER,
@@ -104,6 +113,10 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'period.manage': 'tenant',
     'fx.manage': 'tenant',
     'doa.manage': 'tenant',
+    'doa.read': 'tenant',
+    'org.read': 'tenant',
+    'headcount.import': 'tenant',
+    'master_data.manage': 'tenant',
     'actuals.manage': 'tenant',
     'report.read': 'tenant',
     'audit.read': 'tenant',
@@ -122,6 +135,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'audit.read': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
+    'org.read': 'tenant',
+    'doa.read': 'tenant',
   },
   'budget-owner': OWNER,
   'department-head': OWNER,
@@ -129,13 +144,14 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
   'location-manager': OWNER,
   'event-organizer': {
     'tenant.read': 'tenant',
+    'org.read': 'self',
     'budget.read': 'owned',
     'ledger.read': 'owned',
     'request.create': 'owned',
     'contribution.request': 'owned',
     'event.manage': 'self',
   },
-  employee: { 'tenant.read': 'tenant', 'request.create': 'self' },
+  employee: { 'tenant.read': 'tenant', 'org.read': 'self', 'request.create': 'self' },
   auditor: {
     'tenant.read': 'tenant',
     'budget.read': 'tenant',
@@ -143,10 +159,13 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'report.read': 'tenant',
     'audit.read': 'tenant',
     'integrity.read': 'tenant',
+    'org.read': 'tenant',
+    'doa.read': 'tenant',
   },
   'integration-admin': { 'tenant.read': 'tenant', 'integration.manage': 'tenant' },
   analyst: {
     'tenant.read': 'tenant',
+    'org.read': 'tenant',
     'budget.read': 'tenant',
     'ledger.read': 'tenant',
     'report.read': 'tenant',
@@ -161,12 +180,20 @@ export interface Actor {
   ownedBudgetPaths: readonly string[];
   /** Active, audited break-glass grant (platform operators only). */
   breakGlass?: boolean;
+  /** Org units whose subtrees the actor's `owned` org scope covers (scoped role grants, owned budgets' units, home units). */
+  orgScopeUnitIds?: readonly string[];
+  /** The actor's own location and team (`self` org scope). */
+  homeOrgUnitIds?: readonly string[];
 }
 
 export type Resource =
   | { kind: 'tenant'; tenantId: string }
   | { kind: 'budget'; tenantId: string; id: string; path: string }
-  | { kind: 'owned-by'; tenantId: string; ownerPersonId: string | null };
+  | { kind: 'owned-by'; tenantId: string; ownerPersonId: string | null }
+  /** An org unit as of a date, with every ancestor id (self included). */
+  | { kind: 'org-unit'; tenantId: string; id: string; ancestorIds: readonly string[] }
+  /** A person, with the ancestor ids (self included) of their location and team. */
+  | { kind: 'person'; tenantId: string; personId: string; ancestorIds: readonly string[] };
 
 export interface Decision {
   allowed: boolean;
@@ -181,6 +208,15 @@ function scopeCovers(scope: Scope, actor: Actor, resource: Resource): boolean {
     return scope === 'owned' ? actor.ownedBudgetPaths.length > 0 : true;
   if (resource.kind === 'budget')
     return actor.ownedBudgetPaths.some((p) => resource.path.startsWith(p));
+  if (resource.kind === 'org-unit' || resource.kind === 'person') {
+    const self =
+      resource.kind === 'person'
+        ? resource.personId === actor.personId
+        : (actor.homeOrgUnitIds ?? []).includes(resource.id);
+    if (scope === 'self') return self;
+    const roots = actor.orgScopeUnitIds ?? [];
+    return self || resource.ancestorIds.some((a) => roots.includes(a));
+  }
   return resource.ownerPersonId !== null && resource.ownerPersonId === actor.personId;
 }
 
@@ -202,7 +238,12 @@ export function can(actor: Actor, action: Action, resource: Resource): Decision 
       reason: 'platform operators need a break-glass grant',
     };
   }
-  const readAction: Action = resource.kind === 'budget' ? 'budget.read' : 'tenant.read';
+  const readAction: Action =
+    resource.kind === 'budget'
+      ? 'budget.read'
+      : resource.kind === 'org-unit' || resource.kind === 'person'
+        ? 'org.read'
+        : 'tenant.read';
   const readScope = bestScope(actor, readAction);
   const visible = readScope !== null && scopeCovers(readScope, actor, resource);
   const scope = bestScope(actor, action);
