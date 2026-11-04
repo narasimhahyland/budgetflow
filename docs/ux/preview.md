@@ -94,6 +94,27 @@ Added 2026-11-05. 048 is covered by 045; the 061a reject reason page is specifie
 | 058 Over-budget request             | [default](https://narasimhahyland.github.io/budgetflow/screens/058-over-budget-request--default.html)             | [ded23f83](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=ded23f83e3694b73b84a43f939e32228) |
 | 064 Request history                 | [default](https://narasimhahyland.github.io/budgetflow/screens/064-request-history--default.html)                 | [405ecb28](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=405ecb282a2945ceb61a536cecb3ca57) |
 
+## Phase 6 and Phase 5 employee batch (specs first; designs pending)
+
+Added 2026-11-05. Stitch's daily generation limit blocked this batch, so these screens have specs (with the planned state names) but no images or preview pages yet; the clickable preview is unchanged. Review the specs; the designs follow in the next batch.
+
+| Screen                                        | Spec                                                                                          |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 053 Event budget reconciliation               | [053-event-reconciliation.md](screens/053-event-reconciliation.md)                            |
+| 054 Close event                               | [054-close-event.md](screens/054-close-event.md)                                              |
+| 080a Actuals import: refunds and credit notes | [080a-actuals-import.md](screens/080a-actuals-import.md) (section "Refunds and credit notes") |
+| 080b Unmatched actuals: mapping rules         | [080b-unmatched-actuals.md](screens/080b-unmatched-actuals.md) (section "Mapping rules")      |
+| 080d Accrual proposals and prepaids           | [080d-accruals-prepaids.md](screens/080d-accruals-prepaids.md)                                |
+| 085a Commitment hygiene                       | [085a-commitment-hygiene.md](screens/085a-commitment-hygiene.md)                              |
+| 116 Available budgets                         | [116-available-budgets.md](screens/116-available-budgets.md)                                  |
+| 117 Submit spending request                   | [117-submit-spending-request.md](screens/117-submit-spending-request.md)                      |
+| 118 Request event funding                     | [118-request-event-funding.md](screens/118-request-event-funding.md)                          |
+| 119 View request status                       | [119-request-status.md](screens/119-request-status.md)                                        |
+| 120 View approved allocations                 | [120-approved-allocations.md](screens/120-approved-allocations.md)                            |
+| 121 Upload receipt or document                | [121-upload-receipt.md](screens/121-upload-receipt.md)                                        |
+
+Revised specs whose images now predate a product answer (build from the spec): 022c HR headcount import (all-or-nothing) and 026 reduce budget (pending requests excluded from the floor).
+
 ## How to review
 
 1. Open the preview project and step through the screens in the order above; each shows the default state of one screen.
