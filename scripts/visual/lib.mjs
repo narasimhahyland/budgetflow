@@ -16,8 +16,13 @@ export const VIEWPORTS = {
 
 export class ToolMissing extends Error {}
 
-const searchDirs = () =>
-  [...new Set([process.env.VISUAL_TOOLS_DIR, ROOT, process.cwd(), path.join(ROOT, 'tmp/visual-tools')].filter(Boolean))];
+const searchDirs = () => [
+  ...new Set(
+    [process.env.VISUAL_TOOLS_DIR, ROOT, process.cwd(), path.join(ROOT, 'tmp/visual-tools')].filter(
+      Boolean,
+    ),
+  ),
+];
 
 export function tryRequire(name) {
   for (const dir of searchDirs()) {
@@ -32,7 +37,10 @@ export function tryRequire(name) {
 
 export function loadPlaywright() {
   const pw = tryRequire('playwright') ?? tryRequire('@playwright/test');
-  if (!pw?.chromium) throw new ToolMissing('Playwright is not installed; run: sh scripts/visual/setup-tools.sh --with-browser');
+  if (!pw?.chromium)
+    throw new ToolMissing(
+      'Playwright is not installed; run: sh scripts/visual/setup-tools.sh --with-browser',
+    );
   return pw;
 }
 
@@ -42,7 +50,9 @@ export async function launchChromium() {
     return await chromium.launch({ headless: true });
   } catch (err) {
     if (/Executable doesn't exist|browserType\.launch/i.test(String(err?.message))) {
-      throw new ToolMissing('Chromium for Playwright is not installed; run: sh scripts/visual/setup-tools.sh --with-browser');
+      throw new ToolMissing(
+        'Chromium for Playwright is not installed; run: sh scripts/visual/setup-tools.sh --with-browser',
+      );
     }
     throw err;
   }
@@ -67,7 +77,20 @@ export function parseArgs(argv, booleans = []) {
 }
 
 export const list = (value, fallback = []) =>
-  value ? String(value).split(',').map((s) => s.trim()).filter(Boolean) : fallback;
+  value
+    ? String(value)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : fallback;
+
+/**
+ * Themes to capture: light only by default (dark theme deferred). Re-enable dark with `--themes light,dark`,
+ * BF_VISUAL_THEMES=light,dark, or "themes": ["light", "dark"] in screens.json.
+ */
+export const DEFAULT_THEMES = ['light'];
+export const themesFrom = (arg, config) =>
+  list(arg ?? process.env.BF_VISUAL_THEMES, config?.themes ?? DEFAULT_THEMES);
 
 export function ensureDir(dir) {
   mkdirSync(dir, { recursive: true });

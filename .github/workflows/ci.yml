@@ -161,7 +161,9 @@ jobs:
         run: npm ci --no-audit --fund=false
         env:
           NODE_AUTH_TOKEN: ${{ secrets.SATORI_PACKAGES_TOKEN }}
-      - name: Visual regression in mcr.microsoft.com/playwright:v1.64.1-noble
+      - name: Visual regression in mcr.microsoft.com/playwright:v1.64.1-noble (light theme; dark theme deferred)
+        env:
+          BF_VISUAL_THEMES: light
         run: bash scripts/gate.sh visual --evidence tmp/ci-evidence
       - name: Upload screenshots, diffs and the Playwright HTML report
         if: always()

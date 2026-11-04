@@ -11,5 +11,6 @@ Run the visual QA loop for the screens named after `/visual-qa` by following the
 - Screens: numbers or ids (`005`, `005-budget-allocation`); default is every screen changed on this branch (`git diff --name-only main...HEAD`, mapped through `apps/web-e2e/visual/screens.json`).
 - Output folder: the `--out` value if given, else `evidence/<branch-name>/visual-qa`.
 - `--max-iterations` may lower the limit, never raise it above 5.
+- Themes: light only by default (dark theme deferred); pass `--themes light,dark` only when the user re-enables dark.
 - Never report done while the last iteration has blocking findings; report what is still blocking and why instead.
 - End with the skill's report: iterations, stop reason, before/after screenshots embedded, remaining non-blocking findings, and the `ux-reviewer` verdict.
