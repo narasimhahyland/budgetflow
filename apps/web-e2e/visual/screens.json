@@ -162,6 +162,9 @@
               "click": "[data-testid=import-plan]"
             },
             {
+              "hover": "#import-title"
+            },
+            {
               "fill": [
                 "[data-testid=import-csv]",
                 "Program code,Program,Budget (USD),Entity\nEX-2027,Employee Experience FY2027,\"110,000.00\",HYL-US\nWB-2027,Wellbeing FY2027,abc,HYL-XX"
@@ -176,6 +179,9 @@
               "click": "[data-testid=import-plan]"
             },
             {
+              "hover": "#import-title"
+            },
+            {
               "fill": [
                 "[data-testid=import-csv]",
                 "Program code,Program,Budget (USD),Entity\nEX-2027,Employee Experience FY2027,\"110,000.00\",HYL-US\nWB-2027,Wellbeing FY2027,abc,HYL-XX"
@@ -186,12 +192,6 @@
             },
             {
               "waitFor": "[data-testid=import-rows]"
-            },
-            {
-              "click": "[data-testid=import-rows]"
-            },
-            {
-              "press": "Home"
             }
           ]
         }

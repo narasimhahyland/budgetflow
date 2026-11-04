@@ -233,6 +233,27 @@ type FieldKey = (typeof FIELDS)[number]['key'];
       <section class="bf-card" aria-labelledby="import-title">
         <div class="bf-card__header">
           <h2 class="bf-card__title" id="import-title">Budget-plan spreadsheet import</h2>
+          <div class="bf-actions" style="padding: 0">
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="runImport(true)"
+              [disabled]="busy() || !ready()"
+              data-testid="validate-import"
+            >
+              Validate
+            </button>
+            <button
+              mat-flat-button
+              type="button"
+              (click)="runImport(false)"
+              [disabled]="busy() || !result()?.valid"
+              data-testid="create-version"
+            >
+              Create draft version
+            </button>
+            <button mat-button type="button" (click)="importing.set(false)">Close</button>
+          </div>
         </div>
         <div class="bf-card__body">
           <ol class="bf-steps">
@@ -322,27 +343,6 @@ type FieldKey = (typeof FIELDS)[number]['key'];
               ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
             >
           }
-        </div>
-        <div class="bf-actions">
-          <button
-            mat-stroked-button
-            type="button"
-            (click)="runImport(true)"
-            [disabled]="busy() || !ready()"
-            data-testid="validate-import"
-          >
-            Validate
-          </button>
-          <button
-            mat-flat-button
-            type="button"
-            (click)="runImport(false)"
-            [disabled]="busy() || !result()?.valid"
-            data-testid="create-version"
-          >
-            Create draft version
-          </button>
-          <button mat-button type="button" (click)="importing.set(false)">Close</button>
         </div>
       </section>
     }
