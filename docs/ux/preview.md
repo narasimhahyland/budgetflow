@@ -133,6 +133,23 @@ Added 2026-11-05, same Stitch limit as above: specs only, no preview pages yet.
 | 071a Policy templates and threshold table | [071a-policy-templates-thresholds.md](screens/071a-policy-templates-thresholds.md)   |
 | 072 Category-policy configuration         | [072-category-policy.md](screens/072-category-policy.md)                             |
 
+## Phase 7 batch B (specs first; designs pending)
+
+Added 2026-11-05, same Stitch limit: specs only, no preview pages yet. With batch A, every Phase 7 screen now has a spec.
+
+| Screen                                       | Spec                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 072a Gifts, entertainment and alcohol policy | [072a-gifts-entertainment-alcohol.md](screens/072a-gifts-entertainment-alcohol.md)     |
+| 073 Location-policy configuration            | [073-location-policy.md](screens/073-location-policy.md)                               |
+| 073a Vendor controls                         | [073a-vendor-controls.md](screens/073a-vendor-controls.md)                             |
+| 074 Over-budget policy                       | [074-over-budget-policy.md](screens/074-over-budget-policy.md)                         |
+| 074a Post-spend exception queue              | [074a-post-spend-exceptions.md](screens/074a-post-spend-exceptions.md)                 |
+| 075 Freeze and zero-budget policy            | [075-freeze-zero-policy.md](screens/075-freeze-zero-policy.md)                         |
+| 076 Notification and escalation policy       | [076-notification-escalation-policy.md](screens/076-notification-escalation-policy.md) |
+| 077 Rule simulation and testing              | [077-rule-simulation.md](screens/077-rule-simulation.md)                               |
+| 078 Rule version history                     | [078-rule-version-history.md](screens/078-rule-version-history.md)                     |
+| 090 Approval history                         | [090-approval-history.md](screens/090-approval-history.md)                             |
+
 ## How to review
 
 1. Open the preview project and step through the screens in the order above; each shows the default state of one screen.
