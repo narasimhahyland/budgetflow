@@ -10,15 +10,6 @@
       ],
       "status": "proposed - awaiting user review"
     },
-    "default--desktop--dark.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/cdd3e3dcf1c3481ab25d718c88cc8967",
-      "approved": null,
-      "size": [
-        2560,
-        2048
-      ],
-      "status": "proposed - awaiting user review"
-    },
     "switcher-open--desktop--light.png": {
       "stitchScreen": "projects/1643421514270618068/screens/7e6e2b1ce7ec4f3e9e120bb79b5b31e4",
       "approved": null,

@@ -1,75 +1,72 @@
 # 000a Application shell
 
-Status: proposed - awaiting user review. Start screen 2 (todo `ux-s02-shell`). Lettered because the shell is not one of the 124 numbered screens.
+Status: proposed - awaiting user review. Light theme only (dark deferred).
 
+## Design
 | State | Image | Stitch screen |
 | --- | --- | --- |
-| Default, light | `design/stitch/000a-app-shell/default--desktop--light.png` | `fd62ca975f5b497e960db74a6f608b2c` |
-| Default, dark | `design/stitch/000a-app-shell/default--desktop--dark.png` | `cdd3e3dcf1c3481ab25d718c88cc8967` |
-| Tenant and organization switcher open | `design/stitch/000a-app-shell/switcher-open--desktop--light.png` | `7e6e2b1ce7ec4f3e9e120bb79b5b31e4` |
-| Notifications panel open | `design/stitch/000a-app-shell/notifications-open--desktop--light.png` | `662a5cd63a644fcaa4c9882f2913de9e` |
-| Global search open | `design/stitch/000a-app-shell/search-open--desktop--light.png` | `d177aebf5cf74c9697a652d447a2b61c` |
-| Employee role, forbidden page (403) | `design/stitch/000a-app-shell/employee-forbidden--desktop--light.png` | `9000745aaecd460a82511a8d60739e71` |
-| Mobile, navigation drawer open | `design/stitch/000a-app-shell/nav-drawer-open--mobile--light.png` | `7ece71aa70904a62a3ea5d9d92c8a3a2` |
+| default (Finance Controller) | `design/stitch/000a-app-shell/default--desktop--light.png` | `fd62ca975f5b497e960db74a6f608b2c` |
+| tenant and organization switcher open | `switcher-open--desktop--light.png` | `7e6e2b1ce7ec4f3e9e120bb79b5b31e4` |
+| notifications panel open | `notifications-open--desktop--light.png` | `662a5cd63a644fcaa4c9882f2913de9e` |
+| global search open | `search-open--desktop--light.png` | `d177aebf5cf74c9697a652d447a2b61c` |
+| Employee role, forbidden page (403) | `employee-forbidden--desktop--light.png` | `9000745aaecd460a82511a8d60739e71` |
+| mobile, navigation drawer open | `nav-drawer-open--mobile--light.png` | `7ece71aa70904a62a3ea5d9d92c8a3a2` |
 
 ## Purpose
-The frame around every signed-in page: navigation by role, tenant and organization scope, global search, notifications and tasks, fiscal year and reporting currency context, and the user menu.
+The frame around every signed-in screen: navigation scoped to the user's role, tenant and organization scope switching, global search, notifications and tasks, user menu, breadcrumbs, and the content slot.
 
 ## Roles
-All 14 roles. Navigation items come from the permissions the API returns for the current user and tenant. Super Admin sees platform administration only (no tenant financial data without a break-glass grant).
+- Primary: every signed-in role (14 roles).
+- Navigation differs by role: the API returns the menu the user may see. Finance Controller sees all groups; Employee sees Home, My budgets, Request funds, My requests, Events, Notifications.
+- Super Admin sees platform administration only; tenant financial data needs an audited break-glass grant.
 
 ## Entry points
-After sign-in (screens 001-003) and on every route. Deep links open inside the shell.
+Sign-in completion (Keycloak OIDC), any deep link, switching tenant or scope.
 
-## Layout
-- Sidebar (`sat-platform-nav`, 240px, violet): logo; tenant switcher (`sat-platform-nav-switcher`) with organization scope below it; grouped items: Home; Budgets (Budget hierarchy, Allocation workspace, Budget list); Events; Requests (Approval inbox with count, My requests); Finance (Actuals and matching, GL tie-out); Insights (Reports, Audit log); Admin (Rules and policies, Integrations, Settings); collapse control; user row.
-- Header (`sat-app-header`, 64px, white): breadcrumbs (`sat-breadcrumbs`), global search with Ctrl K, fiscal-year chip, reporting-currency chip, notifications bell with unread count, help, avatar menu.
-- Content: page header bar (`sat-header-bar`) with title, scope subtitle and actions; optional page-level banner; content slot. `sat-skip-to-content` is the first focusable element.
-
-## Main actions
-- Switch tenant (radio list; sandbox tenants tagged "Sandbox").
-- Change organization scope (searchable tree with each unit's currency; footer explains that scope limits what you see and shows the role).
-- Search across budgets, events, people and requests within scope; results grouped, keyboard navigable, status tags inline.
-- Open notifications (tabs All and Tasks; items for thresholds, approvals with an inline Review button, freezes, Inter-Director Budget Contribution Request outcomes; Mark all as read).
-- User menu: profile and preferences (124), timezone, theme (light, dark, system), sign out.
+## Regions and actions
+- Sidebar (`sat-platform-nav`): logo, tenant switcher (`-switcher`), organization scope, grouped menu (Home; Budgets; Events; Requests with Approval inbox count; Finance; Insights; Admin), collapse toggle, user row (`-user`) with menu (profile and preferences, sign out).
+- Header (`sat-app-header`): breadcrumbs (`sat-breadcrumbs`), global search (Ctrl K), fiscal-year chip, reporting-currency chip, notifications bell with unread count, help, avatar menu.
+- Switcher menu: tenant radio list (sandbox tenants tagged), organization scope tree with search and currency tag per unit, footer stating scope and role. Selecting reloads data for the new scope and keeps the current route when the user has access to it.
+- Notifications panel: tabs All and Tasks, unread dots, inline primary action on tasks ("Review"), "Mark all as read", link to the full notifications page (123).
+- Global search: grouped results (Budgets, Events, People, Requests) limited to the user's scope, status tags on results, keyboard navigation (arrows, Enter, Esc).
+- Skip to content link (`sat-skip-to-content`) first in tab order.
 
 ## Data
-Current user (name, role, location, timezone), memberships (tenants), org scope tree with unit currency, fiscal year, reporting currency, unread notification and task counts, navigation permissions.
+Current user (name, role, location, avatar initials), tenant list, organization scope tree with budget currency per unit, active fiscal year, reporting currency, unread notification count, approval inbox count, search results from the API.
 
 ## Permissions
-- Navigation items render only when the user has at least read access to that area; the API remains the enforcement point.
-- Tenant switcher shows only tenants with a membership. Organization scope shows only the subtree the user is scoped to.
-- Search results are limited to the user's scope (stated in the results footer).
+- Menu items, counts and search results come from the API for the current user and tenant; hiding is convenience, the API enforces (`PolicyService.can`).
+- Scope switching only offers units in the user's grant; tenant isolation is by RLS.
+- Routes the user cannot open show the forbidden state inside the shell (`sat-403-error-state`) with "Go to Home" and "Request access".
 
 ## States
-| State | Treatment |
+| State | Behaviour |
 | --- | --- |
-| Loading | Shell renders immediately; content slot uses `sat-ghost` skeletons (default image) |
-| Empty | Per page (`sat-empty-state`) |
-| Error | Per page; shell-level failures (for example notifications unavailable) show an inline message in the panel |
-| Forbidden | `sat-403-error-state` in the content slot with "Go to Home" and "Request access" (employee image) |
-| Session expired | Dialog prompting to sign in again; unsaved form data kept in memory |
-| Tenant switched | Snackbar "Switched to Acme Labs (sandbox)"; content reloads |
+| Loading | shell renders immediately; content slot shows `sat-ghost` skeletons |
+| Empty | per page (the shell itself is never empty) |
+| Error | page-level `sat-500-error-state` in the content slot; shell stays usable |
+| Forbidden | `sat-403-error-state` in the content slot (Employee example) |
+| Unauthenticated | redirect to sign-in (screens 001-003) |
+| Notifications empty | "You are all caught up" in the panel |
+| Search no results | "No results in your scope" with a hint to change scope |
+| Success | snackbar at bottom center; focus returns to the trigger |
 
-## Audit behaviour
-Tenant switches, break-glass access and role changes are audited server-side. Navigation and search are recorded only in product analytics, not in the audit trail.
+## Audit
+Tenant and scope switches are recorded as product analytics events, not audit entries. Break-glass access by Super Admin is audited.
 
-## Responsive behaviour
-Desktop 1440: expanded sidebar. Tablet 834: sidebar collapses to a 72px icon rail with tooltips. Mobile 412: top app bar with menu, title, search, bell and avatar; navigation in a left drawer over a scrim (mobile image); breadcrumbs collapse to a back link; primary page actions become full-width buttons.
+## Responsive
+- Desktop: sidebar expanded (240px), collapsible to 72px icons.
+- Tablet (834): sidebar collapsed to icons by default; expands as an overlay.
+- Mobile (412): top app bar with menu, title, search icon, bell and avatar; navigation in a left drawer over a scrim (see mobile image); breadcrumbs collapse to a back link; primary page action becomes full width.
 
 ## Accessibility
-Skip-to-content link; landmarks (navigation, banner, main); Ctrl K opens search, Esc closes overlays, focus returns to the trigger; badge counts have text equivalents ("7 approvals waiting"); the active nav item has `aria-current="page"`; contrast of white on `#5654ac` is above 4.5:1.
+Landmarks (nav, banner, main); skip link; switcher, notifications and search are menus or dialogs with focus trap and Esc to close; counts announced ("7 approvals waiting"); keyboard shortcut Ctrl K documented in help.
 
-## Related screens
-[000 design system](000-design-system.md), [011 executive dashboard](011-executive-dashboard.md), 123 notifications and tasks, 124 profile and preferences, 001-003 sign-in.
+## Related screens and navigation
+All screens render inside the shell. Search results deep-link to budget details (021), event details (046), employee profile (039) and request details (060). Notifications link to the approval inbox (059) and notifications page (123).
 
-## Navigation
-Breadcrumbs reflect the route; the sidebar item for the current area is active; browser back works across tenant and scope changes (scope is part of the URL).
-
-## Data-model assumptions
-Organization scope is a node in the effective-dated org closure table; switching scope changes a query parameter, not the user's permissions.
-
-## Open questions
-- Should the organization scope live in the sidebar (as designed) or in the header next to the FY chip?
-- Is the reporting-currency chip user-switchable (USD, EUR, INR) or fixed per tenant?
-- Stitch artifacts to ignore: the "Live Mode" tag next to the page title in the default light image.
+## Assumptions and open questions
+- Organization scope: is it a filter of what you see (as designed) or also the default parent for new budgets? Assumed filter only.
+- Fiscal-year chip: switchable from the header, or display only? Assumed switchable for Finance roles, display only for others.
+- Should the sidebar group labels (BUDGETS, EVENTS, ...) be shown for roles with few items? Hidden for Employee in the design.
+- The Stitch default shows a decorative "Live Mode" tag next to the page title; it is not part of the design.

@@ -138,9 +138,9 @@ BudgetFlow Enterprise is a corporate budget delegation and control platform buil
 - Status tones, each with a container background and darker text: success (approved, active, matched), warning (soft warning, pending, near threshold), info (frozen, informational), important (set to zero, rejected), error #b02b36 (hard block, validation error, failed). Neutral grey for draft, closed, expired, cancelled.
 - Tertiary teal #006b61 is used only for charts and secondary accents.
 
-## Dark theme
+## Theme
 
-Dark tokens: surface #121316, surface-container-low #1a1b1f, surface-container #1f1f23, surface-container-high #292a2d, surface-container-lowest #0d0e11, on-surface #e3e2e6, on-surface-variant #c8c5d3, outline #918f9c, outline-variant #474551, primary #c4c1ff, on-primary #272377, primary-container #3e3b92, on-primary-container #e2dfff, error #ffb3b1. Status containers become deep tinted surfaces with light text. The navigation sidebar stays violet (#3e3b92) with white text.
+Light theme only. Dark theme is deferred.
 
 ## Typography
 

@@ -1,42 +1,35 @@
 # 000 Design system reference
 
-Status: proposed - awaiting user review. Start screen 1 (todo `ux-s01-design-system`).
+Status: proposed - awaiting user review. Light theme only (dark deferred).
 
+## Design
 | State | Image | Stitch screen |
 | --- | --- | --- |
-| Default, light | `design/stitch/000-design-system/default--desktop--light.png` | `5d02c6a4235a47d7968986b9629e76b9` |
-| Default, dark | `design/stitch/000-design-system/default--desktop--dark.png` | `676c8738415e4f4dbdfcbcb58d847ab3` |
+| default | `design/stitch/000-design-system/default--desktop--light.png` | `5d02c6a4235a47d7968986b9629e76b9` |
 
 ## Purpose
-One reference page for every shared visual decision: color and status tokens, type scale and money formatting, spacing, radii and grid, buttons, the full status-tag set, dense tables with row states, form fields with validation, banners, KPI cards, the budget bar legend, dialog, drawer and toast, empty and error states, and charts. Every later screen reuses these pieces. Token mapping and rules: [design-system.md](../design-system.md).
+One reference sheet for every shared visual decision, so feature screens reuse the same tokens and components. Not a product screen; it is not routed in the app. Tokens, mapping to Satori and the budget-safety rules are written up in [`../design-system.md`](../design-system.md).
 
-## Roles
-Designers and implementers. It is not an in-app screen; no product role sees it.
-
-## Entry points and navigation
-None in the product. Implementers open it from this spec and the Stitch project.
-
-## Actions, data, permissions
-Not applicable (reference only). Sample values use the fictional Acme Global data from [design-system.md](../design-system.md).
-
-## States shown
-Light and dark versions of every component; component-level states on the page: disabled button with reason tooltip ("Budget is frozen"), field error ("Reason is required"), soft warning vs hard block banners, frozen vs set-to-zero table rows, empty state and error state cards, chart with "View as table".
-
-## Audit behaviour
-Not applicable. The dialog sample shows the pattern every financial dialog uses: impact summary, reason code, typed reason, and a note that the action is audited.
-
-## Responsive behaviour
-Grid: 12 columns at desktop (1440), 8 at tablet (834), 4 at mobile (412). Tables keep their columns at desktop, hide low-priority columns at tablet, and become stacked cards at mobile. Dialogs become full-screen sheets at mobile.
+## Sections on the sheet
+1. Color tokens with hex and status triads (success, warning, info, important).
+2. Typography scale with money samples in USD, INR (lakh grouping) and EUR.
+3. Spacing (4/8/16/24/32), radii (4/8/12/16/28, pill) and the 12-column grid.
+4. Buttons: filled pill, outlined pill, text, tonal icon, destructive "Set to zero", disabled with reason tooltip.
+5. Status tags for all 15 budget states (Draft, Submitted, Pending approval, Approved, Active, Partially allocated, Fully allocated, Frozen, Reduced, Set to zero, Exhausted, Expired, Closed, Revised, Cancelled).
+6. Dense table with row-state stripes (frozen row info, set-to-zero row important), right-aligned tabular money, paginator.
+7. Outlined form fields with currency prefix, reason code select, required reason with error text.
+8. Banners: frozen (info), soft warning, hard block (error), success.
+9. KPI cards with progress bars.
+10. Budget bar legend: allocated out, held, pre-encumbered, encumbered, actual, accrued, available, forecast dashed.
+11. Overlays: set-to-zero dialog preview (28px radius), right drawer, snackbar with Undo.
+12. Empty and error states.
+13. Chart sample with "View as table".
 
 ## Accessibility
-Status is never color alone (icon plus text). Text on containers uses the `on-*-container` tokens (all pairs meet 4.5:1 on their container). Focus ring uses primary. Charts have a table alternative. Money uses tabular numerals and an explicit currency code so screen readers announce the currency.
-
-## Related screens
-[000a app shell](000a-app-shell.md) and every screen that follows.
-
-## Notes on the Stitch render
-Stitch renders at 1280 CSS px. Headlines use Plus Jakarta Sans as a stand-in for Figtree. The dark page derives its tokens (see open questions).
+- Status is never color alone: every tag has an icon and text.
+- Text on status containers uses the darker `on-*-container` tone; contrast is checked in the visual QA loop.
+- Focus ring uses primary; disabled controls carry a tooltip that states why.
 
 ## Open questions
-- Dark tokens are derived from Material 3 tonal palettes, not read from Satori's dark theme (the Satori package is not installed yet). Confirm or replace once `node_modules/@hylandsoftware/satori-ui` is available.
-- Satori status tags: confirm the exact shapes (rounded 8px vs pill) against `sat-status-tag`.
+- Request, commitment and event state sets need their own tag rows (only budget states are drawn); add when those screens are designed.
+- Exact Satori status-tag shape (8px vs pill) to be confirmed against the installed `@hylandsoftware/satori-ui` types.

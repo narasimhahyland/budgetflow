@@ -2,11 +2,11 @@
   "screen": "011-executive-dashboard",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/be92f0b4721f4632a3e01098b0f8b9e6",
+      "stitchScreen": "projects/1643421514270618068/screens/8e3e69d7a1894ea68503b203dd1141e0",
       "approved": null,
       "size": [
         2560,
-        3046
+        3070
       ],
       "status": "proposed - awaiting user review"
     },
