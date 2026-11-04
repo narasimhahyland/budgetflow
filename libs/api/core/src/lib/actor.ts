@@ -9,6 +9,7 @@ import {
   withSubject,
   withTenant,
   type Db,
+  type Tx,
 } from '@bf/api/db';
 import type { Actor, CurrencyCode, RoleId } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
@@ -32,6 +33,23 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export class ActorResolver {
   constructor(@Inject(DB) private readonly db: Db) {}
 
+  /** Roles granted to a person in the current tenant on a date (RLS applies through `tx`). */
+  async rolesForPerson(tx: Tx, personId: string, date: string): Promise<RoleId[]> {
+    const rows = await tx
+      .selectDistinct({ role: roleGrants.role })
+      .from(roleGrants)
+      .innerJoin(memberships, eq(memberships.id, roleGrants.membershipId))
+      .where(
+        and(
+          eq(memberships.personId, personId),
+          eq(memberships.status, 'active'),
+          lte(roleGrants.validFrom, date),
+          or(isNull(roleGrants.validTo), gte(roleGrants.validTo, date)),
+        ),
+      );
+    return rows.map((r) => r.role);
+  }
+
   async resolve(
     subject: string,
     requestedTenantId: string | undefined,
@@ -46,6 +64,7 @@ export class ActorResolver {
           tenantName: tenants.name,
           reportingCurrency: tenants.reportingCurrency,
           role: roleGrants.role,
+          scopeOrgUnitId: roleGrants.scopeOrgUnitId,
         })
         .from(memberships)
         .innerJoin(tenants, eq(tenants.id, memberships.tenantId))
@@ -61,7 +80,13 @@ export class ActorResolver {
     );
     const byTenant = new Map<
       string,
-      { tenantName: string; reportingCurrency: string; personId: string | null; roles: RoleId[] }
+      {
+        tenantName: string;
+        reportingCurrency: string;
+        personId: string | null;
+        roles: RoleId[];
+        scopeUnits: string[];
+      }
     >();
     for (const r of rows) {
       const m = byTenant.get(r.tenantId) ?? {
@@ -69,8 +94,11 @@ export class ActorResolver {
         reportingCurrency: r.reportingCurrency,
         personId: r.personId,
         roles: [],
+        scopeUnits: [],
       };
       if (r.role && !m.roles.includes(r.role)) m.roles.push(r.role);
+      if (r.scopeOrgUnitId && !m.scopeUnits.includes(r.scopeOrgUnitId))
+        m.scopeUnits.push(r.scopeOrgUnitId);
       byTenant.set(r.tenantId, m);
     }
     if (requestedTenantId !== undefined && !UUID.test(requestedTenantId)) {
@@ -99,17 +127,21 @@ export class ActorResolver {
       const person = m.personId
         ? (
             await tx
-              .select({ displayName: people.displayName })
+              .select({
+                displayName: people.displayName,
+                locationOrgUnitId: people.locationOrgUnitId,
+                orgUnitId: people.orgUnitId,
+              })
               .from(people)
               .where(eq(people.id, m.personId))
           )[0]
         : undefined;
       const owned = m.personId
-        ? await tx.execute<{ path: string }>(
-            sql`select ${budgets.path} as path from ${budgets} where ${budgets.ownerPersonId} = ${m.personId}
-                union select b.path from ${budgetCoOwners} c join ${budgets} b on b.id = c.budget_id where c.person_id = ${m.personId}`,
+        ? await tx.execute<{ path: string; org_unit_id: string | null }>(
+            sql`select ${budgets.path} as path, ${budgets.orgUnitId} as org_unit_id from ${budgets} where ${budgets.ownerPersonId} = ${m.personId}
+                union select b.path, b.org_unit_id from ${budgetCoOwners} c join ${budgets} b on b.id = c.budget_id where c.person_id = ${m.personId}`,
           )
-        : { rows: [] as { path: string }[] };
+        : { rows: [] as { path: string; org_unit_id: string | null }[] };
       const now = new Date();
       const glass = await tx
         .select({ id: breakGlassGrants.id })
@@ -121,10 +153,18 @@ export class ActorResolver {
             gte(breakGlassGrants.validToTs, now),
           ),
         );
+      const home = [person?.locationOrgUnitId, person?.orgUnitId].filter((u): u is string =>
+        Boolean(u),
+      );
+      const ownedUnits = owned.rows
+        .map((r) => r.org_unit_id)
+        .filter((u): u is string => Boolean(u));
       return {
         displayName: person?.displayName,
         ownedBudgetPaths: owned.rows.map((r) => r.path),
         breakGlass: glass.length > 0,
+        homeOrgUnitIds: home,
+        orgScopeUnitIds: [...new Set([...m.scopeUnits, ...ownedUnits, ...home])],
       };
     });
 
@@ -135,6 +175,8 @@ export class ActorResolver {
       roles: m.roles,
       ownedBudgetPaths: extra.ownedBudgetPaths,
       breakGlass: extra.breakGlass,
+      orgScopeUnitIds: extra.orgScopeUnitIds,
+      homeOrgUnitIds: extra.homeOrgUnitIds,
       displayName: extra.displayName ?? tokenName ?? subject,
       tenantName: m.tenantName,
       reportingCurrency: m.reportingCurrency as CurrencyCode,
