@@ -250,6 +250,12 @@ export const BudgetListQuery = CursorQuery.extend({
   fiscalYearId: Id.optional(),
   rootId: Id.optional().describe('Only this budget and everything below it.'),
   parentId: Id.optional().describe('Only direct children of this budget.'),
+  topLevel: z
+    .enum(['true', 'false'])
+    .optional()
+    .describe(
+      'Only the highest budgets the user can see (roots, or the top of each owned subtree).',
+    ),
   status: BudgetStatus.optional(),
   budgetType: BudgetType.optional(),
   q: z.string().trim().max(100).optional().describe('Name or code contains.'),

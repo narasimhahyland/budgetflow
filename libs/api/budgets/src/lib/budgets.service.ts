@@ -114,6 +114,15 @@ export class BudgetsService {
       if (q.status) filters.push(eq(budgets.status, q.status));
       if (q.budgetType) filters.push(eq(budgets.budgetType, q.budgetType));
       if (q.parentId) filters.push(eq(budgets.parentId, q.parentId));
+      if (q.topLevel === 'true') {
+        if (scope === null) filters.push(isNull(budgets.parentId));
+        else {
+          const tops = actor.ownedBudgetPaths.filter(
+            (p) => !actor.ownedBudgetPaths.some((o) => o !== p && p.startsWith(o)),
+          );
+          filters.push(inArray(budgets.path, tops));
+        }
+      }
       if (q.rootId) {
         const root = await this.views.row(tx, q.rootId);
         this.policy.assert(actor, 'budget.read', budgetResource(root), 'budget');

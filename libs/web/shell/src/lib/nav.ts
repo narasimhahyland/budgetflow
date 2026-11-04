@@ -28,6 +28,30 @@ export const NAV: NavGroup[] = [
         icon: 'grid_view',
         permission: 'budget.allocate',
       },
+      {
+        label: 'Budget list',
+        path: '/budgets/list',
+        icon: 'list_bullet',
+        permission: 'budget.read',
+      },
+      {
+        label: 'Budget requests',
+        path: '/budgets/requests',
+        icon: 'check_double',
+        permission: 'budget.read',
+      },
+      {
+        label: 'Plans and versions',
+        path: '/budgets/plans',
+        icon: 'table_chart',
+        permission: 'budget.create_root',
+      },
+      {
+        label: 'Program templates',
+        path: '/budgets/templates',
+        icon: 'copy',
+        permission: 'master_data.manage',
+      },
     ],
   },
   {

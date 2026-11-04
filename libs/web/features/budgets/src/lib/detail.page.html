@@ -1,0 +1,373 @@
+<bf-load-state
+  [loading]="res.isLoading() && !b()"
+  [error]="res.error()"
+  what="this budget"
+  (retry)="reload()"
+/>
+@if (b(); as b) {
+  <header class="bf-page__header bf-detail__header">
+    <div class="bf-page__heading">
+      <div class="bf-detail__title-row">
+        <h1 class="bf-page__title">{{ b.name }}</h1>
+        <bf-budget-status [status]="b.status" />
+        @if (b.budgetType === 'contingency') {
+          <sat-category-tag category="gray">Contingency</sat-category-tag>
+        }
+        @if (threshold(); as t) {
+          <sat-status-tag [status]="t >= 100 ? 'important' : 'warning'" data-testid="threshold-tag"
+            >At {{ t }}%</sat-status-tag
+          >
+        }
+      </div>
+      <p class="bf-page__subtitle">
+        Owner {{ b.display.ownerName ?? '—' }} · Legal entity
+        {{ b.display.legalEntityName ?? '—' }} · Cost center {{ b.display.costCenterCode ?? '—' }} ·
+        Budget currency {{ b.currency }} (fixed USD reporting)
+        @if (b.code) {
+          · <code>{{ b.code }}</code>
+        }
+      </p>
+    </div>
+    <div class="bf-page__actions">
+      @if (b.status === 'draft' && can(b, 'budget.create_child')) {
+        <button mat-flat-button type="button" (click)="activate()">Activate</button>
+      }
+      @if (can(b, 'budget.request_increase')) {
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="run('increase')"
+          data-testid="request-increase"
+        >
+          <mat-icon svgIcon="trending_up" aria-hidden="true" />Request increase
+        </button>
+      }
+      @if (can(b, 'budget.transfer')) {
+        <button mat-stroked-button type="button" (click)="run('transfer')" data-testid="transfer">
+          <mat-icon svgIcon="import_export" aria-hidden="true" />Transfer
+        </button>
+      }
+      @if (can(b, 'budget.control') && b.status !== 'set_to_zero') {
+        <button mat-stroked-button type="button" (click)="run('reduce')" data-testid="reduce">
+          <mat-icon svgIcon="trending_down" aria-hidden="true" />Reduce
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          class="bf-danger"
+          (click)="run('zero')"
+          data-testid="set-to-zero"
+        >
+          <mat-icon svgIcon="block" aria-hidden="true" />Set to zero
+        </button>
+      }
+      <button
+        mat-icon-button
+        type="button"
+        [matMenuTriggerFor]="more"
+        aria-label="More actions"
+        data-testid="more-actions"
+      >
+        <mat-icon svgIcon="more_vert" aria-hidden="true" />
+      </button>
+      <mat-menu #more="matMenu">
+        @if (can(b, 'budget.control')) {
+          @if (b.status === 'frozen') {
+            <button mat-menu-item type="button" (click)="run('freeze')">Unfreeze</button>
+          } @else if (b.status === 'set_to_zero') {
+            <button mat-menu-item type="button" (click)="run('restore')">Lift set to zero</button>
+          } @else {
+            <button mat-menu-item type="button" (click)="run('freeze')" data-testid="freeze">
+              Freeze
+            </button>
+          }
+        }
+        @if (can(b, 'budget.settings')) {
+          <button mat-menu-item type="button" (click)="run('settings')" data-testid="settings">
+            Controls and alerts
+          </button>
+        }
+        @if (b.parentId && b.orgUnitId) {
+          <a mat-menu-item [routerLink]="['/budgets', b.id, 'per-head']">Per-head allocation</a>
+        }
+        @if (b.budgetType === 'contingency') {
+          <button mat-menu-item type="button" (click)="run('release')">
+            Request reserve release
+          </button>
+        }
+        @if (!b.parentId && can(b, 'budget.control')) {
+          <button mat-menu-item type="button" (click)="run('rollForward')">Roll forward</button>
+        }
+        <a
+          mat-menu-item
+          routerLink="/budgets"
+          [queryParams]="{ root: b.path.split('/')[1], budget: b.id }"
+          >Show in hierarchy</a
+        >
+      </mat-menu>
+      @if (
+        can(b, 'budget.allocate') &&
+        b.childCount > 0 &&
+        !['frozen', 'set_to_zero'].includes(b.status)
+      ) {
+        <button mat-flat-button type="button" (click)="allocate()" data-testid="allocate">
+          <mat-icon svgIcon="plus_small" aria-hidden="true" />Allocate
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (notice()) {
+    <sat-banner variant="success"
+      ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+    >
+  }
+  @if (failure()) {
+    <sat-banner variant="important"
+      ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+    >
+  }
+  @if (b.status === 'frozen') {
+    <sat-banner variant="info" data-testid="frozen-banner"
+      ><sat-banner-message
+        >Frozen: new requests and allocations are blocked. Existing commitments can still
+        complete.</sat-banner-message
+      ></sat-banner
+    >
+  } @else if (b.status === 'set_to_zero') {
+    <sat-banner variant="important" data-testid="zero-banner"
+      ><sat-banner-message
+        >Set to zero: no new spending is accepted. Approved commitments can still be
+        paid.</sat-banner-message
+      ></sat-banner
+    >
+  }
+
+  <nav class="bf-detail__tabs" role="tablist" aria-label="Budget sections">
+    @for (t of tabs; track t.key) {
+      <button
+        type="button"
+        role="tab"
+        class="bf-detail__tab"
+        [class.bf-detail__tab--active]="tab() === t.key"
+        [attr.aria-selected]="tab() === t.key"
+        (click)="setTab(t.key)"
+        [attr.data-testid]="'tab-' + t.key"
+      >
+        {{ t.label }}
+        @if (t.key === 'children') {
+          ({{ b.childCount }})
+        }
+        @if (t.key === 'versions') {
+          <span class="bf-detail__count">{{ b.version }}</span>
+        }
+      </button>
+    }
+  </nav>
+
+  @switch (tab()) {
+    @case ('overview') {
+      @if (bal(); as x) {
+        <section class="bf-kpis bf-detail__kpis" aria-label="Key figures">
+          <div class="bf-kpi">
+            <p class="bf-kpi__label">Total budget</p>
+            <p class="bf-kpi__value">
+              <bf-money [amountMinor]="x.authorized" [currency]="b.currency" />
+            </p>
+            <p class="bf-kpi__delta">
+              {{
+                b.parentId ? 'Allocated from ' + b.display.parentName : 'Funded by the plan version'
+              }}
+            </p>
+          </div>
+          <div class="bf-kpi">
+            <p class="bf-kpi__label">Committed</p>
+            <p class="bf-kpi__value">
+              <bf-money [amountMinor]="x.encumbered + x.preEncumbered" [currency]="b.currency" />
+            </p>
+            <p class="bf-kpi__delta">{{ pct(committedPct()) }} · encumbered + pending requests</p>
+          </div>
+          <div class="bf-kpi">
+            <p class="bf-kpi__label">Actual spend</p>
+            <p class="bf-kpi__value">
+              <bf-money [amountMinor]="x.actual" [currency]="b.currency" />
+            </p>
+            <p class="bf-kpi__delta">{{ pct(actualPct()) }} of the budget</p>
+          </div>
+          <div class="bf-kpi bf-kpi--available">
+            <p class="bf-kpi__label">
+              Available under this budget’s rules <bf-available-tip [budget]="b" />
+            </p>
+            <p class="bf-kpi__value" data-testid="kpi-available">
+              <bf-money [amountMinor]="x.available" [currency]="b.currency" />
+            </p>
+            <p class="bf-kpi__delta">
+              {{ pct(availablePct()) }} · company-wide
+              <bf-money
+                [amountMinor]="b.available.companyWide.amountMinor"
+                [currency]="b.available.companyWide.currency"
+              />
+            </p>
+          </div>
+        </section>
+
+        <section class="bf-card" aria-labelledby="spectrum-title">
+          <div class="bf-card__header">
+            <div>
+              <h2 class="bf-card__title" id="spectrum-title">Budget lifecycle spectrum</h2>
+              <p class="bf-card__hint">
+                Utilization {{ pct(b.utilizationBps) }} (encumbered + actual). Pending requests are
+                shown separately.
+              </p>
+            </div>
+            @if (threshold(); as t) {
+              <sat-status-tag [status]="t >= 100 ? 'important' : 'warning'"
+                >{{ t }}% alert threshold reached</sat-status-tag
+              >
+            }
+          </div>
+          <div class="bf-card__body"><bf-spectrum [budget]="b" /></div>
+        </section>
+
+        <div class="bf-detail__grid">
+          @if (b.driver; as d) {
+            <section class="bf-card" aria-labelledby="driver-title" data-testid="driver-card">
+              <div class="bf-card__header">
+                <h2 class="bf-card__title" id="driver-title">Per-head driver</h2>
+                <a mat-button [routerLink]="['/budgets', b.id, 'per-head']">Open</a>
+              </div>
+              <div class="bf-card__body">
+                <dl class="bf-def">
+                  <div>
+                    <dt>Rate</dt>
+                    <dd>
+                      <bf-money [amountMinor]="d.rateMinor" [currency]="b.currency" /> per eligible
+                      head
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Eligible headcount</dt>
+                    <dd>
+                      {{ d.eligibleHeadcountMilli / 1000 }} ({{ d.eligibleTypes.join(', ')
+                      }}{{ d.prorate ? ', prorated' : '' }})
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>HR snapshot</dt>
+                    <dd>{{ d.asOfDate ?? '—' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Driver amount</dt>
+                    <dd><bf-money [amountMinor]="d.amountMinor" [currency]="b.currency" /></dd>
+                  </div>
+                </dl>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="checkTrueUp()"
+                  data-testid="check-true-up"
+                >
+                  Check for a true-up
+                </button>
+                @if (trueUp(); as t) {
+                  @if (t.preview.deltaMinor === 0) {
+                    <p class="bf-card__hint">
+                      No true-up needed: the latest HR import ({{ t.preview.asOfDate }}) gives the
+                      same amount.
+                    </p>
+                  } @else {
+                    <sat-banner variant="warning" data-testid="true-up-banner"
+                      ><sat-banner-message
+                        >The HR import of {{ t.preview.asOfDate }} changes this budget by
+                        <bf-money [amountMinor]="t.preview.deltaMinor" [currency]="b.currency" />.
+                        <a [routerLink]="['/budgets', b.id, 'per-head']"
+                          >Review the true-up</a
+                        ></sat-banner-message
+                      ></sat-banner
+                    >
+                  }
+                }
+              </div>
+            </section>
+          }
+          <section class="bf-card" aria-labelledby="gov-title">
+            <div class="bf-card__header">
+              <h2 class="bf-card__title" id="gov-title">Governance and enforcement</h2>
+              <sat-status-tag
+                [status]="
+                  b.control.mode === 'hard'
+                    ? 'important'
+                    : b.control.mode === 'soft'
+                      ? 'warning'
+                      : 'neutral'
+                "
+                >{{ b.control.mode }} control</sat-status-tag
+              >
+            </div>
+            <div class="bf-card__body">
+              <dl class="bf-def">
+                <div>
+                  <dt>Counted against available</dt>
+                  <dd>{{ b.control.basis.join(', ').replaceAll('_', ' ') }}</dd>
+                </div>
+                <div>
+                  <dt>Overrun tolerance</dt>
+                  <dd>{{ b.control.toleranceBps / 100 }}%</dd>
+                </div>
+                <div>
+                  <dt>Owner alert thresholds</dt>
+                  <dd>{{ b.alertThresholdsPct.join('% / ') }}%</dd>
+                </div>
+                <div>
+                  <dt>Budget and reporting currency</dt>
+                  <dd>{{ b.currency }} · local-currency spend converts at the locked plan rate</dd>
+                </div>
+                <div>
+                  <dt>Fiscal year</dt>
+                  <dd>{{ b.display.fiscalYearLabel }}</dd>
+                </div>
+                @if (b.phasingMethod) {
+                  <div>
+                    <dt>Phasing</dt>
+                    <dd>{{ b.phasingMethod }}</dd>
+                  </div>
+                }
+              </dl>
+              @if (can(b, 'budget.settings')) {
+                <button mat-stroked-button type="button" (click)="run('settings')">
+                  Change controls and alerts
+                </button>
+              }
+            </div>
+          </section>
+        </div>
+        @if (b.budgetType === 'contingency') {
+          <section aria-label="Reserve releases">
+            <bf-change-requests [budgetId]="b.id" (changed)="reload()" />
+          </section>
+        }
+      }
+    }
+    @case ('children') {
+      <section class="bf-card"><bf-children-tab [budget]="b" (changed)="reload()" /></section>
+    }
+    @case ('phasing') {
+      <section class="bf-card"><bf-phasing-tab [budget]="b" (changed)="reload()" /></section>
+    }
+    @case ('limits') {
+      <section class="bf-card"><bf-limits-tab [budget]="b" /></section>
+    }
+    @case ('requests') {
+      <bf-change-requests [budgetId]="b.id" (changed)="reload()" />
+    }
+    @case ('versions') {
+      <section class="bf-card"><bf-versions-tab [budget]="b" /></section>
+    }
+    @case ('history') {
+      <section class="bf-card"><bf-history-tab [budget]="b" /></section>
+    }
+    @case ('ledger') {
+      <section class="bf-card"><bf-ledger-tab [budget]="b" /></section>
+    }
+  }
+}

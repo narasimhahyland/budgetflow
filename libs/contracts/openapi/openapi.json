@@ -10050,6 +10050,19 @@
             }
           },
           {
+            "name": "topLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Only the highest budgets the user can see (roots, or the top of each owned subtree).",
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
             "name": "status",
             "in": "query",
             "required": false,

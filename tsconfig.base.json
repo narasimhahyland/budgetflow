@@ -31,6 +31,7 @@
       "@bf/api/tenancy": ["./libs/api/tenancy/src/index.ts"],
       "@bf/web/data-access": ["./libs/web/data-access/src/index.ts"],
       "@bf/web/features/auth": ["./libs/web/features/auth/src/index.ts"],
+      "@bf/web/features/budgets": ["./libs/web/features/budgets/src/index.ts"],
       "@bf/web/features/finance-admin": ["./libs/web/features/finance-admin/src/index.ts"],
       "@bf/web/features/org": ["./libs/web/features/org/src/index.ts"],
       "@bf/web/shell": ["./libs/web/shell/src/index.ts"],
