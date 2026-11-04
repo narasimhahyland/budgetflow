@@ -2,21 +2,15 @@
   "screen": "088-audit-log",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/eb69eed067bf4f34a1dcba6b01ccd962",
+      "stitchScreen": "projects/1643421514270618068/screens/ed6898782feb499cba797ad67db002cb",
       "approved": null,
-      "size": [
-        2560,
-        2048
-      ],
+      "size": [2560, 2048],
       "status": "proposed - awaiting user review"
     },
     "chain-broken--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/c4cd69178174441982a33037c393dc27",
+      "stitchScreen": "projects/1643421514270618068/screens/99974293d1bc442fb605af8466a831bc",
       "approved": null,
-      "size": [
-        2560,
-        2048
-      ],
+      "size": [2560, 2048],
       "status": "proposed - awaiting user review"
     }
   }

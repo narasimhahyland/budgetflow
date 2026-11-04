@@ -2,11 +2,13 @@
 
 Status: proposed - awaiting user review. Light theme only. UX core set (todo `ux-core-screens`). Dialog over 021 budget details.
 
+Revised 2026-11-04 to the single-company decisions: Hyland only (static label, no tenant or organization switcher, no reporting-currency chip), budgets in USD (transactions may show INR or EUR with the USD amount), Export instead of Share. Two-column dialog so the footer stays visible.
+
 ## Design
 
 | State       | Image                                                        | Stitch screen                      |
 | ----------- | ------------------------------------------------------------ | ---------------------------------- |
-| dialog open | `design/stitch/027-freeze-budget/dialog--desktop--light.png` | `23bb5e488964466aad7f6100c0e00bec` |
+| dialog open | `design/stitch/027-freeze-budget/dialog--desktop--light.png` | `203cdea287f94b5abf909f6fbae67699` |
 
 Set to zero has its own design in [028](028-set-to-zero.md) (023 shows the same dialog in its `set-to-zero-dialog` state). Reduce is [026](026-reduce-budget.md): an amount field, the floor and a destination for the cut money.
 
