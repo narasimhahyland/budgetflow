@@ -46,4 +46,4 @@ Mobile: single column, route below the form. Route steps are an ordered list.
 
 ## Assumptions and open questions
 
-- "New money" requires Finance Admin plus CEO; confirm thresholds.
+- Decided 2026-11-05: "new money" increases need Finance Admin plus CEO approval.

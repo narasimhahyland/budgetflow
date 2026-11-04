@@ -52,5 +52,5 @@ Mobile: single column (impact first), full-screen dialog, sticky footer. Confirm
 
 ## Assumptions and open questions
 
-- Pending requests are returned (cancelled) on set to zero; confirm versus keeping them on hold as with freeze.
+- Decided 2026-11-05: set to zero cancels pending requests and returns them to requesters with the reason; freeze holds them.
 - Can a zeroed budget be restored, and is that a new allocation or an undo? Assumed a new allocation (append-only ledger).

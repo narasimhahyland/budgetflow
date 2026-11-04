@@ -46,5 +46,5 @@ Mobile: drawer becomes a full page. KPI bar has a text alternative.
 
 ## Assumptions and open questions
 
-- Is the reserve inside the program total or outside it? Assumed outside (separate root under Hyland).
+- Decided 2026-11-05: the contingency reserve is a separate root outside program totals.
 - Stitch added a policy code ("POL-FIN-08") and reason code label; ignore invented codes.
