@@ -16,6 +16,11 @@ Stitch project `1643421514270618068`, design system `assets/8229316405357604751`
 | 069 Rule builder | [spec](screens/069-rule-builder.md) | `bbb72843f67d43a087e8308adcf569d7` | default, conflict-simulation | proposed - awaiting user review | 2026-11-04 |
 | 088 Audit log | [spec](screens/088-audit-log.md) | `eb69eed067bf4f34a1dcba6b01ccd962` | default, chain-broken | proposed - awaiting user review | 2026-11-04 |
 | 115 Employee dashboard | [spec](screens/115-employee-dashboard.md) | `b42ff3f7211c4f85bd165d75d9aa1e8f` | default, blocked | proposed - awaiting user review | 2026-11-04 |
+| 003 MFA verification (core set) | [spec](screens/003-mfa-verification.md) | `abbf3942f7de440796aa71161c370099` | default (with wrong-code error) | proposed - awaiting user review | 2026-11-04 |
+| 020 Create budget (core set) | [spec](screens/020-create-budget.md) | `b07f9da7ae3b4629b839c5ddfed7b348` | default | proposed - awaiting user review | 2026-11-04 |
+| 021 Budget details (core set) | [spec](screens/021-budget-details.md) | `787bc0a0e3214fc09104ec89258e0707` | default | proposed - awaiting user review | 2026-11-04 |
+| 024a Per-head driver allocation (core set) | [spec](screens/024a-per-head-driver-allocation.md) | `c686c7c18818456faf0a45d1f13a7d22` | default | proposed - awaiting user review | 2026-11-04 |
+| 027 Freeze budget (core set) | [spec](screens/027-freeze-budget.md) | `23bb5e488964466aad7f6100c0e00bec` | dialog | proposed - awaiting user review | 2026-11-04 |
 
 ## Preview
 Click-through review copy: [BudgetFlow Satori - Design preview](https://stitch.withgoogle.com/preview/4948604653652709875) (private until shared from the Stitch web app; static screens without clickable links between them). Per-screen preview links in flow order, plus links to every exported state: [preview.md](preview.md).
@@ -32,6 +37,11 @@ Click-through review copy: [BudgetFlow Satori - Design preview](https://stitch.w
 | 088 Audit log | [39dda5cc](https://stitch.withgoogle.com/preview/4948604653652709875?node-id=39dda5cc01e84c1285ef9abe3ef75dfc) | [eb69eed0](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=eb69eed067bf4f34a1dcba6b01ccd962) |
 | 069 Rule builder | [7cee12c6](https://stitch.withgoogle.com/preview/4948604653652709875?node-id=7cee12c66ef441fc8944ea6df7f22a13) | [bbb72843](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=bbb72843f67d43a087e8308adcf569d7) |
 | 115 Employee dashboard | [0f22185c](https://stitch.withgoogle.com/preview/4948604653652709875?node-id=0f22185c21f145f1afa977e36d0f4ad3) | [b42ff3f7](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=b42ff3f7211c4f85bd165d75d9aa1e8f) |
+| 003 MFA verification | - | [abbf3942](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=abbf3942f7de440796aa71161c370099) |
+| 020 Create budget | - | [b07f9da7](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=b07f9da7ae3b4629b839c5ddfed7b348) |
+| 021 Budget details | - | [787bc0a0](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=787bc0a0e3214fc09104ec89258e0707) |
+| 024a Per-head driver allocation | - | [c686c7c1](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=c686c7c18818456faf0a45d1f13a7d22) |
+| 027 Freeze budget | - | [23bb5e48](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=23bb5e488964466aad7f6100c0e00bec) |
 
 ## Decisions
 - 2026-11-04: dark theme deferred; design and export light theme only. Dark screens already generated stay in Stitch but are not exported or specified.
@@ -44,3 +54,6 @@ Click-through review copy: [BudgetFlow Satori - Design preview](https://stitch.w
 | 022 Budget allocation workspace | First variant timed out on the client and never returned an id; the warning-block state returned an empty session once | Regenerated (`ccdbc282...`); warning-block succeeded on retry (`0fd10f99...`) |
 | 023 Budget hierarchy | Tree table clipped its right-hand columns; a REFINE fix (`78e9e808...`) recovered Available and Used % but still clips Status | Two attempts used; kept `78e9e808...` and recorded the clipped Status column in the spec; `21172b7d...` is superseded |
 | 069 Rule builder | First variant failed with a Stitch 502 | Succeeded on retry (`bbb72843...`) |
+| 001 Sign-in (core set) | Timed out twice (a new screen, then a variant of 003) | Skipped per the two-failure rule; 003 spec describes the sign-in layout. Not exported |
+| 056a Inter-Director Budget Contribution Request (core set) | Variant of the original "Director Transfers" screen timed out once | Not retried in this session; not exported |
+| Rest of the core set | Not started in this session: 002 SSO, 024 allocate to child, 024b HR headcount import, 026 reduce, 046/047 event details and participants, 049a co-funding board, 055 my requests, 057 additional-fund request, 060/061 request details and decision (covered in 059 detail pane), 061a actionable approval email, actuals import and unmatched queue, GL tie-out, 107/108 FX and fiscal calendar admin, 082 utilization snapshot | Pending for the next UX session |
