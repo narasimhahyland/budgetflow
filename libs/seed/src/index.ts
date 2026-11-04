@@ -3,3 +3,4 @@ export * from './lib/roles';
 export * from './lib/dataset';
 export * from './lib/org';
 export * from './lib/budgets';
+export * from './lib/events';
