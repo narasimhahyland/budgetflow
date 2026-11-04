@@ -1,0 +1,416 @@
+{
+  "realm": "budgetflow",
+  "displayName": "BudgetFlow",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyDigits": 6,
+  "otpPolicyPeriod": 30,
+  "roles": {
+    "realm": [
+      {
+        "name": "super-admin",
+        "description": "BudgetFlow role: super-admin"
+      },
+      {
+        "name": "org-admin",
+        "description": "BudgetFlow role: org-admin"
+      },
+      {
+        "name": "ceo",
+        "description": "BudgetFlow role: ceo"
+      },
+      {
+        "name": "finance-admin",
+        "description": "BudgetFlow role: finance-admin"
+      },
+      {
+        "name": "finance-controller",
+        "description": "BudgetFlow role: finance-controller"
+      },
+      {
+        "name": "budget-owner",
+        "description": "BudgetFlow role: budget-owner"
+      },
+      {
+        "name": "department-head",
+        "description": "BudgetFlow role: department-head"
+      },
+      {
+        "name": "regional-manager",
+        "description": "BudgetFlow role: regional-manager"
+      },
+      {
+        "name": "location-manager",
+        "description": "BudgetFlow role: location-manager"
+      },
+      {
+        "name": "event-organizer",
+        "description": "BudgetFlow role: event-organizer"
+      },
+      {
+        "name": "employee",
+        "description": "BudgetFlow role: employee"
+      },
+      {
+        "name": "auditor",
+        "description": "BudgetFlow role: auditor"
+      },
+      {
+        "name": "integration-admin",
+        "description": "BudgetFlow role: integration-admin"
+      },
+      {
+        "name": "analyst",
+        "description": "BudgetFlow role: analyst"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "budgetflow-web",
+      "name": "BudgetFlow web app",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "http://localhost:4201/*",
+        "http://localhost:4202/*"
+      ],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "budgetflow-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "budgetflow-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "budgetflow-api",
+      "name": "BudgetFlow API",
+      "publicClient": false,
+      "secret": "${BF_KC_API_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false
+    },
+    {
+      "clientId": "budgetflow-e2e",
+      "name": "BudgetFlow local test client (direct grant, local stack only)",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "protocolMappers": [
+        {
+          "name": "budgetflow-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "budgetflow-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "50000000-0000-4000-8000-000000000001",
+      "username": "super.admin@example.test",
+      "email": "super.admin@example.test",
+      "emailVerified": true,
+      "firstName": "Sam",
+      "lastName": "Rivera",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["super-admin"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000002",
+      "username": "org.admin@example.test",
+      "email": "org.admin@example.test",
+      "emailVerified": true,
+      "firstName": "Taylor",
+      "lastName": "Brooks",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["org-admin"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000003",
+      "username": "ceo@example.test",
+      "email": "ceo@example.test",
+      "emailVerified": true,
+      "firstName": "Morgan",
+      "lastName": "Lee",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ceo"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000004",
+      "username": "finance.admin@example.test",
+      "email": "finance.admin@example.test",
+      "emailVerified": true,
+      "firstName": "Priya",
+      "lastName": "Raman",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["finance-admin"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000005",
+      "username": "finance.controller@example.test",
+      "email": "finance.controller@example.test",
+      "emailVerified": true,
+      "firstName": "Daniel",
+      "lastName": "Weber",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["finance-controller"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000006",
+      "username": "budget.owner@example.test",
+      "email": "budget.owner@example.test",
+      "emailVerified": true,
+      "firstName": "Jordan",
+      "lastName": "Smith",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["budget-owner"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000007",
+      "username": "department.head@example.test",
+      "email": "department.head@example.test",
+      "emailVerified": true,
+      "firstName": "Lena",
+      "lastName": "Fischer",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["department-head"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000008",
+      "username": "regional.manager@example.test",
+      "email": "regional.manager@example.test",
+      "emailVerified": true,
+      "firstName": "Ananya",
+      "lastName": "Iyer",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["regional-manager"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000009",
+      "username": "location.manager@example.test",
+      "email": "location.manager@example.test",
+      "emailVerified": true,
+      "firstName": "Rahul",
+      "lastName": "Menon",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["location-manager"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000010",
+      "username": "event.organizer@example.test",
+      "email": "event.organizer@example.test",
+      "emailVerified": true,
+      "firstName": "Kavya",
+      "lastName": "Rao",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["event-organizer"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000011",
+      "username": "employee@example.test",
+      "email": "employee@example.test",
+      "emailVerified": true,
+      "firstName": "Arjun",
+      "lastName": "Das",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["employee"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000012",
+      "username": "auditor@example.test",
+      "email": "auditor@example.test",
+      "emailVerified": true,
+      "firstName": "Grace",
+      "lastName": "Kim",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["auditor"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000013",
+      "username": "integration.admin@example.test",
+      "email": "integration.admin@example.test",
+      "emailVerified": true,
+      "firstName": "Omar",
+      "lastName": "Haddad",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["integration-admin"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000014",
+      "username": "analyst@example.test",
+      "email": "analyst@example.test",
+      "emailVerified": true,
+      "firstName": "Mei",
+      "lastName": "Chen",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["analyst"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000015",
+      "username": "globex.admin@example.test",
+      "email": "globex.admin@example.test",
+      "emailVerified": true,
+      "firstName": "Elena",
+      "lastName": "Rossi",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["finance-admin", "ceo"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000016",
+      "username": "sandbox.admin@example.test",
+      "email": "sandbox.admin@example.test",
+      "emailVerified": true,
+      "firstName": "Chris",
+      "lastName": "Park",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["finance-admin", "ceo"]
+    }
+  ]
+}
