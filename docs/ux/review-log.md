@@ -18,7 +18,7 @@ Stitch project `1643421514270618068`, design system `assets/8229316405357604751`
 | 115 Employee dashboard | [spec](screens/115-employee-dashboard.md) | `b42ff3f7211c4f85bd165d75d9aa1e8f` | default, blocked | proposed - awaiting user review | 2026-11-04 |
 
 ## Preview
-Click-through review copy: [BudgetFlow Satori - Design preview](https://stitch.withgoogle.com/preview/4948604653652709875) (private until shared from the Stitch web app; static screens, no prototype links). Per-screen preview links in flow order, plus links to every exported state: [preview.md](preview.md).
+Click-through review copy: [BudgetFlow Satori - Design preview](https://stitch.withgoogle.com/preview/4948604653652709875) (private until shared from the Stitch web app; static screens without clickable links between them). Per-screen preview links in flow order, plus links to every exported state: [preview.md](preview.md).
 
 | Screen | Preview copy | Exported default |
 | --- | --- | --- |

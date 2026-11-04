@@ -35,5 +35,5 @@ Core journey first (shell, executive dashboard, budget hierarchy, allocation, cr
 - Could: create the dedicated preview project, attach the BudgetFlow Satori design system (`assets/9318800711745724949`, same tokens), generate screens there with numbered titles, and give each screen a preview URL by node id.
 - Could not copy screens between projects, so the preview copies are regenerations from the same briefs: layout and tokens match, but nav labels, owners and some sample values drift. The exported designs (main project) are the reference.
 - Could not rename screens, so main-project screens keep Stitch's automatic titles; use this table for numbering.
-- Could not create prototype links or interactions: the MCP has no hotspot, link or prototype tool. Previews are static screens, not a clickable prototype; move between them with the links above.
+- Could not link screens together or add interactions: the MCP has no hotspot, link or flow tool. Previews are static screens, not a click-through flow; move between them with the links above.
 - Could not change project visibility or sharing, and `list_screens` returns nothing for the new project type.
