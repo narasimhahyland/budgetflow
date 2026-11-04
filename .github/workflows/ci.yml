@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NX_DAEMON: 'false'
+  NX_NO_CLOUD: 'true'
+
+jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    outputs:
+      has-token: ${{ steps.token.outputs.has-token }}
+      has-workspace: ${{ steps.repo.outputs.has-workspace }}
+      has-stack: ${{ steps.repo.outputs.has-stack }}
+      has-visual: ${{ steps.repo.outputs.has-visual }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: token
+        name: Check for SATORI_PACKAGES_TOKEN
+        env:
+          TOKEN: ${{ secrets.SATORI_PACKAGES_TOKEN }}
+        run: |
+          if [ -n "$TOKEN" ]; then
+            echo "has-token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-token=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Install-dependent jobs skipped::The SATORI_PACKAGES_TOKEN secret is not available (not created yet, or a fork PR). static, functional and visual are skipped; see docs/ai-harness/README.md."
+          fi
+      - id: repo
+        name: Detect workspace, stack and visual baselines
+        run: |
+          ws=false; stack=false; visual=false
+          [ -f nx.json ] && [ -f package.json ] && [ -f package-lock.json ] && ws=true
+          [ -f infra/compose.yaml ] && stack=true
+          [ -f apps/web-e2e/visual/screens.json ] && visual=true
+          { echo "has-workspace=$ws"; echo "has-stack=$stack"; echo "has-visual=$visual"; } >> "$GITHUB_OUTPUT"
+          [ "$ws" = true ] || echo "::notice title=Workspace not scaffolded yet::No Nx workspace yet (Phase 1 creates it); install-dependent jobs are skipped."
+
+  harness:
+    name: Harness (token-free)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Visual tooling (public npm, pinned Playwright)
+        run: sh scripts/visual/setup-tools.sh --with-browser --with-deps
+      - name: Secret scan, harness structure, shellcheck, hook tests, visual self-test
+        env:
+          VISUAL_SELFTEST: required
+        run: sh scripts/validate-harness.sh
+      - name: Visual baselines changed only with a reason
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: sh scripts/visual/check-baseline-reason.sh
+
+  static:
+    name: Lint, typecheck, build, Satori check
+    needs: preflight
+    if: needs.preflight.outputs.has-token == 'true' && needs.preflight.outputs.has-workspace == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@hylandsoftware'
+      - name: Install
+        run: npm ci --no-audit --fund=false
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.SATORI_PACKAGES_TOKEN }}
+      - name: Static gates
+        run: bash scripts/gate.sh static --evidence tmp/ci-evidence
+      - name: Upload gate logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: static-gate-logs
+          path: |
+            tmp/gate/
+            tmp/ci-evidence/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  functional:
+    name: Functional (API scenarios + journeys on Compose)
+    needs: preflight
+    if: needs.preflight.outputs.has-token == 'true' && needs.preflight.outputs.has-workspace == 'true' && needs.preflight.outputs.has-stack == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@hylandsoftware'
+      - name: Install
+        run: npm ci --no-audit --fund=false
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.SATORI_PACKAGES_TOKEN }}
+      - name: Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Functional gates (stack with MinIO and the fake AI provider, deterministic seed)
+        run: bash scripts/gate.sh functional --evidence tmp/ci-evidence
+      - name: Upload functional reports and evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: functional-reports
+          path: |
+            dist/.playwright/apps/api-e2e/report/
+            dist/.playwright/apps/web-e2e/report/
+            tmp/gate/
+            tmp/ci-evidence/
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Stop the stack
+        if: always()
+        run: bash scripts/stack.sh down || true
+
+  visual:
+    name: Visual regression (pinned Playwright image)
+    needs: preflight
+    if: needs.preflight.outputs.has-token == 'true' && needs.preflight.outputs.has-workspace == 'true' && needs.preflight.outputs.has-stack == 'true' && needs.preflight.outputs.has-visual == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@hylandsoftware'
+      - name: Install
+        run: npm ci --no-audit --fund=false
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.SATORI_PACKAGES_TOKEN }}
+      - name: Visual regression in mcr.microsoft.com/playwright:v1.64.1-noble
+        run: bash scripts/gate.sh visual --evidence tmp/ci-evidence
+      - name: Upload screenshots, diffs and the Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-report
+          path: |
+            dist/.playwright/apps/web-e2e/report/
+            dist/.playwright/apps/web-e2e/test-results/
+            tmp/gate/
+            tmp/ci-evidence/
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Stop the stack
+        if: always()
+        run: bash scripts/stack.sh down || true

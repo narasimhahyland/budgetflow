@@ -1,0 +1,9 @@
+# Default owner. Add path-specific owners as the team grows.
+* @narasimhahyland
+
+# Harness, CI and security-sensitive files: always reviewed by the owner.
+/.cursor/ @narasimhahyland
+/.github/ @narasimhahyland
+/scripts/ @narasimhahyland
+/.githooks/ @narasimhahyland
+/.npmrc @narasimhahyland
