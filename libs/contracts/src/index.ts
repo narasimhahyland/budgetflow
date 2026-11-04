@@ -6,6 +6,8 @@ export * from './lib/domains/budgets';
 export * from './lib/domains/ledger';
 export * from './lib/domains/integrity';
 export * from './lib/domains/audit';
+export * from './lib/domains/org';
+export * from './lib/domains/finance';
 export * from './lib/domains/analytics';
 export * from './lib/endpoints';
 export * from './lib/openapi';
