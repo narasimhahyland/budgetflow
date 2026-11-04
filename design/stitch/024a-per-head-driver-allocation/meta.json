@@ -1,0 +1,14 @@
+{
+  "screen": "024a-per-head-driver-allocation",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/c686c7c18818456faf0a45d1f13a7d22",
+      "approved": null,
+      "size": [
+        2560,
+        2180
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
