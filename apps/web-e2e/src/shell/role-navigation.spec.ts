@@ -10,6 +10,10 @@ import { authFile } from '../support/roles';
 const NEEDS: Record<string, string> = {
   'Budget hierarchy': 'budget.read',
   'Allocation workspace': 'budget.allocate',
+  'Budget list': 'budget.read',
+  'Budget requests': 'budget.read',
+  'Plans and versions': 'budget.create_root',
+  'Program templates': 'master_data.manage',
   Events: 'event.manage',
   'Approval inbox': 'request.approve',
   'Request funds': 'request.create',
@@ -36,10 +40,13 @@ const NEEDS: Record<string, string> = {
   'Tenant settings': 'tenant.settings.manage',
 };
 const ORG = ['Organization', 'People', 'Headcount'];
+const READ = ['Budget hierarchy', 'Budget list', 'Budget requests'];
 const OWNER = [
   'Home',
   'Budget hierarchy',
   'Allocation workspace',
+  'Budget list',
+  'Budget requests',
   'Events',
   'Approval inbox',
   'Request funds',
@@ -51,12 +58,28 @@ const OWNER = [
 const EXPECTED: Record<RoleId, string[]> = {
   'super-admin': ['Home'],
   'org-admin': ['Home', ...ORG, 'Org import', 'Users and roles', 'Tenant settings'],
-  ceo: [...OWNER.slice(0, -1), 'Delegation of authority', 'Reports', 'Audit log'],
-  // Owner-scoped grants (requests, events, approvals) need an owned budget; the seeded finance admin owns none.
+  ceo: [
+    ...OWNER.slice(0, 5),
+    'Plans and versions',
+    ...OWNER.slice(5, -1),
+    'Delegation of authority',
+    'Reports',
+    'Audit log',
+  ],
+  // Owner-scoped grants (requests, events, approvals) need an owned budget; from Phase 4 the seeded finance
+  // admin owns the central contingency reserve.
   'finance-admin': [
     'Home',
     'Budget hierarchy',
     'Allocation workspace',
+    'Budget list',
+    'Budget requests',
+    'Plans and versions',
+    'Program templates',
+    'Events',
+    'Approval inbox',
+    'Request funds',
+    'My requests',
     ...ORG,
     'Cost centers',
     'Actuals and matching',
@@ -74,7 +97,7 @@ const EXPECTED: Record<RoleId, string[]> = {
   ],
   'finance-controller': [
     'Home',
-    'Budget hierarchy',
+    ...READ,
     'Approval inbox',
     ...ORG,
     'Actuals and matching',
@@ -90,9 +113,9 @@ const EXPECTED: Record<RoleId, string[]> = {
   'location-manager': OWNER,
   'event-organizer': ['Home', 'Events', ...ORG],
   employee: ['Home', 'Request funds', 'My requests', ...ORG],
-  auditor: ['Home', 'Budget hierarchy', ...ORG, 'Delegation of authority', 'Reports', 'Audit log'],
+  auditor: ['Home', ...READ, ...ORG, 'Delegation of authority', 'Reports', 'Audit log'],
   'integration-admin': ['Home', 'Integrations'],
-  analyst: ['Home', 'Budget hierarchy', ...ORG, 'Reports'],
+  analyst: ['Home', ...READ, ...ORG, 'Reports'],
 };
 
 for (const [role, expected] of Object.entries(EXPECTED) as [RoleId, string[]][]) {

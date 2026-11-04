@@ -1,0 +1,306 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Allocate {{ parent()?.name ?? 'budget' }}</h1>
+    <p class="bf-page__subtitle">
+      Budget currency USD · fixed USD reporting · {{ parent()?.display?.fiscalYearLabel ?? '' }}
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    <mat-form-field subscriptSizing="dynamic" class="bf-parent">
+      <mat-label>Parent budget</mat-label>
+      <mat-select
+        [ngModel]="parentId()"
+        (ngModelChange)="selectParent($event)"
+        data-testid="parent-select"
+      >
+        @for (p of parents(); track p.id) {
+          <mat-option [value]="p.id">{{ p.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    @if (parent(); as p) {
+      <a mat-stroked-button [routerLink]="['/budgets', p.id]">Open budget</a>
+    }
+  </div>
+</header>
+
+<bf-load-state
+  [loading]="parentRes.isLoading() && !parent()"
+  [error]="parentRes.error()"
+  what="the parent budget"
+  (retry)="parentRes.reload()"
+/>
+
+@if (parent(); as p) {
+  <section class="bf-card bf-summary" aria-label="Parent budget">
+    <div class="bf-summary__figures">
+      <div>
+        <p class="bf-kpi__label">Parent budget total</p>
+        <p class="bf-kpi__value">
+          <bf-money
+            [amountMinor]="p.balances.budgetCurrency.authorized.amountMinor"
+            [currency]="p.currency"
+          />
+        </p>
+      </div>
+      <div>
+        <p class="bf-kpi__label">Allocated out</p>
+        <p class="bf-kpi__value">
+          <bf-money
+            [amountMinor]="p.balances.budgetCurrency.allocatedOut.amountMinor"
+            [currency]="p.currency"
+          />
+        </p>
+      </div>
+      <div>
+        <p class="bf-kpi__label">Available to allocate</p>
+        <p class="bf-kpi__value bf-good" data-testid="available-to-allocate">
+          <bf-money [amountMinor]="available()" [currency]="p.currency" />
+        </p>
+      </div>
+    </div>
+    <div class="bf-bar" aria-hidden="true">
+      <span class="bf-bar__fill" [style.width.%]="allocatedPct() / 100"></span>
+    </div>
+    <p class="bf-card__hint">{{ pct(allocatedPct()) }} allocated after these changes</p>
+  </section>
+
+  @if (p.status === 'frozen' || p.status === 'set_to_zero') {
+    <sat-banner variant="important"
+      ><sat-banner-message
+        >{{ p.name }} is {{ p.status === 'frozen' ? 'frozen' : 'set to zero' }}: no new allocations
+        until it is lifted.</sat-banner-message
+      ></sat-banner
+    >
+  }
+
+  <div class="bf-workspace">
+    <section class="bf-card" aria-label="Allocation grid">
+      <div class="bf-gridbar">
+        <span class="bf-card__hint"
+          >Keyboard-first: arrow keys or Enter move between amounts · paste rows from Excel with
+          <kbd>Ctrl</kbd>+<kbd>V</kbd> (name, then amount)</span
+        >
+        <button mat-stroked-button type="button" (click)="addRow()" data-testid="add-row">
+          <mat-icon svgIcon="plus_small" aria-hidden="true" />Add row
+        </button>
+      </div>
+      @if (pasted() !== null) {
+        <sat-banner variant="info" class="bf-paste-banner" data-testid="paste-banner"
+          ><sat-banner-message
+            >Pasted {{ pasted() }} row(s) from the clipboard. Review, then submit everything as one
+            change.</sat-banner-message
+          ></sat-banner
+        >
+      }
+      <div class="bf-table-scroll" #grid (paste)="onPaste($event)">
+        <table class="bf-grid" aria-label="Child budgets and new amounts">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Child budget</th>
+              <th scope="col">Owner</th>
+              <th scope="col">Driver</th>
+              <th scope="col" class="bf-num">Current (USD)</th>
+              <th scope="col" class="bf-num">New (USD)</th>
+              <th scope="col" class="bf-num">Change (USD)</th>
+              <th scope="col"><span class="bf-visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rows(); track r.key; let i = $index) {
+              <tr
+                [class.bf-grid__error]="rowErrors().has(r.key)"
+                [attr.data-testid]="'grid-row-' + i"
+              >
+                <td>{{ i + 1 }}</td>
+                <td>
+                  @if (r.childId) {
+                    {{ r.name }}
+                  } @else {
+                    <mat-form-field subscriptSizing="dynamic" class="bf-name">
+                      <input
+                        matInput
+                        [ngModel]="r.name"
+                        (ngModelChange)="update(r.key, { name: $event })"
+                        aria-label="New budget name"
+                        placeholder="New budget name"
+                      />
+                    </mat-form-field>
+                    <sat-category-tag category="gray">New</sat-category-tag>
+                  }
+                </td>
+                <td>{{ r.owner }}</td>
+                <td>
+                  <sat-category-tag category="gray">{{
+                    r.driver === 'per_head' ? 'Per head' : 'Fixed'
+                  }}</sat-category-tag>
+                </td>
+                <td class="bf-num">
+                  <bf-money [amountMinor]="r.currentMinor" [currency]="p.currency" />
+                </td>
+                <td class="bf-num">
+                  @if (r.locked) {
+                    <span
+                      class="bf-locked"
+                      [attr.title]="
+                        r.driver === 'per_head'
+                          ? 'Set by the per-head driver'
+                          : 'Not open for allocation'
+                      "
+                    >
+                      <mat-icon svgIcon="lock" aria-hidden="true" /><bf-money
+                        [amountMinor]="r.currentMinor"
+                        [currency]="p.currency"
+                      />
+                    </span>
+                  } @else {
+                    <input
+                      class="bf-cell-input"
+                      inputmode="decimal"
+                      data-col="next"
+                      [ngModel]="r.next"
+                      (ngModelChange)="update(r.key, { next: $event })"
+                      (keydown.arrowdown)="move($event, i, 1)"
+                      (keydown.enter)="move($event, i, 1)"
+                      (keydown.arrowup)="move($event, i, -1)"
+                      [attr.aria-label]="'New amount for ' + (r.name || 'new budget')"
+                      [attr.aria-invalid]="rowErrors().has(r.key)"
+                    />
+                  }
+                  @if (rowErrors().get(r.key); as err) {
+                    <span class="bf-cell-error">{{ err }}</span>
+                  }
+                </td>
+                <td class="bf-num" [class.bf-good]="(deltaOf(r) ?? 0) > 0">
+                  @if ((deltaOf(r) ?? 0) !== 0) {
+                    {{ (deltaOf(r) ?? 0) > 0 ? '+' : ''
+                    }}<bf-money [amountMinor]="deltaOf(r) ?? 0" [currency]="p.currency" />
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>
+                  @if (!r.childId) {
+                    <button
+                      mat-icon-button
+                      type="button"
+                      (click)="removeRow(r.key)"
+                      aria-label="Remove row"
+                    >
+                      <mat-icon svgIcon="minus_small" aria-hidden="true" />
+                    </button>
+                  } @else if (r.driver === 'per_head') {
+                    <a mat-button [routerLink]="['/budgets', r.childId, 'per-head']">Per head</a>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <details class="bf-paste">
+        <summary>Paste rows as text instead</summary>
+        <mat-form-field class="bf-paste__field">
+          <mat-label>Rows from Excel (name, tab, amount)</mat-label>
+          <textarea matInput rows="4" [(ngModel)]="pasteText" data-testid="paste-text"></textarea>
+        </mat-form-field>
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="applyPaste(pasteText)"
+          [disabled]="!pasteText.trim()"
+          data-testid="apply-paste"
+        >
+          Apply pasted rows
+        </button>
+      </details>
+    </section>
+
+    <aside class="bf-card bf-impact" aria-label="Impact preview">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title">Impact preview</h2>
+        @if (preview(); as pv) {
+          <sat-status-tag [status]="pv.ok ? 'success' : 'important'">{{
+            pv.ok ? 'Within parent available' : 'Blocked'
+          }}</sat-status-tag>
+        }
+      </div>
+      <div class="bf-card__body">
+        <dl class="bf-rows">
+          <div>
+            <dt>Total change</dt>
+            <dd data-testid="total-change">
+              <bf-money [amountMinor]="totalChange()" [currency]="p.currency" />
+            </dd>
+          </div>
+          <div>
+            <dt>Available before</dt>
+            <dd><bf-money [amountMinor]="available()" [currency]="p.currency" /></dd>
+          </div>
+          <div>
+            <dt>Unallocated after</dt>
+            <dd [class.bf-bad]="over()">
+              <bf-money [amountMinor]="available() - totalChange()" [currency]="p.currency" />
+            </dd>
+          </div>
+        </dl>
+        @if (over()) {
+          <sat-banner variant="important" data-testid="grid-blocked"
+            ><sat-banner-message
+              >Over allocation: the grid allocates more than {{ p.name }} has available. Nothing
+              posts until it fits.</sat-banner-message
+            ></sat-banner
+          >
+        } @else if (preview(); as pv) {
+          @for (l of pv.lines; track l.index) {
+            @if (l.outcome === 'error') {
+              <p class="bf-bad">{{ l.name }}: {{ l.message }}</p>
+            }
+          }
+          @if (pv.ok) {
+            <p class="bf-card__hint">
+              Checked against {{ p.name }} at the locked plan rate. All lines post as one change, or
+              none do.
+            </p>
+          }
+        }
+        @if (rowErrors().size) {
+          <sat-banner variant="important"
+            ><sat-banner-message
+              >Fix {{ rowErrors().size }} cell(s) to submit.</sat-banner-message
+            ></sat-banner
+          >
+        }
+        @if (failure()) {
+          <sat-banner variant="important"
+            ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+          >
+        }
+        @if (done()) {
+          <sat-banner variant="success" data-testid="grid-done"
+            ><sat-banner-message>{{ done() }}</sat-banner-message></sat-banner
+          >
+        }
+        <div class="bf-impact__actions">
+          <button mat-button type="button" (click)="discard()" [disabled]="busy()">Discard</button>
+          <button
+            mat-flat-button
+            type="button"
+            (click)="submit()"
+            [disabled]="
+              busy() ||
+              !changes().length ||
+              over() ||
+              rowErrors().size > 0 ||
+              !(preview()?.ok ?? false)
+            "
+            data-testid="submit-grid"
+          >
+            Submit as one change
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+}

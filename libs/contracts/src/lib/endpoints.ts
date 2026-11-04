@@ -8,6 +8,7 @@ import { identityEndpoints } from './domains/identity';
 import { integrityEndpoints } from './domains/integrity';
 import { ledgerEndpoints } from './domains/ledger';
 import { orgEndpoints } from './domains/org';
+import { planningEndpoints } from './domains/planning';
 
 export type { Endpoint } from './endpoint';
 
@@ -25,6 +26,7 @@ export const endpoints = {
   ...orgEndpoints,
   ...financeEndpoints,
   ...analyticsEndpoints,
+  ...planningEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;

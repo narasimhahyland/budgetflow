@@ -727,7 +727,7 @@ export const budgetSteps: BudgetStep[] = [
     legalEntityId: LEGAL_ENTITIES.acmeIndia,
     orgUnitId: ORG_UNITS.india,
     owner: 'regional-manager',
-    currency: 'INR',
+    currency: 'USD',
     fiscalYearId: FISCAL_YEARS.acmeFy2026,
   },
   {
@@ -755,7 +755,7 @@ export const budgetSteps: BudgetStep[] = [
     legalEntityId: LEGAL_ENTITIES.acmeEurope,
     orgUnitId: ORG_UNITS.europe,
     owner: 'department-head',
-    currency: 'EUR',
+    currency: 'USD',
     fiscalYearId: FISCAL_YEARS.acmeFy2026,
   },
   {
@@ -795,7 +795,7 @@ export const budgetSteps: BudgetStep[] = [
     orgUnitId: ORG_UNITS.bengaluru,
     owner: 'location-manager',
     categoryCode: 'employee_events',
-    currency: 'INR',
+    currency: 'USD',
     fiscalYearId: FISCAL_YEARS.acmeFy2026,
   },
   {
@@ -811,7 +811,7 @@ export const budgetSteps: BudgetStep[] = [
     orgUnitId: ORG_UNITS.hyderabad,
     owner: 'regional-manager',
     categoryCode: 'employee_events',
-    currency: 'INR',
+    currency: 'USD',
     fiscalYearId: FISCAL_YEARS.acmeFy2026,
   },
   {
@@ -820,7 +820,7 @@ export const budgetSteps: BudgetStep[] = [
     tenantId: TENANTS.acme,
     parentId: BUDGETS.india,
     childId: BUDGETS.bengaluru,
-    amount: { amountMinor: 100_000_000, currency: 'INR' },
+    amount: { amountMinor: 1_200_000, currency: 'USD' },
   },
   {
     kind: 'create',
@@ -886,9 +886,9 @@ export const SEED = {
   costCenters: COST_CENTERS,
   orgUnits: ORG_UNITS,
   planRates: { INR: '83.25', EUR: '0.92', GBP: '0.79', JPY: '150', KWD: '0.307' },
-  /** INR 2,497,500.00 = USD 30,000.00 at the FY2026 plan rate. */
-  indiaAuthorizedMinor: 249_750_000,
-  europeAuthorizedMinor: 2_760_000,
+  /** Every Hyland budget is held in USD (local-currency actuals convert at the locked plan rate). */
+  indiaAuthorizedMinor: 3_000_000,
+  europeAuthorizedMinor: 3_000_000,
   /** Accounting dates by period status in every Acme calendar. */
   dates: {
     locked: '2026-03-15',

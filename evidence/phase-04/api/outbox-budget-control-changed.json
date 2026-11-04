@@ -1,0 +1,24 @@
+[
+  {
+    "topic": "budget.control_changed",
+    "payload": {
+      "action": "frozen",
+      "reason": "Policy review",
+      "status": "frozen",
+      "eventId": "b551c906-ad09-40ac-8981-4545ca38ff2d",
+      "budgetId": "ca2f3e53-2a52-4bf4-8183-c38c205e4756",
+      "currency": "USD",
+      "tenantId": "10000000-0000-4000-8000-000000000001",
+      "journalId": null,
+      "budgetName": "Scenario child USD ea4cb9b2",
+      "occurredAt": "2026-11-04T23:30:24.407Z",
+      "reasonCode": "FRZ-POLICY",
+      "actorPersonId": "40000000-0000-4000-8000-000000000004",
+      "previousStatus": "active",
+      "cascadeFromBudgetId": null,
+      "authorizedAfterMinor": 50000,
+      "pendingRequestPolicy": "hold",
+      "authorizedBeforeMinor": 50000
+    }
+  }
+]

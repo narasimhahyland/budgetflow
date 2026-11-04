@@ -13,6 +13,11 @@ import { PgBoss } from 'pg-boss';
 
 const NIGHTLY = 'integrity.nightly';
 const DEAD_LETTER = 'integrity.dead-letter';
+const BUDGET_EVENT_TOPICS = [
+  'budget.control_changed',
+  'budget.threshold_crossed',
+  'budget.change_requested',
+] as const;
 
 /**
  * Drains the transactional outbox into pg-boss and runs jobs. Jobs are idempotent (keyed by a business
@@ -48,6 +53,9 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       retryBackoff: true,
       deadLetter: DEAD_LETTER,
     });
+    // Budget domain events (Phase 4). Phase 5 adds the workers (cancel or hold pending requests, notify owners).
+    for (const topic of BUDGET_EVENT_TOPICS)
+      await boss.createQueue(topic, { deadLetter: DEAD_LETTER });
     await boss.work<{ tenantId: string; checkRunId: string }>(LEDGER_CHECK_TOPIC, async (jobs) => {
       for (const job of jobs) {
         const outcome = await this.rebuild.run(job.data.tenantId, job.data.checkRunId);

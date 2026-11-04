@@ -18,7 +18,7 @@ Each budget tracks, per accounting period and currency view: **authorized**, **a
 - A journal is a balanced set of lines written atomically with one audit event. Every line carries tenant, legal entity, budget, bucket, accounting date, accounting period, the three currency amounts, dimensions (cost center, GL account, event code), provenance (request, approval, import line), correlation id, idempotency key and actor.
 - Append-only: no `UPDATE` or `DELETE` on ledger rows, ever (database triggers and grants enforce it).
 - Corrections are **reversals**: a line that exactly negates the original (`reversal_of` link), posted in an open period, followed by the corrected line. The UI shows both. Never edit.
-- Reductions require a destination (parent, savings, reallocation). Set to zero is floored at committed + actual + children unless cascaded.
+- Reductions require a destination (parent, savings, reallocation) and move money along the hierarchy (child `authorized` Dr / parent `allocated_out` Cr up to the common ancestor, then down; savings leave through the root). The floor is allocated out (kept by children) + held + encumbered + actual; pending requests (pre-encumbered) are listed in the impact preview but never floored. Set to zero can cascade: children first, each keeping its own floor.
 
 ## Accounting periods
 - Fiscal calendars per legal entity (calendar year, non-calendar start, 4-4-5 variants, 52/53-week), each mapped to the group year. Period statuses: Open, Soft-closed, Closed, Locked.
@@ -28,6 +28,8 @@ Each budget tracks, per accounting period and currency view: **authorized**, **a
 - Every amount carries **transaction**, **budget** and **reporting** currency amounts in integer minor units, each with its ISO 4217 code, plus the rate type and rate used. Rate types: plan (locked per fiscal year at plan approval), spot, month-end, monthly average.
 - Budget control always uses the locked plan rate. Actuals also store the actual rate; **FX never consumes budget** and FX effects are reported separately.
 - Integer minor units: `Number.isSafeInteger` in TypeScript, `bigint` in Postgres; exponents per ISO 4217 (JPY 0, USD 2, KWD 3). Convert once, round half-even at the line; splits use largest remainder so parts sum to the whole.
+- Exception (hierarchy rounding, `budgetRoundingFor`): on `authorized` and `allocated_out` lines across currencies, the budget giving value (the debit: parent allocated out, a child returning authorized) rounds up and the budget receiving it (the credit) rounds down, so a child never holds more than its parent gave up; an amount worth less than one minor unit of either currency is rejected. Every other line rounds half-even; the rebuild check re-verifies stored amounts with this rule.
+- Root budgets tie to the controlling plan version of their year: plan total = root authorized + money returned to savings. Root amounts change only by applying a plan version (plan funding in or out).
 
 ## Legal entities and intercompany
 - Every budget and line belongs to one legal entity. Cross-entity contributions and transfers follow the tenant's intercompany policy (block, recharge at cost, recharge with markup) with a tax approver; recharges create balanced due-to / due-from lines that net to zero at group level and need open periods in both entities. Events cannot close while a cross-entity contribution lacks its recharge.

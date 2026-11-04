@@ -1,0 +1,317 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Budget hierarchy</h1>
+    <p class="bf-page__subtitle">
+      {{ root()?.name ?? 'Budgets' }} · {{ root()?.display?.fiscalYearLabel ?? '' }} · all amounts
+      in USD
+    </p>
+    <p class="bf-page__subtitle bf-summary-line" data-testid="company-available">
+      @if (valueOf(summary); as s) {
+        Company-wide Available
+        <bf-money [amountMinor]="s.available.amountMinor" [currency]="s.currency" /> (child
+        allocations counted once)
+      }
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    <button mat-stroked-button type="button" (click)="export()" [disabled]="!items().length">
+      <mat-icon svgIcon="download" aria-hidden="true" />Export
+    </button>
+    <!-- Always rendered (disabled until the tree loads) so the header does not reflow. -->
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="!selected()"
+      (click)="router.navigate(['/budgets', selected()!.id], { queryParams: { tab: 'versions' } })"
+    >
+      Compare versions
+    </button>
+    @if (canAllocate()) {
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="!root()"
+        (click)="
+          router.navigate(['/budgets/allocate'], {
+            queryParams: { parent: selected()?.id ?? root()!.id },
+          })
+        "
+      >
+        <mat-icon svgIcon="plus_small" aria-hidden="true" />Allocate budget
+      </button>
+    }
+  </div>
+</header>
+
+<section class="bf-card bf-toolbar" aria-label="Filters">
+  <mat-form-field subscriptSizing="dynamic" class="bf-toolbar__program">
+    <mat-label>Program</mat-label>
+    <mat-select [ngModel]="rootId()" (ngModelChange)="selectProgram($event)" data-testid="program">
+      @for (p of programs(); track p.id) {
+        <mat-option [value]="p.id">{{ p.name }}{{ p.code ? ' · ' + p.code : '' }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Filter units</mat-label>
+    <input matInput [ngModel]="filter()" (ngModelChange)="filter.set($event)" />
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select [ngModel]="status()" (ngModelChange)="status.set($event)">
+      <mat-option value="all">All</mat-option>
+      <mat-option value="active">Active</mat-option>
+      <mat-option value="reduced">Reduced</mat-option>
+      <mat-option value="frozen">Frozen</mat-option>
+      <mat-option value="set_to_zero">Set to zero</mat-option>
+      <mat-option value="draft">Draft</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-button-toggle-group value="tree" aria-label="View" class="bf-toolbar__view">
+    <mat-button-toggle value="tree"
+      ><mat-icon svgIcon="tree" aria-hidden="true" /> Tree</mat-button-toggle
+    >
+    <mat-button-toggle value="list" (click)="router.navigate(['/budgets/list'])"
+      ><mat-icon svgIcon="list_bullet" aria-hidden="true" /> List</mat-button-toggle
+    >
+  </mat-button-toggle-group>
+</section>
+
+<div class="bf-split">
+  <section class="bf-card" aria-label="Budget tree">
+    <bf-load-state
+      [loading]="tree.isLoading() || tops.isLoading()"
+      [error]="tree.error() ?? tops.error()"
+      what="the budget hierarchy"
+      (retry)="reload()"
+    />
+    @if (!tops.isLoading() && programs().length === 0) {
+      <sat-empty-state>
+        <h2 satEmptyStateHeadline>No budgets yet</h2>
+        <p satEmptyStateDescription>Budgets you own or can see appear here.</p>
+      </sat-empty-state>
+    }
+    @if (rows().length) {
+      <div class="bf-table-scroll">
+        <table class="bf-tree" role="treegrid" aria-label="Budget hierarchy">
+          <thead>
+            <tr>
+              <th scope="col">Budget unit</th>
+              <th scope="col" class="bf-num">Authorized (USD)</th>
+              <th scope="col" class="bf-num">Allocated (USD)</th>
+              <th scope="col" class="bf-num">Available (USD)</th>
+              <th scope="col">Used</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rows(); track r.b.id) {
+              <tr
+                [class.bf-tree__row--selected]="r.b.id === selectedId()"
+                [attr.aria-level]="r.depth + 1"
+                [attr.aria-expanded]="r.hasChildren ? r.expanded : null"
+                [attr.aria-selected]="r.b.id === selectedId()"
+                (click)="select(r.b.id)"
+                tabindex="0"
+                (keydown.enter)="select(r.b.id)"
+                [attr.data-testid]="'tree-row-' + (r.b.code ?? r.b.id)"
+              >
+                <td>
+                  <div class="bf-tree__unit" [style.padding-inline-start.px]="r.depth * 20">
+                    @if (r.hasChildren) {
+                      <button
+                        type="button"
+                        class="bf-tree__toggle"
+                        (click)="toggle(r.b.id, $event)"
+                        [attr.aria-label]="(r.expanded ? 'Collapse ' : 'Expand ') + r.b.name"
+                      >
+                        <mat-icon
+                          [svgIcon]="r.expanded ? 'chevron_down' : 'chevron_right'"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    } @else {
+                      <span class="bf-tree__spacer"></span>
+                    }
+                    <span>
+                      <span class="bf-cell__primary">{{ r.b.name }}</span>
+                      <span class="bf-cell__secondary">{{
+                        r.b.display.ownerName ?? 'No owner'
+                      }}</span>
+                    </span>
+                  </div>
+                </td>
+                <td class="bf-num">
+                  <bf-money
+                    [amountMinor]="r.b.balances.budgetCurrency.authorized.amountMinor"
+                    [currency]="r.b.currency"
+                  />
+                </td>
+                <td class="bf-num">
+                  <bf-money
+                    [amountMinor]="r.b.balances.budgetCurrency.allocatedOut.amountMinor"
+                    [currency]="r.b.currency"
+                  />
+                </td>
+                <td class="bf-num bf-available">
+                  <bf-money
+                    [amountMinor]="r.b.balances.available.amountMinor"
+                    [currency]="r.b.currency"
+                  />
+                </td>
+                <td>
+                  <bf-usage-bar [bps]="r.b.utilizationBps" [thresholds]="r.b.alertThresholdsPct" />
+                </td>
+                <td>
+                  <span class="bf-status">
+                    @if (r.b.status === 'frozen') {
+                      <mat-icon svgIcon="lock" aria-hidden="true" class="bf-status__icon" />
+                    }
+                    <bf-budget-status [status]="r.b.status" />
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="bf-card__hint bf-tree__foot">
+        Showing {{ rows().length }} of {{ items().length }} budgets
+      </p>
+    }
+  </section>
+
+  @if (selected(); as b) {
+    <aside class="bf-card bf-panel-detail" aria-label="Selected budget" data-testid="detail-panel">
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title">{{ b.name }}</h2>
+          <p class="bf-card__hint">
+            {{ b.code ?? '' }} · Cost center {{ b.display.costCenterCode ?? '—' }} ·
+            {{ b.display.legalEntityName ?? '' }}
+          </p>
+        </div>
+        <span class="bf-status">
+          <bf-budget-status [status]="b.status" />
+          <a mat-icon-button [routerLink]="['/budgets', b.id]" [attr.aria-label]="'Open ' + b.name">
+            <mat-icon svgIcon="arrow_right" aria-hidden="true" />
+          </a>
+        </span>
+      </div>
+      <div class="bf-card__body">
+        <dl class="bf-meta">
+          <div>
+            <dt>Owner</dt>
+            <dd>{{ b.display.ownerName ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Budget currency</dt>
+            <dd>{{ b.currency }}</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{{ b.budgetType }}{{ b.allocationDriver === 'per_head' ? ' · per head' : '' }}</dd>
+          </div>
+          <div>
+            <dt>Control</dt>
+            <dd>{{ b.control.mode }}</dd>
+          </div>
+        </dl>
+        @if (b.status === 'frozen') {
+          <sat-banner variant="info"
+            ><sat-banner-message
+              >Frozen: new requests and allocations are blocked; commitments can
+              complete.</sat-banner-message
+            ></sat-banner
+          >
+        } @else if (b.status === 'set_to_zero') {
+          <sat-banner variant="important"
+            ><sat-banner-message
+              >Set to zero: no new spending; approved commitments can still be
+              paid.</sat-banner-message
+            ></sat-banner
+          >
+        }
+        <h3 class="bf-section-title">Budget lifecycle utilization</h3>
+        <bf-spectrum [budget]="b" />
+        <dl class="bf-figures">
+          <div>
+            <dt>Authorized</dt>
+            <dd><bf-money [amountMinor]="balancesOf(b).authorized" [currency]="b.currency" /></dd>
+          </div>
+          <div>
+            <dt>Allocated out</dt>
+            <dd><bf-money [amountMinor]="balancesOf(b).allocatedOut" [currency]="b.currency" /></dd>
+          </div>
+          <div>
+            <dt>Committed</dt>
+            <dd><bf-money [amountMinor]="balancesOf(b).committed" [currency]="b.currency" /></dd>
+          </div>
+          <div>
+            <dt>Actual spend</dt>
+            <dd><bf-money [amountMinor]="balancesOf(b).actual" [currency]="b.currency" /></dd>
+          </div>
+          <div class="bf-figures__available">
+            <dt>Available under this budget’s rules <bf-available-tip [budget]="b" /></dt>
+            <dd data-testid="available-under-rules">
+              <bf-money [amountMinor]="b.balances.available.amountMinor" [currency]="b.currency" />
+            </dd>
+          </div>
+        </dl>
+        <p class="bf-card__hint">
+          May differ from company-wide Available because of this budget’s control basis.
+        </p>
+        <div class="bf-panel-actions">
+          @if (can(b, 'budget.allocate') && b.childCount > 0) {
+            <button
+              mat-flat-button
+              type="button"
+              (click)="run('allocate')"
+              data-testid="allocate-to-child"
+            >
+              Allocate to child
+            </button>
+          }
+          @if (can(b, 'budget.transfer')) {
+            <button mat-stroked-button type="button" (click)="run('transfer')">Transfer</button>
+          }
+          @if (can(b, 'budget.control')) {
+            @if (b.status === 'frozen') {
+              <button mat-stroked-button type="button" (click)="run('freeze')">Unfreeze</button>
+            } @else if (b.status === 'set_to_zero') {
+              <button mat-stroked-button type="button" (click)="run('restore')">
+                Lift set to zero
+              </button>
+            } @else {
+              <button
+                mat-icon-button
+                type="button"
+                (click)="run('freeze')"
+                matTooltip="Freeze"
+                aria-label="Freeze"
+              >
+                <mat-icon svgIcon="lock" aria-hidden="true" />
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                class="bf-danger"
+                (click)="run('zero')"
+                matTooltip="Set to zero"
+                aria-label="Set to zero"
+                data-testid="set-to-zero"
+              >
+                <mat-icon svgIcon="block" aria-hidden="true" />
+              </button>
+            }
+          }
+          @if (!b.parentId && can(b, 'budget.control')) {
+            <button mat-stroked-button type="button" (click)="run('rollForward')">
+              Roll forward
+            </button>
+          }
+        </div>
+      </div>
+    </aside>
+  }
+</div>

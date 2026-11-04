@@ -1,0 +1,38 @@
+{
+  "action": "reduce",
+  "budgetId": "ca2f3e53-2a52-4bf4-8183-c38c205e4756",
+  "currency": "USD",
+  "currentAuthorizedMinor": 50000,
+  "floorMinor": 19000,
+  "reductionMinor": 31000,
+  "newAuthorizedMinor": 19000,
+  "heldMinor": 2000,
+  "encumberedMinor": 3000,
+  "actualMinor": 4000,
+  "childrenAllocatedMinor": 10000,
+  "pendingMinor": 6000,
+  "availableBeforeMinor": 25000,
+  "availableAfterMinor": -6000,
+  "cascade": false,
+  "blocksNewRequests": false,
+  "pendingRequestPolicy": "keep",
+  "destination": "parent",
+  "destinationBudgetId": null,
+  "destinationName": "Scenario root be6e7abf",
+  "affected": [
+    {
+      "budgetId": "ca2f3e53-2a52-4bf4-8183-c38c205e4756",
+      "name": "Scenario child USD ea4cb9b2",
+      "depth": 1,
+      "status": "active",
+      "newStatus": "reduced",
+      "authorizedMinor": 50000,
+      "reductionMinor": 31000,
+      "floorMinor": 19000,
+      "encumberedMinor": 3000,
+      "pendingMinor": 6000
+    }
+  ],
+  "maxReductionMinor": 31000,
+  "problem": null
+}

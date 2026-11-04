@@ -9,6 +9,7 @@ export * from './lib/domains/audit';
 export * from './lib/domains/org';
 export * from './lib/domains/finance';
 export * from './lib/domains/analytics';
+export * from './lib/domains/planning';
 export * from './lib/endpoints';
 export * from './lib/openapi';
 export * from './lib/client';

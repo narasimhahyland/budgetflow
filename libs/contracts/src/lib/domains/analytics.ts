@@ -12,6 +12,8 @@ export const CLIENT_ANALYTICS_EVENTS = ['session.started', 'page.viewed'] as con
 /** Events only the API records, from the commands that cause them (later phases emit them). */
 export const SERVER_ANALYTICS_EVENTS = [
   'allocation.created',
+  'budget.increase_decided',
+  'budget.control_changed',
   'request.submitted',
   'approval.decided',
   'actual.imported',

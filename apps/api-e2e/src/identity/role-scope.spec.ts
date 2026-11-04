@@ -32,7 +32,8 @@ test.describe('budget visibility by role', () => {
   for (const role of ROLES) {
     test(`${role.id} lists exactly its seeded budgets`, async ({ request }) => {
       const list = await expectContract(
-        await request.get('/api/budgets?limit=200', { headers: await as(role.id) }),
+        // Scenario budgets pile up between resets; the code filter keeps the seeded tree on one page.
+        await request.get('/api/budgets?limit=200&q=EX-', { headers: await as(role.id) }),
         200,
         BudgetList,
       );
@@ -76,7 +77,7 @@ test.describe('audit trail and changes by role', () => {
     for (const role of ['analyst', 'auditor', 'employee', 'org-admin'] as RoleId[]) {
       const res = await request.post(`/api/budgets/${india}/allocations`, {
         headers: await mutate(role),
-        data: { childBudgetId: bengaluru, amount: { amountMinor: 1, currency: 'INR' } },
+        data: { childBudgetId: bengaluru, amount: { amountMinor: 1, currency: 'USD' } },
       });
       expect([403, 404], `${role} allocating`).toContain(res.status());
     }

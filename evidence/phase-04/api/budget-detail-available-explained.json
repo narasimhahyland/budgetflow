@@ -1,0 +1,151 @@
+{
+  "id": "ca2f3e53-2a52-4bf4-8183-c38c205e4756",
+  "parentId": "5afbc792-0b44-4be3-8b70-524c985b2b12",
+  "path": "/5afbc792-0b44-4be3-8b70-524c985b2b12/ca2f3e53-2a52-4bf4-8183-c38c205e4756/",
+  "depth": 1,
+  "name": "Scenario child USD ea4cb9b2",
+  "code": null,
+  "status": "frozen",
+  "allocationBadge": "partially_allocated",
+  "budgetType": "operating",
+  "categoryCode": null,
+  "legalEntityId": "20000000-0000-4000-8000-000000000001",
+  "costCenterId": null,
+  "orgUnitId": null,
+  "ownerPersonId": "40000000-0000-4000-8000-000000000003",
+  "currency": "USD",
+  "reportingCurrency": "USD",
+  "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+  "planVersionId": null,
+  "control": {
+    "basis": ["allocated_out", "held", "pre_encumbered", "encumbered", "actual"],
+    "mode": "hard",
+    "toleranceBps": 0
+  },
+  "alertThresholdsPct": [50, 80, 100],
+  "balances": {
+    "budgetCurrency": {
+      "authorized": {
+        "amountMinor": 50000,
+        "currency": "USD"
+      },
+      "allocatedOut": {
+        "amountMinor": 10000,
+        "currency": "USD"
+      },
+      "held": {
+        "amountMinor": 2000,
+        "currency": "USD"
+      },
+      "preEncumbered": {
+        "amountMinor": 6000,
+        "currency": "USD"
+      },
+      "encumbered": {
+        "amountMinor": 3000,
+        "currency": "USD"
+      },
+      "actual": {
+        "amountMinor": 4000,
+        "currency": "USD"
+      },
+      "accrued": {
+        "amountMinor": 0,
+        "currency": "USD"
+      }
+    },
+    "reporting": {
+      "authorized": {
+        "amountMinor": 50000,
+        "currency": "USD"
+      },
+      "allocatedOut": {
+        "amountMinor": 10000,
+        "currency": "USD"
+      },
+      "held": {
+        "amountMinor": 2000,
+        "currency": "USD"
+      },
+      "preEncumbered": {
+        "amountMinor": 6000,
+        "currency": "USD"
+      },
+      "encumbered": {
+        "amountMinor": 3000,
+        "currency": "USD"
+      },
+      "actual": {
+        "amountMinor": 4000,
+        "currency": "USD"
+      },
+      "accrued": {
+        "amountMinor": 0,
+        "currency": "USD"
+      }
+    },
+    "available": {
+      "amountMinor": 25000,
+      "currency": "USD"
+    },
+    "availableReporting": {
+      "amountMinor": 25000,
+      "currency": "USD"
+    },
+    "allocationAvailable": {
+      "amountMinor": 25000,
+      "currency": "USD"
+    }
+  },
+  "available": {
+    "companyWide": {
+      "amountMinor": 37000,
+      "currency": "USD"
+    },
+    "underRules": {
+      "amountMinor": 25000,
+      "currency": "USD"
+    },
+    "difference": {
+      "amountMinor": 12000,
+      "currency": "USD"
+    },
+    "reasons": [
+      {
+        "kind": "allocated_to_children",
+        "amountMinor": 10000
+      },
+      {
+        "kind": "held",
+        "amountMinor": 2000
+      }
+    ]
+  },
+  "utilizationBps": 1400,
+  "thresholdsReachedPct": [],
+  "allocationDriver": "fixed",
+  "driver": null,
+  "phasingMethod": null,
+  "childCount": 1,
+  "display": {
+    "ownerName": "Morgan Lee",
+    "parentName": "Scenario root be6e7abf",
+    "legalEntityCode": "HYL-US",
+    "legalEntityName": "Hyland North America, Inc.",
+    "costCenterCode": null,
+    "orgUnitName": null,
+    "fiscalYearLabel": "FY2026",
+    "categoryName": null
+  },
+  "version": 3,
+  "allowedActions": [
+    "budget.read",
+    "budget.create_child",
+    "budget.allocate",
+    "ledger.read",
+    "budget.control",
+    "budget.transfer",
+    "budget.settings"
+  ],
+  "createdAt": "2026-11-04T23:30:24.233Z"
+}

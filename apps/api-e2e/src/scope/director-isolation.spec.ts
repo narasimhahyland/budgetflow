@@ -18,7 +18,7 @@ test.describe('director isolation on the seeded hierarchy', () => {
       200,
       BudgetDetail,
     );
-    expectMoney(own.balances.budgetCurrency.authorized, SEED.indiaAuthorizedMinor, 'INR');
+    expectMoney(own.balances.budgetCurrency.authorized, SEED.indiaAuthorizedMinor, 'USD');
     expect(own.allowedActions).toEqual(
       expect.arrayContaining(['budget.read', 'budget.allocate', 'budget.create_child']),
     );
@@ -134,7 +134,7 @@ test.describe('role scope from the authorization matrix', () => {
           request,
           india,
           bengaluru,
-          { amountMinor: 1, currency: 'INR' },
+          { amountMinor: 1, currency: 'USD' },
           { as: role },
         ),
         403,

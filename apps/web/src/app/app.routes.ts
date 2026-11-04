@@ -11,7 +11,16 @@ export const appRoutes: Route[] = [
     path: '',
     component: Shell,
     canActivate: [authGuard, sessionGuard],
-    // Feature libs are wired here as lazy children of the shell as their phases land.
-    children: [...orgRoutes, ...financeAdminRoutes, ...shellChildRoutes],
+    // Feature libs are wired here as children of the shell as their phases land; a lib mounted under its
+    // own path loads lazily as one chunk.
+    children: [
+      {
+        path: 'budgets',
+        loadChildren: () => import('@bf/web/features/budgets').then((m) => m.budgetsRoutes),
+      },
+      ...orgRoutes,
+      ...financeAdminRoutes,
+      ...shellChildRoutes,
+    ],
   },
 ];

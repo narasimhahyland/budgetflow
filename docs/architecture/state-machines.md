@@ -39,7 +39,7 @@ Operating states (active, partially allocated, fully allocated, reduced) accept 
 - `acceptsNewActivity(status)`: new requests, allocations and contributions are refused for frozen (`BUDGET_FROZEN`), set to zero (`BUDGET_SET_TO_ZERO`), exhausted, expired, closed, cancelled, and not-yet-active budgets. Phase 1 applies it to allocations.
 - `allowsCommitmentCompletion(status)`: existing commitments complete under every control.
 - `allocationBadge(authorized, allocatedOut)`: partially and fully allocated as computed badges.
-- Reduce and set to zero: `previewReduction` / `validateReduction` (reason code, typed reason, destination, confirmed preview, floor = committed + actual + children unless cascaded).
+- Reduce and set to zero: `previewReduction` / `validateReduction` (reason code, typed reason, destination, confirmed preview, floor = allocated out kept by children + held + encumbered + actual; pending requests listed but not floored; set to zero can cascade). Implemented in Phase 4 (`ControlsService`); every change publishes `budget.control_changed`.
 
 ## Commitment — `commitmentMachine`
 

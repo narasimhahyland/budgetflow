@@ -82,9 +82,42 @@ export const planVersions = pgTable(
     status: planVersionStatus('status').notNull().default('draft'),
     approvedAt: ts('approved_at'),
     approvedBy: uuid('approved_by'),
+    /** When the version became the controlling plan for its year (root budgets tie to it). */
+    appliedAt: ts('applied_at'),
+    source: varchar('source', { length: 20 }).notNull().default('manual'),
+    createdBy: uuid('created_by'),
     createdAt: createdAt(),
   },
   (t) => [index('plan_versions_tenant_year').on(t.tenantId, t.fiscalYearId)],
+);
+
+/** One line per root budget in a plan version, in the tenant reporting currency. */
+export const planVersionLines = pgTable(
+  'plan_version_lines',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    planVersionId: uuid('plan_version_id')
+      .notNull()
+      .references(() => planVersions.id),
+    lineNo: integer('line_no').notNull(),
+    budgetId: uuid('budget_id'),
+    code: varchar('code', { length: 50 }).notNull(),
+    name: text('name').notNull(),
+    legalEntityId: uuid('legal_entity_id').references(() => legalEntities.id),
+    costCenterId: uuid('cost_center_id'),
+    ownerPersonId: uuid('owner_person_id'),
+    categoryCode: varchar('category_code', { length: 50 }),
+    amountMinor: minor('amount_minor').notNull(),
+    currency: ccy('currency')
+      .notNull()
+      .references(() => currencies.code),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex('plan_version_lines_no').on(t.tenantId, t.planVersionId, t.lineNo),
+    index('plan_version_lines_budget').on(t.tenantId, t.budgetId),
+  ],
 );
 
 export const rolloverPolicies = pgTable(
@@ -137,6 +170,7 @@ export const budgets = pgTable(
     rolloverPolicyId: uuid('rollover_policy_id').references(() => rolloverPolicies.id),
     programTemplateId: uuid('program_template_id').references(() => programTemplates.id),
     expiresOn: day('expires_on'),
+    phasingMethod: varchar('phasing_method', { length: 20 }),
     version: integer('version').notNull().default(1),
     customFields: jsonb('custom_fields').notNull().default({}),
     createdBy: uuid('created_by'),
@@ -205,6 +239,64 @@ export const budgetVersions = pgTable(
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex('budget_versions_unique').on(t.tenantId, t.budgetId, t.version)],
+);
+
+/**
+ * Increase requests (child asks its parent) and contingency reserve releases (finance approves): money
+ * moves only when the request is approved, through an allocation or hierarchy move journal.
+ */
+export const budgetChangeRequests = pgTable(
+  'budget_change_requests',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    kind: varchar('kind', { length: 30 }).notNull(),
+    budgetId: uuid('budget_id')
+      .notNull()
+      .references(() => budgets.id),
+    sourceBudgetId: uuid('source_budget_id')
+      .notNull()
+      .references(() => budgets.id),
+    amountMinor: minor('amount_minor').notNull(),
+    currency: ccy('currency')
+      .notNull()
+      .references(() => currencies.code),
+    approvedAmountMinor: minor('approved_amount_minor'),
+    reason: text('reason').notNull(),
+    status: varchar('status', { length: 20 }).notNull().default('pending'),
+    requestedBy: uuid('requested_by'),
+    decidedBy: uuid('decided_by'),
+    decidedAt: ts('decided_at'),
+    decisionNote: text('decision_note'),
+    journalId: uuid('journal_id'),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index('budget_change_requests_budget').on(t.tenantId, t.budgetId),
+    index('budget_change_requests_source').on(t.tenantId, t.sourceBudgetId, t.status),
+  ],
+);
+
+/** Category, per-event and per-person limits, optionally by location (planned attendance). */
+export const budgetLimits = pgTable(
+  'budget_limits',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    budgetId: uuid('budget_id')
+      .notNull()
+      .references(() => budgets.id),
+    kind: varchar('kind', { length: 20 }).notNull(),
+    categoryCode: varchar('category_code', { length: 50 }),
+    orgUnitId: uuid('org_unit_id'),
+    amountMinor: minor('amount_minor').notNull(),
+    currency: ccy('currency')
+      .notNull()
+      .references(() => currencies.code),
+    mode: varchar('mode', { length: 10 }).notNull().default('hard'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('budget_limits_budget').on(t.tenantId, t.budgetId)],
 );
 
 /** Period phasing (even, seasonal, manual) in the budget currency. */
