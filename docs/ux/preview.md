@@ -150,6 +150,21 @@ Added 2026-11-05, same Stitch limit: specs only, no preview pages yet. With batc
 | 078 Rule version history                     | [078-rule-version-history.md](screens/078-rule-version-history.md)                     |
 | 090 Approval history                         | [090-approval-history.md](screens/090-approval-history.md)                             |
 
+## Phase 2 gaps (specs first; designs pending)
+
+Added 2026-11-05, same Stitch limit: specs only, no preview pages yet. 001 sign-in already covers 002 single sign-on.
+
+| Screen                            | Spec                                                                 |
+| --------------------------------- | -------------------------------------------------------------------- |
+| 004 Forgot password               | [004-forgot-password.md](screens/004-forgot-password.md)             |
+| 005 First-time organization setup | [005-first-time-setup.md](screens/005-first-time-setup.md)           |
+| 008 Role and permission setup     | [008-role-permission-setup.md](screens/008-role-permission-setup.md) |
+| 010 Setup completion dashboard    | [010-setup-completion.md](screens/010-setup-completion.md)           |
+| 102 Tenant settings               | [102-tenant-settings.md](screens/102-tenant-settings.md)             |
+| 103 User and role management      | [103-user-role-management.md](screens/103-user-role-management.md)   |
+| 104 Permission matrix             | [104-permission-matrix.md](screens/104-permission-matrix.md)         |
+| 124 Profile and preferences       | [124-profile-preferences.md](screens/124-profile-preferences.md)     |
+
 ## How to review
 
 1. Open the preview project and step through the screens in the order above; each shows the default state of one screen.
