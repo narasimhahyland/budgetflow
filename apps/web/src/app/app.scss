@@ -1,7 +1,13 @@
 .bf-placeholder {
-  display: grid;
+  display: flex;
   min-height: 100vh;
-  place-items: center;
-  padding: 24px;
   box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.bf-placeholder__state {
+  width: min(560px, 100%);
 }
