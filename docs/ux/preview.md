@@ -115,6 +115,24 @@ Added 2026-11-05. Stitch's daily generation limit blocked this batch, so these s
 
 Revised specs whose images now predate a product answer (build from the spec): 022c HR headcount import (all-or-nothing) and 026 reduce budget (pending requests excluded from the floor).
 
+## Phase 7 batch A (specs first; designs pending)
+
+Added 2026-11-05, same Stitch limit as above: specs only, no preview pages yet.
+
+| Screen                                    | Spec                                                                                 |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| 062 Delegated approval                    | [062-delegated-approval.md](screens/062-delegated-approval.md)                       |
+| 063 Escalated approval                    | [063-escalated-approval.md](screens/063-escalated-approval.md)                       |
+| 065 Rejected request and resubmission     | [065-rejected-request-resubmission.md](screens/065-rejected-request-resubmission.md) |
+| 066 Rules dashboard                       | [066-rules-dashboard.md](screens/066-rules-dashboard.md)                             |
+| 067 Rule list                             | [067-rule-list.md](screens/067-rule-list.md)                                         |
+| 068 Create rule                           | [068-create-rule.md](screens/068-create-rule.md)                                     |
+| 070 Approval routing configuration        | [070-approval-routing.md](screens/070-approval-routing.md)                           |
+| 070a Delegation-of-authority matrix admin | [070a-doa-matrix-admin.md](screens/070a-doa-matrix-admin.md)                         |
+| 071 Spending-limit configuration          | [071-spending-limits.md](screens/071-spending-limits.md)                             |
+| 071a Policy templates and threshold table | [071a-policy-templates-thresholds.md](screens/071a-policy-templates-thresholds.md)   |
+| 072 Category-policy configuration         | [072-category-policy.md](screens/072-category-policy.md)                             |
+
 ## How to review
 
 1. Open the preview project and step through the screens in the order above; each shows the default state of one screen.
