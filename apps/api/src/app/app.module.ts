@@ -1,4 +1,5 @@
 import { ApprovalsApiModule } from '@bf/api/approvals';
+import { ActualsApiModule } from '@bf/api/actuals';
 import { AuditApiModule } from '@bf/api/audit';
 import { BudgetsApiModule } from '@bf/api/budgets';
 import { ContributionsApiModule } from '@bf/api/contributions';
@@ -31,6 +32,7 @@ import { HealthController, OpenApiController } from './health.controller';
     SpendApiModule,
     ContributionsApiModule,
     EventsApiModule,
+    ActualsApiModule,
   ],
   controllers: [HealthController, OpenApiController],
 })

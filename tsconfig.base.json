@@ -21,6 +21,7 @@
       "@bf/contracts": ["./libs/contracts/src/index.ts"],
       "@bf/seed": ["./libs/seed/src/index.ts"],
       "@bf/api/db": ["./libs/api/db/src/index.ts"],
+      "@bf/api/actuals": ["./libs/api/actuals/src/index.ts"],
       "@bf/api/core": ["./libs/api/core/src/index.ts"],
       "@bf/api/audit": ["./libs/api/audit/src/index.ts"],
       "@bf/api/ledger": ["./libs/api/ledger/src/index.ts"],

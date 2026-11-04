@@ -28,3 +28,6 @@ export * from './lib/audit/hash-chain';
 export * from './lib/rules/conflict';
 export * from './lib/org/hierarchy';
 export * from './lib/org/imports';
+export * from './lib/actuals/import';
+export * from './lib/actuals/matching';
+export * from './lib/actuals/accounting';

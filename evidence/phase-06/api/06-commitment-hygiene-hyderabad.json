@@ -1,0 +1,1233 @@
+{
+  "request": "GET /api/actuals/commitments",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "asOfDate": "2026-11-04",
+    "items": [
+      {
+        "id": "78000000-0000-4000-8000-000000000006",
+        "reference": "CMT-00000006",
+        "description": "Quarterly team lunch (no invoice received)",
+        "status": "encumbered",
+        "budgetId": "70000000-0000-4000-8000-000000000003",
+        "budgetName": "United States Region",
+        "legalEntityId": "20000000-0000-4000-8000-000000000001",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": "Harbor View Hotel Group",
+        "serviceStart": "2026-09-25",
+        "serviceEnd": "2026-09-25",
+        "amount": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 40,
+        "agingBucket": "31-60",
+        "releasePrompt": true,
+        "lastActualOn": null
+      },
+      {
+        "id": "28a0b5fa-5c81-41a8-9046-30d2201eb374",
+        "reference": "CMT-201EB374",
+        "description": "Gifts (in dispute)",
+        "status": "encumbered",
+        "budgetId": "c675a3d3-9b84-4bb0-84cb-51a382948d98",
+        "budgetName": "Scenario child USD 7a404c91",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-10-01",
+        "serviceEnd": "2026-10-02",
+        "amount": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 33,
+        "agingBucket": "31-60",
+        "releasePrompt": true,
+        "lastActualOn": null
+      },
+      {
+        "id": "6ec8cabd-2c0b-4998-a62b-0fd4826b0764",
+        "reference": "CMT-826B0764",
+        "description": "Gifts (in dispute)",
+        "status": "encumbered",
+        "budgetId": "14b963f7-766d-405d-9fd9-e289f2bb3dc1",
+        "budgetName": "Scenario child USD 6d0dfef2",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-10-01",
+        "serviceEnd": "2026-10-02",
+        "amount": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 33,
+        "agingBucket": "31-60",
+        "releasePrompt": true,
+        "lastActualOn": null
+      },
+      {
+        "id": "d96ebafb-d5eb-493e-b369-89ea5649bd4b",
+        "reference": "CMT-5649BD4B",
+        "description": "Speaker fee",
+        "status": "encumbered",
+        "budgetId": "14b963f7-766d-405d-9fd9-e289f2bb3dc1",
+        "budgetName": "Scenario child USD 6d0dfef2",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-10-01",
+        "serviceEnd": "2026-10-02",
+        "amount": {
+          "amountMinor": 25000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 25000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 25000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 33,
+        "agingBucket": "31-60",
+        "releasePrompt": true,
+        "lastActualOn": null
+      },
+      {
+        "id": "da37357c-05cf-47fb-92b6-99d6b80d2a65",
+        "reference": "CMT-B80D2A65",
+        "description": "Speaker fee",
+        "status": "encumbered",
+        "budgetId": "c675a3d3-9b84-4bb0-84cb-51a382948d98",
+        "budgetName": "Scenario child USD 7a404c91",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-10-01",
+        "serviceEnd": "2026-10-02",
+        "amount": {
+          "amountMinor": 25000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 25000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 25000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 33,
+        "agingBucket": "31-60",
+        "releasePrompt": true,
+        "lastActualOn": null
+      },
+      {
+        "id": "78000000-0000-4000-8000-000000000003",
+        "reference": "CMT-00000003",
+        "description": "Hack Week meals and venue",
+        "status": "partially_consumed",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "India Region",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": "77000000-0000-4000-8000-000000000002",
+        "eventCode": "HYD-HACK-26",
+        "vendorName": "Garden City Catering Co.",
+        "serviceStart": "2026-10-19",
+        "serviceEnd": "2026-10-23",
+        "amount": {
+          "amountMinor": 8500000,
+          "currency": "INR"
+        },
+        "encumbered": {
+          "amountMinor": 3300000,
+          "currency": "INR"
+        },
+        "encumberedReporting": {
+          "amountMinor": 39640,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 5200000,
+          "currency": "INR"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "accrued": {
+          "amountMinor": 3300000,
+          "currency": "INR"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "daysPast": 12,
+        "agingBucket": "1-30",
+        "releasePrompt": false,
+        "lastActualOn": "2026-11-02"
+      },
+      {
+        "id": "78000000-0000-4000-8000-000000000004",
+        "reference": "CMT-00000004",
+        "description": "Hack Week team travel",
+        "status": "partially_consumed",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "India Region",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": "77000000-0000-4000-8000-000000000002",
+        "eventCode": "HYD-HACK-26",
+        "vendorName": null,
+        "serviceStart": "2026-10-19",
+        "serviceEnd": "2026-10-23",
+        "amount": {
+          "amountMinor": 4000000,
+          "currency": "INR"
+        },
+        "encumbered": {
+          "amountMinor": 2106000,
+          "currency": "INR"
+        },
+        "encumberedReporting": {
+          "amountMinor": 25297,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 1894000,
+          "currency": "INR"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "daysPast": 12,
+        "agingBucket": "1-30",
+        "releasePrompt": true,
+        "lastActualOn": "2026-11-03"
+      },
+      {
+        "id": "a8dd3a18-2685-4132-a68a-9d51b305a98b",
+        "reference": "CMT-B305A98B",
+        "description": "Scenario commitment",
+        "status": "partially_consumed",
+        "budgetId": "63af3c7f-321b-43bb-9ac7-f716a63105db",
+        "budgetName": "Scenario child USD 99c7d698",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-10-30",
+        "amount": {
+          "amountMinor": 150000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 75000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 75000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 75000,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 5,
+        "agingBucket": "1-30",
+        "releasePrompt": false,
+        "lastActualOn": "2026-10-14"
+      },
+      {
+        "id": "eb54269b-0579-4010-a001-6514388c7112",
+        "reference": "CMT-388C7112",
+        "description": "Scenario commitment",
+        "status": "partially_consumed",
+        "budgetId": "5c96a950-4191-41e2-ae63-6e32bb7be5bc",
+        "budgetName": "Scenario child USD a4be311e",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-10-30",
+        "amount": {
+          "amountMinor": 150000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 75000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 75000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 75000,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 5,
+        "agingBucket": "1-30",
+        "releasePrompt": false,
+        "lastActualOn": "2026-10-14"
+      },
+      {
+        "id": "06f286f7-21c0-420d-b0f2-1a98b8d38566",
+        "reference": "CMT-B8D38566",
+        "description": "Shared offsite venue",
+        "status": "encumbered",
+        "budgetId": "3f5cd780-6663-4536-92a8-da2b76dee581",
+        "budgetName": "Scenario child USD ef8cd508",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": "Riverside Retreats Q2B164801",
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-11-12",
+        "amount": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": null
+      },
+      {
+        "id": "1b8f101a-652a-4926-b0c5-254576172237",
+        "reference": "CMT-76172237",
+        "description": "Transport",
+        "status": "encumbered",
+        "budgetId": "b49026cd-992a-4fd8-9e30-3e025b7162ae",
+        "budgetName": "Scenario child USD 5507eda4",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-11-12",
+        "amount": {
+          "amountMinor": 20000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 20000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 20000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": null
+      },
+      {
+        "id": "a76f8756-f762-4da4-a5bc-1d98872f1128",
+        "reference": "CMT-872F1128",
+        "description": "Scenario commitment",
+        "status": "encumbered",
+        "budgetId": "5c96a950-4191-41e2-ae63-6e32bb7be5bc",
+        "budgetName": "Scenario child USD a4be311e",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-11-12",
+        "amount": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": null
+      },
+      {
+        "id": "a9381a41-6ec9-408c-b8ab-3b54abae8ead",
+        "reference": "CMT-ABAE8EAD",
+        "description": "Shared offsite venue",
+        "status": "encumbered",
+        "budgetId": "2e8b7fb0-44ac-4519-88cf-fb7017916e17",
+        "budgetName": "Scenario child USD 3f391924",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": "Riverside Retreats Q3D47262B",
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-11-12",
+        "amount": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": null
+      },
+      {
+        "id": "d69b1606-f2ca-4de5-ac67-f8c726cba0dc",
+        "reference": "CMT-26CBA0DC",
+        "description": "Scenario commitment",
+        "status": "partially_consumed",
+        "budgetId": "28cda3f5-cb8e-4516-a295-5bb9abb89ebb",
+        "budgetName": "Scenario child USD f8e2c442",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": "d76ae99b-fa82-47e1-a519-ddf4c5920256",
+        "eventCode": "SC-94DE3E2A",
+        "vendorName": null,
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-11-12",
+        "amount": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 120000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 120000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 80000,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": "2026-11-03"
+      },
+      {
+        "id": "ea6e9704-80e9-44cc-ab7f-27e13d1bf87d",
+        "reference": "CMT-3D1BF87D",
+        "description": "Transport",
+        "status": "encumbered",
+        "budgetId": "03dc9796-76f6-4200-8de7-e8b343cb4e9c",
+        "budgetName": "Scenario child USD 855bf0b9",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-11-12",
+        "amount": {
+          "amountMinor": 20000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 20000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 20000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": null
+      },
+      {
+        "id": "ec482347-6f9c-4ed6-969b-a246f6fd4c18",
+        "reference": "CMT-F6FD4C18",
+        "description": "Scenario commitment",
+        "status": "partially_consumed",
+        "budgetId": "c34fe523-f9ff-4284-b80f-fa3284423686",
+        "budgetName": "Scenario child USD 18de943a",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": "18481ae8-4422-430e-b963-83e658fab214",
+        "eventCode": "SC-50DC177F",
+        "vendorName": null,
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-11-12",
+        "amount": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 120000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 120000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 80000,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": "2026-11-03"
+      },
+      {
+        "id": "fe534776-7e07-41ce-8240-faeb35a4ea6e",
+        "reference": "CMT-35A4EA6E",
+        "description": "Scenario commitment",
+        "status": "encumbered",
+        "budgetId": "63af3c7f-321b-43bb-9ac7-f716a63105db",
+        "budgetName": "Scenario child USD 99c7d698",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-11-10",
+        "serviceEnd": "2026-11-12",
+        "amount": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 70000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": null
+      },
+      {
+        "id": "78313782-31e3-4580-a661-c3e344e17072",
+        "reference": "CMT-44E17072",
+        "description": "Future service, not due",
+        "status": "encumbered",
+        "budgetId": "55823600-46ee-4e2a-aded-ce5b85ec44b5",
+        "budgetName": "Scenario child USD 6e299bb7",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-12-01",
+        "serviceEnd": "2026-12-02",
+        "amount": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": null
+      },
+      {
+        "id": "a1c7960b-bca8-481a-8990-afe0c2e7c3b5",
+        "reference": "CMT-C2E7C3B5",
+        "description": "Future service, not due",
+        "status": "encumbered",
+        "budgetId": "ff3aac70-180d-409b-b79c-b8f475a98b49",
+        "budgetName": "Scenario child USD ebf04483",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-12-01",
+        "serviceEnd": "2026-12-02",
+        "amount": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 10000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": null
+      },
+      {
+        "id": "78000000-0000-4000-8000-000000000002",
+        "reference": "CMT-00000002",
+        "description": "Annual Day venue hire (deposit due now)",
+        "status": "encumbered",
+        "budgetId": "70000000-0000-4000-8000-000000000005",
+        "budgetName": "Bengaluru Events",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": "77000000-0000-4000-8000-000000000001",
+        "eventCode": "BLR-ANNUAL-26",
+        "vendorName": "Deccan Event Studio",
+        "serviceStart": "2026-12-05",
+        "serviceEnd": "2026-12-06",
+        "amount": {
+          "amountMinor": 20000000,
+          "currency": "INR"
+        },
+        "encumbered": {
+          "amountMinor": 20000000,
+          "currency": "INR"
+        },
+        "encumberedReporting": {
+          "amountMinor": 240240,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 6000000,
+          "currency": "INR"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "prepaid": {
+          "amountMinor": 6000000,
+          "currency": "INR"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": "2026-11-04"
+      },
+      {
+        "id": "7db86ce5-a671-4dd1-be66-a6566b42e84d",
+        "reference": "CMT-6B42E84D",
+        "description": "Venue hire",
+        "status": "partially_consumed",
+        "budgetId": "e7c3fb03-ab36-46aa-b795-77f9ed71a89a",
+        "budgetName": "Scenario child USD 5d6b2618",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-12-05",
+        "serviceEnd": "2026-12-06",
+        "amount": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 140000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 140000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": "2026-11-04"
+      },
+      {
+        "id": "bcafa952-a748-499c-ad51-3a69de7e894b",
+        "reference": "CMT-DE7E894B",
+        "description": "Venue hire",
+        "status": "partially_consumed",
+        "budgetId": "3ed57a18-60ee-4c60-9b4c-21b2252422df",
+        "budgetName": "Scenario child USD 60101f24",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "eventId": null,
+        "eventCode": null,
+        "vendorName": null,
+        "serviceStart": "2026-12-05",
+        "serviceEnd": "2026-12-06",
+        "amount": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 140000,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 140000,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 60000,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": "2026-11-04"
+      }
+    ],
+    "totals": {
+      "open": 22,
+      "prompts": 6,
+      "encumbered": {
+        "amountMinor": 1555177,
+        "currency": "USD"
+      },
+      "byBucket": [
+        {
+          "bucket": "current",
+          "count": 13,
+          "encumberedMinor": 1080240
+        },
+        {
+          "bucket": "1-30",
+          "count": 4,
+          "encumberedMinor": 214937
+        },
+        {
+          "bucket": "31-60",
+          "count": 5,
+          "encumberedMinor": 260000
+        },
+        {
+          "bucket": "61-90",
+          "count": 0,
+          "encumberedMinor": 0
+        },
+        {
+          "bucket": "90+",
+          "count": 0,
+          "encumberedMinor": 0
+        }
+      ]
+    }
+  }
+}
