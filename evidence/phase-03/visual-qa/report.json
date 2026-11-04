@@ -1,9 +1,13 @@
 {
   "phase": "p3-org-master-data",
-  "iterations": 2,
+  "iterations": 3,
   "stopReason": "no blocking findings",
   "themes": ["light"],
-  "designParity": "not applicable: no Stitch designs for Phase 3 screens (pending design review)",
+  "designParity": {
+    "compared": ["022c-hr-headcount-import", "107-exchange-rates", "108-fiscal-calendar"],
+    "report": "design-parity/design-parity.md",
+    "blocking": 0
+  },
   "blockingFindings": 0,
   "screens": [
     {
@@ -31,6 +35,38 @@
           "viewport": "tablet",
           "theme": "light",
           "file": "screens/022c-headcount--tablet--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        }
+      ]
+    },
+    {
+      "screen": "022c-headcount-import-review",
+      "captures": [
+        {
+          "viewport": "desktop",
+          "theme": "light",
+          "file": "screens/022c-headcount-import-review--desktop--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "mobile",
+          "theme": "light",
+          "file": "screens/022c-headcount-import-review--mobile--light.png",
+          "consoleErrors": 0,
+          "failedRequests": 0,
+          "horizontalOverflow": false,
+          "interpolationLeftovers": false
+        },
+        {
+          "viewport": "tablet",
+          "theme": "light",
+          "file": "screens/022c-headcount-import-review--tablet--light.png",
           "consoleErrors": 0,
           "failedRequests": 0,
           "horizontalOverflow": false,

@@ -1,6 +1,6 @@
 # Phase 3 visual QA
 
-Scope: the 13 Phase 3 pages (inventory screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a-c, 107, 107a, 108, 108a) at desktop (1440x900), tablet (834x1112) and mobile (Pixel 7), light theme only (dark theme deferred), on the local stack with the deterministic seed, signed in as the role that owns each page. No Stitch design exists for these screens, so there is no design-parity comparison; they were built from `docs/ux/design-system.md` with Satori components first and Angular Material second and await design review.
+Scope: the 13 Phase 3 pages (inventory screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a-c, 107, 107a, 108, 108a) at desktop (1440x900), tablet (834x1112) and mobile (Pixel 7), light theme only (dark theme deferred), on the local stack with the deterministic seed, signed in as the role that owns each page. During the phase, proposed Stitch designs landed on main for 22c, 107 and 108; those three pages were reworked to follow them and compared side by side (`design-parity/design-parity.md`). The other ten pages have no design yet; they were built from `docs/ux/design-system.md` with Satori components first and Angular Material second and await design review.
 
 ## Iterations
 

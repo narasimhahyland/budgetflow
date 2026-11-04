@@ -54,3 +54,7 @@ Desktop and tablet only for import; mobile shows a read-only summary. Tables hav
 
 - Numbering: the inventory lists per-head allocation as 22a, but its design folder is `024a-per-head-driver-allocation`; this screen uses the inventory number 22c. Rename 024a to 022a?
 - Is the per-head rate monthly or per event? Assumed monthly for the impact column.
+
+## Implementation
+
+Built in Phase 3 at `/org/headcount` (Import HR file). Deviations from this design and the questions for review: `evidence/phase-03/visual-qa/design-parity/design-parity.md`.

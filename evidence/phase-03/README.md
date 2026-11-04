@@ -2,7 +2,7 @@
 
 - Commit: see `gate-summary.txt` (full gate on branch `feat/p3-org-master-data`, rebased on main after Phase 2 and the ledger hardening), reviewed 2026-11-04
 - Scope: plan todo `p3-org-master-data` — org hierarchy with effective dating, legal entities, cost centers, fiscal calendar engine and period statuses, currencies and rate types with plan-rate lock, GL accounts and category-to-GL mapping, reason codes, vendor master, seeded DoA table, HR headcount import, scope-based visibility, CSV import. Screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a-c, 107, 107a, 108, 108a (13 pages). Journeys in `apps/web-e2e/src/org` and `apps/web-e2e/src/finance-admin`.
-- Result: passed with follow-ups — every gate mode is green and every P3 gate item is proven by API scenarios and journeys; the screens have no Stitch designs yet and await design review.
+- Result: passed with follow-ups — every gate mode is green and every P3 gate item is proven by API scenarios and journeys; 22c, 107 and 108 follow their proposed Stitch designs with documented deviations, and the other ten pages await designs.
 
 ## Gates
 
@@ -61,7 +61,7 @@ Rows 23-28 added to `docs/testing/invariant-scenarios.md` (effective dating, org
 
 ## Known issues and follow-ups
 
-- Phase 3 screens need Stitch designs and design review; then add them to `apps/web-e2e/visual/screens.json` with seed-only lists.
+- Ten Phase 3 pages need Stitch designs; all 13 need design review (22c, 107 and 108 deviations in `visual-qa/design-parity/design-parity.md`); then add them to `apps/web-e2e/visual/screens.json` with seed-only lists.
 - Phase 4: the seeded budget tree still holds the India and Europe region budgets in INR and EUR (Phase 1 data); move them to USD per the November 2026 decision when Phase 4 reseeds budgets. Per-head drivers read `GET /api/org/headcount` (latest snapshot by location and team, prorated in thousandths).
 - Phase 5: enforce the seeded DoA matrix in approval routing (lookup logic and boundaries already proven); intercompany policy screens.
 - Phase 6: actuals convert with `lookupExchangeRate`-equivalent selection (plan for control, actual rate stored for the FX effect).
@@ -71,7 +71,7 @@ Rows 23-28 added to `docs/testing/invariant-scenarios.md` (effective dating, org
 ## Open UX questions
 
 - 034 Organization chart: is the indented tree enough, or is a graphical chart wanted?
-- 022c Headcount: should team rows compare with the previous snapshot when that snapshot was location-level only (they show the full count as change today)?
+- 022c Headcount: should imports skip invalid rows (design) or stay all-or-nothing (current invariant 27)? Should team rows compare with a previous snapshot that was location-level only (they show the full count as change today)?
 
 ## Not in this pack
 

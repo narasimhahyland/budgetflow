@@ -51,3 +51,7 @@ Tables scroll horizontally on tablet; mobile read-only. Rates use tabular numera
 ## Assumptions and open questions
 
 - Stitch added helper copy on rate tiles and a "CC-9900" variance reserve line; those are not decisions. FX effect posting target is open.
+
+## Implementation
+
+Built in Phase 3 at `/finance/rates`. Deviations from this design: `evidence/phase-03/visual-qa/design-parity/design-parity.md`.
