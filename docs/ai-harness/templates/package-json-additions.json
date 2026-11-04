@@ -1,0 +1,28 @@
+{
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
+    "gate": "bash scripts/gate.sh",
+    "gate:static": "bash scripts/gate.sh static",
+    "gate:functional": "bash scripts/gate.sh functional",
+    "gate:visual": "bash scripts/gate.sh visual",
+    "secret-scan": "sh scripts/secret-scan.sh --staged",
+    "harness:check": "sh scripts/validate-harness.sh",
+    "functional:api": "nx run api-e2e:functional-api",
+    "functional:e2e": "nx run web-e2e:functional-e2e",
+    "e2e:visual": "bash scripts/visual/pw-docker.sh npx playwright test -c apps/web-e2e/playwright.config.ts --project=visual-light --project=visual-dark",
+    "e2e:update-snapshots": "bash scripts/visual/pw-docker.sh npx playwright test -c apps/web-e2e/playwright.config.ts --project=visual-light --project=visual-dark --update-snapshots",
+    "visual:capture": "node scripts/visual/capture.mjs",
+    "visual:parity": "node scripts/visual/design-parity.mjs",
+    "visual:selftest": "node scripts/visual/self-test.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "testcontainers": "<pin at Phase 1>",
+    "@testcontainers/postgresql": "<pin at Phase 1>",
+    "autocannon": "<pin at Phase 1>"
+  },
+  "nxTargets": {
+    "apps/api-e2e": { "functional-api": "playwright test -c apps/api-e2e/playwright.config.ts" },
+    "apps/web-e2e": { "functional-e2e": "playwright test -c apps/web-e2e/playwright.config.ts --project=desktop --project=tablet --project=mobile" }
+  }
+}
