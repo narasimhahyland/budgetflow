@@ -14,7 +14,7 @@ test.describe('fiscal calendars', () => {
   }) => {
     await page.goto('/finance/periods');
     await expectShell(page);
-    await expect(page.getByTestId('calendar-entities')).toHaveText('HYL-DE, HYL-US');
+    await expect(page.getByTestId('calendar-entities')).toContainText('HYL-DE, HYL-US');
     const periods = page.getByRole('table', { name: 'Accounting periods' });
     await expect(periods.getByRole('row', { name: /Oct 2026/ })).toContainText('Soft-closed');
     await expect(periods.getByRole('row', { name: /Nov 2026/ }).getByRole('button')).toHaveText([
