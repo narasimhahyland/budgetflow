@@ -1,4 +1,5 @@
 import type { INestApplicationContext } from '@nestjs/common';
+import { seedBudgets } from './budgets';
 import { seedOrg } from './org';
 
 /**
@@ -15,4 +16,5 @@ export interface SeedExtension {
 
 export const SEED_EXTENSIONS: SeedExtension[] = [
   { name: 'org and finance master data', phase: 'P3', run: seedOrg },
+  { name: 'budgets, controls and planning demo data', phase: 'P4', run: seedBudgets },
 ];
