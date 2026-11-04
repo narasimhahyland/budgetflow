@@ -78,6 +78,22 @@ Added 2026-11-05. 000 design system was regenerated with the Export menu; 024a w
 | 032a Period phasing editor                    | [validation](https://narasimhahyland.github.io/budgetflow/screens/032a-period-phasing--validation.html)                                                                                                            | [681fcf4b](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=681fcf4b422540a6905c2df0feea927f) |
 | 089 Allocation history                        | [default](https://narasimhahyland.github.io/budgetflow/screens/089-allocation-history--default.html)                                                                                                               | [b0f881de](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=b0f881de1eaa43f89b02c00e6c6c4d96) |
 
+## Phase 5 batch 2 (clickable preview pages)
+
+Added 2026-11-05. 048 is covered by 045; the 061a reject reason page is specified but not exported.
+
+| Screen                              | Clickable preview                                                                                                 | Stitch                                                                                                         |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 044 Event list                      | [default](https://narasimhahyland.github.io/budgetflow/screens/044-event-list--default.html)                      | [6ff4d363](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=6ff4d3633ba3412fb8116ff52a8a87bb) |
+| 049 Cross-location cost allocation  | [default](https://narasimhahyland.github.io/budgetflow/screens/049-cross-location-cost-split--default.html)       | [2bdf89f8](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=2bdf89f808bf4016b4bf8e0003cd1854) |
+| 050 Event approval workflow         | [default](https://narasimhahyland.github.io/budgetflow/screens/050-event-approval-workflow--default.html)         | [5d22b19a](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=5d22b19a68084457938783072e75b1dd) |
+| 051 Event commitments               | [default](https://narasimhahyland.github.io/budgetflow/screens/051-event-commitments--default.html)               | [f1f2395f](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=f1f2395f9bdd422ea5813f65a6a99419) |
+| 052 Event supporting documents      | [default](https://narasimhahyland.github.io/budgetflow/screens/052-event-documents--default.html)                 | [3597ebf4](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=3597ebf4acbc4f1a8faaaa1bfc7fa245) |
+| 053a Intercompany recharge schedule | [default](https://narasimhahyland.github.io/budgetflow/screens/053a-intercompany-recharge-schedule--default.html) | [e7c0f4d7](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=e7c0f4d720c74787b259eaaca6846d9e) |
+| 056 Create budget request           | [default](https://narasimhahyland.github.io/budgetflow/screens/056-create-budget-request--default.html)           | [d20e1216](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=d20e12164da04ff79eb5683c8814575a) |
+| 058 Over-budget request             | [default](https://narasimhahyland.github.io/budgetflow/screens/058-over-budget-request--default.html)             | [ded23f83](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=ded23f83e3694b73b84a43f939e32228) |
+| 064 Request history                 | [default](https://narasimhahyland.github.io/budgetflow/screens/064-request-history--default.html)                 | [405ecb28](https://stitch.withgoogle.com/preview/1643421514270618068?node-id=405ecb282a2945ceb61a536cecb3ca57) |
+
 ## How to review
 
 1. Open the preview project and step through the screens in the order above; each shows the default state of one screen.

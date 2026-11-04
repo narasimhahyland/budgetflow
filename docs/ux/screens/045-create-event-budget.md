@@ -80,5 +80,7 @@ Funding cap = own funds + contributions within estimate + tolerance; per-head li
 
 ## Open questions
 
+- 048 event budget request is covered by this wizard's funding step (decided 2026-11-05, as in the original Stitch mapping 45/48/49); no separate design.
+
 - Should tolerance be per event type or per organization?
 - Stitch render notes: the sidebar ends above the page bottom in the render (shell must fill the height).

@@ -24,6 +24,10 @@ Sent when a request reaches the approver's step; reminders before the SLA.
 
 Header strip with BudgetFlow and "Hyland". Greeting and why you are the approver (DoA limit). Summary card (request, amount, requester, charge to, needed by, justification). Budget impact (available before and after, bar, soft warning). Buttons: "Approve USD 6,000.00", "Reject"; link for approve part, request changes or details (060). Expiry and single-use note; footer with notification settings.
 
+## Reject reason page (product answer 2026-11-05)
+
+The email offers Approve and Reject only; partial approval and request changes happen in the app. Reject opens a one-step web page (no app shell): slim top bar with the BudgetFlow logo and "Hyland"; a centered card with "Signed in as Arjun Mehta", title "Reject REQ-2026-0418", a summary box (amount, title, requester, budget), required Reason code and "Reason for Rahul", a red "Reject request" button and Cancel, a link "Approve part or request changes in BudgetFlow", and the note "This link works once and expires on 7 Nov 2026, 10:15. Rahul is notified with your reason." Expired or used link: the card shows that state with "Open in BudgetFlow". Not exported: the Stitch generation failed twice (see review log); build from this description and the 061a branding.
+
 ## Data and permissions
 
 Buttons carry signed, single-use tokens that expire (72 hours) and are bound to the approver and the request version; the landing page re-checks DoA and budget and may ask the user to sign in (Keycloak). Reject from email asks for a reason code on the landing page.

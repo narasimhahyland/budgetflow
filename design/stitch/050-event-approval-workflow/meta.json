@@ -1,0 +1,11 @@
+{
+  "screen": "050-event-approval-workflow",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/5d22b19a68084457938783072e75b1dd",
+      "approved": null,
+      "size": [2560, 2976],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

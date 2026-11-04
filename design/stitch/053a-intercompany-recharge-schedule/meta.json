@@ -1,0 +1,11 @@
+{
+  "screen": "053a-intercompany-recharge-schedule",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/e7c0f4d720c74787b259eaaca6846d9e",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

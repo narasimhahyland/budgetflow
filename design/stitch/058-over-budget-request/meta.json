@@ -1,0 +1,11 @@
+{
+  "screen": "058-over-budget-request",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/ded23f83e3694b73b84a43f939e32228",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
