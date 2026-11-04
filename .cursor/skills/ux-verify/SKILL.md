@@ -36,3 +36,7 @@ Open every screenshot and side-by-side image with the Read tool and check them a
 ## 5. Report
 
 Embed two or three representative screenshots, list blocking findings with file paths, link `report.md` and `design-parity.md`, and state open UX questions. To fix what you found, run `/visual-qa`.
+
+## 6. Design exports
+
+After exporting new designs to `design/stitch/`, update `design/preview/links.json` and run `design/preview/deploy.sh`, then check the new pages and their links on the live design preview (https://narasimhahyland.github.io/budgetflow/). Details: `design/preview/README.md`.
