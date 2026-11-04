@@ -673,7 +673,9 @@ const FIELDS: { key: string; label: string; money?: boolean }[] = [
                     >
                     {{ v.reason }}</span
                   >
-                  <span class="bf-card__hint">{{ v.createdAt | date: 'd MMM y, HH:mm' }}</span>
+                  <span class="bf-card__hint" data-testid="relative-time">{{
+                    v.createdAt | date: 'd MMM y, HH:mm'
+                  }}</span>
                 </span>
                 <span class="bf-card__hint"
                   >Authorized
@@ -812,7 +814,7 @@ export class VersionsTab {
         <table mat-table [dataSource]="rows()" aria-label="Allocation history">
           <ng-container matColumnDef="date"
             ><th mat-header-cell *matHeaderCellDef>Date</th>
-            <td mat-cell *matCellDef="let r">
+            <td mat-cell *matCellDef="let r" data-testid="relative-time">
               {{ r.createdAt | date: 'd MMM y, HH:mm' }}
             </td></ng-container
           >

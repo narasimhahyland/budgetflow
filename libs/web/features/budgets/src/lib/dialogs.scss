@@ -216,7 +216,7 @@
   gap: 8px;
 }
 
-.bf-danger-button {
-  --mat-button-filled-container-color: var(--mat-sys-error);
-  --mat-button-filled-label-text-color: var(--mat-sys-on-error);
+.bf-danger-button:not(:disabled) {
+  background-color: var(--mat-sys-error);
+  color: var(--mat-sys-on-error);
 }

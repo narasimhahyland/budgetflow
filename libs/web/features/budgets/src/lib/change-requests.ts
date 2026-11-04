@@ -232,7 +232,10 @@ const STATUS_TONE = {
               </div>
               <div>
                 <dt>Submitted</dt>
-                <dd>{{ r.createdAt | date: 'd MMM y' }} by {{ r.requestedByName ?? '—' }}</dd>
+                <dd>
+                  <span data-testid="relative-time">{{ r.createdAt | date: 'd MMM y' }}</span> by
+                  {{ r.requestedByName ?? '—' }}
+                </dd>
               </div>
               @if (r.sourceAvailableMinor !== null && r.status === 'pending') {
                 <div>
@@ -254,7 +257,10 @@ const STATUS_TONE = {
               @if (r.decidedAt) {
                 <div>
                   <dt>Decided</dt>
-                  <dd>{{ r.decidedAt | date: 'd MMM y' }} by {{ r.decidedByName ?? '—' }}</dd>
+                  <dd>
+                    <span data-testid="relative-time">{{ r.decidedAt | date: 'd MMM y' }}</span> by
+                    {{ r.decidedByName ?? '—' }}
+                  </dd>
                 </div>
               }
             </dl>

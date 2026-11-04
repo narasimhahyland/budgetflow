@@ -145,7 +145,12 @@
       "path": "/budgets/plans",
       "role": "finance-admin",
       "waitFor": "[data-testid=tie-out]",
-      "mask": ["[data-testid=tie-out]", "[data-testid=version-lines]"],
+      "mask": [
+        "[data-testid=tie-out]",
+        "[data-testid=version-lines]",
+        ".bf-pv__meta",
+        ".bf-pv__head"
+      ],
       "states": [
         {
           "state": "map-columns",
