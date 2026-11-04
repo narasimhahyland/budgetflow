@@ -1,4 +1,5 @@
 import type { INestApplicationContext } from '@nestjs/common';
+import { seedOrg } from './org';
 
 /**
  * Seed steps added by later phases, run in order after the Phase 1 reference data and budget tree.
@@ -12,4 +13,6 @@ export interface SeedExtension {
   run(app: INestApplicationContext): Promise<void>;
 }
 
-export const SEED_EXTENSIONS: SeedExtension[] = [];
+export const SEED_EXTENSIONS: SeedExtension[] = [
+  { name: 'org and finance master data', phase: 'P3', run: seedOrg },
+];
