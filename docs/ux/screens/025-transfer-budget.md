@@ -52,5 +52,5 @@ Mobile: full-screen dialog, impact preview below the form, sticky footer. Impact
 
 ## Assumptions and open questions
 
-- Do sibling transfers under the same owner need approval at all? Assumed yes (parent owner) unless the requester owns both.
+- Decided 2026-11-05: sibling transfers need the parent owner's approval unless the requester owns both budgets.
 - Stitch shortened names in the impact table ("BLR Events"); use full names.

@@ -6,27 +6,27 @@
 
 ## Guided flow (Start the guided flow, then Next on every step)
 
-000a Application shell, 011 Executive dashboard, 023 Budget hierarchy, 023 Set to zero dialog, 022 Allocation workspace, 022 Warning and block, 045 Create event budget, 045 Validation, 059 Approval inbox, 069 Rule builder, 088 Audit log, 115 Employee dashboard, 020 Create budget, 021 Budget details, 027 Freeze dialog, 024a Per-head allocation, 003 MFA verification.
+000a Application shell, 011 Executive dashboard, 023 Budget hierarchy, 023 Set to zero dialog, 022 Allocation workspace, 022 Warning and block, 045 Create event budget, 045 Validation, 059 Approval inbox, 069 Rule builder, 088 Audit log, 115 Employee dashboard, 020 Create budget, 021 Budget details, 027 Freeze dialog, 022a Per-head allocation (numbered 024a when this check ran; renamed 2026-11-05), 003 MFA verification.
 
 ## Click checks
 
-| Check | Page type | Expected page | Result |
-| --- | --- | --- | --- |
-| Sidebar "Budget hierarchy" on the shell | image + hotspots | 023 default | pass |
-| Notification bell on the shell | image + hotspots | 000a notifications open | pass |
-| "Review" in the notifications panel | image + hotspots | 059 default | pass |
-| "Open approval inbox" on the executive dashboard | HTML | 059 default | pass |
-| "Approve" in the approval inbox | HTML | 059 empty | pass |
-| Sidebar "Approval inbox" on the budget hierarchy | HTML | 059 default | pass |
-| "Allocate budget" on the budget hierarchy | HTML | 022 default | pass |
-| "Add Row" in the allocation workspace | image + hotspots | 022 warning and block | pass |
-| "Bengaluru Events" table row | HTML | 021 default | pass |
-| "Create event" on budget details | HTML | 045 default | pass |
-| "Continue to funding" on create event budget | image + hotspots | 045 validation | pass |
-| "Set to zero" in the hierarchy inspector | HTML | 023 set to zero dialog | pass |
-| "Cancel" in the set to zero dialog | HTML | 023 default | pass |
-| State switcher "Set to zero dialog" | navigation bar | 023 set to zero dialog | pass |
-| Sidebar "Reports" (not designed yet) | HTML | index with notice "Reports is not designed yet" | pass |
+| Check                                            | Page type        | Expected page                                   | Result |
+| ------------------------------------------------ | ---------------- | ----------------------------------------------- | ------ |
+| Sidebar "Budget hierarchy" on the shell          | image + hotspots | 023 default                                     | pass   |
+| Notification bell on the shell                   | image + hotspots | 000a notifications open                         | pass   |
+| "Review" in the notifications panel              | image + hotspots | 059 default                                     | pass   |
+| "Open approval inbox" on the executive dashboard | HTML             | 059 default                                     | pass   |
+| "Approve" in the approval inbox                  | HTML             | 059 empty                                       | pass   |
+| Sidebar "Approval inbox" on the budget hierarchy | HTML             | 059 default                                     | pass   |
+| "Allocate budget" on the budget hierarchy        | HTML             | 022 default                                     | pass   |
+| "Add Row" in the allocation workspace            | image + hotspots | 022 warning and block                           | pass   |
+| "Bengaluru Events" table row                     | HTML             | 021 default                                     | pass   |
+| "Create event" on budget details                 | HTML             | 045 default                                     | pass   |
+| "Continue to funding" on create event budget     | image + hotspots | 045 validation                                  | pass   |
+| "Set to zero" in the hierarchy inspector         | HTML             | 023 set to zero dialog                          | pass   |
+| "Cancel" in the set to zero dialog               | HTML             | 023 default                                     | pass   |
+| State switcher "Set to zero dialog"              | navigation bar   | 023 set to zero dialog                          | pass   |
+| Sidebar "Reports" (not designed yet)             | HTML             | index with notice "Reports is not designed yet" | pass   |
 
 The first run on the published site (floating bar over the page) failed "Approve" and the dialog "Cancel" because the bar covered them; the bar now sits below the design frame and both pass.
 

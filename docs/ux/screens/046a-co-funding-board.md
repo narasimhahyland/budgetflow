@@ -51,5 +51,5 @@ Mobile: event list first, tap opens the event's funding view. Bar has a table al
 
 ## Assumptions and open questions
 
-- Should contributors see other contributors' amounts? Designed as visible to everyone on the board.
+- Decided 2026-11-05: contributors see each other's amounts on the board (as designed).
 - Stitch shows the signed-in user as Priya Raman (Finance Controller) instead of the organizer; either works.

@@ -51,4 +51,4 @@ Desktop only for editing (tablet read-only). `role="grid"` with arrow-key naviga
 
 ## Assumptions and open questions
 
-- New child budgets created by paste start as Draft until an owner is set; confirm.
+- Decided 2026-11-05: pasted rows without an owner start as Draft until an owner is set.

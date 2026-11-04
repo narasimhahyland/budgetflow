@@ -55,4 +55,4 @@ Single 640px column that reflows to 100% on phones; buttons at least 44px high; 
 ## Assumptions and open questions
 
 - Stitch invented email-client chrome (archive, signature badges) around the message; only the 640px message body is the design.
-- Should Reject be allowed from email at all, or only Approve? Designed with both; Reject requires a reason on the landing page.
+- Decided 2026-11-05: the email offers Approve and Reject; Reject opens the one-step reason page above.

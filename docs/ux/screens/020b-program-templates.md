@@ -46,5 +46,5 @@ Tablet and mobile: list first, detail as a full page. Cards are radio-style opti
 
 ## Assumptions and open questions
 
-- Per-head rate is per month (as in 022a). Confirm monthly versus per event.
+- Decided 2026-11-05: the per-head rate is per month (USD 15.00 per eligible employee, prorated), as in 022a.
 - Stitch added helper lines ("unencumbered balance repatriation"); the section labels are the design.
