@@ -74,12 +74,17 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
         deadLetter: DEAD_LETTER,
       });
     }
-    await boss.work<EmailPayload>(EMAIL_TOPIC, async (jobs) => {
+    const fast = { batchSize: 10, pollingIntervalSeconds: 0.5, burstWhenBatchFull: true } as const;
+    await boss.work<EmailPayload>(EMAIL_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.notifications.deliver(job.data);
     });
-    await boss.work<{ tenantId: string; budgetId: string }>(BUDGET_CONTROL_TOPIC, async (jobs) => {
-      for (const job of jobs) await this.controls.handle(job.data.tenantId, job.data.budgetId);
-    });
+    await boss.work<{ tenantId: string; budgetId: string }>(
+      BUDGET_CONTROL_TOPIC,
+      fast,
+      async (jobs) => {
+        for (const job of jobs) await this.controls.handle(job.data.tenantId, job.data.budgetId);
+      },
+    );
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();
       this.log.log(`nightly ledger rebuild check ran for ${n} tenant(s)`);

@@ -23,6 +23,7 @@ import { asFundingSource, FundingSourcesService, type SourceRow } from './fundin
 import { PostingSupport, type LockedBudget, type PostCtx } from './posting-support';
 
 type CommitmentRow = typeof commitments.$inferSelect;
+const KIND_ORDER = { own: 0, contribution: 1, budget: 2 } as const;
 type LineRow = typeof commitmentFundingLines.$inferSelect;
 
 export interface EventRef {
@@ -611,19 +612,25 @@ export class CommitmentsService {
         serviceStart: r.serviceStart,
         serviceEnd: r.serviceEnd,
         createdAt: r.createdAt.toISOString(),
-        fundingLines: own.map((l) => ({
-          budgetId: l.budgetId,
-          budgetName: budgetNames.get(l.budgetId) ?? '',
-          sourceKind: l.fundingSourceId
-            ? l.contributionRequestId
-              ? 'contribution'
-              : 'own'
-            : 'budget',
-          amount: {
-            amountMinor: l.budgetAmountMinor ?? 0,
-            currency: l.budgetCurrency ?? r.currency,
-          },
-        })),
+        fundingLines: own
+          .map((l) => ({
+            budgetId: l.budgetId,
+            budgetName: budgetNames.get(l.budgetId) ?? '',
+            sourceKind: (l.fundingSourceId
+              ? l.contributionRequestId
+                ? 'contribution'
+                : 'own'
+              : 'budget') as keyof typeof KIND_ORDER,
+            amount: {
+              amountMinor: l.budgetAmountMinor ?? 0,
+              currency: l.budgetCurrency ?? r.currency,
+            },
+          }))
+          .sort(
+            (a, b) =>
+              KIND_ORDER[a.sourceKind] - KIND_ORDER[b.sourceKind] ||
+              b.amount.amountMinor - a.amount.amountMinor,
+          ),
       } satisfies EventCommitment;
     });
   }

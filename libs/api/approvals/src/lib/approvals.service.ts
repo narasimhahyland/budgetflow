@@ -968,7 +968,7 @@ export class ApprovalsService {
     );
   }
 
-  /** The viewer's pending task on a subject (as approver or active delegate), if any. */
+  /** The viewer's pending task on a subject (as approver, or as an active delegate for that spend type), if any. */
   async myTask(
     tx: Tx,
     actor: RequestActor,
@@ -987,10 +987,13 @@ export class ApprovalsService {
           eq(approvalTasks.status, 'pending'),
         ),
       );
+    for (const r of rows) if (r.assignee === actor.personId) return r.id;
+    if (!rows.length) return null;
+    const subject = await this.handlers.get(subjectType).load(tx, subjectId);
+    if (!subject) return null;
     for (const r of rows) {
-      if (r.assignee === actor.personId) return r.id;
-      const delegatedFrom = await this.delegatorsOf(tx, actor.personId);
-      if (delegatedFrom.includes(r.assignee)) return r.id;
+      if (await this.delegation(tx, r.assignee, actor.personId, subject.spendType, todayUtc()))
+        return r.id;
     }
     return null;
   }
@@ -1074,7 +1077,22 @@ export class ApprovalsService {
         )
         .orderBy(desc(approvalTasks.decidedAt))
         .limit(limit);
-      const rows = { assigned: pendingMine, delegated, escalated, completed }[tab].slice(0, limit);
+      const delegatedForMe: TaskRow[] = [];
+      for (const t of delegated) {
+        const [instance] = await tx
+          .select()
+          .from(approvalInstances)
+          .where(eq(approvalInstances.id, t.instanceId));
+        const subject = await this.handlers.get(instance.subjectType).load(tx, instance.subjectId);
+        if (
+          subject &&
+          (await this.delegation(tx, t.assigneePersonId, me, subject.spendType, todayUtc()))
+        )
+          delegatedForMe.push(t);
+      }
+      const rows = { assigned: pendingMine, delegated: delegatedForMe, escalated, completed }[
+        tab
+      ].slice(0, limit);
       const items: ApprovalTaskSummary[] = [];
       for (const t of rows) {
         const s = await this.summary(tx, t, me);
@@ -1084,7 +1102,7 @@ export class ApprovalsService {
         items,
         counts: {
           assigned: pendingMine.length,
-          delegated: delegated.length,
+          delegated: delegatedForMe.length,
           escalated: escalated.length,
           completed: completed.length,
         },
