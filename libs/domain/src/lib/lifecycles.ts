@@ -125,6 +125,12 @@ export const requestMachine = defineMachine<
       to: 'withdrawn',
     },
     { from: ['approved', 'partially_approved'], event: 'cancel', to: 'cancelled' },
+    // A budget set to zero cancels requests still waiting for a decision.
+    {
+      from: ['submitted', 'pending_approval', 'changes_requested'],
+      event: 'cancel',
+      to: 'cancelled',
+    },
   ],
 });
 
@@ -177,6 +183,12 @@ export const contributionMachine = defineMachine<
     { from: ['approved_full', 'approved_partial'], event: 'transfer', to: 'transferred' },
     { from: ['earmarked', 'transferred'], event: 'settle', to: 'settled' },
     { from: ['approved_full', 'approved_partial', 'earmarked'], event: 'cancel', to: 'cancelled' },
+    // A giving budget set to zero cancels contribution requests still waiting for a decision.
+    {
+      from: ['submitted', 'pending_approval', 'changes_requested'],
+      event: 'cancel',
+      to: 'cancelled',
+    },
   ],
 });
 

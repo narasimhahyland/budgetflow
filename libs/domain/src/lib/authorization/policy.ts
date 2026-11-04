@@ -188,7 +188,8 @@ export interface Actor {
 
 export type Resource =
   | { kind: 'tenant'; tenantId: string }
-  | { kind: 'budget'; tenantId: string; id: string; path: string }
+  /** `orgUnitId`: the budget's location or team, which lets people there request from it (`HOME_UNIT_ACTIONS`). */
+  | { kind: 'budget'; tenantId: string; id: string; path: string; orgUnitId?: string | null }
   | { kind: 'owned-by'; tenantId: string; ownerPersonId: string | null }
   /** An org unit as of a date, with every ancestor id (self included). */
   | { kind: 'org-unit'; tenantId: string; id: string; ancestorIds: readonly string[] }
@@ -202,12 +203,29 @@ export interface Decision {
   reason: string;
 }
 
-function scopeCovers(scope: Scope, actor: Actor, resource: Resource): boolean {
+/**
+ * Actions people may take on the budget of their own location or team without owning it: an employee
+ * requests from their office's budget, an organizer runs events on it. Reading the budget is not one.
+ */
+export const HOME_UNIT_ACTIONS: readonly Action[] = [
+  'request.create',
+  'contribution.request',
+  'event.manage',
+];
+
+function scopeCovers(scope: Scope, actor: Actor, resource: Resource, action?: Action): boolean {
   if (scope === 'tenant') return true;
   if (resource.kind === 'tenant')
     return scope === 'owned' ? actor.ownedBudgetPaths.length > 0 : true;
-  if (resource.kind === 'budget')
-    return actor.ownedBudgetPaths.some((p) => resource.path.startsWith(p));
+  if (resource.kind === 'budget') {
+    if (actor.ownedBudgetPaths.some((p) => resource.path.startsWith(p))) return true;
+    return Boolean(
+      action &&
+        HOME_UNIT_ACTIONS.includes(action) &&
+        resource.orgUnitId &&
+        (actor.homeOrgUnitIds ?? []).includes(resource.orgUnitId),
+    );
+  }
   if (resource.kind === 'org-unit' || resource.kind === 'person') {
     const self =
       resource.kind === 'person'
@@ -248,7 +266,7 @@ export function can(actor: Actor, action: Action, resource: Resource): Decision 
   const visible = readScope !== null && scopeCovers(readScope, actor, resource);
   const scope = bestScope(actor, action);
   if (scope === null) return { allowed: false, visible, reason: `no role grants ${action}` };
-  const allowed = scopeCovers(scope, actor, resource);
+  const allowed = scopeCovers(scope, actor, resource, action);
   return {
     allowed,
     visible: visible || allowed,
