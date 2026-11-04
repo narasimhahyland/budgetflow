@@ -46,6 +46,9 @@ const UNPROCESSABLE: readonly DomainErrorCode[] = [
   'ACCOUNTING_DATE_OUTSIDE_FISCAL_YEAR',
   'ORG_HIERARCHY_INVALID',
   'IMPORT_INVALID',
+  'TRANSFER_INVALID',
+  'PHASING_TOTAL_MISMATCH',
+  'HEADCOUNT_MISSING',
 ];
 
 /** Domain failures become problems: 422 for invalid input, 409 for conflicts with current state. */

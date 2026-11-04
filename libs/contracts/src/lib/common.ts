@@ -193,6 +193,13 @@ export const PROBLEM_CODES = [
   'PLAN_RATE_LOCKED',
   'IMPORT_INVALID',
   'DUPLICATE_CODE',
+  'TRANSFER_INVALID',
+  'REQUEST_ALREADY_DECIDED',
+  'PHASING_TOTAL_MISMATCH',
+  'PLAN_VERSION_NOT_EDITABLE',
+  'LIMIT_EXCEEDED',
+  'HEADCOUNT_MISSING',
+  'VERSION_CONFLICT',
 ] as const;
 export const ProblemCode = z.enum(PROBLEM_CODES);
 export type ProblemCode = z.infer<typeof ProblemCode>;

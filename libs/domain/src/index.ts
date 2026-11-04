@@ -16,6 +16,7 @@ export * from './lib/ledger/postings';
 export * from './lib/ledger/rebuild';
 export * from './lib/budgets/budget-status';
 export * from './lib/budgets/controls';
+export * from './lib/budgets/planning';
 export * from './lib/lifecycles';
 export * from './lib/authority/doa';
 export * from './lib/cofunding/cofunding';

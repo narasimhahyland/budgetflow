@@ -1,10 +1,5 @@
 import { err, ok, type Result } from '../result';
-import {
-  allocationAvailable,
-  committedOf,
-  type BucketBalances,
-  type ControlSettings,
-} from '../ledger/balances';
+import { allocationAvailable, type BucketBalances, type ControlSettings } from '../ledger/balances';
 
 export const BUDGET_TYPES = ['operating', 'event', 'shared_event', 'contingency'] as const;
 export type BudgetType = (typeof BUDGET_TYPES)[number];
@@ -15,6 +10,9 @@ export type ReductionDestination = (typeof REDUCTION_DESTINATIONS)[number];
 export const ALLOCATION_DRIVERS = ['fixed', 'per_head'] as const;
 export type AllocationDriver = (typeof ALLOCATION_DRIVERS)[number];
 
+export const CONTROL_ACTIONS = ['freeze', 'reduce', 'set_to_zero'] as const;
+export type ControlAction = (typeof CONTROL_ACTIONS)[number];
+
 export interface ReductionRequest {
   kind: 'reduce' | 'set_to_zero';
   /** For `reduce`: amount to remove in the budget currency. Ignored for set to zero. */
@@ -24,6 +22,11 @@ export interface ReductionRequest {
   reasonCode?: string | null;
   reason?: string | null;
   cascade?: boolean;
+  /**
+   * With cascade: what the children keep after their own set to zero (their floors), which stays
+   * allocated out of this budget.
+   */
+  childrenRetainedMinor?: number;
   /** The impact preview the user confirmed (its floor must match the current one). */
   confirmedPreview?: { floorMinor: number } | null;
 }
@@ -33,34 +36,52 @@ export interface ReductionImpact {
   floorMinor: number;
   reductionMinor: number;
   newAuthorizedMinor: number;
+  /** Held (earmarks) + encumbered (approved commitments): part of the floor. */
   committedMinor: number;
+  heldMinor: number;
+  encumberedMinor: number;
   actualMinor: number;
+  /** Allocated to children and kept by them (all of it without cascade). */
   childrenAllocatedMinor: number;
+  /** Pending requests (pre-encumbered): listed, never part of the floor. */
+  pendingMinor: number;
+  availableBeforeMinor: number;
+  availableAfterMinor: number;
   cascade: boolean;
   blocksNewRequests: boolean;
 }
 
 /**
- * Impact preview for reduce / set to zero. The floor is committed + actual + children unless the
- * change cascades to children (whose own floors then apply, checked by the caller per child).
+ * The floor a reduction or set to zero cannot go below: allocated out (unless cascaded, then what the
+ * children keep) + held + encumbered + actual. Pending requests are excluded from the floor; the
+ * impact preview lists them because a set to zero cancels them and a reduction may leave them short.
  */
+export function reductionFloor(
+  balances: BucketBalances,
+  cascade: boolean,
+  childrenRetainedMinor = 0,
+): number {
+  const children = cascade ? childrenRetainedMinor : balances.allocated_out;
+  return children + balances.held + balances.encumbered + balances.actual;
+}
+
+/** Impact preview for reduce / set to zero. */
 export function previewReduction(
   balances: BucketBalances,
   control: ControlSettings,
-  req: Pick<ReductionRequest, 'kind' | 'amountMinor' | 'cascade'>,
+  req: Pick<ReductionRequest, 'kind' | 'amountMinor' | 'cascade' | 'childrenRetainedMinor'>,
 ): Result<ReductionImpact> {
-  const cascade = Boolean(req.cascade);
-  const committed = committedOf(balances);
-  const floor = committed + balances.actual + (cascade ? 0 : balances.allocated_out);
+  const cascade = req.kind === 'set_to_zero' && Boolean(req.cascade);
+  const floor = reductionFloor(balances, cascade, req.childrenRetainedMinor ?? 0);
   const reduction =
-    req.kind === 'set_to_zero' ? balances.authorized - floor : (req.amountMinor ?? 0);
+    req.kind === 'set_to_zero' ? Math.max(balances.authorized - floor, 0) : (req.amountMinor ?? 0);
   if (req.kind === 'reduce' && (!Number.isSafeInteger(reduction) || reduction <= 0)) {
     return err('AMOUNT_NOT_POSITIVE', 'Enter an amount greater than zero to reduce.');
   }
   if (balances.authorized - reduction < floor) {
     return err(
       'REDUCTION_BELOW_FLOOR',
-      'The budget cannot go below what is already committed, spent and allocated to children.',
+      'The budget cannot go below what is already allocated to children, committed and spent.',
       {
         floorMinor: floor,
         maxReductionMinor: Math.max(balances.authorized - floor, 0),
@@ -68,14 +89,23 @@ export function previewReduction(
       },
     );
   }
+  const availableBefore = allocationAvailable(balances, control);
   return ok({
     currentAuthorizedMinor: balances.authorized,
     floorMinor: floor,
-    reductionMinor: Math.max(reduction, 0),
-    newAuthorizedMinor: balances.authorized - Math.max(reduction, 0),
-    committedMinor: committed,
+    reductionMinor: reduction,
+    newAuthorizedMinor: balances.authorized - reduction,
+    committedMinor: balances.held + balances.encumbered,
+    heldMinor: balances.held,
+    encumberedMinor: balances.encumbered,
     actualMinor: balances.actual,
-    childrenAllocatedMinor: balances.allocated_out,
+    childrenAllocatedMinor: cascade ? (req.childrenRetainedMinor ?? 0) : balances.allocated_out,
+    pendingMinor: balances.pre_encumbered,
+    availableBeforeMinor: availableBefore,
+    availableAfterMinor:
+      availableBefore -
+      reduction +
+      (cascade ? balances.allocated_out - (req.childrenRetainedMinor ?? 0) : 0),
     cascade,
     blocksNewRequests: req.kind === 'set_to_zero',
   });
@@ -108,4 +138,16 @@ export function validateReduction(
     });
   }
   return impact;
+}
+
+/** What happens to pending requests on the budget after a control change (consumed by Phase 5 requests). */
+export type PendingRequestPolicy = 'cancel' | 'hold' | 'release' | 'keep';
+
+export function pendingRequestPolicy(
+  action: 'frozen' | 'unfrozen' | 'reduced' | 'set_to_zero' | 'restored',
+): PendingRequestPolicy {
+  if (action === 'set_to_zero') return 'cancel';
+  if (action === 'frozen') return 'hold';
+  if (action === 'unfrozen' || action === 'restored') return 'release';
+  return 'keep';
 }

@@ -401,6 +401,125 @@ export function postReduction(
   );
 }
 
+export type HierarchyDestination =
+  | { kind: 'budget'; chain: readonly BudgetRef[] }
+  | { kind: 'savings'; planVersionId: string | null };
+
+/**
+ * Moves money between two budgets of one tree along the hierarchy, in one journal: up from the source
+ * to the lowest common ancestor (child `authorized` Dr / parent `allocated_out` Cr), then down to the
+ * destination (parent `allocated_out` Dr / child `authorized` Cr). Every parent keeps allocated out
+ * equal to its children's authorized and budgets in between keep their available. With savings as the
+ * destination the money goes up to the root and leaves it (root `authorized` Dr / `savings` Cr).
+ * Chains list the budget first and the root last. Balance checks belong to the caller.
+ */
+export function postHierarchyMove(
+  input: {
+    type: 'transfer' | 'reduction';
+    sourceChain: readonly BudgetRef[];
+    destination: HierarchyDestination;
+    /** In the source budget's currency. */
+    amount: Money;
+    reasonCode?: string | null;
+    reason?: string | null;
+  },
+  ctx: PostingContext,
+): Result<JournalDraft> {
+  const pos = requirePositive(input.amount);
+  if (!pos.ok) return pos;
+  const source = input.sourceChain[0];
+  if (!source) return err('TRANSFER_INVALID', 'Choose the budget the money comes from.');
+  let up: readonly BudgetRef[];
+  let down: BudgetRef[] = [];
+  if (input.destination.kind === 'budget') {
+    const dest = input.destination.chain;
+    if (dest.length === 0 || dest[0].id === source.id)
+      return err('TRANSFER_INVALID', 'Choose a different budget to receive the money.');
+    const lcaIdx = input.sourceChain.findIndex((b) => dest.some((d) => d.id === b.id));
+    if (lcaIdx < 0)
+      return err('TRANSFER_INVALID', 'Money can only move between budgets of the same tree.');
+    const lcaId = input.sourceChain[lcaIdx].id;
+    up = input.sourceChain.slice(0, lcaIdx + 1);
+    down = [...dest.slice(0, dest.findIndex((d) => d.id === lcaId) + 1)].reverse();
+  } else {
+    up = input.sourceChain;
+  }
+  const lines: JournalLine[] = [];
+  for (let i = 0; i + 1 < up.length; i++) {
+    const child = up[i];
+    const parent = up[i + 1];
+    const ct = hierarchyTriplet(input.amount, child.currency, 'authorized', 1, ctx);
+    if (!ct.ok) return ct;
+    const pt = hierarchyTriplet(input.amount, parent.currency, 'allocated_out', -1, ctx);
+    if (!pt.ok) return pt;
+    lines.push(budgetLine(child, 'authorized', 1, ct.value));
+    lines.push(budgetLine(parent, 'allocated_out', -1, pt.value));
+  }
+  for (let i = 0; i + 1 < down.length; i++) {
+    const parent = down[i];
+    const child = down[i + 1];
+    const pt = hierarchyTriplet(input.amount, parent.currency, 'allocated_out', 1, ctx);
+    if (!pt.ok) return pt;
+    const ct = hierarchyTriplet(input.amount, child.currency, 'authorized', -1, ctx);
+    if (!ct.ok) return ct;
+    lines.push(budgetLine(parent, 'allocated_out', 1, pt.value));
+    lines.push(budgetLine(child, 'authorized', -1, ct.value));
+  }
+  if (input.destination.kind === 'savings') {
+    const root = up[up.length - 1];
+    const rt = hierarchyTriplet(input.amount, root.currency, 'authorized', 1, ctx);
+    if (!rt.ok) return rt;
+    lines.push(budgetLine(root, 'authorized', 1, rt.value));
+    lines.push(
+      counterLine('savings', root.legalEntityId, -1, rt.value, {
+        planVersionId: input.destination.planVersionId,
+      }),
+    );
+  }
+  // The common ancestor gives and receives the same allocation: drop the pair when it nets to zero.
+  const netted = lines.filter((l, i) => {
+    if (l.account !== 'allocated_out') return true;
+    return !lines.some(
+      (o, j) =>
+        j !== i &&
+        o.account === 'allocated_out' &&
+        o.budgetId === l.budgetId &&
+        o.budget!.amountMinor === -l.budget!.amountMinor,
+    );
+  });
+  return draft(input.type, input.amount, ctx, netted, {
+    reasonCode: input.reasonCode ?? undefined,
+    reason: input.reason ?? undefined,
+  });
+}
+
+/**
+ * Applying a plan version to a root budget: an increase is Dr `plan_funding` / Cr root `authorized`,
+ * a decrease the opposite; both lines carry the plan version so the root ties to it.
+ */
+export function postPlanAdjustment(
+  input: { root: BudgetRef; planVersionId: string; deltaMinor: number; reason: string },
+  ctx: PostingContext,
+): Result<JournalDraft> {
+  if (!Number.isSafeInteger(input.deltaMinor) || input.deltaMinor === 0)
+    return err('AMOUNT_NOT_POSITIVE', 'The plan adjustment must change the root budget.');
+  const amount: Money = { amountMinor: Math.abs(input.deltaMinor), currency: input.root.currency };
+  const t = triplet(amount, input.root.currency, ctx);
+  if (!t.ok) return t;
+  const side: Side = input.deltaMinor > 0 ? 1 : -1;
+  const prov = { planVersionId: input.planVersionId };
+  return draft(
+    input.deltaMinor > 0 ? 'increase' : 'reduction',
+    amount,
+    ctx,
+    [
+      counterLine('plan_funding', input.root.legalEntityId, side, t.value, prov),
+      budgetLine(input.root, 'authorized', side === 1 ? -1 : 1, t.value, prov),
+    ],
+    { reason: input.reason },
+  );
+}
+
 /** Commitment lifecycle postings: each moves an amount between buckets with paired lines in one journal. */
 export type CommitmentPosting =
   | 'pre_encumber'
