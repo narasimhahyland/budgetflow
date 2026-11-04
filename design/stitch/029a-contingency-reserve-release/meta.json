@@ -1,0 +1,11 @@
+{
+  "screen": "029a-contingency-reserve-release",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/28f76453b5544c969fbc1008c0679e4c",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

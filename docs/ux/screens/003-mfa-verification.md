@@ -59,5 +59,5 @@ One labelled input group ("Verification code, 6 digits"); errors announced with 
 ## Open questions
 
 - Should "Trust this browser" be allowed for finance and admin roles, or disabled by policy?
-- 001 sign-in has no exported design: Stitch timed out twice (see review log). It reuses this split layout with SSO first, then email and password.
+- 001 sign-in now has an exported design (`design/stitch/001-sign-in/`, 2026-11-05) in the same split layout.
 - Stitch render notes: trust badges and the "TLS 1.3" footer in the render are illustrative, not product copy.

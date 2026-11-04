@@ -1,0 +1,17 @@
+{
+  "screen": "019-budget-list",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/faebb2af8d2c4cd69521c53587b67034",
+      "approved": null,
+      "size": [2826, 2048],
+      "status": "proposed - awaiting user review"
+    },
+    "empty--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/12fb15b614ac4a29901083f13f413587",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

@@ -6,6 +6,12 @@
       "approved": null,
       "size": [2560, 2968],
       "status": "proposed - awaiting user review"
+    },
+    "controls-drawer--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/f39bbb30c36c42a596813293d438f0f5",
+      "approved": null,
+      "size": [2560, 2106],
+      "status": "proposed - awaiting user review"
     }
   }
 }

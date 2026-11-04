@@ -23,7 +23,7 @@ Parent budget owners (CEO, Finance Admin, Department Head, Regional Manager, Loc
 
 ## Content and actions
 
-"From" card (parent, owner, "Available under this budget's rules" with tooltip). "To child unit" select with current authorized. Amount (USD prefix, helper with the maximum). Allocation method: Fixed amount or Per-head driver (opens 024a). Effective date. Note to owner. Impact preview: parent available before and after, child authorized before and after, stacked bar (allocated to children, available, committed and actual), DoA check line, ledger and audit note. Footer: Cancel, "Allocate USD 25,000.00" (amount in the label).
+"From" card (parent, owner, "Available under this budget's rules" with tooltip). "To child unit" select with current authorized. Amount (USD prefix, helper with the maximum). Allocation method: Fixed amount or Per-head driver (opens 022a). Effective date. Note to owner. Impact preview: parent available before and after, child authorized before and after, stacked bar (allocated to children, available, committed and actual), DoA check line, ledger and audit note. Footer: Cancel, "Allocate USD 25,000.00" (amount in the label).
 
 ## Data and permissions
 
@@ -50,7 +50,7 @@ Mobile: full-screen dialog, impact preview below the form, sticky footer. Focus 
 
 ## Related screens and navigation
 
-023, 021, 022, 024a, 057, 088.
+023, 021, 022, 022a, 057, 088.
 
 ## Assumptions and open questions
 

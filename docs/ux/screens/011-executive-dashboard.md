@@ -2,13 +2,13 @@
 
 Status: proposed - awaiting user review. Light theme only. Satori variant of the original Stitch screen `e3133442e4ae4fd5a157b55941377892` (unchanged).
 
-Revised 2026-11-04 to the single-company decisions: Hyland only (static label, no tenant or organization switcher, no reporting-currency chip), budgets in USD (transactions may show INR or EUR with the USD amount), Export instead of Share. Regions table moved to full width; Available KPI is company-wide (tooltip with the definition); chart labels and bar values no longer clip. The Stitch export still clips the Utilization bars at the card edge; the implementation must show every column.
+Revised 2026-11-04 to the single-company decisions: Hyland only (static label, no tenant or organization switcher, no reporting-currency chip), budgets in USD (transactions may show INR or EUR with the USD amount), Export instead of Share. Regions table moved to full width; Available KPI is company-wide (tooltip with the definition); chart labels and bar values no longer clip. Fixed 2026-11-05 (variant `4764d004...`): the regions table uses seven fixed-width columns with the owner as a second line under the region, and the Utilization bars are no longer clipped; a note defines utilization as (committed + actual) / budget with pending requests shown separately.
 
 ## Design
 
 | State                                | Image                                                               | Stitch screen                      |
 | ------------------------------------ | ------------------------------------------------------------------- | ---------------------------------- |
-| default                              | `design/stitch/011-executive-dashboard/default--desktop--light.png` | `e6dd17e8d173435abfa67c15f0b23078` |
+| default                              | `design/stitch/011-executive-dashboard/default--desktop--light.png` | `4764d0041a264dd991b641eeaa488938` |
 | loading                              | `loading--desktop--light.png`                                       | `11233aed9295496cb44c90f31ed4710c` |
 | empty (new fiscal year)              | `empty--desktop--light.png`                                         | `1e99ca37015b4ae7be654a517dd43037` |
 | partial error (actuals feed delayed) | `error--desktop--light.png`                                         | `ed9a737d65164d2d81d9b1dcbbcd6664` |
@@ -76,4 +76,4 @@ Budget hierarchy (023), Budget health (013), Alerts and exceptions (017), Pendin
 
 - India budgets: budget currency INR with USD reporting (as drawn), or USD budgets for India? Affects lakh/crore display.
 - Decided 2026-11-04: Available = Authorized - pending requests (pre-encumbered) - approved commitments (encumbered) - actual, company-wide, child allocations counted once; budget drill-downs show "Available under this budget's rules" with a tooltip explaining any difference.
-- Known render issue: the revised Stitch image shows every value column but clips the Utilization bars at the card edge (two attempts); the build must fit all columns at 1440 and drop Owner below 1280.
+- Regions table: seven columns (Region with owner second line, Budget, Allocated, Committed, Actual, Available, Utilization); every column fits at 1440. The loading, empty and error exports still show the earlier table layout; build all states with the fixed layout.

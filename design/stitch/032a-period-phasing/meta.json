@@ -1,0 +1,11 @@
+{
+  "screen": "032a-period-phasing",
+  "files": {
+    "validation--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/681fcf4b422540a6905c2df0feea927f",
+      "approved": null,
+      "size": [2560, 2566],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

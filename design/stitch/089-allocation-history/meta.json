@@ -1,0 +1,11 @@
+{
+  "screen": "089-allocation-history",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/b0f881de1eaa43f89b02c00e6c6c4d96",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "screen": "031-budget-comparison",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/bce493e9105747b5a59271325826990e",
+      "approved": null,
+      "size": [2560, 2412],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

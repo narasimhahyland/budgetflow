@@ -1,0 +1,17 @@
+{
+  "screen": "025-transfer-budget",
+  "files": {
+    "dialog--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/cb857fe8c5294acda41110d4b9270de6",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    },
+    "blocked--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/36c074e880654a17a6cb251f8a2f9222",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
