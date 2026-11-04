@@ -1,0 +1,14 @@
+{
+  "status": 409,
+  "body": {
+    "type": "urn:budgetflow:problem:budget-frozen",
+    "title": "Budget frozen",
+    "status": 409,
+    "code": "BUDGET_FROZEN",
+    "detail": "This budget is frozen: new requests, allocations and contributions are blocked. Existing commitments can still complete.",
+    "instance": "/api/budgets/ca2f3e53-2a52-4bf4-8183-c38c205e4756/allocations",
+    "params": {
+      "status": "frozen"
+    }
+  }
+}

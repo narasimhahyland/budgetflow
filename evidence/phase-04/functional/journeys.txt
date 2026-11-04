@@ -1,0 +1,269 @@
+
+Running 199 tests using 8 workers
+
+(node:95003) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95006) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95002) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95007) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95000) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95001) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95005) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓    2 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-admin (1.5s)
+  ✓    8 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as super-admin (1.6s)
+  ✓    6 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as department-head (1.6s)
+  ✓    1 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as regional-manager (1.6s)
+  ✓    7 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as org-admin (1.8s)
+  ✓    3 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as ceo (1.8s)
+  ✓    5 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as budget-owner (1.8s)
+  ✓    4 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-controller (1.9s)
+  ✓    9 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as location-manager (1.1s)
+  ✓   10 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as event-organizer (1.1s)
+  ✓   11 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as employee (1.1s)
+  ✓   12 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as auditor (1.2s)
+  ✓   13 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as integration-admin (1.1s)
+  ✓   14 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as analyst (1.1s)
+(node:95156) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95161) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95159) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95157) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95163) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95162) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95158) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95160) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   22 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules (841ms)
+  ✓   20 [desktop] › apps/web-e2e/src/auth/sso.spec.ts:7:5 › signing in with Hyland SSO lands in BudgetFlow as the linked employee (1.4s)
+  ✓   18 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:21:7 › sign-in › a wrong password is refused with a plain message and no session (1.5s)
+  ✓   21 [desktop] › apps/web-e2e/src/auth/forgot-password.spec.ts:13:5 › a reset email lets the user set a new password and sign in (1.8s)
+  ✓   23 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request (978ms)
+  ✓   19 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:7:7 › sign-in › a deep link asks the user to sign in, then opens the page they asked for (1.9s)
+  ✓   17 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:29:7 › sign-in › single sign-on: a new tab in the same browser opens without asking again (1.9s)
+  ✓   25 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab (584ms)
+  ✓   24 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India (636ms)
+  ✓   15 [desktop] › apps/web-e2e/src/auth/mfa.spec.ts:6:5 › the authenticator code is required: wrong code refused, right code signs in (2.2s)
+  ✓   31 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:238:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel (560ms)
+  ✓   16 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:43:7 › sign-in › sign-out ends the session; signing in again asks for credentials (2.7s)
+  ✓   28 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:156:7 › finance admin controls a program › validates a plan spreadsheet with column mapping (1.2s)
+  ✓   32 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (1.2s)
+  ✓   30 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:216:7 › per-head driver › allocates rate x eligible headcount from the HR import (1.4s)
+  ✓   27 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change (1.8s)
+  ✓   35 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked (883ms)
+  ✓   34 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (1.8s)
+  ✓   33 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order (1.9s)
+  ✓   38 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (830ms)
+  ✓   39 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (763ms)
+  ✓   29 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:172:7 › increase request › the location manager asks; the regional manager approves part of it (3.0s)
+  ✓   40 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (672ms)
+  ✓   43 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (493ms)
+  ✓   36 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (2.0s)
+  ✓   37 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code (2.0s)
+  ✓   42 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason (1.1s)
+  ✓   26 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero (3.9s)
+  ✓   44 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (807ms)
+  ✓   41 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history (1.6s)
+  ✓   45 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (962ms)
+  ✓   48 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (769ms)
+  ✓   50 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date (697ms)
+  ✓   46 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (1.2s)
+  ✓   47 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (1.1s)
+  ✓   49 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file (1.0s)
+  ✓   53 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST (791ms)
+  ✓   54 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:58:7 › regional manager in Bengaluru › an INR amount uses lakh grouping (716ms)
+  ✓   51 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it (1.3s)
+  ✓   55 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (809ms)
+  ✓   56 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (835ms)
+  ✓   58 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (750ms)
+  ✓   59 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (572ms)
+  ✓   60 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (748ms)
+  ✓   61 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (610ms)
+  ✓   62 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (534ms)
+  ✓   63 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (676ms)
+  ✓   65 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (527ms)
+  ✓   57 [desktop] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (1.6s)
+  ✓   64 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (776ms)
+  ✓   68 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for employee › employee sees exactly the areas their permissions allow (421ms)
+  ✓   66 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (529ms)
+  ✓   67 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (710ms)
+  ✓   73 [desktop] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (490ms)
+  ✓   70 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (664ms)
+  ✓   74 [desktop] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (517ms)
+  ✓   69 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (782ms)
+  ✓   71 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (843ms)
+  ✓   75 [desktop] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (532ms)
+  ✓   72 [desktop] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (839ms)
+  ✓   78 [desktop] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (494ms)
+  ✓   76 [desktop] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (652ms)
+  ✓   77 [desktop] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (697ms)
+  ✓   79 [desktop] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (643ms)
+  ✓   81 [desktop] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (426ms)
+  ✓   80 [desktop] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (428ms)
+  ✓   52 [desktop] › apps/web-e2e/src/shell/analytics.spec.ts:10:5 › sign-in and navigation send product analytics events the API accepts (4.1s)
+(node:95426) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95427) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95429) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95433) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95436) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95435) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95437) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   82 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules (672ms)
+  -   86 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change
+  -   87 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero
+  -   89 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:216:7 › per-head driver › allocates rate x eligible headcount from the HR import
+  -   92 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
+  ✓   84 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India (863ms)
+  ✓   85 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab (771ms)
+  ✓   83 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request (1.0s)
+  -   94 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked
+  -   96 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code
+(node:95470) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   90 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:238:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel (756ms)
+  -   99 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:172:7 › increase request › the location manager asks; the regional manager approves part of it
+  -  101 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history
+  ✓   91 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (1.0s)
+  ✓   88 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:156:7 › finance admin controls a program › validates a plan spreadsheet with column mapping (1.3s)
+  -  102 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason
+  ✓   98 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (662ms)
+  ✓   93 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (1.3s)
+  ✓   97 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (1.1s)
+  ✓  104 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (661ms)
+  ✓  103 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (774ms)
+  ✓  100 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (1.1s)
+  -  109 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file
+  -  110 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date
+  -  111 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it
+  -  113 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:58:7 › regional manager in Bengaluru › an INR amount uses lakh grouping
+  ✓  107 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (502ms)
+  ✓  106 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (794ms)
+  ✓  105 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (1.1s)
+  ✓  108 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (774ms)
+  ✓  114 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (633ms)
+  ✓  115 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (612ms)
+  ✓  117 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (573ms)
+  ✓  112 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST (744ms)
+  ✓   95 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (2.2s)
+  ✓  118 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (835ms)
+  ✓  121 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (638ms)
+  ✓  122 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (708ms)
+  ✓  120 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (854ms)
+  ✓  124 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (867ms)
+  ✓  123 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (942ms)
+  ✓  119 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (1.3s)
+  ✓  125 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (685ms)
+  ✓  116 [tablet] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (1.9s)
+  ✓  126 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (988ms)
+  ✓  127 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for employee › employee sees exactly the areas their permissions allow (972ms)
+  ✓  129 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (799ms)
+  ✓  128 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (865ms)
+  ✓  131 [tablet] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (680ms)
+  ✓  130 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (818ms)
+  ✓  132 [tablet] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (866ms)
+  ✓  133 [tablet] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (917ms)
+  ✓  137 [tablet] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (715ms)
+  ✓  134 [tablet] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (845ms)
+  ✓  140 [tablet] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (473ms)
+  ✓  139 [tablet] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (668ms)
+  ✓  135 [tablet] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (910ms)
+  ✓  138 [tablet] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (855ms)
+  ✓  136 [tablet] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (935ms)
+(node:95701) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95715) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95717) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95718) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95727) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -  145 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero
+  ✓  141 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules (636ms)
+  -  147 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:216:7 › per-head driver › allocates rate x eligible headcount from the HR import
+(node:95740) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:95741) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -  146 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change
+  -  152 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
+  -  150 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:172:7 › increase request › the location manager asks; the regional manager approves part of it
+  -  154 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked
+  ✓  144 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab (938ms)
+  ✓  148 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:238:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel (708ms)
+  ✓  143 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India (1.0s)
+  -  156 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code
+  ✓  142 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request (1.8s)
+  -  160 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history
+  -  161 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason
+  ✓  158 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (842ms)
+  ✓  149 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (1.5s)
+  ✓  159 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (1.1s)
+  ✓  151 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:156:7 › finance admin controls a program › validates a plan spreadsheet with column mapping (1.5s)
+  ✓  157 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (1.4s)
+  ✓  153 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (1.7s)
+  -  168 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file
+  -  169 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date
+  ✓  163 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (901ms)
+  -  170 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it
+  ✓  166 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (619ms)
+  -  172 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:58:7 › regional manager in Bengaluru › an INR amount uses lakh grouping
+  ✓  162 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (1.1s)
+  ✓  164 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (966ms)
+  ✓  167 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (914ms)
+  ✓  165 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (1.3s)
+  ✓  171 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST (840ms)
+  ✓  155 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (2.7s)
+  ✓  173 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (860ms)
+  ✓  174 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (929ms)
+  ✓  177 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (642ms)
+  ✓  176 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (986ms)
+  ✓  179 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (744ms)
+  ✓  178 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (925ms)
+  ✓  180 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (808ms)
+  ✓  184 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (619ms)
+  ✓  183 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (692ms)
+  ✓  182 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (864ms)
+  ✓  181 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (1.1s)
+  ✓  186 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for employee › employee sees exactly the areas their permissions allow (729ms)
+  ✓  175 [mobile] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (2.3s)
+  ✓  188 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (717ms)
+  ✓  185 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (913ms)
+  ✓  189 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (771ms)
+  ✓  187 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (1.2s)
+  ✓  191 [mobile] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (853ms)
+  ✓  192 [mobile] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (666ms)
+  ✓  190 [mobile] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (1.0s)
+  ✓  193 [mobile] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (841ms)
+  ✓  196 [mobile] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (801ms)
+  ✓  195 [mobile] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (921ms)
+  ✓  194 [mobile] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (941ms)
+  ✓  198 [mobile] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (476ms)
+  ✓  197 [mobile] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (635ms)
+  ✓  199 [mobile] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (430ms)
+
+  26 skipped
+  173 passed (1.1m)

@@ -1,0 +1,752 @@
+{
+  "generatedAt": "2026-11-04T23:40:24.276Z",
+  "base": "http://localhost:4240",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 90,
+  "blocking": 0,
+  "warnings": 3,
+  "results": [
+    {
+      "id": "019-budget-list",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/019-budget-list--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "019-budget-list",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/019-budget-list--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "019-budget-list",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/019-budget-list--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "019-budget-list",
+      "state": "empty",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/019-budget-list--empty--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "019-budget-list",
+      "state": "empty",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/019-budget-list--empty--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "019-budget-list",
+      "state": "empty",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/019-budget-list--empty--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "020-create-budget",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020-create-budget--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "020-create-budget",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020-create-budget--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "020-create-budget",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020-create-budget--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "020a-budget-plan-import",
+      "state": "map-columns",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020a-budget-plan-import--map-columns--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "020a-budget-plan-import",
+      "state": "map-columns",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020a-budget-plan-import--map-columns--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "020a-budget-plan-import",
+      "state": "map-columns",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020a-budget-plan-import--map-columns--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "020a-budget-plan-import",
+      "state": "review",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020a-budget-plan-import--review--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "020a-budget-plan-import",
+      "state": "review",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020a-budget-plan-import--review--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "020a-budget-plan-import",
+      "state": "review",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020a-budget-plan-import--review--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "020b-program-templates",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020b-program-templates--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "020b-program-templates",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020b-program-templates--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "020b-program-templates",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/020b-program-templates--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "021-budget-details",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/021-budget-details--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "021-budget-details",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/021-budget-details--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "021-budget-details",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/021-budget-details--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "021-budget-details",
+      "state": "controls-drawer",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/021-budget-details--controls-drawer--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "021-budget-details",
+      "state": "controls-drawer",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/021-budget-details--controls-drawer--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "021-budget-details",
+      "state": "controls-drawer",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/021-budget-details--controls-drawer--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "022-budget-allocation-workspace",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022-budget-allocation-workspace--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "022-budget-allocation-workspace",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022-budget-allocation-workspace--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "022-budget-allocation-workspace",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022-budget-allocation-workspace--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "022-budget-allocation-workspace",
+      "state": "warning-block",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022-budget-allocation-workspace--warning-block--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "022-budget-allocation-workspace",
+      "state": "warning-block",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022-budget-allocation-workspace--warning-block--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "022-budget-allocation-workspace",
+      "state": "warning-block",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022-budget-allocation-workspace--warning-block--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "022a-per-head-driver-allocation",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022a-per-head-driver-allocation--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "022a-per-head-driver-allocation",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022a-per-head-driver-allocation--default--tablet--light.png",
+      "findings": [
+        {
+          "type": "layout-shift",
+          "severity": "warning",
+          "message": "cumulative layout shift 0.182 (> 0.1)"
+        }
+      ]
+    },
+    {
+      "id": "022a-per-head-driver-allocation",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022a-per-head-driver-allocation--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "022b-allocation-grid-paste",
+      "state": "paste-preview",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022b-allocation-grid-paste--paste-preview--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "022b-allocation-grid-paste",
+      "state": "paste-preview",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022b-allocation-grid-paste--paste-preview--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "022b-allocation-grid-paste",
+      "state": "paste-preview",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/022b-allocation-grid-paste--paste-preview--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "023-budget-hierarchy",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/023-budget-hierarchy--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "023-budget-hierarchy",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/023-budget-hierarchy--default--tablet--light.png",
+      "findings": [
+        {
+          "type": "layout-shift",
+          "severity": "warning",
+          "message": "cumulative layout shift 0.173 (> 0.1)"
+        }
+      ]
+    },
+    {
+      "id": "023-budget-hierarchy",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/023-budget-hierarchy--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "023-budget-hierarchy",
+      "state": "set-to-zero-dialog",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/023-budget-hierarchy--set-to-zero-dialog--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "023-budget-hierarchy",
+      "state": "set-to-zero-dialog",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/023-budget-hierarchy--set-to-zero-dialog--tablet--light.png",
+      "findings": [
+        {
+          "type": "layout-shift",
+          "severity": "warning",
+          "message": "cumulative layout shift 0.173 (> 0.1)"
+        }
+      ]
+    },
+    {
+      "id": "023-budget-hierarchy",
+      "state": "set-to-zero-dialog",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/023-budget-hierarchy--set-to-zero-dialog--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "024-allocate-to-child",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/024-allocate-to-child--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "024-allocate-to-child",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/024-allocate-to-child--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "024-allocate-to-child",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/024-allocate-to-child--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "024-allocate-to-child",
+      "state": "blocked",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/024-allocate-to-child--blocked--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "024-allocate-to-child",
+      "state": "blocked",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/024-allocate-to-child--blocked--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "024-allocate-to-child",
+      "state": "blocked",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/024-allocate-to-child--blocked--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "025-transfer-budget",
+      "state": "dialog",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/025-transfer-budget--dialog--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "025-transfer-budget",
+      "state": "dialog",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/025-transfer-budget--dialog--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "025-transfer-budget",
+      "state": "dialog",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/025-transfer-budget--dialog--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "025-transfer-budget",
+      "state": "blocked",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/025-transfer-budget--blocked--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "025-transfer-budget",
+      "state": "blocked",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/025-transfer-budget--blocked--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "025-transfer-budget",
+      "state": "blocked",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/025-transfer-budget--blocked--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "026-reduce-budget",
+      "state": "dialog",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/026-reduce-budget--dialog--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "026-reduce-budget",
+      "state": "dialog",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/026-reduce-budget--dialog--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "026-reduce-budget",
+      "state": "dialog",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/026-reduce-budget--dialog--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "026-reduce-budget",
+      "state": "below-floor",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/026-reduce-budget--below-floor--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "026-reduce-budget",
+      "state": "below-floor",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/026-reduce-budget--below-floor--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "026-reduce-budget",
+      "state": "below-floor",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/026-reduce-budget--below-floor--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "027-freeze-budget",
+      "state": "dialog",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/027-freeze-budget--dialog--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "027-freeze-budget",
+      "state": "dialog",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/027-freeze-budget--dialog--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "027-freeze-budget",
+      "state": "dialog",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/027-freeze-budget--dialog--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "028-set-to-zero",
+      "state": "dialog",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/028-set-to-zero--dialog--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "028-set-to-zero",
+      "state": "dialog",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/028-set-to-zero--dialog--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "028-set-to-zero",
+      "state": "dialog",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/028-set-to-zero--dialog--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "028-set-to-zero",
+      "state": "validation",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/028-set-to-zero--validation--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "028-set-to-zero",
+      "state": "validation",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/028-set-to-zero--validation--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "028-set-to-zero",
+      "state": "validation",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/028-set-to-zero--validation--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "029-revise-budget",
+      "state": "increase-request",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/029-revise-budget--increase-request--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "029-revise-budget",
+      "state": "increase-request",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/029-revise-budget--increase-request--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "029-revise-budget",
+      "state": "increase-request",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/029-revise-budget--increase-request--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "029a-contingency-reserve-release",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/029a-contingency-reserve-release--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "029a-contingency-reserve-release",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/029a-contingency-reserve-release--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "029a-contingency-reserve-release",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/029a-contingency-reserve-release--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "030-budget-version-history",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/030-budget-version-history--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "030-budget-version-history",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/030-budget-version-history--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "030-budget-version-history",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/030-budget-version-history--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "031-budget-comparison",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/031-budget-comparison--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "031-budget-comparison",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/031-budget-comparison--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "031-budget-comparison",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/031-budget-comparison--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "032-budget-calendar",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/032-budget-calendar--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "032-budget-calendar",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/032-budget-calendar--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "032-budget-calendar",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/032-budget-calendar--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "032a-period-phasing",
+      "state": "validation",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/032a-period-phasing--validation--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "032a-period-phasing",
+      "state": "validation",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/032a-period-phasing--validation--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "032a-period-phasing",
+      "state": "validation",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/032a-period-phasing--validation--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "089-allocation-history",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/089-allocation-history--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "089-allocation-history",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/089-allocation-history--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "089-allocation-history",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-04/visual-qa/iter-4/screens/089-allocation-history--default--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

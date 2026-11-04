@@ -1,0 +1,12 @@
+{
+  "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+  "planVersionId": "61000000-0000-4000-8000-000000000001",
+  "planVersionLabel": "FY2026 original plan",
+  "currency": "USD",
+  "planTotalMinor": 53986200,
+  "rootAuthorizedMinor": 53978200,
+  "savingsMinor": 8000,
+  "differenceMinor": 0,
+  "tiedOut": true,
+  "rootCount": 175
+}
