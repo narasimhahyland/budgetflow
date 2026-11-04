@@ -1,0 +1,11 @@
+{
+  "screen": "051-event-commitments",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/f1f2395f9bdd422ea5813f65a6a99419",
+      "approved": null,
+      "size": [2560, 2940],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

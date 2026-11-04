@@ -1,0 +1,11 @@
+{
+  "screen": "044-event-list",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/6ff4d3633ba3412fb8116ff52a8a87bb",
+      "approved": null,
+      "size": [2560, 2092],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

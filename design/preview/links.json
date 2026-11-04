@@ -47,7 +47,16 @@
     "031-budget-comparison": "Budget comparison",
     "032-budget-calendar": "Budget calendar",
     "032a-period-phasing": "Period phasing editor",
-    "089-allocation-history": "Allocation history"
+    "089-allocation-history": "Allocation history",
+    "044-event-list": "Event list",
+    "049-cross-location-cost-split": "Cross-location cost allocation",
+    "050-event-approval-workflow": "Event approval workflow",
+    "051-event-commitments": "Event commitments and spend",
+    "052-event-documents": "Event supporting documents",
+    "053a-intercompany-recharge-schedule": "Intercompany recharge schedule",
+    "056-create-budget-request": "New request (budget request)",
+    "058-over-budget-request": "Over-budget request",
+    "064-request-history": "Request history"
   },
   "stateLabels": {
     "default": "Default",
@@ -117,10 +126,15 @@
     {
       "name": "Events",
       "screens": [
+        "044-event-list",
         "045-create-event-budget",
         "046-event-details",
         "047-event-participants",
-        "046a-co-funding-board"
+        "046a-co-funding-board",
+        "049-cross-location-cost-split",
+        "050-event-approval-workflow",
+        "051-event-commitments",
+        "052-event-documents"
       ]
     },
     {
@@ -133,7 +147,10 @@
         "056a-inter-director-contribution-request",
         "057-additional-fund-request",
         "055-my-requests",
-        "069-rule-builder"
+        "069-rule-builder",
+        "056-create-budget-request",
+        "058-over-budget-request",
+        "064-request-history"
       ]
     },
     {
@@ -143,7 +160,8 @@
         "080b-unmatched-actuals",
         "080c-gl-tie-out",
         "107-exchange-rates",
-        "108-fiscal-calendar"
+        "108-fiscal-calendar",
+        "053a-intercompany-recharge-schedule"
       ]
     },
     {
@@ -212,7 +230,16 @@
     "032-budget-calendar/default",
     "032a-period-phasing/validation",
     "089-allocation-history/default",
-    "001-sign-in/default"
+    "001-sign-in/default",
+    "044-event-list/default",
+    "049-cross-location-cost-split/default",
+    "050-event-approval-workflow/default",
+    "051-event-commitments/default",
+    "052-event-documents/default",
+    "053a-intercompany-recharge-schedule/default",
+    "056-create-budget-request/default",
+    "058-over-budget-request/default",
+    "064-request-history/default"
   ],
   "ignore": ["Skip to main content"],
   "links": {
@@ -225,9 +252,8 @@
       "Budgets": "023-budget-hierarchy",
       "Allocation workspace": "022-budget-allocation-workspace",
       "Budget list": "019-budget-list",
-      "Events": "046-event-details",
+      "Events": "044-event-list",
       "Approval inbox": "059-approval-inbox",
-      "Approvals": "059-approval-inbox",
       "Open approval inbox": "059-approval-inbox",
       "My requests": "055-my-requests",
       "Actuals and matching": "080a-actuals-import",
@@ -261,7 +287,10 @@
       "Request increase": "029-revise-budget/increase-request",
       "Compare versions": "031-budget-comparison",
       "Edit phasing": "032a-period-phasing",
-      "Budget calendar": "032-budget-calendar"
+      "Budget calendar": "032-budget-calendar",
+      "Intercompany recharges": "053a-intercompany-recharge-schedule",
+      "New request": "056-create-budget-request",
+      "Approvals": "059-approval-inbox"
     },
     "000-design-system": {
       "Allocate budget": "",
@@ -454,7 +483,12 @@
       "Participants": "047-event-participants",
       "row:Participants": "047-event-participants",
       "row:Westlake Team Activities": "056a-inter-director-contribution-request",
-      "Edit event": "045-create-event-budget"
+      "Edit event": "045-create-event-budget",
+      "Cost split": "049-cross-location-cost-split",
+      "Commitments": "051-event-commitments",
+      "Documents": "052-event-documents",
+      "Approvals": "050-event-approval-workflow",
+      "Overview": ""
     },
     "047-event-participants": {
       "Overview": "046-event-details",
@@ -462,7 +496,12 @@
       "Fix now": null,
       "Add participants": null,
       "Import CSV": null,
-      "Add location": null
+      "Add location": null,
+      "Cost split": "049-cross-location-cost-split",
+      "Approvals": "050-event-approval-workflow",
+      "Commitments": "051-event-commitments",
+      "Documents": "052-event-documents",
+      "Participants": ""
     },
     "046a-co-funding-board": {
       "Request contribution": "056a-inter-director-contribution-request",
@@ -491,7 +530,8 @@
       "Approve": "061-approval-decision/approve-part",
       "Reject": "061-approval-decision/approve-part",
       "Request changes": "061-approval-decision/approve-part",
-      "Why this route?": null
+      "Why this route?": null,
+      "History": "064-request-history"
     },
     "061-approval-decision": {
       "Cancel": "060-request-details",
@@ -511,7 +551,7 @@
       "row:REQ-2026-0418": "060-request-details",
       "row:IDBCR-2026-0031": "056a-inter-director-contribution-request",
       "row:IDBCR-2026-0027": "046a-co-funding-board",
-      "New request": "057-additional-fund-request",
+      "New request": "056-create-budget-request",
       "REQ-2026-0418": "060-request-details",
       "IDBCR-2026-0031": "056a-inter-director-contribution-request",
       "IDBCR-2026-0027": "046a-co-funding-board"
@@ -645,6 +685,79 @@
       "View in audit log": "088-audit-log",
       "row:JRN-2026-01842": "088-audit-log",
       "Export": null
+    },
+    "044-event-list": {
+      "row:India Annual Day 2026": "046-event-details",
+      "row:Diwali celebration": "046-event-details",
+      "Create event": "045-create-event-budget",
+      "Export": null
+    },
+    "049-cross-location-cost-split": {
+      "Overview": "046-event-details",
+      "Participants": "047-event-participants",
+      "Save split": "046-event-details",
+      "Recalculate": "049-cross-location-cost-split",
+      "row:Recharge at cost": "053a-intercompany-recharge-schedule",
+      "Cost split": "",
+      "Approvals": "050-event-approval-workflow",
+      "Commitments": "051-event-commitments",
+      "Documents": "052-event-documents"
+    },
+    "050-event-approval-workflow": {
+      "Overview": "046-event-details",
+      "Participants": "047-event-participants",
+      "Send reminder": null,
+      "row:IDBCR-2026-0031": "056a-inter-director-contribution-request",
+      "row:IDBCR-2026-0027": "046a-co-funding-board",
+      "Cost split": "049-cross-location-cost-split",
+      "Approvals": "",
+      "Commitments": "051-event-commitments",
+      "Documents": "052-event-documents"
+    },
+    "051-event-commitments": {
+      "Overview": "046-event-details",
+      "Participants": "047-event-participants",
+      "Request additional funds": "057-additional-fund-request",
+      "Add commitment": null,
+      "row:REQ-2026-0433": "060-request-details",
+      "Cost split": "049-cross-location-cost-split",
+      "Approvals": "050-event-approval-workflow",
+      "Commitments": "",
+      "Documents": "052-event-documents"
+    },
+    "052-event-documents": {
+      "Overview": "046-event-details",
+      "Participants": "047-event-participants",
+      "Download": null,
+      "Replace": null,
+      "Cost split": "049-cross-location-cost-split",
+      "Approvals": "050-event-approval-workflow",
+      "Commitments": "051-event-commitments",
+      "Documents": ""
+    },
+    "053a-intercompany-recharge-schedule": {
+      "row:India Annual Day 2026": "046-event-details",
+      "Approve tax treatment": "080c-gl-tie-out",
+      "Request changes": null
+    },
+    "056-create-budget-request": {
+      "row:More money for an event": "057-additional-fund-request",
+      "row:Help from another director": "056a-inter-director-contribution-request",
+      "row:More than is available": "058-over-budget-request",
+      "Submit request": "060-request-details",
+      "Save draft": "055-my-requests",
+      "Cancel": "055-my-requests",
+      "New request": ""
+    },
+    "058-over-budget-request": {
+      "Submit over-budget request": "060-request-details",
+      "Save draft": "055-my-requests",
+      "row:Ask another director": "056a-inter-director-contribution-request"
+    },
+    "064-request-history": {
+      "Details": "060-request-details",
+      "Export history (PDF)": null,
+      "History": ""
     }
   },
   "hotspots": {
