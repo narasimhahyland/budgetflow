@@ -32,3 +32,5 @@ playwright/.cache/
 .vscode/*
 !.vscode/extensions.json
 *.log
+
+.angular

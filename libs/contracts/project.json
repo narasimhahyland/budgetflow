@@ -1,0 +1,31 @@
+{
+  "name": "contracts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/contracts/src",
+  "projectType": "library",
+  "tags": ["type:contracts", "scope:shared"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p libs/contracts/tsconfig.lib.json --noEmit"
+      }
+    },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx --tsconfig libs/contracts/tsconfig.lib.json libs/contracts/scripts/openapi.ts"
+      }
+    },
+    "openapi-check": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default"],
+      "options": {
+        "command": "tsx --tsconfig libs/contracts/tsconfig.lib.json libs/contracts/scripts/openapi.ts --check"
+      }
+    }
+  }
+}

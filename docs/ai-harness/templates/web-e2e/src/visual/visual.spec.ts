@@ -1,17 +1,45 @@
 // Template for apps/web-e2e/src/visual/visual.spec.ts: visual regression baselines for every screen state in
 // apps/web-e2e/visual/screens.json (the same file the visual QA capture script reads). Runs in the visual-light
-// and visual-dark projects, inside the pinned Playwright image only (npm run e2e:visual / e2e:update-snapshots).
+// project (light theme only; dark theme deferred), inside the pinned Playwright image only (npm run e2e:visual / e2e:update-snapshots).
 // Data comes from the deterministic e2e seed (scripts/stack.sh reset); the clock is frozen; animations are off.
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
-type Action = { click?: string; fill?: [string, string]; select?: [string, string]; hover?: string; press?: string; waitFor?: string };
-type State = { state: string; path?: string; role?: string; waitFor?: string; actions?: Action[]; mask?: string[]; fullPage?: boolean };
-type Screen = { id: string; path: string; role?: string; waitFor?: string; mask?: string[]; states: State[] };
+type Action = {
+  click?: string;
+  fill?: [string, string];
+  select?: [string, string];
+  hover?: string;
+  press?: string;
+  waitFor?: string;
+};
+type State = {
+  state: string;
+  path?: string;
+  role?: string;
+  waitFor?: string;
+  actions?: Action[];
+  mask?: string[];
+  fullPage?: boolean;
+};
+type Screen = {
+  id: string;
+  path: string;
+  role?: string;
+  waitFor?: string;
+  mask?: string[];
+  states: State[];
+};
 type ScreensFile = { freezeTime?: string; mask?: string[]; screens: Screen[] };
 
-const config: ScreensFile = JSON.parse(readFileSync(new URL('../../visual/screens.json', import.meta.url), 'utf8'));
-const VIEWPORTS = { desktop: { width: 1440, height: 900 }, tablet: { width: 834, height: 1112 }, mobile: { width: 412, height: 915 } };
+const config: ScreensFile = JSON.parse(
+  readFileSync(new URL('../../visual/screens.json', import.meta.url), 'utf8'),
+);
+const VIEWPORTS = {
+  desktop: { width: 1440, height: 900 },
+  tablet: { width: 834, height: 1112 },
+  mobile: { width: 412, height: 915 },
+};
 
 for (const screen of config.screens) {
   for (const state of screen.states) {
@@ -35,8 +63,13 @@ for (const screen of config.screens) {
             else if (a.waitFor) await expect(page.locator(a.waitFor).first()).toBeVisible();
           }
           await page.evaluate(() => document.fonts.ready);
-          const mask = [...(config.mask ?? []), ...(screen.mask ?? []), ...(state.mask ?? [])].map((s) => page.locator(s));
-          await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, { fullPage: state.fullPage ?? true, mask });
+          const mask = [...(config.mask ?? []), ...(screen.mask ?? []), ...(state.mask ?? [])].map(
+            (s) => page.locator(s),
+          );
+          await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
+            fullPage: state.fullPage ?? true,
+            mask,
+          });
         });
       }
     });

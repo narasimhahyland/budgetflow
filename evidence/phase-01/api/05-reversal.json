@@ -1,0 +1,125 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/ledger/journals/8997b919-f030-4c33-b921-3d77146a5b1c/reversals",
+    "as": "finance.controller@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "reasonCode": "REV-ERROR",
+      "reason": "Evidence: allocated to the wrong region"
+    }
+  },
+  "status": 201,
+  "body": {
+    "id": "400a2dae-2702-442a-a4e6-9bb6c4d1fa62",
+    "type": "reversal",
+    "transactionCurrency": "USD",
+    "reportingCurrency": "USD",
+    "accountingDate": "2026-11-04",
+    "periodId": "23000000-0000-4000-8000-012026110000",
+    "periodLabel": "Nov 2026",
+    "late": false,
+    "originalPeriodId": null,
+    "reversalOfJournalId": "8997b919-f030-4c33-b921-3d77146a5b1c",
+    "reversedByJournalId": null,
+    "reasonCode": "REV-ERROR",
+    "reason": "Evidence: allocated to the wrong region",
+    "actorPersonId": "40000000-0000-4000-8000-000000000005",
+    "createdAt": "2026-11-04T16:48:46.917Z",
+    "totals": {
+      "debitTransactionMinor": 3000000,
+      "creditTransactionMinor": 3000000,
+      "debitReportingMinor": 3000000,
+      "creditReportingMinor": 3000000
+    },
+    "balanced": true,
+    "lines": [
+      {
+        "id": "9d02b766-594f-4674-9b1f-4a9027ad6516",
+        "journalId": "400a2dae-2702-442a-a4e6-9bb6c4d1fa62",
+        "lineNo": 1,
+        "budgetId": "37ee3981-acee-4dd5-9879-62cce76d9189",
+        "account": "allocated_out",
+        "legalEntityId": "20000000-0000-4000-8000-000000000001",
+        "costCenterId": null,
+        "glAccountId": null,
+        "eventCode": null,
+        "periodId": "23000000-0000-4000-8000-012026110000",
+        "accountingDate": "2026-11-04",
+        "transaction": {
+          "amountMinor": -3000000,
+          "currency": "USD"
+        },
+        "budget": {
+          "amountMinor": -3000000,
+          "currency": "USD"
+        },
+        "reporting": {
+          "amountMinor": -3000000,
+          "currency": "USD"
+        },
+        "budgetRate": {
+          "type": "plan",
+          "from": "USD",
+          "to": "USD",
+          "value": "1.000000000000",
+          "rateIds": []
+        },
+        "reportingRate": {
+          "type": "plan",
+          "from": "USD",
+          "to": "USD",
+          "value": "1.000000000000",
+          "rateIds": []
+        },
+        "planVersionId": null,
+        "reversalOfLineId": "327d0289-847b-4cd5-803c-dc50a41569b3"
+      },
+      {
+        "id": "75f44c79-1100-4b04-9983-1ec052630676",
+        "journalId": "400a2dae-2702-442a-a4e6-9bb6c4d1fa62",
+        "lineNo": 2,
+        "budgetId": "b5809913-a1e6-4bea-9492-5e74861aab90",
+        "account": "authorized",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "costCenterId": null,
+        "glAccountId": null,
+        "eventCode": null,
+        "periodId": "23000000-0000-4000-8000-022027080000",
+        "accountingDate": "2026-11-04",
+        "transaction": {
+          "amountMinor": 3000000,
+          "currency": "USD"
+        },
+        "budget": {
+          "amountMinor": 249750000,
+          "currency": "INR"
+        },
+        "reporting": {
+          "amountMinor": 3000000,
+          "currency": "USD"
+        },
+        "budgetRate": {
+          "type": "plan",
+          "from": "USD",
+          "to": "INR",
+          "value": "83.250000000000",
+          "rateIds": ["24000000-0000-4000-8000-000000000100"]
+        },
+        "reportingRate": {
+          "type": "plan",
+          "from": "USD",
+          "to": "USD",
+          "value": "1.000000000000",
+          "rateIds": []
+        },
+        "planVersionId": null,
+        "reversalOfLineId": "4c5abf4a-a84f-4741-b7f5-fb17d381320d"
+      }
+    ]
+  }
+}

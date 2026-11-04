@@ -23,7 +23,7 @@ Satori component, then Angular Material themed by `sat.theme`, then a custom com
 Check selectors and inputs in `node_modules/@hylandsoftware/satori-ui/types/*.d.ts`.
 
 ## Theme and tokens
-- `html { @include sat.theme; }` lives only in `apps/web/src/styles.scss`. Dark mode is `color-scheme`; tokens resolve through `light-dark()`.
+- `html { color-scheme: light; @include sat.theme; }` lives only in `apps/web/src/styles.scss`. Light theme only for now (dark theme deferred); tokens resolve through `light-dark()`, so enabling dark later is a `color-scheme` change, not a restyle.
 - Colors: `var(--mat-sys-*)` (primary, surface, surface-container-*, on-surface, outline, error) and `var(--sat-sys-*)` (`info|success|warning|important|neutral` + `-container`, `on-*-container`, `-icon`; `cat-*`; `primary-loud`). No hex, rgb, hsl or named colors.
 - Type and shape: `var(--mat-sys-body-medium)`, `var(--mat-sys-title-large)`, `var(--mat-sys-corner-medium)`. Never declare `font-family`; Satori fonts are already loaded.
 - Never import `@hylandsoftware/satori-tokens/css/base`, `/light` or `/dark`. `css/dataviz` is allowed for charts only.

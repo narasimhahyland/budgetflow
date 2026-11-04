@@ -22,6 +22,7 @@ BudgetFlow Enterprise is a public repository for a multi-tenant corporate budget
 - App translation files, translation keys or the `translate` pipe in app code (copy is plain English; `@ngx-translate/core` exists only as Satori's peer dependency). Money formatted by hand instead of the shared money component and Angular formatters.
 - Missing screen states (loading, empty, error, forbidden, blocked) or budget-safety states rendered alike (soft warning vs hard block, frozen vs zero, encumbered vs actual).
 - Status shown by color alone, or blocked actions without a visible reason.
+- Dark-theme work while it is deferred: a `visual-dark` project, dark baselines, or app code that switches `color-scheme` away from light (the app is light theme only for now).
 - Behavior changes without a functional check (API scenario in `apps/api-e2e` or journey in `apps/web-e2e`); invariants changed without updating `docs/testing/invariant-scenarios.md`; skipped, focused or weakened scenarios; selectors on Satori or Material internal classes; fixed sleeps.
 - Visual baseline PNGs (`**/__screenshots__/**`) changed without a "Visual baselines updated:" reason in the PR, or baselines generated outside the pinned Playwright image.
 - Drizzle schema changes without a generated migration and RLS policy tests; `drizzle-kit push`.

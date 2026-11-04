@@ -1,0 +1,17 @@
+{
+  "name": "domain",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/domain/src",
+  "projectType": "library",
+  "tags": ["type:domain", "scope:shared"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p libs/domain/tsconfig.lib.json --noEmit"
+      }
+    }
+  }
+}

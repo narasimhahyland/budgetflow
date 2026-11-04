@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "noEmit": true,
+    "experimentalDecorators": false,
+    "emitDecoratorMetadata": false
+  },
+  "include": ["playwright.config.ts", "src/**/*.ts"]
+}

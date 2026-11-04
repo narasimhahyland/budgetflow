@@ -1,6 +1,6 @@
 ---
 name: verify-ui
-description: Slash command /verify-ui [screens] [--out dir] - one capture-and-inspect pass (desktop/tablet/mobile, light/dark) with console, network, overflow, interpolation and layout-shift checks and design parity for BudgetFlow screens. No fixing loop; use /visual-qa for that.
+description: Slash command /verify-ui [screens] [--out dir] - one capture-and-inspect pass (desktop/tablet/mobile, light theme; dark deferred) with console, network, overflow, interpolation and layout-shift checks and design parity for BudgetFlow screens. No fixing loop; use /visual-qa for that.
 disable-model-invocation: true
 ---
 

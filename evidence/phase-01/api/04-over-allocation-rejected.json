@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/budgets/37ee3981-acee-4dd5-9879-62cce76d9189/allocations",
+    "as": "ceo@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "childBudgetId": "b5809913-a1e6-4bea-9492-5e74861aab90",
+      "amount": {
+        "amountMinor": 7000001,
+        "currency": "USD"
+      }
+    }
+  },
+  "status": 409,
+  "body": {
+    "type": "urn:budgetflow:problem:over-allocation",
+    "title": "Over allocation",
+    "status": 409,
+    "code": "OVER_ALLOCATION",
+    "detail": "Only 7000000 USD minor units are available to allocate; 7000001 were requested.",
+    "instance": "/api/budgets/37ee3981-acee-4dd5-9879-62cce76d9189/allocations",
+    "params": {
+      "availableMinor": 7000000,
+      "requestedMinor": 7000001,
+      "shortfallMinor": 1,
+      "currency": "USD"
+    }
+  }
+}

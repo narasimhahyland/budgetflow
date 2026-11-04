@@ -1,0 +1,99 @@
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "bf",
+  "sourceRoot": "apps/web/src",
+  "tags": ["type:app", "scope:web"],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/web",
+        "browser": "apps/web/src/main.ts",
+        "tsConfig": "apps/web/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/web/public"
+          },
+          {
+            "glob": "**/*.svg",
+            "input": "node_modules/@hylandsoftware/satori-illustrations/dist",
+            "output": "satori-svg"
+          },
+          {
+            "glob": "en*.json",
+            "input": "node_modules/@hylandsoftware/satori-ui/i18n",
+            "output": "i18n/@hylandsoftware/satori-ui"
+          }
+        ],
+        "styles": [
+          "node_modules/@hylandsoftware/satori-fonts/index.css",
+          "apps/web/src/styles.scss"
+        ],
+        "stylePreprocessorOptions": {
+          "includePaths": ["node_modules"]
+        }
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1.5mb",
+              "maximumError": "3mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
+      "configurations": {
+        "production": {
+          "buildTarget": "web:build:production"
+        },
+        "development": {
+          "buildTarget": "web:build:development"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "web:build",
+        "staticFilePath": "dist/apps/web/browser",
+        "spa": true
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p apps/web/tsconfig.app.json --noEmit"
+      }
+    }
+  }
+}

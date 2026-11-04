@@ -1,0 +1,24 @@
+{
+  "name": "web-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/web-e2e/src",
+  "tags": ["type:e2e", "scope:e2e"],
+  "implicitDependencies": ["web"],
+  "targets": {
+    "functional-e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright test -c apps/web-e2e/playwright.config.ts --project=desktop --project=tablet --project=mobile"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p apps/web-e2e/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

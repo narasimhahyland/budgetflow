@@ -7,14 +7,14 @@ alwaysApply: false
 # Visual verification
 
 ## Visual QA loop (every UI change and every UI phase gate)
-`/visual-qa` captures every screen state at desktop 1440, tablet 834 and mobile 412 px in light and dark, collects console errors, failed requests, horizontal overflow, unrendered interpolation and layout shift, compares with the approved Stitch design, and the agent opens every screenshot, fixes issues and re-runs until no blocking findings remain (at most 5 iterations). Never report a screen done with blocking findings. Then the `ux-reviewer` subagent reviews the evidence independently.
+`/visual-qa` captures every screen state at desktop 1440, tablet 834 and mobile 412 px in the light theme (dark theme deferred: re-enable with `--themes light,dark` or `BF_VISUAL_THEMES=light,dark`), collects console errors, failed requests, horizontal overflow, unrendered interpolation and layout shift, compares with the approved Stitch design, and the agent opens every screenshot, fixes issues and re-runs until no blocking findings remain (at most 5 iterations). Never report a screen done with blocking findings. Then the `ux-reviewer` subagent reviews the evidence independently.
 
 ## Design parity
 - Approved Stitch exports live in `design/stitch/<NNN-slug>/<state>--<viewport>--<theme>.png` (screen number first; `design/stitch/README.md`). Export with the Stitch MCP (`get_screen` for `screenshot.name`, then `download_file`) and save with `scripts/visual/stitch-save.mjs`.
 - `scripts/visual/design-parity.mjs` writes side-by-side and diff images. The mismatch ratio is advisory; the agent's inspection decides, judged against the design and the budget-safety visual rules in `frontend-angular.mdc`.
 
 ## Visual regression baselines
-- `apps/web-e2e/src/visual/visual.spec.ts` takes `toHaveScreenshot` baselines for every entry in `apps/web-e2e/visual/screens.json` (the same file the QA loop reads), per viewport, in the `visual-light` and `visual-dark` projects.
+- `apps/web-e2e/src/visual/visual.spec.ts` takes `toHaveScreenshot` baselines for every entry in `apps/web-e2e/visual/screens.json` (the same file the QA loop reads), per viewport, in the `visual-light` project (dark theme deferred: add a `visual-dark` project with `colorScheme: 'dark'` when it is re-enabled).
 - Determinism: deterministic seed, frozen clock (`freezeTime`), fonts loaded (`document.fonts.ready`), animations and caret disabled, reduced motion, `scale: 'css'`, dynamic regions (relative times, ids, live counters) masked. Thresholds: `maxDiffPixelRatio` 0.002, `threshold` 0.2; raise only per screen with a reason.
 - Baselines are created and compared only in the pinned image `mcr.microsoft.com/playwright:v1.64.1-noble` through `scripts/visual/pw-docker.sh`, locally and in CI, so renders match. The Playwright version in `package.json`, `pw-docker.sh`, `setup-tools.sh` and CI must agree (harness validation checks it).
 - Intentional updates only via `npm run e2e:update-snapshots`, with "Visual baselines updated: <reason>" in the PR description (CI fails otherwise). Never edit or delete baseline PNGs by hand to make a run pass.

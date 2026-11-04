@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/me",
+    "as": "ceo@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "authorization": "Bearer <redacted>"
+    }
+  },
+  "status": 200,
+  "body": {
+    "subject": "50000000-0000-4000-8000-000000000003",
+    "tenantId": "10000000-0000-4000-8000-000000000001",
+    "tenantName": "Acme Global",
+    "reportingCurrency": "USD",
+    "personId": "40000000-0000-4000-8000-000000000003",
+    "displayName": "Morgan Lee",
+    "roles": ["ceo"],
+    "memberships": [
+      {
+        "tenantId": "10000000-0000-4000-8000-000000000001",
+        "tenantName": "Acme Global",
+        "roles": ["ceo"]
+      }
+    ]
+  }
+}

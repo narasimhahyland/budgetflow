@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/budgets/70000000-0000-4000-8000-000000000003",
+    "as": "regional.manager@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "authorization": "Bearer <redacted>"
+    }
+  },
+  "status": 404,
+  "body": {
+    "type": "urn:budgetflow:problem:not-found",
+    "title": "Not found",
+    "status": 404,
+    "code": "NOT_FOUND",
+    "detail": "The budget does not exist or you cannot see it.",
+    "instance": "/api/budgets/70000000-0000-4000-8000-000000000003"
+  }
+}

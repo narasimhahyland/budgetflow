@@ -1,0 +1,168 @@
+# BudgetFlow local stack. Drive it only through scripts/stack.sh (project name per checkout, env file,
+# host builds of the api, worker and web bundles). Every host port binds to 127.0.0.1.
+name: budgetflow
+
+x-node-healthcheck: &node-healthcheck
+  interval: 5s
+  timeout: 5s
+  retries: 30
+  start_period: 10s
+
+services:
+  postgres:
+    image: postgres:16.11-alpine
+    environment:
+      POSTGRES_DB: ${BF_PG_DB:?}
+      POSTGRES_USER: ${BF_PG_OWNER_USER:?}
+      POSTGRES_PASSWORD: ${BF_PG_OWNER_PASSWORD:?}
+      BF_PG_APP_PASSWORD: ${BF_PG_APP_PASSWORD:?}
+      BF_PG_WORKER_PASSWORD: ${BF_PG_WORKER_PASSWORD:?}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - '127.0.0.1:${BF_PG_PORT:-5432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.7
+    command: ['start-dev', '--import-realm']
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${BF_KC_ADMIN_USER:?}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${BF_KC_ADMIN_PASSWORD:?}
+      KC_HOSTNAME: http://localhost:${BF_KEYCLOAK_PORT:-8080}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: 'true'
+      KC_HTTP_ENABLED: 'true'
+      KC_HEALTH_ENABLED: 'true'
+      BF_E2E_PASSWORD: ${BF_E2E_PASSWORD:?}
+      BF_KC_API_CLIENT_SECRET: ${BF_KC_API_CLIENT_SECRET:?}
+    volumes:
+      - ./keycloak/budgetflow-realm.json:/opt/keycloak/data/import/budgetflow-realm.json:ro
+    ports:
+      - '127.0.0.1:${BF_KEYCLOAK_PORT:-8080}:8080'
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+
+  mailpit:
+    image: axllent/mailpit:v1.28.0
+    ports:
+      - '127.0.0.1:${BF_MAILPIT_PORT:-8025}:8025'
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    # MinIO pinned by digest (Chainguard build with a shell for the health check).
+    image: chainguard/minio:latest-dev@sha256:6d4f84fa90a51955476b23d9bc3bc371d60835c59d1b36826169e0392c2b57a2
+    entrypoint: ['/usr/bin/minio']
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: ${BF_MINIO_ROOT_USER:?}
+      MINIO_ROOT_PASSWORD: ${BF_MINIO_ROOT_PASSWORD:?}
+    volumes:
+      - miniodata:/data
+    ports:
+      - '127.0.0.1:${BF_MINIO_PORT:-9000}:9000'
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'wget -q -O /dev/null http://127.0.0.1:9000/minio/health/ready || curl -fsS -o /dev/null http://127.0.0.1:9000/minio/health/ready',
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/docker/node-app.Dockerfile
+      args:
+        APP: api
+    # Local stack only: migrations run as the owner role before the API starts.
+    command: ['sh', '-c', 'node migrate.js && exec node main.js']
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      DATABASE_URL: postgres://bf_app:${BF_PG_APP_PASSWORD}@postgres:5432/${BF_PG_DB}
+      DATABASE_URL_OWNER: postgres://${BF_PG_OWNER_USER}:${BF_PG_OWNER_PASSWORD}@postgres:5432/${BF_PG_DB}
+      KEYCLOAK_ISSUER: http://localhost:${BF_KEYCLOAK_PORT:-8080}/realms/budgetflow
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/budgetflow/protocol/openid-connect/certs
+      KEYCLOAK_AUDIENCE: budgetflow-api
+      AI_PROVIDER: ${BF_AI_PROVIDER:-fake}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:${BF_API_PORT:-3000}:3000'
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/docker/node-app.Dockerfile
+      args:
+        APP: worker
+    environment:
+      NODE_ENV: production
+      HEALTH_PORT: '3100'
+      DATABASE_URL: postgres://bf_worker:${BF_PG_WORKER_PASSWORD}@postgres:5432/${BF_PG_DB}
+      KEYCLOAK_ISSUER: http://localhost:${BF_KEYCLOAK_PORT:-8080}/realms/budgetflow
+      SMTP_URL: smtp://mailpit:1025
+    depends_on:
+      api:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      <<: *node-healthcheck
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3100/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/docker/web.Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:${BF_WEB_PORT:-4200}:8080'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:8080/health']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:
+  miniodata:

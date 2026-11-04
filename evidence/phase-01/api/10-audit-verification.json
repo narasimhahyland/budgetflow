@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/audit/verification",
+    "as": "auditor@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "authorization": "Bearer <redacted>"
+    }
+  },
+  "status": 200,
+  "body": {
+    "valid": true,
+    "checked": 127,
+    "firstBrokenSeq": null,
+    "reason": null,
+    "verifiedAt": "2026-11-04T16:48:49.592Z"
+  }
+}

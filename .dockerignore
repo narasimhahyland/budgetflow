@@ -1,0 +1,6 @@
+# Images are built from host-built bundles only (scripts/stack.sh up builds them first).
+*
+!dist/apps/api/**
+!dist/apps/worker/**
+!dist/apps/web/**
+!infra/docker/nginx.conf

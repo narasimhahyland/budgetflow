@@ -1,0 +1,126 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/budgets",
+    "as": "ceo@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "name": "Evidence program FY2026",
+      "legalEntityId": "20000000-0000-4000-8000-000000000001",
+      "currency": "USD",
+      "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+      "planVersionId": "61000000-0000-4000-8000-000000000001",
+      "originalAmount": {
+        "amountMinor": 10000000,
+        "currency": "USD"
+      }
+    }
+  },
+  "status": 201,
+  "body": {
+    "id": "37ee3981-acee-4dd5-9879-62cce76d9189",
+    "parentId": null,
+    "path": "/37ee3981-acee-4dd5-9879-62cce76d9189/",
+    "name": "Evidence program FY2026",
+    "code": null,
+    "status": "active",
+    "allocationBadge": "unallocated",
+    "budgetType": "operating",
+    "categoryCode": null,
+    "legalEntityId": "20000000-0000-4000-8000-000000000001",
+    "costCenterId": null,
+    "orgUnitId": null,
+    "ownerPersonId": "40000000-0000-4000-8000-000000000003",
+    "currency": "USD",
+    "reportingCurrency": "USD",
+    "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+    "planVersionId": "61000000-0000-4000-8000-000000000001",
+    "control": {
+      "basis": ["allocated_out", "held", "pre_encumbered", "encumbered", "actual"],
+      "mode": "hard",
+      "toleranceBps": 0
+    },
+    "alertThresholdsPct": [50, 80, 100],
+    "balances": {
+      "budgetCurrency": {
+        "authorized": {
+          "amountMinor": 10000000,
+          "currency": "USD"
+        },
+        "allocatedOut": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "held": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "preEncumbered": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        }
+      },
+      "reporting": {
+        "authorized": {
+          "amountMinor": 10000000,
+          "currency": "USD"
+        },
+        "allocatedOut": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "held": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "preEncumbered": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        }
+      },
+      "available": {
+        "amountMinor": 10000000,
+        "currency": "USD"
+      },
+      "availableReporting": {
+        "amountMinor": 10000000,
+        "currency": "USD"
+      },
+      "allocationAvailable": {
+        "amountMinor": 10000000,
+        "currency": "USD"
+      }
+    },
+    "version": 1,
+    "allowedActions": ["budget.read", "ledger.read"],
+    "createdAt": "2026-11-04T16:48:46.819Z"
+  }
+}

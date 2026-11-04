@@ -1,0 +1,24 @@
+{
+  "name": "api-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/api-e2e/src",
+  "tags": ["type:e2e", "scope:e2e"],
+  "implicitDependencies": ["api", "worker"],
+  "targets": {
+    "functional-api": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright test -c apps/api-e2e/playwright.config.ts"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p apps/api-e2e/tsconfig.json --noEmit"
+      }
+    }
+  }
+}
