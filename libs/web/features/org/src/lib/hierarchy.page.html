@@ -51,12 +51,12 @@
             <li
               role="treeitem"
               [attr.aria-level]="u.depth + 1"
-              [attr.aria-selected]="u.id === detail.value()?.id"
+              [attr.aria-selected]="u.id === valueOf(detail)?.id"
             >
               <button
                 type="button"
                 class="bf-tree__item"
-                [class.bf-tree__item--selected]="u.id === detail.value()?.id"
+                [class.bf-tree__item--selected]="u.id === valueOf(detail)?.id"
                 [style.padding-inline-start.px]="12 + u.depth * 20"
                 (click)="select(u.id)"
               >
@@ -77,7 +77,7 @@
       what="this unit"
       (retry)="detail.reload()"
     />
-    @if (detail.value(); as d) {
+    @if (valueOf(detail); as d) {
       <div class="bf-card__header">
         <div>
           <h2 class="bf-card__title" id="detail-title">{{ d.name }}</h2>
@@ -164,7 +164,7 @@
                   (ngModelChange)="newManagerId.set($event)"
                 >
                   <mat-option [value]="null">No manager</mat-option>
-                  @for (p of people.value()?.items ?? []; track p.id) {
+                  @for (p of valueOf(people)?.items ?? []; track p.id) {
                     <mat-option [value]="p.id">{{ p.displayName }} · {{ p.jobTitle }}</mat-option>
                   }
                 </mat-select>

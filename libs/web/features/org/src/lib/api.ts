@@ -32,3 +32,8 @@ export function errorMessage(e: unknown): string {
 }
 
 export const todayIso = (): string => new Date().toISOString().slice(0, 10);
+
+/** A resource's value, or undefined while it is idle, loading or failed (value() throws on a failed resource). */
+export function valueOf<T>(r: { hasValue(): boolean; value(): T }): T | undefined {
+  return r.hasValue() ? r.value() : undefined;
+}

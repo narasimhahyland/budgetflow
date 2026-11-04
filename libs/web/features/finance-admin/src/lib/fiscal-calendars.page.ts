@@ -18,7 +18,7 @@ import type { CalendarDefinition, FiscalPeriod } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, errorMessage, injectApi } from './api';
+import { data, errorMessage, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
 type PeriodAction = FiscalPeriod['allowedActions'][number];
@@ -102,6 +102,7 @@ const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FiscalCalendarsPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly actionLabel = ACTION_LABEL;
@@ -113,23 +114,36 @@ export class FiscalCalendarsPage {
   protected readonly columns = ['period', 'dates', 'days', 'status', 'actions'];
 
   protected readonly calendars = resource({ loader: () => data(this.api.listFiscalCalendars({})) });
-  protected readonly calendarId = linkedSignal(() => {
-    const items = this.calendars.value()?.items ?? [];
-    return (
-      (items.find((c) => c.legalEntities.some((l) => l.code === 'HYL-US')) ?? items[0])?.id ?? null
-    );
+  /** Keeps the chosen calendar across reloads; defaults to the group calendar. */
+  protected readonly calendarId = linkedSignal<string[], string | null>({
+    source: () => (valueOf(this.calendars)?.items ?? []).map((c) => c.id),
+    computation: (ids, previous) => {
+      if (previous?.value && ids.includes(previous.value)) return previous.value;
+      const items = valueOf(this.calendars)?.items ?? [];
+      return (
+        (items.find((c) => c.legalEntities.some((l) => l.code === 'HYL-US')) ?? items[0])?.id ??
+        null
+      );
+    },
   });
   protected readonly detail = resource({
     params: () => (this.calendarId() ? { id: this.calendarId()! } : undefined),
     loader: ({ params }) => data(this.api.getFiscalCalendar({ params: { calendarId: params.id } })),
   });
-  protected readonly yearId = linkedSignal(() => {
-    const years = this.detail.value()?.fiscalYears ?? [];
-    const today = new Date().toISOString().slice(0, 10);
-    return (years.find((y) => y.startDate <= today && today <= y.endDate) ?? years[0])?.id ?? null;
+  /** Keeps the chosen year across reloads (status changes); defaults to the current year. */
+  protected readonly yearId = linkedSignal<string[], string | null>({
+    source: () => (valueOf(this.detail)?.fiscalYears ?? []).map((y) => y.id),
+    computation: (ids, previous) => {
+      if (previous?.value && ids.includes(previous.value)) return previous.value;
+      const years = valueOf(this.detail)?.fiscalYears ?? [];
+      const today = new Date().toISOString().slice(0, 10);
+      return (
+        (years.find((y) => y.startDate <= today && today <= y.endDate) ?? years[0])?.id ?? null
+      );
+    },
   });
   protected readonly year = computed(
-    () => this.detail.value()?.fiscalYears.find((y) => y.id === this.yearId()) ?? null,
+    () => valueOf(this.detail)?.fiscalYears.find((y) => y.id === this.yearId()) ?? null,
   );
 
   protected readonly canManage = computed(() => this.session.can('period.manage'));
@@ -173,7 +187,7 @@ export class FiscalCalendarsPage {
 
   protected readonly groupCalendarId = computed(
     () =>
-      this.calendars.value()?.items.find((c) => c.legalEntities.some((l) => l.code === 'HYL-US'))
+      valueOf(this.calendars)?.items.find((c) => c.legalEntities.some((l) => l.code === 'HYL-US'))
         ?.id,
   );
 

@@ -17,7 +17,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { data, errorMessage, injectApi, todayIso } from './api';
+import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
 import { LoadState } from './load-state';
 
 /** Screens 39-40: employee profile and reporting relationship management (effective-dated). */
@@ -39,8 +39,8 @@ import { LoadState } from './load-state';
     <header class="bf-page__header">
       <div class="bf-page__heading">
         <a mat-button routerLink="/org/people" class="bf-back">Back to people</a>
-        <h1 class="bf-page__title">{{ person.value()?.displayName ?? 'Person' }}</h1>
-        <p class="bf-page__subtitle">{{ person.value()?.jobTitle }}</p>
+        <h1 class="bf-page__title">{{ valueOf(person)?.displayName ?? 'Person' }}</h1>
+        <p class="bf-page__subtitle">{{ valueOf(person)?.jobTitle }}</p>
       </div>
       @if (canManage() && !editing()) {
         <button mat-flat-button type="button" (click)="editing.set(true)">Change manager</button>
@@ -58,7 +58,7 @@ import { LoadState } from './load-state';
         what="this person"
         (retry)="person.reload()"
       />
-      @if (person.value(); as p) {
+      @if (valueOf(person); as p) {
         @if (editing()) {
           <form class="bf-form" aria-label="Change manager" (ngSubmit)="save(p.id)">
             <mat-form-field appearance="outline">
@@ -69,7 +69,7 @@ import { LoadState } from './load-state';
                 [ngModel]="managerId()"
                 (ngModelChange)="managerId.set($event)"
               >
-                @for (c of candidates.value()?.items ?? []; track c.id) {
+                @for (c of valueOf(candidates)?.items ?? []; track c.id) {
                   @if (c.id !== p.id) {
                     <mat-option [value]="c.id">{{ c.displayName }} · {{ c.jobTitle }}</mat-option>
                   }
@@ -154,7 +154,7 @@ import { LoadState } from './load-state';
         </dl>
       }
     </section>
-    @if (person.value(); as p) {
+    @if (valueOf(person); as p) {
       <section class="bf-card" aria-labelledby="lines-title">
         <div class="bf-card__header">
           <h2 class="bf-card__title" id="lines-title">Reporting history</h2>
@@ -220,6 +220,7 @@ import { LoadState } from './load-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly personId = toSignal(
     inject(ActivatedRoute).paramMap.pipe(map((p) => p.get('personId') ?? '')),
@@ -245,7 +246,7 @@ export class PersonPage {
   });
 
   protected readonly canManage = computed(
-    () => this.person.value()?.allowedActions.includes('org.manage') ?? false,
+    () => valueOf(this.person)?.allowedActions.includes('org.manage') ?? false,
   );
 
   protected async save(personId: string): Promise<void> {

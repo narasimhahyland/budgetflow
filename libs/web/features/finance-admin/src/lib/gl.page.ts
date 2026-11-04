@@ -16,7 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { data, errorMessage, injectApi, todayIso } from './api';
+import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
 import { LoadState } from './load-state';
 
 /** Screens 106 and 106a: categories, GL accounts and category-to-GL mapping per entity. */
@@ -50,7 +50,7 @@ import { LoadState } from './load-state';
             (ngModelChange)="entityId.set($event)"
             data-testid="gl-entity"
           >
-            @for (e of entities.value()?.items ?? []; track e.id) {
+            @for (e of valueOf(entities)?.items ?? []; track e.id) {
               <mat-option [value]="e.id">{{ e.code }} · {{ e.name }}</mat-option>
             }
           </mat-select>
@@ -85,7 +85,7 @@ import { LoadState } from './load-state';
               [ngModel]="mapCategory()"
               (ngModelChange)="mapCategory.set($event)"
             >
-              @for (c of categories.value()?.items ?? []; track c.id) {
+              @for (c of valueOf(categories)?.items ?? []; track c.id) {
                 <mat-option [value]="c.code">{{ c.name }}</mat-option>
               }
             </mat-select>
@@ -109,7 +109,7 @@ import { LoadState } from './load-state';
               [ngModel]="mapAccount()"
               (ngModelChange)="mapAccount.set($event)"
             >
-              @for (a of accounts.value()?.items ?? []; track a.id) {
+              @for (a of valueOf(accounts)?.items ?? []; track a.id) {
                 <mat-option [value]="a.id">{{ a.code }} {{ a.name }}</mat-option>
               }
             </mat-select>
@@ -149,7 +149,7 @@ import { LoadState } from './load-state';
         what="GL mappings"
         (retry)="mappings.reload()"
       />
-      @if (mappings.value(); as m) {
+      @if (valueOf(mappings); as m) {
         @if (rows().length === 0) {
           <p class="bf-empty">No mappings on this date for this entity.</p>
         } @else {
@@ -238,7 +238,7 @@ import { LoadState } from './load-state';
         what="GL accounts"
         (retry)="accounts.reload()"
       />
-      @if (accounts.value(); as a) {
+      @if (valueOf(accounts); as a) {
         <div class="bf-table-scroll">
           <table mat-table [dataSource]="a.items" aria-labelledby="acct-title">
             <ng-container matColumnDef="code">
@@ -264,6 +264,7 @@ import { LoadState } from './load-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly mapColumns = ['category', 'employee', 'client', 'since'];
@@ -272,8 +273,8 @@ export class GlPage {
   protected readonly entities = resource({ loader: () => data(this.api.listLegalEntities({})) });
   protected readonly entityId = linkedSignal(
     () =>
-      this.entities.value()?.items.find((e) => e.code === 'HYL-US')?.id ??
-      this.entities.value()?.items[0]?.id ??
+      valueOf(this.entities)?.items.find((e) => e.code === 'HYL-US')?.id ??
+      valueOf(this.entities)?.items[0]?.id ??
       null,
   );
   protected readonly categories = resource({ loader: () => data(this.api.listCategories({})) });
@@ -291,7 +292,7 @@ export class GlPage {
       string,
       { categoryName: string; employee: string | null; client: string | null; since: string }
     >();
-    for (const m of this.mappings.value()?.items ?? []) {
+    for (const m of valueOf(this.mappings)?.items ?? []) {
       const r = byCat.get(m.categoryCode) ?? {
         categoryName: m.categoryName,
         employee: null,

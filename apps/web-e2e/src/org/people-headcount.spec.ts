@@ -49,7 +49,7 @@ test.describe('headcount', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Headcount' })).toBeVisible();
     await expect(page.getByTestId('headcount-total')).toHaveText('460');
     await expect(page.getByTestId('hc-BLR')).toHaveText('140');
-    await expect(page.getByRole('row', { name: /Bengaluru BLR/ })).toContainText('+10');
+    await expect(page.getByRole('row', { name: /^Bengaluru BLR/ })).toContainText('+10');
     await expect(page.getByTestId('hc-BLR-ENG-PLAT')).toHaveText('46');
   });
 
@@ -115,18 +115,19 @@ test.describe('cost centers', () => {
     await page.goto('/org/cost-centers');
     await expect(page.getByRole('row', { name: /CC-IN-BLR-200/ })).toContainText('HYL-IN');
     await page.getByRole('button', { name: 'Add cost center' }).click();
-    await page.getByLabel('Code').fill(`CC-J-${t}`);
-    await page.getByLabel('Name').fill(`Journey cost center ${t}`);
-    await page.getByRole('combobox', { name: 'Legal entity' }).click();
+    const form = page.getByRole('region', { name: 'Cost center form' });
+    await form.getByLabel('Code').fill(`CC-J-${t}`);
+    await form.getByLabel('Name').fill(`Journey cost center ${t}`);
+    await form.getByRole('combobox', { name: 'Legal entity' }).click();
     await page.getByRole('option', { name: /HYL-UK/ }).click();
-    await page.getByLabel('Effective from').fill(from);
-    await page.getByRole('button', { name: 'Save' }).click();
+    await form.getByLabel('Effective from').fill(from);
+    await form.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByText(`Cost center CC-J-${t} is active from ${from}.`)).toBeVisible();
     const row = page.getByRole('row', { name: new RegExp(`CC-J-${t}`) });
     await row.getByRole('button', { name: 'Deactivate' }).click();
-    await page.getByLabel('Reason').fill('Journey cleanup');
-    await page.getByLabel('Deactivate from').fill(`${Number(from.slice(0, 4)) + 1}-01-01`);
-    await page.getByRole('button', { name: 'Save' }).click();
+    await form.getByLabel('Reason').fill('Journey cleanup');
+    await form.getByLabel('Deactivate from').fill(`${Number(from.slice(0, 4)) + 1}-01-01`);
+    await form.getByRole('button', { name: 'Save' }).click();
     await expect(
       page.getByText(`Cost center CC-J-${t} is inactive after ${from.slice(0, 4)}-12-31.`),
     ).toBeVisible();

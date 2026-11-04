@@ -31,7 +31,7 @@ test.describe('org admin', () => {
       await expect(unit(page, name)).toBeVisible();
     await unit(page, 'Bengaluru').click();
     const detail = page.getByRole('region', { name: 'Bengaluru' });
-    await expect(detail.getByText('Rahul Menon')).toBeVisible();
+    await expect(detail.getByRole('definition').filter({ hasText: 'Rahul Menon' })).toBeVisible();
     await expect(detail.getByTestId('unit-headcount')).toContainText('140');
     await expect(detail.getByRole('table', { name: 'Unit history' })).toContainText('created');
     await expect(detail.getByRole('button', { name: 'Change unit' })).toBeVisible();

@@ -16,7 +16,7 @@ import type { HeadcountImportResult } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, errorMessage, injectApi, todayIso } from './api';
+import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
 import { CsvInput } from './csv-input';
 import { LoadState } from './load-state';
 
@@ -44,6 +44,7 @@ const EXAMPLE =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeadcountPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly example = EXAMPLE;
@@ -74,7 +75,7 @@ export class HeadcountPage {
   protected readonly canImport = computed(() => this.session.can('headcount.import'));
 
   protected readonly totals = computed(() => {
-    const s = this.summary.value();
+    const s = valueOf(this.summary);
     const t = { employee: 0, contractor: 0, intern: 0, previous: 0, hasPrevious: false };
     for (const l of s?.locations ?? []) {
       t.employee += l.byType.employee;
@@ -90,7 +91,7 @@ export class HeadcountPage {
 
   /** Location rows followed by their team rows, for one table. */
   protected readonly rows = computed(() =>
-    (this.summary.value()?.locations ?? []).flatMap((l) => [
+    (valueOf(this.summary)?.locations ?? []).flatMap((l) => [
       { ...l, level: 0 },
       ...l.teams.map((t) => ({ ...t, level: 1 })),
     ]),

@@ -16,7 +16,7 @@ import type { ResponseOf } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, errorMessage, injectApi } from './api';
+import { data, errorMessage, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
 type Vendor = ResponseOf<'listVendors'>['items'][number];
@@ -182,7 +182,7 @@ const STATUS: Record<
         what="vendors"
         (retry)="list.reload()"
       />
-      @if (list.value(); as l) {
+      @if (valueOf(list); as l) {
         @if (l.items.length === 0) {
           <p class="bf-empty">No vendors match.</p>
         } @else {
@@ -233,6 +233,7 @@ const STATUS: Record<
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VendorsPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly statusInfo = STATUS;

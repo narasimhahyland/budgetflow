@@ -15,7 +15,7 @@ import { MatTableModule } from '@angular/material/table';
 import type { LegalEntity } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { data, errorMessage, injectApi } from './api';
+import { data, errorMessage, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
 /** Screens 6 and 102a: organization and legal-entity setup. */
@@ -100,7 +100,7 @@ import { LoadState } from './load-state';
                 [ngModel]="currency()"
                 (ngModelChange)="currency.set($event)"
               >
-                @for (c of currencies.value()?.items ?? []; track c.code) {
+                @for (c of valueOf(currencies)?.items ?? []; track c.code) {
                   <mat-option [value]="c.code">{{ c.code }} · {{ c.name }}</mat-option>
                 }
               </mat-select>
@@ -113,7 +113,7 @@ import { LoadState } from './load-state';
                 [ngModel]="calendarId()"
                 (ngModelChange)="calendarId.set($event)"
               >
-                @for (c of calendars.value()?.items ?? []; track c.id) {
+                @for (c of valueOf(calendars)?.items ?? []; track c.id) {
                   <mat-option [value]="c.id">{{ c.name }}</mat-option>
                 }
               </mat-select>
@@ -159,7 +159,7 @@ import { LoadState } from './load-state';
         what="legal entities"
         (retry)="list.reload()"
       />
-      @if (list.value(); as l) {
+      @if (valueOf(list); as l) {
         <div class="bf-table-scroll">
           <table mat-table [dataSource]="l.items" aria-labelledby="le-title">
             <ng-container matColumnDef="entity">
@@ -207,6 +207,7 @@ import { LoadState } from './load-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LegalEntitiesPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly columns = ['entity', 'currency', 'calendar', 'codes', 'cc', 'actions'];

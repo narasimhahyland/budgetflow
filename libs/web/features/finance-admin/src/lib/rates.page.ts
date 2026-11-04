@@ -18,7 +18,7 @@ import { SessionStore } from '@bf/web/data-access';
 import { Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, errorMessage, injectApi, todayIso } from './api';
+import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
 import { LoadState } from './load-state';
 
 type RateType = ExchangeRate['rateType'];
@@ -62,6 +62,7 @@ const TYPE_LABEL: Record<RateType, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RatesPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly typeLabel = TYPE_LABEL;
@@ -97,10 +98,10 @@ export class RatesPage {
 
   protected readonly canManage = computed(() => this.session.can('fx.manage'));
   protected readonly reporting = computed(
-    () => this.currencies.value()?.reportingCurrency ?? 'USD',
+    () => valueOf(this.currencies)?.reportingCurrency ?? 'USD',
   );
   protected readonly quotes = computed(() =>
-    (this.currencies.value()?.items ?? []).filter((c) => c.code !== this.reporting()),
+    (valueOf(this.currencies)?.items ?? []).filter((c) => c.code !== this.reporting()),
   );
 
   // Lookup
@@ -109,7 +110,7 @@ export class RatesPage {
   protected readonly amount = signal('100000');
   protected readonly compareType = signal<RateType>('spot');
   protected readonly amountMinor = computed(() => {
-    const exp = this.currencies.value()?.items.find((c) => c.code === this.from())?.exponent ?? 2;
+    const exp = valueOf(this.currencies)?.items.find((c) => c.code === this.from())?.exponent ?? 2;
     const n = Number(this.amount());
     return Number.isFinite(n) ? Math.round(n * 10 ** exp) : 0;
   });
@@ -134,8 +135,8 @@ export class RatesPage {
     loader: ({ params }) => data(this.api.lookupExchangeRate({ query: params })),
   });
   protected readonly fxEffect = computed(() => {
-    const a = this.planLookup.value()?.converted;
-    const b = this.otherLookup.value()?.converted;
+    const a = valueOf(this.planLookup)?.converted;
+    const b = valueOf(this.otherLookup)?.converted;
     return a && b ? b.amountMinor - a.amountMinor : null;
   });
 

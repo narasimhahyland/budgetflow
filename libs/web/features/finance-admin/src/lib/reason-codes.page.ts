@@ -17,7 +17,7 @@ import { REASON_CATEGORIES } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, errorMessage, injectApi } from './api';
+import { data, errorMessage, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
 type Category = (typeof REASON_CATEGORIES)[number];
@@ -126,7 +126,7 @@ const CATEGORY_LABEL: Record<Category, string> = {
         what="reason codes"
         (retry)="list.reload()"
       />
-      @if (list.value(); as l) {
+      @if (valueOf(list); as l) {
         <div class="bf-table-scroll">
           <table mat-table [dataSource]="l.items" aria-labelledby="rc-title">
             <ng-container matColumnDef="category">
@@ -175,6 +175,7 @@ const CATEGORY_LABEL: Record<Category, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReasonCodesPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly categories = REASON_CATEGORIES;

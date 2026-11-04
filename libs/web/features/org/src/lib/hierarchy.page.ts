@@ -19,7 +19,7 @@ import type { OrgUnit } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, errorMessage, injectApi, todayIso } from './api';
+import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
 import { LoadState } from './load-state';
 
 type OrgKind = OrgUnit['kind'];
@@ -66,6 +66,7 @@ type ChangeKind = 'rename' | 'move' | 'manager' | 'deactivate';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrgHierarchyPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   protected readonly session = inject(SessionStore);
   protected readonly kindLabel = KIND_LABEL;
@@ -85,7 +86,7 @@ export class OrgHierarchyPage {
 
   protected readonly detail = resource({
     params: () => {
-      const id = this.selectedId() ?? this.units.value()?.items[0]?.id;
+      const id = this.selectedId() ?? valueOf(this.units)?.items[0]?.id;
       return id ? { id, asOf: this.asOf() } : undefined;
     },
     loader: ({ params }) =>
@@ -102,11 +103,11 @@ export class OrgHierarchyPage {
   });
 
   protected readonly entityCode = computed(
-    () => new Map((this.entities.value()?.items ?? []).map((e) => [e.id, `${e.code} ${e.name}`])),
+    () => new Map((valueOf(this.entities)?.items ?? []).map((e) => [e.id, `${e.code} ${e.name}`])),
   );
 
   protected readonly visibleUnits = computed(() => {
-    const items = this.units.value()?.items ?? [];
+    const items = valueOf(this.units)?.items ?? [];
     const q = this.filter().trim().toLowerCase();
     if (!q) return items;
     return items.filter(
@@ -115,11 +116,11 @@ export class OrgHierarchyPage {
   });
 
   protected readonly unitName = computed(
-    () => new Map((this.units.value()?.items ?? []).map((u) => [u.id, u.name])),
+    () => new Map((valueOf(this.units)?.items ?? []).map((u) => [u.id, u.name])),
   );
 
   protected readonly scopeText = computed(() => {
-    switch (this.units.value()?.scope) {
+    switch (valueOf(this.units)?.scope) {
       case 'tenant':
         return 'You see the whole organization.';
       case 'subtree':
@@ -132,24 +133,24 @@ export class OrgHierarchyPage {
   });
 
   protected readonly canManage = computed(
-    () => this.detail.value()?.allowedActions.includes('org.manage') ?? false,
+    () => valueOf(this.detail)?.allowedActions.includes('org.manage') ?? false,
   );
   protected readonly canImport = computed(() => this.session.can('org.manage'));
 
   // Change form
   protected readonly changeKind = signal<ChangeKind>('rename');
   protected readonly effectiveFrom = linkedSignal(() => this.asOf());
-  protected readonly newName = linkedSignal(() => this.detail.value()?.name ?? '');
+  protected readonly newName = linkedSignal(() => valueOf(this.detail)?.name ?? '');
   protected readonly newParentId = signal<string | null>(null);
   protected readonly newManagerId = linkedSignal(
-    () => this.detail.value()?.managerPersonId ?? null,
+    () => valueOf(this.detail)?.managerPersonId ?? null,
   );
   protected readonly reason = signal('');
 
   protected readonly moveTargets = computed(() => {
-    const d = this.detail.value();
+    const d = valueOf(this.detail);
     if (!d) return [];
-    return (this.units.value()?.items ?? []).filter((u) => !u.ancestorIds.includes(d.id));
+    return (valueOf(this.units)?.items ?? []).filter((u) => !u.ancestorIds.includes(d.id));
   });
 
   // Add form
@@ -157,7 +158,7 @@ export class OrgHierarchyPage {
   protected readonly childName = signal('');
   protected readonly childKind = signal<OrgKind>('team');
   protected readonly childKinds = computed(
-    () => CHILD_KINDS[this.detail.value()?.kind ?? 'company'],
+    () => CHILD_KINDS[valueOf(this.detail)?.kind ?? 'company'],
   );
 
   protected readonly historyColumns = [
@@ -200,7 +201,7 @@ export class OrgHierarchyPage {
   }
 
   async saveChange(): Promise<void> {
-    const d = this.detail.value();
+    const d = valueOf(this.detail);
     if (!d) return;
     const kind = this.changeKind();
     const body = {
@@ -222,7 +223,7 @@ export class OrgHierarchyPage {
   }
 
   async saveChild(): Promise<void> {
-    const d = this.detail.value();
+    const d = valueOf(this.detail);
     if (!d) return;
     await this.run(async () => {
       const created = await data(

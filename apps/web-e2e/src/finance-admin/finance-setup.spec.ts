@@ -22,7 +22,7 @@ test.describe('fiscal calendars', () => {
     ]);
     await page.getByTestId('calendar-select').click();
     await page.getByRole('option', { name: /Hyland UK 4-4-5/ }).click();
-    await page.getByRole('button', { name: 'FY2028' }).click();
+    await page.getByRole('button', { name: 'FY2028', exact: true }).click();
     await expect(page.getByTestId('year-summary')).toContainText('53 weeks');
   });
 
@@ -32,26 +32,27 @@ test.describe('fiscal calendars', () => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
     await page.goto('/finance/periods');
     await page.getByRole('button', { name: 'New calendar' }).click();
-    await page.getByLabel('Name').fill(`Journey 4-4-5 ${randomUUID().slice(0, 6)}`);
-    await page.getByLabel('First fiscal year').fill('2028');
+    const form = page.getByRole('region', { name: 'New fiscal calendar' });
+    await form.getByLabel('Name').fill(`Journey 4-4-5 ${randomUUID().slice(0, 6)}`);
+    await form.getByLabel('First fiscal year').fill('2028');
     await expect(page.getByTestId('calendar-preview')).toContainText('53 weeks');
     await expect(page.getByTestId('calendar-preview')).toContainText('4w · 4w · 5w');
     await page.getByRole('button', { name: 'Create calendar' }).click();
     await expect(page.getByText(/is ready with 2 fiscal year\(s\)/)).toBeVisible();
-    await page.getByRole('button', { name: 'FY2028' }).click();
+    await page.getByRole('button', { name: 'FY2028', exact: true }).click();
     const periods = page.getByRole('table', { name: 'Accounting periods' });
     const p1 = periods.getByRole('row', { name: /P01 FY2028/ });
     const p2 = periods.getByRole('row', { name: /P02 FY2028/ });
     await expect(p2.getByRole('button')).toHaveText(['Soft-close']);
-    await p1.getByRole('button', { name: 'Close P01 FY2028' }).click();
+    await p1.getByRole('button', { name: 'Close P01 FY2028', exact: true }).click();
     await expect(page.getByText('P01 FY2028 is now closed.')).toBeVisible();
-    await p1.getByRole('button', { name: 'Lock P01 FY2028' }).click();
+    await p1.getByRole('button', { name: 'Lock P01 FY2028', exact: true }).click();
     await expect(p1).toContainText('Locked');
-    await p1.getByRole('button', { name: 'Unlock P01 FY2028' }).click();
+    await p1.getByRole('button', { name: 'Unlock P01 FY2028', exact: true }).click();
     await page.getByLabel(/Reason to unlock/).fill('Audit adjustment');
     await page.getByRole('button', { name: 'Unlock', exact: true }).click();
     await expect(p1).toContainText('Closed');
-    await p1.getByRole('button', { name: 'Reopen P01 FY2028' }).click();
+    await p1.getByRole('button', { name: 'Reopen P01 FY2028', exact: true }).click();
     await page.getByLabel(/Reason to reopen/).fill('Late supplier invoice');
     await page.getByRole('button', { name: 'Reopen', exact: true }).click();
     await expect(p1).toContainText('Open');
@@ -90,8 +91,9 @@ test.describe('exchange rates', () => {
         'FY2026 locked',
       );
       await page.getByRole('button', { name: 'Add rate' }).click();
-      await page.getByLabel(/Units per 1 USD/).fill('0.8123');
-      await page.getByLabel('Effective date').fill(`${year}-03-15`);
+      const add = page.getByRole('region', { name: 'Add rate' });
+      await add.getByLabel(/Units per 1 USD/).fill('0.8123');
+      await add.getByLabel('Effective date').fill(`${year}-03-15`);
       await page.getByRole('button', { name: 'Add rate', exact: true }).last().click();
       await expect(
         page.getByText(`Spot rate USD/INR 0.812300000000 from ${year}-03-15 added.`),
@@ -115,10 +117,10 @@ test.describe('master data', () => {
     await page.getByTestId('gl-entity').click();
     await page.getByRole('option', { name: /HYL-DE/ }).click();
     const map = page.getByRole('table', { name: 'Category-to-GL mapping' });
-    await expect(map.getByRole('row', { name: /Wellbeing/ })).toContainText(
+    await expect(map.getByRole('row', { name: /^Wellbeing/ })).toContainText(
       '6110 Staff welfare and wellbeing',
     );
-    await expect(map.getByRole('row', { name: /Employee events/ })).toContainText(
+    await expect(map.getByRole('row', { name: /^Employee events/ })).toContainText(
       '6200 Client entertainment',
     );
     await page.goto('/finance/vendors');
@@ -133,7 +135,10 @@ test.describe('master data', () => {
     const t = randomUUID().slice(0, 6).toUpperCase();
     await page.goto('/finance/vendors');
     await page.getByRole('button', { name: 'Add vendor' }).click();
-    await page.getByRole('form').getByLabel('Name').fill(`Journey Caterers ${t}`);
+    await page
+      .getByRole('region', { name: 'Add vendor' })
+      .getByLabel('Name')
+      .fill(`Journey Caterers ${t}`);
     await page.getByRole('button', { name: 'Add vendor', exact: true }).last().click();
     await expect(page.getByText(`Journey Caterers ${t} added as approved.`)).toBeVisible();
     await page.getByTestId('vendor-search').fill(t);
@@ -141,16 +146,18 @@ test.describe('master data', () => {
       .getByRole('row', { name: new RegExp(t) })
       .getByRole('button', { name: 'Change status' })
       .click();
-    await page.getByRole('combobox', { name: 'New status' }).click();
+    const change = page.getByRole('region', { name: 'Change vendor status' });
+    await change.getByRole('combobox', { name: 'New status' }).click();
     await page.getByRole('option', { name: 'Blocked' }).click();
-    await page.getByLabel('Reason').fill('Failed food safety review');
-    await page.getByRole('button', { name: 'Save' }).click();
+    await change.getByLabel('Reason').fill('Failed food safety review');
+    await change.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByText(`Journey Caterers ${t} is now blocked.`)).toBeVisible();
     await page.goto('/finance/reason-codes');
     await page.getByRole('button', { name: 'Add reason code' }).click();
-    await page.getByLabel('Code').fill(`J${t}`);
-    await page.getByLabel('Label').fill(`Journey reason ${t}`);
-    await page.getByRole('button', { name: 'Add', exact: true }).click();
+    const reasonForm = page.getByRole('region', { name: 'Add reason code' });
+    await reasonForm.getByLabel('Code').fill(`J${t}`);
+    await reasonForm.getByLabel('Label').fill(`Journey reason ${t}`);
+    await reasonForm.getByRole('button', { name: 'Add', exact: true }).click();
     await expect(page.getByText(`Reason code J${t} added.`)).toBeVisible();
     await page
       .getByRole('row', { name: new RegExp(`J${t}`) })

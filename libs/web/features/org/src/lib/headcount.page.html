@@ -159,7 +159,7 @@
   what="headcount"
   (retry)="summary.reload()"
 />
-@if (summary.value(); as s) {
+@if (valueOf(summary); as s) {
   @if (!s.snapshot) {
     <section class="bf-card">
       <p class="bf-empty">No HR headcount imported on or before this date.</p>

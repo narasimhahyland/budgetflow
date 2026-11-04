@@ -137,7 +137,7 @@
           [lines]="3"
           (retry)="preview.reload()"
         />
-        @if (preview.value(); as p) {
+        @if (valueOf(preview); as p) {
           <p class="bf-card__hint" data-testid="calendar-preview">
             {{ p.label }}: {{ p.startDate | date: 'd MMM y' : 'UTC' }} to
             {{ p.endDate | date: 'd MMM y' : 'UTC' }}, {{ p.periods.length }} periods{{
@@ -173,7 +173,7 @@
         (ngModelChange)="calendarId.set($event)"
         data-testid="calendar-select"
       >
-        @for (c of calendars.value()?.items ?? []; track c.id) {
+        @for (c of valueOf(calendars)?.items ?? []; track c.id) {
           <mat-option [value]="c.id">{{ c.name }}</mat-option>
         }
       </mat-select>
@@ -187,7 +187,7 @@
     what="fiscal calendars"
     (retry)="calendars.reload(); detail.reload()"
   />
-  @if (detail.value(); as d) {
+  @if (valueOf(detail); as d) {
     <dl class="bf-facts">
       <div>
         <dt>Type</dt>

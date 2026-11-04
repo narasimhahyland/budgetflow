@@ -17,7 +17,7 @@ import type { CostCenter } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, errorMessage, injectApi, todayIso } from './api';
+import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
 import { LoadState } from './load-state';
 
 /** Screen 41: cost-center management, effective-dated per legal entity. */
@@ -95,7 +95,7 @@ import { LoadState } from './load-state';
                 [ngModel]="entityId()"
                 (ngModelChange)="entityId.set($event)"
               >
-                @for (e of entities.value()?.items ?? []; track e.id) {
+                @for (e of valueOf(entities)?.items ?? []; track e.id) {
                   <mat-option [value]="e.id">{{ e.code }} · {{ e.name }}</mat-option>
                 }
               </mat-select>
@@ -104,7 +104,7 @@ import { LoadState } from './load-state';
               <mat-label>Org unit (optional)</mat-label>
               <mat-select name="unit" [ngModel]="unitId()" (ngModelChange)="unitId.set($event)">
                 <mat-option [value]="null">None</mat-option>
-                @for (u of units.value()?.items ?? []; track u.id) {
+                @for (u of valueOf(units)?.items ?? []; track u.id) {
                   <mat-option [value]="u.id">{{ u.name }}</mat-option>
                 }
               </mat-select>
@@ -168,7 +168,7 @@ import { LoadState } from './load-state';
         what="cost centers"
         (retry)="list.reload()"
       />
-      @if (list.value(); as l) {
+      @if (valueOf(list); as l) {
         @if (l.items.length === 0) {
           <p class="bf-empty">No cost centers yet.</p>
         } @else {
@@ -237,6 +237,7 @@ import { LoadState } from './load-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CostCentersPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly columns = ['code', 'entity', 'unit', 'dates', 'status', 'actions'];
@@ -270,7 +271,7 @@ export class CostCentersPage {
     () => this.session.can('org.manage') || this.session.can('master_data.manage'),
   );
   protected readonly activeCount = computed(
-    () => (this.list.value()?.items ?? []).filter((c) => c.active).length,
+    () => (valueOf(this.list)?.items ?? []).filter((c) => c.active).length,
   );
 
   protected startAdd(): void {

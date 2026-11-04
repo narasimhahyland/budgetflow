@@ -9,7 +9,7 @@ import { MatTableModule } from '@angular/material/table';
 import type { DoaLimit, DoaLookupResponse } from '@bf/contracts';
 import { Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { data, errorMessage, injectApi } from './api';
+import { data, errorMessage, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
 type RoleId = NonNullable<DoaLimit['role']>;
@@ -96,7 +96,7 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
             (ngModelChange)="entityId.set($event)"
             data-testid="doa-entity"
           >
-            @for (e of entities.value()?.items ?? []; track e.id) {
+            @for (e of valueOf(entities)?.items ?? []; track e.id) {
               <mat-option [value]="e.id">{{ e.code }}</mat-option>
             }
           </mat-select>
@@ -163,7 +163,7 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
       <div class="bf-card__header">
         <div>
           <h2 class="bf-card__title" id="doa-title">Matrix</h2>
-          @if (matrix.value()?.version; as v) {
+          @if (valueOf(matrix)?.version; as v) {
             <p class="bf-card__hint">
               Version {{ v.version }} · {{ v.status }} since
               {{ v.validFrom | date: 'd MMM y' : 'UTC'
@@ -178,7 +178,7 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
         what="the DoA matrix"
         (retry)="matrix.reload()"
       />
-      @if (matrix.value(); as m) {
+      @if (valueOf(matrix); as m) {
         @if (m.items.length === 0) {
           <p class="bf-empty">No active matrix.</p>
         } @else {
@@ -228,13 +228,14 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DoaPage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   protected readonly roleLabel = ROLE_LABEL;
   protected readonly roles = Object.keys(ROLE_LABEL) as RoleId[];
   protected readonly columns = ['who', 'spend', 'entity', 'limit', 'from'];
   protected readonly matrix = resource({ loader: () => data(this.api.getDoaMatrix({})) });
   protected readonly entities = resource({ loader: () => data(this.api.listLegalEntities({})) });
-  protected readonly spendTypes = computed(() => this.matrix.value()?.spendTypes ?? ['*']);
+  protected readonly spendTypes = computed(() => valueOf(this.matrix)?.spendTypes ?? ['*']);
   protected readonly role = signal<RoleId>('location-manager');
   protected readonly spendType = signal('team_lunch');
   protected readonly entityId = signal<string | null>(null);

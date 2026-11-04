@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
 import type { Person } from '@bf/contracts';
 import { SAT_TABLE_WITH_ROW_STATES_IMPORTS } from '@hylandsoftware/satori-ui/table-with-row-states';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, injectApi } from './api';
+import { data, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
 const TYPE_LABEL: Record<Person['employmentType'], string> = {
@@ -42,7 +42,7 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
     </header>
     <section class="bf-card" aria-labelledby="people-title">
       <div class="bf-card__header">
-        <h2 class="bf-card__title" id="people-title">{{ page.value()?.total ?? 0 }} people</h2>
+        <h2 class="bf-card__title" id="people-title">{{ valueOf(page)?.total ?? 0 }} people</h2>
       </div>
       <div class="bf-filters">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -58,7 +58,7 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
           <mat-label>Unit</mat-label>
           <mat-select [ngModel]="unitId()" (ngModelChange)="unitId.set($event); limit.set(50)">
             <mat-option [value]="null">All units</mat-option>
-            @for (u of units.value()?.items ?? []; track u.id) {
+            @for (u of valueOf(units)?.items ?? []; track u.id) {
               <mat-option [value]="u.id">{{ indent(u.depth) }}{{ u.name }}</mat-option>
             }
           </mat-select>
@@ -70,7 +70,7 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
         what="the people directory"
         (retry)="page.reload()"
       />
-      @if (page.value(); as p) {
+      @if (valueOf(page); as p) {
         @if (p.items.length === 0) {
           <p class="bf-empty">Nobody matches. Clear the search or pick another unit.</p>
         } @else {
@@ -136,6 +136,7 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PeoplePage {
+  protected readonly valueOf = valueOf;
   private readonly api = injectApi();
   protected readonly columns = ['name', 'location', 'entity', 'type', 'manager'];
   protected readonly q = signal('');
@@ -156,11 +157,11 @@ export class PeoplePage {
   });
 
   protected readonly scopeText = computed(() =>
-    this.page.value()?.scope === 'tenant'
+    valueOf(this.page)?.scope === 'tenant'
       ? 'You see everyone.'
-      : this.page.value()?.scope === 'subtree'
+      : valueOf(this.page)?.scope === 'subtree'
         ? 'You see people in the units you are responsible for.'
-        : this.page.value()?.scope === 'self'
+        : valueOf(this.page)?.scope === 'self'
           ? 'You see people in your own location and team.'
           : '',
   );

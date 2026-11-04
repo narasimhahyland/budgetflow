@@ -78,43 +78,76 @@
     </mat-form-field>
   </div>
   <div class="bf-compare">
-    @for (
-      entry of [
-        { label: 'Plan rate (budget control)', res: planLookup },
-        { label: typeLabel[compareType()], res: otherLookup },
-      ];
-      track entry.label
-    ) {
-      <div
-        class="bf-kpi"
-        [attr.data-testid]="'lookup-' + (entry.res === planLookup ? 'plan' : 'other')"
-      >
-        <p class="bf-kpi__label">{{ entry.label }}</p>
-        @if (entry.res.error()) {
-          <p class="bf-kpi__delta">No rate: {{ entry.res.error()?.message }}</p>
-        } @else if (entry.res.value(); as v) {
-          <p class="bf-kpi__value">
-            @if (v.converted) {
-              <bf-money [amountMinor]="v.converted.amountMinor" [currency]="v.converted.currency" />
-            }
-          </p>
-          <p class="bf-kpi__delta">
-            1 {{ v.applied.from }} = {{ v.applied.value }} {{ v.applied.to }}
-            @for (s of v.sources; track s.rateId) {
-              · {{ s.quoteCurrency }} {{ s.rate }} from
-              {{ s.effectiveDate | date: 'd MMM y' : 'UTC'
-              }}{{
-                s.fiscalYearLabel
-                  ? ' (' + s.fiscalYearLabel + (s.locked ? ', locked' : ', not locked') + ')'
-                  : ''
-              }}
-            }
-          </p>
-        } @else {
+    <div class="bf-kpi" data-testid="lookup-plan">
+      <p class="bf-kpi__label">Plan rate (budget control)</p>
+      @switch (planLookup.status()) {
+        @case ('error') {
+          <p class="bf-kpi__delta">No rate: {{ planLookup.error()?.message }}</p>
+        }
+        @case ('resolved') {
+          @if (valueOf(planLookup); as v) {
+            <p class="bf-kpi__value">
+              @if (v.converted) {
+                <bf-money
+                  [amountMinor]="v.converted.amountMinor"
+                  [currency]="v.converted.currency"
+                />
+              }
+            </p>
+            <p class="bf-kpi__delta">
+              1 {{ v.applied.from }} = {{ v.applied.value }} {{ v.applied.to }}
+              @for (s of v.sources; track s.rateId) {
+                · {{ s.quoteCurrency }} {{ s.rate }} from
+                {{ s.effectiveDate | date: 'd MMM y' : 'UTC'
+                }}{{
+                  s.fiscalYearLabel
+                    ? ' (' + s.fiscalYearLabel + (s.locked ? ', locked' : ', not locked') + ')'
+                    : ''
+                }}
+              }
+            </p>
+          }
+        }
+        @default {
           <p class="bf-kpi__delta">Looking up…</p>
         }
-      </div>
-    }
+      }
+    </div>
+    <div class="bf-kpi" data-testid="lookup-other">
+      <p class="bf-kpi__label">{{ typeName(compareType()) }}</p>
+      @switch (otherLookup.status()) {
+        @case ('error') {
+          <p class="bf-kpi__delta">No rate: {{ otherLookup.error()?.message }}</p>
+        }
+        @case ('resolved') {
+          @if (valueOf(otherLookup); as v) {
+            <p class="bf-kpi__value">
+              @if (v.converted) {
+                <bf-money
+                  [amountMinor]="v.converted.amountMinor"
+                  [currency]="v.converted.currency"
+                />
+              }
+            </p>
+            <p class="bf-kpi__delta">
+              1 {{ v.applied.from }} = {{ v.applied.value }} {{ v.applied.to }}
+              @for (s of v.sources; track s.rateId) {
+                · {{ s.quoteCurrency }} {{ s.rate }} from
+                {{ s.effectiveDate | date: 'd MMM y' : 'UTC'
+                }}{{
+                  s.fiscalYearLabel
+                    ? ' (' + s.fiscalYearLabel + (s.locked ? ', locked' : ', not locked') + ')'
+                    : ''
+                }}
+              }
+            </p>
+          }
+        }
+        @default {
+          <p class="bf-kpi__delta">Looking up…</p>
+        }
+      }
+    </div>
     <div class="bf-kpi" data-testid="lookup-fx-effect">
       <p class="bf-kpi__label">FX effect (reported separately)</p>
       <p class="bf-kpi__value">
@@ -182,7 +215,7 @@
             [ngModel]="newYearId()"
             (ngModelChange)="newYearId.set($event)"
           >
-            @for (y of groupCalendar.value()?.fiscalYears ?? []; track y.id) {
+            @for (y of valueOf(groupCalendar)?.fiscalYears ?? []; track y.id) {
               <mat-option [value]="y.id" [disabled]="!!y.planRatesLockedAt"
                 >{{ y.label }}{{ y.planRatesLockedAt ? ' (locked)' : '' }}</mat-option
               >
@@ -224,7 +257,7 @@
     [lines]="2"
     (retry)="groupCalendar.reload()"
   />
-  @if (groupCalendar.value(); as g) {
+  @if (valueOf(groupCalendar); as g) {
     <div class="bf-filters">
       @for (y of g.fiscalYears; track y.id) {
         <sat-status-tag [status]="y.planRatesLockedAt ? 'info' : 'warning'">
@@ -294,7 +327,7 @@
     what="exchange rates"
     (retry)="rates.reload()"
   />
-  @if (rates.value(); as r) {
+  @if (valueOf(rates); as r) {
     @if (r.items.length === 0) {
       <p class="bf-empty">No rates match these filters.</p>
     } @else {
