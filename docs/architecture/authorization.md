@@ -5,7 +5,8 @@ One decision point: `PolicyService.can(actor, action, resource)` in `libs/api/co
 ## Actor and resource
 
 - **Actor** (resolved per request by `ActorResolver`): tenant, person, roles from `role_grants` valid today, materialized paths of the budgets the person owns or co-owns, and an active break-glass flag.
-- **Resource**: the tenant, a budget (`id`, `path`), or something owned by a person.
+- **Resource**: the tenant, a budget (`id`, `path`), something owned by a person, an org unit (`id` and its ancestor ids as of a date) or a person (the ancestor ids of their location and team).
+- **Org scope** (Phase 3): the actor also carries `orgScopeUnitIds` (units of the budgets they own or co-own, `role_grants.scope_org_unit_id`, and their own location and team) and `homeOrgUnitIds` (own location and team). For org resources `O` covers units whose ancestors include an org-scope unit, and `S` covers the actor's own units and their own person record.
 - **Scopes**: `T` tenant-wide, `O` owned budget subtrees (the actor owns the budget or one of its ancestors), `S` self (resources the actor created or is party to).
 - **Not found versus forbidden**: if the actor cannot see the resource the API answers 404 `NOT_FOUND` (other tenants' and other directors' ids are never confirmed); if it can see it but may not act, 403 `FORBIDDEN`.
 - **Platform operator**: `super-admin` has no tenant grants; tenant financial data needs an audited, time-boxed `break_glass_grants` row (Phase 18 adds the grant flow).
@@ -19,6 +20,9 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `tenant.read`            |  –  |  T  |  T  |  T  |  T  |  T  |  T  |  T  |  T  |  T  |  T  |  T  |  T  |  T  |
 | `tenant.settings.manage` |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `org.manage`             |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `org.read`               |  –  |  T  |  T  |  T  |  T  |  O  |  O  |  O  |  O  |  S  |  S  |  T  |  –  |  T  |
+| `headcount.import`       |  –  |  T  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `master_data.manage`     |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `users.manage`           |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `budget.read`            |  –  |  –  |  T  |  T  |  T  |  O  |  O  |  O  |  O  |  O  |  –  |  T  |  –  |  T  |
 | `budget.create_root`     |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
@@ -31,6 +35,7 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `period.manage`          |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `fx.manage`              |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `doa.manage`             |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `doa.read`               |  –  |  –  |  T  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |
 | `request.create`         |  –  |  –  |  O  |  O  |  –  |  O  |  O  |  O  |  O  |  O  |  S  |  –  |  –  |  –  |
 | `request.approve`        |  –  |  –  |  O  |  O  |  T  |  O  |  O  |  O  |  O  |  –  |  –  |  –  |  –  |  –  |
 | `contribution.request`   |  –  |  –  |  O  |  O  |  –  |  O  |  O  |  O  |  O  |  O  |  –  |  –  |  –  |  –  |
@@ -43,11 +48,11 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `integrity.read`         |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |
 | `integration.manage`     |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |
 
-Phase 1 enforces `tenant.read`, `budget.*`, `ledger.*`, `audit.read` and `integrity.*` through the API and proves them with API scenarios (`scope/director-isolation.spec.ts`, `budgets/over-allocation.spec.ts`, `ledger/reversal.spec.ts`, `audit/hash-chain.spec.ts`, `ledger/rebuild-check.spec.ts`). The other actions are reserved for their phases; a phase that needs a new action adds it to `ACTIONS` and `ROLE_GRANTS` (shared surface, integrator) and regenerates this table.
+Phase 1 enforces `tenant.read`, `budget.*`, `ledger.*`, `audit.read` and `integrity.*` through the API and proves them with API scenarios (`scope/director-isolation.spec.ts`, `budgets/over-allocation.spec.ts`, `ledger/reversal.spec.ts`, `audit/hash-chain.spec.ts`, `ledger/rebuild-check.spec.ts`). Phase 3 enforces `org.read`, `org.manage`, `headcount.import`, `master_data.manage`, `period.manage`, `fx.manage` and `doa.read` on the org and finance endpoints (`org/scope-visibility.spec.ts`, `org/effective-dating.spec.ts`, `org/imports.spec.ts`, `finance/*.spec.ts`); org and finance reference data (cost centers, legal entities, calendars, rates, GL, reason codes, vendors) is readable with `tenant.read`. The other actions are reserved for their phases; a phase that needs a new action adds it to `ACTIONS` and `ROLE_GRANTS` (shared surface, integrator) and regenerates this table.
 
 ## Ownership is not authority
 
-Owning a budget grants visibility of its subtree and the right to request, delegate (create children, allocate) and apply controls within it. Approving spend, transfers and contributions additionally requires the delegation-of-authority matrix (`doa_limits`: person or role × spend type × legal entity × limit in the limit currency at the locked plan rate), checked by `checkAuthority` (exactly at the limit passes, one minor unit above escalates). Approval hygiene (`checkApprovalHygiene`) forbids self-approval and approvers who are beneficiaries or attendees; delegations are capped by the delegator's own limit and dates (`delegatedLimit`). Enforcement lands in Phase 5; the matrix is seeded (role limits in USD for Acme Global).
+Owning a budget grants visibility of its subtree and the right to request, delegate (create children, allocate) and apply controls within it. Approving spend, transfers and contributions additionally requires the delegation-of-authority matrix (`doa_limits`: person or role × spend type × legal entity × limit in the limit currency at the locked plan rate), checked by `checkAuthority` (exactly at the limit passes, one minor unit above escalates). Approval hygiene (`checkApprovalHygiene`) forbids self-approval and approvers who are beneficiaries or attendees; delegations are capped by the delegator's own limit and dates (`delegatedLimit`). Enforcement lands in Phase 5; the matrix is seeded in Phase 3 for Hyland (role limits in USD plus spend-type, entity and person-specific rows) and readable through `GET /api/finance/doa` and the `doa/lookup` check.
 
 ## Director isolation
 
