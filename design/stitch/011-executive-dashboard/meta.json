@@ -1,0 +1,41 @@
+{
+  "screen": "011-executive-dashboard",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/be92f0b4721f4632a3e01098b0f8b9e6",
+      "approved": null,
+      "size": [
+        2560,
+        3046
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "loading--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/bce1d3f39e9c4ab4ab39513becea969f",
+      "approved": null,
+      "size": [
+        2560,
+        2784
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "empty--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/83786f7e8b3c45d1899b5d33d0389311",
+      "approved": null,
+      "size": [
+        2560,
+        2048
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "error--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/413ee59e2b1644d8bc7af92ecd5de3d1",
+      "approved": null,
+      "size": [
+        2560,
+        3182
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
