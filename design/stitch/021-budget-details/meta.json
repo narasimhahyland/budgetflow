@@ -2,12 +2,9 @@
   "screen": "021-budget-details",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/787bc0a0e3214fc09104ec89258e0707",
+      "stitchScreen": "projects/1643421514270618068/screens/cf9d2c2bddc748998e466c140f6e123f",
       "approved": null,
-      "size": [
-        2560,
-        2888
-      ],
+      "size": [2560, 2968],
       "status": "proposed - awaiting user review"
     }
   }

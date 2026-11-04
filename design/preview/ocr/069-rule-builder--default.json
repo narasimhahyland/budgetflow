@@ -1,1 +1,925 @@
-{"height":3058,"lines":[{"box":[124,53,187,31],"text":"BudgetFlow","words":[{"box":[124,53,187,31],"t":"BudgetFlow"}]},{"box":[120,93,138,22],"text":"ENTERPRISE","words":[{"box":[120,93,138,22],"t":"ENTERPRISE"}]},{"box":[49,178,160,22],"text":"Acme Global","words":[{"box":[49,178,72,22],"t":"Acme"},{"box":[123,178,86,22],"t":"Global"}]},{"box":[49,209,213,27],"text":"Employee Experience","words":[{"box":[49,209,98,27],"t":"Employee"},{"box":[150,209,112,27],"t":"Experience"}]},{"box":[111,311,142,22],"text":"Dashboard","words":[{"box":[111,311,142,22],"t":"Dashboard"}]},{"box":[111,391,107,27],"text":"Budgets","words":[{"box":[111,391,107,27],"t":"Budgets"}]},{"box":[111,471,129,31],"text":"Hierarchy","words":[{"box":[111,471,129,31],"t":"Hierarchy"}]},{"box":[111,551,89,22],"text":"Events","words":[{"box":[111,551,89,22],"t":"Events"}]},{"box":[111,631,134,28],"text":"Approvals","words":[{"box":[111,631,134,28],"t":"Approvals"}]},{"box":[58,707,27,31],"text":"a","words":[{"box":[58,707,27,31],"t":"a"}]},{"box":[111,711,209,31],"text":"Rules & policies","words":[{"box":[111,711,74,31],"t":"Rules"},{"box":[212,711,108,31],"t":"policies"}]},{"box":[98,791,116,27],"text":"Reports","words":[{"box":[98,791,116,27],"t":"Reports"}]},{"box":[44,861,227,47],"text":"9& Integrations","words":[{"box":[44,861,50,44],"t":"9"},{"box":[99,862,172,46],"t":"Integrations"}]},{"box":[98,951,102,22],"text":"Admin","words":[{"box":[98,951,102,22],"t":"Admin"}]},{"box":[53,1969,36,22],"text":"PR","words":[{"box":[53,1969,36,22],"t":"PR"}]},{"box":[124,1951,165,32],"text":"Priya Raman","words":[{"box":[124,1951,66,31],"t":"Priya"},{"box":[194,1951,95,31],"t":"Raman"}]},{"box":[124,1987,200,22],"text":"Finance Controller","words":[{"box":[124,1987,85,22],"t":"Finance"},{"box":[212,1987,112,22],"t":"Controller"}]},{"box":[658,31,120,27],"text":"Rules and","words":[{"box":[658,31,65,27],"t":"Rules"},{"box":[726,31,52,27],"t":"and"}]},{"box":[542,53,107,23],"text":"Home \/","words":[{"box":[542,53,77,23],"t":"Home"}]},{"box":[653,70,98,30],"text":"policies","words":[{"box":[653,70,98,30],"t":"policies"}]},{"box":[871,31,267,27],"text":"R-12 Over-threshold","words":[{"box":[871,31,64,27],"t":"R"},{"box":[871,31,64,27],"t":"12"},{"box":[939,31,199,27],"t":"Over"},{"box":[939,31,199,27],"t":"threshold"}]},{"box":[867,71,142,32],"text":"approvals","words":[{"box":[867,71,142,32],"t":"approvals"}]},{"box":[1276,36,191,27],"text":"Search budgets,","words":[{"box":[1276,36,85,27],"t":"Search"},{"box":[1364,36,103,27],"t":"budgets"}]},{"box":[1280,71,80,27],"text":"rules...","words":[{"box":[1280,71,80,27],"t":"rules"}]},{"box":[1564,49,84,27],"text":"Ctr1 K","words":[{"box":[1564,49,60,27],"t":"Ctr1"},{"box":[1628,49,21,27],"t":"K"}]},{"box":[1738,53,89,22],"text":"FY2026","words":[{"box":[1738,53,89,22],"t":"FY2026"}]},{"box":[1938,36,129,27],"text":"Reporting","words":[{"box":[1938,36,129,27],"t":"Reporting"}]},{"box":[1938,71,58,22],"text":"USD","words":[{"box":[1938,71,58,22],"t":"USD"}]},{"box":[542,182,698,49],"text":"R-12 Over-threshold approvals","words":[{"box":[542,182,104,49],"t":"R"},{"box":[542,182,104,49],"t":"12"},{"box":[652,182,349,49],"t":"Over"},{"box":[652,182,349,49],"t":"threshold"},{"box":[1007,182,233,49],"t":"approvals"}]},{"box":[1276,187,89,22],"text":"Draft v4","words":[{"box":[1276,187,58,22],"t":"Draft"},{"box":[1336,187,28,22],"t":"v4"}]},{"box":[1422,187,280,27],"text":"• Active v3 in production","words":[{"box":[1448,187,68,26],"t":"Active"},{"box":[1519,187,26,26],"t":"v3"},{"box":[1549,187,23,26],"t":"in"},{"box":[1575,187,127,27],"t":"production"}]},{"box":[542,253,1169,31],"text":"Construct, test, and deploy automated governance triggers, approval workflows, and spend gates","words":[{"box":[542,253,128,31],"t":"Construct"},{"box":[674,253,54,31],"t":"test"},{"box":[732,253,47,31],"t":"and"},{"box":[782,253,81,31],"t":"deploy"},{"box":[868,253,140,31],"t":"automated"},{"box":[1011,253,143,31],"t":"governance"},{"box":[1158,253,101,31],"t":"triggers"},{"box":[1263,253,108,31],"t":"approval"},{"box":[1375,253,136,31],"t":"workflows"},{"box":[1515,253,47,31],"t":"and"},{"box":[1565,253,74,31],"t":"spend"},{"box":[1643,253,69,31],"t":"gates"}]},{"box":[541,290,250,39],"text":"across departments.","words":[{"box":[541,290,80,33],"t":"across"},{"box":[624,293,168,36],"t":"departments"}]},{"box":[1844,187,151,22],"text":"• Simulate","words":[{"box":[1880,187,116,22],"t":"Simulate"}]},{"box":[2075,182,232,36],"text":"D Version history","words":[{"box":[2075,182,36,32],"t":"D"},{"box":[2114,183,98,33],"t":"Version"},{"box":[2214,185,93,33],"t":"history"}]},{"box":[1844,275,175,36],"text":"+ Publish v4","words":[{"box":[1885,276,95,33],"t":"Publish"},{"box":[1982,279,36,31],"t":"v4"}]},{"box":[609,453,80,27],"text":"WHEN","words":[{"box":[609,453,80,27],"t":"WHEN"}]},{"box":[724,453,364,36],"text":"Condition Logic Builder","words":[{"box":[724,453,153,36],"t":"Condition"},{"box":[882,453,85,36],"t":"Logic"},{"box":[972,453,117,36],"t":"Builder"}]},{"box":[1467,453,316,31],"text":"Trigger evaluations in order","words":[{"box":[1467,453,82,31],"t":"Trigger"},{"box":[1552,453,132,31],"t":"evaluations"},{"box":[1688,453,19,31],"t":"in"},{"box":[1711,453,71,31],"t":"order"}]},{"box":[622,591,53,22],"text":"Field","words":[{"box":[622,591,53,22],"t":"Field"}]},{"box":[973,596,107,22],"text":"Operator","words":[{"box":[973,596,107,22],"t":"Operator"}]},{"box":[1328,588,179,31],"text":"Threshold Value","words":[{"box":[1328,588,110,29],"t":"Threshold"},{"box":[1441,591,67,28],"t":"Value"}]},{"box":[1707,622,22,27],"text":"•","words":[]},{"box":[644,649,299,32],"text":"Request amount (report","words":[{"box":[644,649,98,29],"t":"Request"},{"box":[745,650,102,29],"t":"amount"},{"box":[850,652,93,29],"t":"report"}]},{"box":[990,646,201,34],"text":"greater than (>)","words":[{"box":[990,649,95,32],"t":"greater"},{"box":[1088,647,62,31],"t":"than"}]},{"box":[1347,649,196,31],"text":"USD 2,000.00","words":[{"box":[1347,649,58,31],"t":"USD"},{"box":[1409,649,133,31],"t":"2,000.00"}]},{"box":[658,760,49,18],"text":"AND","words":[{"box":[658,760,49,18],"t":"AND"}]},{"box":[1324,849,133,27],"text":"Value Chips","words":[{"box":[1324,849,67,27],"t":"Value"},{"box":[1395,849,63,27],"t":"Chips"}]},{"box":[622,880,53,22],"text":"Field","words":[{"box":[622,880,53,22],"t":"Field"}]},{"box":[644,938,209,31],"text":"Budget category","words":[{"box":[644,938,93,31],"t":"Budget"},{"box":[741,938,112,31],"t":"category"}]},{"box":[973,880,107,27],"text":"Operator","words":[{"box":[973,880,107,27],"t":"Operator"}]},{"box":[991,933,164,27],"text":"is one of (IN)","words":[{"box":[991,933,27,27],"t":"is"},{"box":[1021,933,47,27],"t":"one"},{"box":[1072,933,27,27],"t":"of"},{"box":[1102,933,53,27],"t":"IN"}]},{"box":[1346,902,210,33],"text":"Employee events x","words":[{"box":[1346,904,106,31],"t":"Employee"},{"box":[1455,902,78,30],"t":"events"},{"box":[1535,902,21,29],"t":"x"}]},{"box":[1707,911,22,27],"text":"•","words":[]},{"box":[1347,969,151,27],"text":"Team lunch x","words":[{"box":[1347,969,58,27],"t":"Team"},{"box":[1408,969,64,27],"t":"lunch"},{"box":[1475,969,23,27],"t":"x"}]},{"box":[658,1076,49,22],"text":"AND","words":[{"box":[658,1076,49,22],"t":"AND"}]},{"box":[1324,1164,134,28],"text":"Value Chips","words":[{"box":[1324,1164,65,27],"t":"Value"},{"box":[1393,1165,65,27],"t":"Chips"}]},{"box":[618,1196,58,22],"text":"Field","words":[{"box":[618,1196,58,22],"t":"Field"}]},{"box":[644,1253,111,27],"text":"Location","words":[{"box":[644,1253,111,27],"t":"Location"}]},{"box":[973,1196,107,27],"text":"Operator","words":[{"box":[973,1196,107,27],"t":"Operator"}]},{"box":[991,1253,36,27],"text":"in","words":[{"box":[991,1253,36,27],"t":"in"}]},{"box":[1347,1222,142,23],"text":"Bengaluru X","words":[{"box":[1347,1222,118,23],"t":"Bengaluru"},{"box":[1468,1222,21,23],"t":"X"}]},{"box":[1346,1284,152,30],"text":"Hyderabad X","words":[{"box":[1346,1285,127,29],"t":"Hyderabad"},{"box":[1475,1284,23,25],"t":"X"}]},{"box":[662,1418,187,22],"text":"+ Add condition","words":[{"box":[681,1418,52,22],"t":"Add"},{"box":[736,1418,113,22],"t":"condition"}]},{"box":[613,1627,62,18],"text":"THEN","words":[{"box":[613,1627,62,18],"t":"THEN"}]},{"box":[711,1616,520,39],"text":"Required Actions & Enforcement","words":[{"box":[711,1619,145,35],"t":"Required"},{"box":[859,1618,124,34],"t":"Actions"},{"box":[1016,1616,215,36],"t":"Enforcement"}]},{"box":[1418,1622,364,27],"text":"Enforced governance outcomes","words":[{"box":[1418,1622,108,27],"t":"Enforced"},{"box":[1529,1622,132,27],"t":"governance"},{"box":[1664,1622,118,27],"t":"outcomes"}]},{"box":[591,1729,480,27],"text":"SEQUENTIAL APPROVAL WORKFLOW","words":[{"box":[591,1729,169,27],"t":"SEQUENTIAL"},{"box":[763,1729,135,27],"t":"APPROVAL"},{"box":[901,1729,170,27],"t":"WORKFLOW"}]},{"box":[707,1831,227,27],"text":"Regional Manager","words":[{"box":[707,1831,112,27],"t":"Regional"},{"box":[822,1831,112,27],"t":"Manager"}]},{"box":[707,1867,271,22],"text":"Initial segment assessment","words":[{"box":[707,1867,61,22],"t":"Initial"},{"box":[770,1867,85,22],"t":"segment"},{"box":[858,1867,120,22],"t":"assessment"}]},{"box":[1311,1831,231,22],"text":"Finance Controller","words":[{"box":[1311,1831,102,22],"t":"Finance"},{"box":[1416,1831,127,22],"t":"Controller"}]},{"box":[1311,1862,307,31],"text":"Final fiscal compliance sign-off","words":[{"box":[1311,1866,52,27],"t":"Final"},{"box":[1366,1865,52,27],"t":"fiscal"},{"box":[1421,1863,111,28],"t":"compliance"},{"box":[1535,1862,83,28],"t":"sign"},{"box":[1535,1862,83,28],"t":"off"}]},{"box":[671,2009,271,31],"text":"Notify budget owner","words":[{"box":[671,2009,81,31],"t":"Notify"},{"box":[756,2009,93,31],"t":"budget"},{"box":[853,2009,89,31],"t":"owner"}]},{"box":[671,2049,698,27],"text":"Send real-time alerts upon request creation and routing changes.","words":[{"box":[671,2049,57,27],"t":"Send"},{"box":[732,2049,98,27],"t":"real"},{"box":[732,2049,98,27],"t":"time"},{"box":[833,2049,57,27],"t":"alerts"},{"box":[894,2049,61,27],"t":"upon"},{"box":[958,2049,84,27],"t":"request"},{"box":[1046,2049,88,27],"t":"creation"},{"box":[1137,2049,40,27],"t":"and"},{"box":[1181,2049,84,27],"t":"routing"},{"box":[1268,2049,101,27],"t":"changes"}]},{"box":[1573,2027,165,29],"text":"Email & In-App","words":[{"box":[1573,2027,65,29],"t":"Email"},{"box":[1660,2027,78,29],"t":"In"},{"box":[1660,2027,78,29],"t":"App"}]},{"box":[676,2160,653,31],"text":"Warn requester when remaining budget below 20%","words":[{"box":[676,2160,66,31],"t":"Warn"},{"box":[746,2160,128,31],"t":"requester"},{"box":[878,2160,74,31],"t":"when"},{"box":[955,2160,132,31],"t":"remaining"},{"box":[1091,2160,93,31],"t":"budget"},{"box":[1188,2160,81,31],"t":"below"},{"box":[1273,2160,56,31],"t":"20"}]},{"box":[671,2196,591,27],"text":"Show caution prompt during draft expense submission.","words":[{"box":[671,2196,62,27],"t":"Show"},{"box":[736,2196,81,26],"t":"caution"},{"box":[820,2196,84,26],"t":"prompt"},{"box":[908,2196,75,26],"t":"during"},{"box":[986,2196,55,26],"t":"draft"},{"box":[1045,2196,88,26],"t":"expense"},{"box":[1136,2196,126,27],"t":"submission"}]},{"box":[1556,2178,182,27],"text":"A Warning Alert","words":[{"box":[1556,2178,27,27],"t":"A"},{"box":[1586,2178,91,27],"t":"Warning"},{"box":[1681,2178,57,27],"t":"Alert"}]},{"box":[627,2302,182,23],"text":"+ + Add action","words":[{"box":[682,2302,49,23],"t":"Add"},{"box":[733,2302,76,23],"t":"action"}]},{"box":[609,2507,80,22],"text":"SCOPE","words":[{"box":[609,2507,80,22],"t":"SCOPE"}]},{"box":[724,2502,480,36],"text":"Scope Settings & Applicability","words":[{"box":[724,2502,103,36],"t":"Scope"},{"box":[832,2502,130,36],"t":"Settings"},{"box":[999,2502,206,36],"t":"Applicability"}]},{"box":[1484,2507,293,27],"text":"Rule boundaries & priority","words":[{"box":[1484,2507,50,27],"t":"Rule"},{"box":[1538,2507,132,27],"t":"boundaries"},{"box":[1697,2507,81,27],"t":"priority"}]},{"box":[591,2614,89,27],"text":"Priority","words":[{"box":[591,2614,89,27],"t":"Priority"}]},{"box":[991,2614,236,27],"text":"Effective From Date","words":[{"box":[991,2614,107,27],"t":"Effective"},{"box":[1101,2614,62,26],"t":"From"},{"box":[1166,2614,60,27],"t":"Date"}]},{"box":[1400,2614,249,31],"text":"Organizational Scope","words":[{"box":[1400,2614,174,31],"t":"Organizational"},{"box":[1578,2614,71,31],"t":"Scope"}]},{"box":[618,2680,36,22],"text":"40","words":[{"box":[618,2680,36,22],"t":"40"}]},{"box":[1022,2680,138,27],"text":"1 Dec 2026","words":[{"box":[1022,2680,17,27],"t":"1"},{"box":[1042,2680,51,27],"t":"Dec"},{"box":[1096,2680,64,27],"t":"2026"}]},{"box":[1427,2680,329,31],"text":"India Region and childre v","words":[{"box":[1427,2680,66,31],"t":"India"},{"box":[1497,2680,85,31],"t":"Region"},{"box":[1586,2680,47,31],"t":"and"},{"box":[1636,2680,93,31],"t":"childre"},{"box":[1733,2680,22,31],"t":"v"}]},{"box":[591,2769,387,27],"text":"Explanation Text Shown to Users","words":[{"box":[591,2769,142,27],"t":"Explanation"},{"box":[736,2769,51,27],"t":"Text"},{"box":[790,2769,81,27],"t":"Shown"},{"box":[875,2769,27,27],"t":"to"},{"box":[905,2769,73,27],"t":"Users"}]},{"box":[618,2832,1031,40],"text":"Rule R-12 applies because amount exceeds USD 2,000.00 threshold for regional events.","words":[{"box":[618,2832,54,34],"t":"Rule"},{"box":[675,2833,54,33],"t":"R"},{"box":[675,2833,54,33],"t":"12"},{"box":[733,2833,87,34],"t":"applies"},{"box":[824,2833,99,34],"t":"because"},{"box":[927,2834,99,34],"t":"amount"},{"box":[1030,2835,95,34],"t":"exceeds"},{"box":[1129,2835,54,33],"t":"USD"},{"box":[1187,2836,99,34],"t":"2,000.00"},{"box":[1290,2836,120,34],"t":"threshold"},{"box":[1414,2837,33,33],"t":"for"},{"box":[1451,2837,103,34],"t":"regional"},{"box":[1558,2838,91,34],"t":"events"}]},{"box":[1982,453,298,31],"text":"Explanation Preview","words":[{"box":[1982,453,174,31],"t":"Explanation"},{"box":[2160,453,120,31],"t":"Preview"}]},{"box":[1920,520,467,27],"text":"Live simulation preview of how end-users","words":[{"box":[1920,520,51,27],"t":"Live"},{"box":[1974,520,118,27],"t":"simulation"},{"box":[2096,520,91,27],"t":"preview"},{"box":[2190,520,24,27],"t":"of"},{"box":[2217,520,51,27],"t":"how"},{"box":[2271,520,116,27],"t":"end"},{"box":[2271,520,116,27],"t":"users"}]},{"box":[1920,556,422,27],"text":"perceive this governance gate during","words":[{"box":[1920,556,101,27],"t":"perceive"},{"box":[2024,556,45,26],"t":"this"},{"box":[2073,556,133,26],"t":"governance"},{"box":[2209,556,52,26],"t":"gate"},{"box":[2264,556,78,27],"t":"during"}]},{"box":[1920,590,147,26],"text":"submission.","words":[{"box":[1920,590,147,26],"t":"submission"}]},{"box":[2004,684,400,27],"text":"\"Rule R-12 applies because amount","words":[{"box":[2004,684,64,27],"t":"Rule"},{"box":[2072,684,51,27],"t":"R"},{"box":[2072,684,51,27],"t":"12"},{"box":[2126,684,84,27],"t":"applies"},{"box":[2213,684,95,27],"t":"because"},{"box":[2311,684,93,27],"t":"amount"}]},{"box":[2004,720,311,27],"text":"USD 2,500.00 is above USD","words":[{"box":[2004,720,54,27],"t":"USD"},{"box":[2061,720,98,27],"t":"2,500.00"},{"box":[2163,720,20,27],"t":"is"},{"box":[2186,720,71,27],"t":"above"},{"box":[2261,720,55,27],"t":"USD"}]},{"box":[2004,760,404,31],"text":"2,000.00 and category is Employee","words":[{"box":[2004,760,100,31],"t":"2,000.00"},{"box":[2109,760,46,31],"t":"and"},{"box":[2159,760,97,31],"t":"category"},{"box":[2260,760,19,31],"t":"is"},{"box":[2283,760,126,31],"t":"Employee"}]},{"box":[2004,796,102,27],"text":"events.\"","words":[{"box":[2004,796,102,27],"t":"events"}]},{"box":[1924,907,276,22],"text":"MATCHED CONDITIONS","words":[{"box":[1924,907,115,22],"t":"MATCHED"},{"box":[2042,907,158,22],"t":"CONDITIONS"}]},{"box":[1929,960,476,27],"text":"• Amount threshold (USD 2,500 > 2,000)","words":[{"box":[1970,960,95,27],"t":"Amount"},{"box":[2067,960,108,27],"t":"threshold"},{"box":[2179,960,57,27],"t":"USD"},{"box":[2240,960,68,27],"t":"2,500"},{"box":[2327,960,77,27],"t":"2,000"}]},{"box":[1924,1009,458,31],"text":"• Category matches: Employee events","words":[{"box":[1971,1009,105,31],"t":"Category"},{"box":[2079,1009,105,31],"t":"matches"},{"box":[2188,1009,112,31],"t":"Employee"},{"box":[2304,1009,78,31],"t":"events"}]},{"box":[1964,1062,347,31],"text":"Target location: Bengaluru HQ","words":[{"box":[1964,1062,81,31],"t":"Target"},{"box":[2049,1062,97,31],"t":"location"},{"box":[2150,1062,120,31],"t":"Bengaluru"},{"box":[2274,1062,37,31],"t":"HQ"}]},{"box":[1973,1249,231,31],"text":"Conflict Check","words":[{"box":[1973,1249,131,31],"t":"Conflict"},{"box":[2109,1249,96,31],"t":"Check"}]},{"box":[2000,1338,373,27],"text":"No conflicts with 14 active rules","words":[{"box":[2000,1338,37,27],"t":"No"},{"box":[2041,1338,98,27],"t":"conflicts"},{"box":[2142,1338,57,27],"t":"with"},{"box":[2203,1338,30,27],"t":"14"},{"box":[2236,1338,71,27],"t":"active"},{"box":[2311,1338,63,27],"t":"rules"}]},{"box":[1996,1373,369,27],"text":"Execution precedence resolved","words":[{"box":[1996,1373,125,27],"t":"Execution"},{"box":[2124,1373,135,27],"t":"precedence"},{"box":[2263,1373,102,27],"t":"resolved"}]},{"box":[1996,1405,80,27],"text":"safely.","words":[{"box":[1996,1405,80,27],"t":"safely"}]},{"box":[1920,1507,249,27],"text":"Rule #102 Global Cap","words":[{"box":[1920,1507,55,27],"t":"Rule"},{"box":[1978,1507,58,26],"t":"102"},{"box":[2040,1507,78,26],"t":"Global"},{"box":[2121,1507,47,27],"t":"Cap"}]},{"box":[2342,1511,89,22],"text":"Passed","words":[{"box":[2342,1511,89,22],"t":"Passed"}]},{"box":[1920,1587,356,31],"text":"Rule #104 APAC Regional Policy","words":[{"box":[1920,1587,54,31],"t":"Rule"},{"box":[1978,1587,58,31],"t":"104"},{"box":[2040,1587,62,31],"t":"APAC"},{"box":[2106,1587,101,31],"t":"Regional"},{"box":[2211,1587,65,31],"t":"Policy"}]},{"box":[2342,1591,89,22],"text":"Passed","words":[{"box":[2342,1591,89,22],"t":"Passed"}]},{"box":[1920,1667,347,27],"text":"Rule #105 Quarter-End Freeze","words":[{"box":[1920,1667,55,27],"t":"Rule"},{"box":[1978,1667,58,26],"t":"105"},{"box":[2040,1667,143,26],"t":"Quarter"},{"box":[2040,1667,143,26],"t":"End"},{"box":[2186,1667,80,27],"t":"Freeze"}]},{"box":[2342,1667,89,22],"text":"Passed","words":[{"box":[2342,1667,89,22],"t":"Passed"}]},{"box":[1977,1861,250,40],"text":"Affected Last 30","words":[{"box":[1977,1861,137,38],"t":"Affected"},{"box":[2117,1864,64,35],"t":"Last"},{"box":[2185,1866,42,36],"t":"30"}]},{"box":[1978,1911,89,31],"text":"Days","words":[{"box":[1978,1911,89,31],"t":"Days"}]},{"box":[2280,1876,98,22],"text":"Backtest","words":[{"box":[2280,1876,98,22],"t":"Backtest"}]},{"box":[2280,1907,84,22],"text":"sample","words":[{"box":[2280,1907,84,22],"t":"sample"}]},{"box":[1947,2000,138,27],"text":"Evaluated in","words":[{"box":[1947,2000,107,27],"t":"Evaluated"},{"box":[2057,2000,27,27],"t":"in"}]},{"box":[1947,2036,93,22],"text":"window","words":[{"box":[1947,2036,93,22],"t":"window"}]},{"box":[1942,2080,58,40],"text":"23","words":[{"box":[1942,2080,58,40],"t":"23"}]},{"box":[1941,2143,179,45],"text":"requests","words":[{"box":[1941,2143,179,45],"t":"requests"}]},{"box":[2218,2000,80,27],"text":"Impact","words":[{"box":[2218,2000,80,27],"t":"Impact"}]},{"box":[2217,2049,184,44],"text":"6 change","words":[{"box":[2217,2050,32,42],"t":"6"},{"box":[2253,2049,147,43],"t":"change"}]},{"box":[2218,2098,151,22],"text":"New approvals","words":[{"box":[2218,2098,50,22],"t":"New"},{"box":[2270,2098,99,22],"t":"approvals"}]},{"box":[2218,2129,102,22],"text":"triggered","words":[{"box":[2218,2129,102,22],"t":"triggered"}]},{"box":[2036,2267,289,31],"text":"View backtest report →","words":[{"box":[2036,2267,66,31],"t":"View"},{"box":[2106,2267,105,31],"t":"backtest"},{"box":[2214,2267,85,31],"t":"report"}]},{"box":[2444,53,40,22],"text":"PR","words":[{"box":[2444,53,40,22],"t":"PR"}]}],"width":2560}
+{
+  "height": 3058,
+  "lines": [
+    { "box": [58, 787, 27, 27], "text": "a", "words": [{ "box": [58, 787, 27, 27], "t": "a" }] },
+    {
+      "box": [124, 53, 187, 31],
+      "text": "BudgetFlow",
+      "words": [{ "box": [124, 53, 187, 31], "t": "BudgetFlow" }]
+    },
+    {
+      "box": [120, 93, 138, 22],
+      "text": "ENTERPRISE",
+      "words": [{ "box": [120, 93, 138, 22], "t": "ENTERPRISE" }]
+    },
+    {
+      "box": [129, 178, 89, 27],
+      "text": "Hyland",
+      "words": [{ "box": [129, 178, 89, 27], "t": "Hyland" }]
+    },
+    {
+      "box": [129, 209, 227, 27],
+      "text": "Enterprise Governance",
+      "words": [
+        { "box": [129, 209, 101, 27], "t": "Enterprise" },
+        { "box": [234, 209, 122, 27], "t": "Governance" }
+      ]
+    },
+    {
+      "box": [111, 311, 142, 22],
+      "text": "Dashboard",
+      "words": [{ "box": [111, 311, 142, 22], "t": "Dashboard" }]
+    },
+    {
+      "box": [111, 391, 107, 27],
+      "text": "Budgets",
+      "words": [{ "box": [111, 391, 107, 27], "t": "Budgets" }]
+    },
+    {
+      "box": [111, 471, 129, 31],
+      "text": "Hierarchy",
+      "words": [{ "box": [111, 471, 129, 31], "t": "Hierarchy" }]
+    },
+    {
+      "box": [111, 551, 89, 22],
+      "text": "Events",
+      "words": [{ "box": [111, 551, 89, 22], "t": "Events" }]
+    },
+    {
+      "box": [111, 631, 222, 27],
+      "text": "Co-funding board",
+      "words": [
+        { "box": [111, 631, 138, 27], "t": "Co" },
+        { "box": [111, 631, 138, 27], "t": "funding" },
+        { "box": [253, 631, 81, 27], "t": "board" }
+      ]
+    },
+    {
+      "box": [111, 710, 134, 29],
+      "text": "Approvals",
+      "words": [{ "box": [111, 710, 134, 29], "t": "Approvals" }]
+    },
+    {
+      "box": [111, 791, 209, 27],
+      "text": "Rules & policies",
+      "words": [
+        { "box": [111, 791, 74, 27], "t": "Rules" },
+        { "box": [212, 791, 108, 27], "t": "policies" }
+      ]
+    },
+    {
+      "box": [111, 871, 102, 27],
+      "text": "Reports",
+      "words": [{ "box": [111, 871, 102, 27], "t": "Reports" }]
+    },
+    {
+      "box": [98, 950, 174, 34],
+      "text": "Integrations",
+      "words": [{ "box": [98, 950, 174, 34], "t": "Integrations" }]
+    },
+    {
+      "box": [93, 1031, 107, 24],
+      "text": "Admin",
+      "words": [{ "box": [93, 1031, 107, 24], "t": "Admin" }]
+    },
+    {
+      "box": [49, 1969, 40, 22],
+      "text": "PR",
+      "words": [{ "box": [49, 1969, 40, 22], "t": "PR" }]
+    },
+    {
+      "box": [124, 1950, 165, 33],
+      "text": "Priya Raman",
+      "words": [
+        { "box": [124, 1950, 66, 32], "t": "Priya" },
+        { "box": [194, 1951, 95, 32], "t": "Raman" }
+      ]
+    },
+    {
+      "box": [124, 1987, 200, 22],
+      "text": "Finance Controller",
+      "words": [
+        { "box": [124, 1987, 85, 22], "t": "Finance" },
+        { "box": [212, 1987, 112, 22], "t": "Controller" }
+      ]
+    },
+    {
+      "box": [542, 49, 764, 36],
+      "text": "Home \/ Rules and policies \/ R-12 Over-threshold approvals",
+      "words": [
+        { "box": [542, 49, 83, 36], "t": "Home" },
+        { "box": [651, 49, 70, 35], "t": "Rules" },
+        { "box": [726, 49, 48, 35], "t": "and" },
+        { "box": [778, 49, 96, 35], "t": "policies" },
+        { "box": [905, 49, 66, 35], "t": "R" },
+        { "box": [905, 49, 66, 35], "t": "12" },
+        { "box": [975, 49, 193, 35], "t": "Over" },
+        { "box": [975, 49, 193, 35], "t": "threshold" },
+        { "box": [1172, 49, 135, 36], "t": "approvals" }
+      ]
+    },
+    {
+      "box": [1569, 53, 284, 27],
+      "text": ". Search budgets, rules...",
+      "words": [
+        { "box": [1586, 53, 84, 27], "t": "Search" },
+        { "box": [1674, 53, 98, 27], "t": "budgets" },
+        { "box": [1775, 53, 78, 27], "t": "rules" }
+      ]
+    },
+    {
+      "box": [1902, 49, 84, 27],
+      "text": "Ctr1 K",
+      "words": [
+        { "box": [1902, 49, 61, 27], "t": "Ctr1" },
+        { "box": [1966, 49, 21, 27], "t": "K" }
+      ]
+    },
+    {
+      "box": [2075, 53, 89, 23],
+      "text": "FY2026",
+      "words": [{ "box": [2075, 53, 89, 23], "t": "FY2026" }]
+    },
+    {
+      "box": [542, 182, 698, 49],
+      "text": "R-12 Over-threshold approvals",
+      "words": [
+        { "box": [542, 182, 104, 49], "t": "R" },
+        { "box": [542, 182, 104, 49], "t": "12" },
+        { "box": [652, 182, 355, 49], "t": "Over" },
+        { "box": [652, 182, 355, 49], "t": "threshold" },
+        { "box": [1014, 182, 226, 49], "t": "approvals" }
+      ]
+    },
+    {
+      "box": [1276, 187, 89, 22],
+      "text": "Draft v4",
+      "words": [
+        { "box": [1276, 187, 58, 22], "t": "Draft" },
+        { "box": [1336, 187, 28, 22], "t": "v4" }
+      ]
+    },
+    {
+      "box": [1422, 187, 276, 27],
+      "text": "• Active v3 in production",
+      "words": [
+        { "box": [1448, 187, 68, 26], "t": "Active" },
+        { "box": [1519, 187, 26, 26], "t": "v3" },
+        { "box": [1549, 187, 23, 26], "t": "in" },
+        { "box": [1575, 187, 123, 27], "t": "production" }
+      ]
+    },
+    {
+      "box": [542, 253, 1169, 31],
+      "text": "Construct, test, and deploy automated governance triggers, approval workflows, and spend gates",
+      "words": [
+        { "box": [542, 253, 128, 31], "t": "Construct" },
+        { "box": [674, 253, 54, 31], "t": "test" },
+        { "box": [732, 253, 47, 31], "t": "and" },
+        { "box": [782, 253, 81, 31], "t": "deploy" },
+        { "box": [868, 253, 140, 31], "t": "automated" },
+        { "box": [1011, 253, 143, 31], "t": "governance" },
+        { "box": [1158, 253, 101, 31], "t": "triggers" },
+        { "box": [1263, 253, 108, 31], "t": "approval" },
+        { "box": [1375, 253, 136, 31], "t": "workflows" },
+        { "box": [1515, 253, 47, 31], "t": "and" },
+        { "box": [1565, 253, 74, 31], "t": "spend" },
+        { "box": [1643, 253, 69, 31], "t": "gates" }
+      ]
+    },
+    {
+      "box": [541, 290, 250, 39],
+      "text": "across departments.",
+      "words": [
+        { "box": [541, 290, 80, 33], "t": "across" },
+        { "box": [624, 293, 168, 36], "t": "departments" }
+      ]
+    },
+    {
+      "box": [1844, 187, 151, 22],
+      "text": "• Simulate",
+      "words": [{ "box": [1880, 187, 116, 22], "t": "Simulate" }]
+    },
+    {
+      "box": [2076, 182, 231, 31],
+      "text": "• Version history",
+      "words": [
+        { "box": [2115, 182, 97, 31], "t": "Version" },
+        { "box": [2215, 182, 91, 31], "t": "history" }
+      ]
+    },
+    {
+      "box": [1844, 276, 173, 31],
+      "text": "+ Publish v4",
+      "words": [
+        { "box": [1887, 276, 93, 31], "t": "Publish" },
+        { "box": [1984, 276, 34, 31], "t": "v4" }
+      ]
+    },
+    {
+      "box": [609, 453, 80, 27],
+      "text": "WHEN",
+      "words": [{ "box": [609, 453, 80, 27], "t": "WHEN" }]
+    },
+    {
+      "box": [724, 453, 364, 36],
+      "text": "Condition Logic Builder",
+      "words": [
+        { "box": [724, 453, 153, 36], "t": "Condition" },
+        { "box": [882, 453, 85, 36], "t": "Logic" },
+        { "box": [972, 453, 117, 36], "t": "Builder" }
+      ]
+    },
+    {
+      "box": [1467, 453, 316, 31],
+      "text": "Trigger evaluations in order",
+      "words": [
+        { "box": [1467, 453, 82, 31], "t": "Trigger" },
+        { "box": [1552, 453, 132, 31], "t": "evaluations" },
+        { "box": [1688, 453, 19, 31], "t": "in" },
+        { "box": [1711, 453, 71, 31], "t": "order" }
+      ]
+    },
+    {
+      "box": [622, 591, 53, 22],
+      "text": "Field",
+      "words": [{ "box": [622, 591, 53, 22], "t": "Field" }]
+    },
+    {
+      "box": [973, 596, 107, 22],
+      "text": "Operator",
+      "words": [{ "box": [973, 596, 107, 22], "t": "Operator" }]
+    },
+    {
+      "box": [1328, 588, 179, 31],
+      "text": "Threshold Value",
+      "words": [
+        { "box": [1328, 588, 110, 29], "t": "Threshold" },
+        { "box": [1441, 591, 67, 28], "t": "Value" }
+      ]
+    },
+    { "box": [1707, 622, 22, 27], "text": "•", "words": [] },
+    {
+      "box": [644, 649, 280, 27],
+      "text": "Request amount (USD)",
+      "words": [
+        { "box": [644, 649, 101, 27], "t": "Request" },
+        { "box": [749, 649, 98, 27], "t": "amount" },
+        { "box": [850, 649, 75, 27], "t": "USD" }
+      ]
+    },
+    {
+      "box": [990, 646, 201, 34],
+      "text": "greater than (>)",
+      "words": [
+        { "box": [990, 649, 95, 32], "t": "greater" },
+        { "box": [1088, 647, 62, 31], "t": "than" }
+      ]
+    },
+    {
+      "box": [1347, 649, 196, 31],
+      "text": "USD 2,000.00",
+      "words": [
+        { "box": [1347, 649, 58, 31], "t": "USD" },
+        { "box": [1409, 649, 133, 31], "t": "2,000.00" }
+      ]
+    },
+    {
+      "box": [658, 760, 49, 18],
+      "text": "AND",
+      "words": [{ "box": [658, 760, 49, 18], "t": "AND" }]
+    },
+    {
+      "box": [1324, 849, 133, 27],
+      "text": "Value Chips",
+      "words": [
+        { "box": [1324, 849, 67, 27], "t": "Value" },
+        { "box": [1395, 849, 63, 27], "t": "Chips" }
+      ]
+    },
+    {
+      "box": [622, 880, 53, 22],
+      "text": "Field",
+      "words": [{ "box": [622, 880, 53, 22], "t": "Field" }]
+    },
+    {
+      "box": [644, 938, 209, 31],
+      "text": "Budget category",
+      "words": [
+        { "box": [644, 938, 93, 31], "t": "Budget" },
+        { "box": [741, 938, 112, 31], "t": "category" }
+      ]
+    },
+    {
+      "box": [973, 880, 107, 27],
+      "text": "Operator",
+      "words": [{ "box": [973, 880, 107, 27], "t": "Operator" }]
+    },
+    {
+      "box": [991, 933, 164, 27],
+      "text": "is one of (IN)",
+      "words": [
+        { "box": [991, 933, 27, 27], "t": "is" },
+        { "box": [1021, 933, 47, 27], "t": "one" },
+        { "box": [1072, 933, 27, 27], "t": "of" },
+        { "box": [1102, 933, 53, 27], "t": "IN" }
+      ]
+    },
+    {
+      "box": [1346, 902, 210, 33],
+      "text": "Employee events x",
+      "words": [
+        { "box": [1346, 904, 106, 31], "t": "Employee" },
+        { "box": [1455, 902, 78, 30], "t": "events" },
+        { "box": [1535, 902, 21, 29], "t": "x" }
+      ]
+    },
+    { "box": [1707, 911, 22, 27], "text": "•", "words": [] },
+    {
+      "box": [1347, 969, 151, 27],
+      "text": "Team lunch x",
+      "words": [
+        { "box": [1347, 969, 58, 27], "t": "Team" },
+        { "box": [1408, 969, 64, 27], "t": "lunch" },
+        { "box": [1475, 969, 23, 27], "t": "x" }
+      ]
+    },
+    {
+      "box": [658, 1076, 49, 22],
+      "text": "AND",
+      "words": [{ "box": [658, 1076, 49, 22], "t": "AND" }]
+    },
+    {
+      "box": [1324, 1164, 134, 28],
+      "text": "Value Chips",
+      "words": [
+        { "box": [1324, 1164, 65, 27], "t": "Value" },
+        { "box": [1393, 1165, 65, 27], "t": "Chips" }
+      ]
+    },
+    {
+      "box": [618, 1196, 58, 22],
+      "text": "Field",
+      "words": [{ "box": [618, 1196, 58, 22], "t": "Field" }]
+    },
+    {
+      "box": [644, 1253, 111, 27],
+      "text": "Location",
+      "words": [{ "box": [644, 1253, 111, 27], "t": "Location" }]
+    },
+    {
+      "box": [973, 1196, 107, 27],
+      "text": "Operator",
+      "words": [{ "box": [973, 1196, 107, 27], "t": "Operator" }]
+    },
+    {
+      "box": [991, 1253, 36, 27],
+      "text": "in",
+      "words": [{ "box": [991, 1253, 36, 27], "t": "in" }]
+    },
+    {
+      "box": [1347, 1222, 142, 23],
+      "text": "Bengaluru X",
+      "words": [
+        { "box": [1347, 1222, 118, 23], "t": "Bengaluru" },
+        { "box": [1468, 1222, 21, 23], "t": "X" }
+      ]
+    },
+    {
+      "box": [1346, 1284, 152, 30],
+      "text": "Hyderabad X",
+      "words": [
+        { "box": [1346, 1285, 127, 29], "t": "Hyderabad" },
+        { "box": [1475, 1284, 23, 25], "t": "X" }
+      ]
+    },
+    {
+      "box": [662, 1418, 187, 22],
+      "text": "+ Add condition",
+      "words": [
+        { "box": [681, 1418, 52, 22], "t": "Add" },
+        { "box": [736, 1418, 113, 22], "t": "condition" }
+      ]
+    },
+    {
+      "box": [711, 1616, 520, 39],
+      "text": "Required Actions & Enforcement",
+      "words": [
+        { "box": [711, 1619, 145, 35], "t": "Required" },
+        { "box": [859, 1618, 124, 34], "t": "Actions" },
+        { "box": [1016, 1616, 215, 36], "t": "Enforcement" }
+      ]
+    },
+    {
+      "box": [1418, 1622, 364, 27],
+      "text": "Enforced governance outcomes",
+      "words": [
+        { "box": [1418, 1622, 108, 27], "t": "Enforced" },
+        { "box": [1529, 1622, 132, 27], "t": "governance" },
+        { "box": [1664, 1622, 118, 27], "t": "outcomes" }
+      ]
+    },
+    {
+      "box": [591, 1729, 480, 27],
+      "text": "SEQUENTIAL APPROVAL WORKFLOW",
+      "words": [
+        { "box": [591, 1729, 169, 27], "t": "SEQUENTIAL" },
+        { "box": [763, 1729, 135, 27], "t": "APPROVAL" },
+        { "box": [901, 1729, 170, 27], "t": "WORKFLOW" }
+      ]
+    },
+    {
+      "box": [707, 1831, 227, 27],
+      "text": "Regional Manager",
+      "words": [
+        { "box": [707, 1831, 112, 27], "t": "Regional" },
+        { "box": [822, 1831, 112, 27], "t": "Manager" }
+      ]
+    },
+    {
+      "box": [707, 1867, 271, 22],
+      "text": "Initial segment assessment",
+      "words": [
+        { "box": [707, 1867, 61, 22], "t": "Initial" },
+        { "box": [770, 1867, 85, 22], "t": "segment" },
+        { "box": [858, 1867, 120, 22], "t": "assessment" }
+      ]
+    },
+    {
+      "box": [1311, 1831, 231, 22],
+      "text": "Finance Controller",
+      "words": [
+        { "box": [1311, 1831, 102, 22], "t": "Finance" },
+        { "box": [1416, 1831, 127, 22], "t": "Controller" }
+      ]
+    },
+    {
+      "box": [1311, 1862, 307, 31],
+      "text": "Final fiscal compliance sign-off",
+      "words": [
+        { "box": [1311, 1866, 52, 27], "t": "Final" },
+        { "box": [1366, 1865, 52, 27], "t": "fiscal" },
+        { "box": [1421, 1863, 111, 28], "t": "compliance" },
+        { "box": [1535, 1862, 83, 28], "t": "sign" },
+        { "box": [1535, 1862, 83, 28], "t": "off" }
+      ]
+    },
+    {
+      "box": [671, 2009, 271, 31],
+      "text": "Notify budget owner",
+      "words": [
+        { "box": [671, 2009, 81, 31], "t": "Notify" },
+        { "box": [756, 2009, 93, 31], "t": "budget" },
+        { "box": [853, 2009, 89, 31], "t": "owner" }
+      ]
+    },
+    {
+      "box": [671, 2049, 698, 27],
+      "text": "Send real-time alerts upon request creation and routing changes.",
+      "words": [
+        { "box": [671, 2049, 57, 27], "t": "Send" },
+        { "box": [732, 2049, 98, 27], "t": "real" },
+        { "box": [732, 2049, 98, 27], "t": "time" },
+        { "box": [833, 2049, 57, 27], "t": "alerts" },
+        { "box": [894, 2049, 61, 27], "t": "upon" },
+        { "box": [958, 2049, 84, 27], "t": "request" },
+        { "box": [1046, 2049, 88, 27], "t": "creation" },
+        { "box": [1137, 2049, 40, 27], "t": "and" },
+        { "box": [1181, 2049, 84, 27], "t": "routing" },
+        { "box": [1268, 2049, 101, 27], "t": "changes" }
+      ]
+    },
+    {
+      "box": [1573, 2027, 165, 30],
+      "text": "Email & In-App",
+      "words": [
+        { "box": [1573, 2027, 65, 30], "t": "Email" },
+        { "box": [1660, 2027, 78, 30], "t": "In" },
+        { "box": [1660, 2027, 78, 30], "t": "App" }
+      ]
+    },
+    {
+      "box": [676, 2160, 653, 31],
+      "text": "Warn requester when remaining budget below 20%",
+      "words": [
+        { "box": [676, 2160, 66, 31], "t": "Warn" },
+        { "box": [746, 2160, 128, 31], "t": "requester" },
+        { "box": [878, 2160, 74, 31], "t": "when" },
+        { "box": [955, 2160, 132, 31], "t": "remaining" },
+        { "box": [1091, 2160, 93, 31], "t": "budget" },
+        { "box": [1188, 2160, 81, 31], "t": "below" },
+        { "box": [1273, 2160, 56, 31], "t": "20" }
+      ]
+    },
+    {
+      "box": [671, 2196, 591, 27],
+      "text": "Show caution prompt during draft expense submission.",
+      "words": [
+        { "box": [671, 2196, 62, 27], "t": "Show" },
+        { "box": [736, 2196, 81, 26], "t": "caution" },
+        { "box": [820, 2196, 84, 26], "t": "prompt" },
+        { "box": [908, 2196, 75, 26], "t": "during" },
+        { "box": [986, 2196, 55, 26], "t": "draft" },
+        { "box": [1045, 2196, 88, 26], "t": "expense" },
+        { "box": [1136, 2196, 126, 27], "t": "submission" }
+      ]
+    },
+    {
+      "box": [1556, 2178, 187, 27],
+      "text": "A Warning Alert",
+      "words": [
+        { "box": [1556, 2178, 27, 27], "t": "A" },
+        { "box": [1586, 2178, 91, 27], "t": "Warning" },
+        { "box": [1681, 2178, 61, 27], "t": "Alert" }
+      ]
+    },
+    {
+      "box": [627, 2302, 182, 23],
+      "text": "+ + Add action",
+      "words": [
+        { "box": [682, 2302, 49, 23], "t": "Add" },
+        { "box": [733, 2302, 76, 23], "t": "action" }
+      ]
+    },
+    {
+      "box": [609, 2507, 80, 22],
+      "text": "SCOPE",
+      "words": [{ "box": [609, 2507, 80, 22], "t": "SCOPE" }]
+    },
+    {
+      "box": [724, 2502, 480, 36],
+      "text": "Scope Settings & Applicability",
+      "words": [
+        { "box": [724, 2502, 103, 36], "t": "Scope" },
+        { "box": [832, 2502, 130, 36], "t": "Settings" },
+        { "box": [998, 2502, 206, 36], "t": "Applicability" }
+      ]
+    },
+    {
+      "box": [1484, 2507, 293, 27],
+      "text": "Rule boundaries & priority",
+      "words": [
+        { "box": [1484, 2507, 50, 27], "t": "Rule" },
+        { "box": [1538, 2507, 132, 27], "t": "boundaries" },
+        { "box": [1697, 2507, 81, 27], "t": "priority" }
+      ]
+    },
+    {
+      "box": [591, 2614, 89, 27],
+      "text": "Priority",
+      "words": [{ "box": [591, 2614, 89, 27], "t": "Priority" }]
+    },
+    {
+      "box": [991, 2614, 240, 27],
+      "text": "Effective From Date",
+      "words": [
+        { "box": [991, 2614, 107, 27], "t": "Effective" },
+        { "box": [1101, 2614, 62, 26], "t": "From" },
+        { "box": [1166, 2614, 65, 27], "t": "Date" }
+      ]
+    },
+    {
+      "box": [1404, 2614, 249, 31],
+      "text": "Organizational Scope",
+      "words": [
+        { "box": [1404, 2614, 170, 31], "t": "Organizational" },
+        { "box": [1578, 2614, 75, 31], "t": "Scope" }
+      ]
+    },
+    {
+      "box": [618, 2680, 36, 22],
+      "text": "40",
+      "words": [{ "box": [618, 2680, 36, 22], "t": "40" }]
+    },
+    {
+      "box": [1022, 2680, 138, 28],
+      "text": "1 Dec 2026",
+      "words": [
+        { "box": [1022, 2680, 16, 27], "t": "1" },
+        { "box": [1042, 2680, 49, 26], "t": "Dec" },
+        { "box": [1094, 2680, 67, 27], "t": "2026" }
+      ]
+    },
+    {
+      "box": [1427, 2680, 329, 31],
+      "text": "Hyland \/ India Region an v",
+      "words": [
+        { "box": [1427, 2680, 93, 31], "t": "Hyland" },
+        { "box": [1536, 2680, 66, 31], "t": "India" },
+        { "box": [1605, 2680, 85, 31], "t": "Region" },
+        { "box": [1694, 2680, 35, 31], "t": "an" },
+        { "box": [1733, 2680, 22, 31], "t": "v" }
+      ]
+    },
+    {
+      "box": [591, 2769, 387, 27],
+      "text": "Explanation Text Shown to Users",
+      "words": [
+        { "box": [591, 2769, 142, 27], "t": "Explanation" },
+        { "box": [736, 2769, 51, 27], "t": "Text" },
+        { "box": [790, 2769, 81, 27], "t": "Shown" },
+        { "box": [875, 2769, 30, 27], "t": "to" },
+        { "box": [908, 2769, 70, 27], "t": "Users" }
+      ]
+    },
+    {
+      "box": [618, 2832, 1031, 40],
+      "text": "Rule R-12 applies because amount exceeds USD 2,000.00 threshold for regional events.",
+      "words": [
+        { "box": [618, 2832, 54, 34], "t": "Rule" },
+        { "box": [675, 2833, 54, 33], "t": "R" },
+        { "box": [675, 2833, 54, 33], "t": "12" },
+        { "box": [733, 2833, 87, 34], "t": "applies" },
+        { "box": [824, 2833, 99, 34], "t": "because" },
+        { "box": [927, 2834, 99, 34], "t": "amount" },
+        { "box": [1030, 2835, 95, 34], "t": "exceeds" },
+        { "box": [1129, 2835, 54, 33], "t": "USD" },
+        { "box": [1187, 2836, 99, 34], "t": "2,000.00" },
+        { "box": [1290, 2836, 120, 34], "t": "threshold" },
+        { "box": [1414, 2837, 33, 33], "t": "for" },
+        { "box": [1451, 2837, 103, 34], "t": "regional" },
+        { "box": [1558, 2838, 91, 34], "t": "events" }
+      ]
+    },
+    {
+      "box": [1982, 453, 298, 31],
+      "text": "Explanation Preview",
+      "words": [
+        { "box": [1982, 453, 174, 31], "t": "Explanation" },
+        { "box": [2160, 453, 120, 31], "t": "Preview" }
+      ]
+    },
+    {
+      "box": [1920, 520, 467, 27],
+      "text": "Live simulation preview of how end-users",
+      "words": [
+        { "box": [1920, 520, 51, 27], "t": "Live" },
+        { "box": [1974, 520, 118, 27], "t": "simulation" },
+        { "box": [2096, 520, 91, 27], "t": "preview" },
+        { "box": [2190, 520, 24, 27], "t": "of" },
+        { "box": [2217, 520, 51, 27], "t": "how" },
+        { "box": [2271, 520, 116, 27], "t": "end" },
+        { "box": [2271, 520, 116, 27], "t": "users" }
+      ]
+    },
+    {
+      "box": [1920, 556, 422, 27],
+      "text": "perceive this governance gate during",
+      "words": [
+        { "box": [1920, 556, 101, 27], "t": "perceive" },
+        { "box": [2024, 556, 45, 26], "t": "this" },
+        { "box": [2073, 556, 133, 26], "t": "governance" },
+        { "box": [2209, 556, 52, 26], "t": "gate" },
+        { "box": [2264, 556, 78, 27], "t": "during" }
+      ]
+    },
+    {
+      "box": [1920, 591, 147, 25],
+      "text": "submission.",
+      "words": [{ "box": [1920, 591, 147, 25], "t": "submission" }]
+    },
+    {
+      "box": [2004, 684, 400, 27],
+      "text": "\"Rule R-12 applies because amount",
+      "words": [
+        { "box": [2004, 684, 64, 27], "t": "Rule" },
+        { "box": [2072, 684, 51, 27], "t": "R" },
+        { "box": [2072, 684, 51, 27], "t": "12" },
+        { "box": [2126, 684, 84, 27], "t": "applies" },
+        { "box": [2213, 684, 95, 27], "t": "because" },
+        { "box": [2311, 684, 93, 27], "t": "amount" }
+      ]
+    },
+    {
+      "box": [2004, 720, 311, 27],
+      "text": "USD 2,500.00 is above USD",
+      "words": [
+        { "box": [2004, 720, 54, 27], "t": "USD" },
+        { "box": [2061, 720, 98, 27], "t": "2,500.00" },
+        { "box": [2163, 720, 20, 27], "t": "is" },
+        { "box": [2186, 720, 71, 27], "t": "above" },
+        { "box": [2261, 720, 55, 27], "t": "USD" }
+      ]
+    },
+    {
+      "box": [2004, 760, 404, 31],
+      "text": "2,000.00 and category is Employee",
+      "words": [
+        { "box": [2004, 760, 100, 31], "t": "2,000.00" },
+        { "box": [2109, 760, 46, 31], "t": "and" },
+        { "box": [2159, 760, 97, 31], "t": "category" },
+        { "box": [2260, 760, 19, 31], "t": "is" },
+        { "box": [2283, 760, 126, 31], "t": "Employee" }
+      ]
+    },
+    {
+      "box": [2004, 796, 102, 27],
+      "text": "events.\"",
+      "words": [{ "box": [2004, 796, 102, 27], "t": "events" }]
+    },
+    {
+      "box": [1924, 907, 276, 22],
+      "text": "MATCHED CONDITIONS",
+      "words": [
+        { "box": [1924, 907, 115, 22], "t": "MATCHED" },
+        { "box": [2042, 907, 158, 22], "t": "CONDITIONS" }
+      ]
+    },
+    {
+      "box": [1929, 960, 476, 27],
+      "text": "• Amount threshold (USD 2,500 > 2,000)",
+      "words": [
+        { "box": [1970, 960, 95, 27], "t": "Amount" },
+        { "box": [2067, 960, 108, 27], "t": "threshold" },
+        { "box": [2179, 960, 57, 27], "t": "USD" },
+        { "box": [2240, 960, 68, 27], "t": "2,500" },
+        { "box": [2327, 960, 77, 27], "t": "2,000" }
+      ]
+    },
+    {
+      "box": [1924, 1009, 458, 31],
+      "text": "• Category matches: Employee events",
+      "words": [
+        { "box": [1971, 1009, 105, 31], "t": "Category" },
+        { "box": [2079, 1009, 105, 31], "t": "matches" },
+        { "box": [2188, 1009, 112, 31], "t": "Employee" },
+        { "box": [2304, 1009, 78, 31], "t": "events" }
+      ]
+    },
+    {
+      "box": [1964, 1062, 347, 31],
+      "text": "Target location: Bengaluru HQ",
+      "words": [
+        { "box": [1964, 1062, 81, 31], "t": "Target" },
+        { "box": [2049, 1062, 97, 31], "t": "location" },
+        { "box": [2150, 1062, 120, 31], "t": "Bengaluru" },
+        { "box": [2274, 1062, 37, 31], "t": "HQ" }
+      ]
+    },
+    {
+      "box": [1973, 1249, 231, 31],
+      "text": "Conflict Check",
+      "words": [
+        { "box": [1973, 1249, 131, 31], "t": "Conflict" },
+        { "box": [2109, 1249, 96, 31], "t": "Check" }
+      ]
+    },
+    {
+      "box": [2000, 1338, 373, 27],
+      "text": "No conflicts with 14 active rules",
+      "words": [
+        { "box": [2000, 1338, 37, 27], "t": "No" },
+        { "box": [2041, 1338, 98, 27], "t": "conflicts" },
+        { "box": [2142, 1338, 57, 27], "t": "with" },
+        { "box": [2203, 1338, 30, 27], "t": "14" },
+        { "box": [2236, 1338, 71, 27], "t": "active" },
+        { "box": [2311, 1338, 63, 27], "t": "rules" }
+      ]
+    },
+    {
+      "box": [1996, 1373, 369, 27],
+      "text": "Execution precedence resolved",
+      "words": [
+        { "box": [1996, 1373, 125, 27], "t": "Execution" },
+        { "box": [2124, 1373, 135, 27], "t": "precedence" },
+        { "box": [2263, 1373, 102, 27], "t": "resolved" }
+      ]
+    },
+    {
+      "box": [1996, 1405, 80, 27],
+      "text": "safely.",
+      "words": [{ "box": [1996, 1405, 80, 27], "t": "safely" }]
+    },
+    {
+      "box": [1920, 1507, 249, 27],
+      "text": "Rule #102 Global Cap",
+      "words": [
+        { "box": [1920, 1507, 55, 27], "t": "Rule" },
+        { "box": [1978, 1507, 58, 26], "t": "102" },
+        { "box": [2040, 1507, 78, 26], "t": "Global" },
+        { "box": [2121, 1507, 47, 27], "t": "Cap" }
+      ]
+    },
+    {
+      "box": [2342, 1511, 89, 22],
+      "text": "Passed",
+      "words": [{ "box": [2342, 1511, 89, 22], "t": "Passed" }]
+    },
+    {
+      "box": [1920, 1587, 356, 31],
+      "text": "Rule #104 APAC Regional Policy",
+      "words": [
+        { "box": [1920, 1587, 54, 31], "t": "Rule" },
+        { "box": [1978, 1587, 58, 31], "t": "104" },
+        { "box": [2040, 1587, 62, 31], "t": "APAC" },
+        { "box": [2106, 1587, 101, 31], "t": "Regional" },
+        { "box": [2211, 1587, 65, 31], "t": "Policy" }
+      ]
+    },
+    {
+      "box": [2342, 1591, 89, 22],
+      "text": "Passed",
+      "words": [{ "box": [2342, 1591, 89, 22], "t": "Passed" }]
+    },
+    {
+      "box": [1920, 1667, 347, 27],
+      "text": "Rule #105 Quarter-End Freeze",
+      "words": [
+        { "box": [1920, 1667, 55, 27], "t": "Rule" },
+        { "box": [1978, 1667, 58, 26], "t": "105" },
+        { "box": [2040, 1667, 143, 26], "t": "Quarter" },
+        { "box": [2040, 1667, 143, 26], "t": "End" },
+        { "box": [2186, 1667, 80, 27], "t": "Freeze" }
+      ]
+    },
+    {
+      "box": [2342, 1667, 89, 22],
+      "text": "Passed",
+      "words": [{ "box": [2342, 1667, 89, 22], "t": "Passed" }]
+    },
+    {
+      "box": [1977, 1861, 250, 40],
+      "text": "Affected Last 30",
+      "words": [
+        { "box": [1977, 1861, 137, 38], "t": "Affected" },
+        { "box": [2117, 1864, 64, 35], "t": "Last" },
+        { "box": [2185, 1866, 42, 36], "t": "30" }
+      ]
+    },
+    {
+      "box": [1978, 1911, 89, 31],
+      "text": "Days",
+      "words": [{ "box": [1978, 1911, 89, 31], "t": "Days" }]
+    },
+    {
+      "box": [2280, 1876, 98, 22],
+      "text": "Backtest",
+      "words": [{ "box": [2280, 1876, 98, 22], "t": "Backtest" }]
+    },
+    {
+      "box": [2280, 1907, 84, 22],
+      "text": "sample",
+      "words": [{ "box": [2280, 1907, 84, 22], "t": "sample" }]
+    },
+    {
+      "box": [1947, 2000, 138, 27],
+      "text": "Evaluated in",
+      "words": [
+        { "box": [1947, 2000, 107, 27], "t": "Evaluated" },
+        { "box": [2057, 2000, 27, 27], "t": "in" }
+      ]
+    },
+    {
+      "box": [1946, 2035, 94, 24],
+      "text": "window",
+      "words": [{ "box": [1946, 2035, 94, 24], "t": "window" }]
+    },
+    {
+      "box": [1942, 2080, 58, 40],
+      "text": "23",
+      "words": [{ "box": [1942, 2080, 58, 40], "t": "23" }]
+    },
+    {
+      "box": [1941, 2143, 179, 45],
+      "text": "requests",
+      "words": [{ "box": [1941, 2143, 179, 45], "t": "requests" }]
+    },
+    {
+      "box": [2218, 2000, 80, 27],
+      "text": "Impact",
+      "words": [{ "box": [2218, 2000, 80, 27], "t": "Impact" }]
+    },
+    {
+      "box": [2217, 2049, 184, 43],
+      "text": "6 change",
+      "words": [
+        { "box": [2217, 2050, 32, 42], "t": "6" },
+        { "box": [2254, 2049, 147, 43], "t": "change" }
+      ]
+    },
+    {
+      "box": [2218, 2098, 151, 22],
+      "text": "New approvals",
+      "words": [
+        { "box": [2218, 2098, 50, 22], "t": "New" },
+        { "box": [2270, 2098, 99, 22], "t": "approvals" }
+      ]
+    },
+    {
+      "box": [2218, 2129, 102, 22],
+      "text": "triggered",
+      "words": [{ "box": [2218, 2129, 102, 22], "t": "triggered" }]
+    },
+    {
+      "box": [2036, 2267, 289, 31],
+      "text": "View backtest report →",
+      "words": [
+        { "box": [2036, 2267, 66, 31], "t": "View" },
+        { "box": [2106, 2267, 105, 31], "t": "backtest" },
+        { "box": [2214, 2267, 85, 31], "t": "report" }
+      ]
+    },
+    { "box": [2444, 53, 36, 22], "text": "PR", "words": [{ "box": [2444, 53, 36, 22], "t": "PR" }] }
+  ],
+  "width": 2560
+}

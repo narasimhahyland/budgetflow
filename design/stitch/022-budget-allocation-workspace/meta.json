@@ -2,21 +2,15 @@
   "screen": "022-budget-allocation-workspace",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/ccdbc282cac64caeba9a188fb6fcc676",
+      "stitchScreen": "projects/1643421514270618068/screens/5aca92e48a584a499b7ef84d700dee79",
       "approved": null,
-      "size": [
-        2560,
-        2048
-      ],
+      "size": [2560, 2208],
       "status": "proposed - awaiting user review"
     },
     "warning-block--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/0fd10f99e1ac45879ac85fb3a887e3ba",
+      "stitchScreen": "projects/1643421514270618068/screens/a010ff9be84142eea86f4879106b6443",
       "approved": null,
-      "size": [
-        2560,
-        2444
-      ],
+      "size": [2560, 2664],
       "status": "proposed - awaiting user review"
     }
   }

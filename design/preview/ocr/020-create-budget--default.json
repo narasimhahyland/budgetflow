@@ -1,0 +1,1005 @@
+{
+  "height": 3000,
+  "lines": [
+    {
+      "box": [109, 39, 192, 35],
+      "text": "BudgetFlow",
+      "words": [{ "box": [109, 39, 192, 35], "t": "BudgetFlow" }]
+    },
+    {
+      "box": [109, 78, 214, 18],
+      "text": "ENTERPRISE SATORI",
+      "words": [
+        { "box": [109, 78, 133, 18], "t": "ENTERPRISE" },
+        { "box": [244, 78, 79, 18], "t": "SATORI" }
+      ]
+    },
+    {
+      "box": [57, 148, 131, 26],
+      "text": "Hyland",
+      "words": [{ "box": [57, 148, 131, 26], "t": "Hyland" }]
+    },
+    {
+      "box": [31, 257, 74, 22],
+      "text": "HOME",
+      "words": [{ "box": [31, 257, 74, 22], "t": "HOME" }]
+    },
+    {
+      "box": [89, 311, 74, 32],
+      "text": "Home",
+      "words": [{ "box": [89, 311, 74, 32], "t": "Home" }]
+    },
+    {
+      "box": [31, 392, 109, 26],
+      "text": "BUDGETS",
+      "words": [{ "box": [31, 392, 109, 26], "t": "BUDGETS" }]
+    },
+    {
+      "box": [87, 449, 210, 31],
+      "text": "Budget hierarchy",
+      "words": [
+        { "box": [87, 449, 88, 28], "t": "Budget" },
+        { "box": [177, 451, 120, 28], "t": "hierarchy" }
+      ]
+    },
+    {
+      "box": [92, 515, 257, 22],
+      "text": "Allocation workspace",
+      "words": [
+        { "box": [92, 515, 121, 22], "t": "Allocation" },
+        { "box": [215, 515, 134, 22], "t": "workspace" }
+      ]
+    },
+    {
+      "box": [91, 573, 132, 31],
+      "text": "Budget list",
+      "words": [
+        { "box": [91, 575, 85, 29], "t": "Budget" },
+        { "box": [179, 573, 44, 28], "t": "list" }
+      ]
+    },
+    {
+      "box": [92, 645, 79, 22],
+      "text": "Events",
+      "words": [{ "box": [92, 645, 79, 22], "t": "Events" }]
+    },
+    {
+      "box": [92, 706, 205, 27],
+      "text": "Co-funding board",
+      "words": [
+        { "box": [92, 706, 125, 27], "t": "Co" },
+        { "box": [92, 706, 125, 27], "t": "funding" },
+        { "box": [220, 706, 76, 27], "t": "board" }
+      ]
+    },
+    {
+      "box": [31, 785, 126, 22],
+      "text": "REQUESTS",
+      "words": [{ "box": [31, 785, 126, 22], "t": "REQUESTS" }]
+    },
+    {
+      "box": [87, 842, 183, 26],
+      "text": "Approval inbox",
+      "words": [
+        { "box": [87, 842, 107, 26], "t": "Approval" },
+        { "box": [197, 842, 73, 26], "t": "inbox" }
+      ]
+    },
+    {
+      "box": [92, 907, 144, 26],
+      "text": "My requests",
+      "words": [
+        { "box": [92, 907, 33, 26], "t": "My" },
+        { "box": [128, 907, 108, 26], "t": "requests" }
+      ]
+    },
+    {
+      "box": [31, 985, 109, 22],
+      "text": "FINANCE",
+      "words": [{ "box": [31, 985, 109, 22], "t": "FINANCE" }]
+    },
+    {
+      "box": [87, 1038, 262, 31],
+      "text": "Actuals and matching",
+      "words": [
+        { "box": [87, 1038, 94, 28], "t": "Actuals" },
+        { "box": [184, 1040, 47, 26], "t": "and" },
+        { "box": [234, 1041, 116, 28], "t": "matching" }
+      ]
+    },
+    {
+      "box": [92, 1108, 122, 22],
+      "text": "GL tie-out",
+      "words": [
+        { "box": [92, 1108, 32, 22], "t": "GL" },
+        { "box": [126, 1108, 88, 22], "t": "tie" },
+        { "box": [126, 1108, 88, 22], "t": "out" }
+      ]
+    },
+    {
+      "box": [31, 1186, 113, 22],
+      "text": "INSIGHTS",
+      "words": [{ "box": [31, 1186, 113, 22], "t": "INSIGHTS" }]
+    },
+    {
+      "box": [39, 1243, 148, 26],
+      "text": "Il. Reports",
+      "words": [
+        { "box": [39, 1243, 45, 26], "t": "Il" },
+        { "box": [88, 1243, 100, 26], "t": "Reports" }
+      ]
+    },
+    {
+      "box": [92, 1308, 109, 26],
+      "text": "Audit log",
+      "words": [
+        { "box": [92, 1308, 62, 26], "t": "Audit" },
+        { "box": [157, 1308, 44, 26], "t": "log" }
+      ]
+    },
+    {
+      "box": [30, 1386, 79, 24],
+      "text": "ADMIN",
+      "words": [{ "box": [30, 1386, 79, 24], "t": "ADMIN" }]
+    },
+    {
+      "box": [92, 1443, 214, 26],
+      "text": "Rules and policies",
+      "words": [
+        { "box": [92, 1443, 65, 26], "t": "Rules" },
+        { "box": [160, 1443, 45, 26], "t": "and" },
+        { "box": [209, 1443, 96, 26], "t": "policies" }
+      ]
+    },
+    {
+      "box": [92, 1509, 144, 22],
+      "text": "Integrations",
+      "words": [{ "box": [92, 1509, 144, 22], "t": "Integrations" }]
+    },
+    {
+      "box": [92, 1570, 100, 26],
+      "text": "Settings",
+      "words": [{ "box": [92, 1570, 100, 26], "t": "Settings" }]
+    },
+    {
+      "box": [35, 1980, 44, 26],
+      "text": "DB",
+      "words": [{ "box": [35, 1980, 44, 26], "t": "DB" }]
+    },
+    {
+      "box": [105, 1962, 170, 26],
+      "text": "Daniel Brooks",
+      "words": [
+        { "box": [105, 1962, 78, 26], "t": "Daniel" },
+        { "box": [186, 1962, 89, 26], "t": "Brooks" }
+      ]
+    },
+    {
+      "box": [105, 1997, 183, 22],
+      "text": "Department Head",
+      "words": [
+        { "box": [105, 1997, 119, 22], "t": "Department" },
+        { "box": [226, 1997, 62, 22], "t": "Head" }
+      ]
+    },
+    {
+      "box": [523, 52, 375, 26],
+      "text": "Home \/ Budgets \/ New budget",
+      "words": [
+        { "box": [523, 52, 78, 26], "t": "Home" },
+        { "box": [620, 52, 104, 26], "t": "Budgets" },
+        { "box": [747, 52, 55, 26], "t": "New" },
+        { "box": [806, 52, 93, 26], "t": "budget" }
+      ]
+    },
+    {
+      "box": [968, 48, 536, 31],
+      "text": "Q Search budgets, events, requests... (Ctrl K)",
+      "words": [
+        { "box": [968, 48, 34, 31], "t": "Q" },
+        { "box": [1005, 48, 86, 30], "t": "Search" },
+        { "box": [1095, 48, 101, 30], "t": "budgets" },
+        { "box": [1200, 48, 86, 30], "t": "events" },
+        { "box": [1290, 48, 124, 30], "t": "requests" },
+        { "box": [1418, 48, 52, 30], "t": "Ctrl" },
+        { "box": [1474, 48, 30, 31], "t": "K" }
+      ]
+    },
+    {
+      "box": [527, 187, 337, 54],
+      "text": "Create budget",
+      "words": [
+        { "box": [527, 187, 154, 51], "t": "Create" },
+        { "box": [686, 190, 179, 51], "t": "budget" }
+      ]
+    },
+    {
+      "box": [890, 196, 135, 27],
+      "text": "Draft Level 3",
+      "words": [
+        { "box": [890, 196, 52, 27], "t": "Draft" },
+        { "box": [945, 196, 59, 26], "t": "Level" },
+        { "box": [1007, 196, 18, 26], "t": "3" }
+      ]
+    },
+    {
+      "box": [528, 249, 816, 26],
+      "text": "Define leaf envelope details, currency limits, and authority governance.",
+      "words": [
+        { "box": [528, 249, 75, 26], "t": "Define" },
+        { "box": [606, 249, 49, 26], "t": "leaf" },
+        { "box": [658, 249, 107, 26], "t": "envelope" },
+        { "box": [768, 249, 84, 26], "t": "details" },
+        { "box": [856, 249, 104, 26], "t": "currency" },
+        { "box": [963, 249, 71, 26], "t": "limits" },
+        { "box": [1038, 249, 45, 26], "t": "and" },
+        { "box": [1087, 249, 107, 26], "t": "authority" },
+        { "box": [1197, 249, 146, 26], "t": "governance" }
+      ]
+    },
+    {
+      "box": [632, 397, 96, 26],
+      "text": "Basics",
+      "words": [{ "box": [632, 397, 96, 26], "t": "Basics" }]
+    },
+    {
+      "box": [1531, 397, 266, 26],
+      "text": "General envelope identity",
+      "words": [
+        { "box": [1531, 397, 81, 26], "t": "General" },
+        { "box": [1615, 397, 91, 26], "t": "envelope" },
+        { "box": [1710, 397, 87, 26], "t": "identity" }
+      ]
+    },
+    {
+      "box": [567, 486, 179, 28],
+      "text": "Budget name *",
+      "words": [
+        { "box": [567, 486, 88, 28], "t": "Budget" },
+        { "box": [658, 486, 64, 27], "t": "name" }
+      ]
+    },
+    {
+      "box": [593, 545, 388, 26],
+      "text": "Employee Experience -Wellbeing",
+      "words": [
+        { "box": [593, 545, 117, 26], "t": "Employee" },
+        { "box": [713, 545, 133, 26], "t": "Experience" },
+        { "box": [850, 545, 132, 26], "t": "Wellbeing" }
+      ]
+    },
+    {
+      "box": [567, 623, 193, 35],
+      "text": "Parent budget *",
+      "words": [
+        { "box": [567, 626, 80, 32], "t": "Parent" },
+        { "box": [650, 624, 88, 31], "t": "budget" }
+      ]
+    },
+    {
+      "box": [593, 685, 571, 26],
+      "text": "Employee Experience (USD 3,000.00 unallocated)",
+      "words": [
+        { "box": [593, 685, 117, 26], "t": "Employee" },
+        { "box": [713, 685, 133, 26], "t": "Experience" },
+        { "box": [850, 685, 58, 26], "t": "USD" },
+        { "box": [911, 685, 101, 26], "t": "3,000.00" },
+        { "box": [1015, 685, 149, 26], "t": "unallocated" }
+      ]
+    },
+    {
+      "box": [571, 741, 802, 31],
+      "text": "\"E Allocating from parent envelope. Remaining parent pool determines ceiling.",
+      "words": [
+        { "box": [571, 741, 23, 31], "t": "E" },
+        { "box": [598, 741, 108, 31], "t": "Allocating" },
+        { "box": [711, 741, 47, 31], "t": "from" },
+        { "box": [761, 741, 74, 31], "t": "parent" },
+        { "box": [838, 741, 97, 31], "t": "envelope" },
+        { "box": [939, 741, 109, 31], "t": "Remaining" },
+        { "box": [1052, 741, 70, 31], "t": "parent" },
+        { "box": [1125, 741, 46, 31], "t": "pool" },
+        { "box": [1176, 741, 116, 31], "t": "determines" },
+        { "box": [1296, 741, 78, 31], "t": "ceiling" }
+      ]
+    },
+    {
+      "box": [567, 807, 135, 26],
+      "text": "Category *",
+      "words": [{ "box": [567, 807, 111, 26], "t": "Category" }]
+    },
+    {
+      "box": [1195, 807, 166, 31],
+      "text": "Budget type *",
+      "words": [
+        { "box": [1195, 807, 86, 31], "t": "Budget" },
+        { "box": [1285, 807, 52, 30], "t": "type" }
+      ]
+    },
+    {
+      "box": [592, 862, 124, 32],
+      "text": "Wellbeing",
+      "words": [{ "box": [592, 862, 124, 32], "t": "Wellbeing" }]
+    },
+    {
+      "box": [1221, 868, 122, 26],
+      "text": "Operating",
+      "words": [{ "box": [1221, 868, 122, 26], "t": "Operating" }]
+    },
+    {
+      "box": [637, 1051, 331, 31],
+      "text": "Ownership & Delegation",
+      "words": [
+        { "box": [637, 1051, 143, 31], "t": "Ownership" },
+        { "box": [809, 1051, 159, 31], "t": "Delegation" }
+      ]
+    },
+    {
+      "box": [1570, 1047, 227, 26],
+      "text": "Authority assignment",
+      "words": [
+        { "box": [1570, 1047, 97, 26], "t": "Authority" },
+        { "box": [1671, 1047, 126, 26], "t": "assignment" }
+      ]
+    },
+    {
+      "box": [567, 1138, 174, 26],
+      "text": "Budget owner *",
+      "words": [
+        { "box": [567, 1138, 88, 26], "t": "Budget" },
+        { "box": [658, 1138, 71, 26], "t": "owner" }
+      ]
+    },
+    {
+      "box": [659, 1195, 179, 26],
+      "text": "Sophie Laurent",
+      "words": [
+        { "box": [659, 1195, 78, 26], "t": "Sophie" },
+        { "box": [740, 1195, 97, 26], "t": "Laurent" }
+      ]
+    },
+    {
+      "box": [659, 1225, 458, 22],
+      "text": "People Experience Lead • s.laurent@hyland.com",
+      "words": [
+        { "box": [659, 1225, 66, 22], "t": "People" },
+        { "box": [728, 1225, 107, 22], "t": "Experience" },
+        { "box": [838, 1225, 49, 22], "t": "Lead" },
+        { "box": [901, 1225, 215, 22], "t": "s.laurent" },
+        { "box": [901, 1225, 215, 22], "t": "hyland.com" }
+      ]
+    },
+    {
+      "box": [1669, 1210, 97, 28],
+      "text": "Change",
+      "words": [{ "box": [1669, 1210, 97, 28], "t": "Change" }]
+    },
+    {
+      "box": [567, 1308, 314, 22],
+      "text": "Co-owners & Stakeholders",
+      "words": [
+        { "box": [567, 1308, 127, 22], "t": "Co" },
+        { "box": [567, 1308, 127, 22], "t": "owners" },
+        { "box": [718, 1308, 163, 22], "t": "Stakeholders" }
+      ]
+    },
+    {
+      "box": [602, 1360, 301, 27],
+      "text": "1K Marcus Kim (Approver)",
+      "words": [
+        { "box": [602, 1360, 27, 27], "t": "1K" },
+        { "box": [632, 1360, 91, 27], "t": "Marcus" },
+        { "box": [727, 1360, 44, 27], "t": "Kim" },
+        { "box": [774, 1360, 129, 27], "t": "Approver" }
+      ]
+    },
+    {
+      "box": [1007, 1360, 214, 22],
+      "text": "+ + Add co-owner",
+      "words": [
+        { "box": [1057, 1360, 49, 22], "t": "Add" },
+        { "box": [1109, 1360, 112, 22], "t": "co" },
+        { "box": [1109, 1360, 112, 22], "t": "owner" }
+      ]
+    },
+    {
+      "box": [571, 1417, 868, 22],
+      "text": "Co-owners receive notification events and can assemble procurement commitments.",
+      "words": [
+        { "box": [571, 1417, 107, 22], "t": "Co" },
+        { "box": [571, 1417, 107, 22], "t": "owners" },
+        { "box": [681, 1417, 80, 22], "t": "receive" },
+        { "box": [764, 1417, 118, 22], "t": "notification" },
+        { "box": [885, 1417, 69, 22], "t": "events" },
+        { "box": [956, 1417, 41, 22], "t": "and" },
+        { "box": [1000, 1417, 41, 22], "t": "can" },
+        { "box": [1044, 1417, 102, 22], "t": "assemble" },
+        { "box": [1149, 1417, 135, 22], "t": "procurement" },
+        { "box": [1286, 1417, 153, 22], "t": "commitments" }
+      ]
+    },
+    {
+      "box": [632, 1578, 480, 31],
+      "text": "Accounting & Financial Parameters",
+      "words": [
+        { "box": [632, 1578, 162, 31], "t": "Accounting" },
+        { "box": [822, 1578, 124, 31], "t": "Financial" },
+        { "box": [950, 1578, 162, 31], "t": "Parameters" }
+      ]
+    },
+    {
+      "box": [1509, 1578, 288, 27],
+      "text": "Cost center & currency lock",
+      "words": [
+        { "box": [1509, 1578, 51, 27], "t": "Cost" },
+        { "box": [1563, 1578, 68, 27], "t": "center" },
+        { "box": [1654, 1578, 91, 27], "t": "currency" },
+        { "box": [1749, 1578, 48, 27], "t": "lock" }
+      ]
+    },
+    {
+      "box": [567, 1668, 166, 30],
+      "text": "Legal entity *",
+      "words": [
+        { "box": [567, 1668, 68, 30], "t": "Legal" },
+        { "box": [638, 1668, 71, 30], "t": "entity" }
+      ]
+    },
+    {
+      "box": [1195, 1666, 157, 26],
+      "text": "Cost center *",
+      "words": [
+        { "box": [1195, 1666, 55, 26], "t": "Cost" },
+        { "box": [1253, 1666, 78, 26], "t": "center" }
+      ]
+    },
+    {
+      "box": [1579, 1670, 218, 22],
+      "text": "REQUIRED FOR LEAF",
+      "words": [
+        { "box": [1579, 1670, 110, 22], "t": "REQUIRED" },
+        { "box": [1692, 1670, 44, 22], "t": "FOR" },
+        { "box": [1738, 1670, 58, 22], "t": "LEAF" }
+      ]
+    },
+    {
+      "box": [593, 1727, 214, 26],
+      "text": "Hyland Inc. (US01)",
+      "words": [
+        { "box": [593, 1727, 84, 26], "t": "Hyland" },
+        { "box": [681, 1727, 42, 26], "t": "Inc" },
+        { "box": [726, 1727, 81, 26], "t": "US01" }
+      ]
+    },
+    {
+      "box": [1221, 1722, 135, 26],
+      "text": "EU-EX-210",
+      "words": [
+        { "box": [1221, 1722, 135, 26], "t": "EU" },
+        { "box": [1221, 1722, 135, 26], "t": "EX" },
+        { "box": [1221, 1722, 135, 26], "t": "210" }
+      ]
+    },
+    {
+      "box": [567, 1778, 376, 28],
+      "text": "Inherited from parent division hierarchy",
+      "words": [
+        { "box": [567, 1778, 87, 24], "t": "Inherited" },
+        { "box": [656, 1779, 49, 24], "t": "from" },
+        { "box": [708, 1780, 66, 24], "t": "parent" },
+        { "box": [777, 1780, 66, 24], "t": "division" },
+        { "box": [846, 1781, 97, 25], "t": "hierarchy" }
+      ]
+    },
+    {
+      "box": [1195, 1779, 454, 26],
+      "text": "Mapped to ERP General Ledger (SAP S\/4HANA)",
+      "words": [
+        { "box": [1195, 1779, 78, 26], "t": "Mapped" },
+        { "box": [1276, 1779, 19, 26], "t": "to" },
+        { "box": [1299, 1779, 42, 26], "t": "ERP" },
+        { "box": [1344, 1779, 75, 26], "t": "General" },
+        { "box": [1422, 1779, 68, 26], "t": "Ledger" },
+        { "box": [1494, 1779, 49, 26], "t": "SAP" },
+        { "box": [1546, 1779, 103, 26], "t": "S" },
+        { "box": [1546, 1779, 103, 26], "t": "4HANA" }
+      ]
+    },
+    {
+      "box": [654, 1865, 262, 33],
+      "text": "Budget currency: USD",
+      "words": [
+        { "box": [654, 1869, 85, 29], "t": "Budget" },
+        { "box": [742, 1866, 115, 29], "t": "currency" },
+        { "box": [860, 1865, 57, 29], "t": "USD" }
+      ]
+    },
+    {
+      "box": [942, 1871, 109, 22],
+      "text": "Fixed Base",
+      "words": [
+        { "box": [942, 1871, 55, 22], "t": "Fixed" },
+        { "box": [1000, 1871, 51, 22], "t": "Base" }
+      ]
+    },
+    {
+      "box": [654, 1901, 1095, 34],
+      "text": "Plan rate USD 1.00 = USD 1.00 locked for FY2026. All ceiling deduplication and GL translation",
+      "words": [
+        { "box": [654, 1901, 51, 30], "t": "Plan" },
+        { "box": [708, 1901, 51, 29], "t": "rate" },
+        { "box": [763, 1902, 54, 29], "t": "USD" },
+        { "box": [821, 1902, 62, 29], "t": "1.00" },
+        { "box": [904, 1902, 54, 29], "t": "USD" },
+        { "box": [962, 1902, 58, 29], "t": "1.00" },
+        { "box": [1024, 1903, 80, 29], "t": "locked" },
+        { "box": [1107, 1903, 36, 29], "t": "for" },
+        { "box": [1147, 1903, 94, 29], "t": "FY2026" },
+        { "box": [1245, 1903, 36, 29], "t": "All" },
+        { "box": [1285, 1904, 80, 29], "t": "ceiling" },
+        { "box": [1368, 1904, 156, 30], "t": "deduplication" },
+        { "box": [1528, 1905, 47, 29], "t": "and" },
+        { "box": [1578, 1905, 33, 29], "t": "GL" },
+        { "box": [1615, 1905, 134, 30], "t": "translation" }
+      ]
+    },
+    {
+      "box": [650, 1936, 214, 26],
+      "text": "use USD standard.",
+      "words": [
+        { "box": [650, 1936, 46, 26], "t": "use" },
+        { "box": [699, 1936, 52, 26], "t": "USD" },
+        { "box": [754, 1936, 110, 26], "t": "standard" }
+      ]
+    },
+    {
+      "box": [567, 2023, 310, 34],
+      "text": "Initial allocation amount *",
+      "words": [
+        { "box": [567, 2027, 69, 30], "t": "Initial" },
+        { "box": [639, 2025, 116, 31], "t": "allocation" },
+        { "box": [759, 2023, 91, 30], "t": "amount" }
+      ]
+    },
+    {
+      "box": [593, 2089, 214, 31],
+      "text": "USD 2,700.00",
+      "words": [
+        { "box": [593, 2089, 64, 31], "t": "USD" },
+        { "box": [660, 2089, 146, 31], "t": "2,700.00" }
+      ]
+    },
+    {
+      "box": [571, 2150, 401, 26],
+      "text": "• Requested amount: USD 2,700.00",
+      "words": [
+        { "box": [597, 2150, 117, 26], "t": "Requested" },
+        { "box": [717, 2150, 84, 26], "t": "amount" },
+        { "box": [805, 2150, 52, 26], "t": "USD" },
+        { "box": [860, 2150, 112, 26], "t": "2,700.00" }
+      ]
+    },
+    {
+      "box": [1300, 2150, 497, 26],
+      "text": "Max allowable without exception: USD 3,000.00",
+      "words": [
+        { "box": [1300, 2150, 46, 26], "t": "Max" },
+        { "box": [1349, 2150, 97, 26], "t": "allowable" },
+        { "box": [1449, 2150, 81, 26], "t": "without" },
+        { "box": [1534, 2150, 107, 26], "t": "exception" },
+        { "box": [1644, 2150, 49, 26], "t": "USD" },
+        { "box": [1696, 2150, 100, 26], "t": "3,000.00" }
+      ]
+    },
+    {
+      "box": [637, 2320, 318, 26],
+      "text": "Controls & Governance",
+      "words": [
+        { "box": [637, 2320, 114, 26], "t": "Controls" },
+        { "box": [780, 2320, 175, 26], "t": "Governance" }
+      ]
+    },
+    {
+      "box": [1461, 2315, 336, 22],
+      "text": "Enforcement mode & thresholds",
+      "words": [
+        { "box": [1461, 2315, 132, 22], "t": "Enforcement" },
+        { "box": [1596, 2315, 63, 22], "t": "mode" },
+        { "box": [1681, 2315, 116, 22], "t": "thresholds" }
+      ]
+    },
+    {
+      "box": [571, 2407, 161, 26],
+      "text": "Control mode",
+      "words": [
+        { "box": [571, 2407, 84, 26], "t": "Control" },
+        { "box": [659, 2407, 74, 26], "t": "mode" }
+      ]
+    },
+    {
+      "box": [676, 2477, 100, 27],
+      "text": "Hard",
+      "words": [{ "box": [676, 2477, 100, 27], "t": "Hard" }]
+    },
+    {
+      "box": [973, 2472, 96, 31],
+      "text": "A Soft",
+      "words": [
+        { "box": [973, 2472, 31, 31], "t": "A" },
+        { "box": [1008, 2472, 61, 31], "t": "Soft" }
+      ]
+    },
+    {
+      "box": [1260, 2477, 109, 26],
+      "text": "• Track",
+      "words": [{ "box": [1296, 2477, 74, 26], "t": "Track" }]
+    },
+    {
+      "box": [567, 2547, 1204, 26],
+      "text": "Hard block: Purchase requisitions, invoice commitments, and encumbrances will automatically reject when available",
+      "words": [
+        { "box": [567, 2547, 55, 26], "t": "Hard" },
+        { "box": [625, 2547, 65, 26], "t": "block" },
+        { "box": [694, 2547, 94, 26], "t": "Purchase" },
+        { "box": [791, 2547, 130, 26], "t": "requisitions" },
+        { "box": [924, 2547, 75, 26], "t": "invoice" },
+        { "box": [1002, 2547, 149, 26], "t": "commitments" },
+        { "box": [1155, 2547, 42, 26], "t": "and" },
+        { "box": [1201, 2547, 153, 26], "t": "encumbrances" },
+        { "box": [1357, 2547, 39, 26], "t": "will" },
+        { "box": [1399, 2547, 140, 26], "t": "automatically" },
+        { "box": [1542, 2547, 62, 26], "t": "reject" },
+        { "box": [1607, 2547, 55, 26], "t": "when" },
+        { "box": [1665, 2547, 105, 26], "t": "available" }
+      ]
+    },
+    {
+      "box": [567, 2581, 275, 22],
+      "text": "balance drops below zero.",
+      "words": [
+        { "box": [567, 2581, 83, 22], "t": "balance" },
+        { "box": [652, 2581, 63, 22], "t": "drops" },
+        { "box": [718, 2581, 66, 22], "t": "below" },
+        { "box": [787, 2581, 55, 22], "t": "zero" }
+      ]
+    },
+    {
+      "box": [567, 2647, 218, 22],
+      "text": "Overrun tolerance",
+      "words": [
+        { "box": [567, 2647, 94, 22], "t": "Overrun" },
+        { "box": [663, 2647, 122, 22], "t": "tolerance" }
+      ]
+    },
+    {
+      "box": [1195, 2645, 175, 26],
+      "text": "Period phasing",
+      "words": [
+        { "box": [1195, 2645, 75, 26], "t": "Period" },
+        { "box": [1273, 2645, 97, 26], "t": "phasing" }
+      ]
+    },
+    {
+      "box": [593, 2703, 44, 22],
+      "text": "0%",
+      "words": [{ "box": [593, 2703, 44, 22], "t": "0" }]
+    },
+    {
+      "box": [1221, 2703, 118, 27],
+      "text": "Quarterly",
+      "words": [{ "box": [1221, 2703, 118, 27], "t": "Quarterly" }]
+    },
+    {
+      "box": [567, 2756, 458, 26],
+      "text": "0% strict enforcement (No over-budget leeway)",
+      "words": [
+        { "box": [567, 2756, 33, 26], "t": "0" },
+        { "box": [603, 2756, 49, 26], "t": "strict" },
+        { "box": [655, 2756, 123, 26], "t": "enforcement" },
+        { "box": [781, 2756, 32, 26], "t": "No" },
+        { "box": [817, 2756, 120, 26], "t": "over" },
+        { "box": [817, 2756, 120, 26], "t": "budget" },
+        { "box": [941, 2756, 84, 26], "t": "leeway" }
+      ]
+    },
+    {
+      "box": [1195, 2756, 410, 22],
+      "text": "USD 675.00 available release each quarter",
+      "words": [
+        { "box": [1195, 2756, 41, 22], "t": "USD" },
+        { "box": [1239, 2756, 66, 22], "t": "675.00" },
+        { "box": [1308, 2756, 88, 22], "t": "available" },
+        { "box": [1399, 2756, 72, 22], "t": "release" },
+        { "box": [1473, 2756, 49, 22], "t": "each" },
+        { "box": [1525, 2756, 80, 22], "t": "quarter" }
+      ]
+    },
+    {
+      "box": [571, 2821, 331, 22],
+      "text": "Alert notification thresholds",
+      "words": [
+        { "box": [571, 2821, 60, 22], "t": "Alert" },
+        { "box": [634, 2821, 135, 22], "t": "notification" },
+        { "box": [772, 2821, 131, 22], "t": "thresholds" }
+      ]
+    },
+    {
+      "box": [597, 2874, 52, 22],
+      "text": "50%",
+      "words": [{ "box": [597, 2874, 52, 22], "t": "50" }]
+    },
+    {
+      "box": [715, 2874, 57, 22],
+      "text": "80%",
+      "words": [{ "box": [715, 2874, 57, 22], "t": "80" }]
+    },
+    {
+      "box": [837, 2874, 275, 26],
+      "text": "v 100% (Cap Reached)",
+      "words": [
+        { "box": [837, 2874, 22, 26], "t": "v" },
+        { "box": [863, 2874, 68, 26], "t": "100" },
+        { "box": [934, 2874, 58, 26], "t": "Cap" },
+        { "box": [996, 2874, 116, 26], "t": "Reached" }
+      ]
+    },
+    {
+      "box": [1151, 2874, 118, 22],
+      "text": "+ Custom",
+      "words": [{ "box": [1172, 2874, 97, 22], "t": "Custom" }]
+    },
+    {
+      "box": [2198, 52, 122, 27],
+      "text": "• FY2026",
+      "words": [{ "box": [2224, 52, 96, 27], "t": "FY2026" }]
+    },
+    {
+      "box": [2399, 214, 87, 26],
+      "text": "Cancel",
+      "words": [{ "box": [2399, 214, 87, 26], "t": "Cancel" }]
+    },
+    {
+      "box": [1914, 386, 419, 40],
+      "text": "Parent budget impact preview",
+      "words": [
+        { "box": [1914, 386, 90, 36], "t": "Parent" },
+        { "box": [2008, 388, 98, 35], "t": "budget" },
+        { "box": [2110, 389, 98, 35], "t": "impact" },
+        { "box": [2212, 391, 122, 36], "t": "preview" }
+      ]
+    },
+    {
+      "box": [1915, 432, 353, 26],
+      "text": "Real-time simulation on allocation",
+      "words": [
+        { "box": [1915, 432, 101, 26], "t": "Real" },
+        { "box": [1915, 432, 101, 26], "t": "time" },
+        { "box": [2019, 432, 110, 26], "t": "simulation" },
+        { "box": [2133, 432, 23, 26], "t": "on" },
+        { "box": [2159, 432, 109, 26], "t": "allocation" }
+      ]
+    },
+    {
+      "box": [1915, 532, 209, 22],
+      "text": "PARENT ENVELOPE",
+      "words": [
+        { "box": [1915, 532, 86, 22], "t": "PARENT" },
+        { "box": [2003, 532, 121, 22], "t": "ENVELOPE" }
+      ]
+    },
+    {
+      "box": [1915, 571, 305, 31],
+      "text": "Employee Experience",
+      "words": [
+        { "box": [1915, 571, 140, 31], "t": "Employee" },
+        { "box": [2058, 571, 161, 31], "t": "Experience" }
+      ]
+    },
+    {
+      "box": [1914, 602, 254, 37],
+      "text": "Code: EXP-HR-2026",
+      "words": [
+        { "box": [1914, 606, 79, 32], "t": "Code" },
+        { "box": [1997, 602, 171, 34], "t": "EXP" },
+        { "box": [1997, 602, 171, 34], "t": "HR" },
+        { "box": [1997, 602, 171, 34], "t": "2026" }
+      ]
+    },
+    {
+      "box": [1915, 706, 196, 27],
+      "text": "Available before",
+      "words": [
+        { "box": [1915, 706, 105, 27], "t": "Available" },
+        { "box": [2023, 706, 88, 27], "t": "before" }
+      ]
+    },
+    {
+      "box": [2303, 706, 179, 32],
+      "text": "USD 3,000.00",
+      "words": [
+        { "box": [2303, 707, 49, 31], "t": "USD" },
+        { "box": [2355, 706, 127, 31], "t": "3,000.00" }
+      ]
+    },
+    {
+      "box": [1915, 767, 240, 27],
+      "text": "• Deducted amount",
+      "words": [
+        { "box": [1945, 767, 111, 27], "t": "Deducted" },
+        { "box": [2060, 767, 94, 27], "t": "amount" }
+      ]
+    },
+    {
+      "box": [1945, 798, 262, 22],
+      "text": "Fixed allocation pool",
+      "words": [
+        { "box": [1945, 798, 69, 22], "t": "Fixed" },
+        { "box": [2017, 798, 129, 22], "t": "allocation" },
+        { "box": [2149, 798, 58, 22], "t": "pool" }
+      ]
+    },
+    {
+      "box": [2277, 767, 209, 31],
+      "text": "- USD 2,700.00",
+      "words": [
+        { "box": [2296, 767, 54, 31], "t": "USD" },
+        { "box": [2355, 767, 131, 31], "t": "2,700.00" }
+      ]
+    },
+    {
+      "box": [1915, 885, 179, 26],
+      "text": "Available after",
+      "words": [
+        { "box": [1915, 885, 108, 26], "t": "Available" },
+        { "box": [2025, 885, 68, 26], "t": "after" }
+      ]
+    },
+    {
+      "box": [2285, 885, 196, 31],
+      "text": "USD 300.00",
+      "words": [
+        { "box": [2285, 885, 66, 31], "t": "USD" },
+        { "box": [2355, 885, 127, 31], "t": "300.00" }
+      ]
+    },
+    {
+      "box": [1915, 977, 183, 26],
+      "text": "Parent Utilization",
+      "words": [
+        { "box": [1915, 977, 69, 26], "t": "Parent" },
+        { "box": [1986, 977, 111, 26], "t": "Utilization" }
+      ]
+    },
+    {
+      "box": [2277, 977, 209, 26],
+      "text": "90.0% allocated",
+      "words": [
+        { "box": [2277, 977, 75, 26], "t": "90.0" },
+        { "box": [2355, 977, 131, 26], "t": "allocated" }
+      ]
+    },
+    {
+      "box": [1915, 1055, 279, 26],
+      "text": "• USD 2,700.00 new request",
+      "words": [
+        { "box": [1934, 1055, 45, 26], "t": "USD" },
+        { "box": [1983, 1055, 81, 26], "t": "2,700.00" },
+        { "box": [2068, 1055, 39, 26], "t": "new" },
+        { "box": [2110, 1055, 84, 26], "t": "request" }
+      ]
+    },
+    {
+      "box": [2233, 1060, 249, 22],
+      "text": "• 10.0% remaining buffer",
+      "words": [
+        { "box": [2254, 1060, 58, 21], "t": "10.0" },
+        { "box": [2314, 1060, 100, 21], "t": "remaining" },
+        { "box": [2417, 1060, 65, 22], "t": "buffer" }
+      ]
+    },
+    {
+      "box": [1980, 1147, 214, 26],
+      "text": "Capacity Advisory",
+      "words": [
+        { "box": [1980, 1147, 107, 26], "t": "Capacity" },
+        { "box": [2090, 1147, 103, 26], "t": "Advisory" }
+      ]
+    },
+    {
+      "box": [1976, 1177, 388, 26],
+      "text": "Leaves 0.3% of total parent authority",
+      "words": [
+        { "box": [1976, 1177, 78, 26], "t": "Leaves" },
+        { "box": [2057, 1177, 55, 26], "t": "0.3" },
+        { "box": [2116, 1177, 23, 26], "t": "of" },
+        { "box": [2142, 1177, 52, 26], "t": "total" },
+        { "box": [2197, 1177, 68, 26], "t": "parent" },
+        { "box": [2268, 1177, 95, 26], "t": "authority" }
+      ]
+    },
+    {
+      "box": [1980, 1208, 406, 22],
+      "text": "unallocated. Future leaf allocations will",
+      "words": [
+        { "box": [1980, 1208, 127, 22], "t": "unallocated" },
+        { "box": [2109, 1208, 69, 22], "t": "Future" },
+        { "box": [2181, 1208, 41, 22], "t": "leaf" },
+        { "box": [2225, 1208, 113, 22], "t": "allocations" },
+        { "box": [2340, 1208, 45, 22], "t": "will" }
+      ]
+    },
+    {
+      "box": [1980, 1238, 270, 22],
+      "text": "require top-up or transfer.",
+      "words": [
+        { "box": [1980, 1238, 74, 22], "t": "require" },
+        { "box": [2057, 1238, 72, 22], "t": "top" },
+        { "box": [2057, 1238, 72, 22], "t": "up" },
+        { "box": [2131, 1238, 25, 22], "t": "or" },
+        { "box": [2159, 1238, 92, 22], "t": "transfer" }
+      ]
+    },
+    {
+      "box": [1935, 1324, 360, 56],
+      "text": "• Governance Check Passed",
+      "words": [
+        { "box": [1977, 1332, 144, 45], "t": "Governance" },
+        { "box": [2125, 1328, 78, 42], "t": "Check" },
+        { "box": [2205, 1324, 90, 43], "t": "Passed" }
+      ]
+    },
+    {
+      "box": [1980, 1369, 440, 31],
+      "text": "Approval needed: None - within your DoA",
+      "words": [
+        { "box": [1980, 1369, 97, 31], "t": "Approval" },
+        { "box": [2081, 1369, 85, 31], "t": "needed" },
+        { "box": [2170, 1369, 54, 31], "t": "None" },
+        { "box": [2247, 1369, 66, 31], "t": "within" },
+        { "box": [2317, 1369, 50, 31], "t": "your" },
+        { "box": [2371, 1369, 49, 31], "t": "DoA" }
+      ]
+    },
+    {
+      "box": [1976, 1400, 227, 26],
+      "text": "limit USD 5,000.00.",
+      "words": [
+        { "box": [1976, 1400, 56, 26], "t": "limit" },
+        { "box": [2034, 1400, 49, 26], "t": "USD" },
+        { "box": [2086, 1400, 116, 26], "t": "5,000.00" }
+      ]
+    },
+    {
+      "box": [2089, 1548, 222, 26],
+      "text": "+ Createbudget",
+      "words": [{ "box": [2134, 1548, 177, 26], "t": "Createbudget" }]
+    },
+    {
+      "box": [2120, 1648, 161, 26],
+      "text": "• Save draft",
+      "words": [
+        { "box": [2149, 1648, 62, 26], "t": "Save" },
+        { "box": [2214, 1648, 67, 26], "t": "draft" }
+      ]
+    },
+    {
+      "box": [1910, 1805, 323, 26],
+      "text": "DA Need delegation guide?",
+      "words": [
+        { "box": [1910, 1805, 42, 26], "t": "DA" },
+        { "box": [1955, 1805, 65, 26], "t": "Need" },
+        { "box": [2024, 1805, 123, 26], "t": "delegation" },
+        { "box": [2150, 1805, 82, 26], "t": "guide" }
+      ]
+    },
+    {
+      "box": [2351, 1804, 135, 28],
+      "text": "View SOP →",
+      "words": [
+        { "box": [2351, 1804, 52, 27], "t": "View" },
+        { "box": [2406, 1805, 52, 27], "t": "SOP" }
+      ]
+    }
+  ],
+  "width": 2560
+}

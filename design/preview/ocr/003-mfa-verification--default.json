@@ -1,1 +1,347 @@
-{"height":2048,"lines":[{"box":[145,145,30,30],"text":"•","words":[]},{"box":[219,120,287,60],"text":"BudgetFlow","words":[{"box":[219,120,287,60],"t":"BudgetFlow"}]},{"box":[219,174,153,27],"text":"ENTERPRISE","words":[{"box":[219,174,153,27],"t":"ENTERPRISE"}]},{"box":[2017,112,227,22],"text":"• Production Tenant","words":[{"box":[2039,112,124,22],"t":"Production"},{"box":[2165,112,78,22],"t":"Tenant"}]},{"box":[1458,331,421,37],"text":"< kavya.shah@acme.example","words":[{"box":[1490,331,389,37],"t":"kavya.shah"},{"box":[1490,331,389,37],"t":"acme.example"}]},{"box":[141,673,525,30],"text":"• Hardware & App-Bound Multi-Factor Auth","words":[{"box":[177,673,120,29],"t":"Hardware"},{"box":[322,673,130,29],"t":"App"},{"box":[322,673,130,29],"t":"Bound"},{"box":[456,673,145,29],"t":"Multi"},{"box":[456,673,145,29],"t":"Factor"},{"box":[605,673,61,30],"t":"Auth"}]},{"box":[1455,554,615,55],"text":"Enter your verification code","words":[{"box":[1455,554,115,52],"t":"Enter"},{"box":[1576,554,102,52],"t":"your"},{"box":[1684,555,255,53],"t":"verification"},{"box":[1945,557,124,52],"t":"code"}]},{"box":[1455,628,685,30],"text":"Open your authenticator app and enter the 6-digit","words":[{"box":[1455,628,71,30],"t":"Open"},{"box":[1530,628,67,30],"t":"your"},{"box":[1601,628,184,30],"t":"authenticator"},{"box":[1789,628,56,30],"t":"app"},{"box":[1849,628,56,30],"t":"and"},{"box":[1909,628,75,30],"t":"enter"},{"box":[1987,628,49,30],"t":"the"},{"box":[2040,628,100,30],"t":"6"},{"box":[2040,628,100,30],"t":"digit"}]},{"box":[1451,667,291,38],"text":"code for BudgetFlow.","words":[{"box":[1451,667,67,33],"t":"code"},{"box":[1520,669,43,32],"t":"for"},{"box":[1567,670,175,36],"t":"BudgetFlow"}]},{"box":[1451,755,309,29],"text":"6-DIGIT SECURITY CODE","words":[{"box":[1451,755,100,26],"t":"6"},{"box":[1451,755,100,27],"t":"DIGIT"},{"box":[1554,756,125,27],"t":"SECURITY"},{"box":[1682,758,78,26],"t":"CODE"}]},{"box":[2009,758,182,26],"text":"ø Resets in 24s","words":[{"box":[2009,758,22,26],"t":"ø"},{"box":[2035,758,78,26],"t":"Resets"},{"box":[2116,758,23,26],"t":"in"},{"box":[2142,758,49,26],"t":"24s"}]},{"box":[1492,847,30,33],"text":"8","words":[{"box":[1492,847,30,33],"t":"8"}]},{"box":[1615,844,33,37],"text":"4","words":[{"box":[1615,844,33,37],"t":"4"}]},{"box":[1741,844,33,41],"text":"2","words":[{"box":[1741,844,33,41],"t":"2"}]},{"box":[1868,844,33,37],"text":"9","words":[{"box":[1868,844,33,37],"t":"9"}]},{"box":[108,780,644,67],"text":"Protected financial","words":[{"box":[108,782,347,65],"t":"Protected"},{"box":[462,780,290,65],"t":"financial"}]},{"box":[108,862,540,75],"text":"authority ledger","words":[{"box":[108,862,300,75],"t":"authority"},{"box":[417,862,230,75],"t":"ledger"}]},{"box":[115,970,740,37],"text":"BudgetFlow Enterprise verifies all administrative,","words":[{"box":[115,970,175,37],"t":"BudgetFlow"},{"box":[295,970,162,37],"t":"Enterprise"},{"box":[462,970,111,37],"t":"verifies"},{"box":[578,970,42,37],"t":"all"},{"box":[624,970,232,37],"t":"administrative"}]},{"box":[108,1022,748,37],"text":"approval, and delegation sessions with multi-tier","words":[{"box":[108,1022,148,37],"t":"approval"},{"box":[261,1022,60,37],"t":"and"},{"box":[325,1022,162,37],"t":"delegation"},{"box":[492,1022,134,37],"t":"sessions"},{"box":[631,1022,69,37],"t":"with"},{"box":[705,1022,151,37],"t":"multi"},{"box":[705,1022,151,37],"t":"tier"}]},{"box":[108,1070,480,38],"text":"cryptographic integrity checks.","words":[{"box":[108,1070,219,38],"t":"cryptographic"},{"box":[331,1070,133,38],"t":"integrity"},{"box":[469,1070,119,38],"t":"checks"}]},{"box":[1507,978,406,33],"text":"Trust this browser for 30 days","words":[{"box":[1507,978,70,29],"t":"Trust"},{"box":[1580,979,53,29],"t":"this"},{"box":[1636,980,116,29],"t":"browser"},{"box":[1755,981,46,28],"t":"for"},{"box":[1804,982,35,28],"t":"30"},{"box":[1843,982,70,29],"t":"days"}]},{"box":[1511,1022,603,30],"text":"Do not check this on shared or public corporate kiosks","words":[{"box":[1511,1022,30,30],"t":"Do"},{"box":[1545,1022,41,30],"t":"not"},{"box":[1590,1022,64,30],"t":"check"},{"box":[1657,1022,41,30],"t":"this"},{"box":[1702,1022,30,30],"t":"on"},{"box":[1736,1022,82,30],"t":"shared"},{"box":[1822,1022,22,30],"t":"or"},{"box":[1848,1022,71,30],"t":"public"},{"box":[1923,1022,112,30],"t":"corporate"},{"box":[2040,1022,74,30],"t":"kiosks"}]},{"box":[1749,1147,135,36],"text":"Verify →","words":[{"box":[1749,1148,100,35],"t":"Verify"}]},{"box":[1659,1241,324,45],"text":"or Use a recovery code","words":[{"box":[1659,1245,36,41],"t":"or"},{"box":[1699,1244,56,41],"t":"Use"},{"box":[1759,1244,16,40],"t":"a"},{"box":[1779,1242,121,42],"t":"recovery"},{"box":[1904,1241,80,41],"t":"code"}]},{"box":[123,1227,424,26],"text":"\/ Zero-trust delegation boundaries","words":[{"box":[165,1227,123,26],"t":"Zero"},{"box":[165,1227,123,26],"t":"trust"},{"box":[292,1227,120,26],"t":"delegation"},{"box":[415,1227,131,26],"t":"boundaries"}]},{"box":[164,1293,450,30],"text":"Immutable audit logging for active DoA","words":[{"box":[164,1293,135,30],"t":"Immutable"},{"box":[303,1293,56,30],"t":"audit"},{"box":[363,1293,86,30],"t":"logging"},{"box":[453,1293,34,30],"t":"for"},{"box":[490,1293,67,30],"t":"active"},{"box":[561,1293,52,30],"t":"DoA"}]},{"box":[156,1360,480,30],"text":"SOC2 Type II & FedRAMP High compliant","words":[{"box":[156,1360,82,30],"t":"SOC2"},{"box":[242,1360,56,30],"t":"Type"},{"box":[302,1360,19,30],"t":"II"},{"box":[347,1360,109,30],"t":"FedRAMP"},{"box":[460,1360,52,30],"t":"High"},{"box":[516,1360,120,30],"t":"compliant"}]},{"box":[1455,1384,425,44],"text":"• Google Authenticator \/ Okta Verify","words":[{"box":[1488,1384,81,39],"t":"Google"},{"box":[1573,1385,157,40],"t":"Authenticator"},{"box":[1749,1387,53,39],"t":"Okta"},{"box":[1806,1388,73,40],"t":"Verify"}]},{"box":[2054,1386,138,38],"text":"Need help?","words":[{"box":[2054,1386,65,37],"t":"Need"},{"box":[2123,1386,68,37],"t":"help"}]},{"box":[1409,1556,364,67],"text":"© Authentication failed","words":[{"box":[1466,1561,215,58],"t":"Authentication"},{"box":[1684,1556,89,51],"t":"failed"}]},{"box":[1473,1608,626,49],"text":"That code did not work. 2 attempts left before","words":[{"box":[1473,1616,66,41],"t":"That"},{"box":[1543,1615,66,41],"t":"code"},{"box":[1613,1614,51,41],"t":"did"},{"box":[1668,1613,46,41],"t":"not"},{"box":[1718,1612,76,41],"t":"work"},{"box":[1798,1612,16,40],"t":"2"},{"box":[1818,1610,126,42],"t":"attempts"},{"box":[1948,1609,51,41],"t":"left"},{"box":[2003,1608,96,41],"t":"before"}]},{"box":[1477,1654,216,30],"text":"a 5-minute lock.","words":[{"box":[1477,1654,19,30],"t":"a"},{"box":[1499,1654,124,30],"t":"5"},{"box":[1499,1654,124,30],"t":"minute"},{"box":[1627,1654,66,30],"t":"lock"}]},{"box":[2132,1609,97,35],"text":"Dismiss","words":[{"box":[2132,1609,97,35],"t":"Dismiss"}]},{"box":[153,1899,290,26],"text":"Acme Global Corporation","words":[{"box":[153,1899,69,26],"t":"Acme"},{"box":[224,1899,75,26],"t":"Global"},{"box":[302,1899,140,26],"t":"Corporation"}]},{"box":[740,1903,231,22],"text":"ID: SEC-MFA-2026","words":[{"box":[740,1903,52,22],"t":"ID"},{"box":[795,1903,176,22],"t":"SEC"},{"box":[795,1903,176,22],"t":"MFA"},{"box":[795,1903,176,22],"t":"2026"}]},{"box":[1373,1899,432,37],"text":"BudgetFlow Satori v4.2 • TLS 1.3 256-bit","words":[{"box":[1373,1899,129,37],"t":"BudgetFlow"},{"box":[1507,1899,65,37],"t":"Satori"},{"box":[1577,1899,46,37],"t":"v4.2"},{"box":[1641,1899,37,37],"t":"TLS"},{"box":[1683,1899,32,37],"t":"1.3"},{"box":[1720,1899,85,37],"t":"256"},{"box":[1720,1899,85,37],"t":"bit"}]},{"box":[1972,1903,294,37],"text":"Help Privacy Terms","words":[{"box":[1972,1903,83,37],"t":"Help"},{"box":[2060,1903,116,37],"t":"Privacy"},{"box":[2180,1903,86,37],"t":"Terms"}]}],"width":2560}
+{
+  "height": 2048,
+  "lines": [
+    { "box": [145, 145, 30, 30], "text": "•", "words": [] },
+    {
+      "box": [219, 120, 287, 60],
+      "text": "BudgetFlow",
+      "words": [{ "box": [219, 120, 287, 60], "t": "BudgetFlow" }]
+    },
+    {
+      "box": [219, 174, 153, 27],
+      "text": "ENTERPRISE",
+      "words": [{ "box": [219, 174, 153, 27], "t": "ENTERPRISE" }]
+    },
+    {
+      "box": [1950, 112, 294, 26],
+      "text": "• Hyland Enterprise Tenant",
+      "words": [
+        { "box": [1969, 112, 78, 26], "t": "Hyland" },
+        { "box": [2051, 112, 110, 26], "t": "Enterprise" },
+        { "box": [2164, 112, 79, 26], "t": "Tenant" }
+      ]
+    },
+    {
+      "box": [1455, 331, 458, 41],
+      "text": "< priya.raman@hyland.example",
+      "words": [
+        { "box": [1491, 331, 422, 41], "t": "priya.raman" },
+        { "box": [1491, 331, 422, 41], "t": "hyland.example" }
+      ]
+    },
+    {
+      "box": [2061, 449, 105, 24],
+      "text": "HYLAND",
+      "words": [{ "box": [2061, 449, 105, 24], "t": "HYLAND" }]
+    },
+    {
+      "box": [141, 673, 525, 30],
+      "text": "• Hardware & App-Bound Multi-Factor Auth",
+      "words": [
+        { "box": [177, 673, 120, 29], "t": "Hardware" },
+        { "box": [322, 673, 130, 29], "t": "App" },
+        { "box": [322, 673, 130, 29], "t": "Bound" },
+        { "box": [456, 673, 145, 29], "t": "Multi" },
+        { "box": [456, 673, 145, 29], "t": "Factor" },
+        { "box": [605, 673, 61, 30], "t": "Auth" }
+      ]
+    },
+    {
+      "box": [1455, 554, 614, 52],
+      "text": "Enter your verification code",
+      "words": [
+        { "box": [1455, 554, 117, 52], "t": "Enter" },
+        { "box": [1578, 554, 97, 52], "t": "your" },
+        { "box": [1682, 554, 260, 52], "t": "verification" },
+        { "box": [1949, 554, 120, 52], "t": "code" }
+      ]
+    },
+    {
+      "box": [1455, 628, 685, 30],
+      "text": "Open your authenticator app and enter the 6-digit",
+      "words": [
+        { "box": [1455, 628, 71, 30], "t": "Open" },
+        { "box": [1530, 628, 67, 30], "t": "your" },
+        { "box": [1601, 628, 184, 30], "t": "authenticator" },
+        { "box": [1789, 628, 56, 30], "t": "app" },
+        { "box": [1849, 628, 56, 30], "t": "and" },
+        { "box": [1909, 628, 75, 30], "t": "enter" },
+        { "box": [1987, 628, 49, 30], "t": "the" },
+        { "box": [2040, 628, 100, 30], "t": "6" },
+        { "box": [2040, 628, 100, 30], "t": "digit" }
+      ]
+    },
+    {
+      "box": [1451, 667, 291, 38],
+      "text": "code for BudgetFlow.",
+      "words": [
+        { "box": [1451, 667, 67, 33], "t": "code" },
+        { "box": [1520, 669, 43, 32], "t": "for" },
+        { "box": [1567, 670, 175, 36], "t": "BudgetFlow" }
+      ]
+    },
+    {
+      "box": [1455, 758, 305, 26],
+      "text": "6-DIGIT SECURITY CODE",
+      "words": [
+        { "box": [1455, 758, 94, 26], "t": "6" },
+        { "box": [1455, 758, 94, 26], "t": "DIGIT" },
+        { "box": [1552, 758, 130, 26], "t": "SECURITY" },
+        { "box": [1686, 758, 74, 26], "t": "CODE" }
+      ]
+    },
+    {
+      "box": [2032, 762, 160, 22],
+      "text": "Resets in 24s",
+      "words": [
+        { "box": [2032, 762, 83, 22], "t": "Resets" },
+        { "box": [2117, 762, 22, 22], "t": "in" },
+        { "box": [2142, 762, 50, 22], "t": "24s" }
+      ]
+    },
+    {
+      "box": [1492, 847, 30, 33],
+      "text": "8",
+      "words": [{ "box": [1492, 847, 30, 33], "t": "8" }]
+    },
+    {
+      "box": [1615, 844, 33, 37],
+      "text": "4",
+      "words": [{ "box": [1615, 844, 33, 37], "t": "4" }]
+    },
+    {
+      "box": [1741, 844, 33, 41],
+      "text": "2",
+      "words": [{ "box": [1741, 844, 33, 41], "t": "2" }]
+    },
+    {
+      "box": [1868, 844, 33, 37],
+      "text": "9",
+      "words": [{ "box": [1868, 844, 33, 37], "t": "9" }]
+    },
+    {
+      "box": [108, 780, 644, 67],
+      "text": "Protected financial",
+      "words": [
+        { "box": [108, 782, 347, 65], "t": "Protected" },
+        { "box": [462, 780, 290, 65], "t": "financial" }
+      ]
+    },
+    {
+      "box": [108, 862, 540, 75],
+      "text": "authority ledger",
+      "words": [
+        { "box": [108, 862, 300, 75], "t": "authority" },
+        { "box": [417, 862, 230, 75], "t": "ledger" }
+      ]
+    },
+    {
+      "box": [115, 970, 740, 37],
+      "text": "BudgetFlow Enterprise verifies all administrative,",
+      "words": [
+        { "box": [115, 970, 175, 37], "t": "BudgetFlow" },
+        { "box": [295, 970, 162, 37], "t": "Enterprise" },
+        { "box": [462, 970, 111, 37], "t": "verifies" },
+        { "box": [578, 970, 42, 37], "t": "all" },
+        { "box": [624, 970, 232, 37], "t": "administrative" }
+      ]
+    },
+    {
+      "box": [108, 1022, 748, 37],
+      "text": "approval, and delegation sessions with multi-tier",
+      "words": [
+        { "box": [108, 1022, 148, 37], "t": "approval" },
+        { "box": [261, 1022, 60, 37], "t": "and" },
+        { "box": [325, 1022, 162, 37], "t": "delegation" },
+        { "box": [492, 1022, 134, 37], "t": "sessions" },
+        { "box": [631, 1022, 69, 37], "t": "with" },
+        { "box": [705, 1022, 151, 37], "t": "multi" },
+        { "box": [705, 1022, 151, 37], "t": "tier" }
+      ]
+    },
+    {
+      "box": [108, 1070, 480, 38],
+      "text": "cryptographic integrity checks.",
+      "words": [
+        { "box": [108, 1070, 219, 38], "t": "cryptographic" },
+        { "box": [331, 1070, 133, 38], "t": "integrity" },
+        { "box": [469, 1070, 119, 38], "t": "checks" }
+      ]
+    },
+    {
+      "box": [1507, 978, 406, 33],
+      "text": "Trust this browser for 30 days",
+      "words": [
+        { "box": [1507, 978, 70, 29], "t": "Trust" },
+        { "box": [1580, 979, 53, 29], "t": "this" },
+        { "box": [1636, 980, 116, 29], "t": "browser" },
+        { "box": [1755, 981, 46, 28], "t": "for" },
+        { "box": [1804, 982, 35, 28], "t": "30" },
+        { "box": [1843, 982, 70, 29], "t": "days" }
+      ]
+    },
+    {
+      "box": [1511, 1022, 603, 30],
+      "text": "Do not check this on shared or public corporate kiosks",
+      "words": [
+        { "box": [1511, 1022, 30, 30], "t": "Do" },
+        { "box": [1545, 1022, 41, 30], "t": "not" },
+        { "box": [1590, 1022, 64, 30], "t": "check" },
+        { "box": [1657, 1022, 41, 30], "t": "this" },
+        { "box": [1702, 1022, 30, 30], "t": "on" },
+        { "box": [1736, 1022, 82, 30], "t": "shared" },
+        { "box": [1822, 1022, 22, 30], "t": "or" },
+        { "box": [1848, 1022, 71, 30], "t": "public" },
+        { "box": [1923, 1022, 112, 30], "t": "corporate" },
+        { "box": [2040, 1022, 74, 30], "t": "kiosks" }
+      ]
+    },
+    {
+      "box": [1749, 1147, 135, 36],
+      "text": "Verify →",
+      "words": [{ "box": [1749, 1148, 100, 35], "t": "Verify" }]
+    },
+    {
+      "box": [1659, 1241, 324, 45],
+      "text": "or Use a recovery code",
+      "words": [
+        { "box": [1659, 1245, 36, 41], "t": "or" },
+        { "box": [1699, 1244, 56, 41], "t": "Use" },
+        { "box": [1759, 1244, 16, 40], "t": "a" },
+        { "box": [1779, 1242, 121, 42], "t": "recovery" },
+        { "box": [1904, 1241, 80, 41], "t": "code" }
+      ]
+    },
+    {
+      "box": [123, 1227, 424, 26],
+      "text": "\/ Zero-trust delegation boundaries",
+      "words": [
+        { "box": [165, 1227, 123, 26], "t": "Zero" },
+        { "box": [165, 1227, 123, 26], "t": "trust" },
+        { "box": [292, 1227, 120, 26], "t": "delegation" },
+        { "box": [415, 1227, 131, 26], "t": "boundaries" }
+      ]
+    },
+    {
+      "box": [164, 1293, 450, 30],
+      "text": "Immutable audit logging for active DoA",
+      "words": [
+        { "box": [164, 1293, 135, 30], "t": "Immutable" },
+        { "box": [303, 1293, 56, 30], "t": "audit" },
+        { "box": [363, 1293, 86, 30], "t": "logging" },
+        { "box": [453, 1293, 34, 30], "t": "for" },
+        { "box": [490, 1293, 67, 30], "t": "active" },
+        { "box": [561, 1293, 52, 30], "t": "DoA" }
+      ]
+    },
+    {
+      "box": [156, 1360, 480, 30],
+      "text": "SOC2 Type II & FedRAMP High compliant",
+      "words": [
+        { "box": [156, 1360, 82, 30], "t": "SOC2" },
+        { "box": [242, 1360, 56, 30], "t": "Type" },
+        { "box": [302, 1360, 19, 30], "t": "II" },
+        { "box": [347, 1360, 109, 30], "t": "FedRAMP" },
+        { "box": [460, 1360, 52, 30], "t": "High" },
+        { "box": [516, 1360, 120, 30], "t": "compliant" }
+      ]
+    },
+    {
+      "box": [1455, 1384, 425, 44],
+      "text": "• Google Authenticator \/ Okta Verify",
+      "words": [
+        { "box": [1488, 1384, 81, 39], "t": "Google" },
+        { "box": [1573, 1385, 157, 40], "t": "Authenticator" },
+        { "box": [1749, 1387, 53, 39], "t": "Okta" },
+        { "box": [1806, 1388, 73, 40], "t": "Verify" }
+      ]
+    },
+    {
+      "box": [2054, 1386, 138, 38],
+      "text": "Need help?",
+      "words": [
+        { "box": [2054, 1386, 65, 37], "t": "Need" },
+        { "box": [2123, 1386, 68, 37], "t": "help" }
+      ]
+    },
+    {
+      "box": [1409, 1555, 364, 67],
+      "text": "© Authentication failed",
+      "words": [
+        { "box": [1466, 1561, 215, 58], "t": "Authentication" },
+        { "box": [1684, 1555, 89, 51], "t": "failed" }
+      ]
+    },
+    {
+      "box": [1473, 1608, 626, 49],
+      "text": "That code did not work. 2 attempts left before",
+      "words": [
+        { "box": [1473, 1616, 66, 41], "t": "That" },
+        { "box": [1543, 1615, 66, 41], "t": "code" },
+        { "box": [1613, 1614, 51, 41], "t": "did" },
+        { "box": [1668, 1613, 46, 41], "t": "not" },
+        { "box": [1718, 1612, 76, 41], "t": "work" },
+        { "box": [1798, 1612, 16, 40], "t": "2" },
+        { "box": [1818, 1610, 126, 42], "t": "attempts" },
+        { "box": [1948, 1609, 51, 41], "t": "left" },
+        { "box": [2003, 1608, 96, 41], "t": "before" }
+      ]
+    },
+    {
+      "box": [1477, 1654, 216, 30],
+      "text": "a 5-minute lock.",
+      "words": [
+        { "box": [1477, 1654, 19, 30], "t": "a" },
+        { "box": [1499, 1654, 124, 30], "t": "5" },
+        { "box": [1499, 1654, 124, 30], "t": "minute" },
+        { "box": [1627, 1654, 66, 30], "t": "lock" }
+      ]
+    },
+    {
+      "box": [2132, 1609, 97, 35],
+      "text": "Dismiss",
+      "words": [{ "box": [2132, 1609, 97, 35], "t": "Dismiss" }]
+    },
+    {
+      "box": [112, 1903, 123, 23],
+      "text": "F= Hyland",
+      "words": [
+        { "box": [112, 1903, 36, 22], "t": "F" },
+        { "box": [150, 1903, 84, 23], "t": "Hyland" }
+      ]
+    },
+    {
+      "box": [740, 1903, 231, 22],
+      "text": "ID: SEC-MFA-2026",
+      "words": [
+        { "box": [740, 1903, 52, 22], "t": "ID" },
+        { "box": [795, 1903, 176, 22], "t": "SEC" },
+        { "box": [795, 1903, 176, 22], "t": "MFA" },
+        { "box": [795, 1903, 176, 22], "t": "2026" }
+      ]
+    },
+    {
+      "box": [1373, 1899, 432, 37],
+      "text": "BudgetFlow Satori v4.2 • TLS 1.3 256-bit",
+      "words": [
+        { "box": [1373, 1899, 129, 37], "t": "BudgetFlow" },
+        { "box": [1507, 1899, 65, 37], "t": "Satori" },
+        { "box": [1577, 1899, 46, 37], "t": "v4.2" },
+        { "box": [1641, 1899, 37, 37], "t": "TLS" },
+        { "box": [1683, 1899, 32, 37], "t": "1.3" },
+        { "box": [1720, 1899, 85, 37], "t": "256" },
+        { "box": [1720, 1899, 85, 37], "t": "bit" }
+      ]
+    },
+    {
+      "box": [1972, 1903, 294, 37],
+      "text": "Help Privacy Terms",
+      "words": [
+        { "box": [1972, 1903, 83, 37], "t": "Help" },
+        { "box": [2060, 1903, 116, 37], "t": "Privacy" },
+        { "box": [2180, 1903, 86, 37], "t": "Terms" }
+      ]
+    }
+  ],
+  "width": 2560
+}

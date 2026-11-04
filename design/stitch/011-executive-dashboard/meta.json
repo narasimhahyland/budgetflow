@@ -2,39 +2,27 @@
   "screen": "011-executive-dashboard",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/8e3e69d7a1894ea68503b203dd1141e0",
+      "stitchScreen": "projects/1643421514270618068/screens/e6dd17e8d173435abfa67c15f0b23078",
       "approved": null,
-      "size": [
-        2560,
-        3070
-      ],
+      "size": [2560, 3760],
       "status": "proposed - awaiting user review"
     },
     "loading--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/bce1d3f39e9c4ab4ab39513becea969f",
+      "stitchScreen": "projects/1643421514270618068/screens/11233aed9295496cb44c90f31ed4710c",
       "approved": null,
-      "size": [
-        2560,
-        2784
-      ],
+      "size": [2560, 2784],
       "status": "proposed - awaiting user review"
     },
     "empty--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/83786f7e8b3c45d1899b5d33d0389311",
+      "stitchScreen": "projects/1643421514270618068/screens/1e99ca37015b4ae7be654a517dd43037",
       "approved": null,
-      "size": [
-        2560,
-        2048
-      ],
+      "size": [2560, 2048],
       "status": "proposed - awaiting user review"
     },
     "error--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/413ee59e2b1644d8bc7af92ecd5de3d1",
+      "stitchScreen": "projects/1643421514270618068/screens/ed9a737d65164d2d81d9b1dcbbcd6664",
       "approved": null,
-      "size": [
-        2560,
-        3182
-      ],
+      "size": [2560, 3270],
       "status": "proposed - awaiting user review"
     }
   }

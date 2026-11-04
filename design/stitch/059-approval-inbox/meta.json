@@ -2,30 +2,21 @@
   "screen": "059-approval-inbox",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/989446b543a047778ce424b9107f5fc7",
+      "stitchScreen": "projects/1643421514270618068/screens/fb5ca09447544df782f6087edfad7cfd",
       "approved": null,
-      "size": [
-        2560,
-        2858
-      ],
+      "size": [2560, 2858],
       "status": "proposed - awaiting user review"
     },
     "empty--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/b0273e4f48a04f7794cc604b3e1e7454",
+      "stitchScreen": "projects/1643421514270618068/screens/bb51d8a8b32446cc94c76e063666e6c9",
       "approved": null,
-      "size": [
-        2560,
-        2048
-      ],
+      "size": [2560, 2048],
       "status": "proposed - awaiting user review"
     },
     "delegated-escalated--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/5a48d078e28f467294bc37c69602646f",
+      "stitchScreen": "projects/1643421514270618068/screens/300efc538e3543b689bf90291f245abb",
       "approved": null,
-      "size": [
-        2560,
-        3060
-      ],
+      "size": [2560, 3060],
       "status": "proposed - awaiting user review"
     }
   }

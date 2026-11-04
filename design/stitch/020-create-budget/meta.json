@@ -2,12 +2,9 @@
   "screen": "020-create-budget",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/b07f9da7ae3b4629b839c5ddfed7b348",
+      "stitchScreen": "projects/1643421514270618068/screens/84742f901e8f4ddc93296e9dd568b52f",
       "approved": null,
-      "size": [
-        2560,
-        3000
-      ],
+      "size": [2560, 3000],
       "status": "proposed - awaiting user review"
     }
   }

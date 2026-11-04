@@ -2,21 +2,15 @@
   "screen": "115-employee-dashboard",
   "files": {
     "default--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/b42ff3f7211c4f85bd165d75d9aa1e8f",
+      "stitchScreen": "projects/1643421514270618068/screens/74783c24dd1d4849903fe5c5bc159189",
       "approved": null,
-      "size": [
-        2560,
-        2048
-      ],
+      "size": [2560, 2048],
       "status": "proposed - awaiting user review"
     },
     "blocked--desktop--light.png": {
-      "stitchScreen": "projects/1643421514270618068/screens/5b64f85e79c247009adbdf8be059cf88",
+      "stitchScreen": "projects/1643421514270618068/screens/0e727bee020c41008d567a8f995a9a5b",
       "approved": null,
-      "size": [
-        2560,
-        2086
-      ],
+      "size": [2560, 2110],
       "status": "proposed - awaiting user review"
     }
   }

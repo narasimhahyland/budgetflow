@@ -1,0 +1,542 @@
+{
+  "height": 2784,
+  "lines": [
+    {
+      "box": [125, 48, 190, 37],
+      "text": "BudgetFlow",
+      "words": [{ "box": [125, 48, 190, 37], "t": "BudgetFlow" }]
+    },
+    {
+      "box": [125, 84, 134, 26],
+      "text": "ENTERPRISE",
+      "words": [{ "box": [125, 84, 134, 26], "t": "ENTERPRISE" }]
+    },
+    {
+      "box": [44, 186, 134, 29],
+      "text": "Hyland",
+      "words": [{ "box": [44, 186, 134, 29], "t": "Hyland" }]
+    },
+    {
+      "box": [105, 299, 77, 24],
+      "text": "Home",
+      "words": [{ "box": [105, 299, 77, 24], "t": "Home" }]
+    },
+    {
+      "box": [44, 384, 105, 24],
+      "text": "BUDGETS",
+      "words": [{ "box": [44, 384, 105, 24], "t": "BUDGETS" }]
+    },
+    {
+      "box": [48, 440, 260, 36],
+      "text": "T Budget hierarchy",
+      "words": [
+        { "box": [48, 440, 49, 31], "t": "T" },
+        { "box": [100, 441, 91, 32], "t": "Budget" },
+        { "box": [194, 443, 114, 33], "t": "hierarchy" }
+      ]
+    },
+    { "box": [49, 514, 36, 36], "text": "‡", "words": [] },
+    {
+      "box": [101, 518, 251, 24],
+      "text": "Allocation workspace",
+      "words": [
+        { "box": [101, 518, 120, 24], "t": "Allocation" },
+        { "box": [224, 518, 128, 24], "t": "workspace" }
+      ]
+    },
+    {
+      "box": [105, 591, 130, 29],
+      "text": "Budget list",
+      "words": [
+        { "box": [105, 591, 84, 29], "t": "Budget" },
+        { "box": [193, 591, 42, 28], "t": "list" }
+      ]
+    },
+    {
+      "box": [44, 676, 85, 20],
+      "text": "EVENTS",
+      "words": [{ "box": [44, 676, 85, 20], "t": "EVENTS" }]
+    },
+    {
+      "box": [105, 732, 81, 25],
+      "text": "Events",
+      "words": [{ "box": [105, 732, 81, 25], "t": "Events" }]
+    },
+    {
+      "box": [105, 805, 206, 29],
+      "text": "Co-funding board",
+      "words": [
+        { "box": [105, 805, 127, 29], "t": "Co" },
+        { "box": [105, 805, 127, 29], "t": "funding" },
+        { "box": [235, 805, 76, 29], "t": "board" }
+      ]
+    },
+    {
+      "box": [44, 889, 114, 27],
+      "text": "REQUESTS",
+      "words": [{ "box": [44, 889, 114, 27], "t": "REQUESTS" }]
+    },
+    {
+      "box": [53, 947, 235, 28],
+      "text": "• Approval inbox",
+      "words": [
+        { "box": [102, 947, 105, 28], "t": "Approval" },
+        { "box": [210, 947, 77, 28], "t": "inbox" }
+      ]
+    },
+    {
+      "box": [53, 1024, 194, 28],
+      "text": "Y My requests",
+      "words": [
+        { "box": [53, 1024, 46, 28], "t": "Y" },
+        { "box": [102, 1024, 38, 28], "t": "My" },
+        { "box": [144, 1024, 103, 28], "t": "requests" }
+      ]
+    },
+    {
+      "box": [44, 1108, 97, 22],
+      "text": "FINANCE",
+      "words": [{ "box": [44, 1108, 97, 22], "t": "FINANCE" }]
+    },
+    {
+      "box": [105, 1169, 247, 29],
+      "text": "Actuals and matching",
+      "words": [
+        { "box": [105, 1169, 83, 29], "t": "Actuals" },
+        { "box": [192, 1169, 47, 29], "t": "and" },
+        { "box": [243, 1169, 109, 29], "t": "matching" }
+      ]
+    },
+    {
+      "box": [44, 1238, 178, 29],
+      "text": "GL tie-out",
+      "words": [
+        { "box": [44, 1238, 94, 29], "t": "GL" },
+        { "box": [142, 1238, 81, 29], "t": "tie" },
+        { "box": [142, 1238, 81, 29], "t": "out" }
+      ]
+    },
+    {
+      "box": [44, 1323, 105, 24],
+      "text": "INSIGHTS",
+      "words": [{ "box": [44, 1323, 105, 24], "t": "INSIGHTS" }]
+    },
+    {
+      "box": [53, 1384, 146, 24],
+      "text": "Il. Reports",
+      "words": [
+        { "box": [53, 1384, 48, 24], "t": "Il" },
+        { "box": [104, 1384, 94, 24], "t": "Reports" }
+      ]
+    },
+    {
+      "box": [101, 1457, 113, 28],
+      "text": "Audit log",
+      "words": [
+        { "box": [101, 1457, 66, 28], "t": "Audit" },
+        { "box": [171, 1457, 43, 28], "t": "log" }
+      ]
+    },
+    {
+      "box": [44, 1538, 81, 24],
+      "text": "ADMIN",
+      "words": [{ "box": [44, 1538, 81, 24], "t": "ADMIN" }]
+    },
+    {
+      "box": [49, 1594, 263, 37],
+      "text": "Rules and policies",
+      "words": [
+        { "box": [49, 1594, 121, 37], "t": "Rules" },
+        { "box": [174, 1594, 42, 37], "t": "and" },
+        { "box": [220, 1594, 91, 37], "t": "policies" }
+      ]
+    },
+    {
+      "box": [89, 1673, 162, 27],
+      "text": "Integrations",
+      "words": [{ "box": [89, 1673, 162, 27], "t": "Integrations" }]
+    },
+    {
+      "box": [100, 1739, 108, 36],
+      "text": "Settings",
+      "words": [{ "box": [100, 1739, 108, 36], "t": "Settings" }]
+    },
+    {
+      "box": [53, 2699, 40, 24],
+      "text": "OG",
+      "words": [{ "box": [53, 2699, 40, 24], "t": "OG" }]
+    },
+    {
+      "box": [121, 2687, 142, 24],
+      "text": "Olivia Grant",
+      "words": [
+        { "box": [121, 2687, 66, 24], "t": "Olivia" },
+        { "box": [190, 2687, 73, 24], "t": "Grant" }
+      ]
+    },
+    {
+      "box": [117, 2715, 57, 28],
+      "text": "CEO",
+      "words": [{ "box": [117, 2715, 57, 28], "t": "CEO" }]
+    },
+    {
+      "box": [526, 53, 340, 24],
+      "text": "Home \/ Executive dashboard",
+      "words": [
+        { "box": [526, 53, 75, 24], "t": "Home" },
+        { "box": [625, 53, 111, 24], "t": "Executive" },
+        { "box": [739, 53, 126, 24], "t": "dashboard" }
+      ]
+    },
+    {
+      "box": [526, 190, 473, 45],
+      "text": "Executive dashboard",
+      "words": [
+        { "box": [526, 190, 220, 45], "t": "Executive" },
+        { "box": [751, 190, 248, 45], "t": "dashboard" }
+      ]
+    },
+    {
+      "box": [526, 247, 396, 28],
+      "text": "Hyland • FY2026 • as of 4 Nov 2026",
+      "words": [
+        { "box": [526, 247, 84, 28], "t": "Hyland" },
+        { "box": [624, 247, 87, 28], "t": "FY2026" },
+        { "box": [729, 247, 28, 28], "t": "as" },
+        { "box": [760, 247, 24, 28], "t": "of" },
+        { "box": [788, 247, 17, 28], "t": "4" },
+        { "box": [809, 247, 45, 28], "t": "Nov" },
+        { "box": [858, 247, 64, 28], "t": "2026" }
+      ]
+    },
+    {
+      "box": [526, 348, 150, 24],
+      "text": "Active filters:",
+      "words": [
+        { "box": [526, 348, 69, 24], "t": "Active" },
+        { "box": [598, 348, 77, 24], "t": "filters" }
+      ]
+    },
+    {
+      "box": [720, 348, 263, 24],
+      "text": "Period: FY2026 YTD X",
+      "words": [
+        { "box": [720, 348, 87, 24], "t": "Period" },
+        { "box": [810, 348, 84, 24], "t": "FY2026" },
+        { "box": [897, 348, 57, 24], "t": "YTD" },
+        { "box": [957, 348, 26, 24], "t": "X" }
+      ]
+    },
+    {
+      "box": [1052, 348, 182, 24],
+      "text": "Scope: All units",
+      "words": [
+        { "box": [1052, 348, 81, 24], "t": "Scope" },
+        { "box": [1136, 348, 33, 24], "t": "All" },
+        { "box": [1172, 348, 61, 24], "t": "units" }
+      ]
+    },
+    {
+      "box": [557, 469, 155, 34],
+      "text": "Total budget",
+      "words": [
+        { "box": [557, 469, 59, 31], "t": "Total" },
+        { "box": [619, 471, 93, 32], "t": "budget" }
+      ]
+    },
+    {
+      "box": [963, 469, 109, 24],
+      "text": "Allocated",
+      "words": [{ "box": [963, 469, 109, 24], "t": "Allocated" }]
+    },
+    {
+      "box": [1080, 53, 473, 28],
+      "text": "Search budgets, events, requests, people",
+      "words": [
+        { "box": [1080, 53, 84, 28], "t": "Search" },
+        { "box": [1167, 53, 101, 28], "t": "budgets" },
+        { "box": [1272, 53, 80, 28], "t": "events" },
+        { "box": [1356, 53, 108, 28], "t": "requests" },
+        { "box": [1468, 53, 84, 28], "t": "people" }
+      ]
+    },
+    {
+      "box": [1824, 53, 57, 24],
+      "text": "Ctrl K",
+      "words": [
+        { "box": [1824, 53, 36, 24], "t": "Ctrl" },
+        { "box": [1863, 53, 18, 24], "t": "K" }
+      ]
+    },
+    {
+      "box": [2075, 53, 89, 28],
+      "text": "FY2026",
+      "words": [{ "box": [2075, 53, 89, 28], "t": "FY2026" }]
+    },
+    {
+      "box": [2459, 53, 40, 24],
+      "text": "OG",
+      "words": [{ "box": [2459, 53, 40, 24], "t": "OG" }]
+    },
+    {
+      "box": [2362, 214, 121, 29],
+      "text": "= Export",
+      "words": [{ "box": [2395, 214, 89, 29], "t": "Export" }]
+    },
+    {
+      "box": [1335, 348, 287, 28],
+      "text": "Currency: USD reporting",
+      "words": [
+        { "box": [1335, 348, 112, 28], "t": "Currency" },
+        { "box": [1450, 348, 52, 28], "t": "USD" },
+        { "box": [1506, 348, 115, 28], "t": "reporting" }
+      ]
+    },
+    {
+      "box": [1367, 468, 130, 28],
+      "text": "Committed",
+      "words": [{ "box": [1367, 468, 130, 28], "t": "Committed" }]
+    },
+    {
+      "box": [1715, 348, 138, 24],
+      "text": "Reset filters",
+      "words": [
+        { "box": [1715, 348, 63, 24], "t": "Reset" },
+        { "box": [1781, 348, 71, 24], "t": "filters" }
+      ]
+    },
+    {
+      "box": [1767, 473, 154, 25],
+      "text": "Actual spend",
+      "words": [
+        { "box": [1767, 473, 75, 25], "t": "Actual" },
+        { "box": [1845, 473, 76, 25], "t": "spend" }
+      ]
+    },
+    {
+      "box": [2172, 469, 105, 25],
+      "text": "Available",
+      "words": [{ "box": [2172, 469, 105, 25], "t": "Available" }]
+    },
+    {
+      "box": [570, 784, 413, 39],
+      "text": "Budget vs actual by region",
+      "words": [
+        { "box": [570, 784, 116, 35], "t": "Budget" },
+        { "box": [690, 786, 33, 33], "t": "vs" },
+        { "box": [727, 786, 99, 34], "t": "actual" },
+        { "box": [830, 787, 42, 33], "t": "by" },
+        { "box": [875, 788, 108, 35], "t": "region" }
+      ]
+    },
+    {
+      "box": [566, 825, 987, 29],
+      "text": "Comparative breakdown of authorized budget, commitments, and actual expenditures.",
+      "words": [
+        { "box": [566, 825, 145, 29], "t": "Comparative" },
+        { "box": [715, 825, 130, 29], "t": "breakdown" },
+        { "box": [849, 825, 25, 29], "t": "of" },
+        { "box": [878, 825, 127, 29], "t": "authorized" },
+        { "box": [1008, 825, 91, 29], "t": "budget" },
+        { "box": [1103, 825, 163, 29], "t": "commitments" },
+        { "box": [1269, 825, 47, 29], "t": "and" },
+        { "box": [1320, 825, 73, 29], "t": "actual" },
+        { "box": [1396, 825, 157, 29], "t": "expenditures" }
+      ]
+    },
+    {
+      "box": [602, 890, 97, 29],
+      "text": "Budget",
+      "words": [{ "box": [602, 890, 97, 29], "t": "Budget" }]
+    },
+    {
+      "box": [756, 890, 146, 24],
+      "text": "Committed",
+      "words": [{ "box": [756, 890, 146, 24], "t": "Committed" }]
+    },
+    {
+      "box": [974, 893, 77, 22],
+      "text": "Actual",
+      "words": [{ "box": [974, 893, 77, 22], "t": "Actual" }]
+    },
+    {
+      "box": [1088, 890, 263, 25],
+      "text": "- Forecast (Year-end)",
+      "words": [
+        { "box": [1122, 890, 103, 25], "t": "Forecast" },
+        { "box": [1229, 890, 122, 25], "t": "Year" },
+        { "box": [1229, 890, 122, 25], "t": "end" }
+      ]
+    },
+    {
+      "box": [1609, 797, 187, 33],
+      "text": "I View as table",
+      "words": [
+        { "box": [1609, 801, 29, 29], "t": "I" },
+        { "box": [1640, 800, 57, 29], "t": "View" },
+        { "box": [1700, 799, 25, 29], "t": "as" },
+        { "box": [1728, 797, 68, 30], "t": "table" }
+      ]
+    },
+    {
+      "box": [1921, 785, 344, 32],
+      "text": "Alerts and exceptions",
+      "words": [
+        { "box": [1921, 785, 96, 32], "t": "Alerts" },
+        { "box": [2021, 785, 60, 32], "t": "and" },
+        { "box": [2085, 785, 180, 32], "t": "exceptions" }
+      ]
+    },
+    {
+      "box": [1917, 1517, 295, 37],
+      "text": "Pending approvals",
+      "words": [
+        { "box": [1917, 1517, 134, 37], "t": "Pending" },
+        { "box": [2056, 1517, 156, 37], "t": "approvals" }
+      ]
+    },
+    {
+      "box": [2345, 1517, 110, 28],
+      "text": "7 waiting",
+      "words": [
+        { "box": [2345, 1517, 17, 28], "t": "7" },
+        { "box": [2366, 1517, 90, 28], "t": "waiting" }
+      ]
+    },
+    {
+      "box": [558, 1877, 134, 42],
+      "text": "Regions",
+      "words": [{ "box": [558, 1877, 134, 42], "t": "Regions" }]
+    },
+    {
+      "box": [554, 1914, 975, 48],
+      "text": "Breakdown of budget authority, downstream allocation, commitments, and threshold",
+      "words": [
+        { "box": [554, 1920, 135, 41], "t": "Breakdown" },
+        { "box": [694, 1920, 20, 40], "t": "of" },
+        { "box": [719, 1919, 85, 41], "t": "budget" },
+        { "box": [809, 1918, 110, 41], "t": "authority" },
+        { "box": [924, 1917, 140, 41], "t": "downstream" },
+        { "box": [1069, 1916, 120, 41], "t": "allocation" },
+        { "box": [1194, 1915, 165, 41], "t": "commitments" },
+        { "box": [1364, 1915, 40, 40], "t": "and" },
+        { "box": [1409, 1914, 120, 41], "t": "threshold" }
+      ]
+    },
+    {
+      "box": [558, 1954, 85, 24],
+      "text": "status.",
+      "words": [{ "box": [558, 1954, 85, 24], "t": "status" }]
+    },
+    {
+      "box": [554, 2050, 90, 35],
+      "text": "Region",
+      "words": [{ "box": [554, 2050, 90, 35], "t": "Region" }]
+    },
+    {
+      "box": [829, 2052, 85, 28],
+      "text": "Owner",
+      "words": [{ "box": [829, 2052, 85, 28], "t": "Owner" }]
+    },
+    {
+      "box": [1080, 2048, 65, 36],
+      "text": "Curr.",
+      "words": [{ "box": [1080, 2048, 65, 36], "t": "Curr" }]
+    },
+    {
+      "box": [1254, 2043, 97, 45],
+      "text": "Budget",
+      "words": [{ "box": [1254, 2043, 97, 45], "t": "Budget" }]
+    },
+    {
+      "box": [1407, 2043, 117, 40],
+      "text": "Allocated",
+      "words": [{ "box": [1407, 2043, 117, 40], "t": "Allocated" }]
+    },
+    {
+      "box": [1593, 1894, 125, 36],
+      "text": "3 Regions",
+      "words": [
+        { "box": [1593, 1894, 22, 36], "t": "3" },
+        { "box": [1620, 1894, 99, 36], "t": "Regions" }
+      ]
+    },
+    {
+      "box": [1593, 1926, 81, 32],
+      "text": "Active",
+      "words": [{ "box": [1593, 1926, 81, 32], "t": "Active" }]
+    },
+    {
+      "box": [1549, 2048, 146, 36],
+      "text": "Committed",
+      "words": [{ "box": [1549, 2048, 146, 36], "t": "Committed" }]
+    },
+    {
+      "box": [2054, 2015, 279, 28],
+      "text": "Open approval inbox →",
+      "words": [
+        { "box": [2054, 2015, 66, 28], "t": "Open" },
+        { "box": [2124, 2015, 101, 28], "t": "approval" },
+        { "box": [2229, 2015, 73, 28], "t": "inbox" }
+      ]
+    },
+    {
+      "box": [1775, 2052, 61, 32],
+      "text": "Actu",
+      "words": [{ "box": [1775, 2052, 61, 32], "t": "Actu" }]
+    },
+    {
+      "box": [1917, 2203, 150, 31],
+      "text": "Forecast",
+      "words": [{ "box": [1917, 2203, 150, 31], "t": "Forecast" }]
+    },
+    {
+      "box": [1921, 2262, 534, 28],
+      "text": "Projected year-end utilization based on current",
+      "words": [
+        { "box": [1921, 2262, 108, 28], "t": "Projected" },
+        { "box": [2033, 2262, 105, 28], "t": "year" },
+        { "box": [2033, 2262, 105, 28], "t": "end" },
+        { "box": [2141, 2262, 112, 28], "t": "utilization" },
+        { "box": [2257, 2262, 73, 28], "t": "based" },
+        { "box": [2334, 2262, 28, 28], "t": "on" },
+        { "box": [2365, 2262, 89, 28], "t": "current" }
+      ]
+    },
+    {
+      "box": [1921, 2294, 437, 29],
+      "text": "run rates and approved commitments.",
+      "words": [
+        { "box": [1921, 2294, 43, 29], "t": "run" },
+        { "box": [1968, 2294, 58, 29], "t": "rates" },
+        { "box": [2030, 2294, 47, 29], "t": "and" },
+        { "box": [2081, 2294, 109, 29], "t": "approved" },
+        { "box": [2193, 2294, 165, 29], "t": "commitments" }
+      ]
+    },
+    {
+      "box": [558, 2428, 400, 28],
+      "text": "Showing 3 of 3 operational regions",
+      "words": [
+        { "box": [558, 2428, 101, 28], "t": "Showing" },
+        { "box": [663, 2428, 14, 28], "t": "3" },
+        { "box": [680, 2428, 28, 28], "t": "of" },
+        { "box": [712, 2428, 14, 28], "t": "3" },
+        { "box": [729, 2428, 133, 28], "t": "operational" },
+        { "box": [866, 2428, 92, 28], "t": "regions" }
+      ]
+    },
+    {
+      "box": [1351, 2428, 453, 32],
+      "text": "View comprehensive financial tie-out →",
+      "words": [
+        { "box": [1351, 2428, 56, 32], "t": "View" },
+        { "box": [1411, 2428, 176, 32], "t": "comprehensive" },
+        { "box": [1591, 2428, 100, 32], "t": "financial" },
+        { "box": [1695, 2428, 76, 32], "t": "tie" },
+        { "box": [1695, 2428, 76, 32], "t": "out" }
+      ]
+    }
+  ],
+  "width": 2560
+}
