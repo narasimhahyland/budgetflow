@@ -65,14 +65,14 @@ export class LedgerCommands {
         status: 201,
       },
       async (tx) => {
-        const original = await this.ledger.journalRow(tx, journalId);
-        if (!original) throw ApiProblem.notFound('journal');
         this.policy.assert(
           actor,
           'ledger.reverse',
           { kind: 'tenant', tenantId: actor.tenantId },
           'journal',
         );
+        const original = await this.ledger.journalRow(tx, journalId);
+        if (!original) throw ApiProblem.notFound('journal');
         const lines = await this.ledger.linesOf(tx, journalId);
         const budgetIds = [
           ...new Set(lines.map((l) => l.budgetId).filter((b): b is string => Boolean(b))),
@@ -115,6 +115,7 @@ export class LedgerCommands {
         const reversalId = await this.ledger.post(tx, draft, {
           actor,
           command: 'ledger.reverse',
+          fiscalYearId: budgetIds.length ? rows.get(budgetIds[0])!.fiscalYearId : null,
           requestId: ctx.requestId,
           idempotencyKey: ctx.idempotencyKey,
           allowSoftClosed: true,
@@ -219,6 +220,7 @@ export class LedgerCommands {
         const journalId = await this.ledger.post(tx, draft, {
           actor,
           command: 'ledger.manual_journal',
+          fiscalYearId,
           requestId: ctx.requestId,
           idempotencyKey: ctx.idempotencyKey,
           allowSoftClosed: true,
@@ -234,8 +236,19 @@ export class LedgerCommands {
           requestId: ctx.requestId,
           reason: `${req.reasonCode}: ${req.reason}`,
           changes: {
-            lines: { from: null, to: req.lines.length },
-            budgets: { from: null, to: budgetIds },
+            transactionCurrency: { from: null, to: draft.transactionCurrency },
+            accountingDate: { from: null, to: draft.accountingDate },
+            lines: {
+              from: null,
+              to: draft.lines.map((l) => ({
+                budgetId: l.budgetId,
+                account: l.account,
+                legalEntityId: l.legalEntityId,
+                transactionMinor: l.transaction.amountMinor,
+                budgetMinor: l.budget?.amountMinor ?? null,
+                reportingMinor: l.reporting.amountMinor,
+              })),
+            },
           },
         });
         return this.ledger.journalDto(tx, journalId);

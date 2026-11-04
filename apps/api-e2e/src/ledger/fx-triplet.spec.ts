@@ -1,7 +1,12 @@
 // Invariant 8 (Phase 1 part): every line carries the currency triplet, converted once at the locked plan
 // rate stored on the line; spot rates never drive budget control. FX on actuals lands in Phase 6.
-// Invariant 22 (Phase 1 part): integer minor units with ISO 4217 exponents (JPY 0, USD 2, KWD 3), half-even.
+// Invariant 22 (Phase 1 part): integer minor units with ISO 4217 exponents (JPY 0, USD 2, KWD 3), half-even
+// at the line; on hierarchy lines the giving budget rounds up and the receiving budget rounds down.
 import { expect, test } from '@playwright/test';
+import { Journal } from '@bf/contracts';
+import { SEED } from '@bf/seed';
+import { mutate } from '../support/auth';
+import { expectContract } from '../support/contract';
 import { allocateOk, createChild, createRoot, expectMoney } from '../support/factory';
 
 test.describe('currency triplet at the locked plan rate', () => {
@@ -37,15 +42,16 @@ test.describe('currency triplet at the locked plan rate', () => {
     expectMoney(r.child.balances.budgetCurrency.authorized, 2_497_500, 'INR');
   });
 
-  test('half-even rounding at the line for JPY (0 decimals) and KWD (3 decimals)', async ({
+  test('minor-unit exponents for JPY (0 decimals) and KWD (3 decimals); allocations credit the child rounding down', async ({
     request,
   }) => {
     const root = await createRoot(request, { amountMinor: 100_000 });
     const yen = await createChild(request, root.id, { currency: 'JPY' });
     const dinar = await createChild(request, root.id, { currency: 'KWD' });
-    // USD 10.01 × 150 = JPY 1,501.5 → 1,502 (half to even); USD 10.01 × 0.307 = KWD 3.07307 → 3.073 (3,073 fils).
+    // USD 10.01 × 150 = JPY 1,501.5 → 1,501 (the receiving budget rounds down); USD 10.01 × 0.307 =
+    // KWD 3.07307 → 3.073 (3,073 fils).
     const j = await allocateOk(request, root.id, yen.id, { amountMinor: 1_001, currency: 'USD' });
-    expectMoney(j.child.balances.budgetCurrency.authorized, 1_502, 'JPY');
+    expectMoney(j.child.balances.budgetCurrency.authorized, 1_501, 'JPY');
     const k = await allocateOk(request, root.id, dinar.id, { amountMinor: 1_001, currency: 'USD' });
     expectMoney(k.child.balances.budgetCurrency.authorized, 3_073, 'KWD');
     // USD 10.01 → INR 833.3325 → 833.33 (83,333 paise).
@@ -53,5 +59,38 @@ test.describe('currency triplet at the locked plan rate', () => {
     const i = await allocateOk(request, root.id, india.id, { amountMinor: 1_001, currency: 'USD' });
     expectMoney(i.child.balances.budgetCurrency.authorized, 83_333, 'INR');
     expectMoney(i.parent.balances.budgetCurrency.allocatedOut, 3_003, 'USD');
+  });
+
+  test('half-even rounding at the line outside the hierarchy (JPY 1.5 → 2, JPY 4.5 → 4)', async ({
+    request,
+  }) => {
+    const root = await createRoot(request, { amountMinor: 100_000 });
+    const yen = await createChild(request, root.id, { currency: 'JPY' });
+    await allocateOk(request, root.id, yen.id, { amountMinor: 1_000, currency: 'USD' });
+    const res = await request.post('/api/ledger/journals', {
+      headers: await mutate('finance-admin'),
+      data: {
+        transactionCurrency: 'USD',
+        reasonCode: 'ADJ-OPENING',
+        reason: 'Opening commitments in yen',
+        lines: [
+          { budgetId: yen.id, account: 'encumbered', side: 'debit', amountMinor: 1 },
+          { budgetId: yen.id, account: 'actual', side: 'debit', amountMinor: 3 },
+          {
+            budgetId: null,
+            account: 'obligations',
+            side: 'credit',
+            amountMinor: 4,
+            legalEntityId: SEED.legalEntities.acmeUs,
+          },
+        ],
+      },
+    });
+    const journal = await expectContract(res, 201, Journal);
+    expect(journal.lines.map((l) => [l.account, l.budget?.amountMinor ?? null])).toEqual([
+      ['encumbered', 2],
+      ['actual', 4],
+      ['obligations', null],
+    ]);
   });
 });

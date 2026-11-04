@@ -1,0 +1,201 @@
+{
+  "run": {
+    "id": "610dfbde-14db-4a48-b8cd-51dac9ed537a",
+    "status": "drift_detected",
+    "flagsRaised": 9,
+    "summary": {
+      "auditChain": {
+        "valid": true,
+        "checked": 16,
+        "firstBrokenSeq": null
+      },
+      "linesChecked": 9,
+      "balanceDrifts": [
+        {
+          "bucket": "actual",
+          "budgetId": "70000000-0000-4000-8000-000000000009",
+          "periodId": "23000000-0000-4000-8000-042026110000",
+          "cachedBudgetMinor": 0,
+          "rebuiltBudgetMinor": -100,
+          "cachedReportingMinor": 0,
+          "rebuiltReportingMinor": -100
+        },
+        {
+          "bucket": "allocated_out",
+          "budgetId": "70000000-0000-4000-8000-000000000009",
+          "periodId": "23000000-0000-4000-8000-042026110000",
+          "cachedBudgetMinor": 0,
+          "rebuiltBudgetMinor": 300000,
+          "cachedReportingMinor": 0,
+          "rebuiltReportingMinor": 300000
+        },
+        {
+          "bucket": "authorized",
+          "budgetId": "70000000-0000-4000-8000-000000000009",
+          "periodId": "23000000-0000-4000-8000-042026110000",
+          "cachedBudgetMinor": -250000,
+          "rebuiltBudgetMinor": -250050,
+          "cachedReportingMinor": -250000,
+          "rebuiltReportingMinor": -250050
+        },
+        {
+          "bucket": "encumbered",
+          "budgetId": "70000000-0000-4000-8000-000000000009",
+          "periodId": "23000000-0000-4000-8000-042026110000",
+          "cachedBudgetMinor": 0,
+          "rebuiltBudgetMinor": 101,
+          "cachedReportingMinor": 0,
+          "rebuiltReportingMinor": 100
+        }
+      ],
+      "budgetsChecked": 2,
+      "journalsChecked": 3,
+      "negativeBuckets": [
+        {
+          "bucket": "actual",
+          "budgetId": "70000000-0000-4000-8000-000000000009",
+          "balanceMinor": -100
+        }
+      ],
+      "planTieMismatches": [],
+      "tripletMismatches": [
+        {
+          "view": "budget",
+          "lineId": "69628a8e-8246-4073-8227-51e1f45569f7",
+          "journalId": "be6c5a0d-b435-421f-a270-aa2bf76370c1",
+          "storedMinor": 101,
+          "expectedMinor": 100
+        }
+      ],
+      "unbalancedJournals": [],
+      "hierarchyMismatches": [
+        {
+          "currency": "USD",
+          "parentId": "70000000-0000-4000-8000-000000000008",
+          "allocatedOutMinor": 250000,
+          "roundingAllowanceMinor": 0,
+          "childrenAuthorizedAtPlanMinor": 250050
+        },
+        {
+          "currency": "USD",
+          "parentId": "70000000-0000-4000-8000-000000000009",
+          "allocatedOutMinor": 300000,
+          "roundingAllowanceMinor": 0,
+          "childrenAuthorizedAtPlanMinor": 0
+        }
+      ],
+      "overAllocatedBudgets": [
+        {
+          "budgetId": "70000000-0000-4000-8000-000000000009",
+          "authorizedMinor": 250050,
+          "allocatedOutMinor": 300000
+        }
+      ]
+    }
+  },
+  "flags": [
+    {
+      "kind": "hierarchy_mismatch",
+      "resourceType": "budget",
+      "details": {
+        "currency": "USD",
+        "parentId": "70000000-0000-4000-8000-000000000008",
+        "allocatedOutMinor": 250000,
+        "roundingAllowanceMinor": 0,
+        "childrenAuthorizedAtPlanMinor": 250050
+      }
+    },
+    {
+      "kind": "hierarchy_mismatch",
+      "resourceType": "budget",
+      "details": {
+        "currency": "USD",
+        "parentId": "70000000-0000-4000-8000-000000000009",
+        "allocatedOutMinor": 300000,
+        "roundingAllowanceMinor": 0,
+        "childrenAuthorizedAtPlanMinor": 0
+      }
+    },
+    {
+      "kind": "ledger_drift",
+      "resourceType": "budget",
+      "details": {
+        "bucket": "authorized",
+        "budgetId": "70000000-0000-4000-8000-000000000009",
+        "periodId": "23000000-0000-4000-8000-042026110000",
+        "cachedBudgetMinor": -250000,
+        "rebuiltBudgetMinor": -250050,
+        "cachedReportingMinor": -250000,
+        "rebuiltReportingMinor": -250050
+      }
+    },
+    {
+      "kind": "ledger_drift",
+      "resourceType": "budget",
+      "details": {
+        "bucket": "encumbered",
+        "budgetId": "70000000-0000-4000-8000-000000000009",
+        "periodId": "23000000-0000-4000-8000-042026110000",
+        "cachedBudgetMinor": 0,
+        "rebuiltBudgetMinor": 101,
+        "cachedReportingMinor": 0,
+        "rebuiltReportingMinor": 100
+      }
+    },
+    {
+      "kind": "ledger_drift",
+      "resourceType": "budget",
+      "details": {
+        "bucket": "actual",
+        "budgetId": "70000000-0000-4000-8000-000000000009",
+        "periodId": "23000000-0000-4000-8000-042026110000",
+        "cachedBudgetMinor": 0,
+        "rebuiltBudgetMinor": -100,
+        "cachedReportingMinor": 0,
+        "rebuiltReportingMinor": -100
+      }
+    },
+    {
+      "kind": "ledger_drift",
+      "resourceType": "budget",
+      "details": {
+        "bucket": "allocated_out",
+        "budgetId": "70000000-0000-4000-8000-000000000009",
+        "periodId": "23000000-0000-4000-8000-042026110000",
+        "cachedBudgetMinor": 0,
+        "rebuiltBudgetMinor": 300000,
+        "cachedReportingMinor": 0,
+        "rebuiltReportingMinor": 300000
+      }
+    },
+    {
+      "kind": "negative_bucket",
+      "resourceType": "budget",
+      "details": {
+        "bucket": "actual",
+        "budgetId": "70000000-0000-4000-8000-000000000009",
+        "balanceMinor": -100
+      }
+    },
+    {
+      "kind": "over_allocated",
+      "resourceType": "budget",
+      "details": {
+        "budgetId": "70000000-0000-4000-8000-000000000009",
+        "authorizedMinor": 250050,
+        "allocatedOutMinor": 300000
+      }
+    },
+    {
+      "kind": "triplet_mismatch",
+      "resourceType": "ledger_line",
+      "details": {
+        "view": "budget",
+        "lineId": "69628a8e-8246-4073-8227-51e1f45569f7",
+        "journalId": "be6c5a0d-b435-421f-a270-aa2bf76370c1",
+        "storedMinor": 101,
+        "expectedMinor": 100
+      }
+    }
+  ]
+}

@@ -41,6 +41,9 @@ const UNPROCESSABLE: readonly DomainErrorCode[] = [
   'IMPACT_PREVIEW_REQUIRED',
   'CONTRIBUTION_AMOUNT_INVALID',
   'ROOT_REQUIRES_PLAN_VERSION',
+  'AMOUNT_ROUNDS_TO_ZERO',
+  'MANUAL_JOURNAL_NEEDS_COUNTER_ACCOUNT',
+  'ACCOUNTING_DATE_OUTSIDE_FISCAL_YEAR',
 ];
 
 /** Domain failures become problems: 422 for invalid input, 409 for conflicts with current state. */

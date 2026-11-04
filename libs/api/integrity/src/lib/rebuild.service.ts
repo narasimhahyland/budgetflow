@@ -1,6 +1,7 @@
 import { AuditService } from '@bf/api/audit';
 import { DB } from '@bf/api/core';
 import {
+  exchangeRates,
   integrityCheckRuns,
   integrityFlags,
   tenants,
@@ -9,12 +10,22 @@ import {
   type Tx,
 } from '@bf/api/db';
 import {
+  checkBucketBalances,
   checkHierarchy,
+  checkLineTriplet,
   checkPlanTie,
   compareBalances,
+  toSafeMinor,
   type BalanceDrift,
+  type CurrencyCode,
+  type FxRate,
   type HierarchyMismatch,
+  type LedgerAccount,
+  type NegativeBucket,
+  type OverAllocatedBudget,
   type PlanTieMismatch,
+  type RateType,
+  type TripletMismatch,
 } from '@bf/domain';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
@@ -26,18 +37,24 @@ export interface RebuildSummary {
   unbalancedJournals: string[];
   balanceDrifts: BalanceDrift[];
   hierarchyMismatches: HierarchyMismatch[];
+  negativeBuckets: NegativeBucket[];
+  overAllocatedBudgets: OverAllocatedBudget[];
+  tripletMismatches: TripletMismatch[];
   planTieMismatches: PlanTieMismatch[];
   auditChain: { valid: boolean; checked: number; firstBrokenSeq: number | null };
 }
 
 const SYSTEM = 'system:worker';
-const n = (v: unknown) => Number(v ?? 0);
+const n = toSafeMinor;
+const LINE_BATCH = 5000;
 
 /**
  * The ledger rebuild check: recomputes every bucket balance from ledger lines, compares it with the
- * cached balances, verifies that journals balance, parents' allocated out equals children's authorized,
- * roots tie to their plan version, and the audit hash chain is intact. Drift raises integrity flags;
- * nothing is ever repaired automatically. Idempotent per check run.
+ * cached balances, verifies that journals balance, no bucket is negative, no budget has allocated out
+ * more than it holds, every line's triplet matches its stored rates, parents' allocated out equals
+ * children's authorized at the locked plan rate, roots tie to their plan version, and the audit hash
+ * chain is intact. Drift raises integrity flags; nothing is ever repaired automatically. Idempotent per
+ * check run.
  */
 @Injectable()
 export class RebuildService {
@@ -61,7 +78,7 @@ export class RebuildService {
       const summary = await withTenant(
         this.db,
         { tenantId, subject: SYSTEM },
-        (tx) => this.compute(tx),
+        (tx) => this.compute(tx, tenantId),
         { isolationLevel: 'repeatable read', accessMode: 'read only' },
       );
       const status = this.isClean(summary) ? 'clean' : 'drift_detected';
@@ -122,12 +139,121 @@ export class RebuildService {
       s.unbalancedJournals.length === 0 &&
       s.balanceDrifts.length === 0 &&
       s.hierarchyMismatches.length === 0 &&
+      s.negativeBuckets.length === 0 &&
+      s.overAllocatedBudgets.length === 0 &&
+      s.tripletMismatches.length === 0 &&
       s.planTieMismatches.length === 0 &&
       s.auditChain.valid
     );
   }
 
-  private async compute(tx: Tx): Promise<RebuildSummary> {
+  /**
+   * Re-verifies every line's currency triplet against its stored rates (in batches), and every reversal
+   * line as the exact negation of the line it reverses.
+   */
+  private async tripletMismatches(tx: Tx): Promise<TripletMismatch[]> {
+    const out: TripletMismatch[] = [];
+    let after = '00000000-0000-0000-0000-000000000000';
+    for (;;) {
+      const batch = await tx.execute<{
+        id: string;
+        journal_id: string;
+        account: string;
+        budget_id: string | null;
+        tc: string;
+        ta: string;
+        bc: string | null;
+        ba: string | null;
+        rc: string;
+        ra: string;
+        brt: string | null;
+        br: string | null;
+        rrt: string;
+        rr: string;
+        n: number | null;
+      }>(
+        sql`select l.id, l.journal_id, l.account::text as account, l.budget_id,
+                   l.transaction_currency as tc, l.transaction_amount_minor::text as ta,
+                   l.budget_currency as bc, l.budget_amount_minor::text as ba,
+                   l.reporting_currency as rc, l.reporting_amount_minor::text as ra,
+                   l.budget_rate_type::text as brt, l.budget_rate::text as br,
+                   l.reporting_rate_type::text as rrt, l.reporting_rate::text as rr,
+                   case when l.account = 'fx_variance' and l.transaction_amount_minor = 0
+                        then (select count(*) from ledger_lines x where x.journal_id = l.journal_id)::int end as n
+            from ledger_lines l
+            where l.reversal_of_line_id is null and l.id > ${after}::uuid
+            order by l.id limit ${LINE_BATCH}`,
+      );
+      for (const r of batch.rows) {
+        const tc = r.tc as CurrencyCode;
+        const mismatch = checkLineTriplet({
+          id: r.id,
+          journalId: r.journal_id,
+          account: r.account as LedgerAccount,
+          budgetId: r.budget_id,
+          transaction: { amountMinor: n(r.ta), currency: tc },
+          budget:
+            r.bc && r.ba !== null ? { amountMinor: n(r.ba), currency: r.bc as CurrencyCode } : null,
+          reporting: { amountMinor: n(r.ra), currency: r.rc as CurrencyCode },
+          budgetRate:
+            r.bc && r.br && r.brt
+              ? {
+                  type: r.brt as RateType,
+                  from: tc,
+                  to: r.bc as CurrencyCode,
+                  value: r.br,
+                  rateIds: [],
+                }
+              : null,
+          reportingRate: {
+            type: r.rrt as RateType,
+            from: tc,
+            to: r.rc as CurrencyCode,
+            value: r.rr,
+            rateIds: [],
+          },
+          journalLineCount: r.n ?? 0,
+        });
+        if (mismatch) out.push(mismatch);
+      }
+      if (batch.rows.length < LINE_BATCH) break;
+      after = batch.rows[batch.rows.length - 1].id;
+    }
+    const reversals = await tx.execute<{
+      line_id: string;
+      journal_id: string;
+      expected: string | null;
+      stored: string | null;
+    }>(
+      sql`select l.id as line_id, l.journal_id,
+                 (case when l.budget_amount_minor is distinct from -o.budget_amount_minor then -o.budget_amount_minor
+                       when l.reporting_amount_minor <> -o.reporting_amount_minor then -o.reporting_amount_minor
+                       else -o.transaction_amount_minor end)::text as expected,
+                 (case when l.budget_amount_minor is distinct from -o.budget_amount_minor then l.budget_amount_minor
+                       when l.reporting_amount_minor <> -o.reporting_amount_minor then l.reporting_amount_minor
+                       else l.transaction_amount_minor end)::text as stored
+          from ledger_lines l join ledger_lines o on o.id = l.reversal_of_line_id
+          where l.account <> o.account or l.budget_id is distinct from o.budget_id
+             or l.transaction_currency <> o.transaction_currency
+             or l.budget_currency is distinct from o.budget_currency
+             or l.reporting_currency <> o.reporting_currency
+             or l.transaction_amount_minor <> -o.transaction_amount_minor
+             or l.budget_amount_minor is distinct from -o.budget_amount_minor
+             or l.reporting_amount_minor <> -o.reporting_amount_minor`,
+    );
+    for (const r of reversals.rows) {
+      out.push({
+        lineId: r.line_id,
+        journalId: r.journal_id,
+        view: 'reversal',
+        expectedMinor: r.expected === null ? null : n(r.expected),
+        storedMinor: n(r.stored),
+      });
+    }
+    return out;
+  }
+
+  private async compute(tx: Tx, tenantId: string): Promise<RebuildSummary> {
     const rebuilt = await tx.execute<{
       budget_id: string;
       fiscal_period_id: string;
@@ -166,18 +292,60 @@ export class RebuildService {
     const totals = await tx.execute<{
       id: string;
       parent_id: string | null;
+      currency: string;
+      fiscal_year_id: string;
       ao: string;
       au: string;
+      au_lines: string;
     }>(
       sql`with l as (
-            select l.budget_id, l.account, l.reporting_amount_minor from ledger_lines l
+            select l.budget_id, l.account, l.budget_amount_minor from ledger_lines l
             join ledger_journals j on j.id = l.journal_id where j.journal_type not in ('transfer', 'contribution')
           )
-          select b.id, b.parent_id,
-                 coalesce(sum(case when l.account = 'allocated_out' then l.reporting_amount_minor end), 0)::text as ao,
-                 coalesce(-sum(case when l.account = 'authorized' then l.reporting_amount_minor end), 0)::text as au
-          from budgets b left join l on l.budget_id = b.id group by b.id, b.parent_id`,
+          select b.id, b.parent_id, b.currency, b.fiscal_year_id,
+                 coalesce(sum(case when l.account = 'allocated_out' then l.budget_amount_minor end), 0)::text as ao,
+                 coalesce(-sum(case when l.account = 'authorized' then l.budget_amount_minor end), 0)::text as au,
+                 count(*) filter (where l.account = 'authorized')::text as au_lines
+          from budgets b left join l on l.budget_id = b.id group by b.id, b.parent_id, b.currency, b.fiscal_year_id`,
     );
+    const [tenant] = await tx
+      .select({ reportingCurrency: tenants.reportingCurrency })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId));
+    const rates = await tx
+      .select()
+      .from(exchangeRates)
+      .where(and(eq(exchangeRates.rateType, 'plan'), eq(exchangeRates.locked, true)));
+    const ratesByFiscalYear = new Map<string, FxRate[]>();
+    for (const r of rates) {
+      if (!r.fiscalYearId) continue;
+      ratesByFiscalYear.set(r.fiscalYearId, [
+        ...(ratesByFiscalYear.get(r.fiscalYearId) ?? []),
+        {
+          id: r.id,
+          type: 'plan',
+          base: r.baseCurrency as CurrencyCode,
+          quote: r.quoteCurrency as CurrencyCode,
+          value: r.rate,
+        },
+      ]);
+    }
+    const hierarchy = checkHierarchy(
+      totals.rows.map((r) => ({
+        id: r.id,
+        parentId: r.parent_id,
+        currency: r.currency as CurrencyCode,
+        fiscalYearId: r.fiscal_year_id,
+      })),
+      new Map(
+        totals.rows.map((r) => [
+          r.id,
+          { allocatedOutMinor: n(r.ao), authorizedMinor: n(r.au), authorizedLines: n(r.au_lines) },
+        ]),
+      ),
+      { reportingCurrency: tenant.reportingCurrency as CurrencyCode, ratesByFiscalYear },
+    );
+    if (!hierarchy.ok) throw new Error(`hierarchy check: ${hierarchy.error.message}`);
     const plan = await tx.execute<{ plan_version_id: string; pf: string; ra: string }>(
       sql`select plan_version_id,
                  coalesce(sum(case when account = 'plan_funding' then reporting_amount_minor end), 0)::text as pf,
@@ -188,21 +356,18 @@ export class RebuildService {
       sql`select (select count(*) from budgets)::text as budgets, (select count(*) from ledger_journals)::text as journals, (select count(*) from ledger_lines)::text as lines`,
     );
     const chain = await this.audit.verify(tx);
+    const rebuiltRows = toRows(rebuilt.rows);
+    const buckets = checkBucketBalances(rebuiltRows);
     return {
       budgetsChecked: n(counts.rows[0].budgets),
       journalsChecked: n(counts.rows[0].journals),
       linesChecked: n(counts.rows[0].lines),
       unbalancedJournals: unbalanced.rows.map((r) => r.id),
-      balanceDrifts: compareBalances(toRows(rebuilt.rows), toRows(cached.rows)),
-      hierarchyMismatches: checkHierarchy(
-        totals.rows.map((r) => ({ id: r.id, parentId: r.parent_id })),
-        new Map(
-          totals.rows.map((r) => [
-            r.id,
-            { allocatedOutReportingMinor: n(r.ao), authorizedReportingMinor: n(r.au) },
-          ]),
-        ),
-      ),
+      balanceDrifts: compareBalances(rebuiltRows, toRows(cached.rows)),
+      hierarchyMismatches: hierarchy.value,
+      negativeBuckets: buckets.negativeBuckets,
+      overAllocatedBudgets: buckets.overAllocatedBudgets,
+      tripletMismatches: await this.tripletMismatches(tx),
       planTieMismatches: checkPlanTie(
         plan.rows.map((r) => ({
           planVersionId: r.plan_version_id,
@@ -241,6 +406,27 @@ export class RebuildService {
         resourceType: 'budget',
         resourceId: h.parentId,
         details: h,
+      })),
+      ...s.negativeBuckets.map((b) => ({
+        ...base,
+        kind: 'negative_bucket' as const,
+        resourceType: 'budget',
+        resourceId: b.budgetId,
+        details: b,
+      })),
+      ...s.overAllocatedBudgets.map((b) => ({
+        ...base,
+        kind: 'over_allocated' as const,
+        resourceType: 'budget',
+        resourceId: b.budgetId,
+        details: b,
+      })),
+      ...s.tripletMismatches.map((t) => ({
+        ...base,
+        kind: 'triplet_mismatch' as const,
+        resourceType: 'ledger_line',
+        resourceId: t.lineId,
+        details: t,
       })),
       ...s.planTieMismatches.map((p) => ({
         ...base,

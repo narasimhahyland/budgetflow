@@ -90,9 +90,23 @@ export function journalTotals(
 }
 
 /**
+ * A reporting rounding line: `fx_variance` with a zero transaction amount that absorbs the half-even
+ * rounding of the other lines' reporting amounts, so a journal balanced in its transaction currency
+ * also balances in the reporting currency. It never carries budget value.
+ */
+export function isRoundingLine(l: {
+  account: string;
+  budgetId: string | null;
+  transaction: { amountMinor: number };
+}): boolean {
+  return l.account === 'fx_variance' && l.budgetId === null && l.transaction.amountMinor === 0;
+}
+
+/**
  * Validates a journal: at least two lines, one transaction and one reporting currency, budget
- * buckets carry a budget and a budget amount, counter accounts carry neither, and the journal
- * balances in transaction and reporting currency.
+ * buckets carry a budget and a non-zero budget amount with the transaction's sign, counter accounts
+ * carry neither, only rounding lines have a zero transaction amount, and the journal balances in
+ * transaction and reporting currency.
  */
 export function buildJournal(
   draft: JournalDraft,
@@ -115,6 +129,9 @@ export function buildJournal(
       if (!Number.isSafeInteger(m.amountMinor))
         return err('AMOUNT_NOT_SAFE_INTEGER', `Line ${i + 1} has a non-integer amount.`, where);
     }
+    if (l.transaction.amountMinor === 0 && !isRoundingLine(l)) {
+      return err('JOURNAL_LINE_INVALID', `Line ${i + 1} has a zero amount.`, where);
+    }
     if (isBudgetBucket(l.account)) {
       if (!l.budgetId || !l.budget || !l.budgetRate) {
         return err(
@@ -123,10 +140,14 @@ export function buildJournal(
           where,
         );
       }
-      if (
-        Math.sign(l.budget.amountMinor) !== Math.sign(l.transaction.amountMinor) &&
-        l.budget.amountMinor !== 0
-      ) {
+      if (l.budget.amountMinor === 0) {
+        return err(
+          'AMOUNT_ROUNDS_TO_ZERO',
+          `Line ${i + 1}: the amount converts to less than one minor unit of ${l.budget.currency} at the locked plan rate; enter a larger amount.`,
+          { ...where, currency: l.budget.currency },
+        );
+      }
+      if (Math.sign(l.budget.amountMinor) !== Math.sign(l.transaction.amountMinor)) {
         return err(
           'JOURNAL_LINE_INVALID',
           `Line ${i + 1} has budget and transaction amounts with different signs.`,

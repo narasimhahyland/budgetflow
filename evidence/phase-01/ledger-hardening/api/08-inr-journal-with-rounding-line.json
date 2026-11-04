@@ -1,0 +1,242 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/ledger/journals",
+    "as": "finance.admin@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "transactionCurrency": "INR",
+      "reasonCode": "ADJ-OPENING",
+      "reason": "Opening actual split across three suppliers",
+      "lines": [
+        {
+          "budgetId": "d2870a5f-ccbd-415e-b309-8f9836ecccf6",
+          "account": "actual",
+          "side": "debit",
+          "amountMinor": 300
+        },
+        {
+          "budgetId": null,
+          "account": "obligations",
+          "side": "credit",
+          "amountMinor": 100,
+          "legalEntityId": "20000000-0000-4000-8000-000000000002"
+        },
+        {
+          "budgetId": null,
+          "account": "obligations",
+          "side": "credit",
+          "amountMinor": 100,
+          "legalEntityId": "20000000-0000-4000-8000-000000000002"
+        },
+        {
+          "budgetId": null,
+          "account": "obligations",
+          "side": "credit",
+          "amountMinor": 100,
+          "legalEntityId": "20000000-0000-4000-8000-000000000002"
+        }
+      ]
+    }
+  },
+  "status": 201,
+  "body": {
+    "id": "b699de79-e524-4583-ac77-d82282add409",
+    "type": "manual",
+    "transactionCurrency": "INR",
+    "reportingCurrency": "USD",
+    "accountingDate": "2026-11-04",
+    "periodId": "23000000-0000-4000-8000-022027080000",
+    "periodLabel": "Nov 2026",
+    "late": false,
+    "originalPeriodId": null,
+    "reversalOfJournalId": null,
+    "reversedByJournalId": null,
+    "reasonCode": "ADJ-OPENING",
+    "reason": "Opening actual split across three suppliers",
+    "actorPersonId": "40000000-0000-4000-8000-000000000004",
+    "createdAt": "2026-11-04T17:40:49.877Z",
+    "totals": {
+      "debitTransactionMinor": 300,
+      "creditTransactionMinor": 300,
+      "debitReportingMinor": 4,
+      "creditReportingMinor": 4
+    },
+    "balanced": true,
+    "lines": [
+      {
+        "id": "d7c3c45e-00c1-40b4-8924-94c214af4f62",
+        "journalId": "b699de79-e524-4583-ac77-d82282add409",
+        "lineNo": 1,
+        "budgetId": "d2870a5f-ccbd-415e-b309-8f9836ecccf6",
+        "account": "actual",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "costCenterId": null,
+        "glAccountId": null,
+        "eventCode": null,
+        "periodId": "23000000-0000-4000-8000-022027080000",
+        "accountingDate": "2026-11-04",
+        "transaction": {
+          "amountMinor": 300,
+          "currency": "INR"
+        },
+        "budget": {
+          "amountMinor": 300,
+          "currency": "INR"
+        },
+        "reporting": {
+          "amountMinor": 4,
+          "currency": "USD"
+        },
+        "budgetRate": {
+          "type": "plan",
+          "from": "INR",
+          "to": "INR",
+          "value": "1.000000000000",
+          "rateIds": []
+        },
+        "reportingRate": {
+          "type": "plan",
+          "from": "INR",
+          "to": "USD",
+          "value": "0.012012012012",
+          "rateIds": ["24000000-0000-4000-8000-000000000100"]
+        },
+        "planVersionId": null,
+        "reversalOfLineId": null
+      },
+      {
+        "id": "e601658c-46b4-4438-9505-09289969c4f7",
+        "journalId": "b699de79-e524-4583-ac77-d82282add409",
+        "lineNo": 2,
+        "budgetId": null,
+        "account": "obligations",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "costCenterId": null,
+        "glAccountId": null,
+        "eventCode": null,
+        "periodId": "23000000-0000-4000-8000-022027080000",
+        "accountingDate": "2026-11-04",
+        "transaction": {
+          "amountMinor": -100,
+          "currency": "INR"
+        },
+        "budget": null,
+        "reporting": {
+          "amountMinor": -1,
+          "currency": "USD"
+        },
+        "budgetRate": null,
+        "reportingRate": {
+          "type": "plan",
+          "from": "INR",
+          "to": "USD",
+          "value": "0.012012012012",
+          "rateIds": ["24000000-0000-4000-8000-000000000100"]
+        },
+        "planVersionId": null,
+        "reversalOfLineId": null
+      },
+      {
+        "id": "4c36ddf8-7ee4-465a-b14c-d94f68056ab0",
+        "journalId": "b699de79-e524-4583-ac77-d82282add409",
+        "lineNo": 3,
+        "budgetId": null,
+        "account": "obligations",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "costCenterId": null,
+        "glAccountId": null,
+        "eventCode": null,
+        "periodId": "23000000-0000-4000-8000-022027080000",
+        "accountingDate": "2026-11-04",
+        "transaction": {
+          "amountMinor": -100,
+          "currency": "INR"
+        },
+        "budget": null,
+        "reporting": {
+          "amountMinor": -1,
+          "currency": "USD"
+        },
+        "budgetRate": null,
+        "reportingRate": {
+          "type": "plan",
+          "from": "INR",
+          "to": "USD",
+          "value": "0.012012012012",
+          "rateIds": ["24000000-0000-4000-8000-000000000100"]
+        },
+        "planVersionId": null,
+        "reversalOfLineId": null
+      },
+      {
+        "id": "8c69b02e-60cb-432a-8548-ef77a56ab1a7",
+        "journalId": "b699de79-e524-4583-ac77-d82282add409",
+        "lineNo": 4,
+        "budgetId": null,
+        "account": "obligations",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "costCenterId": null,
+        "glAccountId": null,
+        "eventCode": null,
+        "periodId": "23000000-0000-4000-8000-022027080000",
+        "accountingDate": "2026-11-04",
+        "transaction": {
+          "amountMinor": -100,
+          "currency": "INR"
+        },
+        "budget": null,
+        "reporting": {
+          "amountMinor": -1,
+          "currency": "USD"
+        },
+        "budgetRate": null,
+        "reportingRate": {
+          "type": "plan",
+          "from": "INR",
+          "to": "USD",
+          "value": "0.012012012012",
+          "rateIds": ["24000000-0000-4000-8000-000000000100"]
+        },
+        "planVersionId": null,
+        "reversalOfLineId": null
+      },
+      {
+        "id": "83f92200-d528-4071-9878-7f91691c9470",
+        "journalId": "b699de79-e524-4583-ac77-d82282add409",
+        "lineNo": 5,
+        "budgetId": null,
+        "account": "fx_variance",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "costCenterId": null,
+        "glAccountId": null,
+        "eventCode": null,
+        "periodId": "23000000-0000-4000-8000-022027080000",
+        "accountingDate": "2026-11-04",
+        "transaction": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "budget": null,
+        "reporting": {
+          "amountMinor": -1,
+          "currency": "USD"
+        },
+        "budgetRate": null,
+        "reportingRate": {
+          "type": "plan",
+          "from": "INR",
+          "to": "USD",
+          "value": "0.012012012012",
+          "rateIds": ["24000000-0000-4000-8000-000000000100"]
+        },
+        "planVersionId": null,
+        "reversalOfLineId": null
+      }
+    ]
+  }
+}

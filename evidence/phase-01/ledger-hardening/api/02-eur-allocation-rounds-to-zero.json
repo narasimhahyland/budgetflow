@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/budgets/c55492c1-fe45-4852-b61f-899dfc4c8f8c/allocations",
+    "as": "ceo@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "childBudgetId": "1892b956-2d97-406c-a3a2-7f57989f3061",
+      "amount": {
+        "amountMinor": 1,
+        "currency": "USD"
+      }
+    }
+  },
+  "status": 422,
+  "body": {
+    "type": "urn:budgetflow:problem:amount-rounds-to-zero",
+    "title": "Amount rounds to zero",
+    "status": 422,
+    "code": "AMOUNT_ROUNDS_TO_ZERO",
+    "detail": "The amount converts to less than one minor unit of EUR at the locked plan rate; enter a larger amount.",
+    "instance": "/api/budgets/c55492c1-fe45-4852-b61f-899dfc4c8f8c/allocations",
+    "params": {
+      "currency": "EUR"
+    }
+  }
+}

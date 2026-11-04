@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/budgets/c55492c1-fe45-4852-b61f-899dfc4c8f8c/allocations",
+    "as": "ceo@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "childBudgetId": "d2870a5f-ccbd-415e-b309-8f9836ecccf6",
+      "amount": {
+        "amountMinor": 100,
+        "currency": "USD"
+      },
+      "accountingDate": "2028-06-15"
+    }
+  },
+  "status": 422,
+  "body": {
+    "type": "urn:budgetflow:problem:accounting-date-outside-fiscal-year",
+    "title": "Accounting date outside fiscal year",
+    "status": 422,
+    "code": "ACCOUNTING_DATE_OUTSIDE_FISCAL_YEAR",
+    "detail": "2028-06-15 is outside FY2026 (2026-01-01 to 2026-12-31); post within the budget's fiscal year.",
+    "instance": "/api/budgets/c55492c1-fe45-4852-b61f-899dfc4c8f8c/allocations",
+    "params": {
+      "accountingDate": "2028-06-15",
+      "fiscalYear": "FY2026",
+      "startDate": "2026-01-01",
+      "endDate": "2026-12-31"
+    }
+  }
+}

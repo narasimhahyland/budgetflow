@@ -1,0 +1,40 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/ledger/journals",
+    "as": "finance.admin@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "transactionCurrency": "USD",
+      "reasonCode": "ADJ-CORRECTION",
+      "reason": "Move held from one budget to another",
+      "lines": [
+        {
+          "budgetId": "c55492c1-fe45-4852-b61f-899dfc4c8f8c",
+          "account": "held",
+          "side": "debit",
+          "amountMinor": 100
+        },
+        {
+          "budgetId": "d2870a5f-ccbd-415e-b309-8f9836ecccf6",
+          "account": "held",
+          "side": "credit",
+          "amountMinor": 100
+        }
+      ]
+    }
+  },
+  "status": 422,
+  "body": {
+    "type": "urn:budgetflow:problem:manual-journal-needs-counter-account",
+    "title": "Manual journal needs counter account",
+    "status": 422,
+    "code": "MANUAL_JOURNAL_NEEDS_COUNTER_ACCOUNT",
+    "detail": "A manual journal cannot move amounts between budgets or buckets: put every budget line on the same side and offset it with counter accounts. Allocations and commitments have their own commands.",
+    "instance": "/api/ledger/journals"
+  }
+}

@@ -1,0 +1,35 @@
+# Reviewer probes after the fix (branch fix/p1-ledger-hardening), same stack
+[probe] N append to committed journal (rolled back): {"code":"BF001","message":"ledger_lines: journal f739c933-8204-4f48-9e32-112c1d9258c3 was not created in this transaction; lines are written with their journal and corrections are reversals"}
+[probe] L rebuild check: {"status":"clean","flagsRaised":0,"unbalanced":0,"drifts":0,"hierarchy":0,"planTie":0,"auditChain":{"valid":true,"checked":537,"firstBrokenSeq":null},"budgetsChecked":249,"journalsChecked":393}
+[probe] M audit verification: {"before":{"valid":true,"checked":19,"firstBrokenSeq":null,"reason":null,"verifiedAt":"2026-11-04T17:41:12.312Z"},"chainHeadLastSeq":19,"withNewestDeleted":{"valid":false,"checked":18,"firstBrokenSeq":19,"reason":"the chain ends at 18 but its head records 19","verifiedAt":"2026-11-04T17:41:12.345Z"},"restored":{"valid":true,"checked":19,"firstBrokenSeq":null,"reason":null,"verifiedAt":"2026-11-04T17:41:12.361Z"}}
+[probe] A parent allocationAvailable before: {"amountMinor":0,"currency":"USD"}
+[probe] A 5x INR 0.41 from exhausted USD parent: [{"status":409,"code":"OVER_ALLOCATION"},{"status":409,"code":"OVER_ALLOCATION"},{"status":409,"code":"OVER_ALLOCATION"},{"status":409,"code":"OVER_ALLOCATION"},{"status":409,"code":"OVER_ALLOCATION"}]
+[probe] A KWD 0.001 from exhausted USD parent: {"status":409,"code":"OVER_ALLOCATION"}
+[probe] A INR 0.42 (rounds to 1 cent): {"status":409,"code":"OVER_ALLOCATION"}
+[probe] A parent after: {"authorized":{"amountMinor":10000,"currency":"USD"},"allocatedOut":{"amountMinor":10000,"currency":"USD"},"allocationAvailable":{"amountMinor":0,"currency":"USD"}}
+[probe] A INR child authorized: {"amountMinor":832500,"currency":"INR"}
+[probe] A KWD child authorized: {"amountMinor":0,"currency":"KWD"}
+[probe] A ids: {"root":"6f6c7e97-cecf-4c82-be88-d2b37e44d3a8","india":"6b05a6f5-67e9-45e6-a9f7-dc75be92e089","kwd":"e1bd766e-1589-41c5-965f-096d048f0e8d"}
+[probe] B accepted allocations of INR 1.24: 50
+[probe] B parent: {"authorized":{"amountMinor":100,"currency":"USD"},"allocatedOut":{"amountMinor":100,"currency":"USD"}}
+[probe] B child authorized: {"amountMinor":6200,"currency":"INR"}
+[probe] B child authorized valued at plan (USD cents): "74.47"
+[probe] B ids: {"root":"26718602-b91e-48c5-af52-e78c6b04a81d","india":"0b825f19-fa13-40d9-9a81-40f40be942b9"}
+[probe] C manual journal credit actual 500.00 (no prior actual): {"status":409,"code":"NEGATIVE_BUCKET_BALANCE"}
+[probe] C root after journal: {"authorized":{"amountMinor":100000,"currency":"USD"},"actual":{"amountMinor":0,"currency":"USD"},"available":{"amountMinor":100000,"currency":"USD"},"allocationAvailable":{"amountMinor":100000,"currency":"USD"}}
+[probe] C allocate 1,500.00 from a 1,000.00 root: {"status":409,"code":"OVER_ALLOCATION"}
+[probe] C root/child after: {"rootAuthorized":{"amountMinor":100000,"currency":"USD"},"rootAllocatedOut":{"amountMinor":0,"currency":"USD"},"childAuthorized":{"amountMinor":0,"currency":"USD"}}
+[probe] C ids: {"root":"a985d851-b382-4b76-bb20-e5d52dd1227c","child":"d04cf738-b346-492e-b709-73f47a32dd2e"}
+[probe] C2 held moved A->B: {"status":422,"code":"MANUAL_JOURNAL_NEEDS_COUNTER_ACCOUNT"}
+[probe] C2 B after: {"authorized":{"amountMinor":10000,"currency":"USD"},"held":{"amountMinor":0,"currency":"USD"},"available":{"amountMinor":10000,"currency":"USD"}}
+[probe] D FY2026 allocation dated 2028-06-15: {"status":422,"code":"ACCOUNTING_DATE_OUTSIDE_FISCAL_YEAR"}
+[probe] E reversal/allocation statuses per round: ["201/409","409/201","409/201","409/201","409/201","201/409","409/201","201/409"]
+[probe] F statuses: ["201:ok","409:ALREADY_REVERSED","409:ALREADY_REVERSED","409:ALREADY_REVERSED","409:ALREADY_REVERSED","409:ALREADY_REVERSED","409:ALREADY_REVERSED","409:ALREADY_REVERSED","409:ALREADY_REVERSED","409:ALREADY_REVERSED"]
+[probe] G statuses: {"allocate":201,"replay":201,"replayHeader":"true","rejected":409,"manual":201,"manualUnbalanced":422,"reversal":201,"reversalAgain":409}
+[probe] G audit chain delta (expected 5): {"before":644,"after":649,"valid":true}
+[probe] H: {"first":201,"otherUser":[422,"IDEMPOTENCY_KEY_REUSED"],"otherOp":[400,"VALIDATION_FAILED"]}
+[probe] I Acme child referencing Globex cost center, org unit and person: {"status":422,"code":"VALIDATION_FAILED"}
+[probe] J: {"zero":"422:AMOUNT_NOT_POSITIVE","negative":"422:AMOUNT_NOT_POSITIVE","fraction":"400:VALIDATION_FAILED","unsafe":"400:VALIDATION_FAILED","lowercase":"400:VALIDATION_FAILED","other currency":"422:CURRENCY_MISMATCH","string amount":"400:VALIDATION_FAILED"}
+[probe] K: {"alloc":201,"readAsIndiaManager":404,"reverseAsIndiaManager":403,"reverseUnknownAsIndiaManager":403}
+[probe] O balanced INR split: {"status":201}
+  16 passed (4.4s)

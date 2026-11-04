@@ -1,4 +1,13 @@
-import { index, integer, pgTable, text, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  index,
+  integer,
+  pgTable,
+  text,
+  unique,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { createdAt, day, pk, tenantRef, validFrom, validTo } from './_columns';
 import { employmentType, orgUnitKind, reportingLineKind } from './enums';
 import { legalEntities } from './finance';
@@ -23,6 +32,7 @@ export const orgUnits = pgTable(
   (t) => [
     index('org_units_tenant_parent').on(t.tenantId, t.parentId),
     uniqueIndex('org_units_tenant_code_from').on(t.tenantId, t.code, t.validFrom),
+    unique('org_units_tenant_id_key').on(t.tenantId, t.id),
   ],
 );
 
@@ -62,7 +72,10 @@ export const costCenters = pgTable(
     validFrom: validFrom(),
     validTo: validTo(),
   },
-  (t) => [uniqueIndex('cost_centers_tenant_code').on(t.tenantId, t.code)],
+  (t) => [
+    uniqueIndex('cost_centers_tenant_code').on(t.tenantId, t.code),
+    unique('cost_centers_tenant_id_key').on(t.tenantId, t.id),
+  ],
 );
 
 export const people = pgTable(
@@ -83,7 +96,10 @@ export const people = pgTable(
     endDate: day('end_date'),
     createdAt: createdAt(),
   },
-  (t) => [uniqueIndex('people_tenant_email').on(t.tenantId, t.email)],
+  (t) => [
+    uniqueIndex('people_tenant_email').on(t.tenantId, t.email),
+    unique('people_tenant_id_key').on(t.tenantId, t.id),
+  ],
 );
 
 export const reportingLines = pgTable(

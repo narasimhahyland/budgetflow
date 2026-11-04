@@ -1,0 +1,46 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/ledger/journals",
+    "as": "finance.admin@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "transactionCurrency": "USD",
+      "reasonCode": "ADJ-CORRECTION",
+      "reason": "Credit actual with nothing posted",
+      "lines": [
+        {
+          "budgetId": "c55492c1-fe45-4852-b61f-899dfc4c8f8c",
+          "account": "actual",
+          "side": "credit",
+          "amountMinor": 500
+        },
+        {
+          "budgetId": null,
+          "account": "obligations",
+          "side": "debit",
+          "amountMinor": 500,
+          "legalEntityId": "20000000-0000-4000-8000-000000000001"
+        }
+      ]
+    }
+  },
+  "status": 409,
+  "body": {
+    "type": "urn:budgetflow:problem:negative-bucket-balance",
+    "title": "Negative bucket balance",
+    "status": 409,
+    "code": "NEGATIVE_BUCKET_BALANCE",
+    "detail": "This would leave the budget's actual below zero.",
+    "instance": "/api/ledger/journals",
+    "params": {
+      "budgetId": "c55492c1-fe45-4852-b61f-899dfc4c8f8c",
+      "bucket": "actual",
+      "balanceMinor": -500
+    }
+  }
+}

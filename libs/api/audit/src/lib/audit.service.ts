@@ -91,8 +91,15 @@ export class AuditService {
     return { id: row.id, seq: row.seq, hash: row.hash };
   }
 
-  /** Walks the tenant's chain in batches and reports the first broken link (tenant context set by the caller). */
+  /**
+   * Walks the tenant's chain in batches and reports the first broken link, then checks that the chain
+   * ends where the tenant's chain head says it does, so removing the newest events is detected
+   * (tenant context set by the caller).
+   */
   async verify(tx: Tx): Promise<ChainVerification> {
+    // The head is read before the events: it is written in the same transaction as its event, so every
+    // event up to the head is visible to the walk even while other requests keep appending.
+    const [head] = await tx.select().from(auditChainHeads);
     const events: StoredAuditEvent[] = [];
     let after = 0;
     for (;;) {
@@ -106,7 +113,26 @@ export class AuditService {
       for (const r of batch) events.push({ ...toPayload(r), prevHash: r.prevHash, hash: r.hash });
       after = batch[batch.length - 1].seq;
     }
-    return verifyAuditChain(events, sha256Hex);
+    const chain = verifyAuditChain(events, sha256Hex);
+    if (!chain.valid || !head || head.lastSeq === 0) return chain;
+    const atHead = events[head.lastSeq - 1];
+    if (!atHead) {
+      return {
+        valid: false,
+        checked: chain.checked,
+        firstBrokenSeq: events.length + 1,
+        reason: `the chain ends at ${events.length} but its head records ${head.lastSeq}`,
+      };
+    }
+    if (atHead.hash !== head.lastHash) {
+      return {
+        valid: false,
+        checked: head.lastSeq - 1,
+        firstBrokenSeq: head.lastSeq,
+        reason: 'the event at the chain head does not match the head hash',
+      };
+    }
+    return chain;
   }
 
   async count(tx: Tx): Promise<number> {

@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/budgets",
+    "as": "ceo@example.test",
+    "headers": {
+      "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+      "idempotency-key": "<uuid>",
+      "authorization": "Bearer <redacted>"
+    },
+    "body": {
+      "name": "Evidence child with another tenant cost center",
+      "parentId": "c55492c1-fe45-4852-b61f-899dfc4c8f8c",
+      "legalEntityId": "20000000-0000-4000-8000-000000000001",
+      "currency": "USD",
+      "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+      "costCenterId": "31000000-0000-4000-8000-000000000006"
+    }
+  },
+  "status": 422,
+  "body": {
+    "type": "urn:budgetflow:problem:validation-failed",
+    "title": "Validation failed",
+    "status": 422,
+    "code": "VALIDATION_FAILED",
+    "detail": "The cost center does not exist.",
+    "instance": "/api/budgets",
+    "params": {
+      "field": "costCenterId"
+    }
+  }
+}
