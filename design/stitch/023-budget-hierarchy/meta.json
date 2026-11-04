@@ -1,0 +1,23 @@
+{
+  "screen": "023-budget-hierarchy",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/78e9e80886724ba799cba008d430c342",
+      "approved": null,
+      "size": [
+        2560,
+        2048
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "set-to-zero-dialog--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/2ebc666182144346a80d9339d3f15954",
+      "approved": null,
+      "size": [
+        2560,
+        2048
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

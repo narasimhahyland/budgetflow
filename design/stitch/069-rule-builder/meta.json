@@ -1,0 +1,23 @@
+{
+  "screen": "069-rule-builder",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/bbb72843f67d43a087e8308adcf569d7",
+      "approved": null,
+      "size": [
+        2560,
+        3058
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "conflict-simulation--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/1ca57659dc784b79a69e2df2134f8cf5",
+      "approved": null,
+      "size": [
+        2560,
+        3122
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

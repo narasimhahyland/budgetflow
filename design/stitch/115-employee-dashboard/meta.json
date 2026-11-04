@@ -1,0 +1,23 @@
+{
+  "screen": "115-employee-dashboard",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/b42ff3f7211c4f85bd165d75d9aa1e8f",
+      "approved": null,
+      "size": [
+        2560,
+        2048
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "blocked--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/5b64f85e79c247009adbdf8be059cf88",
+      "approved": null,
+      "size": [
+        2560,
+        2086
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
