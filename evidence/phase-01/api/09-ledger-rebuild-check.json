@@ -1,0 +1,50 @@
+{
+  "queued": {
+    "status": 202,
+    "body": {
+      "id": "75178867-7a18-4888-8ad3-2f913c4c38df",
+      "kind": "ledger_rebuild",
+      "status": "queued",
+      "requestedAt": "2026-11-04T16:48:46.989Z",
+      "startedAt": null,
+      "finishedAt": null,
+      "flagsRaised": 0,
+      "summary": null
+    }
+  },
+  "result": {
+    "request": {
+      "method": "GET",
+      "path": "/api/integrity/ledger-checks/75178867-7a18-4888-8ad3-2f913c4c38df",
+      "as": "finance.controller@example.test",
+      "headers": {
+        "x-tenant-id": "10000000-0000-4000-8000-000000000001",
+        "authorization": "Bearer <redacted>"
+      }
+    },
+    "status": 200,
+    "body": {
+      "id": "75178867-7a18-4888-8ad3-2f913c4c38df",
+      "kind": "ledger_rebuild",
+      "status": "clean",
+      "requestedAt": "2026-11-04T16:48:46.989Z",
+      "startedAt": "2026-11-04T16:48:49.191Z",
+      "finishedAt": "2026-11-04T16:48:49.207Z",
+      "flagsRaised": 0,
+      "summary": {
+        "auditChain": {
+          "valid": true,
+          "checked": 126,
+          "firstBrokenSeq": null
+        },
+        "linesChecked": 180,
+        "balanceDrifts": [],
+        "budgetsChecked": 70,
+        "journalsChecked": 83,
+        "planTieMismatches": [],
+        "unbalancedJournals": [],
+        "hierarchyMismatches": []
+      }
+    }
+  }
+}
