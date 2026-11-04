@@ -100,6 +100,9 @@ export const approvalInstances = pgTable(
     workflowTemplateId: uuid('workflow_template_id'),
     status: approvalStatus('status').notNull().default('pending'),
     explanation: jsonb('explanation').notNull().default({}),
+    /** Version of the subject the route was built for; email links bind to it. */
+    subjectVersion: integer('subject_version').notNull().default(1),
+    currentStep: integer('current_step').notNull().default(1),
     createdAt: createdAt(),
     completedAt: ts('completed_at'),
   },
@@ -122,9 +125,17 @@ export const approvalTasks = pgTable(
     status: approvalStatus('status').notNull().default('pending'),
     dueAt: ts('due_at'),
     escalatedFromTaskId: uuid('escalated_from_task_id'),
+    /** Why this person holds the step (hierarchy, escalation, finance review). */
+    reason: text('reason'),
+    doaLimitMinor: minor('doa_limit_minor'),
+    doaCurrency: ccy('doa_currency').references(() => currencies.code),
+    decidedAt: ts('decided_at'),
     createdAt: createdAt(),
   },
-  (t) => [index('approval_tasks_assignee').on(t.tenantId, t.assigneePersonId, t.status)],
+  (t) => [
+    index('approval_tasks_assignee').on(t.tenantId, t.assigneePersonId, t.status),
+    index('approval_tasks_instance').on(t.tenantId, t.instanceId, t.stepNo),
+  ],
 );
 
 export const approvalActions = pgTable(
@@ -142,6 +153,8 @@ export const approvalActions = pgTable(
     action: varchar('action', { length: 30 }).notNull(),
     approvedMinor: minor('approved_minor'),
     reason: text('reason'),
+    reasonCode: varchar('reason_code', { length: 50 }),
+    noConflictAttested: boolean('no_conflict_attested').notNull().default(false),
     channel: approvalChannel('channel').notNull().default('web'),
     createdAt: createdAt(),
   },

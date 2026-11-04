@@ -174,7 +174,13 @@ export const rechargeSchedules = pgTable(
     status: rechargeStatus('status').notNull().default('proposed'),
     duePeriodId: uuid('due_period_id').references(() => fiscalPeriods.id),
     journalId: uuid('journal_id'),
+    markupBps: integer('markup_bps').notNull().default(0),
+    taxApproverPersonId: uuid('tax_approver_person_id'),
+    taxApprovedAt: ts('tax_approved_at'),
     createdAt: createdAt(),
   },
-  (t) => [index('recharge_schedules_tenant').on(t.tenantId, t.status)],
+  (t) => [
+    index('recharge_schedules_tenant').on(t.tenantId, t.status),
+    index('recharge_schedules_event').on(t.tenantId, t.eventId),
+  ],
 );
