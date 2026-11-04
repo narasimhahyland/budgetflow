@@ -49,50 +49,50 @@
   },
   {
     "page": "011-executive-dashboard--default",
-    "mode": "html",
-    "linked": 20,
-    "notDesigned": 9
+    "mode": "image",
+    "linked": 26,
+    "notDesigned": 0
   },
   {
     "page": "011-executive-dashboard--loading",
-    "mode": "html",
-    "linked": 20,
-    "notDesigned": 9
+    "mode": "image",
+    "linked": 22,
+    "notDesigned": 0
   },
   {
     "page": "011-executive-dashboard--empty",
     "mode": "image",
-    "linked": 21,
+    "linked": 22,
     "notDesigned": 0
   },
   {
     "page": "011-executive-dashboard--error",
-    "mode": "html",
-    "linked": 22,
-    "notDesigned": 9
+    "mode": "image",
+    "linked": 27,
+    "notDesigned": 0
   },
   {
     "page": "020-create-budget--default",
-    "mode": "html",
+    "mode": "image",
     "linked": 19,
-    "notDesigned": 18
+    "notDesigned": 0
   },
   {
     "page": "021-budget-details--default",
-    "mode": "html",
-    "linked": 22,
-    "notDesigned": 14
+    "mode": "image",
+    "linked": 20,
+    "notDesigned": 0
   },
   {
     "page": "022-budget-allocation-workspace--default",
     "mode": "image",
-    "linked": 22,
+    "linked": 23,
     "notDesigned": 0
   },
   {
     "page": "022-budget-allocation-workspace--warning-block",
     "mode": "image",
-    "linked": 21,
+    "linked": 22,
     "notDesigned": 0
   },
   {
@@ -103,15 +103,15 @@
   },
   {
     "page": "023-budget-hierarchy--default",
-    "mode": "html",
+    "mode": "image",
     "linked": 27,
-    "notDesigned": 13
+    "notDesigned": 0
   },
   {
     "page": "023-budget-hierarchy--set-to-zero-dialog",
-    "mode": "html",
-    "linked": 29,
-    "notDesigned": 14
+    "mode": "image",
+    "linked": 20,
+    "notDesigned": 0
   },
   {
     "page": "024-allocate-to-child--default",
@@ -128,7 +128,7 @@
   {
     "page": "024a-per-head-driver-allocation--default",
     "mode": "image",
-    "linked": 19,
+    "linked": 22,
     "notDesigned": 0
   },
   {
@@ -145,9 +145,9 @@
   },
   {
     "page": "027-freeze-budget--dialog",
-    "mode": "html",
-    "linked": 21,
-    "notDesigned": 18
+    "mode": "image",
+    "linked": 4,
+    "notDesigned": 0
   },
   {
     "page": "028-set-to-zero--dialog",
@@ -223,21 +223,21 @@
   },
   {
     "page": "059-approval-inbox--default",
-    "mode": "html",
+    "mode": "image",
     "linked": 24,
-    "notDesigned": 25
+    "notDesigned": 0
   },
   {
     "page": "059-approval-inbox--empty",
     "mode": "image",
-    "linked": 21,
+    "linked": 20,
     "notDesigned": 0
   },
   {
     "page": "059-approval-inbox--delegated-escalated",
-    "mode": "html",
-    "linked": 22,
-    "notDesigned": 21
+    "mode": "image",
+    "linked": 21,
+    "notDesigned": 0
   },
   {
     "page": "060-request-details--default",
@@ -266,14 +266,14 @@
   {
     "page": "069-rule-builder--default",
     "mode": "image",
-    "linked": 15,
+    "linked": 18,
     "notDesigned": 0
   },
   {
     "page": "069-rule-builder--conflict-simulation",
-    "mode": "html",
-    "linked": 15,
-    "notDesigned": 17
+    "mode": "image",
+    "linked": 21,
+    "notDesigned": 0
   },
   {
     "page": "080a-actuals-import--default",
@@ -308,7 +308,7 @@
   {
     "page": "088-audit-log--chain-broken",
     "mode": "image",
-    "linked": 20,
+    "linked": 22,
     "notDesigned": 0
   },
   {
