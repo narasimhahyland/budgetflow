@@ -52,8 +52,14 @@ export async function freshTotp(): Promise<string> {
 /** Fills the BudgetFlow sign-in page (Keycloak) and submits. */
 export async function submitSignIn(page: Page, user: SeedUserId, pass = password()): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Sign in to your account' })).toBeVisible();
-  await page.getByLabel(/username or email/i).fill(userById(user).username);
-  await page.getByLabel('Password', { exact: true }).fill(pass);
+  // Keycloak's page scripts may reload a fresh form right after load; type only once it has settled.
+  await page.waitForLoadState('networkidle');
+  const username = page.getByLabel(/username or email/i);
+  const passwordField = page.getByLabel('Password', { exact: true });
+  await username.fill(userById(user).username);
+  await passwordField.fill(pass);
+  await expect(username).toHaveValue(userById(user).username);
+  await expect(passwordField).toHaveValue(pass);
   await page.getByRole('button', { name: 'Sign In' }).click();
 }
 

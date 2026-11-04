@@ -13,19 +13,20 @@ test('sign-in and navigation send product analytics events the API accepts', asy
 
   await page.goto('/');
   const first = page.waitForResponse((r) => isBatch(r.request()));
-  await submitSignIn(page, 'analyst');
+  // A user no other fresh-sign-in journey uses, so parallel journeys never share its sign-in.
+  await submitSignIn(page, 'integration-admin');
   await expectShell(page);
   const res = await first;
   expect(res.status()).toBe(202);
   expect(((await res.json()) as { accepted: number }).accepted).toBeGreaterThan(0);
 
   const second = page.waitForResponse((r) => isBatch(r.request()));
-  await page.getByRole('menuitem', { name: 'Reports' }).click();
+  await page.getByRole('menuitem', { name: 'Integrations' }).click();
   expect((await second).status()).toBe(202);
 
   expect(seen.map((e) => e.name)).toContain('session.started');
   expect(seen).toContainEqual(
-    expect.objectContaining({ name: 'page.viewed', properties: { route: '/reports' } }),
+    expect.objectContaining({ name: 'page.viewed', properties: { route: '/admin/integrations' } }),
   );
-  for (const e of seen) expect(JSON.stringify(e.properties ?? {})).not.toMatch(/Mei|Chen|@/);
+  for (const e of seen) expect(JSON.stringify(e.properties ?? {})).not.toMatch(/Omar|Haddad|@/);
 });
