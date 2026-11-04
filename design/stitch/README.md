@@ -1,6 +1,6 @@
 # Approved Stitch designs
 
-Approved Stitch exports that implemented screens are compared against (design parity in the visual QA loop). Only approved designs go here.
+Approved Stitch exports that implemented screens are compared against (design parity in the visual QA loop). Proposed designs are exported here too so implementation can start early: their `meta.json` entries have `"approved": null` and `"status": "proposed - awaiting user review"` until the user approves them (see `docs/ux/review-log.md`). Light theme only for now; dark theme is deferred.
 
 ## Layout
 ```text

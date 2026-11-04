@@ -1,0 +1,14 @@
+{
+  "screen": "000-design-system",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/5d02c6a4235a47d7968986b9629e76b9",
+      "approved": null,
+      "size": [
+        2560,
+        12866
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
