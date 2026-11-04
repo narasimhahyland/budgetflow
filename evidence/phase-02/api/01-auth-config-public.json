@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/auth/config",
+    "as": "anonymous"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "issuer": "http://localhost:8090/realms/budgetflow",
+      "clientId": "budgetflow-web"
+    }
+  }
+}

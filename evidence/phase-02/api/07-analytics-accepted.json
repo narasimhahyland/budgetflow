@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/analytics/events",
+    "as": "analyst",
+    "body": {
+      "events": [
+        {
+          "id": "70a16bed-20f7-4b0b-8414-3abc153434cd",
+          "name": "session.started"
+        },
+        {
+          "id": "b3cdf575-3c38-4dff-af3b-fb17eed0ec77",
+          "name": "page.viewed",
+          "properties": {
+            "route": "/reports"
+          }
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 202,
+    "body": {
+      "accepted": 2,
+      "duplicates": 0
+    }
+  }
+}

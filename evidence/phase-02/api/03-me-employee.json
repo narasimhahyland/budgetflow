@@ -1,0 +1,59 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/me",
+    "as": "employee"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "subject": "50000000-0000-4000-8000-000000000011",
+      "tenantId": "10000000-0000-4000-8000-000000000001",
+      "tenantName": "Hyland",
+      "reportingCurrency": "USD",
+      "personId": "40000000-0000-4000-8000-000000000011",
+      "displayName": "Arjun Das",
+      "roles": ["employee"],
+      "memberships": [
+        {
+          "tenantId": "10000000-0000-4000-8000-000000000001",
+          "tenantName": "Hyland",
+          "roles": ["employee"]
+        }
+      ],
+      "email": "employee@example.test",
+      "jobTitle": "Software engineer",
+      "locationName": "Hyderabad",
+      "timezone": "Asia/Kolkata",
+      "tenantTimezone": "America/New_York",
+      "permissions": ["tenant.read", "request.create"],
+      "platformOperator": false,
+      "fiscalYears": [
+        {
+          "id": "22000000-0000-4000-8000-012025000000",
+          "label": "FY2025",
+          "startDate": "2025-01-01",
+          "endDate": "2025-12-31"
+        },
+        {
+          "id": "22000000-0000-4000-8000-012026000000",
+          "label": "FY2026",
+          "startDate": "2026-01-01",
+          "endDate": "2026-12-31"
+        },
+        {
+          "id": "22000000-0000-4000-8000-012027000000",
+          "label": "FY2027",
+          "startDate": "2027-01-01",
+          "endDate": "2027-12-31"
+        },
+        {
+          "id": "22000000-0000-4000-8000-012028000000",
+          "label": "FY2028",
+          "startDate": "2028-01-01",
+          "endDate": "2028-12-31"
+        }
+      ]
+    }
+  }
+}
