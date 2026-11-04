@@ -2,7 +2,7 @@
 
 - Commit: see `gate-summary.txt` on `feat/p2-shell-auth`, reviewed 2026-11-04
 - Scope: plan todo `p2-shell-auth` — Keycloak realm with seeded users for all 14 roles in the single Hyland tenant, OIDC sign-in with PKCE, SSO (Hyland SSO broker and SSO session reuse), MFA (TOTP), forgot password, Satori shell with the company name only (no tenant or organization switcher), role-aware navigation, guards, unauthorized/forbidden/error states, money/number/date formatting (currency code, lakh/crore for INR, user timezone), product analytics pipeline. Screens: 000a shell; 001-004 rendered by Keycloak with the BudgetFlow theme. Also: ADR 0006 (Nov 2026 product decisions) and the harness seed wording.
-- Result: **passed with follow-ups** — every gate passes (`gate-summary.txt`), 110 API scenarios and 92 journeys (plus 14 sign-ins) green, visual QA ends with no blocking findings, both reviewers' blockers fixed. Screens 5, 8, 10, 102-104 and 124 are not built: they have no Stitch design (see Follow-ups).
+- Result: **passed with follow-ups** — every gate passes (`gate-summary.txt`), 133 API scenarios and 92 journeys (plus 14 sign-ins) green, visual QA ends with no blocking findings, both reviewers' blockers fixed. Screens 5, 8, 10, 102-104 and 124 are not built: they have no Stitch design (see Follow-ups).
 
 ## Gates
 
@@ -16,7 +16,7 @@
 | Build (api, worker, web)                              | PASS (web initial bundle 1.95 MB is over the 1.5 MB warning budget, under the 3 MB error) | gate-summary.txt                                  |
 | OpenAPI drift, migration check                        | PASS (no migration in this phase)                                                         | gate-summary.txt                                  |
 | Local stack reset and deterministic seed              | PASS                                                                                      | gate-summary.txt                                  |
-| Functional API scenarios (apps/api-e2e)               | PASS (110 scenarios: 56 Phase 1 + 54 Phase 2)                                             | gate-summary.txt, shell-auth/functional/README.md |
+| Functional API scenarios (apps/api-e2e)               | PASS (133 scenarios: 79 Phase 1 incl. the ledger hardening merged to main + 54 Phase 2)   | gate-summary.txt, shell-auth/functional/README.md |
 | Functional journeys (apps/web-e2e)                    | PASS (92 journeys on desktop, tablet, mobile after 14 real sign-ins)                      | gate-summary.txt, shell-auth/functional/README.md |
 | Visual regression (pinned Playwright image)           | PASS (33 baselines)                                                                       | gate-summary.txt, visual-qa/report.md             |
 | Harness validation (`sh scripts/validate-harness.sh`) | PASS                                                                                      | command output in the PR                          |
@@ -41,7 +41,7 @@
 
 ## Invariant coverage
 
-Rows 17 and 18 in `docs/testing/invariant-scenarios.md` now also cite the Phase 2 scenarios; all 13 rows that had passing scenarios still pass (full suite 110/110). No new invariants.
+Rows 17 and 18 in `docs/testing/invariant-scenarios.md` now also cite the Phase 2 scenarios; all 13 rows that had passing scenarios still pass (full suite 133/133 after rebasing onto main with the Phase 1 ledger hardening). No new invariants.
 
 ## Visual QA
 
@@ -61,7 +61,7 @@ Rows 17 and 18 in `docs/testing/invariant-scenarios.md` now also cite the Phase 
 | Reviewer                  | Verdict                                                                 | Blockers fixed                                                                                                                                                     | Remaining (non-blocking)                                                                                                                                                                                                                                                                                  |
 | ------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ux-reviewer               | blocking (1) → fixed in iteration 5                                     | placeholder card padding; also 404 title, drawer tooltip, employee card                                                                                            | Keycloak default copy (title case, MFA heading without instructions, PatternFly focus colour); rail avatar shows one initial; account menu shows role while Home shows job title; INR Home not in baselines; longest menu (Finance Controller) not captured open on mobile; 000a designs still "proposed" |
-| domain-invariant-reviewer | pass with findings (110/110 scenarios)                                  | analytics property allowlist (route templates only), batch fits the body limit (was a 500), future timestamps limited to 5 minutes, reverse forged-header scenario | per-user rate limit on analytics; `platformOperator` derived from "no tenant.read" (an expired-grants member would be flagged); fiscal years on `/api/me` without a policy decision (documented as non-financial settings); oversized bodies still map to 500 in the shared problem filter                |
+| domain-invariant-reviewer | pass with findings (110/110 before the rebase)                          | analytics property allowlist (route templates only), batch fits the body limit (was a 500), future timestamps limited to 5 minutes, reverse forged-header scenario | per-user rate limit on analytics; `platformOperator` derived from "no tenant.read" (an expired-grants member would be flagged); fiscal years on `/api/me` without a policy decision (documented as non-financial settings); oversized bodies still map to 500 in the shared problem filter                |
 | security review           | not run — the Security Review subagent runs only on an explicit request | –                                                                                                                                                                  | recommended before release for the OIDC code (`libs/web/data-access/src/lib/auth.service.ts`) and realm settings                                                                                                                                                                                          |
 
 ## Follow-ups
