@@ -1,0 +1,23 @@
+{
+  "screen": "088-audit-log",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/eebc55c8836040c88b30341326f8a837",
+      "approved": null,
+      "size": [
+        2560,
+        2492
+      ],
+      "status": "proposed - awaiting user review"
+    },
+    "chain-broken--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/c4cd69178174441982a33037c393dc27",
+      "approved": null,
+      "size": [
+        2560,
+        2048
+      ],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
