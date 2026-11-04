@@ -1,0 +1,11 @@
+{
+  "screen": "108-fiscal-calendar",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/fb67fdf9f9f24425ae1f568e1ca6a0cb",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

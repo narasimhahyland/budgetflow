@@ -1,0 +1,11 @@
+{
+  "screen": "107-exchange-rates",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/7b8ac4dc4ad1465fa2f4d75e733f8245",
+      "approved": null,
+      "size": [2560, 3266],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

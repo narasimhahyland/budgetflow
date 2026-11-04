@@ -1,0 +1,17 @@
+{
+  "screen": "028-set-to-zero",
+  "files": {
+    "dialog--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/87e6bda1828b461fba99670fb92ad232",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    },
+    "validation--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/af5c1c5d8e5447be84651f289b1ea1c4",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

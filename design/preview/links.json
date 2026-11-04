@@ -14,7 +14,26 @@
     "059-approval-inbox": "Approval inbox",
     "069-rule-builder": "Rule builder",
     "088-audit-log": "Audit log",
-    "115-employee-dashboard": "Employee dashboard"
+    "115-employee-dashboard": "Employee dashboard",
+    "022c-hr-headcount-import": "HR headcount import",
+    "024-allocate-to-child": "Allocate budget to child unit",
+    "026-reduce-budget": "Reduce budget",
+    "028-set-to-zero": "Set budget to zero",
+    "046-event-details": "Event details",
+    "046a-co-funding-board": "Live co-funding board",
+    "047-event-participants": "Event locations and participants",
+    "055-my-requests": "My requests",
+    "056a-inter-director-contribution-request": "Inter-Director Budget Contribution Request",
+    "057-additional-fund-request": "Additional-fund request",
+    "060-request-details": "Request details",
+    "061-approval-decision": "Approval decision",
+    "061a-actionable-approval-email": "Actionable approval email",
+    "080a-actuals-import": "Actuals import",
+    "080b-unmatched-actuals": "Unmatched actuals queue",
+    "080c-gl-tie-out": "GL tie-out and monthly sign-off",
+    "082-utilization-report": "Utilization snapshot",
+    "107-exchange-rates": "Exchange rates (FX admin)",
+    "108-fiscal-calendar": "Fiscal calendar admin"
   },
   "stateLabels": {
     "default": "Default",
@@ -25,23 +44,84 @@
     "chain-broken": "Chain broken",
     "nav-drawer-open": "Mobile nav drawer",
     "employee-forbidden": "Employee forbidden (403)",
-    "switcher-open": "Tenant switcher open",
     "notifications-open": "Notifications open",
-    "search-open": "Search open"
+    "search-open": "Search open",
+    "user-menu-open": "User menu open",
+    "blocked": "Blocked (over limit)",
+    "below-floor": "Below floor (blocked)",
+    "dialog": "Dialog",
+    "validation": "Validation",
+    "partial": "Contribute part",
+    "full": "Contribute in full",
+    "decline": "Decline",
+    "approve-part": "Approve part",
+    "outside-doa": "Outside delegation of authority",
+    "export-menu-open": "Export menu open"
   },
   "areas": [
-    { "name": "Foundations and shell", "screens": ["000-design-system", "000a-app-shell", "003-mfa-verification"] },
-    { "name": "Dashboards", "screens": ["011-executive-dashboard", "115-employee-dashboard"] },
+    {
+      "name": "Foundations and shell",
+      "screens": ["000-design-system", "000a-app-shell", "003-mfa-verification"]
+    },
+    {
+      "name": "Dashboards",
+      "screens": ["011-executive-dashboard", "115-employee-dashboard"]
+    },
     {
       "name": "Budgets",
-      "screens": ["023-budget-hierarchy", "020-create-budget", "021-budget-details", "022-budget-allocation-workspace", "024a-per-head-driver-allocation", "027-freeze-budget"]
+      "screens": [
+        "023-budget-hierarchy",
+        "020-create-budget",
+        "021-budget-details",
+        "022-budget-allocation-workspace",
+        "024a-per-head-driver-allocation",
+        "027-freeze-budget",
+        "024-allocate-to-child",
+        "026-reduce-budget",
+        "028-set-to-zero",
+        "022c-hr-headcount-import"
+      ]
     },
-    { "name": "Events", "screens": ["045-create-event-budget"] },
-    { "name": "Approvals and rules", "screens": ["059-approval-inbox", "069-rule-builder"] },
-    { "name": "Audit", "screens": ["088-audit-log"] }
+    {
+      "name": "Events",
+      "screens": [
+        "045-create-event-budget",
+        "046-event-details",
+        "047-event-participants",
+        "046a-co-funding-board"
+      ]
+    },
+    {
+      "name": "Requests, approvals and rules",
+      "screens": [
+        "059-approval-inbox",
+        "060-request-details",
+        "061-approval-decision",
+        "061a-actionable-approval-email",
+        "056a-inter-director-contribution-request",
+        "057-additional-fund-request",
+        "055-my-requests",
+        "069-rule-builder"
+      ]
+    },
+    {
+      "name": "Finance",
+      "screens": [
+        "080a-actuals-import",
+        "080b-unmatched-actuals",
+        "080c-gl-tie-out",
+        "107-exchange-rates",
+        "108-fiscal-calendar"
+      ]
+    },
+    {
+      "name": "Reports and audit",
+      "screens": ["088-audit-log", "082-utilization-report"]
+    }
   ],
   "journey": [
     "000a-app-shell/default",
+    "000a-app-shell/user-menu-open",
     "011-executive-dashboard/default",
     "023-budget-hierarchy/default",
     "023-budget-hierarchy/set-to-zero-dialog",
@@ -57,7 +137,32 @@
     "021-budget-details/default",
     "027-freeze-budget/dialog",
     "024a-per-head-driver-allocation/default",
-    "003-mfa-verification/default"
+    "003-mfa-verification/default",
+    "024-allocate-to-child/default",
+    "024-allocate-to-child/blocked",
+    "026-reduce-budget/dialog",
+    "026-reduce-budget/below-floor",
+    "028-set-to-zero/dialog",
+    "028-set-to-zero/validation",
+    "022c-hr-headcount-import/default",
+    "046-event-details/default",
+    "047-event-participants/default",
+    "057-additional-fund-request/default",
+    "060-request-details/default",
+    "061-approval-decision/approve-part",
+    "061-approval-decision/outside-doa",
+    "061a-actionable-approval-email/default",
+    "056a-inter-director-contribution-request/partial",
+    "056a-inter-director-contribution-request/full",
+    "056a-inter-director-contribution-request/decline",
+    "046a-co-funding-board/default",
+    "055-my-requests/default",
+    "080a-actuals-import/default",
+    "080b-unmatched-actuals/default",
+    "080c-gl-tie-out/default",
+    "107-exchange-rates/default",
+    "108-fiscal-calendar/default",
+    "082-utilization-report/export-menu-open"
   ],
   "ignore": ["Skip to main content"],
   "links": {
@@ -70,22 +175,21 @@
       "Budgets": "023-budget-hierarchy",
       "Allocation workspace": "022-budget-allocation-workspace",
       "Budget list": null,
-      "Events": null,
+      "Events": "046-event-details",
       "Approval inbox": "059-approval-inbox",
       "Approvals": "059-approval-inbox",
       "Open approval inbox": "059-approval-inbox",
-      "My requests": null,
-      "Actuals and matching": null,
-      "GL tie-out": null,
-      "Finance": null,
-      "Reports": null,
+      "My requests": "055-my-requests",
+      "Actuals and matching": "080a-actuals-import",
+      "GL tie-out": "080c-gl-tie-out",
+      "Finance": "080a-actuals-import",
+      "Reports": "082-utilization-report",
       "Audit log": "088-audit-log",
       "Full log": "088-audit-log",
       "Rules and policies": "069-rule-builder",
       "Integrations": null,
-      "Settings": null,
+      "Settings": "108-fiscal-calendar",
       "Admin": null,
-      "Acme Global": "000a-app-shell/switcher-open",
       "icon:notifications": "000a-app-shell/notifications-open",
       "Allocate budget": "022-budget-allocation-workspace",
       "Allocate to child": "022-budget-allocation-workspace",
@@ -95,7 +199,10 @@
       "Freeze": "027-freeze-budget/dialog",
       "India Region": "023-budget-hierarchy",
       "row:Bengaluru Events": "021-budget-details",
-      "row:Hyderabad Events": "024a-per-head-driver-allocation"
+      "row:Hyderabad Events": "024a-per-head-driver-allocation",
+      "Co-funding board": "046a-co-funding-board",
+      "Fiscal calendar": "108-fiscal-calendar",
+      "Exchange rates": "107-exchange-rates"
     },
     "000-design-system": {
       "Allocate budget": "",
@@ -106,13 +213,7 @@
       "row:Hyderabad Events": ""
     },
     "000a-app-shell": {
-      "Change scope": "000a-app-shell/switcher-open",
       "row:Search budgets": "000a-app-shell/search-open"
-    },
-    "000a-app-shell/switcher-open": {
-      "Close": "000a-app-shell",
-      "Acme Global": "000a-app-shell",
-      "Employee Experience": "000a-app-shell"
     },
     "000a-app-shell/notifications-open": {
       "Review": "059-approval-inbox",
@@ -128,7 +229,6 @@
     "000a-app-shell/employee-forbidden": {
       "Home": "115-employee-dashboard",
       "Go to Home": "115-employee-dashboard",
-      "Acme Global": "",
       "Request access": null,
       "My budgets": null,
       "Request funds": null,
@@ -155,7 +255,9 @@
       "Audit": "088-audit-log",
       "Request increase": null,
       "icon:lock": "027-freeze-budget/dialog",
-      "icon:more_vert": "027-freeze-budget/dialog"
+      "icon:more_vert": "027-freeze-budget/dialog",
+      "Reduce": "026-reduce-budget/dialog",
+      "Set to zero": "028-set-to-zero/dialog"
     },
     "027-freeze-budget/dialog": {
       "Cancel": "021-budget-details",
@@ -182,7 +284,8 @@
     "023-budget-hierarchy": {
       "row:India Region": "022-budget-allocation-workspace",
       "Compare versions": null,
-      "Transfer": null
+      "Transfer": null,
+      "Allocate budget": "024-allocate-to-child"
     },
     "023-budget-hierarchy/set-to-zero-dialog": {
       "Cancel": "023-budget-hierarchy",
@@ -192,7 +295,7 @@
       "Apply true-up": "022-budget-allocation-workspace",
       "row:Submit true-up": "022-budget-allocation-workspace",
       "View policy details": "069-rule-builder",
-      "View headcount import": null
+      "View headcount import": "022c-hr-headcount-import"
     },
     "045-create-event-budget": {
       "Continue to funding": "045-create-event-budget/validation",
@@ -205,7 +308,7 @@
       "Back": "045-create-event-budget",
       "Continue to funding": "",
       "Add cost line": "",
-      "Request contribution": null
+      "Request contribution": "056a-inter-director-contribution-request"
     },
     "059-approval-inbox": {
       "Assigned to me": "059-approval-inbox",
@@ -214,7 +317,9 @@
       "Approve": "059-approval-inbox/empty",
       "Approve as delegate": "059-approval-inbox/empty",
       "Completed": null,
-      "View completed approvals": null
+      "View completed approvals": null,
+      "View details": "060-request-details",
+      "Open request": "060-request-details"
     },
     "069-rule-builder": {
       "Simulate": "069-rule-builder/conflict-simulation",
@@ -231,18 +336,201 @@
     },
     "115-employee-dashboard": {
       "Home": "115-employee-dashboard",
-      "Acme Global": "",
       "My budgets": null,
       "Request funds": null,
       "Notifications": null,
       "Upload receipt": null,
       "View all allowances": null,
       "All events": null
+    },
+    "000a-app-shell/user-menu-open": {
+      "Sign out": "003-mfa-verification",
+      "Profile and preferences": null,
+      "Delegations": null,
+      "Notification settings": null
+    },
+    "024-allocate-to-child": {
+      "Cancel": "023-budget-hierarchy",
+      "Allocate USD 25,000.00": "023-budget-hierarchy",
+      "Per-head driver": "024a-per-head-driver-allocation",
+      "Up to USD 180,000.00": "024-allocate-to-child/blocked"
+    },
+    "024-allocate-to-child/blocked": {
+      "Request an increase": "057-additional-fund-request",
+      "Cancel": "024-allocate-to-child",
+      "Fix the amount to continue": "024-allocate-to-child"
+    },
+    "026-reduce-budget": {
+      "Cancel": "021-budget-details",
+      "Reduce by USD 8,000.00": "021-budget-details",
+      "icon:close": "021-budget-details"
+    },
+    "026-reduce-budget/below-floor": {
+      "Cancel": "026-reduce-budget/dialog"
+    },
+    "028-set-to-zero": {
+      "Cancel": "023-budget-hierarchy",
+      "Set to zero": "023-budget-hierarchy",
+      "View": null,
+      "icon:close": "023-budget-hierarchy"
+    },
+    "028-set-to-zero/validation": {
+      "Cancel": "028-set-to-zero/dialog",
+      "Set to zero": ""
+    },
+    "022c-hr-headcount-import": {
+      "Back": "024a-per-head-driver-allocation",
+      "Apply import": "024a-per-head-driver-allocation",
+      "Download error rows": null,
+      "Import history": null,
+      "Download template": null
+    },
+    "046-event-details": {
+      "Request contribution": "056a-inter-director-contribution-request",
+      "Request additional funds": "057-additional-fund-request",
+      "Open co-funding board": "046a-co-funding-board",
+      "Participants": "047-event-participants",
+      "row:Participants": "047-event-participants",
+      "row:Westlake Team Activities": "056a-inter-director-contribution-request",
+      "Edit event": "045-create-event-budget"
+    },
+    "047-event-participants": {
+      "Overview": "046-event-details",
+      "Budget and funding": "046-event-details",
+      "Fix now": null,
+      "Add participants": null,
+      "Import CSV": null,
+      "Add location": null
+    },
+    "046a-co-funding-board": {
+      "Request contribution": "056a-inter-director-contribution-request",
+      "row:IDBCR-2026-0031": "056a-inter-director-contribution-request",
+      "row:India Annual Day 2026": "046-event-details",
+      "Export": null
+    },
+    "056a-inter-director-contribution-request": {
+      "Contribute in full": "056a-inter-director-contribution-request/full",
+      "Contribute part": "056a-inter-director-contribution-request/partial",
+      "Decline": "056a-inter-director-contribution-request/decline",
+      "Cancel": "059-approval-inbox",
+      "Open co-funding board": "046a-co-funding-board",
+      "Open event": "046-event-details",
+      "row:India Annual Day 2026": "046-event-details",
+      "Contribute USD 6,500.00": "046a-co-funding-board",
+      "Contribute USD 12,000.00": "046a-co-funding-board",
+      "Decline request": "046a-co-funding-board"
+    },
+    "057-additional-fund-request": {
+      "Submit request": "055-my-requests",
+      "Save draft": "055-my-requests",
+      "Cancel": "046-event-details"
+    },
+    "060-request-details": {
+      "Approve": "061-approval-decision/approve-part",
+      "Reject": "061-approval-decision/approve-part",
+      "Request changes": "061-approval-decision/approve-part",
+      "Why this route?": null
+    },
+    "061-approval-decision": {
+      "Cancel": "060-request-details",
+      "Approve USD 4,500.00": "059-approval-inbox/empty",
+      "Escalate to Finance Controller": "059-approval-inbox",
+      "Approve part": "061-approval-decision/approve-part",
+      "icon:close": "060-request-details"
+    },
+    "061a-actionable-approval-email": {
+      "Approve USD 6,000.00": "060-request-details",
+      "Reject": "060-request-details",
+      "row:Approve part, request changes": "060-request-details",
+      "Manage notification settings": null,
+      "row:Approve USD6,000.00": "060-request-details"
+    },
+    "055-my-requests": {
+      "row:REQ-2026-0418": "060-request-details",
+      "row:IDBCR-2026-0031": "056a-inter-director-contribution-request",
+      "row:IDBCR-2026-0027": "046a-co-funding-board",
+      "New request": "057-additional-fund-request",
+      "REQ-2026-0418": "060-request-details",
+      "IDBCR-2026-0031": "056a-inter-director-contribution-request",
+      "IDBCR-2026-0027": "046a-co-funding-board"
+    },
+    "080a-actuals-import": {
+      "Unmatched queue": "080b-unmatched-actuals",
+      "Go to queue": "080b-unmatched-actuals",
+      "Send 38 to unmatched queue": "080b-unmatched-actuals",
+      "Post 804 matched lines": "080c-gl-tie-out",
+      "Back": null,
+      "Download template": null,
+      "Mapping rules": null,
+      "Matched": null,
+      "Send 38 to unmatched": "080b-unmatched-actuals",
+      "Post 804 matched": "080c-gl-tie-out"
+    },
+    "080b-unmatched-actuals": {
+      "Import": "080a-actuals-import",
+      "Match to PO-2026-0193": "080c-gl-tie-out",
+      "Split across budgets": null,
+      "Not budget-relevant": null,
+      "Matched": null,
+      "Mapping rules": null
+    },
+    "080c-gl-tie-out": {
+      "1 unmatched line": "080b-unmatched-actuals",
+      "Export": null,
+      "Add explanation": null,
+      "row:unmatched": "080b-unmatched-actuals"
+    },
+    "082-utilization-report": {
+      "Schedule delivery": null,
+      "CSV": null,
+      "XLSX": null,
+      "PDF": null,
+      "View as table": null,
+      "row:Hyderabad Events": "021-budget-details"
+    },
+    "107-exchange-rates": {
+      "Import rates": null,
+      "Add month-end rates": null
+    },
+    "108-fiscal-calendar": {
+      "Exchange rates": "107-exchange-rates",
+      "Close period": null,
+      "Add fiscal year": null
     }
   },
   "hotspots": {
-    "000a-app-shell/default": [{ "label": "Notifications", "box": [1092, 12, 40, 40], "to": "000a-app-shell/notifications-open" }],
-    "000a-app-shell/notifications-open": [{ "label": "Close notifications", "box": [1092, 12, 40, 40], "to": "000a-app-shell" }],
-    "000a-app-shell/search-open": [{ "label": "Clear search", "box": [826, 12, 40, 40], "to": "000a-app-shell" }]
+    "000a-app-shell/default": [
+      {
+        "label": "Notifications",
+        "box": [1092, 12, 40, 40],
+        "to": "000a-app-shell/notifications-open"
+      },
+      {
+        "label": "User menu",
+        "box": [1192, 12, 48, 40],
+        "to": "000a-app-shell/user-menu-open"
+      }
+    ],
+    "000a-app-shell/notifications-open": [
+      {
+        "label": "Close notifications",
+        "box": [1092, 12, 40, 40],
+        "to": "000a-app-shell"
+      }
+    ],
+    "000a-app-shell/search-open": [
+      {
+        "label": "Clear search",
+        "box": [826, 12, 40, 40],
+        "to": "000a-app-shell"
+      }
+    ],
+    "000a-app-shell/user-menu-open": [
+      {
+        "label": "Close user menu",
+        "box": [1192, 12, 48, 40],
+        "to": "000a-app-shell"
+      }
+    ]
   }
 }

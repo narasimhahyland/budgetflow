@@ -1,0 +1,11 @@
+{
+  "screen": "047-event-participants",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/6b3ca830ff7a491cb29e780f0317fe0c",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

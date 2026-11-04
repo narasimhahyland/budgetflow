@@ -1,0 +1,11 @@
+{
+  "screen": "057-additional-fund-request",
+  "files": {
+    "default--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/12ef391e70294f8a85f08e3ea7c62796",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}

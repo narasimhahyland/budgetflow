@@ -1,0 +1,17 @@
+{
+  "screen": "026-reduce-budget",
+  "files": {
+    "dialog--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/8ffc2b68da1549939a97f827ff5e9699",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    },
+    "below-floor--desktop--light.png": {
+      "stitchScreen": "projects/1643421514270618068/screens/a16b2b3124d145feb7b357b9bbc08c4e",
+      "approved": null,
+      "size": [2560, 2048],
+      "status": "proposed - awaiting user review"
+    }
+  }
+}
