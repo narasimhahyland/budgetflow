@@ -121,7 +121,7 @@ const EXAMPLE =
                   [status]="
                     o.op === 'create' ? 'success' : o.op === 'change' ? 'warning' : 'neutral-quiet'
                   "
-                  hideIcon
+                  [hideIcon]="true"
                 >
                   {{ o.op === 'create' ? 'Create' : o.op === 'change' ? 'Change' : 'No change' }}
                 </sat-status-tag>

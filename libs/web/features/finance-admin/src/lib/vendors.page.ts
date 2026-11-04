@@ -208,8 +208,8 @@ const STATUS: Record<
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
                 <td mat-cell *matCellDef="let v">
-                  <sat-status-tag [status]="statusInfo[v.status].tone">{{
-                    statusInfo[v.status].label
+                  <sat-status-tag [status]="statusOf(v.status).tone">{{
+                    statusOf(v.status).label
                   }}</sat-status-tag>
                 </td>
               </ng-container>
@@ -262,6 +262,10 @@ export class VendorsPage {
     }),
     loader: ({ params }) => data(this.api.listVendors({ query: params })),
   });
+
+  protected statusOf(status: Status) {
+    return STATUS[status];
+  }
 
   protected search(value: string): void {
     this.q.set(value);

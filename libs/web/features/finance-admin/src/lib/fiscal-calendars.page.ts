@@ -183,6 +183,14 @@ export class FiscalCalendarsPage {
     return `Ends the ${def.method === 'nearest' ? 'nearest' : 'last'} ${WEEKDAYS[def.endWeekday ?? 6]} of ${MONTHS[(def.endMonth ?? 12) - 1]}`;
   }
 
+  protected statusOf(status: FiscalPeriod['status']) {
+    return STATUS[status];
+  }
+
+  protected labelOf(action: PeriodAction): string {
+    return ACTION_LABEL[action];
+  }
+
   protected entityCodes(list: { code: string }[]): string {
     return list.length ? list.map((l) => l.code).join(', ') : 'None';
   }

@@ -152,6 +152,10 @@ export class RatesPage {
   protected readonly lockYearId = signal<string | null>(null);
   protected readonly lockReason = signal('');
 
+  protected typeName(type: RateType): string {
+    return TYPE_LABEL[type];
+  }
+
   protected async addRate(): Promise<void> {
     await this.run(async () => {
       const r = await data(

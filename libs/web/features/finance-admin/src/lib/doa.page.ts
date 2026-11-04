@@ -148,7 +148,7 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
                   : 'Above the limit; the approval escalates.'
             }}
             @if (r.limit; as l) {
-              Applies: {{ l.personName ?? (l.role ? roleLabel[l.role] : null) ?? l.role }} ·
+              Applies: {{ l.personName ?? roleName(l.role) }} ·
               {{ l.spendType === '*' ? 'any spend' : l.spendType }} ·
               {{ l.legalEntityCode ?? 'any entity' }} · limit
               <bf-money [amountMinor]="l.limit.amountMinor" [currency]="l.limit.currency" />.
@@ -187,9 +187,7 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
               <ng-container matColumnDef="who">
                 <th mat-header-cell *matHeaderCellDef>Who</th>
                 <td mat-cell *matCellDef="let l">
-                  <span class="bf-cell__primary">{{
-                    l.personName ?? roleLabel[l.role] ?? l.role
-                  }}</span>
+                  <span class="bf-cell__primary">{{ l.personName ?? roleName(l.role) }}</span>
                   <span class="bf-cell__secondary">{{
                     l.personName ? 'Person-specific' : 'Role'
                   }}</span>
@@ -245,6 +243,10 @@ export class DoaPage {
   protected readonly result = signal<DoaLookupResponse | null>(null);
   protected readonly busy = signal(false);
   protected readonly failure = signal<string | null>(null);
+
+  protected roleName(role: RoleId | null): string {
+    return role ? (ROLE_LABEL[role] ?? role) : '';
+  }
 
   protected async check(): Promise<void> {
     this.busy.set(true);

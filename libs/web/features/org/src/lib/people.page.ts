@@ -107,9 +107,9 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
                 <td mat-cell *matCellDef="let r">
                   <sat-status-tag
                     [status]="r.employmentType === 'employee' ? 'neutral' : 'info'"
-                    hideIcon
+                    [hideIcon]="true"
                   >
-                    {{ typeLabel[r.employmentType] }}
+                    {{ typeName(r.employmentType) }}
                   </sat-status-tag>
                 </td>
               </ng-container>
@@ -137,7 +137,6 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
 })
 export class PeoplePage {
   private readonly api = injectApi();
-  protected readonly typeLabel = TYPE_LABEL;
   protected readonly columns = ['name', 'location', 'entity', 'type', 'manager'];
   protected readonly q = signal('');
   protected readonly unitId = signal<string | null>(null);
@@ -165,6 +164,10 @@ export class PeoplePage {
           ? 'You see people in your own location and team.'
           : '',
   );
+
+  protected typeName(type: Person['employmentType']): string {
+    return TYPE_LABEL[type];
+  }
 
   protected indent(depth: number): string {
     return '\u00a0\u00a0'.repeat(depth);
