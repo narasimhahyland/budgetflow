@@ -77,3 +77,12 @@ Budget hierarchy (023), Budget health (013), Alerts and exceptions (017), Pendin
 - India budgets: budget currency INR with USD reporting (as drawn), or USD budgets for India? Affects lakh/crore display.
 - Decided 2026-11-04: Available = Authorized - pending requests (pre-encumbered) - approved commitments (encumbered) - actual, company-wide, child allocations counted once; budget drill-downs show "Available under this budget's rules" with a tooltip explaining any difference.
 - Regions table: seven columns (Region with owner second line, Budget, Allocated, Committed, Actual, Available, Utilization); every column fits at 1440. The loading, empty and error exports still show the earlier table layout; build all states with the fixed layout.
+
+## Phase 10 build notes (2026-11-05, spec only - image pending)
+
+Added with the Phase 10 spec batch so the dashboard matches the other P10 screens; no new Stitch image yet (planned state `region-drill--desktop--light.png`).
+
+- No currency filter chip: budgets and reporting are both USD; transaction currencies (INR, EUR, GBP) appear only in drill-downs with the USD amount at the locked plan rate. This answers the first open question above (India budgets are held in USD).
+- Region drill-down: a region row opens a side sheet before navigating to 023, showing company-wide Available next to "Available under this budget's rules" with the `sat-rich-tooltip` explaining any difference (for example a soft-mode budget that does not count pending requests), plus the region's top alerts and a link "Open in hierarchy".
+- Header actions: Schedule delivery (opens the 091 dialog) next to Export; scheduled copies follow 091's access rules.
+- Related P10 screens: 012 finance controller, 013 health, 015 utilization analytics, 15a fairness, 16 forecast, 017 alerts, 018 pending approvals.

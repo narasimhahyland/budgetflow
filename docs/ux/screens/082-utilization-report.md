@@ -49,4 +49,12 @@ Mobile: KPI carousel, chart replaced by the table. Chart has a data table altern
 
 ## Assumptions and open questions
 
-- Utilization formula: (commitments + actual) / authorized, excluding pending (as designed)?
+- Utilization formula: (commitments + actual) / authorized, excluding pending (as designed)? Decided 2026-11-05: yes, pending shown separately.
+
+## Phase 10 build notes (2026-11-05, spec only - image pending)
+
+Added with the Phase 10 spec batch; no new Stitch image yet.
+
+- The report uses the shared report frame of 079: saved views, drill-down from any amount to the ledger lines, owner scope note.
+- "Schedule delivery" opens the 091 schedule dialog (email attachments only to recipients with the same access; Slack and Teams channels get headline figures and a link).
+- The trend and pace view is the dashboard 015; this report stays the point-in-time table.
