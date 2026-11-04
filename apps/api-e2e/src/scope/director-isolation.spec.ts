@@ -3,6 +3,7 @@
 import { expect, test } from '@playwright/test';
 import { BudgetDetail, BudgetList } from '@bf/contracts';
 import { SEED } from '@bf/seed';
+import type { z } from 'zod';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { allocate, allocateOk, createChild, createRoot, expectMoney } from '../support/factory';
@@ -33,13 +34,31 @@ test.describe('director isolation on the seeded hierarchy', () => {
         'NOT_FOUND',
       );
     }
-    const list = await expectContract(
-      await request.get('/api/budgets', { headers }),
-      200,
-      BudgetList,
-    );
-    expect(list.items.length).toBeGreaterThanOrEqual(3);
-    expect(list.items.every((b) => b.path.includes(`/${india}/`))).toBe(true);
+    // Page through everything the regional manager can see (other scenarios create roots they own).
+    const visible: { id: string; path: string }[] = [];
+    let cursor: string | null = null;
+    do {
+      const page: z.infer<typeof BudgetList> = await expectContract(
+        await request.get(`/api/budgets?limit=200${cursor ? `&cursor=${cursor}` : ''}`, {
+          headers,
+        }),
+        200,
+        BudgetList,
+      );
+      visible.push(...page.items);
+      cursor = page.nextCursor;
+    } while (cursor);
+    const ids = visible.map((b) => b.id);
+    expect(ids).toEqual(expect.arrayContaining([india, bengaluru, SEED.budgets.hyderabad]));
+    for (const other of [unitedStates, europe, employeeExperience, SEED.budgets.globexOperations]) {
+      expect(ids).not.toContain(other);
+    }
+    // Everything visible is inside a subtree the regional manager owns: never the seeded root or a sibling region.
+    expect(
+      visible.filter(
+        (b) => b.path.startsWith(`/${employeeExperience}/`) && !b.path.includes(`/${india}/`),
+      ),
+    ).toEqual([]);
   });
 
   test("Director A cannot allocate from or read Director B's budget", async ({ request }) => {
