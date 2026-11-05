@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BudgetFlow Enterprise - Product overview</title>
+    <meta
+      name="description"
+      content="BudgetFlow Enterprise is a budget delegation and control platform: allocate a budget once and it flows through the organization with live visibility, approvals and a complete audit trail."
+    />
+    <style>
+      :root {
+        --primary: #5654ac;
+        --primary-loud: #322f86;
+        --primary-container: #e2dfff;
+        --page: #f4f3f7;
+        --surface: #ffffff;
+        --surface-variant: #eeedf1;
+        --text: #1a1c1e;
+        --text-secondary: #474551;
+        --outline: #c8c5d3;
+        --divider: #e4e1ef;
+        --heading: 'Figtree', 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        --body: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--text);
+        font: 16px/1.55 var(--body);
+        -webkit-text-size-adjust: 100%;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-family: var(--heading);
+        line-height: 1.25;
+      }
+      p {
+        margin: 0;
+      }
+      ul,
+      ol {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      a {
+        color: var(--primary);
+      }
+      .wrap {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* Header */
+      .hero {
+        background: var(--primary);
+        color: #fff;
+      }
+      .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .brand {
+        font-family: var(--heading);
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      .topbar nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 18px;
+        font-size: 14px;
+      }
+      .topbar nav a {
+        color: #fff;
+        text-decoration: none;
+        opacity: 0.88;
+      }
+      .topbar nav a:hover {
+        opacity: 1;
+        text-decoration: underline;
+      }
+      .hero-body {
+        padding-top: 52px;
+        padding-bottom: 56px;
+      }
+      .eyebrow {
+        margin-bottom: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .hero .eyebrow {
+        opacity: 0.8;
+      }
+      .hero h1 {
+        font-size: clamp(32px, 5vw, 46px);
+        font-weight: 700;
+      }
+      .lede {
+        max-width: 760px;
+        margin-top: 16px;
+        font-size: clamp(17px, 2vw, 20px);
+        line-height: 1.5;
+      }
+      .sublede {
+        max-width: 720px;
+        margin-top: 12px;
+        opacity: 0.88;
+      }
+
+      /* Outcomes strip */
+      .outcomes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1px;
+        margin-top: -28px;
+        overflow: hidden;
+        border: 1px solid var(--outline);
+        border-radius: 16px;
+        background: var(--divider);
+      }
+      .outcome {
+        flex: 1 1 190px;
+        padding: 20px 20px 22px;
+        background: var(--surface);
+      }
+      .outcome h3 {
+        margin-bottom: 6px;
+        color: var(--primary-loud);
+        font-size: 16px;
+      }
+      .outcome p {
+        color: var(--text-secondary);
+        font-size: 14px;
+      }
+
+      /* Sections */
+      section {
+        padding: 64px 0 0;
+      }
+      .section-head {
+        max-width: 760px;
+        margin-bottom: 28px;
+      }
+      .section-head .eyebrow {
+        color: var(--primary);
+      }
+      .section-head h2 {
+        font-size: clamp(24px, 3vw, 30px);
+      }
+      .section-head p {
+        margin-top: 10px;
+        color: var(--text-secondary);
+      }
+
+      /* Problem */
+      .problem {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .problem li {
+        padding: 18px 20px;
+        border-left: 3px solid var(--outline);
+        border-radius: 0 12px 12px 0;
+        background: var(--surface);
+      }
+
+      /* Journey */
+      .journey {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        counter-reset: step;
+      }
+      .journey li {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 18px;
+        border: 1px solid var(--divider);
+        border-radius: 12px;
+        background: var(--surface);
+        counter-increment: step;
+      }
+      .journey li::before {
+        content: counter(step);
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #fff;
+        font-family: var(--heading);
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .journey h3 {
+        margin-bottom: 4px;
+        font-size: 16px;
+      }
+      .journey p {
+        color: var(--text-secondary);
+        font-size: 14px;
+      }
+
+      /* Features */
+      .pillars {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .pillar {
+        padding: 22px 22px 24px;
+        border: 1px solid var(--outline);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+      .pillar .num {
+        display: inline-block;
+        margin-bottom: 10px;
+        padding: 2px 9px;
+        border-radius: 8px;
+        background: var(--primary-container);
+        color: var(--primary-loud);
+        font-size: 12px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+      .pillar h3 {
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+      .pillar li {
+        position: relative;
+        padding-left: 16px;
+        color: var(--text-secondary);
+        font-size: 14.5px;
+      }
+      .pillar li + li {
+        margin-top: 6px;
+      }
+      .pillar li::before {
+        content: '';
+        position: absolute;
+        top: 0.62em;
+        left: 0;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+      .pillar strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      /* Roles */
+      .roles {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .role {
+        padding: 22px;
+        border-top: 4px solid var(--primary);
+        border-radius: 12px;
+        background: var(--surface);
+      }
+      .role h3 {
+        font-size: 17px;
+      }
+      .role .label {
+        margin-top: 14px;
+        margin-bottom: 4px;
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .role p,
+      .role li {
+        font-size: 14.5px;
+      }
+      .role p {
+        color: var(--text-secondary);
+      }
+      .role li {
+        position: relative;
+        padding-left: 16px;
+      }
+      .role li + li {
+        margin-top: 4px;
+      }
+      .role li::before {
+        content: '';
+        position: absolute;
+        top: 0.68em;
+        left: 0;
+        width: 8px;
+        height: 2px;
+        background: var(--primary);
+      }
+
+      /* Differentiators */
+      .different {
+        padding: 32px;
+        border-radius: 20px;
+        background: var(--primary-loud);
+        color: #fff;
+      }
+      .different .section-head .eyebrow {
+        color: #fff;
+        opacity: 0.8;
+      }
+      .different .section-head {
+        margin-bottom: 24px;
+      }
+      .diff-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 24px;
+      }
+      .diff-grid h3 {
+        margin-bottom: 6px;
+        font-size: 17px;
+      }
+      .diff-grid p {
+        font-size: 14.5px;
+        opacity: 0.9;
+      }
+
+      /* AI note and ecosystem */
+      .note {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .panel {
+        padding: 24px;
+        border: 1px solid var(--outline);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+      .panel h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+      .panel p {
+        color: var(--text-secondary);
+        font-size: 14.5px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .chips li {
+        padding: 5px 12px;
+        border: 1px solid var(--outline);
+        border-radius: 999px;
+        background: var(--surface-variant);
+        font-size: 13.5px;
+      }
+
+      footer {
+        margin-top: 64px;
+        padding: 28px 0 40px;
+        border-top: 1px solid var(--divider);
+        color: var(--text-secondary);
+        font-size: 14px;
+      }
+      footer .wrap {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 0 16px;
+        }
+        .hero-body {
+          padding-top: 36px;
+          padding-bottom: 48px;
+        }
+        section {
+          padding-top: 48px;
+        }
+        .different {
+          padding: 24px 20px;
+        }
+      }
+
+      @media print {
+        @page {
+          margin: 16mm;
+        }
+        body {
+          background: #fff;
+          font-size: 11pt;
+        }
+        .wrap {
+          max-width: none;
+          padding: 0;
+        }
+        .hero,
+        .different {
+          background: #fff;
+          color: var(--text);
+        }
+        .hero .eyebrow,
+        .different .section-head .eyebrow {
+          color: var(--primary);
+          opacity: 1;
+        }
+        .topbar nav,
+        .footer-link {
+          display: none;
+        }
+        .topbar {
+          border-bottom: 1px solid var(--divider);
+        }
+        .hero-body {
+          padding: 20px 0 28px;
+        }
+        .sublede {
+          opacity: 1;
+        }
+        .outcomes {
+          margin-top: 0;
+        }
+        section {
+          padding-top: 28px;
+        }
+        .different {
+          padding: 0;
+        }
+        .diff-grid p {
+          opacity: 1;
+        }
+        .outcome,
+        .problem li,
+        .journey li,
+        .pillar,
+        .role,
+        .panel,
+        .diff-grid > div {
+          break-inside: avoid;
+        }
+        .section-head {
+          break-after: avoid;
+        }
+        a {
+          color: var(--text);
+          text-decoration: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap topbar">
+        <span class="brand">BudgetFlow Enterprise</span>
+        <nav aria-label="Sections">
+          <a href="#problem">Why</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#roles">Roles</a>
+          <a href="#different">What is different</a>
+        </nav>
+      </div>
+      <div class="wrap hero-body">
+        <p class="eyebrow">Product overview</p>
+        <h1>Allocate a budget once. Control it everywhere.</h1>
+        <p class="lede">
+          BudgetFlow Enterprise is a budget delegation and control platform. Leadership allocates a
+          budget once, and it flows through the organization with live visibility, approvals within
+          clear limits and a complete audit trail.
+        </p>
+        <p class="sublede">
+          It works alongside the card, expense, HR, planning and finance systems the company already
+          uses, so teams keep their tools and leadership gains one view and one set of controls.
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <ul class="outcomes" aria-label="Outcomes">
+          <li class="outcome">
+            <h3>Faster decisions</h3>
+            <p>Owners see what is available and approve from wherever they are.</p>
+          </li>
+          <li class="outcome">
+            <h3>Fewer overspends</h3>
+            <p>Limits are checked the moment money is allocated or requested.</p>
+          </li>
+          <li class="outcome">
+            <h3>Instant leadership control</h3>
+            <p>Freeze, reduce or set a budget to zero, with the impact shown first.</p>
+          </li>
+          <li class="outcome">
+            <h3>Audit-ready history</h3>
+            <p>Every change records who, what, when and why, and cannot be altered.</p>
+          </li>
+          <li class="outcome">
+            <h3>Fair, visible engagement budgets</h3>
+            <p>Spend per person and participation by location, side by side.</p>
+          </li>
+        </ul>
+
+        <section id="problem">
+          <div class="section-head">
+            <p class="eyebrow">Why it exists</p>
+            <h2>The problem it solves</h2>
+            <p>Budgets are set at the top, but the money is spent by many people in many places.</p>
+          </div>
+          <ul class="problem">
+            <li>
+              Budget owners cannot see what they have left, so questions go to finance and decisions
+              wait.
+            </li>
+            <li>
+              Budgets are split by email and spreadsheet, and per-person programs are recalculated
+              by hand as headcount changes.
+            </li>
+            <li>Mid-year cuts take weeks and can break events that are already booked.</li>
+            <li>
+              Events across locations need money from several leaders, agreed informally and hard to
+              audit later.
+            </li>
+          </ul>
+        </section>
+
+        <section id="how-it-works">
+          <div class="section-head">
+            <p class="eyebrow">How it works</p>
+            <h2>From annual budget to closed books</h2>
+            <p>
+              One budget, set once at the top, moves through the organization with checks at every
+              step.
+            </p>
+          </div>
+          <ol class="journey">
+            <li>
+              <div>
+                <h3>Set the annual budget</h3>
+                <p>Leadership approves the company budget once.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Allocate to regions</h3>
+                <p>Each share is checked against what is available above it.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Delegate to locations</h3>
+                <p>Regional managers share budget by headcount or fixed amounts.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Plan an event</h3>
+                <p>An organizer requests extra funds or co-funding from another leader.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Approvals route automatically</h3>
+                <p>The right people approve within their limits, from email, chat or mobile.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Spend is matched</h3>
+                <p>Card and expense transactions are matched to budgets and reconciled.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Leadership stays in control</h3>
+                <p>Freeze or cut any budget, with the impact shown first.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Finance closes the period</h3>
+                <p>Numbers lock, with a full audit trail behind every figure.</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section id="features">
+          <div class="section-head">
+            <p class="eyebrow">What it does</p>
+            <h2>Features at a glance</h2>
+            <p>Eleven capabilities that cover the full budget lifecycle, from planning to audit.</p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <span class="num">01</span>
+              <h3>Budget planning and allocation</h3>
+              <ul>
+                <li>
+                  Set the annual budget top-down and allocate it across regions, departments and
+                  locations.
+                </li>
+                <li>
+                  Per-person programs calculate each location's share from headcount and follow
+                  people as they join or leave.
+                </li>
+                <li>Start from templates, import an existing plan or roll last year forward.</li>
+                <li>Plan versions keep the original, current and forecast figures side by side.</li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">02</span>
+              <h3>Live visibility and dashboards</h3>
+              <ul>
+                <li>Every owner sees available, committed and spent amounts as they change.</li>
+                <li>One company-wide definition of available, so every report agrees.</li>
+                <li>Drill down from the company total to a single event or line.</li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">03</span>
+              <h3>Leadership controls</h3>
+              <ul>
+                <li>Freeze, reduce or set a budget to zero in one step, always with a reason.</li>
+                <li>
+                  The impact is shown before confirming: affected teams, open commitments and
+                  pending requests.
+                </li>
+                <li>Commitments already made are honored; new requests stop.</li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">04</span>
+              <h3>Requests and approvals</h3>
+              <ul>
+                <li>
+                  Requests route to the right approvers automatically, within limits set by role and
+                  amount.
+                </li>
+                <li>
+                  Approvers see the budget left after approval and why the request came to them.
+                </li>
+                <li>Approve from email, chat or a phone.</li>
+                <li>Delegation and escalation keep things moving when people are away.</li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">05</span>
+              <h3>Co-funding between leaders</h3>
+              <ul>
+                <li>
+                  The <strong>Inter-Director Budget Contribution Request</strong> lets one leader
+                  ask another to fund part of an event.
+                </li>
+                <li>The contributor approves in full, approves part or declines with a reason.</li>
+                <li>
+                  A co-funding board shows each contributor's share, the spend against it and what
+                  is returned.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">06</span>
+              <h3>Events and engagement</h3>
+              <ul>
+                <li>Plan events across locations, with costs split fairly by location and team.</li>
+                <li>
+                  Invitations, RSVPs, attendee needs, vendor quotes and checklists in one place.
+                </li>
+                <li>
+                  Surveys, return-on-investment scorecards, recognition and polls show what each
+                  event achieved.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">07</span>
+              <h3>Spend tracking and reconciliation</h3>
+              <ul>
+                <li>
+                  Actual spend arrives from the card, expense and finance tools already in use.
+                </li>
+                <li>Transactions are matched to the right budget and event automatically.</li>
+                <li>
+                  Exceptions go to a short review queue, and finance signs off each month against
+                  the books.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">08</span>
+              <h3>Finance close and forecasting</h3>
+              <ul>
+                <li>Close each period and lock the numbers that went to the board.</li>
+                <li>Forecasts carry owner commentary wherever results move away from plan.</li>
+                <li>Year-end rules decide what carries forward and what lapses.</li>
+                <li>Costs include tax that cannot be recovered, so budgets show the true cost.</li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">09</span>
+              <h3>Insights and AI assistance</h3>
+              <ul>
+                <li>
+                  Ask questions in plain language and get answers limited to your own budgets.
+                </li>
+                <li>
+                  Early warnings of under- and overspend, suggested allocations and alerts on
+                  unusual activity.
+                </li>
+                <li>
+                  <strong>AI suggests; people decide.</strong> It never approves or moves money on
+                  its own.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">10</span>
+              <h3>Governance and audit</h3>
+              <ul>
+                <li>
+                  A tamper-evident history of every change, with before and after values and the
+                  reason.
+                </li>
+                <li>Role-based access: people see only the budgets they are responsible for.</li>
+                <li>One-click evidence packs and clear data retention rules.</li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <span class="num">11</span>
+              <h3>Connected ecosystem</h3>
+              <ul>
+                <li>Connectors to HR, finance, planning, card and expense tools.</li>
+                <li>
+                  Reports and widgets for BI tools and intranets, delivered on a schedule by email
+                  and chat.
+                </li>
+                <li>Native mobile apps for approvals, balances and receipts on the go.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="roles">
+          <div class="section-head">
+            <p class="eyebrow">Who uses it</p>
+            <h2>Roles and how they use it</h2>
+            <p>
+              Each person sees only the budgets they are responsible for, with the actions their
+              role allows.
+            </p>
+          </div>
+          <div class="roles">
+            <article class="role">
+              <h3>Leadership and CEO</h3>
+              <p class="label">Sees</p>
+              <p>
+                Company-wide budget health, spend by region, and fairness and participation across
+                locations.
+              </p>
+              <p class="label">Does</p>
+              <ul>
+                <li>Sets the annual budget and approves new money</li>
+                <li>Freezes, reduces or zeroes budgets with the impact shown first</li>
+                <li>Reviews leadership summaries and the board pack</li>
+              </ul>
+            </article>
+            <article class="role">
+              <h3>Finance: Controller, Admin, FP&amp;A</h3>
+              <p class="label">Sees</p>
+              <p>Balances, commitments and actual spend tied back to the company's books.</p>
+              <p class="label">Does</p>
+              <ul>
+                <li>Imports the plan and sets approval limits</li>
+                <li>Reconciles spend and signs off each month</li>
+                <li>Closes periods, runs forecasts and the year-end</li>
+              </ul>
+            </article>
+            <article class="role">
+              <h3>HR, People Ops and Employee Experience</h3>
+              <p class="label">Sees</p>
+              <p>Per-person programs, participation and reach by location.</p>
+              <p class="label">Does</p>
+              <ul>
+                <li>Sets up programs from templates with per-person rates</li>
+                <li>Keeps headcount current so allocations follow people</li>
+                <li>Nudges teams before money expires and reads survey results</li>
+              </ul>
+            </article>
+            <article class="role">
+              <h3>Regional and location managers</h3>
+              <p class="label">Sees</p>
+              <p>Their own budget, what is left and upcoming events.</p>
+              <p class="label">Does</p>
+              <ul>
+                <li>Delegate budget to locations and teams</li>
+                <li>Plan events and request extra funds or co-funding</li>
+                <li>Approve from email, chat or mobile</li>
+              </ul>
+            </article>
+            <article class="role">
+              <h3>Department heads and budget owners</h3>
+              <p class="label">Sees</p>
+              <p>Each request with the budget left after approval and why it was routed to them.</p>
+              <p class="label">Does</p>
+              <ul>
+                <li>Approve, approve part or decline</li>
+                <li>Delegate approvals while away</li>
+                <li>Set alert thresholds on their budgets</li>
+              </ul>
+            </article>
+            <article class="role">
+              <h3>Event organizers</h3>
+              <p class="label">Sees</p>
+              <p>The event budget, each contributor's share, RSVPs and cost per person.</p>
+              <p class="label">Does</p>
+              <ul>
+                <li>Build events from templates</li>
+                <li>Collect RSVPs, attendee needs and vendor quotes</li>
+                <li>Capture receipts and close the event, returning any surplus</li>
+              </ul>
+            </article>
+            <article class="role">
+              <h3>Employees</h3>
+              <p class="label">Sees</p>
+              <p>Their team's remaining budget and upcoming events.</p>
+              <p class="label">Does</p>
+              <ul>
+                <li>RSVP and share their needs</li>
+                <li>Suggest and vote on activities</li>
+                <li>Submit simple requests and receipts</li>
+              </ul>
+            </article>
+            <article class="role">
+              <h3>Auditors and analysts</h3>
+              <p class="label">Sees</p>
+              <p>The complete, tamper-evident history and read-only reports.</p>
+              <p class="label">Does</p>
+              <ul>
+                <li>Trace any amount to who approved it and why</li>
+                <li>Export evidence packs</li>
+                <li>Review exceptions and unusual patterns</li>
+              </ul>
+            </article>
+            <article class="role">
+              <h3>Administrators</h3>
+              <p class="label">Sees</p>
+              <p>Users, roles, policies and connected systems.</p>
+              <p class="label">Does</p>
+              <ul>
+                <li>Manage access by role and part of the organization</li>
+                <li>Configure policies and approval rules</li>
+                <li>Connect HR, finance and spend systems</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="different">
+          <div class="different">
+            <div class="section-head">
+              <p class="eyebrow">Why BudgetFlow</p>
+              <h2>What makes it different</h2>
+            </div>
+            <div class="diff-grid">
+              <div>
+                <h3>Co-funding between budget owners</h3>
+                <p>
+                  A formal, audited request that another leader can approve in full, approve in part
+                  or decline.
+                </p>
+              </div>
+              <div>
+                <h3>Limits enforced up front</h3>
+                <p>
+                  Checks run at the moment money is allocated or requested, not after it has been
+                  spent.
+                </p>
+              </div>
+              <div>
+                <h3>Controls that respect commitments</h3>
+                <p>
+                  Freezing or cutting a budget stops new spending without breaking what is already
+                  booked.
+                </p>
+              </div>
+              <div>
+                <h3>Works with any card or finance system</h3>
+                <p>
+                  One control layer above the tools the company already has, with no new card
+                  program required.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="note" aria-label="Principles">
+          <div class="panel">
+            <h3>AI suggests; people decide</h3>
+            <p>
+              Assistance features answer questions, flag risks and propose allocations. Every
+              approval, transfer and control is still made by a person, within their own limits.
+            </p>
+          </div>
+          <div class="panel">
+            <h3>Works alongside existing systems</h3>
+            <p>
+              BudgetFlow is the control layer. Spending, payroll and accounting stay in the systems
+              that already handle them.
+            </p>
+            <ul class="chips">
+              <li>Card and expense tools</li>
+              <li>HR systems</li>
+              <li>Finance and ERP systems</li>
+              <li>Planning tools</li>
+              <li>Calendars</li>
+              <li>Email and chat</li>
+              <li>BI and reporting tools</li>
+              <li>Mobile apps</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <span>BudgetFlow Enterprise: budget delegation and control.</span>
+        <a class="footer-link" href="../index.html">See the screen designs</a>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -183,6 +183,8 @@ Added 2026-11-05, same Stitch limit: specs only, no preview pages yet. 001 sign-
 
 Live: **https://narasimhahyland.github.io/budgetflow/** (guided flow starts at https://narasimhahyland.github.io/budgetflow/screens/000a-app-shell--default.html).
 
+Product overview for leadership: **https://narasimhahyland.github.io/budgetflow/overview/**, a one-page, plain-language summary of the finished product (what it brings, features, roles, how it works, what makes it different). It is a single self-contained page in `design/preview/overview/index.html`, published with the preview and linked from its index. The site is public, so the page names only generic system categories, never internal tools, figures or people.
+
 The exported screens and states above are also published as a clickable design preview: sidebar items, primary buttons, table rows and dialog triggers open the matching screen or state, and a bar on every page switches states and steps through the core journey. It is built from `design/preview/` from the Stitch exports and published from the `gh-pages` branch with GitHub Pages (the design preview only; the app itself is never deployed to Pages). Details are in [design/preview/README.md](../../design/preview/README.md). States whose HTML could not be saved from Stitch are shown as their exported image with hotspots.
 
 To rebuild and republish when new screens merge into `design/stitch/`:
