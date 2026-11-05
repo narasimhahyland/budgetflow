@@ -26021,6 +26021,7 @@
               {
                 "type": "string",
                 "enum": [
+                  "queued",
                   "delivered",
                   "partly_delivered",
                   "failed"
@@ -28667,6 +28668,7 @@
           "status": {
             "type": "string",
             "enum": [
+              "queued",
               "delivered",
               "partly_delivered",
               "failed"

@@ -440,7 +440,7 @@ export const SCHEDULE_FREQUENCIES = [
 export const ScheduleFrequency = z.enum(SCHEDULE_FREQUENCIES);
 export type ScheduleFrequency = z.infer<typeof ScheduleFrequency>;
 
-export const SCHEDULE_RUN_STATUSES = ['delivered', 'partly_delivered', 'failed'] as const;
+export const SCHEDULE_RUN_STATUSES = ['queued', 'delivered', 'partly_delivered', 'failed'] as const;
 export const ScheduleRunStatus = z.enum(SCHEDULE_RUN_STATUSES);
 
 export const ScheduleChannel = named(
