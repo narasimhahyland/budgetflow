@@ -12,15 +12,3 @@ export const auditLogRoutes: Routes = [
     loadComponent: () => import('./audit-log.page').then((m) => m.AuditLogPage),
   },
 ];
-
-/** /reports/utilization (82). */
-export const utilizationRoutes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    title: 'Budget utilization',
-    data: { pageTitle: 'Budget utilization', section: 'Insights' },
-    canActivate: [requirePermission('budget.read', 'Budget utilization')],
-    loadComponent: () => import('./utilization.page').then((m) => m.UtilizationPage),
-  },
-];

@@ -312,22 +312,32 @@ test.describe('Wave 2 core acceptance', () => {
   test.describe('Step 10 — utilization and ledger roll-up', () => {
     test.use({ storageState: authFile('regional-manager') });
 
+    // Screen 82 was rebuilt on the Phase 10 report frame, so the roll-up this step checks now comes
+    // from the reports endpoint. The pre-Phase-10 /api/utilization roll-up is still asserted beside
+    // it, because both read the same ledger balances and must agree on what the region authorized.
     test('utilization by location matches the API totals in USD', async ({ page }) => {
-      const report = await api<{
+      const rollUp = await api<{
         currency: string;
         totals: { authorized: { amountMinor: number }; utilizationBps: number };
       }>('regional-manager', 'get', '/api/utilization?groupBy=location');
+      const report = await api<{
+        currency: string;
+        reconciliation: { ties: boolean; authorized: { amountMinor: number } };
+      }>('regional-manager', 'get', '/api/reports/utilization/run?groupBy=location');
 
       await page.goto('/reports/utilization');
-      await expect(
-        page.getByRole('heading', { level: 1, name: 'Budget utilization' }),
-      ).toBeVisible();
-      await expect(page.getByRole('table', { name: 'Utilization' })).toContainText('USD');
-      await expect(page.getByRole('table', { name: 'Utilization' })).toContainText(
-        usdText(report.totals.authorized.amountMinor),
-      );
+      await expect(page.getByRole('heading', { level: 1, name: 'Utilization' })).toBeVisible();
+      const table = page.getByRole('table', { name: 'Utilization' });
+      await expect(table).toContainText('USD');
+      await expect(table).toContainText(usdText(rollUp.totals.authorized.amountMinor));
+
+      expect(rollUp.currency).toBe('USD');
+      expect(rollUp.totals.utilizationBps).toBeGreaterThanOrEqual(0);
       expect(report.currency).toBe('USD');
-      expect(report.totals.utilizationBps).toBeGreaterThanOrEqual(0);
+      expect(report.reconciliation.ties).toBe(true);
+      expect(report.reconciliation.authorized.amountMinor).toBe(
+        rollUp.totals.authorized.amountMinor,
+      );
     });
   });
 });
