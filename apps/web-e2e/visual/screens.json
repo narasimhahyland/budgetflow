@@ -852,6 +852,52 @@
       ]
     },
     {
+      "id": "058-over-budget-request",
+      "role": "employee",
+      "path": "/requests/new?kind=over_budget",
+      "waitFor": "role=heading[name=/over-budget/i]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "061-approval-decision",
+      "role": "location-manager",
+      "path": "/approvals",
+      "waitFor": "text=Team lunch: Platform squad",
+      "states": [
+        {
+          "state": "approve-part",
+          "actions": [
+            {
+              "click": "mat-button-toggle:has-text(\"Approve part\") button"
+            },
+            {
+              "waitFor": "text=Approved amount"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "064-request-history",
+      "role": "event-organizer",
+      "path": "/requests/73000000-0000-4000-8000-000000000012?tab=history",
+      "waitFor": "[data-testid=request-history]",
+      "states": [
+        {
+          "state": "rejected"
+        },
+        {
+          "state": "pending",
+          "path": "/requests/73000000-0000-4000-8000-000000000010?tab=history",
+          "waitFor": "[data-testid=request-history]"
+        }
+      ]
+    },
+    {
       "id": "061a-actionable-approval-email",
       "path": "/email-action?token=v1.00000000-0000-4000-8000-000000000000.00000000-0000-4000-8000-000000000000.not-a-valid-signature",
       "waitFor": "text=This approval link is not valid",
@@ -903,6 +949,67 @@
       "states": [
         {
           "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "118-request-event-funding",
+      "role": "event-organizer",
+      "path": "/requests/event-funding",
+      "waitFor": "role=heading[name=\"Request event funding\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "validation",
+          "actions": [
+            {
+              "click": "[data-testid=submit-event-funding]"
+            },
+            {
+              "waitFor": "[data-testid=error-summary]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "120-approved-allocations",
+      "role": "event-organizer",
+      "path": "/requests/approved",
+      "waitFor": "role=heading[name=\"Approved for you\"]",
+      "states": [
+        {
+          "state": "default",
+          "waitFor": "[data-testid=approved-summary]"
+        },
+        {
+          "state": "empty",
+          "role": "employee",
+          "waitFor": "text=Nothing approved yet this year"
+        }
+      ]
+    },
+    {
+      "id": "121-upload-receipt",
+      "role": "event-organizer",
+      "path": "/requests/upload?request=73000000-0000-4000-8000-000000000011",
+      "waitFor": "role=heading[name=\"Upload a receipt or document\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "amount-check",
+          "actions": [
+            {
+              "fill": ["input[name=receiptAmount]", "120"]
+            },
+            {
+              "waitFor": "[data-testid=amount-check]"
+            }
+          ]
         }
       ]
     }
