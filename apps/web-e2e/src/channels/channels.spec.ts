@@ -17,6 +17,7 @@ import {
   pageAs,
   spendingRequest,
   taskOf,
+  waitingApprovalFor,
 } from '../spend/api';
 
 test.describe('mobile web approvals, balance check, receipts and alerts (059a, 059b)', () => {
@@ -88,6 +89,10 @@ test.describe('notifications, settings, discussion and following (123, 059c, 060
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     test.slow();
 
+    // Give Rahul a request of his own to decide: the seeded queue may already be worked through
+    // by the API scenarios that run before the journeys.
+    await waitingApprovalFor('location-manager');
+
     // Screen 123: Notifications and tasks
     await page.goto('/notifications');
     await expect(
@@ -134,6 +139,9 @@ test.describe('Slack and Teams admin setup, cards, account linking and digests (
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     test.slow();
+
+    // The card screens render the viewer's own waiting approval, so give Ananya one.
+    await waitingApprovalFor('regional-manager');
 
     // Screen 061e: Admin channels
     await page.goto('/admin/channels');

@@ -52,6 +52,29 @@ export async function directorTree(teamMinor = 5_000_000) {
   return { root, dept, team, tag };
 }
 
+/**
+ * A budget owned by `owner` with one spending request waiting on them, so a journey that needs a
+ * pending approval does not depend on the seeded personas' queues surviving the API scenarios.
+ */
+export async function waitingApprovalFor(owner: SeedUserId, amountMinor = 120_000) {
+  const tag = suffix();
+  const root = await createRoot({ amountMinor: 20_000_000, name: `P8 journey root ${tag}` });
+  const owned = await createChild(root.id, {
+    name: `P8 journey ${owner} ${tag}`,
+    owner,
+    as: 'ceo',
+  });
+  await allocate(root.id, owned.id, 5_000_000, 'ceo');
+  const team = await createChild(owned.id, {
+    name: `P8 journey team ${tag}`,
+    owner: 'budget-owner',
+    as: owner,
+  });
+  await allocate(owned.id, team.id, 2_000_000, owner);
+  const req = await spendingRequest(team.id, amountMinor, 'budget-owner', `P8 journey ask ${tag}`);
+  return { root, owned, team, request: req, tag };
+}
+
 /** A second department under the root owned by Lena: the giving budget for contributions. */
 export async function giverBudget(rootId: string, tag: string, amountMinor = 3_000_000) {
   const giver = await createChild(rootId, {
