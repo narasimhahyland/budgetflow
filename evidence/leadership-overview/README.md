@@ -40,3 +40,19 @@ The button moved from the footer to the hero, under the positioning text, as a f
 | Live page at 1440 px ([live-desktop-1440.png](live-desktop-1440.png))                 | 5 sections, 8 steps, 11 feature pillars, 9 roles        | pass   |
 | Live page on a phone ([live-mobile-390.png](live-mobile-390.png))                     | HTTP 200, no horizontal overflow                        | pass   |
 | Console and page errors                                                               | None                                                    | pass   |
+
+The full-page `live-desktop-1440.png` and `live-mobile-390.png` were replaced by the revision check below.
+
+### Live check of the hero button revision
+
+- Merged in [#30](https://github.com/narasimhahyland/budgetflow/pull/30) (merge commit `a7b8b26`), then published with `design/preview/deploy.sh` from that commit.
+- Checked: 2026-11-05 02:54 UTC, curl and Playwright 1.64.1 (Chromium) against https://narasimhahyland.github.io/budgetflow/overview/
+
+| Check                                                                                                                                | Expected                                                       | Result |
+| ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ------ |
+| `curl -sI` on the live URL ([live-curl-headers.txt](live-curl-headers.txt))                                                          | HTTP 200, `text/html`, new file (31630 bytes)                  | pass   |
+| Laptop, 1440 px ([live-desktop-1440-hero.png](live-desktop-1440-hero.png), full page [live-desktop-1440.png](live-desktop-1440.png)) | "See the screen designs" filled `#5654ac`, white text, in hero | pass   |
+| Phone, iPhone 13 ([live-mobile-390-hero.png](live-mobile-390-hero.png), full page [live-mobile-390.png](live-mobile-390.png))        | Full-width button in the first viewport, no overflow           | pass   |
+| Click the button                                                                                                                     | Opens `/budgetflow/index.html` (clickable design preview)      | pass   |
+| Footer                                                                                                                               | No links left                                                  | pass   |
+| Page errors                                                                                                                          | None                                                           | pass   |
