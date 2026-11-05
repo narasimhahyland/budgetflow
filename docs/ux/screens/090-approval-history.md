@@ -8,7 +8,7 @@ Not generated yet (Stitch daily screen-generation limit, 2026-11-05; see the rev
 
 ## Purpose
 
-Give auditors and finance a searchable record of every approval decision: who decided, with what authority, on which channel, under which rule versions and DoA matrix, how long it took, and whether delegation or escalation was involved.
+Give auditors and finance a searchable record of every approval decision: who decided, with what authority, on which channel, under which DoA matrix, how long it took, and whether delegation or escalation was involved.
 
 ## Roles
 
@@ -22,7 +22,7 @@ Sidebar Audit log area and reports; 059 Completed tab; 078 "Decisions made with 
 
 Filters: period, decision (Approved, Partially approved, Rejected, Changes requested, Escalated), approver, request kind, budget, channel (app, email; Slack and Teams in Phase 8), delegated only, escalated only, above SLA. Export (CSV, XLSX, PDF).
 
-Table: decided at, request, requester, budget, amount (USD; transaction currency below), decision tag, approver (with "on behalf of" for delegates), DoA limit at decision, channel, time to decide, rule versions (chips: R-12 v3, R-07 v1), SLA tag (Within SLA, Breached).
+Table: decided at, request, requester, budget, amount (USD; transaction currency below), decision tag, approver (with "on behalf of" for delegates), DoA limit at decision, channel, time to decide, SLA tag (Within SLA, Breached). No rule-version column: routing does not consult the rules engine yet, so no decision records real rule versions.
 
 Decision drawer: request summary, the full chain with each step's decision, DoA check, hygiene checks, the explanation shown at the time (matched rules with fact values), comments, audit entry id with "View in audit log" (088).
 
@@ -30,7 +30,21 @@ Summary strip: decisions 1,284 in the period; median time to decide 5 h 40 min; 
 
 ## Data and permissions
 
-Read model over decisions (rule versions, facts, DoA version and limit, channel, timestamps). Auditors and finance see all; approvers see their own. `approval:read`.
+Read model over decisions (rule versions, facts, DoA version and limit, channel, timestamps). Auditors and finance see all; approvers see their own.
+
+The route guard and the sidebar entry use different permissions on purpose; they are not to be "aligned".
+
+- The route guard uses `tenant.read`, because the server grants every authenticated tenant member
+  access to this endpoint. `ApprovalsService.history` returns the tenant-wide view to holders of
+  `audit.read` or `doa.read`, and otherwise filters rows down to the actor's own decisions. A
+  scenario in `apps/api-e2e/src/rules/workflows-authority.spec.ts` pins this: `location-manager`,
+  who holds no `audit.read`, receives 200 and sees only their own decisions.
+- The sidebar entry uses `audit.read`, because this screen sits under Insights > Reports and audit,
+  for auditors and finance. Approvers reach their own decisions through 059 "Completed".
+- Tightening the guard to `audit.read` would break that scenario and revoke access the server
+  intends to grant. Loosening the nav to `tenant.read` would show the entry to nine further roles,
+  five of which (`org-admin`, `event-organizer`, `employee`, `integration-admin`, `analyst`) hold no
+  `request.approve`, so each would land on a permanently empty screen.
 
 ## States
 
@@ -47,7 +61,7 @@ Read-only; decision tags use the request status tones (approved success, rejecte
 
 ## Responsive and accessibility
 
-Tablet: hide rule-version and channel columns behind the drawer. Mobile: list of decisions. Times are written out ("5 hours 40 minutes") for screen readers.
+Tablet: hide the channel column behind the drawer. Mobile: list of decisions. Times are written out ("5 hours 40 minutes") for screen readers.
 
 ## Related screens and navigation
 
