@@ -147,3 +147,8 @@ If Phases 4-6 run in parallel, scopes stay disjoint: P4 owns `libs/api/budgets` 
 - Phase 1 creates budgets directly as `active`; Phase 4 adds drafts for child budgets (create with `draft: true`, then activate) and approval for increases; budget-level submit and approve stays a follow-up.
 - Cost center is optional on every budget today; Phase 4 enforces it on leaf budgets at the first commitment.
 - Isolated Testcontainers runs (`API_E2E_ISOLATED=1`) and the migration-from-previous-release check are wired as dependencies but not yet used by a scenario; Phase 17 adds them.
+
+## Known follow-ups from Phase 8
+
+- **`type:ui` may now depend on `type:data-access`.** The shared discussion box (`libs/web/ui/src/lib/discussion-box.ts`, `discussion-panel.ts`) is a connected component: it loads and posts comments itself. Feature libs never import each other, so it went into `libs/web/ui` and `eslint.config.mjs` added `type:data-access` to what `type:ui` may depend on. The relaxation applies to every UI library, not just this one. The alternative to revisit is making the discussion box presentational (inputs and outputs only) and keeping the connected wrapper in a feature lib, which restores the original boundary.
+- **`.bf-list__item` is content-box.** In `libs/web/ui/src/styles/page-layout.scss` it has `width: 100%` with 20px side padding and no `box-sizing: border-box`, so it overruns its card. Phase 8 patched it locally on the notification settings screen (`libs/web/features/mobile/src/lib/notification-settings.page.ts`) instead of globally; the shared stylesheet is an integrator surface and the fix moves the visual baselines of every screen that uses the class, which then have to be re-recorded.
