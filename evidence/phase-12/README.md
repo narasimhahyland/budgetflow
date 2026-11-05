@@ -1,6 +1,6 @@
 # Phase 12 — Integrations and public API (backend half)
 
-Branch `feat/p12-integrations-backend`, migration `0012_p12_integrations`. The Angular screens
+Branch `feat/p12-integrations-backend`, migration `0013_p12_integrations`. The Angular screens
 (092-101a) are a separate change; this half ends at a proven API.
 
 ## What was proven, and where

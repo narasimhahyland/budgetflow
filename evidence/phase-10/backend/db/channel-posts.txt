@@ -1,0 +1,5 @@
+ channel |    posted_to     | attachment | count 
+---------+------------------+------------+-------
+ slack   | #finance-reports | false      |     1
+(1 row)
+

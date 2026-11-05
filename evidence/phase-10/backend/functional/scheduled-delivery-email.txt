@@ -1,0 +1,14 @@
+Subject: Run now 6a440c5b: Unused and expired budget
+To: ['finance.controller@example.test']
+
+Hi Daniel,
+
+Unused and expired budget for Hyland.
+Scope: Hyland
+Rows: 539
+Available company-wide: USD 33,832,103.14
+Forecast unused: USD 33,828,458.27
+Days left in the fiscal year: 56
+Reconciles to the ledger: yes
+
+Open in BudgetFlow: http://localhost:4300/reports/unused-expired

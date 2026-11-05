@@ -44,6 +44,7 @@
       "@bf/api/spend": ["./libs/api/spend/src/index.ts"],
       "@bf/api/contributions": ["./libs/api/contributions/src/index.ts"],
       "@bf/api/events": ["./libs/api/events/src/index.ts"],
+      "@bf/api/reports": ["./libs/api/reports/src/index.ts"],
       "@bf/api/rules": ["./libs/api/rules/src/index.ts"],
       "@bf/web/features/events": ["./libs/web/features/events/src/index.ts"],
       "@bf/web/features/requests": ["./libs/web/features/requests/src/index.ts"],

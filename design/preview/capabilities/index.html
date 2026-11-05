@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BudgetFlow Enterprise - Capabilities, wave by wave</title>
+    <meta
+      name="description"
+      content="What BudgetFlow Enterprise brings to the business, release wave by release wave: what is delivered today, what is being built now, and what is planned."
+    />
+    <style>
+      :root {
+        --primary: #5654ac;
+        --primary-loud: #322f86;
+        --primary-container: #e2dfff;
+        --page: #f4f3f7;
+        --surface: #ffffff;
+        --surface-variant: #eeedf1;
+        --text: #1a1c1e;
+        --text-secondary: #474551;
+        --outline: #c8c5d3;
+        --divider: #e4e1ef;
+        --heading: 'Figtree', 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        --body: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--text);
+        font: 16px/1.55 var(--body);
+        -webkit-text-size-adjust: 100%;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-family: var(--heading);
+        line-height: 1.25;
+      }
+      p {
+        margin: 0;
+      }
+      ul,
+      ol {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      a {
+        color: var(--primary);
+      }
+      .wrap {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* Header */
+      .hero {
+        background: var(--primary);
+        color: #fff;
+      }
+      .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .brand {
+        font-family: var(--heading);
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      .topbar nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 18px;
+        font-size: 14px;
+      }
+      .topbar nav a {
+        color: #fff;
+        text-decoration: none;
+        opacity: 0.88;
+      }
+      .topbar nav a:hover {
+        opacity: 1;
+        text-decoration: underline;
+      }
+      .hero-body {
+        padding-top: 52px;
+        padding-bottom: 56px;
+      }
+      .eyebrow {
+        margin-bottom: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .hero .eyebrow {
+        opacity: 0.8;
+      }
+      .hero h1 {
+        font-size: clamp(32px, 5vw, 46px);
+        font-weight: 700;
+      }
+      .lede {
+        max-width: 760px;
+        margin-top: 16px;
+        font-size: clamp(17px, 2vw, 20px);
+        line-height: 1.5;
+      }
+      .sublede {
+        max-width: 720px;
+        margin-top: 12px;
+        opacity: 0.88;
+      }
+      .cta {
+        margin-top: 28px;
+      }
+      .button-light {
+        display: inline-block;
+        padding: 12px 24px;
+        border: 2px solid #fff;
+        border-radius: 999px;
+        background: #fff;
+        color: var(--primary-loud);
+        font-family: var(--heading);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-decoration: none;
+      }
+      .button-light:hover {
+        border-color: var(--primary-container);
+        background: var(--primary-container);
+      }
+      .button-light:focus-visible {
+        outline: 3px solid #fff;
+        outline-offset: 3px;
+      }
+
+      /* Status strip */
+      .outcomes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1px;
+        margin-top: -28px;
+        overflow: hidden;
+        border: 1px solid var(--outline);
+        border-radius: 16px;
+        background: var(--divider);
+      }
+      .outcome {
+        flex: 1 1 240px;
+        padding: 20px 20px 22px;
+        background: var(--surface);
+      }
+      .outcome h3 {
+        margin-bottom: 6px;
+        color: var(--primary-loud);
+        font-size: 16px;
+      }
+      .outcome p {
+        color: var(--text-secondary);
+        font-size: 14px;
+      }
+
+      /* Sections */
+      section {
+        padding: 64px 0 0;
+      }
+      .section-head {
+        max-width: 780px;
+        margin-bottom: 28px;
+      }
+      .section-head .eyebrow {
+        margin-bottom: 0;
+        color: var(--primary);
+      }
+      .section-head h2 {
+        margin-top: 10px;
+        font-size: clamp(24px, 3vw, 30px);
+      }
+      .section-head p {
+        margin-top: 10px;
+        color: var(--text-secondary);
+      }
+
+      /* Wave heading line: label plus status */
+      .wave-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 14px;
+      }
+      .status {
+        padding: 3px 11px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font-family: var(--heading);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .status-done {
+        background: var(--primary-container);
+        color: var(--primary-loud);
+      }
+      .status-now {
+        border-color: var(--primary);
+        background: var(--surface);
+        color: var(--primary-loud);
+      }
+      .status-planned {
+        border-color: var(--outline);
+        background: var(--surface-variant);
+        color: var(--text-secondary);
+      }
+
+      /* Capability cards */
+      .pillars {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .pillar {
+        padding: 22px 22px 24px;
+        border: 1px solid var(--outline);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+      .pillar h3 {
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+      .pillar li {
+        position: relative;
+        padding-left: 16px;
+        color: var(--text-secondary);
+        font-size: 14.5px;
+      }
+      .pillar li + li {
+        margin-top: 8px;
+      }
+      .pillar li::before {
+        content: '';
+        position: absolute;
+        top: 0.62em;
+        left: 0;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+      .pillar strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      /* Who it helps */
+      .who {
+        margin-top: 16px;
+        padding: 16px 20px;
+        border-left: 3px solid var(--primary);
+        border-radius: 0 12px 12px 0;
+        background: var(--surface);
+        color: var(--text-secondary);
+        font-size: 14.5px;
+      }
+      .who strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      /* Panels */
+      .note {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .panel {
+        padding: 24px;
+        border: 1px solid var(--outline);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+      .panel h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+      .panel p {
+        color: var(--text-secondary);
+        font-size: 14.5px;
+      }
+      .panel p + p {
+        margin-top: 10px;
+      }
+
+      /* Closing band */
+      .different {
+        padding: 32px;
+        border-radius: 20px;
+        background: var(--primary-loud);
+        color: #fff;
+      }
+      .different .section-head .eyebrow {
+        color: #fff;
+        opacity: 0.8;
+      }
+      .different .section-head {
+        margin-bottom: 24px;
+      }
+      .diff-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 24px;
+      }
+      .diff-grid h3 {
+        margin-bottom: 6px;
+        font-size: 17px;
+      }
+      .diff-grid p {
+        font-size: 14.5px;
+        opacity: 0.9;
+      }
+
+      footer {
+        margin-top: 64px;
+        padding: 28px 0 40px;
+        border-top: 1px solid var(--divider);
+        color: var(--text-secondary);
+        font-size: 14px;
+      }
+      footer .wrap {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 0 16px;
+        }
+        .hero-body {
+          padding-top: 36px;
+          padding-bottom: 48px;
+        }
+        section {
+          padding-top: 48px;
+        }
+        .different {
+          padding: 24px 20px;
+        }
+        .pillar {
+          padding: 20px 18px 22px;
+        }
+      }
+
+      @media print {
+        @page {
+          margin: 16mm;
+        }
+        body {
+          background: #fff;
+          font-size: 11pt;
+        }
+        .wrap {
+          max-width: none;
+          padding: 0;
+        }
+        .hero,
+        .different {
+          background: #fff;
+          color: var(--text);
+        }
+        .hero .eyebrow,
+        .different .section-head .eyebrow {
+          color: var(--primary);
+          opacity: 1;
+        }
+        .topbar nav,
+        .cta {
+          display: none;
+        }
+        .topbar {
+          border-bottom: 1px solid var(--divider);
+        }
+        .hero-body {
+          padding: 20px 0 28px;
+        }
+        .sublede {
+          opacity: 1;
+        }
+        .outcomes {
+          margin-top: 0;
+        }
+        section {
+          padding-top: 28px;
+        }
+        .different {
+          padding: 0;
+        }
+        .diff-grid p {
+          opacity: 1;
+        }
+        .outcome,
+        .pillar,
+        .panel,
+        .who,
+        .diff-grid > div {
+          break-inside: avoid;
+        }
+        .section-head {
+          break-after: avoid;
+        }
+        a {
+          color: var(--text);
+          text-decoration: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap topbar">
+        <span class="brand">BudgetFlow Enterprise</span>
+        <nav aria-label="Sections and pages">
+          <a href="../overview/">Product overview</a>
+          <a href="#wave-1">Wave 1</a>
+          <a href="#wave-2">Wave 2</a>
+          <a href="#wave-3">Wave 3</a>
+          <a href="#wave-4">Wave 4</a>
+          <a href="#wave-5">Wave 5</a>
+          <a href="#wave-6">Wave 6</a>
+          <a href="#wave-7">Wave 7</a>
+        </nav>
+      </div>
+      <div class="wrap hero-body">
+        <p class="eyebrow">Capabilities</p>
+        <h1>What BudgetFlow brings, wave by wave</h1>
+        <p class="lede">
+          BudgetFlow Enterprise is delivered in seven release waves. Each wave puts a complete,
+          usable piece of the product in people's hands, and each one builds on the wave before it.
+        </p>
+        <p class="sublede">
+          This page describes what the business can do at every stage: what is working today, what
+          is being built now, and what is planned. Status is as of November 2026.
+        </p>
+        <p class="cta">
+          <a class="button-light" href="../overview/">Back to the product overview</a>
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <ul class="outcomes" aria-label="Delivery status">
+          <li class="outcome">
+            <h3>Delivered: Waves 1 to 3</h3>
+            <p>
+              The accounting foundation, budgets and spend, and policy and channels. Working in the
+              product and proven end to end.
+            </p>
+          </li>
+          <li class="outcome">
+            <h3>Being built: Wave 4</h3>
+            <p>
+              Reporting and dashboards, period close and year-end, and the connections to other
+              systems. Under way now.
+            </p>
+          </li>
+          <li class="outcome">
+            <h3>Planned: Waves 5 to 7</h3>
+            <p>
+              Assistance and administration, the extended product and ecosystem, and the final
+              quality, security and documentation pass.
+            </p>
+          </li>
+        </ul>
+
+        <section id="wave-1">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Wave 1</p>
+              <span class="status status-done">Delivered</span>
+            </div>
+            <h2>One set of books, one organization, one way in</h2>
+            <p>
+              Before any budget can be trusted, the company needs a record of the money that cannot
+              be quietly edited, an accurate picture of its own structure, and a reliable answer to
+              "who is this person and what may they see?". Wave 1 delivers all three.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>A record of the money that holds up</h3>
+              <ul>
+                <li>
+                  Every amount is tracked in separate states: approved, passed down to a team, set
+                  aside, committed to a supplier and actually spent. "Available" means the same
+                  thing everywhere in the company.
+                </li>
+                <li>
+                  Entries are added, never altered. A mistake is corrected by a reversing entry that
+                  stays visible, the way accountants expect.
+                </li>
+                <li>
+                  A nightly check rebuilds every balance from scratch and compares it with what the
+                  product is showing. A difference is raised, not hidden.
+                </li>
+                <li>
+                  Amounts are held exactly, in their own currency, and exchange-rate movement never
+                  silently eats someone's budget.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>A complete, tamper-evident history</h3>
+              <ul>
+                <li>
+                  Every change records who made it, what changed, when, why, and the values before
+                  and after.
+                </li>
+                <li>
+                  The history is chained so that a removed or altered entry can be detected. It is
+                  evidence, not a convenience log.
+                </li>
+                <li>
+                  People see only the budgets and areas their role allows, and that limit is applied
+                  in one place rather than screen by screen.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Sign-in, the organization and finance basics</h3>
+              <ul>
+                <li>
+                  Sign in with the company's single sign-on, with multi-factor verification and
+                  self-service password reset.
+                </li>
+                <li>
+                  The organization as it really is: regions, departments, teams, locations, cost
+                  centres, legal entities and reporting lines, each with the dates it was true, so
+                  last year's figures stay correct after a reorganization.
+                </li>
+                <li>
+                  A people directory with headcount that can be loaded from the HR system, which is
+                  what makes per-person budgets possible later.
+                </li>
+                <li>
+                  Finance set-up: fiscal calendars (including 4-4-5 and 52/53-week years), open and
+                  closed periods, currencies and exchange rates with the planning rate locked for
+                  the year, accounts and category mappings, reason codes, the supplier list and the
+                  approval-limit table.
+                </li>
+              </ul>
+            </article>
+          </div>
+          <p class="who">
+            <strong>Who it helps:</strong> finance and administrators get a system of record they
+            can defend; auditors get a history they can rely on; everybody else gets correct numbers
+            without knowing why.
+          </p>
+        </section>
+
+        <section id="wave-2">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Wave 2</p>
+              <span class="status status-done">Delivered</span>
+            </div>
+            <h2>Budgets that flow down, and spend that is accounted for</h2>
+            <p>
+              This is the core promise of the product: leadership allocates once at the top, the
+              money flows down through the organization with a check at every step, events get
+              funded (including by more than one leader), and real spend is matched back to the
+              right budget.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>Planning and allocation</h3>
+              <ul>
+                <li>
+                  Build the annual budget from a template, import it from a spreadsheet with column
+                  mapping, or roll last year's structure forward.
+                </li>
+                <li>
+                  Allocate to regions, departments, teams and locations one at a time, through a
+                  grid you can paste into from Excel, or by a rate per eligible employee that
+                  recalculates as people join and leave, with a top-up when headcount moves.
+                </li>
+                <li>
+                  Over-allocation is refused at the moment it is attempted, including when two
+                  people allocate from the same budget at the same time.
+                </li>
+                <li>
+                  Spread a budget across the months it will actually be spent, keep plan versions
+                  side by side, compare versions, and set spending limits and alert thresholds per
+                  budget.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Leadership controls that respect commitments</h3>
+              <ul>
+                <li>
+                  Freeze a budget, reduce it, or set it to zero, in one step and always with a
+                  reason.
+                </li>
+                <li>
+                  Before confirming, see the impact: which teams are affected, what is already
+                  committed, and which requests are waiting.
+                </li>
+                <li>
+                  Money already committed is honoured; new spending stops. A reduction hands back
+                  the waiting requests that no longer fit, with the reason, so nobody is left
+                  guessing.
+                </li>
+                <li>
+                  Move budget between teams, ask for an increase, and release money from a central
+                  contingency reserve through approval rather than a side conversation.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Events, requests and co-funding</h3>
+              <ul>
+                <li>
+                  Plan events that span several locations, with the cost split fairly by location
+                  and team, and the supporting documents attached.
+                </li>
+                <li>
+                  The <strong>Inter-Director Budget Contribution Request</strong> lets one leader
+                  formally ask another to fund part of an event. The contributor approves in full,
+                  approves part, or declines with a reason, and a live board shows each
+                  contributor's share, the spend against it and what is returned at the end.
+                </li>
+                <li>
+                  Spending requests, additional-fund requests and over-budget requests all route to
+                  the right approver, who sees the budget left after approval and why the request
+                  came to them.
+                </li>
+                <li>Approvers can act straight from the email, within the same limits.</li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Real spend, matched and reconciled</h3>
+              <ul>
+                <li>
+                  Card, expense and finance feeds are brought in and matched automatically to the
+                  right budget and event. What cannot be matched goes to a short review queue rather
+                  than disappearing.
+                </li>
+                <li>
+                  Refunds, credit notes and reversals are handled properly, and the same transaction
+                  arriving twice is caught.
+                </li>
+                <li>
+                  Finance signs off each month against the general ledger, entity by entity and
+                  account by account, and can record accruals and prepaid costs.
+                </li>
+                <li>
+                  Spend in another currency is converted at the rate locked for the plan; the
+                  exchange effect is reported on its own and never consumes the budget.
+                </li>
+              </ul>
+            </article>
+          </div>
+          <p class="who">
+            <strong>Who it helps:</strong> the CEO and executives set and protect the plan; finance
+            reconciles without chasing spreadsheets; budget owners and regional managers see what
+            they have and delegate it; event organisers get funded and know where they stand;
+            employees can ask for what they need.
+          </p>
+        </section>
+
+        <section id="wave-3">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Wave 3</p>
+              <span class="status status-done">Delivered</span>
+            </div>
+            <h2>Policy that enforces itself, wherever people work</h2>
+            <p>
+              Spending policy stops being tribal knowledge and becomes rules the product applies and
+              can explain. Approvals come to people in Slack, Teams, email and on a phone. And
+              events get the planning depth that real events need.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>Rules and approval routing</h3>
+              <ul>
+                <li>
+                  Set policy for spending limits, categories (including gifts, entertainment and
+                  alcohol), locations, suppliers, going over budget, frozen budgets, and how
+                  reminders and escalations work.
+                </li>
+                <li>
+                  When several rules apply, the strictest one decides, and every rule that matched
+                  is shown alongside it, so a decision can always be explained.
+                </li>
+                <li>
+                  Try a rule before it goes live: test it against real past requests and see what
+                  would have changed, without changing anything.
+                </li>
+                <li>
+                  A draft that contradicts a live rule cannot be published. A published version
+                  cannot be quietly edited: it is replaced or retired, and the history is kept.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Approval hygiene people cannot work around</h3>
+              <ul>
+                <li>
+                  Delegation while away is controlled: not to yourself, not above your own limit,
+                  and not open-ended.
+                </li>
+                <li>
+                  Changing somebody's approval limit needs a second person; the person who proposed
+                  it cannot approve it.
+                </li>
+                <li>
+                  Approvals that go overdue escalate to the next level of authority, and that is
+                  recorded.
+                </li>
+                <li>
+                  A rejected request comes back with the reason, and an approver's counter-offer can
+                  be accepted in one step. Auditors can read every decision exactly as it happened.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Slack, Teams, email and the phone</h3>
+              <ul>
+                <li>
+                  Approvers act on a request directly from Slack or Microsoft Teams, and the limits
+                  still apply: the decision is made by BudgetFlow, not by the card in the chat
+                  window.
+                </li>
+                <li>
+                  Rejecting needs a reason. Large amounts cannot be waved through with one tap and
+                  are sent back to the product for a proper decision.
+                </li>
+                <li>
+                  A faked or out-of-date chat message changes nothing, and the same message arriving
+                  twice decides once.
+                </li>
+                <li>
+                  Check a balance or raise a quick request from chat, inside your own scope and
+                  respecting frozen budgets.
+                </li>
+                <li>
+                  Work from a phone: approvals, balances, photographing a receipt with a queue for
+                  weak signal, and alerts.
+                </li>
+                <li>
+                  Notifications and tasks in one place, with comments, mentions that never widen who
+                  can see something, following, per-role digests and quiet hours. An approval
+                  assigned to you can never be switched off.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Events, properly organised</h3>
+              <ul>
+                <li>
+                  Templates, recurring series and cloning, so the quarterly social is not planned
+                  from scratch each time.
+                </li>
+                <li>
+                  A shared checklist, tasks and an agenda, with items that complete themselves as
+                  quotes, invitations and attendance come in.
+                </li>
+                <li>
+                  Invitations and RSVP with capacity and a waiting list, and a calendar view of who
+                  is coming by location.
+                </li>
+                <li>
+                  Attendee needs (dietary, allergies, accessibility, travel, photo consent)
+                  collected privately: organisers and the person see the detail, everyone else sees
+                  counts.
+                </li>
+                <li>
+                  Attendance on the day, including walk-ins, which recalculates the real cost per
+                  person and the split between contributors.
+                </li>
+                <li>
+                  Supplier quotes compared side by side, with a written reason required when the
+                  cheapest is not chosen.
+                </li>
+                <li>
+                  Afterwards: an anonymous survey that only reports once enough people have replied,
+                  a private photo gallery, and a scorecard showing cost per attendee, participation,
+                  no-shows and surplus returned.
+                </li>
+              </ul>
+            </article>
+          </div>
+          <p class="who">
+            <strong>Who it helps:</strong> finance writes policy once instead of repeating it;
+            approvers decide in seconds from wherever they are; event organisers get planning tools
+            instead of spreadsheets; employees are invited and heard; auditors can see how every
+            decision was reached.
+          </p>
+        </section>
+
+        <section id="wave-4">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Wave 4</p>
+              <span class="status status-now">Being built now</span>
+            </div>
+            <h2>Seeing the whole picture, closing the books, connecting the systems</h2>
+            <p>
+              Wave 4 turns the recorded money into the reports leadership and finance act on, closes
+              periods and the financial year properly, and plugs BudgetFlow into the systems the
+              company already runs. This work is under way and is not available yet.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>Dashboards and reports</h3>
+              <ul>
+                <li>
+                  An executive view of company budget health, and a finance view of what still needs
+                  attention, both drilling from the company total down to a single event or line.
+                </li>
+                <li>
+                  Standard reports: budget versus actual, allocation, utilization, location and
+                  department comparison, event spending, unused and expiring budget, and forecast
+                  versus variance.
+                </li>
+                <li>
+                  Fairness and reach, side by side: spend per person by location, and how many
+                  people each location's activities actually involved.
+                </li>
+                <li>
+                  Alerts and exceptions in one queue, plus how long approvals are taking and where
+                  they get stuck.
+                </li>
+                <li>
+                  Every report reconciles to the same underlying record, so two reports cannot
+                  disagree.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Board packs, exports and evidence</h3>
+              <ul>
+                <li>A board and planning pack assembled from the figures rather than by hand.</li>
+                <li>
+                  Reports exported, or scheduled and delivered on a timetable by email and chat.
+                </li>
+                <li>
+                  A one-click evidence pack for a budget, an event or an audit question: the
+                  numbers, the approvals and the documents behind them, gathered in one place.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Period close and year-end</h3>
+              <ul>
+                <li>
+                  Close and lock a period so the numbers that went to the board cannot drift
+                  afterwards.
+                </li>
+                <li>
+                  Forecast cycles where owners explain in their own words why their figures moved.
+                </li>
+                <li>
+                  A year-end run with clear rules for what carries forward, what lapses and what is
+                  swept back to the centre.
+                </li>
+                <li>
+                  Campaigns to reclaim and redistribute unused budget before it expires, instead of
+                  a rush of year-end spending.
+                </li>
+                <li>
+                  Tax handled honestly: sales tax that cannot be recovered is part of the cost, and
+                  per-employee benefit thresholds are tracked with an export for payroll.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Connected systems and a public interface</h3>
+              <ul>
+                <li>
+                  Connections to HR, the general ledger, planning, expense and procurement,
+                  corporate cards, calendars and identity, each with a visible health status,
+                  retries and an error queue.
+                </li>
+                <li>
+                  Duplicate spend arriving from two sources (a card charge and the expense claim
+                  that itemises it) is held for a person to decide which one is the record.
+                </li>
+                <li>
+                  Event codes pushed into the card, expense and finance tools so spend is tagged
+                  where it happens and matches itself, and approved amounts optionally pushed to
+                  card limits so an approval becomes spending power for exactly that amount and
+                  period.
+                </li>
+                <li>
+                  An approved request turned into a prefilled expense claim in the company's expense
+                  tool, with its progress visible back in BudgetFlow.
+                </li>
+                <li>
+                  A documented interface for the company's own automation, with keys that expire,
+                  signed notifications of events, a delivery log, and a sandbox that uses sample
+                  data only.
+                </li>
+              </ul>
+            </article>
+          </div>
+          <p class="who">
+            <strong>Who it helps:</strong> the CEO and executives get the board view; finance closes
+            the month and the year with less manual work; analysts get trustworthy numbers; auditors
+            get evidence on demand; IT connects BudgetFlow without custom glue.
+          </p>
+        </section>
+
+        <section id="wave-5">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Wave 5</p>
+              <span class="status status-planned">Planned</span>
+            </div>
+            <h2>Assistance that suggests, and a product that explains itself</h2>
+            <p>
+              Wave 5 adds help with the questions people currently send to finance, early warnings
+              before money is wasted, and the administration settings that let the company run
+              BudgetFlow its own way.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>Answers and early warnings</h3>
+              <ul>
+                <li>
+                  Ask in plain language: how much is left, what is committed but not yet spent,
+                  where a request has got to, which budgets will lapse. Answers come from
+                  BudgetFlow's own figures, limited to what the asker may see, with every number
+                  traceable to its record.
+                </li>
+                <li>The same questions can be asked in Slack and Teams, with private answers.</li>
+                <li>
+                  Owners are warned early when a budget is heading for an overrun or for money left
+                  unused, based on the rate of spend, what is committed, the requests in the
+                  pipeline and last year's seasonal pattern, with a concrete next step they can take
+                  themselves.
+                </li>
+                <li>
+                  A plain-English explanation of why a request was blocked or needs an extra
+                  approval, and what is possible within policy. The rules still decide; the
+                  assistant only explains.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Less typing, fewer surprises</h3>
+              <ul>
+                <li>
+                  Suggested splits of a budget among teams, based on eligible headcount, how much
+                  each used last year and how many people they reached, with the reasoning shown.
+                  The owner adjusts and submits it as a normal allocation.
+                </li>
+                <li>
+                  Help placing the spend lines that automatic matching could not, so finance
+                  confirms in seconds rather than searching.
+                </li>
+                <li>Receipts and quotes read automatically so forms arrive prefilled to check.</li>
+                <li>
+                  Flags on things that look unusual before money is committed: possible split
+                  requests, duplicate or reused receipts, a cost per person far above comparable
+                  events.
+                </li>
+                <li>
+                  <strong>Assistance suggests; people decide.</strong> Nothing here approves a
+                  request or moves money, and every suggestion is accepted through the normal,
+                  audited action.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Running the product</h3>
+              <ul>
+                <li>
+                  Guided set-up with safe sample data, and invitations that activate hundreds of
+                  budget owners in one pass.
+                </li>
+                <li>
+                  Programs named the way employees know them ("Team Spirit" rather than a budget
+                  code), with the company's branding on the emails they receive.
+                </li>
+                <li>
+                  Optional capabilities switched on or off, tried first with a pilot group, with a
+                  second person required for anything affecting money or approvals.
+                </li>
+                <li>
+                  Company-wide settings for notifications, documents, data retention and legal
+                  holds, security and audit checks, plus a view of whether the service itself is
+                  healthy.
+                </li>
+                <li>
+                  Each person gets their own activity history: what they asked for, what they
+                  approved, what they attended and how much of their yearly allowance they have
+                  used.
+                </li>
+                <li>
+                  A clear "your team's budget" card so employees know the money exists and what it
+                  is for.
+                </li>
+              </ul>
+            </article>
+          </div>
+          <p class="who">
+            <strong>Who it helps:</strong> budget owners stop guessing and stop queueing at
+            finance's door; finance answers fewer repeat questions; administrators configure the
+            product without a project; employees understand what is available to them.
+          </p>
+        </section>
+
+        <section id="wave-6">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Wave 6</p>
+              <span class="status status-planned">Planned</span>
+            </div>
+            <h2>Deeper decisions, better events, an open ecosystem</h2>
+            <p>
+              Wave 6 extends the product beyond controlling money into deciding well and showing
+              what the money achieved, and opens BudgetFlow to the other tools the company and its
+              partners use.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>Decide before you commit</h3>
+              <ul>
+                <li>
+                  Try a mid-year cut or reallocation privately first: see which events and
+                  commitments would be at risk, how spend per person by location would change,
+                  compare a few options against today, and then carry the chosen one out through the
+                  normal controls, reasons and approvals.
+                </li>
+                <li>
+                  Monthly leadership summaries and owner commentary drafted from the figures, with
+                  every number linked to its source, for a person to check, edit and approve.
+                </li>
+                <li>
+                  Outcome linkage, handled carefully: how attendees rate events, which kinds of
+                  event score best for their cost, and whether taking part relates to people
+                  staying. Shown as a relationship, never about an individual.
+                </li>
+                <li>
+                  Population-level warning signs for finance and audit: amounts clustered just under
+                  approval thresholds, unusually round numbers, the same requester and approver
+                  pairing repeatedly, approvals given within seconds.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Events people actually enjoy</h3>
+              <ul>
+                <li>
+                  A planning assistant that starts an organiser from the company's own past events:
+                  a realistic cost per person for that city and activity, ideas that scored well,
+                  and a starter checklist.
+                </li>
+                <li>
+                  Local holidays and festivals on the calendar, so nobody books the offsite during a
+                  regional holiday and money is phased for the months spending really happens.
+                </li>
+                <li>
+                  Date and activity polls and an idea board, so events are planned around what
+                  people want and when they can come.
+                </li>
+                <li>
+                  Quick check-in at the door from a phone, including walk-ins, so cost per person
+                  and no-show figures reflect who actually came.
+                </li>
+                <li>
+                  Remote and hybrid colleagues included and funded from the same event, with
+                  per-person caps respected.
+                </li>
+                <li>
+                  Recognition awards and per-person wellbeing and learning allowances paid from a
+                  real budget rather than leaking into expense claims, with taxable amounts
+                  reported.
+                </li>
+                <li>
+                  Visible credit for volunteer organisers, and friendly competition between offices
+                  that ranks taking part, never spending.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>An open ecosystem</h3>
+              <ul>
+                <li>
+                  Live BudgetFlow figures in Power BI or Tableau, where each connection carries the
+                  scope of the person who made it, so a report never shows more than that person
+                  could see in the product.
+                </li>
+                <li>
+                  No-code connections to the long tail of tools teams use, while decisions about
+                  money stay with a person inside BudgetFlow.
+                </li>
+                <li>
+                  Budget questions answerable from the AI assistant somebody already uses, read-only
+                  and under their own permissions.
+                </li>
+                <li>
+                  A partner marketplace for team experiences, catering, gifts and kits, where a
+                  booking becomes a quote and then a committed amount through the normal approval
+                  path.
+                </li>
+                <li>
+                  "Your team's budget" and upcoming events embedded in the intranet or HR portal,
+                  each viewer seeing only their own.
+                </li>
+                <li>
+                  Installable iOS and Android apps for reliable notifications, biometric unlock,
+                  offline check-in and multi-page receipt capture.
+                </li>
+              </ul>
+            </article>
+          </div>
+          <p class="who">
+            <strong>Who it helps:</strong> executives test a decision before making it; finance and
+            audit get sharper signals; HR and people teams can show what engagement spending
+            achieved; organisers and employees get a better experience; analysts and IT get the data
+            where they already work.
+          </p>
+        </section>
+
+        <section id="wave-7">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Wave 7</p>
+              <span class="status status-planned">Planned</span>
+            </div>
+            <h2>Proving it, securing it, writing it down</h2>
+            <p>
+              The final wave adds no new features. It is the assurance pass that lets the company
+              put the product in front of an auditor, a security reviewer or a new joiner with
+              confidence.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>Quality and security</h3>
+              <ul>
+                <li>
+                  Performance measured at realistic data volumes, so the product is known to hold up
+                  at the size the company will actually reach.
+                </li>
+                <li>
+                  Upgrade checks that prove an existing installation moves to a new release without
+                  losing or corrupting data.
+                </li>
+                <li>
+                  A full security review of access, credentials and the release process, plus a
+                  controlled, time-limited and fully audited procedure for the rare case where a
+                  platform operator must look at company financial data.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Evidence and documentation</h3>
+              <ul>
+                <li>
+                  Every business rule mapped to a check that proves it on the running product, with
+                  the results recorded rather than asserted.
+                </li>
+                <li>
+                  A complete evidence pack covering the whole product, assembled the same way for
+                  every area.
+                </li>
+                <li>
+                  Documentation for the people who use the product day to day and for the people who
+                  run it.
+                </li>
+              </ul>
+            </article>
+          </div>
+          <p class="who">
+            <strong>Who it helps:</strong> auditors and security reviewers get what they need
+            without a special project; administrators and new joiners get answers from
+            documentation; leadership gets a product that can be signed off.
+          </p>
+        </section>
+
+        <section aria-label="How status is decided" class="note">
+          <div class="panel">
+            <h3>What "delivered" means on this page</h3>
+            <p>
+              <strong>Delivered</strong> means the capability is in the product and has been proven
+              working end to end against the running system, as the people whose job it is, with the
+              results recorded.
+            </p>
+            <p>
+              <strong>Being built now</strong> means the work is actively under way and is not
+              available to use. <strong>Planned</strong> means it is specified and scheduled, but
+              not started.
+            </p>
+            <p>
+              Nothing on this page is described as delivered on the strength of a plan alone. Waves
+              5 to 7 are written from their specifications and may change as they are built.
+            </p>
+          </div>
+          <div class="panel">
+            <h3>What does not change between waves</h3>
+            <p>
+              Money is recorded to accounting standards and corrected by reversal, never by editing.
+              Approvals happen within the limits set for each person's role. Everyone sees only
+              their own part of the organization. Every change leaves a tamper-evident record.
+            </p>
+            <p>
+              Assistance features suggest, flag and explain. Every approval, transfer and control is
+              made by a person, within their own limits, through the same audited action they would
+              use anyway.
+            </p>
+          </div>
+        </section>
+
+        <section id="in-short">
+          <div class="different">
+            <div class="section-head">
+              <p class="eyebrow">In short</p>
+              <h2>Where the product stands today</h2>
+            </div>
+            <div class="diff-grid">
+              <div>
+                <h3>The money is under control</h3>
+                <p>
+                  Budgets are allocated and delegated with limits checked up front, leadership can
+                  freeze or cut without breaking what is already booked, and spend is matched and
+                  reconciled.
+                </p>
+              </div>
+              <div>
+                <h3>Policy is enforced, not remembered</h3>
+                <p>
+                  Rules decide routing and limits, can be tested before they go live, and explain
+                  themselves. Delegation and escalation are governed.
+                </p>
+              </div>
+              <div>
+                <h3>People can act where they are</h3>
+                <p>
+                  Approvals from Slack, Microsoft Teams, email or a phone, with the same limits and
+                  the same audit trail as in the product.
+                </p>
+              </div>
+              <div>
+                <h3>Reporting and close are next</h3>
+                <p>
+                  Dashboards, board packs, period close and year-end, and the connections to HR,
+                  finance, card and expense systems are being built now.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <span>BudgetFlow Enterprise: budget delegation and control.</span>
+        <span><a href="../overview/">Product overview</a></span>
+      </div>
+    </footer>
+  </body>
+</html>

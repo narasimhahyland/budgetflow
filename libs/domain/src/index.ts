@@ -33,3 +33,5 @@ export * from './lib/org/imports';
 export * from './lib/actuals/import';
 export * from './lib/actuals/matching';
 export * from './lib/actuals/accounting';
+export * from './lib/reports/health';
+export * from './lib/reports/schedule';

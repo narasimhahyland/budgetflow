@@ -5,6 +5,7 @@ A click-through version of the Stitch designs in `design/stitch/`, for design re
 - Live site: https://narasimhahyland.github.io/budgetflow/
 - Guided flow: https://narasimhahyland.github.io/budgetflow/screens/000a-app-shell--default.html
 - Product overview (leadership summary): https://narasimhahyland.github.io/budgetflow/overview/
+- Capabilities, wave by wave (leadership): https://narasimhahyland.github.io/budgetflow/capabilities/
 
 Every exported screen state is one page. Sidebar items, header links, primary buttons, table rows and dialog triggers open the matching screen or state; items without a design yet lead to the index with a "not designed yet" notice (unlinked buttons show the notice in place). The design sits in a frame so it is never covered; a bar docked below it shows the screen number and title, switches between the screen's states, steps Previous/Next along the guided flow (also the ← → keys), highlights links (L) and returns to the index.
 
@@ -18,6 +19,7 @@ Every exported screen state is one page. Sidebar items, header links, primary bu
 | `ocr/<NNN-slug>--<state>.json` | Text positions for states without saved HTML (written by `ocr.swift`, macOS Vision)                                                                                |
 | `assets/`                      | Navigation bar (`overlay.js`, `shell.css`), link routing inside frames (`frame.js`, `overlay.css`), index styles                                                   |
 | `overview/index.html`          | Standalone product overview for leadership (one self-contained page, no scripts); copied as is to `dist/overview/` and linked from the index                       |
+| `capabilities/index.html`      | Standalone capabilities page for leadership, wave by wave (same pattern); copied as is to `dist/capabilities/` and linked from the overview                        |
 | `deploy.sh`                    | Builds and publishes only `dist/` to the `gh-pages` branch, then enables Pages                                                                                     |
 
 A state with saved HTML is served as that HTML with its links rewritten by visible text. Any other state is served as its exported PNG with hotspots on the labels `links.json` knows about, placed from the OCR positions.

@@ -12,6 +12,7 @@ import { IntegrationsApiModule } from '@bf/api/integrations';
 import { IntegrityApiModule } from '@bf/api/integrity';
 import { LedgerApiModule } from '@bf/api/ledger';
 import { OrgApiModule } from '@bf/api/org';
+import { ReportsApiModule } from '@bf/api/reports';
 import { RulesApiModule } from '@bf/api/rules';
 import { SpendApiModule } from '@bf/api/spend';
 import { TenancyApiModule } from '@bf/api/tenancy';
@@ -39,6 +40,7 @@ import { HealthController, OpenApiController } from './health.controller';
     IntegrationsApiModule,
     ChannelsApiModule,
     RulesApiModule,
+    ReportsApiModule,
   ],
   controllers: [HealthController, OpenApiController],
 })

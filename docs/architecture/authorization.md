@@ -49,6 +49,7 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `actuals.read`           |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |
 | `gl.sign_off`            |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `report.read`            |  –  |  –  |  T  |  T  |  T  |  O  |  O  |  O  |  O  |  –  |  –  |  T  |  –  |  T  |
+| `report.schedule`        |  –  |  –  |  T  |  T  |  T  |  O  |  O  |  O  |  O  |  –  |  –  |  T  |  –  |  T  |
 | `audit.read`             |  –  |  –  |  T  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |
 | `integrity.run`          |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `integrity.read`         |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |

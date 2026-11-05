@@ -1,0 +1,17 @@
+              table              | rls_enabled | rls_forced |     policies     
+---------------------------------+-------------+------------+------------------
+ report_exports                  | t           | t          | tenant_isolation
+ report_exports_pkey             | f           | f          | 
+ report_exports_tenant_requested | f           | f          | 
+ report_saved_views              | t           | t          | tenant_isolation
+ report_saved_views_owner        | f           | f          | 
+ report_saved_views_pkey         | f           | f          | 
+ report_schedule_runs            | t           | t          | tenant_isolation
+ report_schedule_runs_pkey       | f           | f          | 
+ report_schedule_runs_schedule   | f           | f          | 
+ report_schedules                | t           | t          | tenant_isolation
+ report_schedules_due            | f           | f          | 
+ report_schedules_owner          | f           | f          | 
+ report_schedules_pkey           | f           | f          | 
+(13 rows)
+
