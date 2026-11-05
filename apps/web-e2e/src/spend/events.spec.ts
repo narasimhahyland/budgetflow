@@ -23,6 +23,20 @@ const pick = async (page: Page, label: string | RegExp, option: string | RegExp)
   await page.getByRole('option', { name: option }).click();
 };
 
+/** The search reloads the candidate giving budgets; wait for that answer before opening the select. */
+const pickGivingBudget = async (page: Page, budgetName: string) => {
+  const matchedSearch = page.waitForResponse(
+    (res) =>
+      res.request().method() === 'GET' &&
+      res.url().includes('/api/contributions/candidate-budgets') &&
+      new URL(res.url()).searchParams.get('q') === budgetName &&
+      res.ok(),
+  );
+  await page.getByLabel('Find a giving budget').fill(budgetName);
+  await matchedSearch;
+  await pick(page, 'Giving budget', new RegExp(budgetName));
+};
+
 test.describe('event organizer', () => {
   test.use({ storageState: authFile('budget-owner') });
 
@@ -113,8 +127,7 @@ test.describe('Inter-Director Budget Contribution Request', () => {
 
     await page.goto(`/events/${event.id}`);
     await page.getByRole('button', { name: 'Request contribution' }).click();
-    await page.getByLabel('Find a giving budget').fill(giver.name);
-    await pick(page, 'Giving budget', new RegExp(giver.name));
+    await pickGivingBudget(page, giver.name);
     await page.getByLabel(/^Amount/).fill('3000');
     await page.getByLabel('Purpose').fill('Co-fund the shared offsite');
     await page.getByRole('button', { name: 'Send request' }).click();
