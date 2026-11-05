@@ -19,7 +19,8 @@ import { and, eq } from 'drizzle-orm';
 class RulesSeedModule {}
 
 const T = TENANTS.acme;
-const TODAY = '2026-11-16';
+/** Fixtures are dated relative to the seed run so ages and the 30-day windows stay realistic. */
+const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000);
 
 /**
  * Phase 7 demo data: published policy rules with their version history, the conflicting draft that
@@ -114,14 +115,10 @@ export async function seedRules(_app: INestApplicationContext): Promise<void> {
           .onConflictDoNothing();
       }
 
-      for (const e of P7_EXCEPTIONS) {
+      for (const [i, e] of P7_EXCEPTIONS.entries()) {
         await tx
           .insert(s.postSpendExceptions)
-          .values({
-            ...e,
-            personId: null,
-            raisedAt: new Date(`${TODAY}T06:00:00.000Z`),
-          })
+          .values({ ...e, personId: null, raisedAt: daysAgo(3 + i * 4) })
           .onConflictDoNothing();
       }
 
@@ -137,7 +134,7 @@ export async function seedRules(_app: INestApplicationContext): Promise<void> {
           matchedRules: [{ ruleCode: rule.code }],
           facts: {},
           explanation: rule.versions[rule.versions.length - 1].explanation,
-          evaluatedAt: new Date(Date.parse(`${TODAY}T06:00:00.000Z`) - i * 5 * 86_400_000),
+          evaluatedAt: daysAgo(i * 5 + 1),
         })),
       );
       await tx.insert(s.ruleExecutions).values(executions).onConflictDoNothing();

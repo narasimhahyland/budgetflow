@@ -251,6 +251,15 @@ export function evaluateRules(
   };
 }
 
+/** What each outcome does, phrased to drop into a sentence about two rules disagreeing. */
+const EFFECT_TEXT: Record<RuleEffect, string> = {
+  block: 'block them',
+  freeze: 'hold them until the budget is available again',
+  require_approval: 'send them for approval',
+  warn: 'let them through with a warning',
+  auto_approve: 'let them through with no approval step',
+};
+
 export interface DetectedConflict {
   otherRule: EvaluableRule;
   winningEffect: RuleEffect;
@@ -347,11 +356,11 @@ export function detectRuleConflicts(
 
     if (RestrictiveVsPermissive || PermissiveVsRestrictive || SamePriorityCollision) {
       const winningEffect = candRank <= otherRank ? candidate.effect : other.effect;
-      const reason = RestrictiveVsPermissive
-        ? `Conflict with ${other.code} ${other.name} (priority ${other.priority}). ${other.code} enforces ${other.effect} while ${candidate.code} would route for ${candidate.effect.replace('_', ' ')}. Highest outcome wins: block > freeze > approvals > warn > auto-approve.`
-        : SamePriorityCollision
-          ? `Conflict with ${other.code} ${other.name}: both rules have priority ${candidate.priority} with different outcomes (${candidate.effect} vs ${other.effect}).`
-          : `Conflict with ${other.code} ${other.name} (priority ${other.priority}): overlapping conditions produce opposing outcomes (${candidate.effect} vs ${other.effect}).`;
+      const mine = EFFECT_TEXT[candidate.effect];
+      const theirs = EFFECT_TEXT[other.effect];
+      const reason = SamePriorityCollision
+        ? `${other.code} ${other.name} has the same priority (${candidate.priority}) but a different outcome: it would ${theirs} while ${candidate.code} would ${mine}. Give one of them a higher priority so the outcome is never decided by chance.`
+        : `${other.code} ${other.name} (priority ${other.priority}) would ${theirs} for requests that ${candidate.code} would ${mine}. The stricter outcome wins, so ${EFFECT_TEXT[winningEffect]} is what happens.`;
       conflicts.push({
         otherRule: other,
         winningEffect,

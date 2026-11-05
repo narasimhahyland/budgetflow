@@ -67,7 +67,7 @@ export const rulesRoutes: Routes = [
     loadComponent: () => import('./exceptions.page').then((m) => m.ExceptionsPage),
   },
   {
-    path: 'policies/:section',
+    path: 'policies/:policySection',
     title: 'Policy settings',
     data: { pageTitle: 'Policy settings', section },
     canActivate: guard('Policy settings'),

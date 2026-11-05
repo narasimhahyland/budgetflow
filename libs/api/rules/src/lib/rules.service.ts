@@ -40,6 +40,7 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import {
+  approverLabel,
   conditionsOf,
   conditionText,
   EFFECT_LABELS,
@@ -513,7 +514,7 @@ export class RulesService {
           'effect',
           EFFECT_LABELS[from.effect as RuleEffect],
           EFFECT_LABELS[to.effect as RuleEffect],
-          `Outcome changed from ${EFFECT_LABELS[from.effect as RuleEffect].toLowerCase()} to ${EFFECT_LABELS[to.effect as RuleEffect].toLowerCase()}.`,
+          `Outcome changed from "${EFFECT_LABELS[from.effect as RuleEffect]}" to "${EFFECT_LABELS[to.effect as RuleEffect]}".`,
         );
       }
 
@@ -545,6 +546,7 @@ export class RulesService {
       const approversOf = (row: RuleVersionRow) =>
         ((row.actions as { approvers?: string[] }[] | null) ?? [])
           .flatMap((a) => a.approvers ?? [])
+          .map(approverLabel)
           .join(', ');
       if (approversOf(from) !== approversOf(to)) {
         line(

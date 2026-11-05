@@ -13,7 +13,7 @@ import { Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { approverLabel } from './labels';
+import { approverLabel, spendTypeLabel } from './labels';
 import { LoadState } from './load-state';
 import { RulesTabs } from './rules-tabs';
 
@@ -140,7 +140,7 @@ const MARKER_LABELS: Record<string, string> = {
               @for (row of v.rows; track $index) {
                 <tr>
                   <td>{{ who(row) }}</td>
-                  <td>{{ row.spendType }}</td>
+                  <td>{{ spendType(row.spendType) }}</td>
                   <td>{{ row.legalEntityCode ?? 'Any entity' }}</td>
                   <td class="bf-num">
                     <bf-money
@@ -215,6 +215,8 @@ export class DoaAdminPage {
   protected can(action: string): boolean {
     return (this.current()?.allowedActions ?? []).includes(action);
   }
+
+  protected readonly spendType = spendTypeLabel;
 
   protected who(row: { personName?: string | null; role: string | null }): string {
     return row.personName ?? (row.role ? approverLabel(row.role) : 'Anyone');

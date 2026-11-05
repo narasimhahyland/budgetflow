@@ -126,10 +126,25 @@ export function scopeSummary(scope: RuleScope): string {
   return parts.length ? parts.join(' · ') : 'All locations and entities';
 }
 
+/** Must read the same as the labels on the rules screens, because both reach the same people. */
 export const EFFECT_LABELS: Record<RuleEffect, string> = {
   block: 'Block',
-  freeze: 'Freeze',
-  require_approval: 'Require approval',
+  freeze: 'Hold',
+  require_approval: 'Needs approval',
   warn: 'Warn',
-  auto_approve: 'Auto-approve',
+  auto_approve: 'Goes through',
 };
+
+const APPROVER_LABELS: Record<string, string> = {
+  budget_owner: 'budget owner',
+  parent_owner: 'parent budget owner',
+  finance_controller: 'Finance Controller',
+  finance_review: 'Finance Controller',
+  giving_director: 'giving director',
+  executive: 'CEO',
+  ceo: 'CEO',
+  tax_approver: 'tax approver',
+};
+
+export const approverLabel = (key: string): string =>
+  APPROVER_LABELS[key] ?? key.replace(/[_-]/g, ' ');

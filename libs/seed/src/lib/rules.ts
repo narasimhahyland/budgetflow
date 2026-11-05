@@ -23,6 +23,7 @@ export const P7_RULES = {
   clientEntertainment: seedId('80000000', 25),
   alcohol: seedId('80000000', 26),
   splitPurchase: seedId('80000000', 28),
+  contributionThresholds: seedId('80000000', 30),
 } as const;
 
 export const P7_DOA_V2 = seedId('83000000', 2);
@@ -296,6 +297,27 @@ export const P7_RULE_SEEDS: RuleSeed[] = [
         approvers: ['parent_owner'],
         explanation:
           'Alcohol is allowed only at approved events, up to USD 20.00 per attendee, with the parent owner signing off.',
+        validFrom: '2026-01-01',
+      },
+    ],
+  },
+  {
+    id: P7_RULES.contributionThresholds,
+    code: 'R-30',
+    name: 'Contribution approval thresholds',
+    family: 'approval_thresholds',
+    templateCode: null,
+    publishedBy: 'finance-admin',
+    versions: [
+      {
+        version: 1,
+        priority: 620,
+        effect: 'require_approval',
+        conditions: [{ fact: 'amount_reporting_minor', op: 'gt', value: 1_000_000 }],
+        scope: { requestKinds: ['contribution'] },
+        approvers: ['giving_director', 'finance_controller'],
+        explanation:
+          'An Inter-Director Budget Contribution Request above USD 10,000.00 needs the Finance Controller as well as the giving director.',
         validFrom: '2026-01-01',
       },
     ],

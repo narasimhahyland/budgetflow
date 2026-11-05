@@ -5,7 +5,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { data, injectApi, valueOf } from './api';
-import { approverLabel } from './labels';
 import { LoadState } from './load-state';
 import { RulesTabs } from './rules-tabs';
 
@@ -79,21 +78,9 @@ import { RulesTabs } from './rules-tabs';
                 @for (s of route.steps; track s.stepNo) {
                   <tr>
                     <td class="bf-num">{{ s.stepNo }}</td>
-                    <td>
-                      <span class="bf-cell__primary">{{ s.label }}</span>
-                      <span class="bf-cell__secondary">{{ resolver(s.resolver) }}</span>
-                    </td>
+                    <td class="bf-cell__primary">{{ s.label }}</td>
                     <td>{{ s.conditionLabel ?? 'Always' }}</td>
-                    <td>
-                      {{
-                        s.mode === 'parallel'
-                          ? 'At the same time as other steps'
-                          : 'One after another'
-                      }}
-                      <span class="bf-cell__secondary">{{
-                        s.groupRule === 'all' ? 'Everyone named must agree' : 'Any one of them'
-                      }}</span>
-                    </td>
+                    <td>{{ order(s) }}</td>
                     <td class="bf-num">{{ s.slaBusinessHours }} working hours</td>
                     <td>{{ s.applyDoa ? 'Yes' : 'No' }}</td>
                   </tr>
@@ -119,10 +106,17 @@ import { RulesTabs } from './rules-tabs';
 export class RoutingPage {
   private readonly api = injectApi();
   protected readonly valueOf = valueOf;
-  protected readonly resolver = approverLabel;
   protected readonly kind = signal('spending');
   protected readonly routes = resource({ loader: () => data(this.api.listWorkflowRoutes({})) });
   protected readonly selected = computed(() =>
     (valueOf(this.routes)?.items ?? []).find((r) => r.requestKind === this.kind()),
   );
+
+  /** One sentence for how a step runs, instead of two labels that look contradictory. */
+  protected order(step: { mode: string; groupRule: string }): string {
+    const when =
+      step.mode === 'parallel' ? 'Runs alongside other steps' : 'Runs after the step before it';
+    const who = step.groupRule === 'all' ? 'everyone named must agree' : 'any one of them decides';
+    return `${when}; ${who}.`;
+  }
 }

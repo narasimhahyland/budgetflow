@@ -67,7 +67,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
       @for (s of sections; track s.key) {
         <a
           satNavigationTab
-          [active]="s.key === section()"
+          [active]="s.key === policySection()"
           (click)="go(s.key)"
           (keydown.enter)="go(s.key)"
           tabindex="0"
@@ -82,7 +82,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
       (retry)="view.reload()"
     />
     @if (valueOf(view); as v) {
-      @switch (section()) {
+      @switch (policySection()) {
         @case ('limits') {
           <section class="bf-card" aria-labelledby="limits-title">
             <div class="bf-card__header">
@@ -565,8 +565,12 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PoliciesPage {
-  /** Bound from the `:section` route parameter. */
-  readonly section = input<PolicySectionKey>('limits');
+  /**
+   * Bound from the `:policySection` route parameter. Not named `section`: the shell puts a
+   * `section` key in every route's `data` for the breadcrumb, and component input binding would
+   * bind that instead of the parameter.
+   */
+  readonly policySection = input<PolicySectionKey>('limits');
 
   private readonly api = injectApi();
   private readonly router = inject(Router);
@@ -574,7 +578,7 @@ export class PoliciesPage {
   protected readonly approverList = approverList;
   protected readonly sections = POLICY_SECTIONS;
   protected readonly view = resource({ loader: () => data(this.api.getPolicyConfigs({})) });
-  protected readonly intro = computed(() => SECTION_INTROS[this.section()] ?? '');
+  protected readonly intro = computed(() => SECTION_INTROS[this.policySection()] ?? '');
 
   protected go(key: PolicySectionKey): void {
     void this.router.navigate(['/admin/rules/policies', key]);

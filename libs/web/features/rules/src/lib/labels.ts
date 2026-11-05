@@ -33,6 +33,7 @@ export const effectTone = (effect: RuleEffect): 'rejected' | 'pending' | 'approv
       ? 'approved'
       : 'pending';
 
+/** Resolver keys and role ids both appear in approver fields, so one table covers them. */
 export const APPROVER_LABELS: Record<string, string> = {
   budget_owner: 'Budget owner',
   parent_owner: 'Parent budget owner',
@@ -42,9 +43,30 @@ export const APPROVER_LABELS: Record<string, string> = {
   executive: 'CEO',
   ceo: 'CEO',
   tax_approver: 'Tax approver',
+  'finance-admin': 'Finance administrator',
+  'finance-controller': 'Finance Controller',
+  'budget-owner': 'Budget owner',
+  'department-head': 'Department head',
+  'regional-manager': 'Regional manager',
+  'location-manager': 'Location manager',
+  'event-organizer': 'Event organizer',
+  'org-admin': 'Organization administrator',
+  'integration-admin': 'Integration administrator',
+  'super-admin': 'Platform operator',
+  employee: 'Employee',
+  auditor: 'Auditor',
+  analyst: 'Analyst',
 };
 
-export const approverLabel = (key: string): string => APPROVER_LABELS[key] ?? key;
+export const approverLabel = (key: string): string =>
+  APPROVER_LABELS[key] ?? key.replace(/[_-]/g, ' ');
+
+/** Spend types and categories are stored as codes; `*` is the wildcard the DoA matrix uses. */
+export const spendTypeLabel = (code: string): string => {
+  if (code === '*') return 'Any spend type';
+  const text = code.replace(/_/g, ' ');
+  return text.charAt(0).toUpperCase() + text.slice(1);
+};
 
 export const approverList = (keys: readonly string[]): string =>
   keys.length ? keys.map(approverLabel).join(', ') : 'No extra approver';

@@ -93,7 +93,11 @@ import { RulesTabs } from './rules-tabs';
         <div class="bf-filters">
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>From version</mat-label>
-            <mat-select [ngModel]="from()" (ngModelChange)="from.set($event)" name="from">
+            <mat-select
+              [ngModel]="pair()?.fromVersion"
+              (ngModelChange)="from.set($event)"
+              name="from"
+            >
               @for (v of r.versions; track v.id) {
                 <mat-option [value]="v.version">v{{ v.version }}</mat-option>
               }
@@ -101,7 +105,7 @@ import { RulesTabs } from './rules-tabs';
           </mat-form-field>
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>To version</mat-label>
-            <mat-select [ngModel]="to()" (ngModelChange)="to.set($event)" name="to">
+            <mat-select [ngModel]="pair()?.toVersion" (ngModelChange)="to.set($event)" name="to">
               @for (v of r.versions; track v.id) {
                 <mat-option [value]="v.version">v{{ v.version }}</mat-option>
               }
@@ -118,8 +122,9 @@ import { RulesTabs } from './rules-tabs';
           <div class="bf-card__body">
             <sat-banner variant="info">
               <sat-banner-message>
-                {{ d.decisionsWithToVersion | number }} decision(s) were made while version
-                {{ d.toVersion }} was in force. Those decisions keep that version.
+                Comparing version {{ d.fromVersion }} with version {{ d.toVersion }}.
+                {{ d.decisionsWithToVersion | number }} decisions have been recorded against this
+                rule, and each one keeps the version that decided it.
               </sat-banner-message>
             </sat-banner>
             <ul class="bf-timeline">
@@ -148,7 +153,7 @@ export class RuleHistoryPage {
   });
 
   /** Defaults to the two newest versions until the reader picks a pair. */
-  private readonly pair = computed(() => {
+  protected readonly pair = computed(() => {
     const versions = valueOf(this.detail)?.versions ?? [];
     if (!versions.length) return null;
     return {

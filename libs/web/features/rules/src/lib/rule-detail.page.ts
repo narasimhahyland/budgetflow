@@ -74,11 +74,19 @@ import { RulesTabs } from './rules-tabs';
     />
     @if (rule(); as r) {
       @if (r.conflicts.length) {
-        <sat-banner variant="important">
-          <sat-banner-message>
-            This draft cannot be published yet. {{ r.conflicts[0].reason }}
-          </sat-banner-message>
-        </sat-banner>
+        @if (r.draft) {
+          <sat-banner variant="important">
+            <sat-banner-message>
+              This draft cannot be published yet. {{ r.conflicts[0].reason }}
+            </sat-banner-message>
+          </sat-banner>
+        } @else {
+          <sat-banner variant="warning">
+            <sat-banner-message>
+              This rule overlaps with another one. {{ r.conflicts[0].reason }}
+            </sat-banner-message>
+          </sat-banner>
+        }
       }
 
       <section class="bf-card" aria-labelledby="active-title">
