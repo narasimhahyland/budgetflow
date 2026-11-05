@@ -57,7 +57,7 @@ type Panel = 'contribution' | 'commit' | 'participants' | 'cancel' | null;
     SpendStatus,
   ],
   templateUrl: './event-detail.page.html',
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EventDetailPage {

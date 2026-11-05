@@ -465,7 +465,7 @@ const REASONS = [
       </div>
     }
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContributionPage {

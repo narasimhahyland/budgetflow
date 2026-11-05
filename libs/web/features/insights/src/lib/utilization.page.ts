@@ -214,7 +214,7 @@ type GroupBy = 'location' | 'team' | 'budget';
       }
     </section>
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UtilizationPage {

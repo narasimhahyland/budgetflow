@@ -181,7 +181,7 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
       }
     </section>
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EventsListPage {

@@ -154,7 +154,7 @@ const REASONS = [
       align-self: flex-start;
     }
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmailActionPage {

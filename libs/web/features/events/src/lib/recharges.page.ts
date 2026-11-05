@@ -133,7 +133,7 @@ import { LoadState } from './load-state';
       }
     </section>
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RechargesPage {

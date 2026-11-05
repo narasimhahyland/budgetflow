@@ -202,7 +202,7 @@ const KIND: Record<string, string> = {
       }
     </section>
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyRequestsPage {

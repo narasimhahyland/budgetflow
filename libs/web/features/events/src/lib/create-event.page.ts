@@ -399,7 +399,7 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
       </aside>
     </div>
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateEventPage {

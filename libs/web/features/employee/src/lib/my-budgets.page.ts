@@ -179,7 +179,7 @@ type Filter = 'all' | 'open' | 'paused';
       }
     }
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyBudgetsPage {

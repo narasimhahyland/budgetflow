@@ -259,7 +259,7 @@ const TYPES = ['', 'event', 'request', 'contribution', 'budget', 'recharge', 'or
       word-break: break-all;
     }
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuditLogPage {

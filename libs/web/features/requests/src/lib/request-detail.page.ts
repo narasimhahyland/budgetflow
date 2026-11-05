@@ -288,7 +288,7 @@ const KIND: Record<string, string> = {
       </div>
     }
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RequestDetailPage {

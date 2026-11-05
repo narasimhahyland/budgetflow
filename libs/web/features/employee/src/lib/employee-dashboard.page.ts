@@ -229,7 +229,7 @@ import { LoadState } from './load-state';
       opacity: 0.5;
     }
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeeDashboardPage {

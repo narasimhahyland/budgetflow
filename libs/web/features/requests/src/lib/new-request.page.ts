@@ -215,7 +215,7 @@ const SPEND_TYPES = [
       </aside>
     </div>
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewRequestPage {

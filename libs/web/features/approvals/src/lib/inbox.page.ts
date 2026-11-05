@@ -260,7 +260,7 @@ const TABS: { id: Tab; label: string }[] = [
       }
     }
   `,
-  styleUrl: './page.scss',
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InboxPage {
