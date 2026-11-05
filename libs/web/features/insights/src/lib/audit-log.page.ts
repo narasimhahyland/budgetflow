@@ -166,7 +166,7 @@ const TYPES = ['', 'event', 'request', 'contribution', 'budget', 'recharge', 'or
                       </td>
                       <td>{{ e.reason ?? '' }}</td>
                       <td>
-                        <code>{{ e.hash.slice(0, 10) }}…</code>
+                        <code class="bf-audit__hash">{{ e.hash.slice(0, 10) }}…</code>
                       </td>
                     </tr>
                   }
@@ -236,6 +236,12 @@ const TYPES = ['', 'event', 'request', 'contribution', 'budget', 'recharge', 'or
   styles: `
     .bf-audit__row {
       cursor: pointer;
+    }
+    .bf-audit__hash {
+      display: inline-block;
+      width: 11ch;
+      overflow: hidden;
+      white-space: nowrap;
     }
     .bf-audit__row--active td {
       background: var(--mat-sys-secondary-container);
