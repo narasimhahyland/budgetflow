@@ -235,6 +235,7 @@ export const AcknowledgeCheckRequest = named(
     .strict()
     .describe('Accept a soft check with a reason. Hard checks cannot be acknowledged.'),
 );
+export type AcknowledgeCheckRequest = z.infer<typeof AcknowledgeCheckRequest>;
 
 export const ClosePeriodRequest = named(
   'ClosePeriodRequest',
@@ -248,11 +249,13 @@ export const ClosePeriodRequest = named(
     })
     .strict(),
 );
+export type ClosePeriodRequest = z.infer<typeof ClosePeriodRequest>;
 
 export const PeriodStatusRequest = named(
   'PeriodStatusRequest',
   z.object({ reason: Reason.optional() }).strict(),
 );
+export type PeriodStatusRequest = z.infer<typeof PeriodStatusRequest>;
 
 export const RequestReopenRequest = named(
   'RequestReopenRequest',
@@ -264,6 +267,7 @@ export const RequestReopenRequest = named(
     })
     .strict(),
 );
+export type RequestReopenRequest = z.infer<typeof RequestReopenRequest>;
 
 export const ReopenDecisionRequest = named(
   'ReopenDecisionRequest',
@@ -275,6 +279,7 @@ export const ReopenDecisionRequest = named(
     .strict()
     .describe('A second person decides; the requester may not approve their own request.'),
 );
+export type ReopenDecisionRequest = z.infer<typeof ReopenDecisionRequest>;
 
 // Rollover policies ------------------------------------------------------------------------------
 
@@ -307,11 +312,13 @@ export const AssignRolloverPolicyRequest = named(
   'AssignRolloverPolicyRequest',
   z.object({ rolloverPolicyId: Id.nullable(), reason: Reason }).strict(),
 );
+export type AssignRolloverPolicyRequest = z.infer<typeof AssignRolloverPolicyRequest>;
 
 export const BudgetRolloverPolicy = named(
   'BudgetRolloverPolicy',
   z.object({ budgetId: Id, budgetName: z.string(), rolloverPolicyId: Id.nullable() }).strict(),
 );
+export type BudgetRolloverPolicy = z.infer<typeof BudgetRolloverPolicy>;
 
 // Year-end run -----------------------------------------------------------------------------------
 
@@ -370,7 +377,8 @@ export const YearEndReadinessCheck = named(
         'target_year_exists',
         'target_plan_rates_locked',
         'target_budgets_exist',
-        'final_period_closed',
+        'prior_periods_closed',
+        'posting_periods_open',
         'rollover_policies_assigned',
         'carry_approvals_decided',
       ]),
@@ -443,6 +451,7 @@ export const CreateYearEndRunRequest = named(
     })
     .strict(),
 );
+export type CreateYearEndRunRequest = z.infer<typeof CreateYearEndRunRequest>;
 
 export const YearEndCarryDecisionRequest = named(
   'YearEndCarryDecisionRequest',
@@ -458,6 +467,7 @@ export const YearEndCarryDecisionRequest = named(
     })
     .strict(),
 );
+export type YearEndCarryDecisionRequest = z.infer<typeof YearEndCarryDecisionRequest>;
 
 export const ExecuteYearEndRequest = named(
   'ExecuteYearEndRequest',
@@ -473,6 +483,7 @@ export const ExecuteYearEndRequest = named(
     })
     .strict(),
 );
+export type ExecuteYearEndRequest = z.infer<typeof ExecuteYearEndRequest>;
 
 export const closeEndpoints = {
   listClosePeriods: {

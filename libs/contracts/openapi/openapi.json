@@ -32205,7 +32205,8 @@
               "target_year_exists",
               "target_plan_rates_locked",
               "target_budgets_exist",
-              "final_period_closed",
+              "prior_periods_closed",
+              "posting_periods_open",
               "rollover_policies_assigned",
               "carry_approvals_decided"
             ]
