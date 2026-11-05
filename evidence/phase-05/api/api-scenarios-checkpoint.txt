@@ -1,0 +1,31 @@
+# API scenarios, checkpoint run 2026-11-05T01:40Z on the +50 stack (apps/api-e2e, all specs)
+  224 passed (1.0m)
+
+apps/api-e2e/src/approvals/doa-routing.spec.ts:126:7 › approval routing by hierarchy and delegation of authority › an approver can escalate to the next authority up the hierarchy
+apps/api-e2e/src/approvals/doa-routing.spec.ts:154:7 › approval routing by hierarchy and delegation of authority › leaving less than 10% of the budget adds a finance review even for a small amount
+apps/api-e2e/src/approvals/doa-routing.spec.ts:20:7 › approval routing by hierarchy and delegation of authority › requester skipped, owner within limit approves; exactly at the limit adds finance review; one cent above escalates
+apps/api-e2e/src/approvals/email-links.spec.ts:27:7 › actionable approval email links › approve from email once; the second use and the sibling reject link change nothing
+apps/api-e2e/src/approvals/email-links.spec.ts:89:7 › actionable approval email links › reject from email needs a reason; tampered and expired links are refused
+apps/api-e2e/src/approvals/hygiene.spec.ts:131:7 › approval hygiene › a requester cannot approve their own request, even as a delegate
+apps/api-e2e/src/approvals/hygiene.spec.ts:152:7 › approval hygiene › a delegate acts within the lower of both limits and only between the delegation dates
+apps/api-e2e/src/approvals/hygiene.spec.ts:58:7 › approval hygiene › an attendee and a co-organizer are skipped as approvers of the event’s funding and contributions
+apps/api-e2e/src/contributions/intercompany.spec.ts:30:7 › intercompany policy on contributions › block, recharge with markup and recharge at cost with tax approval; close waits for the recharge
+apps/api-e2e/src/contributions/partial-approval.spec.ts:214:7 › Inter-Director Budget Contribution Request decisions › only the giving director decides; others are refused and nobody else sees the giving budget
+apps/api-e2e/src/contributions/partial-approval.spec.ts:23:7 › Inter-Director Budget Contribution Request decisions › full, partial and declined contributions with attribution, earmarks and one audit entry each
+apps/api-e2e/src/documents/upload.spec.ts:18:7 › documents on the DocumentStore › declare, upload, verify and download; wrong type, size and owner are refused
+apps/api-e2e/src/events/funding-cap.spec.ts:184:7 › event funding cap, consumption order and surplus return › an event cannot be committed against before its budget is approved
+apps/api-e2e/src/events/funding-cap.spec.ts:32:7 › event funding cap, consumption order and surplus return › cap, pro-rata commitments, exact release and surplus returned by share at close
+apps/api-e2e/src/events/scope.spec.ts:131:7 › Phase 5 scope › Director A does not see Director B’s requests; the seeded event detail stays consistent
+apps/api-e2e/src/events/scope.spec.ts:19:7 › Phase 5 scope › an employee requests only from their own location’s budget and never sees its totals
+apps/api-e2e/src/events/scope.spec.ts:56:7 › Phase 5 scope › events are visible to organizers, participants, funders and finance only
+apps/api-e2e/src/events/scope.spec.ts:96:7 › Phase 5 scope › the co-funding board shows contributors’ amounts, never their balances
+apps/api-e2e/src/finance/doa.spec.ts:153:7 › delegation-of-authority matrix › owning a budget does not grant approval authority
+apps/api-e2e/src/finance/doa.spec.ts:23:7 › delegation-of-authority matrix › finance roles and auditors read the active matrix; others cannot
+apps/api-e2e/src/finance/doa.spec.ts:52:7 › delegation-of-authority matrix › exactly at the limit passes; one minor unit above escalates
+apps/api-e2e/src/finance/doa.spec.ts:67:7 › delegation-of-authority matrix › amounts in INR convert at the locked FY2026 plan rate before the check
+apps/api-e2e/src/finance/doa.spec.ts:84:7 › delegation-of-authority matrix › the most specific row wins: person, then spend type, then entity, then wildcards
+apps/api-e2e/src/requests/commitment-relief.spec.ts:21:7 › commitment relief in a non-budget currency › a partial approval of an INR request leaves no rounding behind on the USD budget
+apps/api-e2e/src/requests/controls.spec.ts:121:7 › budget controls on waiting requests › freeze holds waiting requests (no decision) and unfreezing releases them
+apps/api-e2e/src/requests/controls.spec.ts:152:7 › budget controls on waiting requests › a reduction keeps waiting requests decidable
+apps/api-e2e/src/requests/controls.spec.ts:34:7 › budget controls on waiting requests › set to zero cancels waiting requests and contributions, releases them and keeps approved commitments
+apps/api-e2e/src/requests/thresholds.spec.ts:10:5 › approving a request past an alert threshold emails the budget owner once

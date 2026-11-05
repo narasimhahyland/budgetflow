@@ -82,6 +82,16 @@ Not in Phase 4: executive dashboard (P10), commitments and actuals tabs on budge
   - _Per-head rate per month_: amount = USD rate × eligible headcount (prorated) × months left in the fiscal year from the as-of month; a monthly true-up posts rate × headcount change × months left. Rename the contract field and label it "Rate per eligible employee per month (USD)"; the seed driver and the per-head scenarios change with it.
 - **One audit entry per command.** `BudgetsService.createInTx` / `allocateInTx` and `ControlsService.transferInTx` take `audit: false` when the calling command writes the single entry itself (grid, per-head, request decisions, roll forward, plan apply).
 
+### Commitments: what Phase 6 consumes from Phase 5
+
+Import `SpendModule` from `@bf/api/spend` and use `CommitmentsService` inside your command transaction (`tx` from `CommandRunner.run`, `PostCtx` = actor, command name, request id, idempotency key):
+
+- `consume(tx, ctx, { commitmentId, amount, actualId? })`: a matched actual moves encumbered to actual at the commitment's stored rates, pro rata across its funding lines; the last remainder relieves exactly what was posted. Returns `{ journalIds, consumedBudgetMinor, status }`. Allowed under every budget control.
+- `release(tx, ctx, commitmentId)`: releases what is left of an encumbered or partially consumed commitment (event lines back to their funding sources' earmarks, request lines to the budget). Returns `{ journalIds, releasedBudgetMinor }`.
+- `row(tx, id, lock?)` reads a commitment; `listForEvent` / `views` return the contract shape.
+
+Every posting goes through `PostingSupport.post`, which raises owner threshold alerts (`BudgetViews.emitThresholds`); the worker emails the owner on `budget.threshold_crossed`. The worker consumes `budget.control_changed` (`BudgetControlConsumer`): set to zero cancels waiting requests and Inter-Director Budget Contribution Requests with the reason "budget set to zero" and emails the requesters, freeze holds them, unfreeze and restore release them, reduce keeps them.
+
 ## Rules for every phase agent
 
 1. **Owned paths only.** Each phase below lists the paths it owns. Shared surfaces belong to the integrator (`git-worktree-workflow.mdc`): `package.json`, lockfile, `nx.json`, `tsconfig.base.json`, `eslint.config.mjs`, `.stylelintrc.mjs`, `libs/contracts/src/lib/{common,endpoint,endpoints,registry}.ts` and `index.ts`, `libs/api/db/**`, `libs/domain/src/index.ts` and `authorization/policy.ts`, `apps/api/src/app/app.module.ts`, `apps/worker/src/app/worker.module.ts`, `apps/api/src/seed/extensions.ts`, `apps/web/src/app/**`, `libs/web/ui/**`, `libs/web/data-access/**`, `apps/web-e2e/visual/screens.json`, `docs/testing/invariant-scenarios.md`, `infra/**`, `.cursor/**`, `.github/**`. Put requested changes to them in your report.
