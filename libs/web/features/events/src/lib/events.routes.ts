@@ -9,6 +9,13 @@ export const eventRoutes: Routes = [
     title: 'Events',
     data: { pageTitle: 'Events', section: 'Events' },
     canActivate: [requirePermission('tenant.read', 'Events')],
+    loadComponent: () => import('./events-dashboard.page').then((m) => m.EventsDashboardPage),
+  },
+  {
+    path: 'all',
+    title: 'All events',
+    data: { pageTitle: 'All events', section: 'Events' },
+    canActivate: [requirePermission('tenant.read', 'All events')],
     loadComponent: () => import('./events-list.page').then((m) => m.EventsListPage),
   },
   {
@@ -19,6 +26,13 @@ export const eventRoutes: Routes = [
     loadComponent: () => import('./create-event.page').then((m) => m.CreateEventPage),
   },
   {
+    path: 'templates',
+    title: 'Event templates',
+    data: { pageTitle: 'Event templates', section: 'Events' },
+    canActivate: [requirePermission('tenant.read', 'Event templates')],
+    loadComponent: () => import('./event-templates.page').then((m) => m.EventTemplatesPage),
+  },
+  {
     path: 'cofunding-board',
     title: 'Co-funding board',
     data: { pageTitle: 'Co-funding board', section: 'Events' },
@@ -27,10 +41,53 @@ export const eventRoutes: Routes = [
   },
   {
     path: ':eventId',
+    pathMatch: 'full',
     title: 'Event',
     data: { pageTitle: 'Event', section: 'Events' },
     canActivate: [requirePermission('tenant.read', 'Event')],
     loadComponent: () => import('./event-detail.page').then((m) => m.EventDetailPage),
+  },
+  {
+    path: ':eventId/plan',
+    title: 'Event plan',
+    data: { pageTitle: 'Event plan', section: 'Events' },
+    canActivate: [requirePermission('tenant.read', 'Event plan')],
+    loadComponent: () => import('./event-plan.page').then((m) => m.EventPlanPage),
+  },
+  {
+    path: ':eventId/people',
+    title: 'Event people',
+    data: { pageTitle: 'Event people', section: 'Events' },
+    canActivate: [requirePermission('tenant.read', 'Event people')],
+    loadComponent: () => import('./event-people.page').then((m) => m.EventPeoplePage),
+  },
+  {
+    path: ':eventId/people/:section',
+    title: 'Event people',
+    data: { pageTitle: 'Event people', section: 'Events' },
+    canActivate: [requirePermission('tenant.read', 'Event people')],
+    loadComponent: () => import('./event-people.page').then((m) => m.EventPeoplePage),
+  },
+  {
+    path: ':eventId/quotes',
+    title: 'Event quotes',
+    data: { pageTitle: 'Event quotes', section: 'Events' },
+    canActivate: [requirePermission('tenant.read', 'Event quotes')],
+    loadComponent: () => import('./event-quotes.page').then((m) => m.EventQuotesPage),
+  },
+  {
+    path: ':eventId/feedback',
+    title: 'Event feedback',
+    data: { pageTitle: 'Event feedback', section: 'Events' },
+    canActivate: [requirePermission('tenant.read', 'Event feedback')],
+    loadComponent: () => import('./event-feedback.page').then((m) => m.EventFeedbackPage),
+  },
+  {
+    path: ':eventId/scorecard',
+    title: 'Event scorecard',
+    data: { pageTitle: 'Event scorecard', section: 'Events' },
+    canActivate: [requirePermission('tenant.read', 'Event scorecard')],
+    loadComponent: () => import('./event-scorecard.page').then((m) => m.EventScorecardPage),
   },
 ];
 

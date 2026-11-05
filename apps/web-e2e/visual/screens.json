@@ -1022,6 +1022,154 @@
           ]
         }
       ]
+    },
+    {
+      "id": "043-events-dashboard",
+      "role": "event-organizer",
+      "path": "/events",
+      "waitFor": "role=heading[name=\"Needs your attention\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "045a-event-templates",
+      "role": "event-organizer",
+      "path": "/events/templates",
+      "waitFor": "text=Diwali celebration",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "my-templates",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"My templates\")"
+            },
+            {
+              "waitFor": "text=Squad celebration"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "046b-checklist-tasks-agenda",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001/plan",
+      "waitFor": "role=heading[name=\"Plan\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "agenda",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Agenda\")"
+            },
+            {
+              "waitFor": "text=Welcome and lamp lighting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "047a-invitations-rsvp",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001/people",
+      "waitFor": "role=heading[name=\"RSVP tracker\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "047b-attendee-needs",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001/people",
+      "waitFor": "role=heading[name=\"People\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Needs\")"
+            },
+            {
+              "waitFor": "role=heading[name=\"Counts\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "047e-attendance-per-head-recalculation",
+      "role": "event-organizer",
+      "path": "/events/78000000-0000-4000-8000-000000000020/people",
+      "waitFor": "role=heading[name=\"People\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Attendance\")"
+            },
+            {
+              "waitFor": "[data-testid=split-applied]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "051a-vendor-quotes",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001/quotes",
+      "waitFor": "text=Catering for the Diwali celebration",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "054a-survey-photo-gallery",
+      "role": "event-organizer",
+      "path": "/events/78000000-0000-4000-8000-000000000020/feedback",
+      "waitFor": "[data-testid=response-count]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "gallery",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Gallery\")"
+            },
+            {
+              "waitFor": "role=heading[name=\"Add a photo\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "054b-event-roi-scorecard",
+      "role": "event-organizer",
+      "path": "/events/78000000-0000-4000-8000-000000000020/scorecard",
+      "waitFor": "[data-testid=cost-per-attendee]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
     }
   ]
 }
