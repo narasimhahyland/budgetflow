@@ -78,8 +78,15 @@ const KIND: Record<string, string> = {
           <a mat-menu-item routerLink="/requests/new" [queryParams]="{ kind: 'over_budget' }"
             >Over-budget request</a
           >
+          @if (session.can('event.manage')) {
+            <a mat-menu-item routerLink="/requests/event-funding">Funding for a team event</a>
+          }
           <a mat-menu-item routerLink="/events">Additional funds or co-funding for an event</a>
         </mat-menu>
+        <a mat-stroked-button routerLink="/requests/approved">Approved for you</a>
+        <a mat-stroked-button routerLink="/requests/upload"
+          ><mat-icon svgIcon="upload" />Upload receipt</a
+        >
       </div>
     </header>
     <sat-navigation-tabs class="bf-tabs" aria-label="Request status">

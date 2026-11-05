@@ -46,6 +46,13 @@ export const RequestSummary = named(
       budgetName: z.string(),
       eventId: Id.nullable(),
       eventName: z.string().nullable(),
+      spend: z
+        .object({ committed: Money, used: Money, released: Money })
+        .strict()
+        .nullable()
+        .describe(
+          'The request’s commitment in its budget currency: committed, used (matched actuals) and released.',
+        ),
       requesterPersonId: Id,
       requesterName: z.string(),
       currentStep: z
@@ -93,6 +100,24 @@ export const RequestListQuery = CursorQuery.extend({
   q: z.string().max(100).optional(),
 }).strict();
 
+export const RequestVersion = named(
+  'RequestVersion',
+  z
+    .object({
+      version: z.int().min(1),
+      submittedAt: IsoDateTime,
+      amount: Money,
+      title: z.string().nullable(),
+      purpose: z.string().nullable(),
+      neededBy: IsoDate.nullable(),
+    })
+    .strict()
+    .describe(
+      'What the requester sent at one submission (first submission and each resubmission).',
+    ),
+);
+export type RequestVersion = z.infer<typeof RequestVersion>;
+
 export const RequestDetail = named(
   'RequestDetail',
   RequestSummary.extend({
@@ -105,6 +130,7 @@ export const RequestDetail = named(
     route: ApprovalRouteView.nullable(),
     impact: BudgetImpact.nullable(),
     activity: z.array(ActivityEntry),
+    versions: z.array(RequestVersion).describe('Submitted versions, oldest first.'),
     documents: z.array(DocumentSummary),
     allowedActions: z.array(z.enum(['submit', 'withdraw', 'resubmit', 'decide', 'upload'])),
     myTaskId: Id.nullable().describe('The viewer’s pending approval task, if any.'),

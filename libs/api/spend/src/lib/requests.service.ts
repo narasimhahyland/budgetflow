@@ -25,6 +25,7 @@ import {
 import { DocumentsService } from '@bf/api/documents';
 import {
   budgets,
+  commitments,
   eventCoOrganizers,
   eventParticipants,
   events,
@@ -43,6 +44,7 @@ import type {
   RequestDetail,
   RequestList,
   RequestSummary,
+  RequestVersion,
   ResubmitRequestBody,
   RoutePreview,
 } from '@bf/contracts';
@@ -727,6 +729,10 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         changes: {
           status: { from: r.status, to: status },
           amount: { from: null, to: { amountMinor: r.amountMinor, currency: r.currency } },
+          version: {
+            from: null,
+            to: { version: r.version, title: r.title, purpose: r.purpose, neededBy: r.neededBy },
+          },
           budgetAmount: { from: null, to: budgetAmount },
           preEncumbered: { from: null, to: budgetAmount },
           ...(commitmentId ? { commitmentId: { from: null, to: commitmentId } } : {}),
@@ -1026,8 +1032,23 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       'request',
       rows.map((r) => r.id),
     );
+    const commitmentIds = rows.map((r) => r.commitmentId).filter((c): c is string => Boolean(c));
+    const commitmentRows = commitmentIds.length
+      ? await tx.select().from(commitments).where(inArray(commitments.id, commitmentIds))
+      : [];
+    const cm = new Map(commitmentRows.map((c) => [c.id, c]));
     const bn = new Map(budgetRows.map((b) => [b.id, b.name]));
     const en = new Map(eventRows.map((e) => [e.id, e.name]));
+    const spendOf = (id: string | null): RequestSummary['spend'] => {
+      const c = id ? cm.get(id) : undefined;
+      if (!c) return null;
+      const m = (amountMinor: number) => ({ amountMinor, currency: c.currency });
+      return {
+        committed: m(c.amountMinor),
+        used: m(c.consumedMinor),
+        released: m(c.releasedMinor),
+      };
+    };
     return rows.map((r) => ({
       id: r.id,
       ref: r.ref,
@@ -1045,6 +1066,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       budgetName: bn.get(r.budgetId!) ?? '',
       eventId: r.eventId,
       eventName: r.eventId ? (en.get(r.eventId) ?? null) : null,
+      spend: spendOf(r.commitmentId),
       requesterPersonId: r.requesterPersonId,
       requesterName: names.get(r.requesterPersonId) ?? '',
       currentStep: steps.get(r.id) ?? null,
@@ -1188,10 +1210,33 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       route: await this.approvals.routeView(tx, 'request', id),
       impact: showImpact ? await this.impact(tx, s) : null,
       activity: await this.approvals.activity(tx, [{ type: 'request', id }]),
+      versions: await this.versions(tx, id),
       documents: await this.documents.listTx(tx, 'request', id, actor.personId),
       allowedActions: allowed,
       myTaskId,
     };
+  }
+
+  /** Each submission as recorded in its audit entry, oldest first (entries before snapshots carry the amount only). */
+  private async versions(tx: Tx, id: string): Promise<RequestVersion[]> {
+    const rows = (await this.audit.forResources(tx, [{ type: 'request', id }]))
+      .filter((a) => a.action === 'request.submitted' || a.action === 'request.resubmitted')
+      .sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
+    return rows.map((a, i) => {
+      const changes = a.changes as Record<string, { to?: unknown } | undefined>;
+      const amount = changes['amount']?.to as RequestVersion['amount'];
+      const snap = (changes['version']?.to ?? {}) as Partial<
+        Pick<RequestVersion, 'version' | 'title' | 'purpose' | 'neededBy'>
+      >;
+      return {
+        version: snap.version ?? i + 1,
+        submittedAt: a.occurredAt.toISOString(),
+        amount,
+        title: snap.title ?? null,
+        purpose: snap.purpose ?? null,
+        neededBy: snap.neededBy ?? null,
+      };
+    });
   }
 
   /** Budgets the viewer may request from (their location or team, budgets they own), with blocks and what they already asked. */

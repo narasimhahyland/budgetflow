@@ -32,7 +32,9 @@ import { LoadState } from './load-state';
         <p class="bf-page__subtitle">What you can request, and where your requests are</p>
       </div>
       <div class="bf-page__actions">
-        <a mat-stroked-button routerLink="/requests"><mat-icon svgIcon="upload" />Upload receipt</a>
+        <a mat-stroked-button routerLink="/requests/upload"
+          ><mat-icon svgIcon="upload" />Upload receipt</a
+        >
         <a mat-flat-button routerLink="/requests/new"
           ><mat-icon svgIcon="circle_add" />Request funds</a
         >
