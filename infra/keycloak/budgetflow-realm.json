@@ -526,6 +526,23 @@
         }
       ],
       "realmRoles": ["finance-admin"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000020",
+      "username": "sandbox.controller@example.test",
+      "email": "sandbox.controller@example.test",
+      "emailVerified": true,
+      "firstName": "Rhea",
+      "lastName": "Varma",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["finance-controller"]
     }
   ]
 }

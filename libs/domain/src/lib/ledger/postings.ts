@@ -538,10 +538,12 @@ export function postYearEndCarryIn(
   const root = chain[chain.length - 1];
   const rt = hierarchyTriplet(input.amount, root.currency, 'authorized', -1, ctx);
   if (!rt.ok) return rt;
-  const prov = { planVersionId: input.planVersionId };
+  // Only the savings line carries the plan version, exactly as the mirror reduction does: the plan
+  // tie-out compares plan funding with the root authorized that plan funded, and a carry is money
+  // the ending year already had, not new plan funding.
   const lines: JournalLine[] = [
-    counterLine('savings', root.legalEntityId, 1, rt.value, prov),
-    budgetLine(root, 'authorized', -1, rt.value, prov),
+    counterLine('savings', root.legalEntityId, 1, rt.value, { planVersionId: input.planVersionId }),
+    budgetLine(root, 'authorized', -1, rt.value),
   ];
   const down = [...chain].reverse();
   for (let i = 0; i + 1 < down.length; i++) {

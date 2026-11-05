@@ -195,6 +195,18 @@ export const EXTRA_USERS = [
     ['finance-admin'],
     'Finance planning lead',
   ),
+  // Period close and year end need two different people: this one prepares and requests in the
+  // sandbox tenant, `sandbox-admin` decides. Used by the Phase 11 close scenarios only.
+  user(
+    20,
+    'sandbox-controller',
+    'sandbox.controller@example.test',
+    'Rhea',
+    'Varma',
+    ['finance-controller'],
+    'Sandbox finance controller',
+    TENANTS.sandbox,
+  ),
 ] as const satisfies readonly SeedUser[];
 
 /** Signs in through the simulated corporate identity provider (Hyland SSO) as well as with a password. */

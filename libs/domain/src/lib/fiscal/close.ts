@@ -42,10 +42,14 @@ export interface EntityChecklist {
   checks: readonly CloseCheckState[];
 }
 
-/** True when this check stops the close right now. */
+/**
+ * True when this check stops the close right now. A hard check blocks until it passes. A soft check
+ * blocks until it passes **or** someone accepts it with a reason: that is what acknowledgement is
+ * for, and it is why unmatched actuals can be carried to the next open period rather than fixed.
+ */
 export function isBlocking(check: CloseCheckState): boolean {
   if (closeCheckKind(check.code) === 'hard') return check.status === 'fail';
-  return check.status === 'fail' && !check.acknowledged;
+  return check.status !== 'pass' && !check.acknowledged;
 }
 
 /**

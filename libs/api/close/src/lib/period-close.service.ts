@@ -33,6 +33,7 @@ import {
   canAcknowledge,
   changePeriodStatus,
   closeCheckKind,
+  isBlocking,
   closeConfirmationFor,
   closeReadiness,
   requireConfirmation,
@@ -648,7 +649,7 @@ export class PeriodCloseService {
         r.amountMinor !== null && r.currency
           ? { amountMinor: r.amountMinor, currency: r.currency }
           : null,
-      blocking: kind === 'hard' ? r.status === 'fail' : r.status === 'fail' && !acknowledged,
+      blocking: isBlocking({ code: r.code, status: r.status, acknowledged }),
       acknowledgement: ack
         ? {
             id: ack.id,
