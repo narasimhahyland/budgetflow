@@ -70,9 +70,9 @@
         },
         {
           "state": "placeholder",
-          "role": "ceo",
-          "path": "/reports",
-          "waitFor": "role=heading[name=\"Reports is not open yet\"]"
+          "role": "org-admin",
+          "path": "/admin/settings",
+          "waitFor": "role=heading[name=\"Tenant settings is not open yet\"]"
         },
         {
           "state": "not-found",
