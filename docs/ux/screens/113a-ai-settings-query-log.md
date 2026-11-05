@@ -37,7 +37,7 @@ Tab Features: table, one row per feature: feature, where it appears, status (On,
 - Transaction matching suggestions (80f): On.
 - Receipt and quote extraction (121a): On.
 - Anomaly flags (17c): On.
-- Phase 15 rows appear when built: leadership summary drafts (11b), variance commentary drafts (11b), event planning copilot (45b), what-if narrative (31a).
+- Phase 15 and 16 rows appear when built: leadership summary drafts (11b), variance commentary drafts (11b), event planning copilot (45b), what-if narrative (31a), connector for AI assistants (92c, key `ai.mcp`).
 
 Settings card: questions per person per hour (50); conversation history kept (30 days; 7-90); nudge minimum gap (USD 500.00 and 10% of authorized); nudge frequency (once per 14 days per budget); "Show AI flags to approvers" (on). Provider card (read-only): "Model provider configured by the platform; model id and version" with the current values; "Provider keys are held in the server environment and never shown."
 

@@ -8,7 +8,7 @@ Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 10
 
 Phase 8 to 12 screens are specified spec-first in `docs/ux/screens/` (images pending a later Stitch session; status in [review-log.md](review-log.md)). Screens 47e, 59b, 59c, 61d and 61e (Phases 8 and 9), 80g, 80h and 87c (Phase 11) and 94a, 94b and 99b (Phase 12) were added with those batches for plan features that had no screen. Phase 10 reports share the report frame defined in `079-reports-dashboard.md`; Phase 12 connectors share the connector frame defined in `092-integrations-dashboard.md`.
 
-Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and 113a (Phase 13) were added for plan features that had no screen (questions in Slack and Teams; AI feature switches and the AI query log), and the shared pattern 000b (Phase 14) for chart table alternatives and the keyboard-first grid. Every AI surface uses the AI output pattern defined in `011a-ai-assistant-panel.md`. Screens 105a (plans and entitlements) and 102e (white-label for resellers) are deferred with the multi-customer backlog and are not specified.
+Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and 113a (Phase 13) were added for plan features that had no screen (questions in Slack and Teams; AI feature switches and the AI query log), the shared pattern 000b (Phase 14) for chart table alternatives and the keyboard-first grid, and 15c, 80i and 122b (Phase 15) for outcome linkage, withholding tax and organizer recognition. Every AI surface uses the AI output pattern defined in `011a-ai-assistant-panel.md`. Screens 105a (plans and entitlements) and 102e (white-label for resellers) are deferred with the multi-customer backlog and are not specified.
 
 ## Shared patterns
 
@@ -40,13 +40,14 @@ Specs that apply across many screens. The design system (000) and the applicatio
 | --- | ------------------------------------------------------- | ----------- | ---------------------------------------- | --------------- |
 | 11  | Executive dashboard                                     | P10         | CEO, FA, FC, AN; owners scoped           | Stitch, start 3 |
 | 11a | AI assistant panel (plain-language questions)           | P13         | All roles within scope                   | review-added    |
-| 11b | Auto-drafted leadership summary                         | P15         | CEO, FA, FC                              | review-added    |
+| 11b | Auto-drafted leadership summary and variance commentary | P15         | CEO, FA, FC; owners (commentary)         | review-added    |
 | 12  | Finance controller dashboard                            | P10         | CEO, FA, FC, AN; owners scoped           |                 |
 | 13  | Budget health overview                                  | P10         | CEO, FA, FC, AN; owners scoped           |                 |
 | 14  | Organization-wide budget hierarchy                      | P4          | CEO, FA; owners scoped; FC, AUD, AN read | Stitch, start 4 |
 | 15  | Budget utilization analytics                            | P10         | CEO, FA, FC, AN; owners scoped           |                 |
 | 15a | Fairness view: spend per head by location               | P10         | CEO, FA, AN                              | review-added    |
 | 15b | Participation and reach                                 | P10         | CEO, FA, AN, OA                          | review-added    |
+| 15c | Outcome linkage (pulse, eNPS, retention)                | P15         | CEO, OA, FA, AN; RM scoped               | review-added    |
 | 16  | Budget forecast and variance view                       | P10         | CEO, FA, FC, AN; owners scoped           |                 |
 | 16a | Board and FP&A pack                                     | P10         | CEO, FA, FC, AN                          | review-added    |
 | 16b | Under/overspend forecasts and nudges                    | P13         | Owners, FA                               | review-added    |
@@ -200,6 +201,7 @@ Specs that apply across many screens. The design system (000) and the applicatio
 | 80f | Transaction matching review (AI)         | P13         | FC, FA                              | review-added |
 | 80g | Tax-aware consumption (GST/VAT recovery) | P11         | FA, FC, tax approver                | review-added |
 | 80h | Employee benefit ledger and thresholds   | P11         | FA, FC, AUD                         | review-added |
+| 80i | Withholding tax on commitments           | P15         | FA, FC, tax approver                | review-added |
 | 81  | Allocation report                        | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
 | 82  | Utilization report                       | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
 | 83  | Location comparison report               | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
@@ -293,6 +295,7 @@ Specs that apply across many screens. The design system (000) and the applicatio
 | 121a | Receipt and quote extraction                      | P13         | EMP, EO                          | review-added     |
 | 122  | Personal activity history                         | P14         | EMP, EO; all roles for own items |                  |
 | 122a | Gamified participation                            | P15         | EMP, EO                          | review-added     |
+| 122b | Organizer recognition                             | P15         | EO, EMP, managers                | review-added     |
 | 123  | Notifications and tasks                           | P8          | EMP, EO; all roles for own items |                  |
 | 124  | Profile and preferences                           | P2          | All roles                        |                  |
 
@@ -313,10 +316,10 @@ Specs that apply across many screens. The design system (000) and the applicatio
 | P12      | 16                                    |
 | P13      | 9                                     |
 | P14      | 14                                    |
-| P15      | 11                                    |
+| P15      | 14                                    |
 | P16      | 6                                     |
 | Deferred | 2 (105a, 102e)                        |
-| Total    | 224 (124 specified, 100 review-added) |
+| Total    | 227 (124 specified, 103 review-added) |
 
 ## Role-to-screen matrix
 

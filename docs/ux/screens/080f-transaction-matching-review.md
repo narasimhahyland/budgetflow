@@ -23,7 +23,7 @@ Finance Admin and Finance Controller (all lines); budget owners for suggestions 
 
 ## Entry points
 
-Finance > Actuals and matching tab "AI suggestions (24)"; 080a import summary "24 lines have AI suggestions"; 080b drawer suggestion chip "AI suggests EVT-2026-0122"; 012 finance controller dashboard; owner notification "3 card lines may belong to your budgets".
+Finance > Actuals and matching tab "AI suggestions (24)"; 080a import summary "24 lines have AI suggestions"; 080b drawer suggestion chip "AI suggests EVT-2026-0136"; 012 finance controller dashboard; owner notification "3 card lines may belong to your budgets".
 
 ## Content and actions
 
@@ -32,7 +32,7 @@ Header: title, metrics strip "Last 30 days: 312 suggestions reviewed, 296 accept
 Queue (one row per line): date, source, merchant and memo, card holder or claimant, amount in transaction currency and USD at the locked plan rate, suggested target, confidence, reasons (short), actions Accept, Choose another, Reject. Samples:
 
 - High: Concur expense INR 4,560.00 (USD 54.61) "Cafe Mocha Indiranagar", 18 Oct, Kavya Shah -> REQ-2026-0145 Team lunch Q4 (approved USD 57.49). Reasons: "Same person; receipt date within the request window; amount within approved; receipt attached matches."
-- Medium: Ramp card GBP 412.00 (USD 523.24) "THE BRASS LANTERN LONDON", 6 Nov, Emma Clarke -> commitment PO-2026-0263, London team social (EVT-2026-0122). Reasons: "Event on 6 Nov; card holder is a co-organizer; restaurant merchant; 2 other candidates within 10% of the amount."
+- Medium: Ramp card GBP 412.00 (USD 523.24) "THE BRASS LANTERN LONDON", 6 Nov, Emma Clarke -> commitment PO-2026-0263, London team social (EVT-2026-0136). Reasons: "Event on 6 Nov; card holder is a co-organizer; restaurant merchant; 2 other candidates within 10% of the amount."
 - Low: Navan hotel USD 1,240.00 "Hotel Westlake", 3 Nov, Tom Reilly -> budget Westlake Team Activities (no event). Reasons: "Cost center CC-3100 maps to Westlake Team Activities; no event on that date."
 
 Detail (side sheet): the line (all source fields, receipt thumbnail), the suggested target with its encumbered and remaining amounts, the other candidates ranked with their scores in words, the facts used, Sources, AI tag. FX block as in 080b: transaction amount, budget USD at the locked plan rate, month-end value, FX effect (never consumes budget). Actions: Accept (opens the 080b match confirmation prefilled: target, amount, partial or full, difference handling), Choose another (candidate list or budget search), Reject suggestion (reason: wrong event, wrong budget, not budget-relevant, personal expense, other).
