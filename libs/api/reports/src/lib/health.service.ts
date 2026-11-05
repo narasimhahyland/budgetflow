@@ -251,16 +251,15 @@ export class HealthService {
       sql`, `,
     );
     const commitments = await tx.execute<{ budget_id: string; amount: string; n: string }>(sql`
-      select fl.budget_id,
-             coalesce(sum(fl.amount_minor - fl.consumed_minor - fl.released_minor), 0)::text as amount,
-             count(distinct c.id)::text as n
+      select c.budget_id,
+             coalesce(sum(c.amount_minor - c.consumed_minor - c.released_minor), 0)::text as amount,
+             count(*)::text as n
       from commitments c
-      join commitment_funding_lines fl on fl.commitment_id = c.id
-      where fl.budget_id in (${list})
-        and c.status in ('open', 'partially_consumed')
-        and c.service_end_date is not null
-        and c.service_end_date < current_date - ${days}::int
-      group by fl.budget_id`);
+      where c.budget_id in (${list})
+        and c.status in ('pre_encumbered', 'encumbered', 'partially_consumed')
+        and c.service_end is not null
+        and c.service_end < current_date - ${days}::int
+      group by c.budget_id`);
     for (const r of commitments.rows)
       out.set(r.budget_id, {
         agedCommitmentsMinor: Math.max(Number(r.amount), 0),
@@ -268,14 +267,16 @@ export class HealthService {
         unmatchedActualsMinor: 0,
         unmatchedActualsCount: 0,
       });
+    // An unmatched actual has no budget yet; it ages against the budget it was proposed for.
     const actuals = await tx.execute<{ budget_id: string; amount: string; n: string }>(sql`
-      select a.budget_id, coalesce(sum(a.reporting_amount_minor), 0)::text as amount,
+      select coalesce(a.matched_budget_id, a.proposed_budget_id) as budget_id,
+             coalesce(sum(a.reporting_amount_minor), 0)::text as amount,
              count(*)::text as n
       from actuals a
-      where a.budget_id in (${list})
-        and a.match_status <> 'matched'
+      where coalesce(a.matched_budget_id, a.proposed_budget_id) in (${list})
+        and a.match_status in ('unmatched', 'partially_matched')
         and a.transaction_date < current_date - ${days}::int
-      group by a.budget_id`);
+      group by coalesce(a.matched_budget_id, a.proposed_budget_id)`);
     for (const r of actuals.rows) {
       const cur = out.get(r.budget_id) ?? {
         agedCommitmentsMinor: 0,

@@ -99,7 +99,7 @@ test.describe('budget health checks', () => {
     expect(after.status).toBe('frozen');
   });
 
-  test('a healthy budget is counted but not listed, and the matrix adds up', async ({
+  test('an untouched budget late in the year is on Watch for money that would lapse', async ({
     request,
   }) => {
     const root = await createRoot(request, {
@@ -114,11 +114,16 @@ test.describe('budget health checks', () => {
       BudgetHealthOverview,
     );
     expect(overview.summary.budgets).toBe(1);
-    expect(overview.summary.healthy).toBe(1);
-    expect(rowFor(overview, root.id)).toBeUndefined();
+    expect(overview.summary.watch).toBe(1);
+    expect(overview.summary.atRisk).toBe(0);
+    const row = rowFor(overview, root.id)!;
+    expect(row.reasons.map((r) => r.check)).toEqual(['unused']);
+    expect(row.reasons[0].text).toContain('would lapse');
+    // The matrix counts the same budget under the same check.
     expect(overview.matrix).toHaveLength(1);
-    for (const check of ['pace', 'forecast', 'controls', 'hygiene', 'unused'])
-      expect(overview.matrix[0].cells[check]).toEqual({ watch: 0, atRisk: 0 });
+    expect(overview.matrix[0].cells['unused']).toEqual({ watch: 1, atRisk: 0 });
+    expect(overview.matrix[0].cells['pace']).toEqual({ watch: 0, atRisk: 0 });
+    // Nothing is committed or spent, so the whole amount is still available.
     expect(overview.reconciliation.authorized.amountMinor).toBe(1_000_000);
     expect(overview.reconciliation.available.amountMinor).toBe(1_000_000);
   });

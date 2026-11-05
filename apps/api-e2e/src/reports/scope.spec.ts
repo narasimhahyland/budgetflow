@@ -40,9 +40,16 @@ test.describe('report scope per role', () => {
     });
     const child = await createChild(request, mine.id, {
       currency: 'USD',
+      as: 'finance-admin',
       owner: 'department-head',
     });
-    await allocateOk(request, mine.id, child.id, { amountMinor: 150_000, currency: 'USD' });
+    await allocateOk(
+      request,
+      mine.id,
+      child.id,
+      { amountMinor: 150_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
 
     const owner = await expectContract(
       await request.get('/api/reports/utilization/run', {
@@ -64,7 +71,10 @@ test.describe('report scope per role', () => {
     // The owner's figure is strictly smaller: the rest of the company is not in it.
     expect(owner.reconciliation.authorized.amountMinor).toBeLessThan(financeTotal);
     expect(owner.rows.some((r) => r.budgetId === mine.id)).toBe(true);
-    expect(owner.rows.some((r) => r.budgetId === SEED.budgets.europe)).toBe(false);
+    // The department head owns Europe, not India: another region's money is not in their figures.
+    expect(owner.rows.some((r) => r.budgetId === SEED.budgets.europe)).toBe(true);
+    expect(owner.rows.some((r) => r.budgetId === SEED.budgets.india)).toBe(false);
+    expect(owner.rows.some((r) => r.budgetId === SEED.budgets.employeeExperience)).toBe(false);
   });
 
   test('an owner cannot widen the scope to a budget outside their subtree', async ({ request }) => {

@@ -89,12 +89,18 @@ export class SchedulesService {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, body);
   }
 
+  /** Tenant-wide scope is asked against the budget root: an owner's `owned` scope never covers it. */
+  private tenantWide(actor: RequestActor, action: 'report.read' | 'report.schedule'): boolean {
+    return this.policy.can(actor, action, {
+      kind: 'budget',
+      tenantId: actor.tenantId,
+      id: '',
+      path: '/',
+    }).allowed;
+  }
+
   private assertCanSchedule(actor: RequestActor, filters: ReportFilters): void {
-    if (
-      this.policy.can(actor, 'report.schedule', { kind: 'tenant', tenantId: actor.tenantId })
-        .allowed
-    )
-      return;
+    if (this.tenantWide(actor, 'report.schedule')) return;
     const owned = actor.ownedBudgetPaths.length > 0;
     if (!owned)
       throw ApiProblem.forbidden('Scheduling reports is for finance roles and budget owners.');
@@ -238,10 +244,7 @@ export class SchedulesService {
 
   list(actor: RequestActor): Promise<{ items: ReportSchedule[] }> {
     return this.tx(actor, async (tx) => {
-      const tenantWide = this.policy.can(actor, 'report.read', {
-        kind: 'tenant',
-        tenantId: actor.tenantId,
-      }).allowed;
+      const tenantWide = this.tenantWide(actor, 'report.read');
       const rows = await tx.select().from(reportSchedules).orderBy(desc(reportSchedules.createdAt));
       const mine = tenantWide
         ? rows
@@ -518,12 +521,7 @@ export class SchedulesService {
   ): Promise<ScheduleRow> {
     const [row] = await tx.select().from(reportSchedules).where(eq(reportSchedules.id, scheduleId));
     if (!row) throw ApiProblem.notFound('schedule');
-    const action = opts.read ? 'report.read' : 'report.schedule';
-    const tenantWide = this.policy.can(actor, action, {
-      kind: 'tenant',
-      tenantId: actor.tenantId,
-    }).allowed;
-    if (tenantWide) return row;
+    if (this.tenantWide(actor, opts.read ? 'report.read' : 'report.schedule')) return row;
     if (row.ownerPersonId && row.ownerPersonId === actor.personId) return row;
     throw ApiProblem.forbidden('Only the schedule owner or finance can change this schedule.');
   }
@@ -538,11 +536,15 @@ export class SchedulesService {
       'reports',
     );
     return this.tx(actor, async (tx) => {
-      const rows = await tx
+      const all = await tx
         .select()
         .from(reportExports)
         .orderBy(desc(reportExports.requestedAt))
         .limit(50);
+      // A scoped owner sees only the exports they asked for; finance sees every export.
+      const rows = this.tenantWide(actor, 'report.read')
+        ? all
+        : all.filter((r) => r.requestedByPersonId && r.requestedByPersonId === actor.personId);
       const names = await this.personNames(
         tx,
         rows.map((r) => r.requestedByPersonId),

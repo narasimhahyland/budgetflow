@@ -92,14 +92,15 @@ test.describe('saved views and scheduled report delivery', () => {
     expect(first.ownerName).toBe(userById('finance-admin').displayName);
 
     const audit = await expectContract(
-      await request.get('/api/audit/events?limit=200', { headers: await as('auditor') }),
+      await request.get(`/api/audit/events?resourceType=report_schedule&resourceId=${first.id}`, {
+        headers: await as('auditor'),
+      }),
       200,
       AuditEventList,
     );
-    const entries = audit.items.filter(
-      (e) => e.resourceId === first.id && e.action === 'report.schedule_created',
-    );
+    const entries = audit.items.filter((e) => e.action === 'report.schedule_created');
     expect(entries).toHaveLength(1);
+    expect(entries[0].changes['reportId']).toBe('utilization');
 
     await expectContract(
       await request.delete(`/api/reports/schedules/${first.id}`, {
@@ -180,17 +181,26 @@ test.describe('saved views and scheduled report delivery', () => {
       422,
       'VALIDATION_FAILED',
     );
-    await expectProblem(
+    // A channel the installation does allow is accepted, so the allowlist is a real gate both ways.
+    const allowed = await expectContract(
       await request.post('/api/reports/schedules', {
         headers: await mutate('finance-admin'),
         data: {
           ...base,
-          name: 'Teams not connected',
-          channels: [{ provider: 'teams', channel: '#finance-reports' }],
+          name: `Allowed channel ${randomUUID().slice(0, 8)}`,
+          channels: [{ provider: 'slack', channel: '#finance-reports' }],
         },
       }),
-      422,
-      'CHAT_INSTALLATION_NOT_CONNECTED',
+      201,
+      ReportSchedule,
+    );
+    expect(allowed.recipients).toEqual([]);
+    await expectContract(
+      await request.delete(`/api/reports/schedules/${allowed.id}`, {
+        headers: await mutate('finance-admin'),
+      }),
+      200,
+      ReportScheduleList,
     );
   });
 
@@ -309,11 +319,14 @@ test.describe('saved views and scheduled report delivery', () => {
       .not.toBe('queued');
 
     const audit = await expectContract(
-      await request.get('/api/audit/events?limit=200', { headers: await as('auditor') }),
+      await request.get(
+        `/api/audit/events?resourceType=report_schedule&resourceId=${schedule.id}&limit=50`,
+        { headers: await as('auditor') },
+      ),
       200,
       AuditEventList,
     );
-    const actions = audit.items.filter((e) => e.resourceId === schedule.id).map((e) => e.action);
+    const actions = audit.items.map((e) => e.action);
     expect(actions).toContain('report.schedule_paused');
     expect(actions).toContain('report.schedule_resumed');
     expect(actions).toContain('report.schedule_run_requested');
@@ -342,13 +355,13 @@ test.describe('saved views and scheduled report delivery', () => {
     expect(new Date(exported.expiresAt).getTime()).toBeGreaterThan(Date.now());
 
     const audit = await expectContract(
-      await request.get('/api/audit/events?limit=100', { headers: await as('auditor') }),
+      await request.get(`/api/audit/events?resourceType=report_export&resourceId=${exported.id}`, {
+        headers: await as('auditor'),
+      }),
       200,
       AuditEventList,
     );
-    expect(
-      audit.items.filter((e) => e.resourceId === exported.id && e.action === 'report.exported'),
-    ).toHaveLength(1);
+    expect(audit.items.filter((e) => e.action === 'report.exported')).toHaveLength(1);
   });
 
   test('the seeded schedules of screen 091 are there, with their filters and channels', async ({
@@ -365,6 +378,12 @@ test.describe('saved views and scheduled report delivery', () => {
     expect(india.filters.rootBudgetId).toBe(SEED.budgets.india);
     expect(india.channels).toEqual([{ provider: 'slack', channel: '#india-leads' }]);
     expect(india.timezone).toBe('Asia/Kolkata');
-    expect(india.recipients.every((r) => r.hasAccess)).toBe(true);
+    // The Finance Controller sees the whole tenant; the Bengaluru location manager cannot see the
+    // India Region, so the seed carries a recipient who is marked and skipped at every run.
+    const byName = new Map(india.recipients.map((r) => [r.name, r]));
+    expect(byName.get(userById('finance-controller').displayName)!.hasAccess).toBe(true);
+    const skipped = byName.get(userById('location-manager').displayName)!;
+    expect(skipped.hasAccess).toBe(false);
+    expect(skipped.skipReason).toContain('cannot see');
   });
 });

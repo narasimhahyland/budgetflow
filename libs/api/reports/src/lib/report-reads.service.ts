@@ -109,9 +109,17 @@ export const committedOf = (b: ScopedBudget): number =>
 export class ReportReads {
   constructor(private readonly policy: PolicyService) {}
 
+  /**
+   * Whether the viewer reports on the whole tenant. Asked against the budget root rather than the
+   * tenant, because an owner's `owned` scope covers a tenant resource as soon as they own anything.
+   */
   tenantWide(actor: RequestActor): boolean {
-    return this.policy.can(actor, 'report.read', { kind: 'tenant', tenantId: actor.tenantId })
-      .allowed;
+    return this.policy.can(actor, 'report.read', {
+      kind: 'budget',
+      tenantId: actor.tenantId,
+      id: '',
+      path: '/',
+    }).allowed;
   }
 
   /** Path prefixes the viewer may report on; null means tenant-wide, 'none' means nothing. */

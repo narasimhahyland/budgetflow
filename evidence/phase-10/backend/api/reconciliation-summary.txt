@@ -1,0 +1,9 @@
+utilization            rows= 556 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0
+budget-vs-actual       rows= 556 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0
+allocation             rows= 556 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0
+location-comparison    rows=   9 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0
+department-comparison  rows=   2 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0
+event-spending         rows=  51 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0
+spend-per-head         rows=   9 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0
+participation-reach    rows=   5 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0
+unused-expired         rows= 556 ties=True authorized=  3412149100 actual=   6047955 available=  3387398314 diffs=0

@@ -71,7 +71,9 @@ export class ReportExtrasReads {
                  where p.event_id = e.id and p.attendance_status = 'attended')
              end::text as attendees,
              (select count(*) from contribution_requests c
-               where c.event_id = e.id and c.status = 'approved')::text as co_funders
+               where c.event_id = e.id
+                 and c.status in ('approved_full', 'approved_partial', 'earmarked',
+                                  'transferred', 'settled'))::text as co_funders
       from events e
       join scoped s on s.id = e.id
       left join event_locations el on el.event_id = e.id

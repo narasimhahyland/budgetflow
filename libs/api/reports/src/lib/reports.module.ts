@@ -22,7 +22,13 @@ import { SchedulesService } from './schedules.service';
     SchedulesService,
     ReportDeliveryService,
   ],
-  exports: [ReportsService, HealthService, SchedulesService, ReportDeliveryService],
+  exports: [
+    ReportsService,
+    HealthService,
+    SavedViewsService,
+    SchedulesService,
+    ReportDeliveryService,
+  ],
 })
 export class ReportsModule {}
 

@@ -115,6 +115,8 @@ test.describe('reported figures reconcile to the ledger', () => {
       'location-comparison',
       'department-comparison',
       'spend-per-head',
+      'event-spending',
+      'participation-reach',
     ]) {
       const report = await expectContract(
         await request.get(`/api/reports/${reportId}/run?rootBudgetId=${root.id}`, {
