@@ -83,8 +83,15 @@ export class EventDetailPage {
     params: () => (this.tab() === 'activity' ? { eventId: this.eventId() } : undefined),
     loader: ({ params }) => data(this.api.eventActivity({ params })),
   });
+  protected readonly giverQuery = signal('');
   protected readonly candidates = resource({
-    params: () => (this.panel() === 'contribution' ? { eventId: this.eventId() } : undefined),
+    params: () =>
+      this.panel() === 'contribution'
+        ? {
+            eventId: this.eventId(),
+            ...(this.giverQuery().trim().length > 1 ? { q: this.giverQuery().trim() } : {}),
+          }
+        : undefined,
     loader: ({ params }) => data(this.api.candidateGivingBudgets({ query: params })),
   });
 

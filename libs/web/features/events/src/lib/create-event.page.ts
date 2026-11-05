@@ -156,7 +156,10 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
               </ul>
             }
             <div class="bf-section">
-              <h3 class="bf-section__title">{{ participants().length }} participants</h3>
+              <h3 class="bf-section__title">
+                {{ participants().length }}
+                {{ participants().length === 1 ? 'participant' : 'participants' }}
+              </h3>
               @for (p of participants(); track p.id) {
                 <div class="bf-list__row">
                   <span
@@ -256,7 +259,9 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
               <h3 class="bf-section__title">Cost split by location</h3>
               @for (s of split(); track s.name) {
                 <div class="bf-list__row">
-                  <span>{{ s.name }} · {{ s.count }} participants</span
+                  <span
+                    >{{ s.name }} · {{ s.count }}
+                    {{ s.count === 1 ? 'participant' : 'participants' }}</span
                   ><span
                     >{{ s.pct }}% · <bf-money [amountMinor]="s.amount" [currency]="currency()"
                   /></span>

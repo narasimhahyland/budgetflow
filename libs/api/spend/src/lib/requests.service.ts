@@ -1252,9 +1252,11 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
           .select()
           .from(budgets)
           .where(and(or(...conds), ne(budgets.status, 'cancelled')))
-          .orderBy(budgets.path)
+          .orderBy(desc(budgets.createdAt))
           .limit(100)
-      ).filter((b) => this.policy.can(actor, 'request.create', budgetResourceOf(b)).allowed);
+      )
+        .filter((b) => this.policy.can(actor, 'request.create', budgetResourceOf(b)).allowed)
+        .sort((a, b) => a.path.localeCompare(b.path));
       if (!rows.length) return { items: [] };
       const asked = actor.personId
         ? await tx

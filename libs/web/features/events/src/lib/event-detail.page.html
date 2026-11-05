@@ -123,7 +123,17 @@
         </p>
       </div>
       <div class="bf-form">
-        <mat-form-field appearance="outline" class="bf-form__wide">
+        <mat-form-field appearance="outline">
+          <mat-label>Find a giving budget</mat-label>
+          <input
+            matInput
+            [ngModel]="giverQuery()"
+            (ngModelChange)="giverQuery.set($event)"
+            name="giverQuery"
+          />
+          <mat-hint>Name or code</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
           <mat-label>Giving budget</mat-label>
           <mat-select [(ngModel)]="giverBudgetId" name="giver">
             @for (c of valueOf(candidates)?.items ?? []; track c.budgetId) {
