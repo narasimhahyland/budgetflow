@@ -57,6 +57,7 @@ export const ACTIONS = [
   'integrity.run',
   'integrity.read',
   'integration.manage',
+  'notification.manage',
 ] as const;
 export type Action = (typeof ACTIONS)[number];
 
@@ -94,6 +95,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'org.read': 'tenant',
     'headcount.import': 'tenant',
     'users.manage': 'tenant',
+    'notification.manage': 'tenant',
   },
   ceo: {
     ...OWNER,
@@ -132,6 +134,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'audit.read': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
+    'notification.manage': 'tenant',
     'rules.read': 'tenant',
     'rules.manage': 'tenant',
     'exception.resolve': 'tenant',

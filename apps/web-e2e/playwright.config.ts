@@ -22,8 +22,9 @@ export default defineConfig({
   // No {platform} segment: baselines are only produced in the pinned Linux image, locally and in CI.
   snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{arg}{ext}',
   fullyParallel: true,
+  workers: 2,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: 1,
   reporter: [
     ['list'],
     ['html', { outputFolder: '../../dist/.playwright/apps/web-e2e/report', open: 'never' }],
@@ -49,7 +50,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    { name: 'setup', testMatch: /auth\.setup\.ts/, workers: 1 },
     {
       name: 'desktop',
       dependencies: ['setup'],
@@ -72,7 +73,8 @@ export default defineConfig({
       name: 'visual-light',
       dependencies: ['setup'],
       testMatch: /visual\/.*\.spec\.ts/,
-      use: { colorScheme: 'light' },
+      workers: 1,
+      use: { colorScheme: 'light', trace: 'off' },
     },
   ],
 });

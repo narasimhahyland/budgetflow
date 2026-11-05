@@ -1,0 +1,13 @@
+scripts/gate.sh static --affected — 2026-11-05T13:21:55Z — commit a6c1088
+PASS|secrets|5s
+PASS|lint|1s
+PASS|styles|5s
+PASS|satori|39s
+PASS|typecheck|1s
+PASS|build|2s
+PASS|openapi|2s
+PASS|db|1s
+PASS|functional-api (apps/api-e2e/src/channels)|24 passed
+PASS|functional-e2e (apps/web-e2e/src/channels)|17 passed, 6 skipped by project
+PASS|visual (npm run e2e:visual, pinned image)|275 passed
+note: the full scripts/gate.sh matrix runs on the pull request; see evidence/phase-08/outcomes.md

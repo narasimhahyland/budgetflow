@@ -7,6 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: false,
     logger: ['error', 'warn', 'log'],
+    rawBody: true,
   });
   app.enableShutdownHooks();
   const port = Number(process.env.PORT ?? 3000);

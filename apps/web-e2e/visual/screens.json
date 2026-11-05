@@ -1382,6 +1382,128 @@
           "state": "default"
         }
       ]
+    },
+    {
+      "id": "059a-mobile-web-approvals",
+      "role": "location-manager",
+      "path": "/m/approvals",
+      "waitFor": "[data-testid=mobile-approval-cards]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "059b-mobile-balance-receipts",
+      "role": "location-manager",
+      "path": "/m/balance",
+      "waitFor": "[data-testid=mobile-balance-cards]",
+      "states": [
+        {
+          "state": "balance"
+        },
+        {
+          "state": "receipt",
+          "role": "event-organizer",
+          "path": "/m/receipt?request=73000000-0000-4000-8000-000000000011",
+          "waitFor": "[data-testid=receipt-review-card]"
+        }
+      ]
+    },
+    {
+      "id": "059c-notification-channels-push",
+      "role": "location-manager",
+      "path": "/me/notifications",
+      "waitFor": "[data-testid=channels-card]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "060a-comments-mentions-follow",
+      "role": "regional-manager",
+      "path": "/me/following",
+      "waitFor": "[data-testid=following-table]",
+      "states": [
+        {
+          "state": "following"
+        }
+      ]
+    },
+    {
+      "id": "061b-slack-approval-card",
+      "role": "location-manager",
+      "path": "/admin/channels/cards?provider=slack",
+      "waitFor": "[data-testid=chat-approval-card]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "061c-teams-approval-card",
+      "role": "location-manager",
+      "path": "/admin/channels/cards?provider=teams",
+      "waitFor": "[data-testid=chat-approval-card]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "061d-chat-balance-request-alerts",
+      "role": "location-manager",
+      "path": "/admin/channels/cards?provider=slack&surface=app-home",
+      "waitFor": "[data-testid=chat-app-home]",
+      "states": [
+        {
+          "state": "app-home"
+        }
+      ]
+    },
+    {
+      "id": "061e-chat-app-setup-linking",
+      "role": "integration-admin",
+      "path": "/admin/channels",
+      "waitFor": "[data-testid=slack-card]",
+      "mask": ["[data-testid=slack-approvers-linked]"],
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "064a-digest-templates",
+      "role": "finance-admin",
+      "path": "/admin/digests",
+      "waitFor": "[data-testid=digest-templates-table]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "123-notifications-tasks",
+      "role": "location-manager",
+      "path": "/notifications",
+      "waitFor": "[data-testid=notifications-list]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "tasks",
+          "path": "/notifications?tab=tasks",
+          "waitFor": "[data-testid=tasks-table]"
+        }
+      ]
     }
   ]
 }

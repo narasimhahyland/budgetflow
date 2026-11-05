@@ -5,3 +5,6 @@ export * from './lib/spend-status';
 export * from './lib/budget-impact';
 export * from './lib/approval-route';
 export * from './lib/decision-form';
+export * from './lib/mobile-tab-bar';
+export * from './lib/discussion-panel';
+export * from './lib/discussion-box';

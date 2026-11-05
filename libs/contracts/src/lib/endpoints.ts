@@ -15,6 +15,7 @@ import { ledgerEndpoints } from './domains/ledger';
 import { orgEndpoints } from './domains/org';
 import { planningEndpoints } from './domains/planning';
 import { requestEndpoints } from './domains/requests';
+import { channelEndpoints } from './domains/channels';
 import { rulesEndpoints } from './domains/rules';
 
 export type { Endpoint } from './endpoint';
@@ -40,6 +41,7 @@ export const endpoints = {
   ...contributionEndpoints,
   ...documentEndpoints,
   ...actualsEndpoints,
+  ...channelEndpoints,
   ...rulesEndpoints,
 } as const;
 

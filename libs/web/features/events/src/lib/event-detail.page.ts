@@ -20,7 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
 import type { EventDetail, Person } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, DateTimePipe, formatMoney, Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, DateTimePipe, DiscussionBox, formatMoney, Money, SpendStatus } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
@@ -38,6 +38,7 @@ type Panel = 'contribution' | 'commit' | 'participants' | 'cancel' | null;
   imports: [
     DateOnlyPipe,
     DateTimePipe,
+    DiscussionBox,
     DocumentsPanel,
     FormsModule,
     LoadState,

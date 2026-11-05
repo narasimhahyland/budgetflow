@@ -14,6 +14,9 @@ export const usdText = (minor: number) =>
 export const suffix = () => randomUUID().slice(0, 6);
 export const desktopOnly = (name: string) =>
   name === 'desktop' ? undefined : 'mutating journey runs once, on desktop';
+/** Phone-only journeys (the `/m/*` app) run once, on the emulated phone with touch. */
+export const mobileOnly = (name: string) =>
+  name === 'mobile' ? undefined : 'phone journey runs once, on the mobile project';
 
 interface Detail {
   id: string;
@@ -47,6 +50,29 @@ export async function directorTree(teamMinor = 5_000_000) {
   });
   await allocate(dept.id, team.id, teamMinor, 'department-head');
   return { root, dept, team, tag };
+}
+
+/**
+ * A budget owned by `owner` with one spending request waiting on them, so a journey that needs a
+ * pending approval does not depend on the seeded personas' queues surviving the API scenarios.
+ */
+export async function waitingApprovalFor(owner: SeedUserId, amountMinor = 120_000) {
+  const tag = suffix();
+  const root = await createRoot({ amountMinor: 20_000_000, name: `P8 journey root ${tag}` });
+  const owned = await createChild(root.id, {
+    name: `P8 journey ${owner} ${tag}`,
+    owner,
+    as: 'ceo',
+  });
+  await allocate(root.id, owned.id, 5_000_000, 'ceo');
+  const team = await createChild(owned.id, {
+    name: `P8 journey team ${tag}`,
+    owner: 'budget-owner',
+    as: owner,
+  });
+  await allocate(owned.id, team.id, 2_000_000, owner);
+  const req = await spendingRequest(team.id, amountMinor, 'budget-owner', `P8 journey ask ${tag}`);
+  return { root, owned, team, request: req, tag };
 }
 
 /** A second department under the root owned by Lena: the giving budget for contributions. */

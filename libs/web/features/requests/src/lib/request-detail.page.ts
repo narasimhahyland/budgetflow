@@ -28,6 +28,7 @@ import {
   DateOnlyPipe,
   DateTimePipe,
   DecisionForm,
+  DiscussionBox,
   formatMoney,
   Money,
   SpendStatus,
@@ -62,6 +63,7 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
     BudgetImpactCard,
     DateTimePipe,
     DecisionForm,
+    DiscussionBox,
     DocumentsPanel,
     FormsModule,
     LoadState,
@@ -119,6 +121,7 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
           }
         </div>
       </header>
+      <bf-discussion-box itemType="request" [itemId]="r.id" />
       @if (failure()) {
         <sat-banner variant="important"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
@@ -518,6 +521,9 @@ export class RequestDetailPage {
 
   protected channelLabel(a: ActivityEntry): string {
     if (a.channel === 'email') return 'Email';
+    if (a.channel === 'slack') return 'Slack';
+    if (a.channel === 'teams') return 'Teams';
+    if (a.channel === 'mobile') return 'Mobile';
     return a.actorName === 'BudgetFlow' || !a.actorName ? 'System' : 'Web';
   }
 

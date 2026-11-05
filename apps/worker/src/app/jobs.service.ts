@@ -1,5 +1,10 @@
 import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
+import {
+  CHANNEL_DELIVER_TOPIC,
+  ChannelsService,
+  type ChannelDeliverJob,
+} from '@bf/api/channels';
 import { DB } from '@bf/api/core';
 import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
 import { LEDGER_CHECK_TOPIC, RebuildService } from '@bf/api/integrity';
@@ -37,6 +42,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly notifications: NotificationsService,
     private readonly controls: BudgetControlConsumer,
     private readonly alerts: BudgetAlertsConsumer,
+    private readonly channels: ChannelsService,
     private readonly slaSweep: SlaSweepService,
   ) {}
 
@@ -66,7 +72,12 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
         this.log.log(`ledger check ${job.data.checkRunId}: ${outcome}`);
       }
     });
-    for (const topic of [EMAIL_TOPIC, BUDGET_CONTROL_TOPIC, BUDGET_THRESHOLD_TOPIC]) {
+    for (const topic of [
+      EMAIL_TOPIC,
+      BUDGET_CONTROL_TOPIC,
+      BUDGET_THRESHOLD_TOPIC,
+      CHANNEL_DELIVER_TOPIC,
+    ]) {
       await boss.createQueue(topic, {
         retryLimit: 5,
         retryDelay: 5,
@@ -92,6 +103,9 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     );
     await boss.work<ThresholdCrossed>(BUDGET_THRESHOLD_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.alerts.handle(job.data);
+    });
+    await boss.work<ChannelDeliverJob>(CHANNEL_DELIVER_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.channels.deliverChannelJob(job.data);
     });
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();

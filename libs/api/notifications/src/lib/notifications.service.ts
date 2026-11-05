@@ -25,6 +25,10 @@ export interface EmailPayload {
   text: string;
   html: string;
   kind: string;
+  recipientPersonId?: string | null;
+  subjectType?: string | null;
+  subjectId?: string | null;
+  subjectRef?: string | null;
 }
 
 export interface Recipient {
@@ -64,6 +68,7 @@ export class NotificationsService {
     to: Recipient,
     email: RenderedEmail,
     kind: string,
+    meta?: { subjectType?: string | null; subjectId?: string | null; subjectRef?: string | null },
   ): Promise<void> {
     const payload: EmailPayload = {
       tenantId,
@@ -73,6 +78,10 @@ export class NotificationsService {
       text: email.text,
       html: email.html,
       kind,
+      recipientPersonId: to.personId,
+      subjectType: meta?.subjectType ?? null,
+      subjectId: meta?.subjectId ?? null,
+      subjectRef: meta?.subjectRef ?? null,
     };
     await tx.insert(outboxMessages).values({ tenantId, topic: EMAIL_TOPIC, payload });
   }

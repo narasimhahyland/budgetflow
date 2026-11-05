@@ -47,7 +47,7 @@ export interface ApprovalSubject {
 export interface DecisionContext {
   actor: RequestActor;
   onBehalfOfPersonId: string | null;
-  channel: 'web' | 'email';
+  channel: 'web' | 'email' | 'slack' | 'teams' | 'mobile' | 'api';
   taskId: string;
   requestId: string | null;
   idempotencyKey: string | null;
