@@ -19,8 +19,7 @@ import { PgBoss } from 'pg-boss';
 
 const NIGHTLY = 'integrity.nightly';
 const DEAD_LETTER = 'integrity.dead-letter';
-/** Phase 12: delivers the webhooks the outbox drain queued for customer endpoints. */
-const WEBHOOK_DELIVER = 'integrations.webhook-deliver';
+
 const BUDGET_EVENT_TOPICS = ['budget.change_requested'] as const;
 
 /**
@@ -32,7 +31,9 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
   private readonly log = new Logger('Jobs');
   private boss?: PgBoss;
   private timer?: NodeJS.Timeout;
+  private webhookTimer?: NodeJS.Timeout;
   private draining = false;
+  private deliveringWebhooks = false;
   ready = false;
 
   constructor(
@@ -134,27 +135,16 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       {},
       { tz: 'UTC' },
     );
-    // Phase 12: outbound webhooks to customer endpoints, retried with backoff (101).
-    await boss.createQueue(WEBHOOK_DELIVER, {
-      retryLimit: 2,
-      retryDelay: 30,
-      retryBackoff: true,
-      deadLetter: DEAD_LETTER,
-    });
-    await boss.work(WEBHOOK_DELIVER, async () => {
-      const sent = await this.webhooks.deliverDue();
-      if (sent > 0) this.log.log(`delivered ${sent} webhook(s) to customer endpoints`);
-    });
-    await boss.schedule(
-      WEBHOOK_DELIVER,
-      process.env.WEBHOOK_DELIVERY_CRON ?? '* * * * *',
-      {},
-      { tz: 'UTC' },
-    );
     this.boss = boss;
     this.timer = setInterval(
       () => void this.drainOutbox(),
       Number(process.env.OUTBOX_POLL_MS ?? 1000),
+    );
+    // Phase 12: deliveries the outbox drain created, plus anything due for a retry (101). A timer
+    // rather than a queued job, so a delivery is never looked for before its row is committed.
+    this.webhookTimer = setInterval(
+      () => void this.deliverWebhooks(),
+      Number(process.env.WEBHOOK_POLL_MS ?? 2000),
     );
     this.ready = true;
     this.log.log(
@@ -164,7 +154,22 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
 
   async onApplicationShutdown(): Promise<void> {
     if (this.timer) clearInterval(this.timer);
+    if (this.webhookTimer) clearInterval(this.webhookTimer);
     await this.boss?.stop({ graceful: true, timeout: 10_000 });
+  }
+
+  /** Sends webhook deliveries that are pending or due for a retry. */
+  async deliverWebhooks(): Promise<void> {
+    if (this.deliveringWebhooks) return;
+    this.deliveringWebhooks = true;
+    try {
+      const sent = await this.webhooks.deliverDue();
+      if (sent > 0) this.log.log(`delivered ${sent} webhook(s) to customer endpoints`);
+    } catch (e) {
+      this.log.error(`webhook delivery failed: ${(e as Error).message}`);
+    } finally {
+      this.deliveringWebhooks = false;
+    }
   }
 
   /** Publishes unpublished outbox rows per tenant; the job's singleton key makes publication idempotent. */
@@ -184,19 +189,14 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
             .for('update', { skipLocked: true });
           for (const m of pending) {
             try {
-              // Phase 12 reuses this drain: subscribed customer endpoints get a pending delivery.
-              const deliveries = await this.webhooks.fanOutFromOutbox(
+              // Phase 12 reuses this drain: subscribed customer endpoints get a pending delivery,
+              // written in the same transaction and sent by the webhook timer.
+              await this.webhooks.fanOutFromOutbox(
                 tx,
                 m.tenantId,
                 m.topic,
                 m.payload as Record<string, unknown>,
               );
-              if (deliveries.length > 0)
-                await this.boss!.send(
-                  WEBHOOK_DELIVER,
-                  { tenantId: m.tenantId },
-                  { singletonKey: `wh:${m.id}` },
-                );
               await this.boss!.send(
                 m.topic,
                 { tenantId: m.tenantId, ...(m.payload as object) },
