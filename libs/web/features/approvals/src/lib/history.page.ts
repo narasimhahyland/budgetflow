@@ -29,7 +29,7 @@ const DECISION_LABELS: Record<string, string> = {
   escalate: 'Escalated',
 };
 
-/** Screen 90: every approval decision with the authority, channel, rules and timing behind it. */
+/** Screen 90: every approval decision with the approver, their authority, channel and timing. */
 @Component({
   selector: 'bf-approval-history-page',
   imports: [
