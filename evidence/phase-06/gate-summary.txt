@@ -1,4 +1,4 @@
-scripts/gate.sh lint typecheck build functional-api functional-e2e visual — 2026-11-05T05:51:38Z — commit 2f1c218
+scripts/gate.sh lint typecheck build functional-api functional-e2e visual — 2026-11-05T05:51:38Z — commit ccd223e
 PASS|secrets|1s
 PASS|lint|1s
 PASS|styles|1s
