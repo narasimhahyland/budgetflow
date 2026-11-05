@@ -146,10 +146,12 @@ test.describe('finance admin controls a program', () => {
     await page.getByTestId('paste-text').fill(`${a.name}\t1500\nGrid new team\t700`);
     await page.getByTestId('apply-paste').click();
     await expect(page.getByTestId('paste-banner')).toContainText('Pasted 2 row(s)');
-    await expect(page.getByTestId('total-change')).toContainText(usd(220_000));
+    // The new row has no owner yet: it is saved as a Draft and allocates nothing.
+    await expect(page.getByTestId('total-change')).toContainText(usd(150_000));
     await expect(page.getByTestId('submit-grid')).toBeEnabled();
     await page.getByTestId('submit-grid').click();
-    await expect(page.getByTestId('grid-done')).toContainText('Posted 2 allocation(s)');
+    await expect(page.getByTestId('grid-done')).toContainText('Posted 1 allocation(s)');
+    await expect(page.getByTestId('grid-done')).toContainText('1 new budget(s) saved as Draft');
     expect((await getBudget(a.id)).balances.budgetCurrency.authorized.amountMinor).toBe(150_000);
   });
 

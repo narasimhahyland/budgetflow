@@ -256,6 +256,8 @@
           @for (l of pv.lines; track l.index) {
             @if (l.outcome === 'error') {
               <p class="bf-bad">{{ l.name }}: {{ l.message }}</p>
+            } @else if (l.outcome === 'draft') {
+              <p class="bf-card__hint">{{ l.name }}: {{ l.message }}</p>
             }
           }
           @if (pv.ok) {

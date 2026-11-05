@@ -128,14 +128,25 @@ export class AllocationService {
         if (!ok.ok) return fail(child.name, ok.error.code, ok.error.message);
         return { ...base, childBudgetId: child.id, name: child.name, outcome: 'ok' as const };
       }
+      if (!l.newChild!.ownerPersonId)
+        return {
+          ...base,
+          childBudgetId: null,
+          name: l.newChild!.name,
+          outcome: 'draft' as const,
+          message: 'Saved as a Draft until an owner is set; nothing is allocated to it.',
+        };
       return { ...base, childBudgetId: null, name: l.newChild!.name, outcome: 'ok' as const };
     });
-    const total = req.lines.reduce((s, l) => s + l.amountMinor, 0);
+    const total = req.lines.reduce(
+      (s, l, i) => s + (lines[i].outcome === 'draft' ? 0 : l.amountMinor),
+      0,
+    );
     const balances = (await this.reads.balances(tx, [parentId])).get(parentId)!.budget;
     const control = toPostingBudget(parent).control;
     const availableBefore = allocationAvailable(balances, control);
     const fits = checkAllocation(balances, control, total, parent.currency);
-    const ok = parentStatus.ok && fits.ok && lines.every((l) => l.outcome === 'ok');
+    const ok = parentStatus.ok && fits.ok && lines.every((l) => l.outcome !== 'error');
     const result: BatchAllocationResult = {
       dryRun: req.dryRun,
       ok,
@@ -163,6 +174,7 @@ export class AllocationService {
     const audited: Record<string, unknown>[] = [];
     for (const [i, l] of req.lines.entries()) {
       let childId = l.childBudgetId;
+      const draft = lines[i].outcome === 'draft';
       if (!childId) {
         childId = await this.budgetsService.createInTx(
           tx,
@@ -173,11 +185,23 @@ export class AllocationService {
             legalEntityId: l.newChild!.legalEntityId ?? parent.legalEntityId,
             currency: parent.currency,
             fiscalYearId: parent.fiscalYearId,
+            draft,
           },
           { ...ctx, fixedId: undefined },
-          { reason: 'Created in the allocation grid', audit: false },
+          { reason: 'Created in the allocation grid', audit: false, ownerless: draft },
         );
         lines[i].childBudgetId = childId;
+      }
+      if (draft) {
+        audited.push({
+          childBudgetId: childId,
+          name: lines[i].name,
+          created: true,
+          draft: true,
+          amountMinor: 0,
+          journalId: null,
+        });
+        continue;
       }
       const journalId = await this.budgetsService.allocateInTx(
         tx,

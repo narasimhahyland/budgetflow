@@ -3,7 +3,8 @@
 // lines post as one change or none do; parallel grids never exceed the parent).
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { BatchAllocationResult, BudgetDetail, PerHeadResult } from '@bf/contracts';
-import { SEED } from '@bf/seed';
+import { SEED, userById } from '@bf/seed';
+import { mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { createChild, createRoot } from '../support/factory';
 import { bal, budget, post } from './p4';
@@ -169,7 +170,14 @@ test.describe('allocation grid', () => {
     const lines = [
       { childBudgetId: c1.id, amountMinor: 40_000 },
       { childBudgetId: c2.id, amountMinor: 30_000 },
-      { newChild: { name: 'Grid team', code: 'GRID-1' }, amountMinor: 20_000 },
+      {
+        newChild: {
+          name: 'Grid team',
+          code: 'GRID-1',
+          ownerPersonId: userById('location-manager').personId,
+        },
+        amountMinor: 20_000,
+      },
     ];
     const grid = (body: Record<string, unknown>, key?: string) =>
       post(request, `/api/budgets/${root.id}/allocations/batch`, body, 'ceo', key);
@@ -247,5 +255,49 @@ test.describe('allocation grid', () => {
     );
     expect(responses.map((r) => r.status()).sort()).toEqual([200, 409, 409]);
     expect(bal(await budget(request, root.id)).allocatedOut).toBe(60_000);
+  });
+
+  test('a pasted row without an owner is saved as an unfunded Draft until an owner is set', async ({
+    request,
+  }) => {
+    const root = await createRoot(request, { amountMinor: 100_000 });
+    const c = await createChild(request, root.id, { currency: 'USD' });
+    const r = await expectContract(
+      await post(
+        request,
+        `/api/budgets/${root.id}/allocations/batch`,
+        {
+          dryRun: false,
+          lines: [
+            { childBudgetId: c.id, amountMinor: 10_000 },
+            { newChild: { name: 'Pasted row without owner' }, amountMinor: 5_000 },
+          ],
+        },
+        'ceo',
+      ),
+      200,
+      BatchAllocationResult,
+    );
+    expect(r).toMatchObject({ ok: true, totalMinor: 10_000, availableAfterMinor: 90_000 });
+    expect(r.journalIds).toHaveLength(1);
+    expect(r.lines[1]).toMatchObject({ outcome: 'draft', amountMinor: 5_000 });
+    const draftId = r.lines[1].childBudgetId!;
+    const draft = await budget(request, draftId);
+    expect([draft.status, draft.ownerPersonId, bal(draft).authorized]).toEqual(['draft', null, 0]);
+    expect(bal(await budget(request, root.id)).allocatedOut).toBe(10_000);
+    const activate = () => post(request, `/api/budgets/${draftId}/activate`, {}, 'finance-admin');
+    await expectProblem(await activate(), 422, 'VALIDATION_FAILED');
+    await expectContract(
+      await request.put(`/api/budgets/${draftId}/settings`, {
+        headers: await mutate('finance-admin'),
+        data: {
+          expectedVersion: draft.version,
+          ownerPersonId: userById('location-manager').personId,
+        },
+      }),
+      200,
+      BudgetDetail,
+    );
+    expect((await expectContract(await activate(), 200, BudgetDetail)).status).toBe('active');
   });
 });

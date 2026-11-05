@@ -277,6 +277,8 @@ export class BudgetsService {
       reason?: string;
       /** `false` when the calling command writes the one audit entry itself. */
       audit?: boolean;
+      /** Allocation grid rows without an owner start as an ownerless Draft. */
+      ownerless?: boolean;
     } = {},
   ): Promise<string> {
     const id = ctx.fixedId ?? randomUUID();
@@ -423,7 +425,7 @@ export class BudgetsService {
         legalEntityId: entity.id,
         costCenterId: req.costCenterId ?? null,
         orgUnitId: req.orgUnitId ?? null,
-        ownerPersonId: req.ownerPersonId ?? actor.personId,
+        ownerPersonId: options.ownerless ? null : (req.ownerPersonId ?? actor.personId),
         currency,
         fiscalYearId: fy.id,
         planVersionId: parent ? null : req.planVersionId!,
@@ -658,6 +660,13 @@ export class BudgetsService {
         if (!parent) throw ApiProblem.notFound('parent budget');
         this.policy.assert(actor, 'budget.create_child', budgetResource(parent), 'budget');
         await this.reads.lockBudgets(tx, [id]);
+        if (!row.ownerPersonId)
+          throw new ApiProblem(
+            422,
+            'VALIDATION_FAILED',
+            'Set an owner before activating this budget; a Draft without an owner receives no money.',
+            { field: 'ownerPersonId' },
+          );
         const next = unwrap(budgetMachine.next(row.status, 'activate'));
         await tx.update(budgets).set({ status: next }).where(eq(budgets.id, id));
         await this.audit.append(tx, {

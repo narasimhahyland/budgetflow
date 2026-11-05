@@ -665,8 +665,10 @@
                   "type": "string",
                   "enum": [
                     "ok",
+                    "draft",
                     "error"
-                  ]
+                  ],
+                  "description": "draft: a new row without an owner, created as a Draft that receives nothing."
                 },
                 "code": {
                   "type": [

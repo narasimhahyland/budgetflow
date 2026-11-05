@@ -696,7 +696,11 @@ export const BatchAllocationResult = named(
             childBudgetId: Id.nullable(),
             name: z.string(),
             amountMinor: z.int(),
-            outcome: z.enum(['ok', 'error']),
+            outcome: z
+              .enum(['ok', 'draft', 'error'])
+              .describe(
+                'draft: a new row without an owner, created as a Draft that receives nothing.',
+              ),
             code: z.string().nullable(),
             message: z.string().nullable(),
           })

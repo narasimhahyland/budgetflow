@@ -174,8 +174,9 @@ export class AllocationWorkspacePage {
           : { newChild: { name: r.name.trim() }, amountMinor: d },
       ),
   );
+  /** New rows have no owner yet, so they are saved as Drafts and allocate nothing. */
   protected readonly totalChange = computed(() =>
-    this.changes().reduce((s, l) => s + l.amountMinor, 0),
+    this.changes().reduce((s, l) => s + ('childBudgetId' in l ? l.amountMinor : 0), 0),
   );
   protected readonly available = computed(
     () => this.parent()?.balances.allocationAvailable.amountMinor ?? 0,
@@ -203,7 +204,7 @@ export class AllocationWorkspacePage {
         key: `new-${rows.length}-${Date.now()}`,
         childId: null,
         name,
-        owner: 'You (change later)',
+        owner: 'No owner yet (Draft)',
         driver: 'fixed',
         currentMinor: 0,
         next: toMajor(amountMinor),
@@ -279,7 +280,13 @@ export class AllocationWorkspacePage {
           body: { dryRun: false, lines: this.changes(), memo: 'Allocation workspace' },
         }),
       );
-      this.done.set(`Posted ${r.journalIds.length} allocation(s) as one change.`);
+      const drafts = r.lines.filter((l) => l.outcome === 'draft').length;
+      this.done.set(
+        `Posted ${r.journalIds.length} allocation(s) as one change.` +
+          (drafts
+            ? ` ${drafts} new budget(s) saved as Draft with nothing allocated; set an owner to activate them.`
+            : ''),
+      );
       this.pasted.set(null);
       this.parentRes.reload();
       this.childrenRes.reload();
