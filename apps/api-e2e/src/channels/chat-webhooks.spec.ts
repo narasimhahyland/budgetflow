@@ -294,15 +294,30 @@ test.describe('signed Slack and Teams approval callbacks', () => {
     );
     const taskId = await taskOf(request, 'department-head', 'request', r.id);
 
-    // Kavya has a linked Slack account but no authority on Lena's task: the server re-authorizes.
-    const res = await postChatWebhook(request, 'slack', {
-      tenantId: TENANT,
-      providerUserId: SLACK.eventOrganizer,
-      kind: 'decision',
-      taskId,
-      decision: 'approve',
-    });
-    expect([403, 404]).toContain(res.status());
+    // Daniel can read the request but holds no task on it: the server re-authorizes every callback.
+    await expectProblem(
+      await postChatWebhook(request, 'slack', {
+        tenantId: TENANT,
+        providerUserId: SLACK.financeController,
+        kind: 'decision',
+        taskId,
+        decision: 'approve',
+      }),
+      403,
+      'APPROVAL_NOT_ASSIGNED',
+    );
+    // Kavya cannot even see the request, so the task is simply not there for her.
+    await expectProblem(
+      await postChatWebhook(request, 'slack', {
+        tenantId: TENANT,
+        providerUserId: SLACK.eventOrganizer,
+        kind: 'decision',
+        taskId,
+        decision: 'approve',
+      }),
+      404,
+      'NOT_FOUND',
+    );
     expect((await getRequest(request, 'budget-owner', r.id)).status).toBe('pending_approval');
 
     // Opening the card in a shared channel never shows the amount to somebody out of scope.
@@ -327,6 +342,18 @@ test.describe('signed Slack and Teams approval callbacks', () => {
     expect(readOnly.card?.canApprove).toBe(false);
     expect(readOnly.card?.canReject).toBe(false);
     expect(readOnly.card?.stateHeadline).toContain('Lena Fischer');
+
+    // Cards refresh per viewer (Teams Universal Actions): a viewer other than the person the message
+    // was posted for never gets decision buttons, even when the account is linked.
+    const perViewer = await webhookOk(request, 'slack', {
+      tenantId: TENANT,
+      providerUserId: SLACK.financeController,
+      viewerProviderUserId: 'U-SOMEONE-ELSE',
+      kind: 'card_view',
+      taskId,
+    });
+    expect(perViewer.card?.state).toBe('read_only');
+    expect(perViewer.card?.canApprove).toBe(false);
   });
 
   test('an amount above the chat single-click threshold sends the approver to BudgetFlow', async ({
