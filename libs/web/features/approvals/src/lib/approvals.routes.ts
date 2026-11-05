@@ -12,6 +12,13 @@ export const approvalRoutes: Routes = [
     loadComponent: () => import('./inbox.page').then((m) => m.InboxPage),
   },
   {
+    path: 'history',
+    title: 'Approval history',
+    data: { pageTitle: 'Approval history', section: 'Insights' },
+    canActivate: [requirePermission('tenant.read', 'Approval history')],
+    loadComponent: () => import('./history.page').then((m) => m.ApprovalHistoryPage),
+  },
+  {
     path: 'delegations',
     title: 'Delegations',
     data: { pageTitle: 'Delegations', section: 'Requests' },

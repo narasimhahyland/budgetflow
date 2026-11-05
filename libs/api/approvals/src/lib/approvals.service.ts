@@ -1900,11 +1900,8 @@ export class ApprovalsService {
         if (q.aboveSlaOnly === 'true' && !breached) continue;
 
         const plan = inst.explanation as unknown as PlanJson & { ruleVersions?: string[] };
-        const ruleChips = plan.ruleVersions?.length
-          ? plan.ruleVersions
-          : subject.budgetAmount.amountMinor >= 500_000
-            ? ['R-12 v3', 'R-07 v1']
-            : ['R-12 v3'];
+        // Only the versions the route actually recorded: an audit trail never infers which rule ran.
+        const ruleChips = plan.ruleVersions ?? [];
         if (q.ruleCode && !ruleChips.some((rc) => rc.startsWith(q.ruleCode!))) continue;
 
         const [auditRow] = await tx
@@ -1956,7 +1953,12 @@ export class ApprovalsService {
       const medianMin = sortedMins.length ? sortedMins[Math.floor(sortedMins.length / 2)] : 0;
       const mh = Math.floor(medianMin / 60);
       const mm = medianMin % 60;
-      const medianLabel = mh > 0 ? `${mh} h ${mm} min` : `${medianMin} min`;
+      // A median over nothing is not zero minutes; say so rather than print a figure.
+      const medianLabel = !sortedMins.length
+        ? 'No decisions yet'
+        : mh > 0
+          ? `${mh} h ${mm} min`
+          : `${medianMin} min`;
       const escCount = items.filter((i) => i.escalated).length;
       const emailCount = items.filter((i) => i.channel === 'email').length;
 

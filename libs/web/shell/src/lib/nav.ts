@@ -179,6 +179,12 @@ export const NAV: NavGroup[] = [
         icon: 'chart_arrow_up',
         permission: 'report.read',
       },
+      {
+        label: 'Approval history',
+        path: '/approvals/history',
+        icon: 'checklist',
+        permission: 'audit.read',
+      },
       { label: 'Audit log', path: '/audit-log', icon: 'book', permission: 'audit.read' },
     ],
   },

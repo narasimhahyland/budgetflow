@@ -3,6 +3,7 @@
 // and a post-spend exception is settled with a reversal rather than an edit.
 import { expect, test } from '@playwright/test';
 import {
+  ApprovalHistoryResponse,
   DelegationView,
   DoaMatrixAdminView,
   PostSpendExceptionList,
@@ -285,6 +286,43 @@ test.describe('approval workflows and authority', () => {
 
     const entries = await auditFor(request, open!.id);
     expect(entries.map((e) => e.action)).toContain('exception.resolved');
+  });
+
+  test('the approval history records real decisions and shows an approver only their own', async ({
+    request,
+  }) => {
+    const all = await expectContract(
+      await request.get('/api/approvals/history', { headers: await as('auditor') }),
+      200,
+      ApprovalHistoryResponse,
+    );
+    expect(all.items.length).toBeGreaterThan(0);
+    expect(all.summary.totalDecisions).toBe(all.items.length);
+    for (const i of all.items) {
+      expect(i.timeToDecideMinutes).toBeGreaterThan(0);
+      // Rule versions are only what the route recorded; the history never guesses which rule ran.
+      expect(Array.isArray(i.ruleVersions)).toBe(true);
+    }
+
+    const rejected = await expectContract(
+      await request.get('/api/approvals/history?decision=reject', {
+        headers: await as('auditor'),
+      }),
+      200,
+      ApprovalHistoryResponse,
+    );
+    expect(rejected.items.every((i) => i.decision === 'reject')).toBe(true);
+    expect(rejected.items.length).toBeLessThan(all.items.length);
+
+    // An approver without audit rights sees the decisions they made, not everyone's.
+    const mine = await expectContract(
+      await request.get('/api/approvals/history', { headers: await as('location-manager') }),
+      200,
+      ApprovalHistoryResponse,
+    );
+    const me = userById('location-manager').displayName;
+    expect(mine.items.every((i) => i.approverName === me || i.onBehalfOfName === me)).toBe(true);
+    expect(mine.items.length).toBeLessThanOrEqual(all.items.length);
   });
 
   test('rules administration is refused to people without it', async ({ request }) => {
