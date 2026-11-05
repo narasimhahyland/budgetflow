@@ -8,3 +8,4 @@ export * from './lib/events-depth';
 export * from './lib/actuals';
 export * from './lib/channels';
 export * from './lib/rules';
+export * from './lib/reports';
