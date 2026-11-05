@@ -301,10 +301,14 @@ export class AllocationService {
 
   async perHead(actor: RequestActor, parentId: string, req: PerHeadRequest, ctx: CommandContext) {
     const run = async (tx: Tx): Promise<PerHeadResult> => {
-      const parent = await this.views.row(tx, parentId);
+      let parent = await this.views.row(tx, parentId);
       this.policy.assert(actor, 'budget.allocate', budgetResource(parent), 'budget');
-      const child = await this.views.row(tx, req.childBudgetId);
-      if (!req.dryRun) await this.reads.lockBudgets(tx, [parentId, child.id]);
+      let child = await this.views.row(tx, req.childBudgetId);
+      if (!req.dryRun) {
+        await this.reads.lockBudgets(tx, [parentId, child.id]);
+        parent = await this.views.row(tx, parentId);
+        child = await this.views.row(tx, req.childBudgetId);
+      }
       const preview = await this.perHeadPreview(tx, parent, child, req);
       if (req.dryRun) return { preview, journalId: null, child: null };
       return this.applyPerHead(
@@ -344,17 +348,25 @@ export class AllocationService {
     ctx: CommandContext,
   ) {
     const run = async (tx: Tx): Promise<PerHeadResult> => {
-      const child = await this.views.row(tx, childId);
-      const cfg = child.driverConfig as PerHeadDriverConfig | null;
-      if (child.allocationDriver !== 'per_head' || !cfg || !child.parentId)
-        throw new ApiProblem(
-          422,
-          'VALIDATION_FAILED',
-          'This budget is not allocated by the per-head driver.',
-        );
-      const parent = await this.views.row(tx, child.parentId);
+      const driverOf = (row: BudgetRow) => {
+        const cfg = row.driverConfig as PerHeadDriverConfig | null;
+        if (row.allocationDriver !== 'per_head' || !cfg || !row.parentId)
+          throw new ApiProblem(
+            422,
+            'VALIDATION_FAILED',
+            'This budget is not allocated by the per-head driver.',
+          );
+        return { cfg, parentId: row.parentId };
+      };
+      let child = await this.views.row(tx, childId);
+      let parent = await this.views.row(tx, driverOf(child).parentId);
       this.policy.assert(actor, 'budget.allocate', budgetResource(parent), 'budget');
-      if (!req.dryRun) await this.reads.lockBudgets(tx, [parent.id, child.id]);
+      if (!req.dryRun) {
+        await this.reads.lockBudgets(tx, [parent.id, child.id]);
+        child = await this.views.row(tx, childId);
+        parent = await this.views.row(tx, driverOf(child).parentId);
+      }
+      const { cfg } = driverOf(child);
       const preview = await this.perHeadPreview(tx, parent, child, {
         rateMinor: cfg.rateMinor,
         eligibleTypes: cfg.eligibleTypes,
@@ -394,6 +406,26 @@ export class AllocationService {
     ctx: CommandContext,
     opts: { eligibleTypes: EmploymentType[]; prorate: boolean; reason: string },
   ): Promise<PerHeadResult> {
+    const driver: PerHeadDriverConfig = {
+      rateMinor: preview.rateMinor,
+      eligibleTypes: opts.eligibleTypes,
+      prorate: opts.prorate,
+      orgUnitId: preview.orgUnitId,
+      snapshotId: preview.snapshotId,
+      asOfDate: preview.asOfDate,
+      eligibleHeadcountMilli: preview.eligibleHeadcountMilli,
+      amountMinor: preview.amountMinor,
+      programTemplateId,
+    };
+    const stored = (child.driverConfig ?? {}) as Record<string, unknown>;
+    const unchanged =
+      preview.deltaMinor === 0 &&
+      child.allocationDriver === 'per_head' &&
+      (Object.keys(driver) as (keyof PerHeadDriverConfig)[]).every(
+        (k) => JSON.stringify(stored[k] ?? null) === JSON.stringify(driver[k] ?? null),
+      );
+    if (unchanged)
+      return { preview, journalId: null, child: await this.views.detailById(tx, actor, child.id) };
     let journalId: string | null = null;
     if (preview.deltaMinor > 0) {
       journalId = await this.budgetsService.allocateInTx(
@@ -418,17 +450,6 @@ export class AllocationService {
         ctx,
       );
     }
-    const driver: PerHeadDriverConfig = {
-      rateMinor: preview.rateMinor,
-      eligibleTypes: opts.eligibleTypes,
-      prorate: opts.prorate,
-      orgUnitId: preview.orgUnitId,
-      snapshotId: preview.snapshotId,
-      asOfDate: preview.asOfDate,
-      eligibleHeadcountMilli: preview.eligibleHeadcountMilli,
-      amountMinor: preview.amountMinor,
-      programTemplateId,
-    };
     await tx
       .update(budgets)
       .set({

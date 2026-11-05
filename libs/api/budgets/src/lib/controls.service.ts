@@ -80,6 +80,25 @@ export class ControlsService {
       .where(like(budgets.path, `${row.path}%`));
   }
 
+  /** Locks the budget (and its subtree when cascading) and re-reads it, so status checks see committed changes. */
+  private async lockedRows(
+    tx: Tx,
+    row: BudgetRow,
+    cascade: boolean,
+  ): Promise<{ row: BudgetRow; rows: BudgetRow[] }> {
+    const before = cascade ? await this.subtree(tx, row) : [row];
+    await this.reads.lockBudgets(
+      tx,
+      before.map((r) => r.id),
+    );
+    const fresh = await this.reads.budgetRows(
+      tx,
+      before.map((r) => r.id),
+    );
+    const rows = before.map((r) => fresh.get(r.id)!);
+    return { row: fresh.get(row.id)!, rows };
+  }
+
   /**
    * Set to zero with cascade, bottom-up: each budget below keeps its own floor (held + encumbered +
    * actual + what its children keep) and returns the rest to its parent.
@@ -391,13 +410,9 @@ export class ControlsService {
         status: 200,
       },
       async (tx) => {
-        const { row } = await this.loadForControl(tx, actor, id);
+        const { row: unlocked } = await this.loadForControl(tx, actor, id);
         await this.assertReasonCode(tx, req.reasonCode, ['freeze', 'reduction', 'exception']);
-        const rows = req.cascade ? await this.subtree(tx, row) : [row];
-        await this.reads.lockBudgets(
-          tx,
-          rows.map((r) => r.id),
-        );
+        const { row, rows } = await this.lockedRows(tx, unlocked, Boolean(req.cascade));
         unwrap(budgetMachine.next(row.status, 'freeze'));
         const affected: string[] = [];
         for (const r of rows) {
@@ -450,12 +465,8 @@ export class ControlsService {
         status: 200,
       },
       async (tx) => {
-        const { row } = await this.loadForControl(tx, actor, id);
-        const rows = req.cascade ? await this.subtree(tx, row) : [row];
-        await this.reads.lockBudgets(
-          tx,
-          rows.map((r) => r.id),
-        );
+        const { row: unlocked } = await this.loadForControl(tx, actor, id);
+        const { row, rows } = await this.lockedRows(tx, unlocked, Boolean(req.cascade));
         unwrap(budgetMachine.next(row.status, 'unfreeze'));
         const affected: string[] = [];
         for (const r of rows) {
@@ -504,8 +515,8 @@ export class ControlsService {
         status: 200,
       },
       async (tx) => {
-        const { row } = await this.loadForControl(tx, actor, id);
-        await this.reads.lockBudgets(tx, [id]);
+        const { row: unlocked } = await this.loadForControl(tx, actor, id);
+        const { row } = await this.lockedRows(tx, unlocked, false);
         const next = unwrap(budgetMachine.next(row.status, 'restore'));
         await this.setStatus(
           tx,
@@ -783,6 +794,8 @@ export class ControlsService {
         for (const item of plan) {
           if (item.row.id === id) continue;
           const next = budgetMachine.next(item.row.status, 'set_to_zero');
+          const statusChanges = next.ok && next.value !== item.row.status;
+          if (!statusChanges && item.reductionMinor === 0) continue;
           let journalId: string | null = null;
           if (item.reductionMinor > 0) {
             const parentRow = await this.views.row(tx, item.row.parentId!);
