@@ -17,6 +17,17 @@
 | Self-contained                                                                                                  | Inline CSS only; no scripts, external fonts or images        | pass   |
 | Public-content scan (internal tool names, figures, people, office cities, "prototype", emojis, technical terms) | No matches; only generic system categories                   | pass   |
 
+## Revision: "See the screen designs" is the primary action in the hero
+
+The button moved from the footer to the hero, under the positioning text, as a filled primary button (`#5654ac`, white text). The hero body is now white, with a slim purple brand bar above it, so the button stands out; the footer keeps only its closing line. The `local-*.png` screenshots above show the revised page.
+
+| Check (local, 2026-11-05)                       | Expected                                                         | Result |
+| ----------------------------------------------- | ---------------------------------------------------------------- | ------ |
+| Button style at laptop, tablet and phone widths | Background `rgb(86, 84, 172)`, white text, in the first viewport | pass   |
+| Phone (iPhone 13)                               | Full-width button, no horizontal overflow                        | pass   |
+| Click the button                                | Opens the preview index (`../index.html`)                        | pass   |
+| Print view                                      | Button hidden, no links left in the footer                       | pass   |
+
 ## Live check (after deploy)
 
 - Merged in [#28](https://github.com/narasimhahyland/budgetflow/pull/28) (merge commit `ba9a1f0`), then published with `design/preview/deploy.sh` from that commit.
