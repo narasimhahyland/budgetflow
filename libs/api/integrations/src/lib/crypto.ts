@@ -64,8 +64,9 @@ export function newBearerSecret(
   label: 'live' | 'scim',
   tenantId: string,
 ): { secret: string; prefix: string } {
-  const random = randomBytes(24).toString('base64url');
-  const tag = Buffer.from(tenantId.replace(/-/g, ''), 'hex').toString('base64url');
+  // Hex throughout: the underscore separators stay unambiguous whatever the random bytes are.
+  const random = randomBytes(24).toString('hex');
+  const tag = tenantId.replace(/-/g, '');
   return { secret: `bf_${label}_${tag}_${random}`, prefix: `bf_${label}_${random.slice(0, 4)}` };
 }
 
@@ -73,9 +74,8 @@ export function newBearerSecret(
 export function tenantFromSecret(secret: string): string | null {
   const parts = secret.split('_');
   if (parts.length !== 4 || parts[0] !== 'bf') return null;
-  const bytes = Buffer.from(parts[2], 'base64url');
-  if (bytes.length !== 16) return null;
-  const hex = bytes.toString('hex');
+  const hex = parts[2];
+  if (!/^[0-9a-f]{32}$/.test(hex)) return null;
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 

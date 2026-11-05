@@ -34,7 +34,8 @@ export class PlanImportService {
       this.db,
       { tenantId: actor.tenantId, subject: actor.subject },
       async (tx) => {
-        this.policy.assert(actor, 'integration.manage', tenantOf(actor));
+        // 094a: a Finance Admin runs the import; seeing the connector is enough on the integration side.
+        this.policy.assert(actor, 'integration.read', tenantOf(actor));
         this.policy.assert(actor, 'budget.create_root', tenantOf(actor));
         const row = await this.connections.rowOrFail(tx, connectionId);
         if (row.category !== 'planning') {

@@ -38,9 +38,12 @@ const SERVICES = [
 })
 export class IntegrationsModule {}
 
-/** Routes: the integrations area (092-101) and the public API v1 (101a). */
+/**
+ * Routes: the integrations area (092-101) and the public API v1 (101a). The public controller reads
+ * balances and feeds the actuals review, so it needs those modules alongside the integration services.
+ */
 @Module({
-  imports: [IntegrationsModule],
+  imports: [IntegrationsModule, CoreModule, LedgerModule, ActualsModule],
   controllers: [IntegrationsController, PublicApiController],
 })
 export class IntegrationsApiModule {}

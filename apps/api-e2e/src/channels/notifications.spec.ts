@@ -98,11 +98,7 @@ test.describe('notifications, preferences and push devices', () => {
     }
 
     // Starting later or ending earlier than the company default would mean more noise, not less.
-    for (const bad of [
-      { start: '22:00', end: '07:00' },
-      { start: '21:00' },
-      { end: '07:30' },
-    ]) {
+    for (const bad of [{ start: '22:00', end: '07:00' }, { start: '21:00' }, { end: '07:30' }]) {
       await expectProblem(
         await patchSettings(request, 'regional-manager', { quietHours: bad }),
         422,

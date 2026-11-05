@@ -4,6 +4,7 @@ import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
 import { seedEvents } from './events';
 import { seedEventsDepth } from './events-depth';
+import { seedIntegrations } from './integrations';
 import { seedOrg } from './org';
 import { seedRules } from './rules';
 
@@ -34,5 +35,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'event templates, plans, invitations, quotes, attendance and feedback',
     phase: 'P9',
     run: seedEventsDepth,
+  },
+  {
+    name: 'connected systems in Mock mode, mappings, an API key and a webhook endpoint',
+    phase: 'P12',
+    run: seedIntegrations,
   },
 ];

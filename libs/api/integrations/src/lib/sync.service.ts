@@ -20,6 +20,7 @@ import type {
   SyncRunView,
   SyncStatus,
 } from '@bf/contracts';
+import type { Action } from '@bf/domain';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, desc, eq, gte, sql } from 'drizzle-orm';
 import { MAX_RETRY_ATTEMPTS, RETRY_BACKOFF_MINUTES } from './config';
@@ -42,6 +43,29 @@ import { classifyError, isRetryable, OutboundHttp, providerMessage } from './htt
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const todayUtc = () => new Date().toISOString().slice(0, 10);
+
+/**
+ * The identity a connector applies records with. A person authorizes the run; the records themselves
+ * are applied by the connector, which holds exactly the actions the review paths need and nothing
+ * that approves, applies a control or posts to the ledger.
+ */
+const CONNECTOR_SCOPES: Action[] = [
+  'tenant.read',
+  'integration.read',
+  'integration.manage',
+  'actuals.read',
+  'actuals.manage',
+  'headcount.import',
+  'org.read',
+];
+
+const connectorActor = (actor: RequestActor, provider: string): RequestActor => ({
+  ...actor,
+  subject: `connector:${provider}`,
+  roles: [],
+  ownedBudgetPaths: [],
+  serviceScopes: CONNECTOR_SCOPES,
+});
 
 interface ApplyOutcome {
   applied: number;
@@ -237,7 +261,14 @@ export class SyncService {
       read = rows.length;
       const records = rows.map((r) => spec.map(r, { mappings: context.mappings }));
       nextCursor = this.cursorFrom(rows, spec) ?? since;
-      outcome = await this.apply(actor, context, spec, records, run.id, ctx);
+      outcome = await this.apply(
+        connectorActor(actor, String(prepared.row.provider)),
+        context,
+        spec,
+        records,
+        run.id,
+        ctx,
+      );
       if (outcome.failed > 0 || outcome.duplicates > 0) status = 'partly_succeeded';
       if (outcome.applied === 0 && outcome.failed > 0) status = 'failed';
     } catch (e) {
