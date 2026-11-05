@@ -15,9 +15,7 @@ import {
   signChatWebhook,
   webhookOk,
 } from '../support/p8';
-import {
-  createRoot,
-} from '../support/factory';
+import { createRoot } from '../support/factory';
 import {
   decideOk,
   directorTree,

@@ -15,3 +15,4 @@ export * from './channels';
 export * from './rules';
 export * from './events-depth';
 export * from './reports';
+export * from './integrations';

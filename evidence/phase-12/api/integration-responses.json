@@ -1,0 +1,1740 @@
+{
+  "hub": {
+    "request": "GET /api/integrations",
+    "status": 200,
+    "body": {
+      "health": {
+        "connected": 5,
+        "needsAttention": 2,
+        "notConnected": 8,
+        "retrying": 2,
+        "deadLetter": 1
+      },
+      "connections": [
+        {
+          "id": "90000000-0000-4000-8000-000000000005",
+          "provider": "outlook",
+          "category": "calendar",
+          "displayName": "Microsoft Outlook",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000002",
+          "provider": "ramp",
+          "category": "cards",
+          "displayName": "Ramp",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": "2026-11-05T21:33:40.037Z",
+          "recordsLast24h": 2,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000001",
+          "provider": "erpnext",
+          "category": "erp",
+          "displayName": "ERPNext",
+          "status": "needs_attention",
+          "mode": "mock",
+          "lastSyncAt": "2026-11-05T21:33:44.259Z",
+          "recordsLast24h": 4,
+          "errorsLast24h": 0,
+          "attention": "503 The provider is unavailable",
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000003",
+          "provider": "concur",
+          "category": "expense",
+          "displayName": "Concur",
+          "status": "needs_attention",
+          "mode": "mock",
+          "lastSyncAt": "2026-11-05T21:33:44.620Z",
+          "recordsLast24h": 2,
+          "errorsLast24h": 2,
+          "attention": "503 The provider is unavailable",
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000004",
+          "provider": "hr_file",
+          "category": "hr",
+          "displayName": "HR file import",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000006",
+          "provider": "scim",
+          "category": "identity",
+          "displayName": "SCIM provisioning",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000007",
+          "provider": "adaptive_planning",
+          "category": "planning",
+          "displayName": "Adaptive Planning",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        }
+      ],
+      "available": [
+        {
+          "provider": "odoo",
+          "category": "erp",
+          "displayName": "Odoo",
+          "exchanges": ["Inbound: journal items", "Outbound: event codes as analytic tags"]
+        },
+        {
+          "provider": "workday_financials",
+          "category": "erp",
+          "displayName": "Workday Financials",
+          "exchanges": [
+            "Inbound: journal lines",
+            "Outbound: event codes as worktags",
+            "Optional budget check before approving commitments"
+          ]
+        },
+        {
+          "provider": "netsuite",
+          "category": "erp",
+          "displayName": "NetSuite",
+          "exchanges": ["Inbound: transactions", "Outbound: event codes as a custom segment"]
+        },
+        {
+          "provider": "brex",
+          "category": "cards",
+          "displayName": "Brex",
+          "exchanges": [
+            "Inbound: card transactions",
+            "Outbound: spend limits (lowered to the amount spent instead of suspended)"
+          ]
+        },
+        {
+          "provider": "navan",
+          "category": "expense",
+          "displayName": "Navan",
+          "exchanges": ["Inbound: expense lines and travel bookings", "Outbound: event codes"]
+        },
+        {
+          "provider": "coupa",
+          "category": "expense",
+          "displayName": "Coupa",
+          "exchanges": [
+            "Inbound: purchase orders and supplier invoices",
+            "Outbound: event codes and approved commitment references"
+          ]
+        },
+        {
+          "provider": "workday_hcm",
+          "category": "hr",
+          "displayName": "Workday HCM",
+          "exchanges": ["Inbound only: workers, org units, locations, cost centers"]
+        },
+        {
+          "provider": "google_calendar",
+          "category": "calendar",
+          "displayName": "Google Calendar",
+          "exchanges": [
+            "Outbound: invitations from one shared BudgetFlow calendar",
+            "Inbound: attendee responses"
+          ]
+        }
+      ],
+      "canManage": true
+    }
+  },
+  "connectorDetail": {
+    "request": "GET /api/integrations/connections/90000000-0000-4000-8000-000000000001",
+    "status": 200,
+    "body": {
+      "summary": {
+        "id": "90000000-0000-4000-8000-000000000001",
+        "provider": "erpnext",
+        "category": "erp",
+        "displayName": "ERPNext",
+        "status": "needs_attention",
+        "mode": "mock",
+        "lastSyncAt": "2026-11-05T21:33:44.259Z",
+        "recordsLast24h": 4,
+        "errorsLast24h": 0,
+        "attention": "503 The provider is unavailable",
+        "pausedByName": null
+      },
+      "baseUrl": "http://mock-providers:4010",
+      "accountRef": "hyland-books",
+      "credential": {
+        "secretRef": "90000000-0000-4000-8000-000000000011",
+        "setAt": "2026-11-02T09:00:00.000Z",
+        "setByName": "Omar Haddad"
+      },
+      "settings": {
+        "webhooksEnabled": true
+      },
+      "schedules": [
+        {
+          "mode": "incremental",
+          "object": "gl_lines",
+          "paused": false,
+          "dedupeKey": "source_ref",
+          "direction": "inbound",
+          "nextRunAt": null,
+          "everyMinutes": 1440
+        }
+      ],
+      "mappings": [],
+      "objects": [
+        {
+          "object": "gl_lines",
+          "direction": "inbound"
+        },
+        {
+          "object": "suppliers",
+          "direction": "inbound"
+        },
+        {
+          "object": "event_codes",
+          "direction": "outbound"
+        }
+      ],
+      "inboundWebhookPath": "/api/integrations/webhooks/10000000-0000-4000-8000-000000000001/90000000-0000-4000-8000-000000000001",
+      "recordsIn24h": 4,
+      "recordsOut24h": 0
+    }
+  },
+  "syncRun": {
+    "request": "POST /api/integrations/connections/{id}/sync",
+    "status": 201,
+    "body": {
+      "id": "76e4f3c8-ecf1-40d2-a6cb-b1846a1825df",
+      "connectionId": "90000000-0000-4000-8000-000000000001",
+      "provider": "erpnext",
+      "object": "gl_lines",
+      "direction": "inbound",
+      "mode": "mock",
+      "status": "partly_succeeded",
+      "startedAt": "2026-11-05T21:33:49.374Z",
+      "finishedAt": "2026-11-05T21:33:49.401Z",
+      "durationMs": 27,
+      "recordsRead": 4,
+      "recordsApplied": 0,
+      "recordsSkippedDuplicate": 4,
+      "recordsFailed": 0,
+      "cursor": "2026-12-01",
+      "idempotencyKey": "sync:90000000-0000-4000-8000-000000000001:gl_lines:inbound:3932b001-7261-4115-af32-a5e360c16bb5",
+      "importBatchId": "f9502f5c-ae20-4351-849d-e3d41abb11a1",
+      "errorSummary": "This window was already imported; nothing was applied again.",
+      "triggeredByName": null
+    }
+  },
+  "syncRuns": {
+    "request": "GET /api/integrations/sync-runs?limit=5",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "76e4f3c8-ecf1-40d2-a6cb-b1846a1825df",
+          "connectionId": "90000000-0000-4000-8000-000000000001",
+          "provider": "erpnext",
+          "object": "gl_lines",
+          "direction": "inbound",
+          "mode": "mock",
+          "status": "partly_succeeded",
+          "startedAt": "2026-11-05T21:33:49.374Z",
+          "finishedAt": "2026-11-05T21:33:49.401Z",
+          "durationMs": 27,
+          "recordsRead": 4,
+          "recordsApplied": 0,
+          "recordsSkippedDuplicate": 4,
+          "recordsFailed": 0,
+          "cursor": "2026-12-01",
+          "idempotencyKey": "sync:90000000-0000-4000-8000-000000000001:gl_lines:inbound:3932b001-7261-4115-af32-a5e360c16bb5",
+          "importBatchId": "f9502f5c-ae20-4351-849d-e3d41abb11a1",
+          "errorSummary": "This window was already imported; nothing was applied again.",
+          "triggeredByName": null
+        },
+        {
+          "id": "84a44035-d4be-42bb-acf9-991924a9228b",
+          "connectionId": "90000000-0000-4000-8000-000000000003",
+          "provider": "concur",
+          "object": "expense_lines",
+          "direction": "inbound",
+          "mode": "mock",
+          "status": "failed",
+          "startedAt": "2026-11-05T21:33:44.283Z",
+          "finishedAt": "2026-11-05T21:33:44.619Z",
+          "durationMs": 336,
+          "recordsRead": 0,
+          "recordsApplied": 0,
+          "recordsSkippedDuplicate": 0,
+          "recordsFailed": 0,
+          "cursor": "2026-11-06",
+          "idempotencyKey": "sync:90000000-0000-4000-8000-000000000003:expense_lines:inbound:57be35fa-8f3d-420c-bfaa-50b7df9670d0",
+          "importBatchId": null,
+          "errorSummary": "503 The provider is unavailable",
+          "triggeredByName": null
+        },
+        {
+          "id": "1b1088f2-8a57-4efe-8134-c5eaf0c872cb",
+          "connectionId": "90000000-0000-4000-8000-000000000001",
+          "provider": "erpnext",
+          "object": "gl_lines",
+          "direction": "inbound",
+          "mode": "mock",
+          "status": "partly_succeeded",
+          "startedAt": "2026-11-05T21:33:43.922Z",
+          "finishedAt": "2026-11-05T21:33:44.258Z",
+          "durationMs": 336,
+          "recordsRead": 1,
+          "recordsApplied": 0,
+          "recordsSkippedDuplicate": 1,
+          "recordsFailed": 0,
+          "cursor": "2026-12-01",
+          "idempotencyKey": "sync:90000000-0000-4000-8000-000000000001:gl_lines:inbound:retry:sync:aba9217e-8a55-448e-ab91-905e1948df55",
+          "importBatchId": null,
+          "errorSummary": "Every line was already imported; nothing was applied again.",
+          "triggeredByName": null
+        },
+        {
+          "id": "aba9217e-8a55-448e-ab91-905e1948df55",
+          "connectionId": "90000000-0000-4000-8000-000000000001",
+          "provider": "erpnext",
+          "object": "gl_lines",
+          "direction": "inbound",
+          "mode": "mock",
+          "status": "failed",
+          "startedAt": "2026-11-05T21:33:43.569Z",
+          "finishedAt": "2026-11-05T21:33:43.903Z",
+          "durationMs": 334,
+          "recordsRead": 0,
+          "recordsApplied": 0,
+          "recordsSkippedDuplicate": 0,
+          "recordsFailed": 0,
+          "cursor": "2026-12-01",
+          "idempotencyKey": "sync:90000000-0000-4000-8000-000000000001:gl_lines:inbound:081ea95f-571f-4719-a478-4d88bd40bde1",
+          "importBatchId": null,
+          "errorSummary": "503 The provider is unavailable",
+          "triggeredByName": null
+        },
+        {
+          "id": "63331cfe-3cff-46fa-89f5-69f938b85e6e",
+          "connectionId": "90000000-0000-4000-8000-000000000002",
+          "provider": "ramp",
+          "object": "transactions",
+          "direction": "inbound",
+          "mode": "mock",
+          "status": "partly_succeeded",
+          "startedAt": "2026-11-05T21:33:40.009Z",
+          "finishedAt": "2026-11-05T21:33:40.037Z",
+          "durationMs": 28,
+          "recordsRead": 1,
+          "recordsApplied": 0,
+          "recordsSkippedDuplicate": 1,
+          "recordsFailed": 0,
+          "cursor": "2026-11-06",
+          "idempotencyKey": "sync:90000000-0000-4000-8000-000000000002:transactions:inbound:6535ec88-61ca-45aa-869d-ef33fe9769dd",
+          "importBatchId": null,
+          "errorSummary": "Every line was already imported; nothing was applied again.",
+          "triggeredByName": null
+        }
+      ],
+      "summary": {
+        "runs24h": 25,
+        "succeeded": 2,
+        "partlySucceeded": 16,
+        "failed": 7,
+        "recordsIn": 8,
+        "recordsOut": 0
+      }
+    }
+  },
+  "messages": {
+    "request": "GET /api/integrations/messages",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "4b3a62e8-9afb-444f-af9c-05576ecee269",
+          "connectionId": "90000000-0000-4000-8000-000000000003",
+          "provider": "concur",
+          "direction": "inbound",
+          "item": "expense_lines inbound sync",
+          "errorClass": "provider_unavailable",
+          "lastError": "503 The provider is unavailable",
+          "attempts": 1,
+          "maxAttempts": 8,
+          "firstFailedAt": "2026-11-05T21:33:44.615Z",
+          "nextRetryAt": null,
+          "movedToDeadLetterAt": null,
+          "status": "discarded",
+          "discardReasonCode": "DISCARD-DUPLICATE",
+          "discardReason": "The provider resent a window we already have.",
+          "payloadRedacted": {
+            "since": "2026-11-06",
+            "object": "expense_lines"
+          },
+          "idempotencyKey": "sync:84a44035-d4be-42bb-acf9-991924a9228b"
+        },
+        {
+          "id": "4bf810a0-eb2d-4f19-bf01-affc95e73c89",
+          "connectionId": "90000000-0000-4000-8000-000000000001",
+          "provider": "erpnext",
+          "direction": "inbound",
+          "item": "gl_lines inbound sync",
+          "errorClass": "provider_unavailable",
+          "lastError": "503 The provider is unavailable",
+          "attempts": 1,
+          "maxAttempts": 8,
+          "firstFailedAt": "2026-11-05T21:33:43.899Z",
+          "nextRetryAt": null,
+          "movedToDeadLetterAt": null,
+          "status": "succeeded",
+          "discardReasonCode": null,
+          "discardReason": null,
+          "payloadRedacted": {
+            "since": "2026-12-01",
+            "object": "gl_lines"
+          },
+          "idempotencyKey": "sync:aba9217e-8a55-448e-ab91-905e1948df55"
+        },
+        {
+          "id": "a37d57a1-1dc4-4706-a650-ff672efdc097",
+          "connectionId": "90000000-0000-4000-8000-000000000002",
+          "provider": "ramp",
+          "direction": "inbound",
+          "item": "transactions inbound sync",
+          "errorClass": "authentication",
+          "lastError": "401 401 Unauthorized: check the client secret",
+          "attempts": 1,
+          "maxAttempts": 8,
+          "firstFailedAt": "2026-11-05T21:33:39.170Z",
+          "nextRetryAt": null,
+          "movedToDeadLetterAt": null,
+          "status": "retrying",
+          "discardReasonCode": null,
+          "discardReason": null,
+          "payloadRedacted": {
+            "since": "2026-11-06",
+            "object": "transactions"
+          },
+          "idempotencyKey": "sync:1b218b65-c705-478a-86f0-9ea27a2abd13"
+        },
+        {
+          "id": "e7299d43-46b4-4fd8-9d2b-acc9fe8ee70e",
+          "connectionId": "90000000-0000-4000-8000-000000000003",
+          "provider": "concur",
+          "direction": "inbound",
+          "item": "expense_lines inbound sync",
+          "errorClass": "provider_unavailable",
+          "lastError": "503 The provider is unavailable",
+          "attempts": 1,
+          "maxAttempts": 8,
+          "firstFailedAt": "2026-11-05T21:32:48.055Z",
+          "nextRetryAt": null,
+          "movedToDeadLetterAt": null,
+          "status": "discarded",
+          "discardReasonCode": "DISCARD-DUPLICATE",
+          "discardReason": "The provider resent a window we already have.",
+          "payloadRedacted": {
+            "since": "2026-11-06",
+            "object": "expense_lines"
+          },
+          "idempotencyKey": "sync:e7f58410-4e8e-4a32-a90e-ffb747515d9f"
+        },
+        {
+          "id": "1a78b965-9463-40e3-b613-1c2a128b5e63",
+          "connectionId": "90000000-0000-4000-8000-000000000001",
+          "provider": "erpnext",
+          "direction": "inbound",
+          "item": "gl_lines inbound sync",
+          "errorClass": "provider_unavailable",
+          "lastError": "503 The provider is unavailable",
+          "attempts": 1,
+          "maxAttempts": 8,
+          "firstFailedAt": "2026-11-05T21:32:47.327Z",
+          "nextRetryAt": null,
+          "movedToDeadLetterAt": null,
+          "status": "succeeded",
+          "discardReasonCode": null,
+          "discardReason": null,
+          "payloadRedacted": {
+            "since": "2026-12-01",
+            "object": "gl_lines"
+          },
+          "idempotencyKey": "sync:cf54fbf7-293f-4046-b1a3-a57a8a5316dc"
+        },
+        {
+          "id": "b925da42-a37e-44d7-9ee0-630e177d0505",
+          "connectionId": "90000000-0000-4000-8000-000000000002",
+          "provider": "ramp",
+          "direction": "inbound",
+          "item": "transactions inbound sync",
+          "errorClass": "authentication",
+          "lastError": "401 401 Unauthorized: check the client secret",
+          "attempts": 1,
+          "maxAttempts": 8,
+          "firstFailedAt": "2026-11-05T21:32:43.837Z",
+          "nextRetryAt": null,
+          "movedToDeadLetterAt": null,
+          "status": "retrying",
+          "discardReasonCode": null,
+          "discardReason": null,
+          "payloadRedacted": {
+            "since": "2026-11-06",
+            "object": "transactions"
+          },
+          "idempotencyKey": "sync:92de56aa-5db4-4722-a2ef-aef3eb84f641"
+        },
+        {
+          "id": "1472925b-40e8-4720-a297-cac13852fb24",
+          "connectionId": "90000000-0000-4000-8000-000000000003",
+          "provider": "concur",
+          "direction": "inbound",
+          "item": "expense_lines CNR-77-2003",
+          "errorClass": "mapping",
+          "lastError": "\"Wellness - other\" has no mapping (expense_type); the record is held back.",
+          "attempts": 2,
+          "maxAttempts": 8,
+          "firstFailedAt": "2026-11-05T21:32:43.785Z",
+          "nextRetryAt": null,
+          "movedToDeadLetterAt": "2026-11-05T21:33:39.114Z",
+          "status": "dead_letter",
+          "discardReasonCode": null,
+          "discardReason": null,
+          "payloadRedacted": {
+            "missing": {
+              "kind": "expense_type",
+              "value": "Wellness - other"
+            },
+            "externalId": "CNR-77-2003"
+          },
+          "idempotencyKey": "map:90000000-0000-4000-8000-000000000003:expense_lines:CNR-77-2003"
+        }
+      ],
+      "retrying": 2,
+      "deadLetter": 1
+    }
+  },
+  "duplicates": {
+    "request": "GET /api/integrations/duplicates?status=open",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "flagId": "386df838-c9da-438e-8844-85d8bef46f02",
+          "confidence": "high",
+          "pattern": "Card-paid expense itemization",
+          "detectedAt": "2026-11-05T21:33:39.240Z",
+          "status": "open",
+          "facts": ["Same amount in the same currency", "0 day(s) apart", "Same merchant"],
+          "keptActualId": null,
+          "resolution": null,
+          "resolvedByName": null,
+          "lines": [
+            {
+              "actualId": "304e746c-0928-4791-8cc3-43f5467d89ea",
+              "source": "card",
+              "sourceRef": "CARD-D665F9C0",
+              "accountingDate": "2026-11-07",
+              "transactionAmount": {
+                "amountMinor": 8640,
+                "currency": "USD"
+              },
+              "reportingAmount": {
+                "amountMinor": 8640,
+                "currency": "USD"
+              },
+              "merchant": "Cafe Mocha",
+              "personName": null,
+              "eventCode": null,
+              "matchStatus": "unmatched"
+            },
+            {
+              "actualId": "78f09bab-7bdd-4c49-8648-e1a0cc6ba995",
+              "source": "expense",
+              "sourceRef": "EXP-5687CA75",
+              "accountingDate": "2026-11-07",
+              "transactionAmount": {
+                "amountMinor": 8640,
+                "currency": "USD"
+              },
+              "reportingAmount": {
+                "amountMinor": 8640,
+                "currency": "USD"
+              },
+              "merchant": "Cafe Mocha",
+              "personName": null,
+              "eventCode": null,
+              "matchStatus": "excluded"
+            }
+          ]
+        },
+        {
+          "flagId": "1fb3b7e2-362e-4b31-9ff1-01c02d0f62a5",
+          "confidence": "high",
+          "pattern": "Card-paid expense itemization",
+          "detectedAt": "2026-11-05T21:32:43.787Z",
+          "status": "open",
+          "facts": [
+            "Same amount in the same currency",
+            "0 day(s) apart",
+            "Same merchant",
+            "The expense line carries the card transaction id"
+          ],
+          "keptActualId": null,
+          "resolution": null,
+          "resolvedByName": null,
+          "lines": [
+            {
+              "actualId": "ee1a40fa-47fa-4d45-b9e6-ba6c3d697fff",
+              "source": "card",
+              "sourceRef": "RMP-5501",
+              "accountingDate": "2026-11-05",
+              "transactionAmount": {
+                "amountMinor": 8640,
+                "currency": "USD"
+              },
+              "reportingAmount": {
+                "amountMinor": 8640,
+                "currency": "USD"
+              },
+              "merchant": "Cafe Mocha",
+              "personName": null,
+              "eventCode": null,
+              "matchStatus": "unmatched"
+            },
+            {
+              "actualId": "78f44b6a-2ab9-4df7-adb7-7b143a76a79f",
+              "source": "expense",
+              "sourceRef": "CNR-77-2001",
+              "accountingDate": "2026-11-05",
+              "transactionAmount": {
+                "amountMinor": 8640,
+                "currency": "USD"
+              },
+              "reportingAmount": {
+                "amountMinor": 8640,
+                "currency": "USD"
+              },
+              "merchant": "Cafe Mocha",
+              "personName": null,
+              "eventCode": null,
+              "matchStatus": "unmatched"
+            }
+          ]
+        },
+        {
+          "flagId": "b6719df2-5950-48fc-82df-c941d96c82b0",
+          "confidence": "high",
+          "pattern": "Deposit paid by card and invoiced",
+          "detectedAt": "2026-11-05T21:32:03.292Z",
+          "status": "open",
+          "facts": ["Same amount in the same currency", "0 day(s) apart", "Same merchant"],
+          "keptActualId": null,
+          "resolution": null,
+          "resolvedByName": null,
+          "lines": [
+            {
+              "actualId": "fdd5e77a-9e95-4bca-bdce-5ef02ed93e1c",
+              "source": "erp",
+              "sourceRef": "X5FC0EB33-2",
+              "accountingDate": "2026-11-03",
+              "transactionAmount": {
+                "amountMinor": 7700,
+                "currency": "USD"
+              },
+              "reportingAmount": {
+                "amountMinor": 7700,
+                "currency": "USD"
+              },
+              "merchant": "Metro Coffee X5FC0EB33",
+              "personName": null,
+              "eventCode": null,
+              "matchStatus": "unmatched"
+            },
+            {
+              "actualId": "cd7da0c0-1fa9-4674-8b23-0a1b3cdfe319",
+              "source": "card",
+              "sourceRef": "CX5FC0EB33",
+              "accountingDate": "2026-11-03",
+              "transactionAmount": {
+                "amountMinor": 7700,
+                "currency": "USD"
+              },
+              "reportingAmount": {
+                "amountMinor": 7700,
+                "currency": "USD"
+              },
+              "merchant": "Metro Coffee X5FC0EB33",
+              "personName": null,
+              "eventCode": null,
+              "matchStatus": "excluded"
+            }
+          ]
+        },
+        {
+          "flagId": "b372d6cb-9b3b-478b-bddb-b78d8509007c",
+          "confidence": "high",
+          "pattern": "Deposit paid by card and invoiced",
+          "detectedAt": "2026-11-05T21:31:42.247Z",
+          "status": "open",
+          "facts": ["Same amount in the same currency", "0 day(s) apart", "Same merchant"],
+          "keptActualId": null,
+          "resolution": null,
+          "resolvedByName": null,
+          "lines": [
+            {
+              "actualId": "ce994a3f-d26d-4bc0-a4d4-ee84f285ddf2",
+              "source": "erp",
+              "sourceRef": "ERP-2611-0008",
+              "accountingDate": "2026-11-03",
+              "transactionAmount": {
+                "amountMinor": 1894000,
+                "currency": "INR"
+              },
+              "reportingAmount": {
+                "amountMinor": 22751,
+                "currency": "USD"
+              },
+              "merchant": "City Cabs",
+              "personName": null,
+              "eventCode": null,
+              "matchStatus": "matched"
+            },
+            {
+              "actualId": "e37111f2-29cf-48dd-a4e3-13c25d87d8b6",
+              "source": "card",
+              "sourceRef": "CARD-88120",
+              "accountingDate": "2026-11-03",
+              "transactionAmount": {
+                "amountMinor": 1894000,
+                "currency": "INR"
+              },
+              "reportingAmount": {
+                "amountMinor": 22751,
+                "currency": "USD"
+              },
+              "merchant": "City Cabs",
+              "personName": null,
+              "eventCode": null,
+              "matchStatus": "unmatched"
+            }
+          ]
+        }
+      ],
+      "open": 4
+    }
+  },
+  "apiKeys": {
+    "request": "GET /api/integrations/api-keys",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "c500de6f-d93e-43d3-8c6d-43f05387979c",
+          "name": "scenario key 88d068ad",
+          "prefix": "bf_live_7f30",
+          "scopes": ["actuals.write"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.551Z",
+          "lastUsedAt": "2026-11-05T21:33:43.554Z",
+          "expiresAt": "2026-12-05T21:33:43.552Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "79f2f955-b45b-40de-9c34-23a78ba3f2a6",
+          "name": "scenario key 82f299db",
+          "prefix": "bf_live_9232",
+          "scopes": ["actuals.write"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.525Z",
+          "lastUsedAt": "2026-11-05T21:33:43.542Z",
+          "expiresAt": "2026-12-05T21:33:43.526Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "94397a97-747e-4c28-ac86-da6e6266fbe8",
+          "name": "scenario key 2a610eb1",
+          "prefix": "bf_live_dc69",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.508Z",
+          "lastUsedAt": "2026-11-05T21:33:43.511Z",
+          "expiresAt": "2026-12-05T21:33:43.508Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "0096c25e-5935-4706-a4e0-52e2fc483eda",
+          "name": "scenario key 39784110",
+          "prefix": "bf_live_3ba2",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.486Z",
+          "lastUsedAt": "2026-11-05T21:33:43.494Z",
+          "expiresAt": "2026-12-05T21:33:43.486Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 3,
+          "rotatedFromId": null
+        },
+        {
+          "id": "7c9ceef6-91d9-4ee7-9335-b336f26d70a8",
+          "name": "scenario key c2eedf1e",
+          "prefix": "bf_live_6358",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.467Z",
+          "lastUsedAt": "2026-11-05T21:33:43.477Z",
+          "expiresAt": "2026-12-05T21:33:43.468Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "d4cfbed6-496d-4acc-8f77-0d7361c36fc4",
+          "name": "scenario key ab308801",
+          "prefix": "bf_live_7dac",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.447Z",
+          "lastUsedAt": "2026-11-05T21:33:43.451Z",
+          "expiresAt": "2026-12-05T21:33:43.447Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "2fea86cd-d5ce-455a-bfe4-af3a0f00ae53",
+          "name": "scenario key cee213e3",
+          "prefix": "bf_live_f0bf",
+          "scopes": ["budgets.read", "events.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.422Z",
+          "lastUsedAt": "2026-11-05T21:33:43.437Z",
+          "expiresAt": "2026-12-05T21:33:43.423Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "7d9c9072-5b99-40c3-8f33-715147b6d49f",
+          "name": "scenario key f3a5bbdf",
+          "prefix": "bf_live_95b8",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.406Z",
+          "lastUsedAt": "2026-11-05T21:33:43.410Z",
+          "expiresAt": "2026-12-05T21:33:43.401Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": "a79ba3aa-5419-4a82-98be-d760990b54de"
+        },
+        {
+          "id": "a79ba3aa-5419-4a82-98be-d760990b54de",
+          "name": "scenario key f3a5bbdf",
+          "prefix": "bf_live_a412",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.401Z",
+          "lastUsedAt": "2026-11-05T21:33:43.414Z",
+          "expiresAt": "2026-11-12T21:33:43.407Z",
+          "revokedAt": null,
+          "status": "expiring_soon",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "2864d894-7b62-461a-bd02-5b98043d1d64",
+          "name": "scenario key df362c78",
+          "prefix": "bf_live_dd0b",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.383Z",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:33:43.384Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "b31a87ce-cacf-4d46-b510-61a290a9a076",
+          "name": "scenario key 79058467",
+          "prefix": "bf_live_c292",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.360Z",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:33:43.361Z",
+          "revokedAt": "2026-11-05T21:33:43.369Z",
+          "status": "revoked",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "4d1b6d73-6a8b-4343-b65b-9ffd723fef0c",
+          "name": "scenario key c4ea6737",
+          "prefix": "bf_live_147b",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:43.317Z",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:33:43.318Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "3df872b0-a126-4b98-98bf-6afd3cc351a2",
+          "name": "not a scim token 0cff4f4e",
+          "prefix": "bf_live_0f7a",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:33:39.538Z",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:33:39.538Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "b0e4f4eb-2538-41f7-b3f7-b13873d77787",
+          "name": "scenario key 52b50019",
+          "prefix": "bf_live_8c88",
+          "scopes": ["actuals.write"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.978Z",
+          "lastUsedAt": "2026-11-05T21:32:46.981Z",
+          "expiresAt": "2026-12-05T21:32:46.978Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "e5d11f71-fd74-423b-b744-aede32f992f8",
+          "name": "scenario key a491012b",
+          "prefix": "bf_live_3cc9",
+          "scopes": ["actuals.write"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.952Z",
+          "lastUsedAt": "2026-11-05T21:32:46.970Z",
+          "expiresAt": "2026-12-05T21:32:46.953Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "275982a6-6f5c-466d-bcdc-f7a982064554",
+          "name": "scenario key 4284a033",
+          "prefix": "bf_live_0637",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.933Z",
+          "lastUsedAt": "2026-11-05T21:32:46.936Z",
+          "expiresAt": "2026-12-05T21:32:46.933Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "9109f4b3-d717-4dca-b74b-61e2cf47a756",
+          "name": "scenario key ab124ee4",
+          "prefix": "bf_live_0afc",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.913Z",
+          "lastUsedAt": "2026-11-05T21:32:46.920Z",
+          "expiresAt": "2026-12-05T21:32:46.913Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 3,
+          "rotatedFromId": null
+        },
+        {
+          "id": "20437d42-5da3-4064-98a0-424d6d823421",
+          "name": "scenario key 662115a8",
+          "prefix": "bf_live_d8fa",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.892Z",
+          "lastUsedAt": "2026-11-05T21:32:46.903Z",
+          "expiresAt": "2026-12-05T21:32:46.893Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "0430b3c7-d46e-4d38-b186-e3adadc9ac21",
+          "name": "scenario key 1dc1f386",
+          "prefix": "bf_live_2403",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.867Z",
+          "lastUsedAt": "2026-11-05T21:32:46.871Z",
+          "expiresAt": "2026-12-05T21:32:46.867Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "fd75b8cf-a264-4692-b4e2-7a449c645577",
+          "name": "scenario key ab09fbeb",
+          "prefix": "bf_live_64ea",
+          "scopes": ["budgets.read", "events.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.844Z",
+          "lastUsedAt": "2026-11-05T21:32:46.856Z",
+          "expiresAt": "2026-12-05T21:32:46.845Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "c9bb7e33-3e73-4357-b153-06b7d71610e6",
+          "name": "scenario key 0016f837",
+          "prefix": "bf_live_6caf",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.828Z",
+          "lastUsedAt": "2026-11-05T21:32:46.832Z",
+          "expiresAt": "2026-12-05T21:32:46.822Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": "96f172cf-3544-4d8e-b09a-8b20fa928c69"
+        },
+        {
+          "id": "96f172cf-3544-4d8e-b09a-8b20fa928c69",
+          "name": "scenario key 0016f837",
+          "prefix": "bf_live_0a16",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.822Z",
+          "lastUsedAt": "2026-11-05T21:32:46.835Z",
+          "expiresAt": "2026-11-12T21:32:46.829Z",
+          "revokedAt": null,
+          "status": "expiring_soon",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "4df1f862-a189-4593-8522-4b217231fdaf",
+          "name": "scenario key ab29c3bb",
+          "prefix": "bf_live_71c6",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.805Z",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:32:46.806Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "55ed0954-3994-42f8-adf7-3686ac6f9100",
+          "name": "scenario key 0d9f858c",
+          "prefix": "bf_live_46df",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.784Z",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:32:46.784Z",
+          "revokedAt": "2026-11-05T21:32:46.791Z",
+          "status": "revoked",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "02796597-58b4-443c-8daa-f0c107d8468e",
+          "name": "scenario key 0d3192bb",
+          "prefix": "bf_live_69bf",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:46.753Z",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:32:46.754Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "06f7fca3-e9db-4434-9921-fca87d4b406d",
+          "name": "not a scim token b207d797",
+          "prefix": "bf_live_ed97",
+          "scopes": ["budgets.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:32:44.126Z",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:32:44.126Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000020",
+          "name": "Intranet budget widget",
+          "prefix": "bf_live_6603",
+          "scopes": ["budgets.read", "events.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-05T21:31:42.877Z",
+          "lastUsedAt": null,
+          "expiresAt": "2027-02-03T21:31:43.039Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        }
+      ]
+    }
+  },
+  "webhookEndpoints": {
+    "request": "GET /api/integrations/webhook-endpoints",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "12dafd92-9989-4827-9dea-97f2f62ea562",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.790Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 0,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:33:40.558Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "4f95149c-4906-4d2a-ba22-cc25d4dc9fe2",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "updated by the admin",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.515Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:33:40.501Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "39aad02e-66c2-4576-9a05-3826194f4031",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.488Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 6667,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:33:40.328Z",
+          "secretRotatedAt": "2026-11-05T21:33:40.385Z"
+        },
+        {
+          "id": "a4999ea7-ddbf-42d0-b339-a294d6b996b0",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.435Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 2,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:33:40.209Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "3eb1126d-ccb4-4dcb-b8c1-962e28668562",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.764Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 0,
+          "successRateBps": 6667,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:33:40.139Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "209076bd-a2a4-4d15-9063-f9a53c657c7f",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.740Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:33:40.072Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "03a05809-75b2-4996-8953-42818764ea78",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.565Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:32:45.094Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "e3e0443e-fd2e-4daa-947a-fc5e7d64951f",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "updated by the admin",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.540Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:32:45.038Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "21f4d389-e0ad-446a-b749-2540443e39f6",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.715Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 5135,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:32:44.873Z",
+          "secretRotatedAt": "2026-11-05T21:32:44.929Z"
+        },
+        {
+          "id": "2e235f36-dca6-44dc-8f6a-d6a4d1451a87",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.666Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 0,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:32:44.765Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "29829770-9855-4ec6-ae30-f6c9dd60a4a4",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.614Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 5135,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:32:44.687Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "32d0c5e0-d7e3-4bac-9cd3-65295f5e0357",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Scenario receiver",
+          "events": ["budget.frozen", "budget.threshold_crossed"],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.590Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:32:44.626Z",
+          "secretRotatedAt": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000021",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Finance hub: control changes and threshold alerts",
+          "events": [
+            "budget.frozen",
+            "budget.reduced",
+            "budget.set_to_zero",
+            "budget.threshold_crossed"
+          ],
+          "status": "active",
+          "lastDeliveryAt": "2026-11-05T21:33:42.641Z",
+          "lastStatusCode": 200,
+          "lastDurationMs": 1,
+          "successRateBps": 5000,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-05T21:31:42.877Z",
+          "secretRotatedAt": null
+        }
+      ],
+      "verification": "Every delivery carries a BudgetFlow-Signature header: t=<unix seconds>,v1=<HMAC-SHA256 of \"<t>.<body>\">. Reject deliveries older than 5 minutes."
+    }
+  },
+  "webhookDeliveries": {
+    "request": "GET /api/integrations/webhook-deliveries?limit=3",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "5d4cc6fd-7806-40a2-a5d4-ba047a3e380a",
+          "endpointId": "12dafd92-9989-4827-9dea-97f2f62ea562",
+          "eventId": "28889cec-e3fe-472d-a885-468df459d354",
+          "eventType": "budget.frozen",
+          "attempt": 1,
+          "statusCode": 200,
+          "durationMs": 0,
+          "status": "succeeded",
+          "nextRetryAt": null,
+          "error": null,
+          "payload": {
+            "action": "frozen",
+            "reason": "Policy review",
+            "status": "frozen",
+            "eventId": "5fed9f27-1d09-4be7-8943-18721559f541",
+            "budgetId": "adb3ad23-a6e4-4733-ac1c-7fa69f48bec5",
+            "currency": "USD",
+            "tenantId": "10000000-0000-4000-8000-000000000001",
+            "journalId": null,
+            "budgetName": "Scenario child USD 3d7e2b4a",
+            "occurredAt": "2026-11-05T21:33:40.759Z",
+            "reasonCode": "FRZ-POLICY",
+            "actorPersonId": "40000000-0000-4000-8000-000000000004",
+            "previousStatus": "active",
+            "unfitRequestIds": [],
+            "cascadeFromBudgetId": null,
+            "authorizedAfterMinor": 500000,
+            "pendingRequestPolicy": "hold",
+            "authorizedBeforeMinor": 500000
+          },
+          "createdAt": "2026-11-05T21:33:42.790Z"
+        },
+        {
+          "id": "3102cc04-7f5a-4e17-94be-5011fb5b73aa",
+          "endpointId": "3eb1126d-ccb4-4dcb-b8c1-962e28668562",
+          "eventId": "fb3d68de-e838-4dd2-843b-a70d6cd90672",
+          "eventType": "budget.frozen",
+          "attempt": 1,
+          "statusCode": 200,
+          "durationMs": 0,
+          "status": "succeeded",
+          "nextRetryAt": null,
+          "error": null,
+          "payload": {
+            "action": "frozen",
+            "reason": "Policy review",
+            "status": "frozen",
+            "eventId": "5fed9f27-1d09-4be7-8943-18721559f541",
+            "budgetId": "adb3ad23-a6e4-4733-ac1c-7fa69f48bec5",
+            "currency": "USD",
+            "tenantId": "10000000-0000-4000-8000-000000000001",
+            "journalId": null,
+            "budgetName": "Scenario child USD 3d7e2b4a",
+            "occurredAt": "2026-11-05T21:33:40.759Z",
+            "reasonCode": "FRZ-POLICY",
+            "actorPersonId": "40000000-0000-4000-8000-000000000004",
+            "previousStatus": "active",
+            "unfitRequestIds": [],
+            "cascadeFromBudgetId": null,
+            "authorizedAfterMinor": 500000,
+            "pendingRequestPolicy": "hold",
+            "authorizedBeforeMinor": 500000
+          },
+          "createdAt": "2026-11-05T21:33:42.764Z"
+        },
+        {
+          "id": "a732b0d2-2e67-4ac1-8457-957a80e9a594",
+          "endpointId": "209076bd-a2a4-4d15-9063-f9a53c657c7f",
+          "eventId": "1b5ee2fc-5263-4eed-87fc-884869a8c0f7",
+          "eventType": "budget.frozen",
+          "attempt": 1,
+          "statusCode": 200,
+          "durationMs": 1,
+          "status": "succeeded",
+          "nextRetryAt": null,
+          "error": null,
+          "payload": {
+            "action": "frozen",
+            "reason": "Policy review",
+            "status": "frozen",
+            "eventId": "5fed9f27-1d09-4be7-8943-18721559f541",
+            "budgetId": "adb3ad23-a6e4-4733-ac1c-7fa69f48bec5",
+            "currency": "USD",
+            "tenantId": "10000000-0000-4000-8000-000000000001",
+            "journalId": null,
+            "budgetName": "Scenario child USD 3d7e2b4a",
+            "occurredAt": "2026-11-05T21:33:40.759Z",
+            "reasonCode": "FRZ-POLICY",
+            "actorPersonId": "40000000-0000-4000-8000-000000000004",
+            "previousStatus": "active",
+            "unfitRequestIds": [],
+            "cascadeFromBudgetId": null,
+            "authorizedAfterMinor": 500000,
+            "pendingRequestPolicy": "hold",
+            "authorizedBeforeMinor": 500000
+          },
+          "createdAt": "2026-11-05T21:33:42.740Z"
+        }
+      ]
+    }
+  },
+  "identity": {
+    "request": "GET /api/integrations/identity",
+    "status": 200,
+    "body": {
+      "ssoStatus": "connected",
+      "ssoDescription": "People sign in through the company identity provider (OpenID Connect); multi-factor authentication is optional per person.",
+      "scimEndpoint": "/scim/v2/Users",
+      "tokens": [
+        {
+          "id": "e530bdab-5a50-48a6-a88b-42a01e7894a2",
+          "prefix": "bf_scim_3527",
+          "createdAt": "2026-11-05T21:33:39.586Z",
+          "createdByName": "Omar Haddad",
+          "lastUsedAt": "2026-11-05T21:33:39.590Z",
+          "expiresAt": "2026-12-05T21:33:39.586Z",
+          "revokedAt": null
+        },
+        {
+          "id": "18646572-d0a2-4b1b-9304-7ba392dc7a8e",
+          "prefix": "bf_scim_985c",
+          "createdAt": "2026-11-05T21:33:39.554Z",
+          "createdByName": "Omar Haddad",
+          "lastUsedAt": "2026-11-05T21:33:39.570Z",
+          "expiresAt": "2026-12-05T21:33:39.554Z",
+          "revokedAt": null
+        },
+        {
+          "id": "63cf9ee0-f87f-4eb6-9480-beb725bf8516",
+          "prefix": "bf_scim_d20f",
+          "createdAt": "2026-11-05T21:33:39.486Z",
+          "createdByName": "Omar Haddad",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:33:39.486Z",
+          "revokedAt": null
+        },
+        {
+          "id": "cda786cb-8a8b-4faa-b681-bcc63bfba5fc",
+          "prefix": "bf_scim_2290",
+          "createdAt": "2026-11-05T21:32:44.166Z",
+          "createdByName": "Omar Haddad",
+          "lastUsedAt": "2026-11-05T21:32:44.170Z",
+          "expiresAt": "2026-12-05T21:32:44.166Z",
+          "revokedAt": null
+        },
+        {
+          "id": "b626c50c-1bcc-4881-9ebe-3b4b9fde60fa",
+          "prefix": "bf_scim_606d",
+          "createdAt": "2026-11-05T21:32:44.137Z",
+          "createdByName": "Omar Haddad",
+          "lastUsedAt": "2026-11-05T21:32:44.151Z",
+          "expiresAt": "2026-12-05T21:32:44.138Z",
+          "revokedAt": null
+        },
+        {
+          "id": "09e36f8a-fa46-4483-bd34-f0014975d8b0",
+          "prefix": "bf_scim_b643",
+          "createdAt": "2026-11-05T21:32:44.083Z",
+          "createdByName": "Omar Haddad",
+          "lastUsedAt": null,
+          "expiresAt": "2026-12-05T21:32:44.084Z",
+          "revokedAt": null
+        }
+      ],
+      "holdOwnerDeactivations": false,
+      "log": [
+        {
+          "id": "4c354762-de37-44de-9db9-d252c155e175",
+          "at": "2026-11-05T21:33:39.570Z",
+          "operation": "deactivate",
+          "personName": "Priya Raman (Engineering)",
+          "externalId": "WD-priya.raman.1efb7400",
+          "result": "applied",
+          "detail": "Deactivated Priya Raman (Engineering): 0 role grant(s) ended, 0 open approval(s) escalate on the next sweep, 0 budget(s) flagged for a new owner."
+        },
+        {
+          "id": "b6ea3b1f-037c-4602-bd35-70175fd98cf4",
+          "at": "2026-11-05T21:33:39.566Z",
+          "operation": "update",
+          "personName": "Priya Raman (Engineering)",
+          "externalId": "WD-priya.raman.1efb7400",
+          "result": "applied",
+          "detail": "Updated Priya Raman (Engineering)."
+        },
+        {
+          "id": "4d266f26-b4f5-4086-b0ab-e027d0fa220f",
+          "at": "2026-11-05T21:33:39.560Z",
+          "operation": "create",
+          "personName": "Priya Raman (Engineering)",
+          "externalId": "WD-priya.raman.1efb7400",
+          "result": "applied",
+          "detail": "Created Priya Raman; roles follow the group mapping."
+        },
+        {
+          "id": "29a1e7a1-2f6f-45f2-96ce-62dc45792eb0",
+          "at": "2026-11-05T21:32:44.151Z",
+          "operation": "deactivate",
+          "personName": "Priya Raman (Engineering)",
+          "externalId": "WD-priya.raman.0093b4ec",
+          "result": "applied",
+          "detail": "Deactivated Priya Raman (Engineering): 0 role grant(s) ended, 0 open approval(s) escalate on the next sweep, 0 budget(s) flagged for a new owner."
+        },
+        {
+          "id": "c69f530b-4b5c-47c9-8aab-a827c8431dc9",
+          "at": "2026-11-05T21:32:44.147Z",
+          "operation": "update",
+          "personName": "Priya Raman (Engineering)",
+          "externalId": "WD-priya.raman.0093b4ec",
+          "result": "applied",
+          "detail": "Updated Priya Raman (Engineering)."
+        },
+        {
+          "id": "c89c0cd0-b7b0-46bd-85aa-9da962609422",
+          "at": "2026-11-05T21:32:44.142Z",
+          "operation": "create",
+          "personName": "Priya Raman (Engineering)",
+          "externalId": "WD-priya.raman.0093b4ec",
+          "result": "applied",
+          "detail": "Created Priya Raman; roles follow the group mapping."
+        }
+      ]
+    }
+  },
+  "publicMeta": {
+    "request": "GET /api/public/v1/meta (Authorization: Bearer bf_live_… )",
+    "status": 200,
+    "body": {
+      "version": "v1",
+      "keyPrefix": "bf_live_53eb",
+      "scopes": ["budgets.read"],
+      "rateLimitPerMinute": 120,
+      "rateLimitRemaining": 119,
+      "tenantId": "10000000-0000-4000-8000-000000000001",
+      "notice": "API keys read and feed data. They can never approve or reject requests, change controls or move money."
+    }
+  },
+  "publicBudgets": {
+    "request": "GET /api/public/v1/budgets?limit=2",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "003cd2ff-46a9-417a-b495-4abe58b591ee",
+          "name": "P5 department-head 29e9b2",
+          "parentId": "dac16e17-dcd2-42fa-842a-2c497f0a5ba4",
+          "status": "active",
+          "currency": "USD",
+          "authorized": {
+            "amountMinor": 10000000,
+            "currency": "USD"
+          },
+          "allocatedOut": {
+            "amountMinor": 5000000,
+            "currency": "USD"
+          },
+          "held": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "preEncumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "encumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "actual": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "available": {
+            "amountMinor": 5000000,
+            "currency": "USD"
+          },
+          "fiscalYearLabel": null
+        },
+        {
+          "id": "01491fc0-5970-4bf4-b732-6c455c2796bd",
+          "name": "Scenario root SC-E1F803",
+          "parentId": null,
+          "status": "active",
+          "currency": "USD",
+          "authorized": {
+            "amountMinor": 500000,
+            "currency": "USD"
+          },
+          "allocatedOut": {
+            "amountMinor": 200000,
+            "currency": "USD"
+          },
+          "held": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "preEncumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "encumbered": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "actual": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "available": {
+            "amountMinor": 300000,
+            "currency": "USD"
+          },
+          "fiscalYearLabel": null
+        }
+      ],
+      "nextCursor": "01491fc0-5970-4bf4-b732-6c455c2796bd"
+    }
+  },
+  "publicEventsWithoutScope": {
+    "request": "GET /api/public/v1/events with a budgets.read-only key",
+    "status": 403,
+    "body": {
+      "type": "urn:budgetflow:problem:api-key-scope-missing",
+      "title": "Api key scope missing",
+      "status": 403,
+      "code": "API_KEY_SCOPE_MISSING",
+      "detail": "This key does not have the events.read scope.",
+      "instance": "/api/public/v1/events",
+      "params": {
+        "scope": "events.read"
+      }
+    }
+  }
+}

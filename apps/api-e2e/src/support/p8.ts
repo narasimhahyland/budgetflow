@@ -111,8 +111,7 @@ export const discussion = (
   as_: SeedUserId,
   itemType: 'budget' | 'event' | 'request',
   itemId: string,
-) =>
-  as(as_).then((headers) => request.get(`/api/discussions/${itemType}/${itemId}`, { headers }));
+) => as(as_).then((headers) => request.get(`/api/discussions/${itemType}/${itemId}`, { headers }));
 
 export const comment = async (
   request: APIRequestContext,
@@ -132,8 +131,7 @@ export const patchComment = async (
   as_: SeedUserId,
   commentId: string,
   body: Record<string, unknown>,
-) =>
-  request.patch(`/api/comments/${commentId}`, { headers: await mutate(as_), data: body });
+) => request.patch(`/api/comments/${commentId}`, { headers: await mutate(as_), data: body });
 
 export const deleteComment = async (
   request: APIRequestContext,
@@ -160,8 +158,7 @@ export const patchSettings = async (
   request: APIRequestContext,
   as_: SeedUserId,
   body: Record<string, unknown>,
-) =>
-  request.patch('/api/me/notification-settings', { headers: await mutate(as_), data: body });
+) => request.patch('/api/me/notification-settings', { headers: await mutate(as_), data: body });
 
 /** Audit entries for a resource, as the auditor. */
 export async function auditEvents(request: APIRequestContext, resourceId: string) {

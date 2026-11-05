@@ -42,6 +42,7 @@ if [ "$cmd" = urls ]; then
   echo "keycloak  http://localhost:${BF_KEYCLOAK_PORT:-8080}  (realm: budgetflow)"
   echo "mailpit   http://localhost:${BF_MAILPIT_PORT:-8025}"
   echo "minio     http://localhost:${BF_MINIO_PORT:-9000}"
+  echo "mocks     http://localhost:${BF_MOCK_PROVIDERS_PORT:-4010}  (mock providers for the connectors)"
   echo "postgres  127.0.0.1:${BF_PG_PORT:-5432}  (database ${BF_PG_DB:-budgetflow})"
   exit 0
 fi

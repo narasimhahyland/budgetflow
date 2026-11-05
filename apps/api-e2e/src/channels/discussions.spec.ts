@@ -193,9 +193,9 @@ test.describe('discussion, mentions and follow', () => {
 
     const audit = await auditEvents(request, r.id);
     expect(audit.filter((a) => a.action === 'comment.removed')).toHaveLength(1);
-    expect(
-      audit.find((a) => a.action === 'comment.created')?.changes['body']?.to,
-    ).toBe('Wrong thread, sorry.');
+    expect(audit.find((a) => a.action === 'comment.created')?.changes['body']?.to).toBe(
+      'Wrong thread, sorry.',
+    );
   });
 
   test('read-only roles read the discussion but cannot post', async ({ request }) => {
@@ -290,11 +290,7 @@ test.describe('discussion, mentions and follow', () => {
       201,
       RequestDetail,
     );
-    await expectProblem(
-      await discussion(request, 'employee', 'request', r.id),
-      404,
-      'NOT_FOUND',
-    );
+    await expectProblem(await discussion(request, 'employee', 'request', r.id), 404, 'NOT_FOUND');
     await expectProblem(
       await comment(request, 'employee', 'request', r.id, { body: 'Hello?' }),
       404,

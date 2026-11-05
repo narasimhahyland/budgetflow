@@ -1,0 +1,45 @@
+          table          | enabled | forced | policy 
+-------------------------+---------+--------+--------
+ api_key_rate_windows    | t       | t      | t
+ api_key_requests        | t       | t      | t
+ api_keys                | t       | t      | t
+ inbound_webhook_events  | t       | t      | t
+ integration_connections | t       | t      | t
+ integration_mappings    | t       | t      | t
+ integration_messages    | t       | t      | t
+ integration_pushes      | t       | t      | t
+ integration_secrets     | t       | t      | t
+ scim_operations         | t       | t      | t
+ sync_runs               | t       | t      | t
+ webhook_deliveries      | t       | t      | t
+ webhook_endpoints       | t       | t      | t
+(13 rows)
+
+SET
+           purpose           |  algorithm  | ciphertext_chars | leaks_plaintext 
+-----------------------------+-------------+------------------+-----------------
+ connector:adaptive_planning | aes-256-gcm |               48 | f
+ connector:adaptive_planning | aes-256-gcm |               36 | f
+ connector:adaptive_planning | aes-256-gcm |               36 | f
+ connector:concur            | aes-256-gcm |               36 | f
+ connector:erpnext           | aes-256-gcm |               36 | f
+ connector:hr_file           | aes-256-gcm |               36 | f
+ connector:outlook           | aes-256-gcm |               36 | f
+ connector:ramp              | aes-256-gcm |               32 | f
+(8 rows)
+
+    kind    |    prefix    | hash_chars | scopes | rate_limit_per_minute 
+------------+--------------+------------+--------+-----------------------
+ public_api | bf_live_6603 |         64 |      2 |                   120
+ scim       | bf_scim_b643 |         64 |      0 |                   120
+ scim       | bf_scim_0232 |         64 |      0 |                   120
+ public_api | bf_live_ed97 |         64 |      1 |                   120
+ scim       | bf_scim_606d |         64 |      0 |                   120
+(5 rows)
+
+SET
+ visible_to_globex 
+-------------------
+                 0
+(1 row)
+
