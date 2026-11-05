@@ -169,18 +169,3 @@ ALTER TABLE "documents" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "documents" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE POLICY tenant_isolation ON "documents" USING (tenant_id = app_current_tenant()) WITH CHECK (tenant_id = app_current_tenant());--> statement-breakpoint
 ALTER TABLE "event_funding_sources" ADD CONSTRAINT "event_funding_sources_amounts" CHECK ("funded_minor" > 0 AND "consumed_minor" >= 0 AND "returned_minor" >= 0 AND "consumed_minor" + "returned_minor" <= "funded_minor");
---> statement-breakpoint
--- Hand-written (reviewed): tenant isolation for the Phase 5 tables.
-ALTER TABLE "event_funding_sources" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
-ALTER TABLE "event_funding_sources" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
-CREATE POLICY tenant_isolation ON "event_funding_sources" USING (tenant_id = app_current_tenant()) WITH CHECK (tenant_id = app_current_tenant());--> statement-breakpoint
-ALTER TABLE "event_cost_lines" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
-ALTER TABLE "event_cost_lines" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
-CREATE POLICY tenant_isolation ON "event_cost_lines" USING (tenant_id = app_current_tenant()) WITH CHECK (tenant_id = app_current_tenant());--> statement-breakpoint
-ALTER TABLE "approval_action_tokens" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
-ALTER TABLE "approval_action_tokens" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
-CREATE POLICY tenant_isolation ON "approval_action_tokens" USING (tenant_id = app_current_tenant()) WITH CHECK (tenant_id = app_current_tenant());--> statement-breakpoint
-ALTER TABLE "documents" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
-ALTER TABLE "documents" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
-CREATE POLICY tenant_isolation ON "documents" USING (tenant_id = app_current_tenant()) WITH CHECK (tenant_id = app_current_tenant());--> statement-breakpoint
-ALTER TABLE "event_funding_sources" ADD CONSTRAINT "event_funding_sources_amounts" CHECK ("funded_minor" > 0 AND "consumed_minor" >= 0 AND "returned_minor" >= 0 AND "consumed_minor" + "returned_minor" <= "funded_minor");
