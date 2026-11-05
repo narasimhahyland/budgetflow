@@ -33,8 +33,8 @@ export interface DrillRequest {
     @if (note()) {
       <sat-banner class="bf-banner" variant="info" data-testid="report-scope-note">
         <sat-banner-message
-          ><strong>{{ note() }}</strong> {{ label() }} · {{ budgetIds() }} budgets in
-          scope.</sat-banner-message
+          ><strong>{{ note() }}</strong> {{ label() }} · {{ budgetIds() }}
+          {{ budgetIds() === 1 ? 'budget' : 'budgets' }} in scope.</sat-banner-message
         >
       </sat-banner>
     }
@@ -59,7 +59,8 @@ export class ScopeNote {
     @if (reconciliation(); as r) {
       @if (r.ties) {
         <p class="bf-reconcile" data-testid="reconciliation-ties">
-          Figures tie to the ledger across {{ r.budgetsCounted }} budgets. Authorized
+          Figures tie to the ledger across {{ r.budgetsCounted }}
+          {{ r.budgetsCounted === 1 ? 'budget' : 'budgets' }}. Authorized
           <bf-money [amountMinor]="r.authorized.amountMinor" [currency]="r.authorized.currency" />,
           available
           <bf-money [amountMinor]="r.available.amountMinor" [currency]="r.available.currency" />.

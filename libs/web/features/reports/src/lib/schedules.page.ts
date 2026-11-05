@@ -217,7 +217,7 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
 
     @if (valueOf(schedules); as list) {
       @if (list.items.length) {
-        @for (schedule of list.items; track schedule.id) {
+        @for (schedule of ordered(); track schedule.id) {
           <section
             class="bf-card"
             [attr.data-testid]="'schedule-' + schedule.id"
@@ -285,28 +285,19 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
               <div>
                 <dt>Next run</dt>
                 <dd>
-                  @if (schedule.nextRunAt) {
-                    <span data-testid="relative-time">{{
-                      schedule.nextRunAt | bfDateTime: session.timezone()
-                    }}</span>
-                  } @else {
-                    Not scheduled
-                  }
+                  <span class="bf-when" data-testid="relative-time">{{
+                    schedule.nextRunAt
+                      ? (schedule.nextRunAt | bfDateTime: session.timezone())
+                      : 'Not scheduled'
+                  }}</span>
                 </dd>
               </div>
               <div>
                 <dt>Last run</dt>
                 <dd>
-                  @if (schedule.lastRunAt) {
-                    <span data-testid="relative-time">{{
-                      schedule.lastRunAt | bfDateTime: session.timezone()
-                    }}</span>
-                    @if (schedule.lastRunStatus) {
-                      · {{ runStatusLabel(schedule.lastRunStatus) }}
-                    }
-                  } @else {
-                    Never
-                  }
+                  <span class="bf-when" data-testid="relative-time">{{
+                    lastRunText(schedule)
+                  }}</span>
                 </dd>
               </div>
               <div>
@@ -488,6 +479,13 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
     .bf-facts > div {
       min-width: 0;
     }
+    /* One line whatever the state, so the visual baseline's masked box keeps its height. */
+    .bf-when {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -503,6 +501,13 @@ export class ReportSchedulesPage {
   protected readonly schedules = resource({
     loader: () => data(this.api.listReportSchedules({})),
   });
+  /**
+   * By name, so the list reads the same every time. The API orders by creation time, and schedules
+   * made in one batch share it, which leaves their order to the database.
+   */
+  protected readonly ordered = computed(() =>
+    [...(valueOf(this.schedules)?.items ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+  );
   protected readonly exports = resource({ loader: () => data(this.api.listReportExports({})) });
   protected readonly catalog = resource({ loader: () => data(this.api.getReportCatalog({})) });
   protected readonly reports = computed(() => valueOf(this.catalog)?.reports ?? []);
@@ -601,6 +606,16 @@ export class ReportSchedulesPage {
 
   protected formatList(formats: readonly ReportFormat[]): string {
     return formats.map((f) => f.toUpperCase()).join(', ');
+  }
+
+  protected lastRunText(schedule: ReportSchedule): string {
+    if (!schedule.lastRunAt) return 'Never';
+    const when = new Date(schedule.lastRunAt).toLocaleString('en-US', {
+      timeZone: this.session.timezone(),
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+    return schedule.lastRunStatus ? `${when} · ${RUN_STATUS_LABELS[schedule.lastRunStatus]}` : when;
   }
 
   protected channelList(schedule: ReportSchedule): string {

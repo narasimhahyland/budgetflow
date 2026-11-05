@@ -935,10 +935,24 @@
       "id": "082-utilization-report",
       "role": "location-manager",
       "path": "/reports/utilization",
-      "waitFor": "role=heading[name=\"Budget utilization\"]",
+      "waitFor": "role=heading[name=\"Utilization\"]",
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "drilldown",
+          "actions": [
+            {
+              "click": "[data-testid=report-drill] >> nth=0"
+            },
+            {
+              "waitFor": "[data-testid=report-drilldown]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
         }
       ]
     },
@@ -1527,6 +1541,139 @@
           "state": "tasks",
           "path": "/notifications?tab=tasks",
           "waitFor": "[data-testid=tasks-table]"
+        }
+      ]
+    },
+    {
+      "id": "079-report-catalog",
+      "role": "finance-admin",
+      "path": "/reports",
+      "waitFor": "role=heading[name=\"Reports\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "scoped-owner",
+          "role": "location-manager",
+          "waitFor": "[data-testid=catalog-scope-hint]"
+        },
+        {
+          "state": "forbidden",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ],
+      "mask": ["[data-testid=recent-exports]"]
+    },
+    {
+      "id": "013-budget-health",
+      "role": "finance-controller",
+      "path": "/reports/health",
+      "waitFor": "role=heading[name=\"Budget health\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "080-budget-vs-actual",
+      "role": "finance-controller",
+      "path": "/reports/budget-vs-actual",
+      "waitFor": "role=heading[name=\"Budget versus actual\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "081-allocation-report",
+      "role": "finance-controller",
+      "path": "/reports/allocation",
+      "waitFor": "role=heading[name=\"Allocation\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "083-location-comparison",
+      "role": "finance-controller",
+      "path": "/reports/location-comparison",
+      "waitFor": "role=heading[name=\"Location comparison\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "084-department-comparison",
+      "role": "finance-controller",
+      "path": "/reports/department-comparison",
+      "waitFor": "role=heading[name=\"Department comparison\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "085-event-spending",
+      "role": "finance-controller",
+      "path": "/reports/event-spending",
+      "waitFor": "role=heading[name=\"Event spending\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "086-unused-expired",
+      "role": "finance-controller",
+      "path": "/reports/unused-expired",
+      "waitFor": "role=heading[name=\"Unused and expired budget\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "015a-spend-per-head",
+      "role": "ceo",
+      "path": "/reports/spend-per-head",
+      "waitFor": "role=heading[name=\"Spend per head by location\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "015b-participation-reach",
+      "role": "ceo",
+      "path": "/reports/participation-reach",
+      "waitFor": "role=heading[name=\"Participation and reach\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "091-scheduled-exports",
+      "role": "finance-admin",
+      "path": "/reports/schedules",
+      "waitFor": "role=heading[name=\"Scheduled reports\"]",
+      "states": [
+        {
+          "state": "default",
+          "fullPage": false
         }
       ]
     }

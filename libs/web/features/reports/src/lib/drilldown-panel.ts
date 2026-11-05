@@ -35,7 +35,10 @@ const BUCKETS: Record<string, Bucket> = {
           <h2 class="bf-card__title" id="drill-title">
             {{ request().columnLabel }} · {{ request().rowLabel }}
           </h2>
-          <p class="bf-card__hint">The ledger lines behind this figure, newest first.</p>
+          <p class="bf-card__hint">
+            The ledger lines behind this figure, newest first. Amounts are signed as the ledger
+            holds them: a debit is positive and a credit is negative.
+          </p>
         </div>
         <button mat-icon-button type="button" aria-label="Close drill-down" (click)="closed.emit()">
           <mat-icon svgIcon="x_small" />

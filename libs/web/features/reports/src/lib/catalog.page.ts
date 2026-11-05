@@ -14,6 +14,7 @@ import { SessionStore } from '@bf/web/data-access';
 import { DateTimePipe } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 import { ScopeNote } from './report-frame';
@@ -42,6 +43,7 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SatStatusTag,
     ScopeNote,
   ],
   template: `
@@ -102,7 +104,7 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
         </div>
         <div class="bf-kpi">
           <p class="bf-kpi__label">Recent exports</p>
-          <p class="bf-kpi__value">{{ c.recentExports }}</p>
+          <p class="bf-kpi__value" data-testid="recent-exports">{{ c.recentExports }}</p>
         </div>
       </div>
 
@@ -114,15 +116,15 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
               A view stores filters; the figures are recomputed each time.
             </p>
           </div>
-          <ul class="bf-list">
+          <ul class="bf-saved-views">
             @for (view of c.savedViews; track view.id) {
-              <li class="bf-list__item bf-view-row">
+              <li class="bf-view-row">
                 <a class="bf-view-row__link" [routerLink]="link(view)" [queryParams]="params(view)">
-                  <span class="bf-cell__primary">
-                    @if (view.favourite) {
-                      <mat-icon svgIcon="star" inline />
-                    }
+                  <span class="bf-view-row__name">
                     {{ view.name }}
+                    @if (view.favourite) {
+                      <sat-status-tag status="info">Favourite</sat-status-tag>
+                    }
                   </span>
                   <span class="bf-cell__secondary">
                     {{ reportName(view.reportId) }}
@@ -214,18 +216,32 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
       color: var(--mat-sys-on-surface-variant);
       font: var(--mat-sys-label-small);
     }
+    .bf-saved-views {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
     .bf-view-row {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--mat-sys-outline-variant);
     }
     .bf-view-row__link {
       color: var(--mat-sys-on-surface);
       text-decoration: none;
     }
-    .bf-view-row__link:hover .bf-cell__primary {
+    .bf-view-row__name {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font: var(--mat-sys-body-medium);
+    }
+    .bf-view-row__link:hover .bf-view-row__name {
       text-decoration: underline;
     }
   `,

@@ -164,7 +164,7 @@ const isReportId = (value: string | null): value is ReportId =>
         @if (groupBys().length > 1) {
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Group by</mat-label>
-            <mat-select [ngModel]="groupBy()" (ngModelChange)="setFilter('groupBy', $event)">
+            <mat-select [ngModel]="shownGroupBy()" (ngModelChange)="setFilter('groupBy', $event)">
               @for (g of groupBys(); track g) {
                 <mat-option [value]="g">{{ label(g) }}</mat-option>
               }
@@ -430,6 +430,10 @@ export class ReportPage {
       data(this.api.runReport({ params: { reportId: params.reportId }, query: params.filters })),
   });
   protected readonly report = computed(() => valueOf(this.run));
+  /** Without a filter the server picks the report's default grouping; show the one it used. */
+  protected readonly shownGroupBy = computed(
+    () => this.groupBy() || (this.report()?.groupBy ?? ''),
+  );
   protected readonly drill = signal<DrillRequest | null>(null);
 
   protected readonly saving = signal(false);

@@ -61,10 +61,10 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
         <p class="bf-page__subtitle">
           Five checks per budget — pace, forecast, controls, hygiene and unused money.
           @if (overview(); as o) {
-            In {{ o.currency }} as of {{ o.asOf }} ·
-            <span data-testid="relative-time">{{
-              o.generatedAt | bfDateTime: session.timezone()
-            }}</span>
+            In {{ o.currency }} as of
+            <span data-testid="relative-time"
+              >{{ o.asOf }} · {{ o.generatedAt | bfDateTime: session.timezone() }}</span
+            >
           }
         </p>
       </div>
