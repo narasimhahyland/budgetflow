@@ -15,7 +15,7 @@ import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { EventSummary } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, DateTimePipe, Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, Money, SpendStatus } from '@bf/web/ui';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SAT_TABLE_WITH_ROW_STATES_IMPORTS } from '@hylandsoftware/satori-ui/table-with-row-states';
 import { data, injectApi, valueOf } from './api';
@@ -35,7 +35,6 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
   selector: 'bf-events-list-page',
   imports: [
     DateOnlyPipe,
-    DateTimePipe,
     FormsModule,
     LoadState,
     MatButtonModule,

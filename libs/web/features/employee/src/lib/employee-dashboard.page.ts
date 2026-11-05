@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, DateTimePipe, Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, Money, SpendStatus } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
@@ -15,7 +15,6 @@ import { LoadState } from './load-state';
   selector: 'bf-employee-dashboard-page',
   imports: [
     DateOnlyPipe,
-    DateTimePipe,
     LoadState,
     MatButtonModule,
     MatIconModule,

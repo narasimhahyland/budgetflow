@@ -307,7 +307,7 @@ export class CofundingBoardPage {
   protected readonly board = resource({ loader: () => data(this.api.getCofundingBoard({})) });
   protected readonly events = computed(() => valueOf(this.board)?.events ?? []);
   protected readonly selected = computed(
-    () => this.events().find((e) => e.id === this.picked()) ?? this.events()[0],
+    () => this.events().find((e) => e.id === this.picked()) ?? this.events()[0] ?? null,
   );
   protected readonly updatedAt = computed(() => valueOf(this.board)?.generatedAt ?? null);
   protected readonly stale = computed(() => Boolean(this.board.error()) && this.board.hasValue());
