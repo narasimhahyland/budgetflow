@@ -258,9 +258,16 @@ export interface DetectedConflict {
   blocking: boolean;
 }
 
+/**
+ * Whether two condition sets can both match the same request on the facts they share. Rules that
+ * name no fact in common are not compared: precedence (block > freeze > approvals > warn >
+ * auto-approve) already resolves them, and treating them as conflicts would flag every pair.
+ */
 function factsOverlap(a: ConditionGroup, b: ConditionGroup): boolean {
   const byFactA = new Map(a.conditions.map((c) => [c.fact, c]));
-  for (const cb of b.conditions) {
+  const shared = b.conditions.filter((c) => byFactA.has(c.fact));
+  if (shared.length === 0) return false;
+  for (const cb of shared) {
     const ca = byFactA.get(cb.fact);
     if (!ca) continue;
     if (
@@ -317,11 +324,15 @@ export function detectRuleConflicts(
   for (const other of activeRules) {
     if (other.id === candidate.id || other.code === candidate.code) continue;
     if (!scopesOverlap(candidate.scope, other.scope)) continue;
-    if (!factsOverlap(candidate.conditions, other.conditions)) continue;
 
     const candRank = RULE_EFFECTS.indexOf(candidate.effect);
     const otherRank = RULE_EFFECTS.indexOf(other.effect);
     if (candRank === otherRank && candidate.priority !== other.priority) continue;
+
+    // Two rules contend either because they share facts, or because they sit at the same priority
+    // with different outcomes, where the tie-break would otherwise decide the outcome by rule code.
+    const samePriority = candidate.priority === other.priority && candidate.effect !== other.effect;
+    if (!samePriority && !factsOverlap(candidate.conditions, other.conditions)) continue;
 
     // A conflict occurs when one rule blocks/freezes a scope that the other rule tries to route for approval or auto-approve,
     // or when both share the exact same priority.

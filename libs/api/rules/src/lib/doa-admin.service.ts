@@ -57,6 +57,22 @@ export class DoaAdminService {
     this.policy.assert(actor, 'doa.read', TENANT(actor), 'delegation-of-authority matrix');
   }
 
+  /** The person who submitted a version for approval, from the audit trail. */
+  private async submitterOf(tx: Tx, tenantId: string, versionId: string): Promise<string | null> {
+    const submitted = await tx.execute(sql`
+      select actor_person_id from audit_events
+      where tenant_id = ${tenantId}
+        and resource_type = 'doa_matrix_version'
+        and resource_id = ${versionId}
+        and action = 'doa.version_submitted'
+      order by seq desc limit 1
+    `);
+    return (
+      (submitted.rows[0] as { actor_person_id?: string | null } | undefined)?.actor_person_id ??
+      null
+    );
+  }
+
   private toSummary(row: VersionRow, names: Map<string, string>): DoaMatrixVersionSummary {
     return {
       id: row.id,
@@ -217,7 +233,11 @@ export class DoaAdminService {
     const allowedActions: string[] = ['view'];
     if (this.policy.can(actor, 'doa.manage', TENANT(actor)).allowed) {
       if (selected.status === 'draft') allowedActions.push('edit', 'submit');
-      if (selected.status === 'awaiting_approval') allowedActions.push('approve');
+      if (selected.status === 'awaiting_approval') {
+        // Two people: the submitter sees the version but cannot approve their own submission.
+        const submitter = await this.submitterOf(tx, actor.tenantId, selected.id);
+        if (!submitter || submitter !== actor.personId) allowedActions.push('approve');
+      }
       if (selected.status === 'active') allowedActions.push('new_draft');
     }
 
@@ -366,16 +386,7 @@ export class DoaAdminService {
         }
 
         // Two people: whoever submitted the version cannot also approve it.
-        const submitted = await tx.execute(sql`
-          select actor_person_id from audit_events
-          where tenant_id = ${actor.tenantId}
-            and resource_type = 'doa_matrix_version'
-            and resource_id = ${version.id}
-            and action = 'doa.version_submitted'
-          order by seq desc limit 1
-        `);
-        const submitter = (submitted.rows[0] as { actor_person_id?: string | null } | undefined)
-          ?.actor_person_id;
+        const submitter = await this.submitterOf(tx, actor.tenantId, version.id);
         if (submitter && actor.personId && submitter === actor.personId) {
           throw new ApiProblem(
             409,
