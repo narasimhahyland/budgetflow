@@ -191,13 +191,22 @@ export async function seedEventsDepth(_app: INestApplicationContext): Promise<vo
     const employeeInvitation = diwaliParticipants.find(
       (p) => p.personId === userById('employee').personId,
     );
-    if (employeeInvitation && employeeInvitation.rsvpStatus === 'invited')
+    if (employeeInvitation && employeeInvitation.rsvpStatus === 'invited') {
       await invitations.respond(
         employee,
         employeeInvitation.id,
         { response: 'going' },
         key('diwali:rsvp:employee'),
       );
+      // The answer goes through the real command for its audit entry and waitlist check; the time it
+      // happened is then pinned like every other seeded answer, so the seed stays deterministic.
+      await db.transaction((tx) =>
+        tx
+          .update(s.eventParticipants)
+          .set({ rsvpRespondedAt: new Date('2026-11-08T06:00:00.000Z') })
+          .where(eq(s.eventParticipants.id, employeeInvitation.id)),
+      );
+    }
 
     // Catering quotes on the Diwali celebration -----------------------------------------------------
     const hasQuoteRequest = await read(
@@ -385,7 +394,7 @@ export async function seedEventsDepth(_app: INestApplicationContext): Promise<vo
       // Anonymous answers never carry a person, so they are written with the same one-way token the
       // API uses; a replay finds the row and inserts nothing.
       await db.transaction(async (tx) => {
-        for (const r of w.survey.responses) {
+        for (const [i, r] of w.survey.responses.entries()) {
           const p = wellbeingParticipants[r.index];
           if (!p?.personId) continue;
           await tx
@@ -394,6 +403,8 @@ export async function seedEventsDepth(_app: INestApplicationContext): Promise<vo
               tenantId: T,
               surveyId: survey.id,
               eventId: w.id,
+              // Fixed, an hour apart: the results list is ordered newest first and must not move.
+              submittedAt: new Date(Date.UTC(2026, 9, 24, 9 + i, 0, 0)),
               respondentTokenHash: respondentToken(survey.id, p.personId),
               locationOrgUnitId: p.locationOrgUnitId,
               locationName: p.locationOrgUnitId
