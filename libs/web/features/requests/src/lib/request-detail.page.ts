@@ -130,7 +130,7 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
         >
       }
       @if (r.status === 'changes_requested') {
-        <sat-banner variant="info"
+        <sat-banner variant="warning"
           ><sat-banner-message
             >Changes requested{{
               r.decisionReason ? ': ' + r.decisionReason : ''
@@ -155,6 +155,65 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
           </div>
         </section>
       }
+      <!-- Only while the offer is still open: once it is accepted or answered, the history tab has it. -->
+      @if (r.status === 'changes_requested' && r.counterOffer; as offer) {
+        <section class="bf-card" aria-labelledby="offer-title" data-testid="counter-offer">
+          <div class="bf-card__header">
+            <h2 class="bf-card__title" id="offer-title">
+              {{ offer.offeredByName }} offered a smaller amount
+            </h2>
+          </div>
+          <div class="bf-section">
+            <dl class="bf-facts">
+              <div class="bf-facts__item">
+                <dt>You asked for</dt>
+                <dd>
+                  <bf-money [amountMinor]="r.amount.amountMinor" [currency]="r.amount.currency" />
+                </dd>
+              </div>
+              <div class="bf-facts__item">
+                <dt>Offered</dt>
+                <dd data-testid="offer-amount">
+                  <bf-money
+                    [amountMinor]="offer.amount.amountMinor"
+                    [currency]="offer.amount.currency"
+                  />
+                </dd>
+              </div>
+              <div class="bf-facts__item">
+                <dt>Offered on</dt>
+                <dd>{{ offer.offeredAt | bfDate: session.timezone() }}</dd>
+              </div>
+            </dl>
+            @if (offer.expired) {
+              <sat-banner variant="important"
+                ><sat-banner-message
+                  >This offer expired on {{ offer.expiresAt | bfDate: session.timezone() }}. Change
+                  the request and send it again.</sat-banner-message
+                ></sat-banner
+              >
+            } @else {
+              <p class="bf-muted">
+                Accepting approves the request at {{ money(offer.amount) }} with no further review.
+                The offer runs out on {{ offer.expiresAt | bfDate: session.timezone() }}.
+              </p>
+            }
+          </div>
+          @if (r.allowedActions.includes('accept_offer') && !offer.expired) {
+            <div class="bf-form__actions">
+              <button
+                mat-flat-button
+                type="button"
+                data-testid="accept-offer"
+                [disabled]="busy()"
+                (click)="acceptOffer()"
+              >
+                Accept {{ money(offer.amount) }}
+              </button>
+            </div>
+          }
+        </section>
+      }
       @if (r.allowedActions.includes('resubmit')) {
         <section class="bf-card" aria-labelledby="resubmit-title">
           <div class="bf-card__header">
@@ -169,9 +228,39 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
               <mat-label>Justification</mat-label>
               <textarea matInput rows="3" [(ngModel)]="newPurpose" name="newPurpose"></textarea>
             </mat-form-field>
+            <mat-form-field appearance="outline" class="bf-form__wide">
+              <mat-label>Note to the approver</mat-label>
+              <textarea matInput rows="2" [(ngModel)]="resubmitNote" name="resubmitNote"></textarea>
+              <mat-hint>Say what you changed and why.</mat-hint>
+            </mat-form-field>
+          </div>
+          <div class="bf-section" data-testid="what-changed">
+            <h3 class="bf-subtitle">What changed</h3>
+            @if (amountProblem(); as problem) {
+              <p class="bf-muted" data-testid="amount-problem">{{ problem }}</p>
+            } @else if (changes().length) {
+              <dl class="bf-facts">
+                @for (c of changes(); track c.label) {
+                  <div class="bf-facts__item">
+                    <dt>{{ c.label }}</dt>
+                    <dd>Changed · was {{ c.before }} · now {{ c.after }}</dd>
+                  </div>
+                }
+              </dl>
+            } @else {
+              <p class="bf-muted">
+                Nothing has changed yet. Change the amount or the justification above, then say what
+                you changed.
+              </p>
+            }
           </div>
           <div class="bf-form__actions">
-            <button mat-flat-button type="button" [disabled]="busy()" (click)="resubmit()">
+            <button
+              mat-flat-button
+              type="button"
+              [disabled]="busy() || !canResubmit()"
+              (click)="resubmit()"
+            >
               Resubmit
             </button>
           </div>
@@ -450,6 +539,7 @@ export class RequestDetailPage {
   protected readonly failure = signal('');
   protected newAmount = '';
   protected newPurpose = '';
+  protected resubmitNote = '';
 
   protected readonly item = resource({
     params: () => ({ requestId: this.requestId() }),
@@ -457,6 +547,7 @@ export class RequestDetailPage {
       const r = await data(this.api.getRequest({ params }));
       this.newAmount = toMajor(r.amount.amountMinor, r.amount.currency);
       this.newPurpose = r.purpose;
+      this.resubmitNote = '';
       return r;
     },
   });
@@ -569,6 +660,7 @@ export class RequestDetailPage {
   protected resubmit(): void {
     const r = this.r()!;
     const amount = toMinor(this.newAmount, r.amount.currency);
+    const note = this.resubmitNote.trim();
     void this.run(
       () =>
         data(
@@ -577,10 +669,59 @@ export class RequestDetailPage {
             body: {
               ...(amount ? { amount: { amountMinor: amount, currency: r.amount.currency } } : {}),
               purpose: this.newPurpose.trim(),
+              ...(note ? { note } : {}),
             },
           }),
         ),
       'Request resubmitted',
+    );
+  }
+
+  protected acceptOffer(): void {
+    const r = this.r()!;
+    void this.run(
+      () => data(this.api.acceptCounterOffer({ params: { requestId: r.id } })),
+      `Accepted ${this.money(r.counterOffer!.amount)}; ${r.ref} is approved at that amount`,
+    );
+  }
+
+  protected money(m: MoneyAmount): string {
+    return formatMoney(m.amountMinor, m.currency);
+  }
+
+  /** Why the typed amount cannot be sent, so an unusable figure never reads as "nothing changed". */
+  protected amountProblem(): string | null {
+    const r = this.r();
+    if (!r) return null;
+    const typed = this.newAmount.trim();
+    if (!typed) return 'Enter the amount you are asking for.';
+    const amount = toMinor(typed, r.amount.currency);
+    if (amount === null) return 'That amount is not a number. Use digits, for example 160.00.';
+    if (amount <= 0) return 'The amount has to be more than zero.';
+    return null;
+  }
+
+  /** What the resubmission would send, next to what the approver saw, so version 2 is deliberate. */
+  protected changes(): { label: string; before: string; after: string }[] {
+    const r = this.r();
+    if (!r || this.amountProblem()) return [];
+    const out: { label: string; before: string; after: string }[] = [];
+    const amount = toMinor(this.newAmount, r.amount.currency);
+    if (amount && amount !== r.amount.amountMinor)
+      out.push({
+        label: 'Amount',
+        before: this.money(r.amount),
+        after: formatMoney(amount, r.amount.currency),
+      });
+    const purpose = this.newPurpose.trim();
+    if (purpose && purpose !== r.purpose)
+      out.push({ label: 'Justification', before: r.purpose, after: purpose });
+    return out;
+  }
+
+  protected canResubmit(): boolean {
+    return (
+      !this.amountProblem() && this.changes().length > 0 && this.resubmitNote.trim().length > 0
     );
   }
 }

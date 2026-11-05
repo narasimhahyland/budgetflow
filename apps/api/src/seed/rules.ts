@@ -2,6 +2,7 @@ import { ActorResolver, CoreModule, DB } from '@bf/api/core';
 import * as s from '@bf/api/db';
 import type { Db } from '@bf/api/db';
 import {
+  P7_COUNTER_OFFER,
   P7_DOA_DRAFT,
   P7_EXCEPTIONS,
   P7_RULE_SEEDS,
@@ -11,11 +12,13 @@ import {
   userById,
 } from '@bf/seed';
 import { DoaAdminService, RulesModule } from '@bf/api/rules';
+import { ApprovalsService } from '@bf/api/approvals';
+import { RequestsService, SpendModule } from '@bf/api/spend';
 import { Module, type INestApplicationContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { and, eq } from 'drizzle-orm';
 
-@Module({ imports: [CoreModule, RulesModule] })
+@Module({ imports: [CoreModule, RulesModule, SpendModule] })
 class RulesSeedModule {}
 
 const T = TENANTS.acme;
@@ -176,6 +179,45 @@ export async function seedRules(_app: INestApplicationContext): Promise<void> {
         { idempotencyKey: 'seed:p7:doa-v2', requestId: 'seed' },
       );
     }
+
+    // A request whose approver answered with a smaller amount, so the requester has an offer to
+    // accept on screen 065. Both steps run through the real commands, offer included.
+    const offer = P7_COUNTER_OFFER;
+    const requests = ctx.get(RequestsService);
+    const approvals = ctx.get(ApprovalsService);
+    const requester = userById(offer.requester);
+    const approver = userById(offer.approver);
+    const requesterActor = await actors.resolve(requester.subject, T, requester.displayName);
+    await requests.create(
+      requesterActor,
+      {
+        kind: 'spending',
+        budgetId: offer.budgetId,
+        amount: { amountMinor: offer.amountMinor, currency: offer.currency },
+        spendType: offer.spendType,
+        title: offer.title,
+        purpose: offer.purpose,
+        category: offer.category,
+        submit: true,
+      },
+      { idempotencyKey: 'seed:p7:counter-offer', requestId: 'seed', fixedId: offer.requestId },
+    );
+    const approverActor = await actors.resolve(approver.subject, T, approver.displayName);
+    const taskId = await s.withTenant(db, { tenantId: T, subject: approverActor.subject }, (tx) =>
+      approvals.myTask(tx, approverActor, 'request', offer.requestId),
+    );
+    if (taskId)
+      await approvals.decide(
+        approverActor,
+        taskId,
+        {
+          decision: 'request_changes',
+          counterOfferAmount: { amountMinor: offer.offerMinor, currency: offer.currency },
+          comment: offer.comment,
+          noConflictAttested: true,
+        },
+        { idempotencyKey: 'seed:p7:counter-offer:decide', requestId: 'seed' },
+      );
   } finally {
     await ctx.close();
   }
