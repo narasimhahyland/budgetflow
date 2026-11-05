@@ -1,0 +1,127 @@
+# Visual capture report
+
+- Base: http://localhost:4250
+- Matrix: desktop, tablet, mobile x light
+- Captures: 102; blocking findings: 14; warnings: 4
+
+| Screen                                   | State        | Viewport | Theme | Blocking | Warnings | Screenshot                                                                      |
+| ---------------------------------------- | ------------ | -------- | ----- | -------- | -------- | ------------------------------------------------------------------------------- |
+| 044-event-list                           | default      | desktop  | light | 0        | 0        | screens/044-event-list--default--desktop--light.png                             |
+| 044-event-list                           | default      | tablet   | light | 0        | 0        | screens/044-event-list--default--tablet--light.png                              |
+| 044-event-list                           | default      | mobile   | light | 0        | 0        | screens/044-event-list--default--mobile--light.png                              |
+| 045-create-event-budget                  | default      | desktop  | light | 0        | 0        | screens/045-create-event-budget--default--desktop--light.png                    |
+| 045-create-event-budget                  | default      | tablet   | light | 0        | 0        | screens/045-create-event-budget--default--tablet--light.png                     |
+| 045-create-event-budget                  | default      | mobile   | light | 0        | 0        | screens/045-create-event-budget--default--mobile--light.png                     |
+| 046-event-details                        | default      | desktop  | light | 0        | 0        | screens/046-event-details--default--desktop--light.png                          |
+| 046-event-details                        | default      | tablet   | light | 0        | 0        | screens/046-event-details--default--tablet--light.png                           |
+| 046-event-details                        | default      | mobile   | light | 0        | 0        | screens/046-event-details--default--mobile--light.png                           |
+| 047-event-participants                   | default      | desktop  | light | 0        | 0        | screens/047-event-participants--default--desktop--light.png                     |
+| 047-event-participants                   | default      | tablet   | light | 0        | 0        | screens/047-event-participants--default--tablet--light.png                      |
+| 047-event-participants                   | default      | mobile   | light | 0        | 0        | screens/047-event-participants--default--mobile--light.png                      |
+| 049-cross-location-cost-split            | default      | desktop  | light | 0        | 0        | screens/049-cross-location-cost-split--default--desktop--light.png              |
+| 049-cross-location-cost-split            | default      | tablet   | light | 0        | 0        | screens/049-cross-location-cost-split--default--tablet--light.png               |
+| 049-cross-location-cost-split            | default      | mobile   | light | 0        | 0        | screens/049-cross-location-cost-split--default--mobile--light.png               |
+| 050-event-approval-workflow              | default      | desktop  | light | 0        | 0        | screens/050-event-approval-workflow--default--desktop--light.png                |
+| 050-event-approval-workflow              | default      | tablet   | light | 0        | 0        | screens/050-event-approval-workflow--default--tablet--light.png                 |
+| 050-event-approval-workflow              | default      | mobile   | light | 0        | 0        | screens/050-event-approval-workflow--default--mobile--light.png                 |
+| 051-event-commitments                    | default      | desktop  | light | 0        | 0        | screens/051-event-commitments--default--desktop--light.png                      |
+| 051-event-commitments                    | default      | tablet   | light | 0        | 0        | screens/051-event-commitments--default--tablet--light.png                       |
+| 051-event-commitments                    | default      | mobile   | light | 0        | 0        | screens/051-event-commitments--default--mobile--light.png                       |
+| 052-event-documents                      | default      | desktop  | light | 0        | 0        | screens/052-event-documents--default--desktop--light.png                        |
+| 052-event-documents                      | default      | tablet   | light | 0        | 0        | screens/052-event-documents--default--tablet--light.png                         |
+| 052-event-documents                      | default      | mobile   | light | 0        | 0        | screens/052-event-documents--default--mobile--light.png                         |
+| 046a-co-funding-board                    | default      | desktop  | light | 0        | 0        | screens/046a-co-funding-board--default--desktop--light.png                      |
+| 046a-co-funding-board                    | default      | tablet   | light | 0        | 0        | screens/046a-co-funding-board--default--tablet--light.png                       |
+| 046a-co-funding-board                    | default      | mobile   | light | 0        | 0        | screens/046a-co-funding-board--default--mobile--light.png                       |
+| 053a-intercompany-recharge-schedule      | default      | desktop  | light | 0        | 0        | screens/053a-intercompany-recharge-schedule--default--desktop--light.png        |
+| 053a-intercompany-recharge-schedule      | default      | tablet   | light | 0        | 0        | screens/053a-intercompany-recharge-schedule--default--tablet--light.png         |
+| 053a-intercompany-recharge-schedule      | default      | mobile   | light | 0        | 0        | screens/053a-intercompany-recharge-schedule--default--mobile--light.png         |
+| 055-my-requests                          | default      | desktop  | light | 0        | 0        | screens/055-my-requests--default--desktop--light.png                            |
+| 055-my-requests                          | default      | tablet   | light | 0        | 0        | screens/055-my-requests--default--tablet--light.png                             |
+| 055-my-requests                          | default      | mobile   | light | 0        | 0        | screens/055-my-requests--default--mobile--light.png                             |
+| 056-create-budget-request                | default      | desktop  | light | 0        | 0        | screens/056-create-budget-request--default--desktop--light.png                  |
+| 056-create-budget-request                | default      | tablet   | light | 0        | 0        | screens/056-create-budget-request--default--tablet--light.png                   |
+| 056-create-budget-request                | default      | mobile   | light | 0        | 0        | screens/056-create-budget-request--default--mobile--light.png                   |
+| 056a-inter-director-contribution-request | giver        | desktop  | light | 0        | 0        | screens/056a-inter-director-contribution-request--giver--desktop--light.png     |
+| 056a-inter-director-contribution-request | giver        | tablet   | light | 0        | 0        | screens/056a-inter-director-contribution-request--giver--tablet--light.png      |
+| 056a-inter-director-contribution-request | giver        | mobile   | light | 0        | 0        | screens/056a-inter-director-contribution-request--giver--mobile--light.png      |
+| 056a-inter-director-contribution-request | organizer    | desktop  | light | 0        | 0        | screens/056a-inter-director-contribution-request--organizer--desktop--light.png |
+| 056a-inter-director-contribution-request | organizer    | tablet   | light | 0        | 0        | screens/056a-inter-director-contribution-request--organizer--tablet--light.png  |
+| 056a-inter-director-contribution-request | organizer    | mobile   | light | 0        | 0        | screens/056a-inter-director-contribution-request--organizer--mobile--light.png  |
+| 057-additional-fund-request              | default      | desktop  | light | 1        | 0        | screens/057-additional-fund-request--default--desktop--light.png                |
+| 057-additional-fund-request              | default      | tablet   | light | 1        | 0        | screens/057-additional-fund-request--default--tablet--light.png                 |
+| 057-additional-fund-request              | default      | mobile   | light | 1        | 0        | screens/057-additional-fund-request--default--mobile--light.png                 |
+| 059-approval-inbox                       | default      | desktop  | light | 0        | 0        | screens/059-approval-inbox--default--desktop--light.png                         |
+| 059-approval-inbox                       | default      | tablet   | light | 0        | 0        | screens/059-approval-inbox--default--tablet--light.png                          |
+| 059-approval-inbox                       | default      | mobile   | light | 0        | 0        | screens/059-approval-inbox--default--mobile--light.png                          |
+| 060-request-details                      | approver     | desktop  | light | 0        | 1        | screens/060-request-details--approver--desktop--light.png                       |
+| 060-request-details                      | approver     | tablet   | light | 1        | 0        | screens/060-request-details--approver--tablet--light.png                        |
+| 060-request-details                      | approver     | mobile   | light | 0        | 0        | screens/060-request-details--approver--mobile--light.png                        |
+| 060-request-details                      | requester    | desktop  | light | 0        | 0        | screens/060-request-details--requester--desktop--light.png                      |
+| 060-request-details                      | requester    | tablet   | light | 0        | 0        | screens/060-request-details--requester--tablet--light.png                       |
+| 060-request-details                      | requester    | mobile   | light | 0        | 0        | screens/060-request-details--requester--mobile--light.png                       |
+| 060-request-details                      | rejected     | desktop  | light | 0        | 0        | screens/060-request-details--rejected--desktop--light.png                       |
+| 060-request-details                      | rejected     | tablet   | light | 0        | 0        | screens/060-request-details--rejected--tablet--light.png                        |
+| 060-request-details                      | rejected     | mobile   | light | 0        | 0        | screens/060-request-details--rejected--mobile--light.png                        |
+| 058-over-budget-request                  | default      | desktop  | light | 0        | 0        | screens/058-over-budget-request--default--desktop--light.png                    |
+| 058-over-budget-request                  | default      | tablet   | light | 0        | 0        | screens/058-over-budget-request--default--tablet--light.png                     |
+| 058-over-budget-request                  | default      | mobile   | light | 0        | 0        | screens/058-over-budget-request--default--mobile--light.png                     |
+| 061-approval-decision                    | approve-part | desktop  | light | 0        | 0        | screens/061-approval-decision--approve-part--desktop--light.png                 |
+| 061-approval-decision                    | approve-part | tablet   | light | 0        | 0        | screens/061-approval-decision--approve-part--tablet--light.png                  |
+| 061-approval-decision                    | approve-part | mobile   | light | 0        | 0        | screens/061-approval-decision--approve-part--mobile--light.png                  |
+| 064-request-history                      | rejected     | desktop  | light | 0        | 0        | screens/064-request-history--rejected--desktop--light.png                       |
+| 064-request-history                      | rejected     | tablet   | light | 0        | 0        | screens/064-request-history--rejected--tablet--light.png                        |
+| 064-request-history                      | rejected     | mobile   | light | 0        | 0        | screens/064-request-history--rejected--mobile--light.png                        |
+| 064-request-history                      | pending      | desktop  | light | 0        | 0        | screens/064-request-history--pending--desktop--light.png                        |
+| 064-request-history                      | pending      | tablet   | light | 0        | 0        | screens/064-request-history--pending--tablet--light.png                         |
+| 064-request-history                      | pending      | mobile   | light | 0        | 0        | screens/064-request-history--pending--mobile--light.png                         |
+| 061a-actionable-approval-email           | link-invalid | desktop  | light | 1        | 0        | screens/061a-actionable-approval-email--link-invalid--desktop--light.png        |
+| 061a-actionable-approval-email           | link-invalid | tablet   | light | 1        | 0        | screens/061a-actionable-approval-email--link-invalid--tablet--light.png         |
+| 061a-actionable-approval-email           | link-invalid | mobile   | light | 1        | 0        | screens/061a-actionable-approval-email--link-invalid--mobile--light.png         |
+| 082-utilization-report                   | default      | desktop  | light | 0        | 0        | screens/082-utilization-report--default--desktop--light.png                     |
+| 082-utilization-report                   | default      | tablet   | light | 0        | 1        | screens/082-utilization-report--default--tablet--light.png                      |
+| 082-utilization-report                   | default      | mobile   | light | 0        | 0        | screens/082-utilization-report--default--mobile--light.png                      |
+| 088-audit-log                            | default      | desktop  | light | 0        | 0        | screens/088-audit-log--default--desktop--light.png                              |
+| 088-audit-log                            | default      | tablet   | light | 0        | 0        | screens/088-audit-log--default--tablet--light.png                               |
+| 088-audit-log                            | default      | mobile   | light | 0        | 0        | screens/088-audit-log--default--mobile--light.png                               |
+| 115-employee-dashboard                   | default      | desktop  | light | 0        | 0        | screens/115-employee-dashboard--default--desktop--light.png                     |
+| 115-employee-dashboard                   | default      | tablet   | light | 0        | 0        | screens/115-employee-dashboard--default--tablet--light.png                      |
+| 115-employee-dashboard                   | default      | mobile   | light | 0        | 0        | screens/115-employee-dashboard--default--mobile--light.png                      |
+| 116-available-budgets                    | default      | desktop  | light | 0        | 0        | screens/116-available-budgets--default--desktop--light.png                      |
+| 116-available-budgets                    | default      | tablet   | light | 0        | 0        | screens/116-available-budgets--default--tablet--light.png                       |
+| 116-available-budgets                    | default      | mobile   | light | 0        | 0        | screens/116-available-budgets--default--mobile--light.png                       |
+| 118-request-event-funding                | default      | desktop  | light | 0        | 0        | screens/118-request-event-funding--default--desktop--light.png                  |
+| 118-request-event-funding                | default      | tablet   | light | 0        | 1        | screens/118-request-event-funding--default--tablet--light.png                   |
+| 118-request-event-funding                | default      | mobile   | light | 0        | 0        | screens/118-request-event-funding--default--mobile--light.png                   |
+| 118-request-event-funding                | validation   | desktop  | light | 0        | 0        | screens/118-request-event-funding--validation--desktop--light.png               |
+| 118-request-event-funding                | validation   | tablet   | light | 0        | 1        | screens/118-request-event-funding--validation--tablet--light.png                |
+| 118-request-event-funding                | validation   | mobile   | light | 0        | 0        | screens/118-request-event-funding--validation--mobile--light.png                |
+| 120-approved-allocations                 | default      | desktop  | light | 0        | 0        | screens/120-approved-allocations--default--desktop--light.png                   |
+| 120-approved-allocations                 | default      | tablet   | light | 0        | 0        | screens/120-approved-allocations--default--tablet--light.png                    |
+| 120-approved-allocations                 | default      | mobile   | light | 1        | 0        | screens/120-approved-allocations--default--mobile--light.png                    |
+| 120-approved-allocations                 | empty        | desktop  | light | 0        | 0        | screens/120-approved-allocations--empty--desktop--light.png                     |
+| 120-approved-allocations                 | empty        | tablet   | light | 0        | 0        | screens/120-approved-allocations--empty--tablet--light.png                      |
+| 120-approved-allocations                 | empty        | mobile   | light | 0        | 0        | screens/120-approved-allocations--empty--mobile--light.png                      |
+| 121-upload-receipt                       | default      | desktop  | light | 1        | 0        | screens/121-upload-receipt--default--desktop--light.png                         |
+| 121-upload-receipt                       | default      | tablet   | light | 1        | 0        | screens/121-upload-receipt--default--tablet--light.png                          |
+| 121-upload-receipt                       | default      | mobile   | light | 1        | 0        | screens/121-upload-receipt--default--mobile--light.png                          |
+| 121-upload-receipt                       | amount-check | desktop  | light | 1        | 0        | screens/121-upload-receipt--amount-check--desktop--light.png                    |
+| 121-upload-receipt                       | amount-check | tablet   | light | 1        | 0        | screens/121-upload-receipt--amount-check--tablet--light.png                     |
+| 121-upload-receipt                       | amount-check | mobile   | light | 1        | 0        | screens/121-upload-receipt--amount-check--mobile--light.png                     |
+
+## Blocking findings
+
+- `057-additional-fund-request--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+- `057-additional-fund-request--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+- `057-additional-fund-request--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+- `060-request-details--approver--tablet--light.png` **layout-shift**: cumulative layout shift 0.430 (> 0.25)
+- `061a-actionable-approval-email--link-invalid--desktop--light.png` **console-error**: Failed to load resource: the server responded with a status of 404 (Not Found)
+- `061a-actionable-approval-email--link-invalid--tablet--light.png` **console-error**: Failed to load resource: the server responded with a status of 404 (Not Found)
+- `061a-actionable-approval-email--link-invalid--mobile--light.png` **console-error**: Failed to load resource: the server responded with a status of 404 (Not Found)
+- `120-approved-allocations--default--mobile--light.png` **overflow**: horizontal overflow of 158px
+- `121-upload-receipt--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+- `121-upload-receipt--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+- `121-upload-receipt--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+- `121-upload-receipt--amount-check--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+- `121-upload-receipt--amount-check--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+- `121-upload-receipt--amount-check--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.

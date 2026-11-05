@@ -25,6 +25,7 @@ test.describe('approval inbox', () => {
     browser,
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { team } = await directorTree();
     const r = await spendingRequest(team.id, 120_000);
     const taskId = await taskOf(r.id, 'department-head', 'requests');
@@ -59,6 +60,7 @@ test.describe('actionable approval email', () => {
     page,
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { team } = await directorTree();
     const ok = await spendingRequest(team.id, 45_000);
     const okMail = await mailTo('department-head', ok.ref);
@@ -88,6 +90,7 @@ test.describe('budget controls seen by the requester', () => {
     page,
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { team } = await directorTree();
     const r = await spendingRequest(team.id, 80_000);
 

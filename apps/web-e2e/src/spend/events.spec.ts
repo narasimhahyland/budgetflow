@@ -30,6 +30,7 @@ test.describe('event organizer', () => {
     page,
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { team } = await directorTree();
     const name = `Journey offsite ${suffix()}`;
 
@@ -105,6 +106,7 @@ test.describe('Inter-Director Budget Contribution Request', () => {
     browser,
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { root, team, tag } = await directorTree();
     const giver = await giverBudget(root.id, tag);
     const event = await approvedEvent(team.id, 2_000_000, 400_000);

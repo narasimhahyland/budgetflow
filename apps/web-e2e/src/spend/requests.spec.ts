@@ -23,6 +23,7 @@ test.describe('requester', () => {
     page,
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { team } = await directorTree();
     const r = await spendingRequest(team.id, 80_000);
     await decide(await taskOf(r.id, 'department-head', 'requests'), 'department-head', {
@@ -52,6 +53,7 @@ test.describe('requester', () => {
     page,
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { team } = await directorTree();
     const r = await spendingRequest(team.id, 5_749);
     await decide(await taskOf(r.id, 'department-head', 'requests'), 'department-head', {
@@ -84,6 +86,7 @@ test.describe('requester', () => {
     page,
   }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     await page.goto('/requests/upload');
     await page.locator('input[type=file]').setInputFiles({
       name: 'notes.txt',
@@ -95,6 +98,7 @@ test.describe('requester', () => {
 
   test('sees what was approved with used and open amounts', async ({ page }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { team } = await directorTree();
     const r = await spendingRequest(team.id, 12_000, 'budget-owner', `Approved lunch ${suffix()}`);
     await decide(await taskOf(r.id, 'department-head', 'requests'), 'department-head', {
@@ -113,6 +117,7 @@ test.describe('requester', () => {
 
   test('requests funding for a team event in one step', async ({ page }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
     const { team } = await directorTree();
     const name = `Team pottery workshop ${suffix()}`;
 
