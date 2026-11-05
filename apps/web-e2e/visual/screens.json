@@ -910,6 +910,17 @@
       ]
     },
     {
+      "id": "065-rejected-request-resubmission",
+      "role": "event-organizer",
+      "path": "/requests/86000000-0000-4000-8000-000000000001",
+      "waitFor": "[data-testid=counter-offer]",
+      "states": [
+        {
+          "state": "counter-offer"
+        }
+      ]
+    },
+    {
       "id": "061a-actionable-approval-email",
       "path": "/email-action?token=v1.00000000-0000-4000-8000-000000000000.00000000-0000-4000-8000-000000000000.not-a-valid-signature",
       "waitFor": "text=This approval link is not valid",
