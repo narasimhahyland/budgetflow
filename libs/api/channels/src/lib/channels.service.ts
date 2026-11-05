@@ -2312,12 +2312,13 @@ export class ChannelsService {
     let canApprove = d.allowedDecisions.includes('approve');
     let canReject = d.allowedDecisions.includes('reject');
 
+    const isApprover = d.allowedDecisions.length > 0;
     if (opts?.notLinked) {
       state = 'not_linked';
       stateHeadline = `Connect your BudgetFlow account to decide from ${provider === 'slack' ? 'Slack' : 'Teams'}`;
       canApprove = false;
       canReject = false;
-    } else if (opts?.readOnlyViewer) {
+    } else if (opts?.readOnlyViewer || (t.taskStatus === 'pending' && !isApprover && !t.onHold && !d.impact?.blocked && d.doa.message === 'Shown to the approver.')) {
       state = 'read_only';
       const [taskRow] = await tx
         .select({ assignee: approvalTasks.assigneePersonId })
@@ -2502,14 +2503,28 @@ export class ChannelsService {
             if (!del) readOnlyViewer = true;
           }
         }
-        const sysActor = systemActor(tenantId);
-        const card = await this.renderCardTx(
-          tx,
-          readOnlyViewer ? sysActor : actor,
-          provider,
-          body.taskId,
-          { readOnlyViewer },
-        );
+        // The card is always rendered with the viewer's own actor, so a shared channel never shows
+        // amounts to somebody PolicyService would not let read the request.
+        const card = await this.renderCardTx(tx, actor, provider, body.taskId, {
+          readOnlyViewer,
+        }).catch((e: unknown) => {
+          if (readOnlyViewer && e instanceof ApiProblem && e.status === 404) return null;
+          throw e;
+        });
+        if (!card) {
+          return {
+            provider,
+            kind: 'card_view',
+            ephemeral: true,
+            headline: 'This approval is not yours to see',
+            text: 'Only the approver or their delegate can open this approval.',
+            card: null,
+            decision: null,
+            stepUpRequired: false,
+            stepUpReason: null,
+            stepUpUrl: null,
+          };
+        }
         return {
           provider,
           kind: 'card_view',
