@@ -1,0 +1,32 @@
+Wave 2 readiness validation — 2026-11-05 (functional-tester, no commit)
+
+Working tree: untracked acceptance spec + evidence only; lint fix in wave-2-core.spec.ts (removed unused imports/helpers).
+
+## scripts/gate.sh static — PASS
+Log: tmp/gate/20261105-120148/
+PASS secrets, lint, styles, satori, typecheck, build, openapi, db
+
+## scripts/gate.sh all (default ports) — FAIL (environment)
+Log: tmp/gate/20261105-115033/
+- FAIL lint (fixed: unused decide / pickGivingBudget in acceptance spec)
+- FAIL stack: MinIO bind 127.0.0.1:9000 (bf-demo stack already running)
+
+## scripts/gate.sh all (alt ports via shell export) — PARTIAL
+Log: tmp/gate/20261105-115152/
+- PASS static steps after lint fix
+- FAIL stack: API container exited during first up (migration race on fresh volume); manual reset + up recovered
+
+## scripts/gate.sh functional-api functional-e2e visual (alt ports) — PARTIAL
+Log: tmp/gate/20261105-115402/
+Stack: bf-budget-delegation-and-control @ BF_* 5440/3040/8120/8040/9040/4240
+PASS secrets, stack, functional-api, functional-e2e, reseed
+FAIL visual: 31 screenshot diffs (208 passed) — Playwright Docker container used default ports from infra/.env.example (4200/8080) and hit bf-demo, not this stack
+
+## Visual rerun — PASS
+Command: npm run e2e:visual after reseed, with gitignored .env copying port overrides (then removed)
+Log: tmp/gate-visual-rerun.log
+239 passed (visual-light)
+
+## Prior agent (bf-demo on default ports)
+Log: tmp/gate/20261105-114549/ (referenced in evidence/wave-02/README.md)
+PASS functional-api, functional-e2e including Wave 2 core acceptance journey

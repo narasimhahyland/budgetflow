@@ -1,0 +1,15 @@
+Wave 2 gate summary — 2026-11-05T06:35:00Z — commit eb7e88e (main, uncommitted acceptance + evidence)
+
+Static (scripts/gate.sh static): PASS — tmp/gate/20261105-120148/
+Functional (alt ports, bf-budget-delegation-and-control): PASS — tmp/gate/20261105-115402/
+  PASS|secrets|1s
+  PASS|stack|43s
+  PASS|functional-api|80s
+  PASS|functional-e2e|79s
+  PASS|reseed|44s
+Visual: PASS on rerun with port-aligned .env — tmp/gate-visual-rerun.log (239/239)
+  First gate-attached visual run: FAIL (31 diffs) — wrong stack (default ports → bf-demo)
+
+Full single-command scripts/gate.sh all on this machine: blocked unless bf-demo is stopped or a full gitignored .env overrides BF_* ports (pw-docker reads .env for Keycloak/web/API during visual).
+
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report
