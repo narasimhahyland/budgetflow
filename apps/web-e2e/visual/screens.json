@@ -28,6 +28,9 @@
               "waitFor": "p.bf-shell__group >> nth=0"
             },
             {
+              "waitFor": "role=menuitem[name=\"Utilization\"]"
+            },
+            {
               "hover": "div.bf-shell__brand"
             }
           ]
