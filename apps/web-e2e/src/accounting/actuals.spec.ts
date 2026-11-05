@@ -109,12 +109,10 @@ test.describe('accruals, commitment hygiene and event close', () => {
     await expect(page.getByRole('heading', { name: 'Accruals and prepaids' })).toBeVisible();
     const accruals = page.getByRole('table', { name: 'Accruals' });
     await expect(accruals.getByRole('row', { name: /Hack Week meals and venue/ })).toContainText(
-      'INR 33,000.00',
+      'USD 396.40',
     );
     const prepaids = page.getByRole('table', { name: 'Prepaids' });
-    await expect(prepaids.getByRole('row', { name: /CMT-00000002/ })).toContainText(
-      'INR 60,000.00',
-    );
+    await expect(prepaids.getByRole('row', { name: /CMT-00000002/ })).toContainText('USD 720.72');
   });
 
   test('commitment hygiene prompts to release the stale team lunch commitment', async ({
