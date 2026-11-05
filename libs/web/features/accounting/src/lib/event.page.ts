@@ -325,7 +325,7 @@ export class EventPage {
     this.failure.set(null);
     try {
       const r = await data(
-        this.api.closeEvent({
+        this.api.closeReconciledEvent({
           params: { eventId: this.eventId() },
           body: { reason: this.reason() },
         }),

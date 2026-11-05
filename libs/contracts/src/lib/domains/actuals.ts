@@ -1329,8 +1329,8 @@ export const actualsEndpoints = {
     response: { status: 200, schema: EventReconciliation },
     errors: READ_ERRORS,
   },
-  closeEvent: {
-    operationId: 'closeEvent',
+  closeReconciledEvent: {
+    operationId: 'closeReconciledEvent',
     method: 'post',
     path: '/api/actuals/events/{eventId}/close',
     summary: 'Close a reconciled event and return the surplus to each contributor',

@@ -392,7 +392,7 @@ export class ActualsController {
 
   @Post('events/:eventId/close')
   @HttpCode(200)
-  async closeEvent(
+  async closeReconciledEvent(
     @CurrentActor() actor: RequestActor,
     @IdempotencyKey() key: string,
     @RequestId() rid: string | null,
