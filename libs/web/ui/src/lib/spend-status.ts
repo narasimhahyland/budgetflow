@@ -67,7 +67,7 @@ const STATUS: Record<SpendStatusKind, Record<string, { label: string; tone: Tone
   },
   task: {
     waiting: { label: 'Waiting', tone: 'neutral-quiet' },
-    pending: { label: 'Pending your action', ...PENDING },
+    pending: { label: 'Pending', ...PENDING },
     approved: { label: 'Approved', tone: 'success' },
     partially_approved: { label: 'Approved in part', tone: 'success' },
     rejected: { label: 'Rejected', tone: 'important' },

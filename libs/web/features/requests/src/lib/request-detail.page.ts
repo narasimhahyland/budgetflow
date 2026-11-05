@@ -47,6 +47,9 @@ const KIND: Record<string, string> = {
   exception: 'Exception request',
 };
 
+const DECISION_ACTIONS =
+  /^request\.(approved|approved_partial|step_approved|rejected|changes_requested|escalated)$/;
+
 type Tab = 'details' | 'history' | 'documents';
 const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ? t : 'details');
 
@@ -512,7 +515,7 @@ export class RequestDetailPage {
 
   /** The delegation-of-authority limit the approver decided under, for approval decisions. */
   protected doaLimit(a: ActivityEntry): MoneyAmount | null {
-    if (!a.action.startsWith('approval.') || !a.actorName) return null;
+    if (!DECISION_ACTIONS.test(a.action) || !a.actorName) return null;
     const step = this.r()?.route?.steps.find((s) => s.decidedAt && s.actedByName === a.actorName);
     return step?.limit ?? null;
   }
