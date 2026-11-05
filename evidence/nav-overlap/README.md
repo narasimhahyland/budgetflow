@@ -35,7 +35,7 @@ Reported: "nav menu items are overlapping" on Budget hierarchy at about 1024px w
 - the expanded navigation closes on Escape (after an open account menu), on the scrim (without activating the page), on picking the open page and on picking another page; afterwards the content's leading edge takes clicks;
 - a touch swipe (no hover) reaches "Rules and policies" fully above the account row, and tapping it opens the page.
 
-Against the old shell build all 6 runs failed (Escape left the navigation open; the swipe left the last item at viewport ratio 0). Against the fix: 6/6 pass; all shell journeys 100/100.
+The swipe is raw touch input (`Input.dispatchTouchEvent`), never a mouse hover; the synthetic scroll gesture does nothing in headless Chromium on Linux, which the first CI run showed. Against the old shell build all 6 runs failed, on macOS and in the pinned Linux image (Escape left the navigation open; the swipe left the last item at viewport ratio 0). Against the fix: 6/6 pass on both; all shell journeys 100/100.
 
 ## Visual QA and baselines
 

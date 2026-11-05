@@ -5,6 +5,8 @@ import { expect, test, type Locator, type Page, type TestInfo } from '@playwrigh
 import { authFile } from '../support/roles';
 
 test.use({ storageState: authFile('finance-admin') });
+// Each test walks several open and close cycles, on desktop at two window sizes.
+test.describe.configure({ timeout: 90_000 });
 
 const DESKTOP_SIZES = [
   { width: 1024, height: 768 },
@@ -25,6 +27,29 @@ async function expectClosedWithoutCoveringContent(page: Page): Promise<void> {
   await expect(navigation(page).getByText('Budgets', { exact: true })).toHaveCount(0);
   // The leading edge of the page content takes clicks: no part of the navigation lies over it.
   await page.getByRole('main').click({ trial: true, position: { x: 2, y: 120 }, timeout: 5_000 });
+}
+
+/**
+ * A finger dragging up over the lower half of the menu: raw touch input, never a mouse hover. Playwright
+ * has no touch-scroll API, and the synthetic scroll gesture does nothing in headless Chromium on Linux.
+ */
+async function swipeUp(
+  page: Page,
+  menu: { x: number; y: number; width: number; height: number },
+): Promise<void> {
+  const x = Math.round(menu.x + menu.width / 2);
+  const from = Math.round(menu.y + menu.height * 0.75);
+  const step = Math.round(menu.height / 20);
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: from }] });
+  for (let i = 1; i <= 10; i++) {
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ x, y: from - i * step }],
+    });
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
 }
 
 async function sizesFor(testInfo: TestInfo, page: Page) {
@@ -90,21 +115,12 @@ test.describe('on a touch screen', () => {
       await expect(last).toHaveText('Rules and policies');
       const account = page.getByRole('button', { name: 'Priya Raman', exact: true });
 
-      // A finger swipe over the menu (no mouse hover). Playwright has no touch-scroll API, so the swipe
-      // goes through the browser's gesture input.
-      const start = await nav.getByRole('menuitem', { name: 'Home' }).boundingBox();
-      if (!start) throw new Error('Home is not on screen');
-      const cdp = await page.context().newCDPSession(page);
-      await cdp.send('Input.synthesizeScrollGesture', {
-        x: Math.round(start.x + start.width / 2),
-        y: Math.round(start.y + start.height / 2),
-        yDistance: -3000,
-        speed: 6000,
-        gestureSourceType: 'touch',
-      });
-      await cdp.detach();
-
-      await expect(last).toBeInViewport({ ratio: 1 });
+      const menu = await nav.boundingBox();
+      if (!menu) throw new Error('the menu is not on screen');
+      await expect(async () => {
+        await swipeUp(page, menu);
+        await expect(last).toBeInViewport({ ratio: 1, timeout: 1_000 });
+      }).toPass({ timeout: 15_000 });
       await expect(account).toBeInViewport({ ratio: 1 });
       await expect
         .poll(async () => {
