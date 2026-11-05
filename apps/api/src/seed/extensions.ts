@@ -2,6 +2,7 @@ import type { INestApplicationContext } from '@nestjs/common';
 import { seedActuals } from './actuals';
 import { seedBudgets } from './budgets';
 import { seedEvents } from './events';
+import { seedEventsDepth } from './events-depth';
 import { seedOrg } from './org';
 
 /**
@@ -21,4 +22,9 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
   { name: 'budgets, controls and planning demo data', phase: 'P4', run: seedBudgets },
   { name: 'events, co-funding and requests', phase: 'P5', run: seedEvents },
   { name: 'actuals feeds, commitments, accruals and tie-outs', phase: 'P6', run: seedActuals },
+  {
+    name: 'event templates, plans, invitations, quotes, attendance and feedback',
+    phase: 'P9',
+    run: seedEventsDepth,
+  },
 ];
