@@ -18,6 +18,7 @@ export * from './lib/domains/events';
 export * from './lib/domains/actuals';
 export * from './lib/domains/channels';
 export * from './lib/domains/rules';
+export * from './lib/domains/integrations';
 export * from './lib/endpoints';
 export * from './lib/openapi';
 export * from './lib/client';

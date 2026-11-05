@@ -10,6 +10,7 @@ import { eventEndpoints } from './domains/events';
 import { financeEndpoints } from './domains/finance';
 import { healthEndpoints } from './domains/health';
 import { identityEndpoints } from './domains/identity';
+import { integrationEndpoints } from './domains/integrations';
 import { integrityEndpoints } from './domains/integrity';
 import { ledgerEndpoints } from './domains/ledger';
 import { orgEndpoints } from './domains/org';
@@ -43,6 +44,7 @@ export const endpoints = {
   ...actualsEndpoints,
   ...channelEndpoints,
   ...rulesEndpoints,
+  ...integrationEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;
