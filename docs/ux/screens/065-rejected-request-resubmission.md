@@ -60,3 +60,11 @@ Mobile: counter-offer card first with full-width buttons; "What changed" becomes
 ## Assumptions and open questions
 
 - Should accepting a counter-offer need no further review (as designed) when the offer came from the final approver?
+
+## Built in Phase 7, with these parts still open
+
+- Accepting leaves the request partially approved at the offered amount, which is what the ledger
+  records; the status chip reads "Partly approved" rather than "Approved".
+- "Copy as new request", "Ask a question" and attachment changes in a resubmission are not built;
+  a resubmission changes the amount and the justification and carries a note to the approver.
+- The offer card disappears once the offer is accepted or answered; the history tab keeps it.

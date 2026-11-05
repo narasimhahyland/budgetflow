@@ -885,6 +885,9 @@
             },
             {
               "waitFor": "text=Approved amount"
+            },
+            {
+              "scrollTop": true
             }
           ]
         }
@@ -903,6 +906,17 @@
           "state": "pending",
           "path": "/requests/73000000-0000-4000-8000-000000000010?tab=history",
           "waitFor": "[data-testid=request-history]"
+        }
+      ]
+    },
+    {
+      "id": "065-rejected-request-resubmission",
+      "role": "event-organizer",
+      "path": "/requests/86000000-0000-4000-8000-000000000001",
+      "waitFor": "[data-testid=counter-offer]",
+      "states": [
+        {
+          "state": "counter-offer"
         }
       ]
     },
@@ -939,6 +953,17 @@
         }
       ],
       "mask": ["code.bf-audit__hash"]
+    },
+    {
+      "id": "090-approval-history",
+      "role": "auditor",
+      "path": "/approvals/history",
+      "waitFor": "[data-testid=history-summary]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
     },
     {
       "id": "115-employee-dashboard",

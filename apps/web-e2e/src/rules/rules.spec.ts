@@ -128,3 +128,33 @@ test.describe('policy settings', () => {
     }
   });
 });
+
+test.describe('approval history', () => {
+  test.use({ storageState: authFile('auditor') });
+
+  test('an auditor reads every decision and narrows it to the rejections', async ({
+    page,
+  }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+
+    await page.goto('/approvals/history');
+    await expect(page.getByRole('heading', { level: 1, name: 'Approval history' })).toBeVisible();
+    const summary = page.getByTestId('history-summary');
+    await expect(summary).toContainText('Decisions');
+    const rows = page.getByRole('row').filter({ hasText: 'REQ-' });
+    const all = await rows.count();
+    expect(all).toBeGreaterThan(0);
+
+    await page.getByTestId('filter-decision').click();
+    await page.getByRole('option', { name: 'Rejected' }).click();
+    await expect.poll(() => rows.count()).toBeLessThan(all);
+    for (const cell of await page.getByRole('row').filter({ hasText: 'REQ-' }).all()) {
+      await expect(cell).toContainText('Rejected');
+    }
+
+    // A combination with nothing in it says so instead of showing an empty table.
+    await page.getByTestId('filter-only').click();
+    await page.getByRole('option', { name: 'Escalated first' }).click();
+    await expect(page.getByTestId('history-empty')).toBeVisible();
+  });
+});
