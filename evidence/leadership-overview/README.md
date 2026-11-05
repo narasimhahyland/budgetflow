@@ -51,4 +51,14 @@
 
 ### Revision 2
 
-Recorded after the pull request merged and `design/preview/deploy.sh` published the site.
+- Merged in [#33](https://github.com/narasimhahyland/budgetflow/pull/33) (merge commit `3acc082`), then published with `design/preview/deploy.sh` from that commit.
+- Checked: 2026-11-05 03:15 UTC, curl and Playwright 1.64.1 (Chromium) against https://narasimhahyland.github.io/budgetflow/overview/
+
+| Check                                                                                                                                | Expected                                                                                               | Result |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------ |
+| `curl -sI` on the live URL ([live-curl-headers.txt](live-curl-headers.txt))                                                          | HTTP 200, `text/html`, new file (31604 bytes)                                                          | pass   |
+| Laptop, 1440 px ([live-desktop-1440-hero.png](live-desktop-1440-hero.png), full page [live-desktop-1440.png](live-desktop-1440.png)) | Purple hero (`rgb(86, 84, 172)`) with a white "See the screen designs" button, `rgb(50, 47, 134)` text | pass   |
+| Phone, iPhone 13 ([live-mobile-390-hero.png](live-mobile-390-hero.png), full page [live-mobile-390.png](live-mobile-390.png))        | Button in the first viewport, no horizontal overflow                                                   | pass   |
+| Links to the screen designs                                                                                                          | Exactly one, in the hero; none in the footer                                                           | pass   |
+| Click the button                                                                                                                     | Opens `/budgetflow/index.html` (clickable design preview)                                              | pass   |
+| Page errors                                                                                                                          | None                                                                                                   | pass   |
