@@ -1,0 +1,3 @@
+Full API suite on a clean seeded stack (scripts/stack.sh reset), 2026-11-05T18:57:41Z:
+  333 passed (1.5m) — 24 of them the Phase 10 reports scenarios
+  npx playwright test -c apps/api-e2e/playwright.config.ts
