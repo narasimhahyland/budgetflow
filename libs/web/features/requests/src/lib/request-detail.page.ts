@@ -1,0 +1,586 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  resource,
+  signal,
+} from '@angular/core';
+import { formatDate } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import type {
+  ActivityEntry,
+  DecisionRequest,
+  Money as MoneyAmount,
+  RequestVersion,
+} from '@bf/contracts';
+import { SessionStore } from '@bf/web/data-access';
+import {
+  ApprovalRoute,
+  BudgetImpactCard,
+  DateOnlyPipe,
+  DateTimePipe,
+  DecisionForm,
+  formatMoney,
+  Money,
+  SpendStatus,
+} from '@bf/web/ui';
+import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
+import { data, errorMessage, injectApi, valueOf } from './api';
+import { DocumentsPanel } from './documents-panel';
+import { LoadState } from './load-state';
+import { toMajor, toMinor } from './money-input';
+
+const KIND: Record<string, string> = {
+  budget: 'Event budget request',
+  additional_fund: 'Additional-fund request',
+  spending: 'Spending request',
+  over_budget: 'Over-budget request',
+  exception: 'Exception request',
+};
+
+const DECISION_ACTIONS =
+  /^request\.(approved|approved_partial|step_approved|rejected|changes_requested|escalated)$/;
+
+type Tab = 'details' | 'history' | 'documents';
+const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ? t : 'details');
+
+/** Screen 60 (with 61 decision and 119 request status): one request with its route, rules, budget impact and activity. */
+@Component({
+  selector: 'bf-request-detail-page',
+  imports: [
+    DateOnlyPipe,
+    ApprovalRoute,
+    BudgetImpactCard,
+    DateTimePipe,
+    DecisionForm,
+    DocumentsPanel,
+    FormsModule,
+    LoadState,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    Money,
+    RouterLink,
+    SAT_BANNER_IMPORTS,
+    SAT_NAVIGATION_TABS_IMPORTS,
+    SpendStatus,
+  ],
+  template: `
+    <bf-load-state
+      [loading]="(item.isLoading() && !item.hasValue()) || (item.hasValue() && !r())"
+      [error]="item.error()"
+      what="the request"
+      (retry)="item.reload()"
+    />
+    @if (r(); as r) {
+      <header class="bf-page__header">
+        <div class="bf-page__heading">
+          <div class="bf-title-row">
+            <h1 class="bf-page__title">{{ r.title }}</h1>
+            @if (r.myTaskId) {
+              <span class="bf-chip">Pending your approval</span>
+            } @else {
+              <bf-spend-status kind="request" [status]="r.status" />
+            }
+          </div>
+          <p class="bf-meta">
+            <span>{{ r.ref }} · {{ kind(r.kind) }}</span>
+            <span>requested by {{ r.requesterName }}</span>
+            @if (r.submittedAt) {
+              <span data-testid="relative-time"
+                >submitted {{ r.submittedAt | bfDate: session.timezone() }}</span
+              >
+            }
+            @if (r.currentStep) {
+              <span>with {{ r.currentStep.approverName }}</span>
+            }
+          </p>
+        </div>
+        <div class="bf-page__actions">
+          @if (r.allowedActions.includes('withdraw')) {
+            <button mat-stroked-button type="button" [disabled]="busy()" (click)="withdraw()">
+              Withdraw
+            </button>
+          }
+          @if (r.allowedActions.includes('submit')) {
+            <button mat-flat-button type="button" [disabled]="busy()" (click)="submit()">
+              Submit
+            </button>
+          }
+        </div>
+      </header>
+      @if (failure()) {
+        <sat-banner variant="important"
+          ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+        >
+      }
+      @if (r.onHold) {
+        <sat-banner variant="info"
+          ><sat-banner-message>{{ r.holdReason }}</sat-banner-message></sat-banner
+        >
+      }
+      @if (r.status === 'changes_requested') {
+        <sat-banner variant="info"
+          ><sat-banner-message
+            >Changes requested{{
+              r.decisionReason ? ': ' + r.decisionReason : ''
+            }}</sat-banner-message
+          ></sat-banner
+        >
+      }
+      @if (r.status === 'cancelled' && r.cancelReason) {
+        <sat-banner variant="info"
+          ><sat-banner-message
+            >Cancelled: {{ r.cancelReason }}. Nothing was charged.</sat-banner-message
+          ></sat-banner
+        >
+      }
+      @if (task.hasValue() && r.myTaskId) {
+        <section class="bf-card" aria-labelledby="decide-title">
+          <div class="bf-card__header">
+            <h2 class="bf-card__title" id="decide-title">Your decision</h2>
+          </div>
+          <div class="bf-section">
+            <bf-decision-form [task]="task.value()!" [busy]="busy()" (decide)="decide($event)" />
+          </div>
+        </section>
+      }
+      @if (r.allowedActions.includes('resubmit')) {
+        <section class="bf-card" aria-labelledby="resubmit-title">
+          <div class="bf-card__header">
+            <h2 class="bf-card__title" id="resubmit-title">Change and resubmit</h2>
+          </div>
+          <div class="bf-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Amount ({{ r.amount.currency }})</mat-label>
+              <input matInput inputmode="decimal" [(ngModel)]="newAmount" name="newAmount" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="bf-form__wide">
+              <mat-label>Justification</mat-label>
+              <textarea matInput rows="3" [(ngModel)]="newPurpose" name="newPurpose"></textarea>
+            </mat-form-field>
+          </div>
+          <div class="bf-form__actions">
+            <button mat-flat-button type="button" [disabled]="busy()" (click)="resubmit()">
+              Resubmit
+            </button>
+          </div>
+        </section>
+      }
+      <sat-navigation-tabs class="bf-tabs" aria-label="Request sections">
+        @for (t of tabs; track t.key) {
+          <a
+            satNavigationTab
+            [active]="tab() === t.key"
+            (click)="setTab(t.key)"
+            (keydown.enter)="setTab(t.key)"
+            tabindex="0"
+            [attr.data-testid]="'tab-' + t.key"
+            >{{ t.label }}
+            @if (t.key === 'history') {
+              <span class="bf-chip">{{ r.activity.length }}</span>
+            }
+            @if (t.key === 'documents') {
+              <span class="bf-chip">{{ r.documents.length }}</span>
+            }
+          </a>
+        }
+      </sat-navigation-tabs>
+      @switch (tab()) {
+        @case ('history') {
+          <div class="bf-layout">
+            <div class="bf-layout__main">
+              <section class="bf-card" aria-labelledby="history-title">
+                <div class="bf-card__header">
+                  <h2 class="bf-card__title" id="history-title">Request history</h2>
+                  <span class="bf-card__hint">Newest first, from the audit trail</span>
+                </div>
+                <ol class="bf-timeline" data-testid="request-history">
+                  @for (a of history(); track a.id) {
+                    <li>
+                      <span class="bf-cell__primary"
+                        >{{ a.actorName ?? 'BudgetFlow'
+                        }}{{ a.onBehalfOfName ? ' for ' + a.onBehalfOfName : '' }}:
+                        {{ a.summary }}</span
+                      >
+                      <span class="bf-cell__secondary"
+                        ><span data-testid="relative-time">{{
+                          a.at | bfDateTime: session.timezone()
+                        }}</span></span
+                      >
+                      <span class="bf-history__chips">
+                        <span class="bf-chip">{{ channelLabel(a) }}</span>
+                        @if (doaLimit(a); as limit) {
+                          <span class="bf-chip"
+                            >Within DoA
+                            <bf-money [amountMinor]="limit.amountMinor" [currency]="limit.currency"
+                          /></span>
+                        }
+                        @if (canAudit()) {
+                          <a
+                            [routerLink]="['/audit-log']"
+                            [queryParams]="{ type: 'request', resource: r.id }"
+                            >Audit record</a
+                          >
+                        }
+                      </span>
+                      @if (a.reason) {
+                        <blockquote class="bf-history__quote">“{{ a.reason }}”</blockquote>
+                      }
+                    </li>
+                  }
+                </ol>
+              </section>
+            </div>
+            <aside class="bf-layout__side">
+              @if (compare(); as c) {
+                <section
+                  class="bf-card"
+                  aria-labelledby="compare-title"
+                  data-testid="compare-versions"
+                >
+                  <div class="bf-card__header">
+                    <h2 class="bf-card__title" id="compare-title">Compare versions</h2>
+                  </div>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Compare version {{ c.to.version }} with</mat-label>
+                    <mat-select [value]="c.from.version" (valueChange)="baseVersion.set($event)">
+                      @for (v of r.versions.slice(0, -1); track v.version) {
+                        <mat-option [value]="v.version">Version {{ v.version }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <dl class="bf-facts">
+                    @for (f of c.fields; track f.label) {
+                      <div>
+                        <dt>{{ f.label }}</dt>
+                        <dd>
+                          @if (f.changed) {
+                            <s>{{ f.from }}</s> → <strong>{{ f.to }}</strong>
+                          } @else {
+                            {{ f.to }} <span class="bf-cell__secondary">(unchanged)</span>
+                          }
+                        </dd>
+                      </div>
+                    }
+                  </dl>
+                </section>
+              }
+              @if (r.impact; as impact) {
+                <section class="bf-card" aria-label="Budget impact">
+                  <div class="bf-section">
+                    <bf-budget-impact [impact]="impact" title="Budget impact" />
+                  </div>
+                </section>
+              }
+            </aside>
+          </div>
+        }
+        @case ('documents') {
+          <section class="bf-card" aria-labelledby="documents-title">
+            <div class="bf-card__header">
+              <h2 class="bf-card__title" id="documents-title">Documents</h2>
+              @if (r.allowedActions.includes('upload')) {
+                <a
+                  mat-stroked-button
+                  routerLink="/requests/upload"
+                  [queryParams]="{ request: r.id }"
+                  >Upload receipt</a
+                >
+              }
+            </div>
+            <bf-documents-panel
+              ownerType="request"
+              [ownerId]="r.id"
+              [documents]="r.documents"
+              [canUpload]="r.allowedActions.includes('upload')"
+              (changed)="item.reload()"
+            />
+          </section>
+        }
+        @default {
+          <div class="bf-layout">
+            <div class="bf-layout__main">
+              <section class="bf-card" aria-labelledby="details-title">
+                <div class="bf-card__header">
+                  <h2 class="bf-card__title" id="details-title">Request details</h2>
+                </div>
+                <dl class="bf-facts">
+                  <div>
+                    <dt>Amount</dt>
+                    <dd>
+                      <bf-money
+                        [amountMinor]="r.amount.amountMinor"
+                        [currency]="r.amount.currency"
+                      />
+                    </dd>
+                  </div>
+                  @if (r.budgetAmount && r.budgetAmount.currency !== r.amount.currency) {
+                    <div>
+                      <dt>In budget currency (locked plan rate)</dt>
+                      <dd>
+                        <bf-money
+                          [amountMinor]="r.budgetAmount.amountMinor"
+                          [currency]="r.budgetAmount.currency"
+                        />
+                      </dd>
+                    </div>
+                  }
+                  @if (r.approvedAmount) {
+                    <div>
+                      <dt>Approved</dt>
+                      <dd>
+                        <bf-money
+                          [amountMinor]="r.approvedAmount.amountMinor"
+                          [currency]="r.approvedAmount.currency"
+                        />
+                      </dd>
+                    </div>
+                  }
+                  <div>
+                    <dt>Spend type</dt>
+                    <dd>{{ r.spendType.replace('_', ' ') }}</dd>
+                  </div>
+                  <div>
+                    <dt>Needed by</dt>
+                    <dd>{{ r.neededBy ?? '—' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Charge to</dt>
+                    <dd>{{ r.budgetName }}</dd>
+                  </div>
+                  @if (r.eventId) {
+                    <div>
+                      <dt>Event</dt>
+                      <dd>
+                        <a [routerLink]="['/events', r.eventId]">{{ r.eventName }}</a>
+                      </dd>
+                    </div>
+                  }
+                  @if (r.overBudget) {
+                    <div>
+                      <dt>Over budget</dt>
+                      <dd>Needs finance review</dd>
+                    </div>
+                  }
+                </dl>
+                <div class="bf-section">
+                  <h3 class="bf-section__title">Business justification</h3>
+                  <p>{{ r.purpose }}</p>
+                </div>
+              </section>
+              @if (r.route; as route) {
+                <section class="bf-card" aria-labelledby="route-title">
+                  <div class="bf-card__header">
+                    <h2 class="bf-card__title" id="route-title">Approval route</h2>
+                  </div>
+                  <div class="bf-section"><bf-approval-route [route]="route" /></div>
+                </section>
+                <section class="bf-card" aria-labelledby="rules-title">
+                  <div class="bf-card__header">
+                    <h2 class="bf-card__title" id="rules-title">Rules applied: why this route</h2>
+                  </div>
+                  <ul class="bf-timeline">
+                    @for (line of route.explanation; track $index) {
+                      <li>{{ line }}</li>
+                    }
+                  </ul>
+                </section>
+              }
+            </div>
+            <aside class="bf-layout__side">
+              @if (r.impact; as impact) {
+                <section class="bf-card" aria-label="Budget impact">
+                  <div class="bf-section">
+                    <bf-budget-impact [impact]="impact" title="Budget impact analysis" />
+                  </div>
+                </section>
+              }
+            </aside>
+          </div>
+        }
+      }
+    }
+  `,
+  styles: `
+    .bf-history__chips {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .bf-history__quote {
+      margin: 8px 0 0;
+      padding: 8px 12px;
+      border-inline-start: 3px solid var(--mat-sys-outline-variant);
+      background: var(--mat-sys-surface-container);
+      font: var(--mat-sys-body-small);
+    }
+  `,
+  host: { class: 'bf-page-layout' },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class RequestDetailPage {
+  private readonly api = injectApi();
+  private readonly snack = inject(MatSnackBar);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  protected readonly session = inject(SessionStore);
+  readonly requestId = input.required<string>();
+  protected readonly tabs: { key: Tab; label: string }[] = [
+    { key: 'details', label: 'Details' },
+    { key: 'history', label: 'History' },
+    { key: 'documents', label: 'Documents' },
+  ];
+  protected readonly tab = signal<Tab>(asTab(this.route.snapshot.queryParamMap.get('tab')));
+  protected readonly baseVersion = signal<number | null>(null);
+  protected readonly canAudit = computed(() => this.session.can('audit.read'));
+  protected readonly busy = signal(false);
+  protected readonly failure = signal('');
+  protected newAmount = '';
+  protected newPurpose = '';
+
+  protected readonly item = resource({
+    params: () => ({ requestId: this.requestId() }),
+    loader: async ({ params }) => {
+      const r = await data(this.api.getRequest({ params }));
+      this.newAmount = toMajor(r.amount.amountMinor, r.amount.currency);
+      this.newPurpose = r.purpose;
+      return r;
+    },
+  });
+  /** The request, shown once the viewer's decision task (if any) has loaded too, so nothing shifts. */
+  protected readonly r = computed(() => {
+    const v = valueOf(this.item);
+    if (v?.myTaskId && !this.task.hasValue() && !this.task.error()) return undefined;
+    return v;
+  });
+  protected readonly history = computed(() =>
+    [...(this.r()?.activity ?? [])].sort((a, b) => b.at.localeCompare(a.at)),
+  );
+  /** Field-by-field comparison of the latest version with an earlier one (hidden for a single version). */
+  protected readonly compare = computed(() => {
+    const versions = this.r()?.versions ?? [];
+    if (versions.length < 2) return null;
+    const to = versions[versions.length - 1]!;
+    const from =
+      versions.find((v) => v.version === this.baseVersion()) ?? versions[versions.length - 2]!;
+    const money = (v: RequestVersion) => formatMoney(v.amount.amountMinor, v.amount.currency);
+    const date = (d: string | null) => (d ? formatDate(d, 'mediumDate', 'en-US') : 'Not set');
+    const field = (label: string, a: string | null, b: string | null) => ({
+      label,
+      from: a ?? 'Not recorded',
+      to: b ?? 'Not recorded',
+      changed: a !== null && a !== b,
+    });
+    return {
+      from,
+      to,
+      fields: [
+        field('Amount', money(from), money(to)),
+        field('Title', from.title, to.title),
+        field('Needed by', date(from.neededBy), date(to.neededBy)),
+        field('Justification', from.purpose, to.purpose),
+      ],
+    };
+  });
+  protected readonly task = resource({
+    params: () => {
+      const taskId = valueOf(this.item)?.myTaskId;
+      return taskId ? { taskId } : undefined;
+    },
+    loader: ({ params }) => data(this.api.getApprovalTask({ params })),
+  });
+
+  protected kind(k: string): string {
+    return KIND[k] ?? k;
+  }
+
+  protected setTab(t: Tab): void {
+    this.tab.set(t);
+    void this.router.navigate([], {
+      queryParams: { tab: t === 'details' ? null : t },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  protected channelLabel(a: ActivityEntry): string {
+    if (a.channel === 'email') return 'Email';
+    return a.actorName === 'BudgetFlow' || !a.actorName ? 'System' : 'Web';
+  }
+
+  /** The delegation-of-authority limit the approver decided under, for approval decisions. */
+  protected doaLimit(a: ActivityEntry): MoneyAmount | null {
+    if (!DECISION_ACTIONS.test(a.action) || !a.actorName) return null;
+    const step = this.r()?.route?.steps.find((s) => s.decidedAt && s.actedByName === a.actorName);
+    return step?.limit ?? null;
+  }
+
+  private async run(
+    call: () => Promise<{ ref?: string; message?: string }>,
+    done: string,
+  ): Promise<void> {
+    this.busy.set(true);
+    this.failure.set('');
+    try {
+      const res = await call();
+      this.snack.open(res.message ?? done, undefined, { duration: 4000 });
+      this.item.reload();
+    } catch (e) {
+      this.failure.set(errorMessage(e));
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  protected decide(d: DecisionRequest): void {
+    void this.run(
+      () => data(this.api.decideApprovalTask({ params: { taskId: this.r()!.myTaskId! }, body: d })),
+      'Decision recorded',
+    );
+  }
+
+  protected withdraw(): void {
+    void this.run(
+      () => data(this.api.withdrawRequest({ params: { requestId: this.requestId() }, body: {} })),
+      'Request withdrawn',
+    );
+  }
+
+  protected submit(): void {
+    void this.run(
+      () => data(this.api.submitRequest({ params: { requestId: this.requestId() } })),
+      'Request submitted',
+    );
+  }
+
+  protected resubmit(): void {
+    const r = this.r()!;
+    const amount = toMinor(this.newAmount, r.amount.currency);
+    void this.run(
+      () =>
+        data(
+          this.api.resubmitRequest({
+            params: { requestId: r.id },
+            body: {
+              ...(amount ? { amount: { amountMinor: amount, currency: r.amount.currency } } : {}),
+              purpose: this.newPurpose.trim(),
+            },
+          }),
+        ),
+      'Request resubmitted',
+    );
+  }
+}

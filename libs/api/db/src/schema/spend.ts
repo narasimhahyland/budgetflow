@@ -1,8 +1,11 @@
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
   integer,
   jsonb,
+  numeric,
+  pgSequence,
   pgTable,
   text,
   uniqueIndex,
@@ -17,6 +20,7 @@ import {
   contributionStatus,
   eventStatus,
   intercompanyMode,
+  rateType,
   requestKind,
   requestStatus,
   vendorStatus,
@@ -40,6 +44,10 @@ export const vendors = pgTable(
   (t) => [index('vendors_tenant_name').on(t.tenantId, t.name)],
 );
 
+/** Human-readable references (REQ-00042, IDC-00007); ids stay opaque UUIDs. */
+export const requestRefSeq = pgSequence('request_ref_seq');
+export const contributionRefSeq = pgSequence('contribution_ref_seq');
+
 /** Budget, spending, additional-fund, over-budget and exception requests with resubmission chain. */
 export const requests = pgTable(
   'requests',
@@ -61,12 +69,36 @@ export const requests = pgTable(
     spendType: varchar('spend_type', { length: 50 }).notNull(),
     purpose: text('purpose').notNull(),
     resubmissionOfId: uuid('resubmission_of_id'),
+    ref: varchar('ref', { length: 20 })
+      .notNull()
+      .default(sql`'REQ-' || lpad(nextval('request_ref_seq')::text, 5, '0')`),
+    title: text('title').notNull().default(''),
+    category: varchar('category', { length: 50 }),
+    neededBy: day('needed_by'),
+    /** The amount in the budget currency at the locked plan rate when submitted. */
+    budgetAmountMinor: minor('budget_amount_minor'),
+    budgetCurrency: ccy('budget_currency').references(() => currencies.code),
+    commitmentId: uuid('commitment_id'),
+    /** Spend beyond available within the budget's tolerance or soft mode needs an over-budget approval. */
+    overBudget: boolean('over_budget').notNull().default(false),
+    version: integer('version').notNull().default(1),
+    submittedAt: ts('submitted_at'),
+    decidedAt: ts('decided_at'),
+    reasonCode: varchar('reason_code', { length: 50 }),
+    decisionReason: text('decision_reason'),
+    /** Set while the budget is frozen: decisions wait until it is unfrozen. */
+    heldAt: ts('held_at'),
+    holdReason: text('hold_reason'),
+    cancelReason: text('cancel_reason'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
     index('requests_tenant_status').on(t.tenantId, t.status),
     index('requests_tenant_budget').on(t.tenantId, t.budgetId),
+    index('requests_tenant_requester').on(t.tenantId, t.requesterPersonId, t.createdAt),
+    index('requests_tenant_event').on(t.tenantId, t.eventId),
+    uniqueIndex('requests_tenant_ref').on(t.tenantId, t.ref),
   ],
 );
 
@@ -100,10 +132,14 @@ export const commitments = pgTable(
       .references(() => currencies.code),
     nonRefundableDepositMinor: minor('non_refundable_deposit_minor').notNull().default(0),
     expiresOn: day('expires_on'),
+    createdByPersonId: uuid('created_by_person_id'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index('commitments_tenant_budget').on(t.tenantId, t.budgetId, t.status)],
+  (t) => [
+    index('commitments_tenant_budget').on(t.tenantId, t.budgetId, t.status),
+    index('commitments_tenant_event').on(t.tenantId, t.eventId),
+  ],
 );
 
 /** One funding line per contributor (own budget or an Inter-Director Budget Contribution Request). */
@@ -119,12 +155,26 @@ export const commitmentFundingLines = pgTable(
       .notNull()
       .references(() => budgets.id),
     contributionRequestId: uuid('contribution_request_id'),
+    /** Event funding source the line draws on (null for a request's own budget). */
+    fundingSourceId: uuid('funding_source_id'),
     amountMinor: minor('amount_minor').notNull(),
     currency: ccy('currency')
       .notNull()
       .references(() => currencies.code),
+    /** Budget-currency amount first posted and the rates used; every later movement reuses these rates. */
+    budgetAmountMinor: minor('budget_amount_minor'),
+    budgetCurrency: ccy('budget_currency').references(() => currencies.code),
+    rateType: rateType('rate_type'),
+    budgetRate: numeric('budget_rate', { precision: 24, scale: 12 }),
+    budgetRateIds: uuid('budget_rate_ids').array(),
+    reportingCurrency: ccy('reporting_currency').references(() => currencies.code),
+    reportingRate: numeric('reporting_rate', { precision: 24, scale: 12 }),
+    reportingRateIds: uuid('reporting_rate_ids').array(),
   },
-  (t) => [index('commitment_funding_lines_commitment').on(t.tenantId, t.commitmentId)],
+  (t) => [
+    index('commitment_funding_lines_commitment').on(t.tenantId, t.commitmentId),
+    index('commitment_funding_lines_source').on(t.tenantId, t.fundingSourceId),
+  ],
 );
 
 export const commitmentTaxLines = pgTable(
@@ -169,12 +219,23 @@ export const events = pgTable(
       .notNull()
       .references(() => currencies.code),
     toleranceBps: integer('tolerance_bps').notNull().default(0),
+    description: text('description'),
+    venue: text('venue'),
+    spendType: varchar('spend_type', { length: 50 }).notNull().default('employee_events'),
+    /** Own funds asked from the home budget when the event is submitted. */
+    ownFundsMinor: minor('own_funds_minor').notNull().default(0),
+    perHeadLimitMinor: minor('per_head_limit_minor'),
+    submittedAt: ts('submitted_at'),
+    closedAt: ts('closed_at'),
+    cancelReason: text('cancel_reason'),
+    version: integer('version').notNull().default(1),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
     uniqueIndex('events_tenant_code').on(t.tenantId, t.eventCode),
     index('events_tenant_status').on(t.tenantId, t.status),
+    index('events_tenant_organizer').on(t.tenantId, t.organizerPersonId),
   ],
 );
 
@@ -212,7 +273,12 @@ export const eventParticipants = pgTable(
     needs: jsonb('needs').notNull().default({}),
     createdAt: createdAt(),
   },
-  (t) => [index('event_participants_event').on(t.tenantId, t.eventId)],
+  (t) => [
+    index('event_participants_event').on(t.tenantId, t.eventId),
+    uniqueIndex('event_participants_person')
+      .on(t.tenantId, t.eventId, t.personId)
+      .where(sql`${t.personId} is not null`),
+  ],
 );
 
 export const eventCoOrganizers = pgTable(
@@ -277,12 +343,28 @@ export const contributionRequests = pgTable(
     decidedAt: ts('decided_at'),
     intercompanyMode: intercompanyMode('intercompany_mode'),
     resubmissionOfId: uuid('resubmission_of_id'),
+    ref: varchar('ref', { length: 20 })
+      .notNull()
+      .default(sql`'IDC-' || lpad(nextval('contribution_ref_seq')::text, 5, '0')`),
+    neededBy: day('needed_by'),
+    reasonCode: varchar('reason_code', { length: 50 }),
+    /** Message from the giving director to the requester with the decision. */
+    message: text('message'),
+    fundingSourceId: uuid('funding_source_id'),
+    rechargeScheduleId: uuid('recharge_schedule_id'),
+    version: integer('version').notNull().default(1),
+    submittedAt: ts('submitted_at'),
+    heldAt: ts('held_at'),
+    holdReason: text('hold_reason'),
+    cancelReason: text('cancel_reason'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
     index('contribution_requests_tenant_status').on(t.tenantId, t.status),
     index('contribution_requests_giver').on(t.tenantId, t.giverBudgetId),
+    index('contribution_requests_event').on(t.tenantId, t.eventId),
+    uniqueIndex('contribution_requests_tenant_ref').on(t.tenantId, t.ref),
   ],
 );
 

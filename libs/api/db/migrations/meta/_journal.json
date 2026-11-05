@@ -36,6 +36,13 @@
       "when": 1793821729687,
       "tag": "0004_budgets_planning",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793839762493,
+      "tag": "0005_events_cofunding",
+      "breakpoints": true
     }
   ]
 }

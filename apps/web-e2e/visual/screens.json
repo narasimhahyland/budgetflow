@@ -28,6 +28,9 @@
               "waitFor": "p.bf-shell__group >> nth=0"
             },
             {
+              "waitFor": "role=menuitem[name=\"Utilization\"]"
+            },
+            {
               "hover": "div.bf-shell__brand"
             }
           ]
@@ -501,7 +504,7 @@
               "click": "[data-testid=set-to-zero]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"12,000.00\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"8,886.00\")"
             }
           ]
         },
@@ -512,7 +515,7 @@
               "click": "[data-testid=set-to-zero]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"12,000.00\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"8,886.00\")"
             },
             {
               "waitFor": "[data-testid=confirm-text]"
@@ -626,6 +629,397 @@
       "states": [
         {
           "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "044-event-list",
+      "role": "event-organizer",
+      "path": "/events",
+      "waitFor": "text=Diwali celebration 2026",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "045-create-event-budget",
+      "role": "event-organizer",
+      "path": "/events/new",
+      "waitFor": "role=heading[name=\"Create event budget\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "046-event-details",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Funding sources\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "047-event-participants",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Funding sources\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Participants\")"
+            },
+            {
+              "waitFor": "role=heading[name=/participants$/]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "049-cross-location-cost-split",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Cost split by location and legal entity\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "050-event-approval-workflow",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Funding sources\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Activity\")"
+            },
+            {
+              "waitFor": "role=heading[name=\"Activity\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "051-event-commitments",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Funding sources\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Commitments\")"
+            },
+            {
+              "waitFor": "role=heading[name=\"Commitments\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "052-event-documents",
+      "role": "event-organizer",
+      "path": "/events/73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Funding sources\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Documents\")"
+            },
+            {
+              "waitFor": "role=heading[name=\"Supporting documents\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "046a-co-funding-board",
+      "role": "event-organizer",
+      "path": "/events/cofunding-board?event=73000000-0000-4000-8000-000000000001",
+      "waitFor": "text=Diwali celebration 2026",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "053a-intercompany-recharge-schedule",
+      "role": "finance-controller",
+      "path": "/finance/recharges?event=73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Intercompany recharge schedule\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "055-my-requests",
+      "role": "event-organizer",
+      "path": "/requests",
+      "waitFor": "text=Team lunch: Platform squad",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "056-create-budget-request",
+      "role": "employee",
+      "path": "/requests/new?kind=spending",
+      "waitFor": "role=heading[name=\"Submit a spending request\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "056a-inter-director-contribution-request",
+      "role": "regional-manager",
+      "path": "/contributions/73000000-0000-4000-8000-000000000021",
+      "waitFor": "text=Gifts for the Hyderabad attendees",
+      "states": [
+        {
+          "state": "giver"
+        },
+        {
+          "state": "organizer",
+          "role": "event-organizer"
+        }
+      ]
+    },
+    {
+      "id": "057-additional-fund-request",
+      "role": "event-organizer",
+      "path": "/requests/new?kind=additional_fund&eventId=73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Request additional funds\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "059-approval-inbox",
+      "role": "location-manager",
+      "path": "/approvals",
+      "waitFor": "text=Team lunch: Platform squad",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "060-request-details",
+      "role": "location-manager",
+      "path": "/requests/73000000-0000-4000-8000-000000000010",
+      "waitFor": "role=heading[name=/Team lunch: Platform squad/]",
+      "states": [
+        {
+          "state": "approver"
+        },
+        {
+          "state": "requester",
+          "role": "event-organizer"
+        },
+        {
+          "state": "rejected",
+          "role": "event-organizer",
+          "path": "/requests/73000000-0000-4000-8000-000000000012",
+          "waitFor": "role=heading[name=/Photo booth rental/]"
+        }
+      ]
+    },
+    {
+      "id": "058-over-budget-request",
+      "role": "employee",
+      "path": "/requests/new?kind=over_budget",
+      "waitFor": "role=heading[name=/over-budget/i]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "061-approval-decision",
+      "role": "location-manager",
+      "path": "/approvals",
+      "waitFor": "text=Team lunch: Platform squad",
+      "states": [
+        {
+          "state": "approve-part",
+          "actions": [
+            {
+              "waitFor": "text=Check before you decide"
+            },
+            {
+              "waitFor": "text=Company-wide Available"
+            },
+            {
+              "click": "mat-button-toggle:has-text(\"Approve part\") button"
+            },
+            {
+              "waitFor": "text=Approved amount"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "064-request-history",
+      "role": "event-organizer",
+      "path": "/requests/73000000-0000-4000-8000-000000000012?tab=history",
+      "waitFor": "[data-testid=request-history]",
+      "states": [
+        {
+          "state": "rejected"
+        },
+        {
+          "state": "pending",
+          "path": "/requests/73000000-0000-4000-8000-000000000010?tab=history",
+          "waitFor": "[data-testid=request-history]"
+        }
+      ]
+    },
+    {
+      "id": "061a-actionable-approval-email",
+      "path": "/email-action?token=v1.00000000-0000-4000-8000-000000000000.00000000-0000-4000-8000-000000000000.not-a-valid-signature",
+      "waitFor": "text=This approval link is not valid",
+      "states": [
+        {
+          "state": "link-invalid",
+          "allowRequests": ["/api/approvals/email-actions/"]
+        }
+      ]
+    },
+    {
+      "id": "082-utilization-report",
+      "role": "location-manager",
+      "path": "/reports/utilization",
+      "waitFor": "role=heading[name=\"Budget utilization\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "088-audit-log",
+      "role": "auditor",
+      "path": "/audit-log?type=event&resource=73000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"Audit log\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ],
+      "mask": ["code.bf-audit__hash"]
+    },
+    {
+      "id": "115-employee-dashboard",
+      "role": "employee",
+      "path": "/my",
+      "waitFor": "role=heading[name=\"Budgets you can use\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "116-available-budgets",
+      "role": "employee",
+      "path": "/my/budgets",
+      "waitFor": "role=heading[name=\"My budgets\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "118-request-event-funding",
+      "role": "event-organizer",
+      "path": "/requests/event-funding",
+      "waitFor": "role=heading[name=\"Request event funding\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "validation",
+          "actions": [
+            {
+              "click": "[data-testid=submit-event-funding]"
+            },
+            {
+              "waitFor": "[data-testid=error-summary]:focus"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "120-approved-allocations",
+      "role": "event-organizer",
+      "path": "/requests/approved",
+      "waitFor": "role=heading[name=\"Approved for you\"]",
+      "states": [
+        {
+          "state": "default",
+          "waitFor": "[data-testid=approved-summary]"
+        },
+        {
+          "state": "empty",
+          "role": "employee",
+          "waitFor": "text=Nothing approved yet this year"
+        }
+      ]
+    },
+    {
+      "id": "121-upload-receipt",
+      "role": "event-organizer",
+      "path": "/requests/upload?request=73000000-0000-4000-8000-000000000011",
+      "waitFor": "role=heading[name=\"Upload a receipt or document\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "amount-check",
+          "actions": [
+            {
+              "fill": ["input[name=receiptAmount]", "120"]
+            },
+            {
+              "waitFor": "[data-testid=amount-check]"
+            }
+          ]
         }
       ]
     }

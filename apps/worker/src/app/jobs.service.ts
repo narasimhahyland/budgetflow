@@ -1,6 +1,9 @@
+import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
 import { DB } from '@bf/api/core';
 import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
 import { LEDGER_CHECK_TOPIC, RebuildService } from '@bf/api/integrity';
+import { EMAIL_TOPIC, NotificationsService, type EmailPayload } from '@bf/api/notifications';
+import { BUDGET_THRESHOLD_TOPIC, BudgetAlertsConsumer, type ThresholdCrossed } from '@bf/api/spend';
 import {
   Inject,
   Injectable,
@@ -13,11 +16,7 @@ import { PgBoss } from 'pg-boss';
 
 const NIGHTLY = 'integrity.nightly';
 const DEAD_LETTER = 'integrity.dead-letter';
-const BUDGET_EVENT_TOPICS = [
-  'budget.control_changed',
-  'budget.threshold_crossed',
-  'budget.change_requested',
-] as const;
+const BUDGET_EVENT_TOPICS = ['budget.change_requested'] as const;
 
 /**
  * Drains the transactional outbox into pg-boss and runs jobs. Jobs are idempotent (keyed by a business
@@ -34,6 +33,9 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
   constructor(
     @Inject(DB) private readonly db: Db,
     private readonly rebuild: RebuildService,
+    private readonly notifications: NotificationsService,
+    private readonly controls: BudgetControlConsumer,
+    private readonly alerts: BudgetAlertsConsumer,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -53,7 +55,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       retryBackoff: true,
       deadLetter: DEAD_LETTER,
     });
-    // Budget domain events (Phase 4). Phase 5 adds the workers (cancel or hold pending requests, notify owners).
+    // Budget change requests (Phase 4) only drain until approver notifications land.
     for (const topic of BUDGET_EVENT_TOPICS)
       await boss.createQueue(topic, { deadLetter: DEAD_LETTER });
     await boss.work<{ tenantId: string; checkRunId: string }>(LEDGER_CHECK_TOPIC, async (jobs) => {
@@ -61,6 +63,33 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
         const outcome = await this.rebuild.run(job.data.tenantId, job.data.checkRunId);
         this.log.log(`ledger check ${job.data.checkRunId}: ${outcome}`);
       }
+    });
+    for (const topic of [EMAIL_TOPIC, BUDGET_CONTROL_TOPIC, BUDGET_THRESHOLD_TOPIC]) {
+      await boss.createQueue(topic, {
+        retryLimit: 5,
+        retryDelay: 5,
+        retryBackoff: true,
+        deadLetter: DEAD_LETTER,
+      });
+    }
+    const fast = { batchSize: 10, pollingIntervalSeconds: 0.5, burstWhenBatchFull: true } as const;
+    await boss.work<EmailPayload>(EMAIL_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.notifications.deliver(job.data);
+    });
+    await boss.work<{ tenantId: string; budgetId: string; unfitRequestIds?: string[] }>(
+      BUDGET_CONTROL_TOPIC,
+      fast,
+      async (jobs) => {
+        for (const job of jobs)
+          await this.controls.handle(
+            job.data.tenantId,
+            job.data.budgetId,
+            job.data.unfitRequestIds ?? [],
+          );
+      },
+    );
+    await boss.work<ThresholdCrossed>(BUDGET_THRESHOLD_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.alerts.handle(job.data);
     });
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();
@@ -78,7 +107,9 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       Number(process.env.OUTBOX_POLL_MS ?? 1000),
     );
     this.ready = true;
-    this.log.log('worker ready: outbox drain and integrity jobs running');
+    this.log.log(
+      'worker ready: outbox drain, email, budget-control, budget-alert and integrity jobs running',
+    );
   }
 
   async onApplicationShutdown(): Promise<void> {
@@ -103,7 +134,11 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
             .for('update', { skipLocked: true });
           for (const m of pending) {
             try {
-              await this.boss!.send(m.topic, m.payload as object, { singletonKey: m.id });
+              await this.boss!.send(
+                m.topic,
+                { tenantId: m.tenantId, ...(m.payload as object) },
+                { singletonKey: m.id },
+              );
               await tx
                 .update(outboxMessages)
                 .set({ publishedAt: new Date(), attempts: sql`${outboxMessages.attempts} + 1` })

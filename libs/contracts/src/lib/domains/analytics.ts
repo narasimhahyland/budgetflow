@@ -16,6 +16,9 @@ export const SERVER_ANALYTICS_EVENTS = [
   'budget.control_changed',
   'request.submitted',
   'approval.decided',
+  'contribution.requested',
+  'contribution.decided',
+  'event.submitted',
   'actual.imported',
   'actual.matched',
 ] as const;

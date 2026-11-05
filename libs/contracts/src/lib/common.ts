@@ -200,6 +200,21 @@ export const PROBLEM_CODES = [
   'LIMIT_EXCEEDED',
   'HEADCOUNT_MISSING',
   'VERSION_CONFLICT',
+  // Phase 5: approvals, email links, events, contributions, documents
+  'APPROVAL_NOT_ASSIGNED',
+  'APPROVAL_NOT_PENDING',
+  'APPROVAL_LINK_INVALID',
+  'APPROVAL_LINK_USED',
+  'APPROVAL_LINK_EXPIRED',
+  'APPROVAL_LINK_STALE',
+  'CONFLICT_ATTESTATION_REQUIRED',
+  'REQUEST_ON_HOLD',
+  'TRANSFER_NOT_ALLOWED',
+  'EVENT_NOT_FUNDED',
+  'DOCUMENT_TYPE_NOT_ALLOWED',
+  'DOCUMENT_TOO_LARGE',
+  'DOCUMENT_NOT_UPLOADED',
+  'DOCUMENT_STORE_UNAVAILABLE',
 ] as const;
 export const ProblemCode = z.enum(PROBLEM_CODES);
 export type ProblemCode = z.infer<typeof ProblemCode>;

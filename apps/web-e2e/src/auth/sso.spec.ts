@@ -19,8 +19,10 @@ test('signing in with Hyland SSO lands in BudgetFlow as the linked employee', as
   const nav = page.getByRole('navigation', { name: 'Platform Navigation' });
   await expect(nav.getByRole('menuitem')).toHaveText([
     'Home',
+    'Events',
     'Request funds',
     'My requests',
+    'My budgets',
     'Organization',
     'People',
     'Headcount',

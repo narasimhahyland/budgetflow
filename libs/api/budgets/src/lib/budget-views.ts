@@ -362,7 +362,7 @@ export class BudgetViews {
   /** Publishes `budget.threshold_crossed` for thresholds newly reached on roll-up utilization (ancestors included). */
   emitThresholds(
     tx: Tx,
-    actor: RequestActor,
+    actor: Pick<RequestActor, 'tenantId'>,
     before: Map<string, number>,
     ids: readonly string[],
   ): Promise<void> {

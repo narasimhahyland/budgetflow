@@ -1,0 +1,18 @@
+{
+  "name": "web-feature-requests",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/web/features/requests/src",
+  "projectType": "library",
+  "prefix": "bf",
+  "tags": ["type:feature", "scope:web"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc -p libs/web/features/requests/tsconfig.lib.json --noEmit"
+      }
+    }
+  }
+}

@@ -175,8 +175,12 @@ async function runJob(browser, job) {
     ...(state.allowRequests ?? []).map((s) => new RegExp(s)),
   ];
   page.on('console', (m) => {
-    if (m.type() === 'error' && !ignoreConsole.some((r) => r.test(m.text())))
-      add('console-error', 'blocking', m.text().slice(0, 300));
+    if (m.type() !== 'error' || ignoreConsole.some((r) => r.test(m.text()))) return;
+    // The browser logs every 4xx as "Failed to load resource"; a request the state expects to fail
+    // (allowRequests) is not a finding, any other one still is.
+    const url = m.location()?.url ?? '';
+    if (/^Failed to load resource/.test(m.text()) && allowRequests.some((x) => x.test(url))) return;
+    add('console-error', 'blocking', m.text().slice(0, 300));
   });
   page.on('pageerror', (e) => add('page-error', 'blocking', String(e?.message ?? e).slice(0, 300)));
   page.on('requestfailed', (r) => {

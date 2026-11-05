@@ -111,10 +111,19 @@ services:
       KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/budgetflow/protocol/openid-connect/certs
       KEYCLOAK_AUDIENCE: budgetflow-api
       AI_PROVIDER: ${BF_AI_PROVIDER:-fake}
+      # Phase 5: documents on MinIO (signed URLs use the browser-reachable public URL), email links
+      DOCUMENT_STORE_ENDPOINT: http://minio:9000
+      DOCUMENT_STORE_PUBLIC_URL: http://localhost:${BF_MINIO_PORT:-9000}
+      DOCUMENT_STORE_ACCESS_KEY: ${BF_MINIO_ROOT_USER:?}
+      DOCUMENT_STORE_SECRET_KEY: ${BF_MINIO_ROOT_PASSWORD:?}
+      WEB_BASE_URL: http://localhost:${BF_WEB_PORT:-4200}
+      APPROVAL_LINK_SECRET: ${BF_APPROVAL_LINK_SECRET:-}
     depends_on:
       postgres:
         condition: service_healthy
       keycloak:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     ports:
       - '127.0.0.1:${BF_API_PORT:-3000}:3000'
@@ -140,6 +149,8 @@ services:
       DATABASE_URL: postgres://bf_worker:${BF_PG_WORKER_PASSWORD}@postgres:5432/${BF_PG_DB}
       KEYCLOAK_ISSUER: http://localhost:${BF_KEYCLOAK_PORT:-8080}/realms/budgetflow
       SMTP_URL: smtp://mailpit:1025
+      WEB_BASE_URL: http://localhost:${BF_WEB_PORT:-4200}
+      APPROVAL_LINK_SECRET: ${BF_APPROVAL_LINK_SECRET:-}
     depends_on:
       api:
         condition: service_healthy

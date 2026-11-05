@@ -65,6 +65,7 @@ export const DOMAIN_ERROR_CODES = [
   'LIMIT_EXCEEDED',
   'HEADCOUNT_MISSING',
   'VERSION_CONFLICT',
+  'APPROVAL_NOT_ASSIGNED',
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

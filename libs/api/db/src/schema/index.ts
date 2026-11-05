@@ -8,3 +8,5 @@ export * from './spend';
 export * from './authority';
 export * from './accounting';
 export * from './platform';
+export * from './cofunding';
+export * from './documents';

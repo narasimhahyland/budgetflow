@@ -8,6 +8,10 @@ import { Shell, shellChildRoutes } from '@bf/web/shell';
 export const appRoutes: Route[] = [
   ...authRoutes,
   {
+    path: 'email-action',
+    loadChildren: () => import('@bf/web/features/approvals').then((m) => m.approvalEmailRoutes),
+  },
+  {
     path: '',
     component: Shell,
     canActivate: [authGuard, sessionGuard],
@@ -20,6 +24,38 @@ export const appRoutes: Route[] = [
       },
       ...orgRoutes,
       ...financeAdminRoutes,
+      {
+        path: 'events',
+        loadChildren: () => import('@bf/web/features/events').then((m) => m.eventRoutes),
+      },
+      {
+        path: 'contributions',
+        loadChildren: () => import('@bf/web/features/events').then((m) => m.contributionRoutes),
+      },
+      {
+        path: 'finance/recharges',
+        loadChildren: () => import('@bf/web/features/events').then((m) => m.rechargeRoutes),
+      },
+      {
+        path: 'requests',
+        loadChildren: () => import('@bf/web/features/requests').then((m) => m.requestRoutes),
+      },
+      {
+        path: 'approvals',
+        loadChildren: () => import('@bf/web/features/approvals').then((m) => m.approvalRoutes),
+      },
+      {
+        path: 'my',
+        loadChildren: () => import('@bf/web/features/employee').then((m) => m.employeeRoutes),
+      },
+      {
+        path: 'audit-log',
+        loadChildren: () => import('@bf/web/features/insights').then((m) => m.auditLogRoutes),
+      },
+      {
+        path: 'reports/utilization',
+        loadChildren: () => import('@bf/web/features/insights').then((m) => m.utilizationRoutes),
+      },
       ...shellChildRoutes,
     ],
   },

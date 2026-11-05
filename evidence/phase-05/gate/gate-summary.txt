@@ -1,0 +1,18 @@
+scripts/gate.sh lint typecheck build functional-api functional-e2e visual — 2026-11-05T03:54:16Z — commit dabbd01
+PASS|secrets|2s
+PASS|lint|5s
+PASS|styles|4s
+PASS|satori|19s
+PASS|typecheck|3s
+PASS|build|1s
+PASS|openapi|2s
+PASS|db|1s
+PASS|stack|53s
+PASS|functional-api|64s
+PASS|functional-e2e|73s
+PASS|reseed|44s
+FAIL|visual|66s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report
+
+visual re-run (same commit, same seed): the three screenshots that differed in this run (000a nav-drawer-open desktop, 026 reduce dialog tablet, 061 approve-part tablet) pass 6 of 6 with --repeat-each=2; a different one or two flake per local full run under load (CI retries once).
+Last run with every mode green in one pass: tmp/gate/20261105-085647 at 05c3368, before the rebase onto main's shell change (PR #32).

@@ -1,7 +1,11 @@
 import { ProblemDetails } from './common';
 import { analyticsEndpoints } from './domains/analytics';
+import { approvalEndpoints } from './domains/approvals';
 import { auditEndpoints } from './domains/audit';
 import { budgetEndpoints } from './domains/budgets';
+import { contributionEndpoints } from './domains/contributions';
+import { documentEndpoints } from './domains/documents';
+import { eventEndpoints } from './domains/events';
 import { financeEndpoints } from './domains/finance';
 import { healthEndpoints } from './domains/health';
 import { identityEndpoints } from './domains/identity';
@@ -9,6 +13,7 @@ import { integrityEndpoints } from './domains/integrity';
 import { ledgerEndpoints } from './domains/ledger';
 import { orgEndpoints } from './domains/org';
 import { planningEndpoints } from './domains/planning';
+import { requestEndpoints } from './domains/requests';
 
 export type { Endpoint } from './endpoint';
 
@@ -27,6 +32,11 @@ export const endpoints = {
   ...financeEndpoints,
   ...analyticsEndpoints,
   ...planningEndpoints,
+  ...eventEndpoints,
+  ...requestEndpoints,
+  ...approvalEndpoints,
+  ...contributionEndpoints,
+  ...documentEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;
