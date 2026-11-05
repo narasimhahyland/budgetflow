@@ -140,6 +140,37 @@ export async function approvedEvent(homeBudgetId: string, estimateMinor: number,
   return api<EventDetail>('budget-owner', 'get', `/api/events/${event.id}`);
 }
 
+/**
+ * Phase 9 journeys need an approved event with people on it: same flow as `approvedEvent`, with the
+ * participants, estimate and own funds the journey asks for.
+ */
+export async function approvedEventWith(
+  homeBudgetId: string,
+  opts: { name: string; estimateMinor: number; ownMinor: number; participantPersonIds: string[] },
+) {
+  const event = await api<EventDetail>('budget-owner', 'post', '/api/events', {
+    name: opts.name,
+    eventType: 'offsite',
+    homeBudgetId,
+    startsAt: '2026-12-03T09:00:00.000Z',
+    endsAt: '2026-12-03T17:00:00.000Z',
+    toleranceBps: 500,
+    locationOrgUnitIds: [SEED.orgUnits.newYork],
+    estimate: usd(opts.estimateMinor),
+    ownFunds: usd(opts.ownMinor),
+    participantPersonIds: opts.participantPersonIds,
+  });
+  const submitted = await api<EventDetail>(
+    'budget-owner',
+    'post',
+    `/api/events/${event.id}/submit`,
+    {},
+  );
+  const task = await taskOf(submitted.ownFundsRequest!.id, 'department-head', 'requests');
+  await decide(task, 'department-head', { decision: 'approve' });
+  return api<EventDetail>('budget-owner', 'get', `/api/events/${event.id}`);
+}
+
 /** Phase 4 control endpoints as the finance admin; the worker consumes `budget.control_changed`. */
 export async function control(budgetId: string, action: 'freeze' | 'set_to_zero') {
   const reason = `Journey ${action.replace(/_/g, ' ')}`;

@@ -3,6 +3,7 @@ import { seedActuals } from './actuals';
 import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
 import { seedEvents } from './events';
+import { seedEventsDepth } from './events-depth';
 import { seedOrg } from './org';
 import { seedRules } from './rules';
 
@@ -28,5 +29,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'policy rules, approval routes, DoA draft and post-spend exceptions',
     phase: 'P7',
     run: seedRules,
+  },
+  {
+    name: 'event templates, plans, invitations, quotes, attendance and feedback',
+    phase: 'P9',
+    run: seedEventsDepth,
   },
 ];

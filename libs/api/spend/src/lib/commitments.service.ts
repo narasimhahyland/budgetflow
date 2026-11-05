@@ -335,6 +335,7 @@ export class CommitmentsService {
       amount: Money;
       serviceStart?: string | null;
       serviceEnd?: string | null;
+      nonRefundableDepositMinor?: number;
     },
   ): Promise<{ commitmentId: string; budgetAmount: Money; journalIds: string[] }> {
     const active = input.sources.filter(
@@ -422,6 +423,7 @@ export class CommitmentsService {
       serviceEnd: input.serviceEnd ?? null,
       amountMinor: input.amount.amountMinor,
       currency: input.amount.currency,
+      nonRefundableDepositMinor: input.nonRefundableDepositMinor ?? 0,
       createdByPersonId: c.actor.personId,
     });
     const journals: { drafts: JournalDraft[]; fy: string }[] = [];
@@ -464,6 +466,103 @@ export class CommitmentsService {
       budgetAmount: { amountMinor: budgetTotal, currency: input.event.currency as CurrencyCode },
       journalIds,
     };
+  }
+
+  /**
+   * Moves an event commitment's encumbrance onto a new split of its funding sources (47e). The
+   * ledger is append-only, so this releases every posted encumbrance back to the holds and posts
+   * fresh encumbrances by `weights`; the commitment itself stays encumbered. Only a commitment that
+   * nothing has consumed yet can move, because consumed amounts are already actual spend.
+   */
+  async rebalanceEventFunding(
+    tx: Tx,
+    c: PostCtx,
+    commitmentId: string,
+    weights: ReadonlyMap<string, number>,
+  ): Promise<{ journalIds: string[]; movedBudgetMinor: number }> {
+    const commitment = await this.row(tx, commitmentId, true);
+    if (!commitment) throw ApiProblem.notFound('commitment');
+    if (commitment.status !== 'encumbered') return { journalIds: [], movedBudgetMinor: 0 };
+    const released = await this.relieve(
+      tx,
+      c,
+      commitment,
+      'encumbered',
+      'all',
+      () => 'release_encumbrance_to_hold',
+    );
+    for (const p of released.perLine)
+      if (p.line.fundingSourceId)
+        await this.sources.adjust(tx, p.line.fundingSourceId, { consumedMinor: -p.budgetMinor });
+    await tx
+      .delete(commitmentFundingLines)
+      .where(eq(commitmentFundingLines.commitmentId, commitment.id));
+
+    const sources = await this.sources.list(tx, commitment.eventId!, { lock: true });
+    const targets = sources.filter((s) => s.status === 'active' && (weights.get(s.id) ?? 0) > 0);
+    if (!targets.length)
+      throw new ApiProblem(
+        409,
+        'EVENT_NOT_FUNDED',
+        'The event has no active funding source to carry this commitment.',
+      );
+    const transactionMinor = released.perLine.reduce((a, p) => a + p.transactionMinor, 0);
+    const parts = unwrap(
+      splitByWeights(
+        transactionMinor,
+        targets.map((s) => weights.get(s.id)!),
+      ),
+    );
+    const locked = await this.posting.lock(
+      tx,
+      targets.map((s) => s.budgetId),
+    );
+    const ctx = await this.posting.context(
+      tx,
+      locked.get(targets[0].budgetId)!,
+      c.actor.reportingCurrency,
+    );
+    const journalIds: string[] = [];
+    let movedBudgetMinor = 0;
+    for (const [i, source] of targets.entries()) {
+      if (parts[i] <= 0) continue;
+      const budget = locked.get(source.budgetId)!;
+      const moved = unwrap(
+        postSpendMovement(
+          {
+            kind: 'encumber_from_hold',
+            budget,
+            amount: { amountMinor: parts[i], currency: commitment.currency as CurrencyCode },
+            journalType: 'commitment',
+            provenance: {
+              commitmentId: commitment.id,
+              eventId: commitment.eventId,
+              contributionId: source.contributionRequestId,
+              requestId: source.requestId,
+            },
+            reason: 'Cost split re-posted from actual attendance',
+          },
+          ctx,
+        ),
+      );
+      await tx
+        .insert(commitmentFundingLines)
+        .values(
+          this.lineValues(
+            c,
+            commitment.id,
+            budget.id,
+            source.id,
+            source.contributionRequestId,
+            moved.triplet,
+            { amountMinor: parts[i], currency: commitment.currency as CurrencyCode },
+          ),
+        );
+      await this.sources.adjust(tx, source.id, { consumedMinor: moved.budgetAmount.amountMinor });
+      movedBudgetMinor += moved.budgetAmount.amountMinor;
+      journalIds.push(...(await this.posting.post(tx, moved.journals, budget.fiscalYearId, c)));
+    }
+    return { journalIds: [...released.journalIds, ...journalIds], movedBudgetMinor };
   }
 
   /**
