@@ -56,3 +56,12 @@ Tablet: hide rule-version and channel columns behind the drawer. Mobile: list of
 ## Assumptions and open questions
 
 - Approvers see only their own decisions here (assumed); their team's decisions are in 018a (P10).
+
+## Built in Phase 7, with these parts still open
+
+- Rule versions per decision are not shown: routing does not consult the rules engine yet, so no
+  decision records which rule versions shaped its route. The column returns as soon as it does.
+- No export, no column sorting, no decision drawer and no date-range filter; the list covers every
+  decision on record and each row links to the request, whose history tab holds the chain.
+- A partial approval shows the amount asked for; the amount granted needs a contract field.
+- Filters are not kept in the address, so a filtered view cannot be bookmarked or shared.

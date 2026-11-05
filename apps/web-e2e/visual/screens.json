@@ -955,6 +955,17 @@
       "mask": ["code.bf-audit__hash"]
     },
     {
+      "id": "090-approval-history",
+      "role": "auditor",
+      "path": "/approvals/history",
+      "waitFor": "[data-testid=history-summary]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
       "id": "115-employee-dashboard",
       "role": "employee",
       "path": "/my",
