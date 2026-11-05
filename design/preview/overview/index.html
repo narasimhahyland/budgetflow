@@ -63,6 +63,10 @@
 
       /* Header */
       .hero {
+        border-bottom: 1px solid var(--divider);
+        background: var(--surface);
+      }
+      .brandbar {
         background: var(--primary);
         color: #fff;
       }
@@ -72,9 +76,8 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding-top: 18px;
-        padding-bottom: 18px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        padding-top: 16px;
+        padding-bottom: 16px;
       }
       .brand {
         font-family: var(--heading);
@@ -98,8 +101,8 @@
         text-decoration: underline;
       }
       .hero-body {
-        padding-top: 52px;
-        padding-bottom: 56px;
+        padding-top: 48px;
+        padding-bottom: 48px;
       }
       .eyebrow {
         margin-bottom: 10px;
@@ -109,7 +112,7 @@
         text-transform: uppercase;
       }
       .hero .eyebrow {
-        opacity: 0.8;
+        color: var(--primary);
       }
       .hero h1 {
         font-size: clamp(32px, 5vw, 46px);
@@ -124,7 +127,30 @@
       .sublede {
         max-width: 720px;
         margin-top: 12px;
-        opacity: 0.88;
+        color: var(--text-secondary);
+      }
+      .cta {
+        margin-top: 28px;
+      }
+      .button-primary {
+        display: inline-block;
+        padding: 14px 28px;
+        border-radius: 999px;
+        background: var(--primary);
+        color: #fff;
+        font-family: var(--heading);
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-align: center;
+        text-decoration: none;
+      }
+      .button-primary:hover {
+        background: var(--primary-loud);
+      }
+      .button-primary:focus-visible {
+        outline: 3px solid var(--primary-container);
+        outline-offset: 2px;
       }
 
       /* Outcomes strip */
@@ -132,7 +158,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 1px;
-        margin-top: -28px;
+        margin-top: 32px;
         overflow: hidden;
         border: 1px solid var(--outline);
         border-radius: 16px;
@@ -394,20 +420,17 @@
         color: var(--text-secondary);
         font-size: 14px;
       }
-      footer .wrap {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 12px;
-      }
 
       @media (max-width: 600px) {
         .wrap {
           padding: 0 16px;
         }
         .hero-body {
-          padding-top: 36px;
-          padding-bottom: 48px;
+          padding-top: 32px;
+          padding-bottom: 36px;
+        }
+        .button-primary {
+          display: block;
         }
         section {
           padding-top: 48px;
@@ -430,30 +453,30 @@
           padding: 0;
         }
         .hero,
+        .brandbar,
         .different {
           background: #fff;
           color: var(--text);
         }
-        .hero .eyebrow,
+        .hero {
+          border-bottom: 0;
+        }
         .different .section-head .eyebrow {
           color: var(--primary);
           opacity: 1;
         }
         .topbar nav,
-        .footer-link {
+        .cta {
           display: none;
         }
         .topbar {
           border-bottom: 1px solid var(--divider);
         }
         .hero-body {
-          padding: 20px 0 28px;
-        }
-        .sublede {
-          opacity: 1;
+          padding: 20px 0 0;
         }
         .outcomes {
-          margin-top: 0;
+          margin-top: 24px;
         }
         section {
           padding-top: 28px;
@@ -485,15 +508,17 @@
   </head>
   <body>
     <header class="hero">
-      <div class="wrap topbar">
-        <span class="brand">BudgetFlow Enterprise</span>
-        <nav aria-label="Sections">
-          <a href="#problem">Why</a>
-          <a href="#how-it-works">How it works</a>
-          <a href="#features">Features</a>
-          <a href="#roles">Roles</a>
-          <a href="#different">What is different</a>
-        </nav>
+      <div class="brandbar">
+        <div class="wrap topbar">
+          <span class="brand">BudgetFlow Enterprise</span>
+          <nav aria-label="Sections">
+            <a href="#problem">Why</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#features">Features</a>
+            <a href="#roles">Roles</a>
+            <a href="#different">What is different</a>
+          </nav>
+        </div>
       </div>
       <div class="wrap hero-body">
         <p class="eyebrow">Product overview</p>
@@ -506,6 +531,9 @@
         <p class="sublede">
           It works alongside the card, expense, HR, planning and finance systems the company already
           uses, so teams keep their tools and leadership gains one view and one set of controls.
+        </p>
+        <p class="cta">
+          <a class="button-primary" href="../index.html">See the screen designs</a>
         </p>
       </div>
     </header>
@@ -961,7 +989,6 @@
     <footer>
       <div class="wrap">
         <span>BudgetFlow Enterprise: budget delegation and control.</span>
-        <a class="footer-link" href="../index.html">See the screen designs</a>
       </div>
     </footer>
   </body>
