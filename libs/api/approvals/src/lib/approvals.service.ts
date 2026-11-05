@@ -1301,7 +1301,15 @@ export class ApprovalsService {
             : 'Shown to the approver.',
           onBehalfOfName: delegation ? (names.get(t.assigneePersonId) ?? null) : null,
         },
-        ruleReason: [t.reason, ...plan.explanation].filter(Boolean).join(' '),
+        ruleReason: [
+          ...new Set(
+            [t.reason, ...plan.explanation]
+              .filter((r): r is string => !!r)
+              .map((r) => r.replace(/\.$/, '')),
+          ),
+        ]
+          .map((r) => `${r}.`)
+          .join(' '),
         allowedDecisions: allowed,
         documents: await documents(tx, subject.type, subject.id),
         contributionMode: subject.contributionMode,

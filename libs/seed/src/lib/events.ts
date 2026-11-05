@@ -19,7 +19,11 @@ export const P5_IDS = {
     photoBooth: seedId('73000000', 12),
     decorations: seedId('73000000', 13),
   },
-  contributions: { approved: seedId('73000000', 20), pending: seedId('73000000', 21) },
+  contributions: {
+    approved: seedId('73000000', 20),
+    pending: seedId('73000000', 21),
+    crossEntity: seedId('73000000', 22),
+  },
   delegation: seedId('73000000', 30),
 } as const;
 
@@ -115,6 +119,14 @@ export const P5_EVENT = {
       giverBudgetId: BUDGETS.india,
       requested: amount(72_000, 6_000_000),
       purpose: 'Gifts for the Hyderabad attendees added after the RSVP count.',
+    },
+    /** Germany to India: recharged with the 5% markup under the pair policy. */
+    crossEntity: {
+      id: P5_IDS.contributions.crossEntity,
+      giverBudgetId: BUDGETS.europe,
+      giver: 'department-head' as const,
+      requested: amount(24_000, 2_000_000),
+      purpose: 'Sweets boxes for the Berlin colleagues joining the celebration remotely.',
     },
   },
   commitment: {

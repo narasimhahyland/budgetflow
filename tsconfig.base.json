@@ -41,7 +41,12 @@
       "@bf/api/documents": ["./libs/api/documents/src/index.ts"],
       "@bf/api/spend": ["./libs/api/spend/src/index.ts"],
       "@bf/api/contributions": ["./libs/api/contributions/src/index.ts"],
-      "@bf/api/events": ["./libs/api/events/src/index.ts"]
+      "@bf/api/events": ["./libs/api/events/src/index.ts"],
+      "@bf/web/features/events": ["./libs/web/features/events/src/index.ts"],
+      "@bf/web/features/requests": ["./libs/web/features/requests/src/index.ts"],
+      "@bf/web/features/approvals": ["./libs/web/features/approvals/src/index.ts"],
+      "@bf/web/features/employee": ["./libs/web/features/employee/src/index.ts"],
+      "@bf/web/features/insights": ["./libs/web/features/insights/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

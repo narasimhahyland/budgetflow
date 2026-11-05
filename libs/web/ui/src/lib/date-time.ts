@@ -37,3 +37,14 @@ export class DateTimePipe implements PipeTransform {
     return `${formatDate(at, format, 'en-US', utcOffset(timezone, at))} ${zoneLabel(timezone, at)}`;
   }
 }
+
+/** The calendar date of a UTC timestamp in the user's timezone, without a zone label: `2 Nov 2026`. */
+@Pipe({ name: 'bfDate' })
+export class DateOnlyPipe implements PipeTransform {
+  transform(value: string | Date | null | undefined, timezone: string, format = 'd MMM y'): string {
+    if (value === null || value === undefined || value === '') return '';
+    const at = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(at.getTime())) return '';
+    return formatDate(at, format, 'en-US', utcOffset(timezone, at));
+  }
+}

@@ -56,7 +56,15 @@ export const NAV: NavGroup[] = [
   },
   {
     label: 'Events',
-    items: [{ label: 'Events', path: '/events', icon: 'calendar', permission: 'event.manage' }],
+    items: [
+      { label: 'Events', path: '/events', icon: 'calendar', permission: 'tenant.read' },
+      {
+        label: 'Co-funding board',
+        path: '/events/cofunding-board',
+        icon: 'users',
+        permission: 'event.manage',
+      },
+    ],
   },
   {
     label: 'Requests',
@@ -77,6 +85,12 @@ export const NAV: NavGroup[] = [
         label: 'My requests',
         path: '/requests',
         icon: 'list_bullet',
+        permission: 'request.create',
+      },
+      {
+        label: 'My budgets',
+        path: '/my/budgets',
+        icon: 'currency_dollar',
         permission: 'request.create',
       },
     ],
@@ -102,6 +116,12 @@ export const NAV: NavGroup[] = [
         label: 'Actuals and matching',
         path: '/finance/actuals',
         icon: 'table_chart',
+        permission: 'actuals.manage',
+      },
+      {
+        label: 'Intercompany recharges',
+        path: '/finance/recharges',
+        icon: 'currency_dollar',
         permission: 'actuals.manage',
       },
       {
@@ -153,6 +173,12 @@ export const NAV: NavGroup[] = [
     label: 'Insights',
     items: [
       { label: 'Reports', path: '/reports', icon: 'bar_chart', permission: 'report.read' },
+      {
+        label: 'Utilization',
+        path: '/reports/utilization',
+        icon: 'chart_arrow_up',
+        permission: 'report.read',
+      },
       { label: 'Audit log', path: '/audit-log', icon: 'book', permission: 'audit.read' },
     ],
   },

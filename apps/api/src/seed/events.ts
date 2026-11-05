@@ -46,12 +46,13 @@ export async function seedEvents(_app: INestApplicationContext): Promise<void> {
     const organizer = await as(P5_EVENT.organizer);
     const approver = await as(P5_EVENT.approver);
     const giverOwner = await as('regional-manager');
-    const home = await s.withTenant(
-      db,
-      { tenantId: TENANTS.acme, subject: 'seed' },
-      async (tx) =>
-        (await tx.select().from(s.budgets).where(eq(s.budgets.id, BUDGETS.bengaluru)))[0],
-    );
+    const budget = (id: string) =>
+      s.withTenant(
+        db,
+        { tenantId: TENANTS.acme, subject: 'seed' },
+        async (tx) => (await tx.select().from(s.budgets).where(eq(s.budgets.id, id)))[0],
+      );
+    const home = await budget(BUDGETS.bengaluru);
     const ccy = home.currency === 'INR' ? 'INR' : 'USD';
     const money = (a: { USD: number; INR: number }) => ({ amountMinor: a[ccy], currency: ccy });
     const key = (k: string) => ({ idempotencyKey: `seed:p5:${k}`, requestId: 'seed' });
@@ -153,6 +154,27 @@ export async function seedEvents(_app: INestApplicationContext): Promise<void> {
       },
       { ...key('contribution:pending'), fixedId: c2.id },
     );
+    const c3 = e.contributions.crossEntity;
+    // Contributions are in the event currency, so this one waits until every budget is held in USD.
+    if ((await budget(c3.giverBudgetId)).currency === home.currency) {
+      await contributions.create(
+        organizer,
+        {
+          eventId: e.id,
+          giverBudgetId: c3.giverBudgetId,
+          amount: money(c3.requested),
+          purpose: c3.purpose,
+        },
+        { ...key('contribution:cross-entity'), fixedId: c3.id },
+      );
+      await decide(
+        await as(c3.giver),
+        'contribution',
+        c3.id,
+        { decision: 'approve', noConflictAttested: true },
+        'contribution:cross-entity:decide',
+      );
+    }
     await events.commit(
       organizer,
       e.id,

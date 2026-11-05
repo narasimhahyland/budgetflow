@@ -347,6 +347,19 @@
               }
             ]
           },
+          "actorName": {
+            "description": "Display name of the actor (list only).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "onBehalfOfName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "action": {
             "type": "string"
           },
@@ -13989,6 +14002,19 @@
             "schema": {
               "type": "string",
               "maxLength": 100
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "asc (default): oldest first; desc: newest first.",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
             }
           },
           {

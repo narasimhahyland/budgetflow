@@ -14,6 +14,12 @@ export const AuditEvent = named(
       actorPersonId: Id.nullable(),
       actorSubject: z.string().nullable(),
       onBehalfOfPersonId: Id.nullable(),
+      actorName: z
+        .string()
+        .nullable()
+        .optional()
+        .describe('Display name of the actor (list only).'),
+      onBehalfOfName: z.string().nullable().optional(),
       action: z.string(),
       resourceType: z.string(),
       resourceId: z.string(),
@@ -37,6 +43,10 @@ export const AuditEventQuery = z
     resourceType: z.string().max(50).optional(),
     resourceId: z.string().max(100).optional(),
     action: z.string().max(100).optional(),
+    order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .describe('asc (default): oldest first; desc: newest first.'),
     cursor: z.string().max(200).optional(),
     limit: z.coerce.number().int().min(1).max(200).optional(),
   })
