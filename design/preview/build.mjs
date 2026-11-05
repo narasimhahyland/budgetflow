@@ -8,11 +8,13 @@
 // Inputs: design/stitch/*/meta.json and PNGs (every exported state), design/preview/html/<screen>/<state>.html
 // (Stitch HTML saved with `import`), design/preview/ocr/<screen>--<state>.json (text positions for states without
 // HTML, written by ocr.swift) and design/preview/links.json (guided flow, areas, link map, extra hotspots).
+// design/preview/overview/ (the standalone product overview page) is copied as is to dist/overview/.
 // A state with saved HTML is served as that HTML with its links rewritten; any other state is served as its
 // exported PNG with hotspots on the labels links.json knows about.
 import { execFileSync } from 'node:child_process';
 import {
   copyFileSync,
+  cpSync,
   existsSync,
   mkdirSync,
   readFileSync,
@@ -580,7 +582,7 @@ ${inFlow ? '<span class="flow">In the guided flow</span>' : ''}
 <p class="eyebrow">BudgetFlow Enterprise</p>
 <h1>Clickable design preview</h1>
 <p class="lede">Proposed Stitch designs, light theme, linked into a flow you can click through. Sidebar items, primary buttons, table rows and dialog triggers open the matching screen or state. This is a design review artifact, not the product.</p>
-<p class="actions"><a class="primary" href="${pageHref(journey[0], true)}">Start the guided flow</a><span class="hint">${journey.length} steps · ← → keys move along the flow · press L on a screen to highlight its links</span></p>
+<p class="actions"><a class="primary" href="${pageHref(journey[0], true)}">Start the guided flow</a><a class="secondary" href="overview/">Product overview</a><span class="hint">${journey.length} steps · ← → keys move along the flow · press L on a screen to highlight its links</span></p>
 </div>
 </header>
 <main>
@@ -623,6 +625,8 @@ function build() {
     mkdirSync(join(out, d), { recursive: true });
   for (const f of readdirSync(join(here, 'assets')))
     copyFileSync(join(here, 'assets', f), join(out, 'assets', f));
+  if (existsSync(join(here, 'overview')))
+    cpSync(join(here, 'overview'), join(out, 'overview'), { recursive: true });
   const summary = [];
   for (const page of pages) {
     const result =
