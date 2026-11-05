@@ -335,6 +335,7 @@ export class CommitmentsService {
       amount: Money;
       serviceStart?: string | null;
       serviceEnd?: string | null;
+      nonRefundableDepositMinor?: number;
     },
   ): Promise<{ commitmentId: string; budgetAmount: Money; journalIds: string[] }> {
     const active = input.sources.filter(
@@ -422,6 +423,7 @@ export class CommitmentsService {
       serviceEnd: input.serviceEnd ?? null,
       amountMinor: input.amount.amountMinor,
       currency: input.amount.currency,
+      nonRefundableDepositMinor: input.nonRefundableDepositMinor ?? 0,
       createdByPersonId: c.actor.personId,
     });
     const journals: { drafts: JournalDraft[]; fy: string }[] = [];

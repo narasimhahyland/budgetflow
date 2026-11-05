@@ -22,6 +22,7 @@ export * from './lib/authority/doa';
 export * from './lib/cofunding/cofunding';
 export * from './lib/spend/movements';
 export * from './lib/spend/event-funding';
+export * from './lib/spend/event-depth';
 export * from './lib/spend/approval-routing';
 export * from './lib/authorization/policy';
 export * from './lib/audit/hash-chain';

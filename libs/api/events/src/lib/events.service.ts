@@ -443,6 +443,7 @@ export class EventsService implements OnModuleInit {
             toleranceBps: body.toleranceBps,
             ownFundsMinor: body.ownFunds.amountMinor,
             perHeadLimitMinor: body.perHeadLimit?.amountMinor ?? null,
+            templateId: body.templateId ?? null,
           })
           .returning();
         await tx.insert(eventLocations).values(
@@ -1047,6 +1048,22 @@ export class EventsService implements OnModuleInit {
         const locked = (await this.row(tx, e.id, true))!;
         const srcs = await this.sources.list(tx, e.id, { lock: true });
         const funding = await this.funding(tx, locked, srcs);
+        if (locked.attendanceFinal && locked.perHeadLimitMinor !== null) {
+          const attendedCount = (await this.participantsOf(tx, e.id)).filter(
+            (p) => p.attendanceStatus === 'attended' || p.attendanceStatus === 'walk_in',
+          ).length;
+          if (attendedCount > 0) {
+            const perAttendee = Math.round(funding.committedMinor / attendedCount);
+            if (perAttendee > locked.perHeadLimitMinor) {
+              throw new ApiProblem(
+                409,
+                'LIMIT_EXCEEDED',
+                'Actual cost per attendee is above the per-head limit. Request over-budget approval before adding commitments.',
+                { perHeadActualMinor: perAttendee, perHeadLimitMinor: locked.perHeadLimitMinor },
+              );
+            }
+          }
+        }
         const res = await this.commitmentsService.createForEvent(
           tx,
           this.pc(actor, 'events.commit', ctx),
@@ -1249,7 +1266,11 @@ export class EventsService implements OnModuleInit {
         locationOrgUnitId: p.locationOrgUnitId,
         locationName: p.locationOrgUnitId ? (units.get(p.locationOrgUnitId) ?? null) : null,
         rsvpStatus: p.rsvpStatus,
+        rsvpRespondedAt: p.rsvpRespondedAt?.toISOString() ?? null,
+        waitlistPosition: p.waitlistPosition,
+        remindersSentCount: p.remindersSentCount,
         attendanceStatus: p.attendanceStatus,
+        needsSubmitted: Boolean(p.needsSubmittedAt),
         costShare: { amountMinor: shares[i] ?? 0, currency: e.currency },
         intercompany: Boolean(p.employingEntityId && p.employingEntityId !== e.legalEntityId),
         missingCostCenter: !p.costCenterId,
@@ -1655,6 +1676,10 @@ export class EventsService implements OnModuleInit {
       ),
       documents: await this.documents.listTx(tx, 'event', e.id, actor.personId),
       blockedReason: homeBlock && !homeBlock.ok ? homeBlock.error.message : null,
+      templateId: e.templateId,
+      seriesId: e.seriesId,
+      attendanceFinal: e.attendanceFinal,
+      organizerNotes: e.organizerNotes,
       allowedActions: allowed,
     };
   }
