@@ -14,33 +14,36 @@
 } @else {
   <sat-platform-nav-container>
     <sat-platform-nav>
-      @if (!navState.collapsed()) {
-        <div class="bf-shell__brand">
-          <span class="bf-shell__product">BudgetFlow</span>
-          <span class="bf-shell__company" data-testid="company-name">{{ me()?.tenantName }}</span>
-        </div>
-      }
-      @for (group of nav(); track group.label) {
-        @if (group.label && !navState.collapsed()) {
-          <p class="bf-shell__group" aria-hidden="true">{{ group.label }}</p>
+      <div class="bf-shell__nav">
+        @if (!navState.collapsed()) {
+          <div class="bf-shell__brand">
+            <span class="bf-shell__product">BudgetFlow</span>
+            <span class="bf-shell__company" data-testid="company-name">{{ me()?.tenantName }}</span>
+          </div>
         }
-        <sat-platform-nav-menu [attr.aria-label]="group.label ?? 'Home'">
-          @for (item of group.items; track item.path) {
-            <a
-              satPlatformNavMenuItem
-              [routerLink]="item.path"
-              routerLinkActive
-              #rla="routerLinkActive"
-              [routerLinkActiveOptions]="{ exact: true }"
-              [active]="rla.isActive"
-              [attr.aria-current]="rla.isActive ? 'page' : null"
-            >
-              <sat-platform-nav-avatar [item]="item" />
-              {{ item.label }}
-            </a>
+        @for (group of nav(); track group.label) {
+          @if (group.label && !navState.collapsed()) {
+            <p class="bf-shell__group" aria-hidden="true">{{ group.label }}</p>
           }
-        </sat-platform-nav-menu>
-      }
+          <sat-platform-nav-menu [attr.aria-label]="group.label ?? 'Home'">
+            @for (item of group.items; track item.path) {
+              <a
+                satPlatformNavMenuItem
+                [routerLink]="item.path"
+                routerLinkActive
+                #rla="routerLinkActive"
+                [routerLinkActiveOptions]="{ exact: true }"
+                [active]="rla.isActive"
+                [attr.aria-current]="rla.isActive ? 'page' : null"
+                (click)="closeNav()"
+              >
+                <sat-platform-nav-avatar [item]="item" />
+                {{ item.label }}
+              </a>
+            }
+          </sat-platform-nav-menu>
+        }
+      </div>
       <sat-platform-nav-user>
         <button
           satPlatformNavUserProfile

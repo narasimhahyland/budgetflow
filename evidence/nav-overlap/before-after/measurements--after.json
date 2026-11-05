@@ -1,0 +1,542 @@
+{
+  "desktop-1024x768": {
+    "expanded": {
+      "viewport": {
+        "w": 1024,
+        "h": 768
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 308,
+        "h": 768,
+        "bottom": 768,
+        "right": 308
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 968,
+        "h": 1261,
+        "bottom": 1261,
+        "right": 1024
+      },
+      "navOverlapsMainPx": 252,
+      "list": {
+        "x": 0,
+        "y": 64,
+        "w": 308,
+        "h": 648,
+        "bottom": 712,
+        "right": 308
+      },
+      "listOverflowY": "hidden",
+      "user": {
+        "x": 0,
+        "y": 712,
+        "w": 308,
+        "h": 56,
+        "bottom": 768,
+        "right": 308
+      },
+      "itemCount": 13,
+      "lastItem": {
+        "label": "Reports",
+        "rect": {
+          "x": 4,
+          "y": 952,
+          "w": 300,
+          "h": 48,
+          "bottom": 1000,
+          "right": 304
+        }
+      },
+      "lastItemBelowUserTop": 288,
+      "scrollers": [
+        {
+          "tag": "div.bf-shell__nav",
+          "overflowY": "auto",
+          "scrollHeight": 896,
+          "clientHeight": 597
+        }
+      ]
+    },
+    "reach": {
+      "scrollableWithoutHover": "div",
+      "lastBottom": 701,
+      "userTop": 712,
+      "lastHitIsItself": true
+    },
+    "stillOpenAfterEscape": false,
+    "stillOpenAfterOutsideClick": false,
+    "closed": {
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 56,
+        "h": 768,
+        "bottom": 768,
+        "right": 56
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 968,
+        "h": 1261,
+        "bottom": 1261,
+        "right": 1024
+      },
+      "navOverlapsMainPx": 0
+    }
+  },
+  "desktop-1024x600": {
+    "expanded": {
+      "viewport": {
+        "w": 1024,
+        "h": 600
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 308,
+        "h": 600,
+        "bottom": 600,
+        "right": 308
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 968,
+        "h": 1261,
+        "bottom": 1261,
+        "right": 1024
+      },
+      "navOverlapsMainPx": 252,
+      "list": {
+        "x": 0,
+        "y": 64,
+        "w": 308,
+        "h": 480,
+        "bottom": 544,
+        "right": 308
+      },
+      "listOverflowY": "hidden",
+      "user": {
+        "x": 0,
+        "y": 544,
+        "w": 308,
+        "h": 56,
+        "bottom": 600,
+        "right": 308
+      },
+      "itemCount": 13,
+      "lastItem": {
+        "label": "Reports",
+        "rect": {
+          "x": 4,
+          "y": 952,
+          "w": 300,
+          "h": 48,
+          "bottom": 1000,
+          "right": 304
+        }
+      },
+      "lastItemBelowUserTop": 456,
+      "scrollers": [
+        {
+          "tag": "div.bf-shell__nav",
+          "overflowY": "auto",
+          "scrollHeight": 896,
+          "clientHeight": 429
+        }
+      ]
+    },
+    "reach": {
+      "scrollableWithoutHover": "div",
+      "lastBottom": 533,
+      "userTop": 544,
+      "lastHitIsItself": true
+    },
+    "stillOpenAfterEscape": false,
+    "stillOpenAfterOutsideClick": false,
+    "closed": {
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 56,
+        "h": 600,
+        "bottom": 600,
+        "right": 56
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 968,
+        "h": 1261,
+        "bottom": 1261,
+        "right": 1024
+      },
+      "navOverlapsMainPx": 0
+    }
+  },
+  "desktop-1440x900": {
+    "expanded": {
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 308,
+        "h": 900,
+        "bottom": 900,
+        "right": 308
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 1384,
+        "h": 1017,
+        "bottom": 1017,
+        "right": 1440
+      },
+      "navOverlapsMainPx": 252,
+      "list": {
+        "x": 0,
+        "y": 64,
+        "w": 308,
+        "h": 780,
+        "bottom": 844,
+        "right": 308
+      },
+      "listOverflowY": "hidden",
+      "user": {
+        "x": 0,
+        "y": 844,
+        "w": 308,
+        "h": 56,
+        "bottom": 900,
+        "right": 308
+      },
+      "itemCount": 13,
+      "lastItem": {
+        "label": "Reports",
+        "rect": {
+          "x": 4,
+          "y": 952,
+          "w": 300,
+          "h": 48,
+          "bottom": 1000,
+          "right": 304
+        }
+      },
+      "lastItemBelowUserTop": 156,
+      "scrollers": [
+        {
+          "tag": "div.bf-shell__nav",
+          "overflowY": "auto",
+          "scrollHeight": 896,
+          "clientHeight": 729
+        }
+      ]
+    },
+    "reach": {
+      "scrollableWithoutHover": "div",
+      "lastBottom": 833,
+      "userTop": 844,
+      "lastHitIsItself": true
+    },
+    "stillOpenAfterEscape": false,
+    "stillOpenAfterOutsideClick": false,
+    "closed": {
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 56,
+        "h": 900,
+        "bottom": 900,
+        "right": 56
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 1384,
+        "h": 1017,
+        "bottom": 1017,
+        "right": 1440
+      },
+      "navOverlapsMainPx": 0
+    }
+  },
+  "desktop-1440x900-ceo": {
+    "expanded": {
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 308,
+        "h": 900,
+        "bottom": 900,
+        "right": 308
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 1384,
+        "h": 1017,
+        "bottom": 1017,
+        "right": 1440
+      },
+      "navOverlapsMainPx": 252,
+      "list": {
+        "x": 0,
+        "y": 64,
+        "w": 308,
+        "h": 780,
+        "bottom": 844,
+        "right": 308
+      },
+      "listOverflowY": "hidden",
+      "user": {
+        "x": 0,
+        "y": 844,
+        "w": 308,
+        "h": 56,
+        "bottom": 900,
+        "right": 308
+      },
+      "itemCount": 16,
+      "lastItem": {
+        "label": "Audit log",
+        "rect": {
+          "x": 4,
+          "y": 1132,
+          "w": 300,
+          "h": 48,
+          "bottom": 1180,
+          "right": 304
+        }
+      },
+      "lastItemBelowUserTop": 336,
+      "scrollers": [
+        {
+          "tag": "div.bf-shell__nav",
+          "overflowY": "auto",
+          "scrollHeight": 1076,
+          "clientHeight": 729
+        }
+      ]
+    },
+    "reach": {
+      "scrollableWithoutHover": "div",
+      "lastBottom": 833,
+      "userTop": 844,
+      "lastHitIsItself": true
+    },
+    "stillOpenAfterEscape": false,
+    "stillOpenAfterOutsideClick": false,
+    "closed": {
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 56,
+        "h": 900,
+        "bottom": 900,
+        "right": 56
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 1384,
+        "h": 1017,
+        "bottom": 1017,
+        "right": 1440
+      },
+      "navOverlapsMainPx": 0
+    }
+  },
+  "tablet-834x1112-ceo": {
+    "expanded": {
+      "viewport": {
+        "w": 834,
+        "h": 1112
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 308,
+        "h": 1112,
+        "bottom": 1112,
+        "right": 308
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 778,
+        "h": 1567,
+        "bottom": 1567,
+        "right": 834
+      },
+      "navOverlapsMainPx": 252,
+      "list": {
+        "x": 0,
+        "y": 64,
+        "w": 308,
+        "h": 992,
+        "bottom": 1056,
+        "right": 308
+      },
+      "listOverflowY": "hidden",
+      "user": {
+        "x": 0,
+        "y": 1056,
+        "w": 308,
+        "h": 56,
+        "bottom": 1112,
+        "right": 308
+      },
+      "itemCount": 16,
+      "lastItem": {
+        "label": "Audit log",
+        "rect": {
+          "x": 4,
+          "y": 1132,
+          "w": 300,
+          "h": 48,
+          "bottom": 1180,
+          "right": 304
+        }
+      },
+      "lastItemBelowUserTop": 124,
+      "scrollers": [
+        {
+          "tag": "div.bf-shell__nav",
+          "overflowY": "auto",
+          "scrollHeight": 1076,
+          "clientHeight": 941
+        }
+      ]
+    },
+    "reach": {
+      "scrollableWithoutHover": "div",
+      "lastBottom": 1045,
+      "userTop": 1056,
+      "lastHitIsItself": true
+    },
+    "stillOpenAfterEscape": false,
+    "stillOpenAfterOutsideClick": false,
+    "closed": {
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 56,
+        "h": 1112,
+        "bottom": 1112,
+        "right": 56
+      },
+      "main": {
+        "x": 56,
+        "y": 0,
+        "w": 778,
+        "h": 1567,
+        "bottom": 1567,
+        "right": 834
+      },
+      "navOverlapsMainPx": 0
+    }
+  },
+  "mobile-412x915-ceo": {
+    "expanded": {
+      "viewport": {
+        "w": 412,
+        "h": 915
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 308,
+        "h": 915,
+        "bottom": 915,
+        "right": 308
+      },
+      "main": {
+        "x": 0,
+        "y": 0,
+        "w": 412,
+        "h": 1915,
+        "bottom": 1915,
+        "right": 412
+      },
+      "navOverlapsMainPx": 308,
+      "list": {
+        "x": 0,
+        "y": 64,
+        "w": 308,
+        "h": 795,
+        "bottom": 859,
+        "right": 308
+      },
+      "listOverflowY": "hidden",
+      "user": {
+        "x": 0,
+        "y": 859,
+        "w": 308,
+        "h": 56,
+        "bottom": 915,
+        "right": 308
+      },
+      "itemCount": 16,
+      "lastItem": {
+        "label": "Audit log",
+        "rect": {
+          "x": 4,
+          "y": 1132,
+          "w": 300,
+          "h": 48,
+          "bottom": 1180,
+          "right": 304
+        }
+      },
+      "lastItemBelowUserTop": 321,
+      "scrollers": [
+        {
+          "tag": "div.bf-shell__nav",
+          "overflowY": "auto",
+          "scrollHeight": 1076,
+          "clientHeight": 744
+        }
+      ]
+    },
+    "reach": {
+      "scrollableWithoutHover": "div",
+      "lastBottom": 848,
+      "userTop": 859,
+      "lastHitIsItself": true
+    },
+    "stillOpenAfterEscape": false,
+    "stillOpenAfterOutsideClick": false,
+    "closed": {
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 915,
+        "bottom": 915,
+        "right": 0
+      },
+      "main": {
+        "x": 0,
+        "y": 0,
+        "w": 412,
+        "h": 1915,
+        "bottom": 1915,
+        "right": 412
+      },
+      "navOverlapsMainPx": 0
+    }
+  }
+}
