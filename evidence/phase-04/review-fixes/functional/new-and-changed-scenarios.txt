@@ -1,0 +1,14 @@
+apps/api-e2e/src/audit/budget-commands.spec.ts:34:7 › one audit entry per budget command › allocation, grid, per-head, transfer, controls, requests and decisions each write one entry (440ms)
+apps/api-e2e/src/audit/budget-commands.spec.ts:156:7 › one audit entry per budget command › approving a contingency release writes one entry (141ms)
+apps/api-e2e/src/budgets/concurrent-controls.spec.ts:40:7 › concurrent controls and drivers › parallel freeze, unfreeze, set to zero and restore: one success, one event and one audit entry each (254ms
+apps/api-e2e/src/budgets/concurrent-controls.spec.ts:83:7 › concurrent controls and drivers › parallel reductions that each fit once: one succeeds, the rest are below the floor (141ms)
+apps/api-e2e/src/budgets/concurrent-controls.spec.ts:110:7 › concurrent controls and drivers › parallel per-head set and true-up allocate the driver amount once (3.1s)
+apps/api-e2e/src/budgets/concurrent-controls.spec.ts:175:7 › concurrent controls and drivers › a cascade set to zero skips a child that is already at zero (385ms)
+apps/api-e2e/src/budgets/controls.spec.ts:141:7 › reduce › the floor counts allocated out, held, encumbered and actual but not pending requests (247ms)
+apps/api-e2e/src/budgets/per-head-grid.spec.ts:260:7 › allocation grid › a pasted row without an owner is saved as an unfunded Draft until an owner is set (109ms)
+apps/api-e2e/src/budgets/planning.spec.ts:446:7 › budget rules: phasing, limits, settings, alerts › settings use optimistic concurrency; owners tune thresholds, the parent owner governs the control mo
+apps/api-e2e/src/budgets/planning.spec.ts:514:7 › budget rules: phasing, limits, settings, alerts › crossing an owner alert threshold publishes budget.threshold_crossed (116ms)
+apps/api-e2e/src/budgets/planning.spec.ts:554:7 › budget rules: phasing, limits, settings, alerts › a parent's owner is alerted when spend in a child crosses the parent's threshold (114ms)
+apps/api-e2e/src/budgets/planning.spec.ts:629:7 › Available, roll-ups and scope › company-wide Available subtracts held money; parent utilization rolls up child spend once (188ms)
+apps/api-e2e/src/budgets/transfers-requests.spec.ts:26:7 › transfers › between siblings the parent is untouched; between cousins money moves through their ancestors (299ms)
+apps/api-e2e/src/budgets/transfers-requests.spec.ts:96:7 › transfers › pending requests reduce what can be transferred; the owner of both siblings or of their parent may transfer (206ms)

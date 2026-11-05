@@ -40,8 +40,10 @@ import {
   DEFAULT_CONTROL,
   postAllocation,
   postOriginalBudget,
+  rollupUtilizationBps,
   utilizationBps,
   type CurrencyCode,
+  type SubtreeTotals,
 } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, asc, eq, gt, ilike, inArray, isNull, like, or, sql, type SQL } from 'drizzle-orm';
@@ -152,8 +154,8 @@ export class BudgetsService {
   }
 
   /**
-   * Company-wide roll-up: authorized of the top budgets in scope minus pre-encumbered, encumbered and
-   * actual of every budget below them, so money allocated to children is counted once.
+   * Company-wide roll-up: authorized of the top budgets in scope minus held, pre-encumbered, encumbered
+   * and actual of every budget below them, so money allocated to children is counted once.
    */
   async summary(
     actor: RequestActor,
@@ -195,8 +197,8 @@ export class BudgetsService {
       );
       const subtree = await this.views.subtreeTotals(tx, tops);
       const authorized = tops.reduce((s, t) => s + balances.get(t.id)!.reporting.authorized, 0);
-      const sum = (k: 'preEncumberedMinor' | 'encumberedMinor' | 'actualMinor') =>
-        tops.reduce((s, t) => s + subtree.get(t.id)![k], 0);
+      const sum = (k: keyof SubtreeTotals) => tops.reduce((s, t) => s + subtree.get(t.id)![k], 0);
+      const held = sum('heldMinor');
       const pre = sum('preEncumberedMinor');
       const enc = sum('encumberedMinor');
       const act = sum('actualMinor');
@@ -211,11 +213,15 @@ export class BudgetsService {
         tx,
         all.map((b) => b.id),
       );
+      const allSubtrees = await this.views.subtreeTotals(tx, all);
       const byStatus: Record<string, number> = {};
       let over = 0;
       for (const b of all) {
         byStatus[b.status] = (byStatus[b.status] ?? 0) + 1;
-        const util = utilizationBps(allBalances.get(b.id)!.budget);
+        const util = rollupUtilizationBps(
+          allBalances.get(b.id)!.reporting.authorized,
+          allSubtrees.get(b.id)!,
+        );
         if (b.alertThresholdsPct.some((t) => util >= t * 100)) over++;
       }
       return {
@@ -224,10 +230,11 @@ export class BudgetsService {
         rootId: q.rootId ?? null,
         currency: rep,
         authorized: m(authorized),
+        held: m(held),
         preEncumbered: m(pre),
         encumbered: m(enc),
         actual: m(act),
-        available: m(authorized - pre - enc - act),
+        available: m(authorized - held - pre - enc - act),
         utilizationBps: utilizationBps({ authorized, encumbered: enc, actual: act }),
         budgetCount: all.length,
         byStatus,
@@ -264,7 +271,15 @@ export class BudgetsService {
     actor: RequestActor,
     req: CreateBudgetRequest,
     ctx: CommandContext,
-    options: { recordPlanLine?: boolean; skipPolicy?: boolean; reason?: string } = {},
+    options: {
+      recordPlanLine?: boolean;
+      skipPolicy?: boolean;
+      reason?: string;
+      /** `false` when the calling command writes the one audit entry itself. */
+      audit?: boolean;
+      /** Allocation grid rows without an owner start as an ownerless Draft. */
+      ownerless?: boolean;
+    } = {},
   ): Promise<string> {
     const id = ctx.fixedId ?? randomUUID();
     let parent: BudgetRow | undefined;
@@ -410,7 +425,7 @@ export class BudgetsService {
         legalEntityId: entity.id,
         costCenterId: req.costCenterId ?? null,
         orgUnitId: req.orgUnitId ?? null,
-        ownerPersonId: req.ownerPersonId ?? actor.personId,
+        ownerPersonId: options.ownerless ? null : (req.ownerPersonId ?? actor.personId),
         currency,
         fiscalYearId: fy.id,
         planVersionId: parent ? null : req.planVersionId!,
@@ -444,24 +459,25 @@ export class BudgetsService {
       if (options.recordPlanLine !== false)
         await this.recordPlanLine(tx, actor, row, req, journalId);
     }
-    await this.audit.append(tx, {
-      tenantId: actor.tenantId,
-      actorPersonId: actor.personId,
-      actorSubject: actor.subject,
-      action: 'budget.created',
-      resourceType: 'budget',
-      resourceId: id,
-      legalEntityId: entity.id,
-      requestId: ctx.requestId,
-      changes: {
-        name: { from: null, to: req.name },
-        parentId: { from: null, to: parent?.id ?? null },
-        currency: { from: null, to: currency },
-        status: { from: null, to: row.status },
-        ...(req.originalAmount ? { originalAmount: { from: null, to: req.originalAmount } } : {}),
-        ...(journalId ? { journalId: { from: null, to: journalId } } : {}),
-      },
-    });
+    if (options.audit !== false)
+      await this.audit.append(tx, {
+        tenantId: actor.tenantId,
+        actorPersonId: actor.personId,
+        actorSubject: actor.subject,
+        action: 'budget.created',
+        resourceType: 'budget',
+        resourceId: id,
+        legalEntityId: entity.id,
+        requestId: ctx.requestId,
+        changes: {
+          name: { from: null, to: req.name },
+          parentId: { from: null, to: parent?.id ?? null },
+          currency: { from: null, to: currency },
+          status: { from: null, to: row.status },
+          ...(req.originalAmount ? { originalAmount: { from: null, to: req.originalAmount } } : {}),
+          ...(journalId ? { journalId: { from: null, to: journalId } } : {}),
+        },
+      });
     await this.views.snapshot(tx, actor, id, options.reason ?? 'Created');
     return id;
   }
@@ -555,7 +571,8 @@ export class BudgetsService {
     },
     ctx: CommandContext,
     auditAction: string,
-    options: { skipPolicy?: boolean } = {},
+    /** `audit: false` when the calling command writes the one audit entry itself. */
+    options: { skipPolicy?: boolean; audit?: boolean } = {},
   ): Promise<string> {
     const found = await this.reads.budgetRows(tx, [parentId, req.childBudgetId]);
     const parentRow = found.get(parentId);
@@ -598,26 +615,27 @@ export class BudgetsService {
       requestId: ctx.requestId,
       idempotencyKey: ctx.idempotencyKey,
     });
-    await this.audit.append(tx, {
-      tenantId: actor.tenantId,
-      actorPersonId: actor.personId,
-      actorSubject: actor.subject,
-      action: auditAction,
-      resourceType: 'budget',
-      resourceId: parentId,
-      legalEntityId: parent.legalEntityId,
-      requestId: ctx.requestId,
-      reason: req.memo ?? null,
-      changes: {
-        childBudgetId: { from: null, to: child.id },
-        allocatedOut: {
-          from: balances.get(parentId)!.budget.allocated_out,
-          to: balances.get(parentId)!.budget.allocated_out + result.parentAmount.amountMinor,
+    if (options.audit !== false)
+      await this.audit.append(tx, {
+        tenantId: actor.tenantId,
+        actorPersonId: actor.personId,
+        actorSubject: actor.subject,
+        action: auditAction,
+        resourceType: 'budget',
+        resourceId: parentId,
+        legalEntityId: parent.legalEntityId,
+        requestId: ctx.requestId,
+        reason: req.memo ?? null,
+        changes: {
+          childBudgetId: { from: null, to: child.id },
+          allocatedOut: {
+            from: balances.get(parentId)!.budget.allocated_out,
+            to: balances.get(parentId)!.budget.allocated_out + result.parentAmount.amountMinor,
+          },
+          childAuthorizedDelta: { from: null, to: result.childAmount },
+          journalId: { from: null, to: journalId },
         },
-        childAuthorizedDelta: { from: null, to: result.childAmount },
-        journalId: { from: null, to: journalId },
-      },
-    });
+      });
     await this.views.snapshot(tx, actor, child.id, req.memo ?? 'Allocation received');
     await this.analytics.track(tx, actor, 'allocation.created', {
       depth: locked.get(req.childBudgetId)!.depth,
@@ -642,6 +660,13 @@ export class BudgetsService {
         if (!parent) throw ApiProblem.notFound('parent budget');
         this.policy.assert(actor, 'budget.create_child', budgetResource(parent), 'budget');
         await this.reads.lockBudgets(tx, [id]);
+        if (!row.ownerPersonId)
+          throw new ApiProblem(
+            422,
+            'VALIDATION_FAILED',
+            'Set an owner before activating this budget; a Draft without an owner receives no money.',
+            { field: 'ownerPersonId' },
+          );
         const next = unwrap(budgetMachine.next(row.status, 'activate'));
         await tx.update(budgets).set({ status: next }).where(eq(budgets.id, id));
         await this.audit.append(tx, {

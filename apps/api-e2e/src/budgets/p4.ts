@@ -1,7 +1,8 @@
 // Helpers for the Phase 4 budget scenarios: controls, transfers, commitments posted as opening balances
 // (manual journals; Phase 5 posts real commitments) and the ledger rebuild check.
-import { expect, type APIRequestContext } from '@playwright/test';
+import { expect, type APIRequestContext, type APIResponse } from '@playwright/test';
 import {
+  AuditEventList,
   BudgetDetail,
   ControlImpact,
   ControlResult,
@@ -12,6 +13,7 @@ import {
 import { SEED, type SeedUserId } from '@bf/seed';
 import { as, mutate } from '../support/auth';
 import { expectContract } from '../support/contract';
+import { asOwner } from '../support/db';
 import { allocateOk, createChild, createRoot } from '../support/factory';
 
 export const USD = (amountMinor: number) => ({ amountMinor, currency: 'USD' });
@@ -138,6 +140,56 @@ export const bal = (b: BudgetDetail) => {
     actual: c.actual.amountMinor,
   };
 };
+
+/** Audit actions recorded on one resource, oldest first (read as the auditor). */
+export async function auditActions(request: APIRequestContext, resourceId: string) {
+  const list = await expectContract(
+    await request.get(`/api/audit/events?resourceId=${resourceId}&limit=200`, {
+      headers: await as('auditor'),
+    }),
+    200,
+    AuditEventList,
+  );
+  return list.items.map((e) => e.action);
+}
+
+/** Audit events written by one HTTP request (the scenario sets X-Request-Id). */
+export async function auditsOfRequest(requestId: string) {
+  return asOwner(
+    async (c) =>
+      (
+        await c.query<{ action: string; resource_type: string; resource_id: string }>(
+          'select action, resource_type, resource_id from audit_events where request_id = $1 order by seq',
+          [requestId],
+        )
+      ).rows,
+  );
+}
+
+/** `budget.control_changed` outbox payloads for a budget, oldest first. */
+export async function controlEvents(budgetId: string, action?: string) {
+  const rows = await asOwner(
+    async (c) =>
+      (
+        await c.query<{ payload: Record<string, unknown> }>(
+          `select payload from outbox_messages where topic = 'budget.control_changed' and payload->>'budgetId' = $1 order by created_at`,
+          [budgetId],
+        )
+      ).rows,
+  );
+  return rows.map((r) => r.payload).filter((p) => !action || p['action'] === action);
+}
+
+/** Status and problem code of each response, tallied: { '200': 1, '409 INVALID_TRANSITION': 4 }. */
+export async function tally(responses: Promise<APIResponse>[]) {
+  const out: Record<string, number> = {};
+  for (const r of await Promise.all(responses)) {
+    const code = r.status() >= 400 ? ((await r.json().catch(() => null))?.code ?? '') : '';
+    const k = `${r.status()}${code ? ` ${code}` : ''}`;
+    out[k] = (out[k] ?? 0) + 1;
+  }
+  return out;
+}
 
 export async function rebuildCheck(request: APIRequestContext) {
   const queued = await expectContract(

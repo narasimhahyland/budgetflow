@@ -128,14 +128,25 @@ export class AllocationService {
         if (!ok.ok) return fail(child.name, ok.error.code, ok.error.message);
         return { ...base, childBudgetId: child.id, name: child.name, outcome: 'ok' as const };
       }
+      if (!l.newChild!.ownerPersonId)
+        return {
+          ...base,
+          childBudgetId: null,
+          name: l.newChild!.name,
+          outcome: 'draft' as const,
+          message: 'Saved as a Draft until an owner is set; nothing is allocated to it.',
+        };
       return { ...base, childBudgetId: null, name: l.newChild!.name, outcome: 'ok' as const };
     });
-    const total = req.lines.reduce((s, l) => s + l.amountMinor, 0);
+    const total = req.lines.reduce(
+      (s, l, i) => s + (lines[i].outcome === 'draft' ? 0 : l.amountMinor),
+      0,
+    );
     const balances = (await this.reads.balances(tx, [parentId])).get(parentId)!.budget;
     const control = toPostingBudget(parent).control;
     const availableBefore = allocationAvailable(balances, control);
     const fits = checkAllocation(balances, control, total, parent.currency);
-    const ok = parentStatus.ok && fits.ok && lines.every((l) => l.outcome === 'ok');
+    const ok = parentStatus.ok && fits.ok && lines.every((l) => l.outcome !== 'error');
     const result: BatchAllocationResult = {
       dryRun: req.dryRun,
       ok,
@@ -160,8 +171,10 @@ export class AllocationService {
           .filter((l) => l.outcome === 'error')
           .map((l) => ({ path: `lines.${l.index}`, message: l.message ?? '' })),
       );
+    const audited: Record<string, unknown>[] = [];
     for (const [i, l] of req.lines.entries()) {
       let childId = l.childBudgetId;
+      const draft = lines[i].outcome === 'draft';
       if (!childId) {
         childId = await this.budgetsService.createInTx(
           tx,
@@ -172,27 +185,61 @@ export class AllocationService {
             legalEntityId: l.newChild!.legalEntityId ?? parent.legalEntityId,
             currency: parent.currency,
             fiscalYearId: parent.fiscalYearId,
+            draft,
           },
           { ...ctx, fixedId: undefined },
-          { reason: 'Created in the allocation grid' },
+          { reason: 'Created in the allocation grid', audit: false, ownerless: draft },
         );
         lines[i].childBudgetId = childId;
       }
-      result.journalIds.push(
-        await this.budgetsService.allocateInTx(
-          tx,
-          actor,
-          parentId,
-          {
-            childBudgetId: childId,
-            amount: { amountMinor: l.amountMinor, currency: parent.currency },
-            memo: req.memo ?? 'Allocation grid',
-          },
-          ctx,
-          'budget.allocated',
-        ),
+      if (draft) {
+        audited.push({
+          childBudgetId: childId,
+          name: lines[i].name,
+          created: true,
+          draft: true,
+          amountMinor: 0,
+          journalId: null,
+        });
+        continue;
+      }
+      const journalId = await this.budgetsService.allocateInTx(
+        tx,
+        actor,
+        parentId,
+        {
+          childBudgetId: childId,
+          amount: { amountMinor: l.amountMinor, currency: parent.currency },
+          memo: req.memo ?? 'Allocation grid',
+        },
+        ctx,
+        'budget.allocated',
+        { audit: false },
       );
+      result.journalIds.push(journalId);
+      audited.push({
+        childBudgetId: childId,
+        name: lines[i].name,
+        created: !l.childBudgetId,
+        amountMinor: l.amountMinor,
+        journalId,
+      });
     }
+    await this.audit.append(tx, {
+      tenantId: actor.tenantId,
+      actorPersonId: actor.personId,
+      actorSubject: actor.subject,
+      action: 'budget.allocation_grid_applied',
+      resourceType: 'budget',
+      resourceId: parentId,
+      legalEntityId: parent.legalEntityId,
+      requestId: ctx.requestId,
+      reason: req.memo ?? null,
+      changes: {
+        allocatedOut: { from: balances.allocated_out, to: balances.allocated_out + total },
+        lines: { from: null, to: audited },
+      },
+    });
     result.parent = await this.views.detailById(tx, actor, parentId);
     return result;
   }
@@ -301,10 +348,14 @@ export class AllocationService {
 
   async perHead(actor: RequestActor, parentId: string, req: PerHeadRequest, ctx: CommandContext) {
     const run = async (tx: Tx): Promise<PerHeadResult> => {
-      const parent = await this.views.row(tx, parentId);
+      let parent = await this.views.row(tx, parentId);
       this.policy.assert(actor, 'budget.allocate', budgetResource(parent), 'budget');
-      const child = await this.views.row(tx, req.childBudgetId);
-      if (!req.dryRun) await this.reads.lockBudgets(tx, [parentId, child.id]);
+      let child = await this.views.row(tx, req.childBudgetId);
+      if (!req.dryRun) {
+        await this.reads.lockBudgets(tx, [parentId, child.id]);
+        parent = await this.views.row(tx, parentId);
+        child = await this.views.row(tx, req.childBudgetId);
+      }
       const preview = await this.perHeadPreview(tx, parent, child, req);
       if (req.dryRun) return { preview, journalId: null, child: null };
       return this.applyPerHead(
@@ -344,17 +395,25 @@ export class AllocationService {
     ctx: CommandContext,
   ) {
     const run = async (tx: Tx): Promise<PerHeadResult> => {
-      const child = await this.views.row(tx, childId);
-      const cfg = child.driverConfig as PerHeadDriverConfig | null;
-      if (child.allocationDriver !== 'per_head' || !cfg || !child.parentId)
-        throw new ApiProblem(
-          422,
-          'VALIDATION_FAILED',
-          'This budget is not allocated by the per-head driver.',
-        );
-      const parent = await this.views.row(tx, child.parentId);
+      const driverOf = (row: BudgetRow) => {
+        const cfg = row.driverConfig as PerHeadDriverConfig | null;
+        if (row.allocationDriver !== 'per_head' || !cfg || !row.parentId)
+          throw new ApiProblem(
+            422,
+            'VALIDATION_FAILED',
+            'This budget is not allocated by the per-head driver.',
+          );
+        return { cfg, parentId: row.parentId };
+      };
+      let child = await this.views.row(tx, childId);
+      let parent = await this.views.row(tx, driverOf(child).parentId);
       this.policy.assert(actor, 'budget.allocate', budgetResource(parent), 'budget');
-      if (!req.dryRun) await this.reads.lockBudgets(tx, [parent.id, child.id]);
+      if (!req.dryRun) {
+        await this.reads.lockBudgets(tx, [parent.id, child.id]);
+        child = await this.views.row(tx, childId);
+        parent = await this.views.row(tx, driverOf(child).parentId);
+      }
+      const { cfg } = driverOf(child);
       const preview = await this.perHeadPreview(tx, parent, child, {
         rateMinor: cfg.rateMinor,
         eligibleTypes: cfg.eligibleTypes,
@@ -394,6 +453,26 @@ export class AllocationService {
     ctx: CommandContext,
     opts: { eligibleTypes: EmploymentType[]; prorate: boolean; reason: string },
   ): Promise<PerHeadResult> {
+    const driver: PerHeadDriverConfig = {
+      rateMinor: preview.rateMinor,
+      eligibleTypes: opts.eligibleTypes,
+      prorate: opts.prorate,
+      orgUnitId: preview.orgUnitId,
+      snapshotId: preview.snapshotId,
+      asOfDate: preview.asOfDate,
+      eligibleHeadcountMilli: preview.eligibleHeadcountMilli,
+      amountMinor: preview.amountMinor,
+      programTemplateId,
+    };
+    const stored = (child.driverConfig ?? {}) as Record<string, unknown>;
+    const unchanged =
+      preview.deltaMinor === 0 &&
+      child.allocationDriver === 'per_head' &&
+      (Object.keys(driver) as (keyof PerHeadDriverConfig)[]).every(
+        (k) => JSON.stringify(stored[k] ?? null) === JSON.stringify(driver[k] ?? null),
+      );
+    if (unchanged)
+      return { preview, journalId: null, child: await this.views.detailById(tx, actor, child.id) };
     let journalId: string | null = null;
     if (preview.deltaMinor > 0) {
       journalId = await this.budgetsService.allocateInTx(
@@ -407,6 +486,7 @@ export class AllocationService {
         },
         ctx,
         'budget.per_head_allocated',
+        { audit: false },
       );
     } else if (preview.deltaMinor < 0) {
       journalId = await this.controls.returnToParentInTx(
@@ -418,17 +498,6 @@ export class AllocationService {
         ctx,
       );
     }
-    const driver: PerHeadDriverConfig = {
-      rateMinor: preview.rateMinor,
-      eligibleTypes: opts.eligibleTypes,
-      prorate: opts.prorate,
-      orgUnitId: preview.orgUnitId,
-      snapshotId: preview.snapshotId,
-      asOfDate: preview.asOfDate,
-      eligibleHeadcountMilli: preview.eligibleHeadcountMilli,
-      amountMinor: preview.amountMinor,
-      programTemplateId,
-    };
     await tx
       .update(budgets)
       .set({
@@ -454,6 +523,8 @@ export class AllocationService {
           to: preview.eligibleHeadcountMilli,
         },
         snapshotId: { from: null, to: preview.snapshotId },
+        parentId: { from: null, to: parent.id },
+        authorizedDelta: { from: null, to: preview.deltaMinor },
         journalId: { from: null, to: journalId },
       },
     });
@@ -853,6 +924,7 @@ export class AllocationService {
               },
               ctx,
               'budget.increase_approved',
+              { audit: false },
             );
           } else {
             const t = await this.controls.transferInTx(
@@ -866,7 +938,7 @@ export class AllocationService {
                 reason: `Contingency release approved: ${row.reason}`,
               },
               ctx,
-              { skipPolicy: true, auditAction: 'budget.contingency_released' },
+              { skipPolicy: true, audit: false },
             );
             journalId = t.journal.id;
           }
@@ -896,6 +968,9 @@ export class AllocationService {
           reason: req.note ?? null,
           changes: {
             status: { from: 'pending', to: updated.status },
+            kind: { from: null, to: row.kind },
+            budgetId: { from: null, to: target.id },
+            sourceBudgetId: { from: null, to: source.id },
             approvedAmountMinor: { from: null, to: approved },
             journalId: { from: null, to: journalId },
           },

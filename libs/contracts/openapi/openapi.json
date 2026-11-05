@@ -509,7 +509,7 @@
         "type": "object",
         "properties": {
           "companyWide": {
-            "description": "Authorized − pre-encumbered − encumbered − actual over this budget and everything below it (child allocations counted once).",
+            "description": "Authorized − held − pre-encumbered − encumbered − actual over this budget and everything below it (child allocations counted once).",
             "$ref": "#/components/schemas/Money"
           },
           "underRules": {
@@ -665,8 +665,10 @@
                   "type": "string",
                   "enum": [
                     "ok",
+                    "draft",
                     "error"
-                  ]
+                  ],
+                  "description": "draft: a new row without an owner, created as a Draft that receives nothing."
                 },
                 "code": {
                   "type": [
@@ -1161,7 +1163,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "(encumbered + actual) / authorized in basis points; pending shown separately."
+            "description": "Roll-up utilization: (encumbered + actual of this budget and everything below it) / authorized in basis points, child spend counted once; pending shown separately."
           },
           "thresholdsReachedPct": {
             "type": "array",
@@ -1679,6 +1681,10 @@
           "authorized": {
             "$ref": "#/components/schemas/Money"
           },
+          "held": {
+            "description": "Earmarks and reserve holds across the scope; held money cannot be spent.",
+            "$ref": "#/components/schemas/Money"
+          },
           "preEncumbered": {
             "$ref": "#/components/schemas/Money"
           },
@@ -1689,7 +1695,7 @@
             "$ref": "#/components/schemas/Money"
           },
           "available": {
-            "description": "Company-wide Available: authorized − pre-encumbered − encumbered − actual, child allocations counted once.",
+            "description": "Company-wide Available: authorized − held − pre-encumbered − encumbered − actual, child allocations counted once.",
             "$ref": "#/components/schemas/Money"
           },
           "utilizationBps": {
@@ -1735,6 +1741,7 @@
           "rootId",
           "currency",
           "authorized",
+          "held",
           "preEncumbered",
           "encumbered",
           "actual",
@@ -2059,9 +2066,19 @@
               "cancel",
               "hold",
               "release",
-              "keep"
+              "return_unfit"
             ],
             "description": "What Phase 5 does with pending requests after this change."
+          },
+          "unfitRequestIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            },
+            "description": "Reduce: pending requests that no longer fit and go back to their requesters, most recent first."
           },
           "destination": {
             "anyOf": [
@@ -2248,6 +2265,7 @@
           "cascade",
           "blocksNewRequests",
           "pendingRequestPolicy",
+          "unfitRequestIds",
           "destination",
           "destinationBudgetId",
           "destinationName",
@@ -2349,14 +2367,24 @@
                   "cancel",
                   "hold",
                   "release",
-                  "keep"
+                  "return_unfit"
                 ]
+              },
+              "unfitRequestIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "description": "Opaque identifier (UUID)."
+                }
               }
             },
             "required": [
               "topic",
               "action",
-              "pendingRequestPolicy"
+              "pendingRequestPolicy",
+              "unfitRequestIds"
             ],
             "additionalProperties": false
           }

@@ -763,7 +763,12 @@ export class PlanningService {
                 accountingDate,
               },
               { ...ctx, fixedId: undefined },
-              { recordPlanLine: false, skipPolicy: true, reason: `Created from ${pv.label}` },
+              {
+                recordPlanLine: false,
+                skipPolicy: true,
+                reason: `Created from ${pv.label}`,
+                audit: false,
+              },
             );
             await tx
               .update(planVersionLines)
@@ -839,6 +844,9 @@ export class PlanningService {
             supersedes: { from: null, to: previous && previous.id !== pv.id ? previous.id : null },
             created: { from: null, to: created.length },
             adjusted: { from: null, to: adjusted.length },
+            createdBudgetIds: { from: null, to: created },
+            adjustedBudgetIds: { from: null, to: adjusted },
+            journalIds: { from: null, to: journalIds },
           },
         });
         return {
@@ -972,7 +980,11 @@ export class PlanningService {
               : {}),
           },
           { ...ctx, fixedId: undefined },
-          { skipPolicy: true, reason: `Rolled forward from ${srcFy?.label ?? 'last year'}` },
+          {
+            skipPolicy: true,
+            reason: `Rolled forward from ${srcFy?.label ?? 'last year'}`,
+            audit: false,
+          },
         );
         idMap.set(s.id, newId);
         result.budgets[i].newId = newId;
@@ -989,7 +1001,7 @@ export class PlanningService {
             },
             ctx,
             'budget.allocated',
-            { skipPolicy: true },
+            { skipPolicy: true, audit: false },
           );
         }
         if (s.allocationDriver === 'per_head' && s.driverConfig) {
@@ -1017,6 +1029,7 @@ export class PlanningService {
           targetFiscalYearId: { from: null, to: fy.id },
           newRootId: { from: null, to: result.rootId },
           budgets: { from: null, to: idMap.size },
+          budgetIds: { from: null, to: [...idMap.values()] },
           scalePct: { from: null, to: req.scalePct },
         },
       });

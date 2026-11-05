@@ -140,8 +140,12 @@ export function validateReduction(
   return impact;
 }
 
-/** What happens to pending requests on the budget after a control change (consumed by Phase 5 requests). */
-export type PendingRequestPolicy = 'cancel' | 'hold' | 'release' | 'keep';
+/**
+ * What happens to pending requests on the budget after a control change (consumed by Phase 5 requests):
+ * set to zero cancels them, freeze holds them, unfreeze and restore release them, and a reduction
+ * returns to their requesters the ones that no longer fit (`unfitPendingRequests`).
+ */
+export type PendingRequestPolicy = 'cancel' | 'hold' | 'release' | 'return_unfit';
 
 export function pendingRequestPolicy(
   action: 'frozen' | 'unfrozen' | 'reduced' | 'set_to_zero' | 'restored',
@@ -149,5 +153,32 @@ export function pendingRequestPolicy(
   if (action === 'set_to_zero') return 'cancel';
   if (action === 'frozen') return 'hold';
   if (action === 'unfrozen' || action === 'restored') return 'release';
-  return 'keep';
+  return 'return_unfit';
+}
+
+export interface PendingRequestAmount {
+  requestId: string;
+  openMinor: number;
+  submittedAt: string;
+}
+
+/**
+ * Pending requests that no longer fit after a reduction leaves `availableAfterMinor` below zero: the
+ * most recently submitted are returned first until what remains fits; earlier requests keep their place.
+ */
+export function unfitPendingRequests(
+  pending: readonly PendingRequestAmount[],
+  availableAfterMinor: number,
+): string[] {
+  let shortfall = -availableAfterMinor;
+  const out: string[] = [];
+  const newestFirst = [...pending].sort(
+    (a, b) => b.submittedAt.localeCompare(a.submittedAt) || b.requestId.localeCompare(a.requestId),
+  );
+  for (const p of newestFirst) {
+    if (shortfall <= 0) break;
+    out.push(p.requestId);
+    shortfall -= p.openMinor;
+  }
+  return out;
 }
