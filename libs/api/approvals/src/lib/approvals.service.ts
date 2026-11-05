@@ -62,7 +62,7 @@ import {
   type Resource,
   type RouteStep,
 } from '@bf/domain';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lte, ne, or } from 'drizzle-orm';
 import { ApprovalLinks } from './approval-links';
 import {
@@ -140,6 +140,8 @@ export const systemActor = (tenantId: string): RequestActor => ({
  */
 @Injectable()
 export class ApprovalsService {
+  private readonly log = new Logger('Approvals');
+
   constructor(
     @Inject(DB) private readonly db: Db,
     private readonly commands: CommandRunner,
@@ -1744,7 +1746,12 @@ export class ApprovalsService {
             reason: 'Escalated after SLA breach (no decision before due time)',
           };
         }
-      } catch {
+      } catch (e) {
+        // Nobody above this approver holds authority for the amount and spend type, so the task
+        // stays where it is. Logged rather than swallowed: a silent sweep hides a broken matrix.
+        this.log.warn(
+          `SLA sweep: task ${task.id} cannot escalate (${(e as Error).message}); leaving it with the current approver`,
+        );
         nextStep = null;
       }
       if (!nextStep) continue;

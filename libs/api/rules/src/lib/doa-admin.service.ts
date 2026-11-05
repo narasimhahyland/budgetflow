@@ -74,10 +74,16 @@ export class DoaAdminService {
   }
 
   private toSummary(row: VersionRow, names: Map<string, string>): DoaMatrixVersionSummary {
+    // Approved versions are stored as active and effective-dated; one that has not started yet
+    // reads as "scheduled" so the screen does not claim it is already in force.
+    const status =
+      row.status === 'active' && row.validFrom > today()
+        ? 'scheduled'
+        : (row.status as DoaMatrixVersionSummary['status']);
     return {
       id: row.id,
       version: row.version,
-      status: row.status as DoaMatrixVersionSummary['status'],
+      status,
       validFrom: row.validFrom,
       validTo: row.validTo,
       approvedByName: row.approvedBy ? (names.get(row.approvedBy) ?? null) : null,
@@ -108,7 +114,12 @@ export class DoaAdminService {
       tx,
       versionRows.map((v) => v.approvedBy),
     );
-    const active = versionRows.find((v) => v.status === 'active') ?? null;
+    // The matrix in force today, not simply the newest approved one (a version may start later).
+    const day = today();
+    const active =
+      versionRows.find(
+        (v) => v.status === 'active' && v.validFrom <= day && (!v.validTo || v.validTo >= day),
+      ) ?? null;
     const selected = versionId
       ? versionRows.find((v) => v.id === versionId)
       : (versionRows.find((v) => v.status === 'draft' || v.status === 'awaiting_approval') ??
@@ -406,16 +417,21 @@ export class DoaAdminService {
             ),
           )
           .for('update');
+        const startsLater = version.validFrom > day;
         if (priorActive) {
+          // A version that starts later closes the current one on its start date but does not
+          // replace it today: the matrix in force must never have a gap.
           await tx
             .update(doaMatrixVersions)
-            .set({ status: 'superseded', validTo: version.validFrom })
+            .set({
+              status: startsLater ? 'active' : 'superseded',
+              validTo: version.validFrom,
+            })
             .where(eq(doaMatrixVersions.id, priorActive.id));
         }
-        const scheduled = version.validFrom > day;
         await tx
           .update(doaMatrixVersions)
-          .set({ status: scheduled ? 'scheduled' : 'active', approvedBy: actor.personId })
+          .set({ status: 'active', approvedBy: actor.personId })
           .where(eq(doaMatrixVersions.id, version.id));
 
         await this.audit.append(tx, {
@@ -428,7 +444,8 @@ export class DoaAdminService {
           requestId: ctx.requestId,
           reason: body.comment ?? `Delegation-of-authority version ${version.version} approved`,
           changes: {
-            status: { from: 'awaiting_approval', to: scheduled ? 'scheduled' : 'active' },
+            status: { from: 'awaiting_approval', to: 'active' },
+            effectiveFrom: { from: null, to: version.validFrom },
             supersededVersion: { from: priorActive?.version ?? null, to: version.version },
           },
         });
