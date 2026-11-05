@@ -8,7 +8,15 @@ Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 10
 
 Phase 8 to 12 screens are specified spec-first in `docs/ux/screens/` (images pending a later Stitch session; status in [review-log.md](review-log.md)). Screens 47e, 59b, 59c, 61d and 61e (Phases 8 and 9), 80g, 80h and 87c (Phase 11) and 94a, 94b and 99b (Phase 12) were added with those batches for plan features that had no screen. Phase 10 reports share the report frame defined in `079-reports-dashboard.md`; Phase 12 connectors share the connector frame defined in `092-integrations-dashboard.md`.
 
-Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and 113a (Phase 13) were added for plan features that had no screen (questions in Slack and Teams; AI feature switches and the AI query log). Every AI surface uses the AI output pattern defined in `011a-ai-assistant-panel.md`.
+Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and 113a (Phase 13) were added for plan features that had no screen (questions in Slack and Teams; AI feature switches and the AI query log), and the shared pattern 000b (Phase 14) for chart table alternatives and the keyboard-first grid. Every AI surface uses the AI output pattern defined in `011a-ai-assistant-panel.md`. Screens 105a (plans and entitlements) and 102e (white-label for resellers) are deferred with the multi-customer backlog and are not specified.
+
+## Shared patterns
+
+Specs that apply across many screens. The design system (000) and the application shell (000a) are start-screen specs and are not counted in the tables below.
+
+| #    | Pattern                                          | Build phase | Primary roles | Notes        |
+| ---- | ------------------------------------------------ | ----------- | ------------- | ------------ |
+| 000b | Chart table alternatives and keyboard-first grid | P14         | All roles     | review-added |
 
 ## Group 1: Authentication and onboarding
 
@@ -241,15 +249,15 @@ Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and
 | 102  | Tenant settings                                    | P2          | OA, FA, SA (system health) |              |
 | 102a | Legal entities                                     | P3          | FA, OA                     | review-added |
 | 102b | Program branding                                   | P14         | OA                         | review-added |
-| 102c | Demo tenant and rules sandbox                      | P14         | OA, FA                     | review-added |
+| 102c | Demo environment and rules sandbox                 | P14         | OA, FA                     | review-added |
 | 102d | Embeddable balance and events widgets              | P16         | OA, IA                     | review-added |
-| 102e | White-label for resellers                          | P16         | SA, OA                     | review-added |
+| 102e | White-label for resellers                          | Deferred    | SA, OA                     | deferred     |
 | 103  | User and role management                           | P2          | OA                         |              |
 | 103a | Bulk owner invites                                 | P14         | OA                         | review-added |
 | 104  | Permission matrix                                  | P2          | OA; AUD read               |              |
 | 104a | Delegation-of-authority matrix (seeded, read-only) | P3          | FA, FC, AUD                | review-added |
 | 105  | Feature flags                                      | P14         | OA, FA, SA (system health) |              |
-| 105a | Plans and entitlements                             | P14         | SA, OA                     | review-added |
+| 105a | Plans and entitlements                             | Deferred    | SA, OA                     | deferred     |
 | 106  | Categories and custom fields                       | P3          | OA, FA                     |              |
 | 106a | GL accounts and category-to-GL mapping             | P3          | FA                         | review-added |
 | 106b | Reason-code taxonomy                               | P3          | FA, OA                     | review-added |
@@ -290,24 +298,25 @@ Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and
 
 ## Screens per build phase
 
-| Phase | Specified + review-added screens     |
-| ----- | ------------------------------------ |
-| P2    | 11                                   |
-| P3    | 24                                   |
-| P4    | 23                                   |
-| P5    | 29                                   |
-| P6    | 7                                    |
-| P7    | 22                                   |
-| P8    | 10                                   |
-| P9    | 9                                    |
-| P10   | 24                                   |
-| P11   | 7                                    |
-| P12   | 16                                   |
-| P13   | 9                                    |
-| P14   | 14                                   |
-| P15   | 11                                   |
-| P16   | 7                                    |
-| Total | 223 (124 specified, 99 review-added) |
+| Phase    | Specified + review-added screens      |
+| -------- | ------------------------------------- |
+| P2       | 11                                    |
+| P3       | 24                                    |
+| P4       | 23                                    |
+| P5       | 29                                    |
+| P6       | 7                                     |
+| P7       | 22                                    |
+| P8       | 10                                    |
+| P9       | 9                                     |
+| P10      | 24                                    |
+| P11      | 7                                     |
+| P12      | 16                                    |
+| P13      | 9                                     |
+| P14      | 14                                    |
+| P15      | 11                                    |
+| P16      | 6                                     |
+| Deferred | 2 (105a, 102e)                        |
+| Total    | 224 (124 specified, 100 review-added) |
 
 ## Role-to-screen matrix
 
