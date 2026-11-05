@@ -191,7 +191,7 @@ export const NAV: NavGroup[] = [
         label: 'Rules and policies',
         path: '/admin/rules',
         icon: 'rules',
-        permission: 'doa.manage',
+        permission: 'rules.read',
       },
       {
         label: 'Integrations',

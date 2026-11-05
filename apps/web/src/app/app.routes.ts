@@ -46,6 +46,10 @@ export const appRoutes: Route[] = [
         loadChildren: () => import('@bf/web/features/approvals').then((m) => m.approvalRoutes),
       },
       {
+        path: 'admin/rules',
+        loadChildren: () => import('@bf/web/features/rules').then((m) => m.rulesRoutes),
+      },
+      {
         path: 'my',
         loadChildren: () => import('@bf/web/features/employee').then((m) => m.employeeRoutes),
       },

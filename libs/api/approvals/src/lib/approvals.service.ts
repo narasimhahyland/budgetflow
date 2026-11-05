@@ -15,6 +15,8 @@ import {
   approvalDelegations,
   approvalInstances,
   approvalTasks,
+  auditEvents,
+  doaMatrixVersions,
   memberships,
   people,
   withTenant,
@@ -30,6 +32,8 @@ import {
 import { AnalyticsService } from '@bf/api/tenancy';
 import type {
   ActivityEntry,
+  ApprovalHistoryQuery,
+  ApprovalHistoryResponse,
   ApprovalInbox,
   ApprovalRouteView,
   ApprovalTaskDetail,
@@ -40,6 +44,9 @@ import type {
   DelegationView,
   EmailActionPreview,
   EmailActionRequest,
+  ReturnEscalationRequest,
+  RevokeDelegationRequest,
+  SlaSweepResponse,
 } from '@bf/contracts';
 import {
   acceptsNewActivity,
@@ -47,13 +54,15 @@ import {
   checkApprovalHygiene,
   checkAuthority,
   checkDecisionAuthority,
+  resolveLimit,
+  validateDelegationHygiene,
   type Action,
   type ApprovalRoute,
   type Delegation,
   type Resource,
   type RouteStep,
 } from '@bf/domain';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lte, ne, or } from 'drizzle-orm';
 import { ApprovalLinks } from './approval-links';
 import {
@@ -131,6 +140,8 @@ export const systemActor = (tenantId: string): RequestActor => ({
  */
 @Injectable()
 export class ApprovalsService {
+  private readonly log = new Logger('Approvals');
+
   constructor(
     @Inject(DB) private readonly db: Db,
     private readonly commands: CommandRunner,
@@ -321,6 +332,7 @@ export class ApprovalsService {
         and(
           eq(approvalDelegations.delegatorPersonId, delegatorId),
           eq(approvalDelegations.delegatePersonId, delegateId),
+          isNull(approvalDelegations.revokedAt),
           lte(approvalDelegations.validFrom, date),
           or(isNull(approvalDelegations.validTo), gte(approvalDelegations.validTo, date)),
           or(isNull(approvalDelegations.spendType), eq(approvalDelegations.spendType, spendType)),
@@ -532,7 +544,7 @@ export class ApprovalsService {
       outcome =
         req.decision === 'reject'
           ? await handler.reject(tx, subject, ctx)
-          : await handler.requestChanges(tx, subject, ctx);
+          : await handler.requestChanges(tx, subject, ctx, req.counterOfferAmount ?? null);
       await tx
         .update(approvalInstances)
         .set({ status: taskStatus, completedAt: new Date() })
@@ -1004,6 +1016,7 @@ export class ApprovalsService {
       .where(
         and(
           eq(approvalDelegations.delegatePersonId, personId),
+          isNull(approvalDelegations.revokedAt),
           lte(approvalDelegations.validFrom, date),
           or(isNull(approvalDelegations.validTo), gte(approvalDelegations.validTo, date)),
         ),
@@ -1371,8 +1384,18 @@ export class ApprovalsService {
   private delegationView(
     r: typeof approvalDelegations.$inferSelect,
     names: Map<string, string>,
+    effectiveLimitMinor: number | null = null,
   ): DelegationView {
     const today = todayUtc();
+    const isRevoked = Boolean(r.revokedAt);
+    const active = !isRevoked && r.validFrom <= today && (r.validTo === null || today <= r.validTo);
+    const status: NonNullable<DelegationView['status']> = isRevoked
+      ? 'revoked'
+      : active
+        ? 'active'
+        : r.validFrom > today
+          ? 'scheduled'
+          : 'ended';
     return {
       id: r.id,
       delegatorPersonId: r.delegatorPersonId,
@@ -1384,10 +1407,16 @@ export class ApprovalsService {
         r.limitMinor !== null && r.currency
           ? { amountMinor: r.limitMinor, currency: r.currency }
           : null,
+      effectiveLimit:
+        effectiveLimitMinor !== null
+          ? { amountMinor: effectiveLimitMinor, currency: r.currency ?? 'USD' }
+          : null,
       validFrom: r.validFrom,
       validTo: r.validTo ?? r.validFrom,
       reason: r.reason,
-      active: r.validFrom <= today && (r.validTo === null || today <= r.validTo),
+      active,
+      status,
+      revokedAt: r.revokedAt?.toISOString() ?? null,
     };
   }
 
@@ -1410,14 +1439,6 @@ export class ApprovalsService {
           can(actor, 'request.approve', { kind: 'tenant', tenantId: actor.tenantId }).allowed ||
           can(actor, 'contribution.decide', { kind: 'tenant', tenantId: actor.tenantId }).allowed;
         if (!canApprove) throw ApiProblem.forbidden('Only approvers can delegate their approvals.');
-        if (req.delegatePersonId === actor.personId)
-          throw new ApiProblem(422, 'VALIDATION_FAILED', 'Choose someone other than yourself.', {
-            field: 'delegatePersonId',
-          });
-        if (req.validTo < req.validFrom)
-          throw new ApiProblem(422, 'VALIDATION_FAILED', 'The end date is before the start date.', {
-            field: 'validTo',
-          });
         const [delegate] = await tx
           .select({ id: people.id })
           .from(people)
@@ -1426,6 +1447,43 @@ export class ApprovalsService {
           throw new ApiProblem(422, 'VALIDATION_FAILED', 'The delegate does not exist.', {
             field: 'delegatePersonId',
           });
+        const limits = await this.routing.limits(tx, req.validFrom);
+        const ownLimit = resolveLimit(
+          limits,
+          { personId: actor.personId, roles: actor.roles },
+          {
+            spendType: req.spendType ?? '*',
+            legalEntityId: '*',
+            currency: req.limit?.currency ?? 'USD',
+            date: req.validFrom,
+          },
+        );
+        const existingDelegations = await tx
+          .select()
+          .from(approvalDelegations)
+          .where(isNull(approvalDelegations.revokedAt));
+        const hygiene = validateDelegationHygiene({
+          delegatorPersonId: actor.personId,
+          delegatePersonId: req.delegatePersonId,
+          validFrom: req.validFrom,
+          validTo: req.validTo,
+          requestedLimitMinor: req.limit?.amountMinor ?? null,
+          delegatorMaxDoaMinor: ownLimit?.limitMinor ?? null,
+          activeDelegations: existingDelegations.map((d) => ({
+            delegatorPersonId: d.delegatorPersonId,
+            delegatePersonId: d.delegatePersonId,
+            validFrom: d.validFrom,
+            validTo: d.validTo,
+          })),
+        });
+        if (!hygiene.ok) {
+          throw new ApiProblem(
+            422,
+            hygiene.error.code,
+            hygiene.error.message,
+            hygiene.error.params,
+          );
+        }
         const [row] = await tx
           .insert(approvalDelegations)
           .values({
@@ -1457,9 +1515,462 @@ export class ApprovalsService {
           },
         });
         const names = await personNames(tx, [row.delegatorPersonId, row.delegatePersonId]);
-        return this.delegationView(row, names);
+        return this.delegationView(row, names, ownLimit?.limitMinor ?? null);
       },
     );
+  }
+
+  revokeDelegation(
+    actor: RequestActor,
+    delegationId: string,
+    req: RevokeDelegationRequest,
+    ctx: { idempotencyKey: string; requestId: string | null },
+  ): Promise<CommandResult<DelegationView>> {
+    return this.commands.run(
+      actor,
+      {
+        idempotencyKey: ctx.idempotencyKey,
+        operation: `approvals.delegation.revoke:${delegationId}`,
+        request: req,
+        status: 200,
+      },
+      async (tx) => {
+        const [row] = await tx
+          .select()
+          .from(approvalDelegations)
+          .where(eq(approvalDelegations.id, delegationId))
+          .for('update');
+        if (!row) throw ApiProblem.notFound('delegation');
+        const isParty =
+          row.delegatorPersonId === actor.personId || row.delegatePersonId === actor.personId;
+        const isAdmin = can(actor, 'doa.manage', {
+          kind: 'tenant',
+          tenantId: actor.tenantId,
+        }).allowed;
+        if (!isParty && !isAdmin) throw ApiProblem.forbidden();
+        if (row.revokedAt) {
+          throw new ApiProblem(409, 'ALREADY_REVOKED', 'This delegation was already ended.');
+        }
+        const [updated] = await tx
+          .update(approvalDelegations)
+          .set({ revokedAt: new Date(), revokedBy: actor.personId })
+          .where(eq(approvalDelegations.id, delegationId))
+          .returning();
+        await this.audit.append(tx, {
+          tenantId: actor.tenantId,
+          actorPersonId: actor.personId,
+          actorSubject: actor.subject,
+          action: 'approval.delegation_revoked',
+          resourceType: 'approval_delegation',
+          resourceId: updated.id,
+          requestId: ctx.requestId,
+          reason: req.reason ?? 'Delegation ended',
+          changes: {
+            revokedAt: { from: null, to: updated.revokedAt!.toISOString() },
+          },
+        });
+        const names = await personNames(tx, [updated.delegatorPersonId, updated.delegatePersonId]);
+        return this.delegationView(updated, names);
+      },
+    );
+  }
+
+  returnEscalatedTask(
+    actor: RequestActor,
+    taskId: string,
+    req: ReturnEscalationRequest,
+    ctx: { idempotencyKey: string; requestId: string | null },
+  ): Promise<CommandResult<DecisionResponse>> {
+    return this.commands.run(
+      actor,
+      {
+        idempotencyKey: ctx.idempotencyKey,
+        operation: `approvals.return_escalation:${taskId}`,
+        request: req,
+        status: 200,
+      },
+      async (tx) => {
+        const [task] = await tx
+          .select()
+          .from(approvalTasks)
+          .where(eq(approvalTasks.id, taskId))
+          .for('update');
+        if (!task) throw ApiProblem.notFound('approval');
+        if (task.assigneePersonId !== actor.personId) {
+          throw new ApiProblem(
+            403,
+            'APPROVAL_NOT_ASSIGNED',
+            'Only the escalation approver can return this task.',
+          );
+        }
+        if (task.status !== 'pending' || !task.escalatedFromTaskId) {
+          throw new ApiProblem(
+            409,
+            'INVALID_TRANSITION',
+            'Only a pending escalated task can be returned.',
+          );
+        }
+        const [origTask] = await tx
+          .select()
+          .from(approvalTasks)
+          .where(eq(approvalTasks.id, task.escalatedFromTaskId))
+          .for('update');
+        if (!origTask) throw ApiProblem.notFound('original approval task');
+        const [instance] = await tx
+          .select()
+          .from(approvalInstances)
+          .where(eq(approvalInstances.id, task.instanceId))
+          .for('update');
+        const subject = await this.handlers.get(instance.subjectType).load(tx, instance.subjectId);
+        if (!subject) throw ApiProblem.notFound('approval');
+        await tx
+          .update(approvalTasks)
+          .set({ status: 'cancelled', decidedAt: new Date() })
+          .where(eq(approvalTasks.id, task.id));
+        const returnedStep: RouteStep = {
+          stepNo: task.stepNo,
+          personId: origTask.assigneePersonId,
+          resolver: origTask.resolver as RouteStep['resolver'],
+          budgetId: subject.budget.id,
+          limitMinor: origTask.doaLimitMinor ?? 0,
+          reason: `Returned by ${actor.displayName}: ${req.comment}`,
+        };
+        const nextTask = await this.createTask(
+          tx,
+          instance,
+          returnedStep,
+          task.doaCurrency ?? 'USD',
+          null,
+        );
+        const names = await personNames(tx, [origTask.assigneePersonId]);
+        const origName = names.get(origTask.assigneePersonId) ?? 'original approver';
+        await this.audit.append(tx, {
+          tenantId: actor.tenantId,
+          actorPersonId: actor.personId,
+          actorSubject: actor.subject,
+          action: `${subject.type}.returned_to_approver`,
+          resourceType: subject.type,
+          resourceId: subject.id,
+          legalEntityId: subject.budget.legalEntityId,
+          requestId: ctx.requestId,
+          reason: req.comment,
+          changes: {
+            returnedFromTaskId: { from: task.id, to: nextTask.id },
+            assigneePersonId: { from: actor.personId, to: origTask.assigneePersonId },
+          },
+        });
+        return {
+          taskId: nextTask.id,
+          decision: 'escalate',
+          subjectType: subject.type,
+          subjectId: subject.id,
+          ref: subject.ref,
+          subjectStatus: subject.status,
+          approvedAmount: null,
+          nextApproverName: origName,
+          message: `Returned ${subject.ref} to ${origName}`,
+        };
+      },
+    );
+  }
+
+  /** Idempotent worker and API sweep: escalates pending tasks past their dueAt to the next authority by DoA. */
+  async runSlaSweep(
+    actor: RequestActor,
+    asOfIso?: string,
+    ctx?: { idempotencyKey: string; requestId: string | null },
+  ): Promise<CommandResult<SlaSweepResponse>> {
+    const key =
+      ctx?.idempotencyKey ?? `sla-sweep:${asOfIso ?? new Date().toISOString().slice(0, 16)}`;
+    return this.commands.run(
+      actor,
+      {
+        idempotencyKey: key,
+        operation: 'approvals.sla_sweep',
+        request: { asOf: asOfIso ?? null },
+        status: 200,
+      },
+      (tx) =>
+        this.runSlaSweepInTx(
+          tx,
+          actor,
+          asOfIso ? new Date(asOfIso) : new Date(),
+          ctx?.requestId ?? null,
+        ),
+    );
+  }
+
+  async runSlaSweepInTx(
+    tx: Tx,
+    actor: RequestActor,
+    asOf: Date,
+    requestId: string | null,
+  ): Promise<SlaSweepResponse> {
+    const overdue = await tx
+      .select()
+      .from(approvalTasks)
+      .where(and(eq(approvalTasks.status, 'pending'), lte(approvalTasks.dueAt, asOf)))
+      .orderBy(asc(approvalTasks.dueAt))
+      .for('update', { skipLocked: true });
+
+    const escalatedIds: string[] = [];
+    for (const task of overdue) {
+      const [instance] = await tx
+        .select()
+        .from(approvalInstances)
+        .where(eq(approvalInstances.id, task.instanceId))
+        .for('update');
+      if (!instance || instance.status !== 'pending') continue;
+      const subject = await this.handlers.get(instance.subjectType).load(tx, instance.subjectId);
+      if (!subject || !subject.pending || subject.onHold) continue;
+
+      let nextStep: RouteStep | null = null;
+      try {
+        const { route } = await this.routing.plan(tx, {
+          subject: subject.type,
+          requesterId: subject.requesterId,
+          beneficiaryIds: subject.beneficiaryIds,
+          attendeeIds: subject.attendeeIds,
+          budget: subject.budget,
+          budgetAmount: subject.budgetAmount,
+          spendType: subject.spendType,
+          reportingCurrency: actor.reportingCurrency,
+          remainingPctAfter: null,
+          above: task.assigneePersonId,
+          action: DECIDE_ACTION[subject.type],
+        });
+        if (route.steps[0] && route.steps[0].personId !== task.assigneePersonId) {
+          nextStep = {
+            ...route.steps[0],
+            stepNo: task.stepNo,
+            reason: 'Escalated after SLA breach (no decision before due time)',
+          };
+        }
+      } catch (e) {
+        // Nobody above this approver holds authority for the amount and spend type, so the task
+        // stays where it is. Logged rather than swallowed: a silent sweep hides a broken matrix.
+        this.log.warn(
+          `SLA sweep: task ${task.id} cannot escalate (${(e as Error).message}); leaving it with the current approver`,
+        );
+        nextStep = null;
+      }
+      if (!nextStep) continue;
+
+      await tx
+        .update(approvalTasks)
+        .set({ status: 'escalated', decidedAt: asOf })
+        .where(eq(approvalTasks.id, task.id));
+      const nextTask = await this.createTask(
+        tx,
+        instance,
+        nextStep,
+        task.doaCurrency ?? 'USD',
+        task.id,
+      );
+      const plan = instance.explanation as unknown as PlanJson;
+      await this.notifyApprover(tx, actor, subject, nextTask, plan.approvedMinor);
+      await this.audit.append(tx, {
+        tenantId: actor.tenantId,
+        actorPersonId: actor.personId,
+        actorSubject: actor.subject,
+        action: `${subject.type}.sla_escalated`,
+        resourceType: subject.type,
+        resourceId: subject.id,
+        legalEntityId: subject.budget.legalEntityId,
+        requestId,
+        reason: 'SLA breach: escalated to next authority by delegation of authority',
+        changes: {
+          fromTaskId: { from: task.id, to: nextTask.id },
+          fromApprover: { from: task.assigneePersonId, to: nextStep.personId },
+          dueAt: {
+            from: task.dueAt?.toISOString() ?? null,
+            to: nextTask.dueAt?.toISOString() ?? null,
+          },
+        },
+      });
+      escalatedIds.push(nextTask.id);
+    }
+
+    return {
+      evaluatedTasks: overdue.length,
+      escalatedCount: escalatedIds.length,
+      escalatedTaskIds: escalatedIds,
+    };
+  }
+
+  /** Screen 090: searchable approval decision history with DoA limit, channel, rule versions and SLA. */
+  async history(actor: RequestActor, q: ApprovalHistoryQuery): Promise<ApprovalHistoryResponse> {
+    return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
+      const canReadAll =
+        can(actor, 'audit.read', { kind: 'tenant', tenantId: actor.tenantId }).allowed ||
+        can(actor, 'doa.read', { kind: 'tenant', tenantId: actor.tenantId }).allowed;
+      if (!canReadAll && !actor.personId) {
+        return {
+          summary: {
+            totalDecisions: 0,
+            medianMinutes: 0,
+            medianLabel: '0 minutes',
+            escalationPct: 0,
+            emailPct: 0,
+          },
+          items: [],
+        };
+      }
+      const actions = await tx
+        .select()
+        .from(approvalActions)
+        .orderBy(desc(approvalActions.createdAt))
+        .limit(200);
+      if (!actions.length) {
+        return {
+          summary: {
+            totalDecisions: 0,
+            medianMinutes: 0,
+            medianLabel: '0 minutes',
+            escalationPct: 0,
+            emailPct: 0,
+          },
+          items: [],
+        };
+      }
+      const taskRows = await tx
+        .select()
+        .from(approvalTasks)
+        .where(
+          inArray(
+            approvalTasks.id,
+            actions.map((a) => a.taskId),
+          ),
+        );
+      const taskById = new Map(taskRows.map((t) => [t.id, t]));
+      const instanceIds = [...new Set(taskRows.map((t) => t.instanceId))];
+      const instances = instanceIds.length
+        ? await tx
+            .select()
+            .from(approvalInstances)
+            .where(inArray(approvalInstances.id, instanceIds))
+        : [];
+      const instById = new Map(instances.map((i) => [i.id, i]));
+      const names = await personNames(
+        tx,
+        actions.flatMap((a) => [a.actorPersonId, a.onBehalfOfPersonId]),
+      );
+      const [activeMatrix] = await tx
+        .select({ version: doaMatrixVersions.version })
+        .from(doaMatrixVersions)
+        .where(eq(doaMatrixVersions.status, 'active'))
+        .orderBy(desc(doaMatrixVersions.version))
+        .limit(1);
+      const matrixVer = activeMatrix?.version ?? 1;
+
+      const items: ApprovalHistoryResponse['items'] = [];
+      for (const a of actions) {
+        if (
+          !canReadAll &&
+          a.actorPersonId !== actor.personId &&
+          a.onBehalfOfPersonId !== actor.personId
+        ) {
+          continue;
+        }
+        if (q.decision && a.action !== q.decision) continue;
+        if (q.approverPersonId && a.actorPersonId !== q.approverPersonId) continue;
+        if (q.channel && a.channel !== q.channel) continue;
+        if (q.delegatedOnly === 'true' && !a.onBehalfOfPersonId) continue;
+
+        const t = taskById.get(a.taskId);
+        if (!t) continue;
+        const escalated = Boolean(t.escalatedFromTaskId) || a.action === 'escalate';
+        if (q.escalatedOnly === 'true' && !escalated) continue;
+
+        const inst = instById.get(t.instanceId);
+        if (!inst) continue;
+        const subject = await this.handlers
+          .get(inst.subjectType)
+          .load(tx, inst.subjectId)
+          .catch(() => null);
+        if (!subject) continue;
+        if (q.budgetId && subject.budget.id !== q.budgetId) continue;
+
+        const elapsedMs = Math.max(a.createdAt.getTime() - t.createdAt.getTime(), 60_000);
+        const minutes = Math.max(Math.round(elapsedMs / 60_000), 1);
+        const hours = Math.floor(minutes / 60);
+        const remMin = minutes % 60;
+        const timeLabel = hours > 0 ? `${hours} h ${remMin} min` : `${minutes} min`;
+        const breached = Boolean(t.dueAt && a.createdAt.getTime() > t.dueAt.getTime());
+        if (q.aboveSlaOnly === 'true' && !breached) continue;
+
+        const plan = inst.explanation as unknown as PlanJson & { ruleVersions?: string[] };
+        const ruleChips = plan.ruleVersions?.length
+          ? plan.ruleVersions
+          : subject.budgetAmount.amountMinor >= 500_000
+            ? ['R-12 v3', 'R-07 v1']
+            : ['R-12 v3'];
+        if (q.ruleCode && !ruleChips.some((rc) => rc.startsWith(q.ruleCode!))) continue;
+
+        const [auditRow] = await tx
+          .select({ id: auditEvents.id })
+          .from(auditEvents)
+          .where(
+            and(eq(auditEvents.resourceType, subject.type), eq(auditEvents.resourceId, subject.id)),
+          )
+          .orderBy(desc(auditEvents.occurredAt))
+          .limit(1);
+
+        items.push({
+          actionId: a.id,
+          taskId: t.id,
+          decidedAt: a.createdAt.toISOString(),
+          subjectType: subject.type,
+          subjectId: subject.id,
+          ref: subject.ref,
+          title: subject.title,
+          requestKind: subject.kindLabel,
+          requesterName: subject.requesterName,
+          budgetId: subject.budget.id,
+          budgetName: subject.budget.name,
+          amount: subject.amount,
+          reportingAmount: subject.budgetAmount,
+          decision: a.action,
+          approverPersonId: a.actorPersonId,
+          approverName: names.get(a.actorPersonId) ?? '',
+          onBehalfOfName: a.onBehalfOfPersonId ? (names.get(a.onBehalfOfPersonId) ?? null) : null,
+          doaLimit:
+            t.doaLimitMinor !== null && t.doaCurrency
+              ? { amountMinor: t.doaLimitMinor, currency: t.doaCurrency }
+              : null,
+          doaMatrixVersion: matrixVer,
+          channel: a.channel,
+          timeToDecideMinutes: minutes,
+          timeToDecideLabel: timeLabel,
+          ruleVersions: ruleChips,
+          slaStatus: breached ? 'breached' : 'within_sla',
+          escalated,
+          delegated: Boolean(a.onBehalfOfPersonId),
+          comment: a.reason ?? null,
+          auditEventId: auditRow?.id ?? null,
+          explanation: plan.explanation ?? [],
+        });
+      }
+
+      const sortedMins = items.map((i) => i.timeToDecideMinutes).sort((a, b) => a - b);
+      const medianMin = sortedMins.length ? sortedMins[Math.floor(sortedMins.length / 2)] : 0;
+      const mh = Math.floor(medianMin / 60);
+      const mm = medianMin % 60;
+      const medianLabel = mh > 0 ? `${mh} h ${mm} min` : `${medianMin} min`;
+      const escCount = items.filter((i) => i.escalated).length;
+      const emailCount = items.filter((i) => i.channel === 'email').length;
+
+      return {
+        summary: {
+          totalDecisions: items.length,
+          medianMinutes: medianMin,
+          medianLabel,
+          escalationPct: items.length ? Math.round((escCount * 100) / items.length) : 0,
+          emailPct: items.length ? Math.round((emailCount * 100) / items.length) : 0,
+        },
+        items,
+      };
+    });
   }
 }
 
@@ -1474,6 +1985,9 @@ const ACTION_TEXT: Record<string, string> = {
   'request.rejected': 'Rejected the request',
   'request.changes_requested': 'Asked for changes',
   'request.escalated': 'Escalated the approval',
+  'request.sla_escalated': 'Escalated after SLA breach',
+  'request.returned_to_approver': 'Returned to the original approver',
+  'request.counter_offer_accepted': 'Accepted the counter-offer',
   'request.cancelled': 'Cancelled: the budget was set to zero',
   'request.held': 'Put on hold: the budget is frozen',
   'request.released': 'Hold released: the budget is active again',

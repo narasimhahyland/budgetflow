@@ -118,6 +118,22 @@ export const RequestVersion = named(
 );
 export type RequestVersion = z.infer<typeof RequestVersion>;
 
+export const CounterOfferView = named(
+  'CounterOfferView',
+  z
+    .object({
+      amount: Money,
+      budgetAmount: Money.nullable(),
+      offeredByName: z.string(),
+      offeredAt: IsoDateTime,
+      expiresAt: IsoDateTime,
+      expired: z.boolean(),
+      comment: z.string().nullable(),
+    })
+    .strict(),
+);
+export type CounterOfferView = z.infer<typeof CounterOfferView>;
+
 export const RequestDetail = named(
   'RequestDetail',
   RequestSummary.extend({
@@ -127,12 +143,15 @@ export const RequestDetail = named(
     neededBy: IsoDate.nullable(),
     overBudget: z.boolean(),
     commitmentId: Id.nullable(),
+    counterOffer: CounterOfferView.nullable().optional(),
     route: ApprovalRouteView.nullable(),
     impact: BudgetImpact.nullable(),
     activity: z.array(ActivityEntry),
     versions: z.array(RequestVersion).describe('Submitted versions, oldest first.'),
     documents: z.array(DocumentSummary),
-    allowedActions: z.array(z.enum(['submit', 'withdraw', 'resubmit', 'decide', 'upload'])),
+    allowedActions: z.array(
+      z.enum(['submit', 'withdraw', 'resubmit', 'accept_offer', 'decide', 'upload']),
+    ),
     myTaskId: Id.nullable().describe('The viewer’s pending approval task, if any.'),
   }).strict(),
 );
@@ -169,6 +188,7 @@ export const ResubmitRequestBody = named(
       title: z.string().trim().min(3).max(200).optional(),
       purpose: z.string().trim().min(3).max(4000).optional(),
       neededBy: IsoDate.optional(),
+      note: z.string().trim().max(1000).optional(),
     })
     .strict(),
 );
@@ -323,6 +343,18 @@ export const requestEndpoints = {
     idempotent: true,
     params: RequestParams,
     body: ResubmitRequestBody,
+    response: { status: 200, schema: RequestDetail },
+    errors: [400, 401, 403, 404, 409, 422],
+  },
+  acceptCounterOffer: {
+    operationId: 'acceptCounterOffer',
+    method: 'post',
+    path: '/api/requests/{requestId}/accept-offer',
+    summary: 'Accept an approver counter-offer to approve the request at the offered amount',
+    tags: ['requests'],
+    auth: true,
+    idempotent: true,
+    params: RequestParams,
     response: { status: 200, schema: RequestDetail },
     errors: [400, 401, 403, 404, 409, 422],
   },

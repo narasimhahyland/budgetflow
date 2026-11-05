@@ -39,7 +39,7 @@ const NEEDS: Record<string, string> = {
   'Audit log': 'audit.read',
   'Org import': 'org.manage',
   'Users and roles': 'users.manage',
-  'Rules and policies': 'doa.manage',
+  'Rules and policies': 'rules.read',
   Integrations: 'integration.manage',
   'Tenant settings': 'tenant.settings.manage',
 };
@@ -74,6 +74,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Reports',
     'Utilization',
     'Audit log',
+    'Rules and policies',
   ],
   // Owner-scoped grants (requests, events, approvals) need an owned budget; from Phase 4 the seeded finance
   // admin owns the central contingency reserve.
@@ -120,6 +121,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Reports',
     'Utilization',
     'Audit log',
+    'Rules and policies',
   ],
   'budget-owner': OWNER,
   'department-head': OWNER,
@@ -136,6 +138,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Reports',
     'Utilization',
     'Audit log',
+    'Rules and policies',
   ],
   'integration-admin': ['Home', 'Events', 'Integrations'],
   analyst: ['Home', ...READ, 'Events', ...ORG, 'Reports', 'Utilization'],

@@ -814,6 +814,12 @@ export class AllocationService {
     if (!source || r.status !== 'pending') return false;
     if (r.kind === 'increase')
       return this.policy.can(actor, 'budget.allocate', budgetResource(source)).allowed;
+    if (r.kind === 'sibling_transfer') {
+      const parent = source.parentId ? rows.get(source.parentId) : undefined;
+      return parent
+        ? this.policy.can(actor, 'budget.allocate', budgetResource(parent)).allowed
+        : this.policy.can(actor, 'budget.allocate', budgetResource(source)).allowed;
+    }
     if (!source.parentId)
       return (
         this.views.canControl(actor, source, undefined) ||
@@ -985,13 +991,17 @@ export class AllocationService {
               {
                 toBudgetId: target.id,
                 amountMinor: approved,
-                reasonCode: 'CONTINGENCY-RELEASE',
-                reason: `Contingency release approved: ${row.reason}`,
+                reasonCode:
+                  row.kind === 'sibling_transfer' ? 'TRF-REBALANCE' : 'CONTINGENCY-RELEASE',
+                reason:
+                  row.kind === 'sibling_transfer'
+                    ? `Sibling transfer approved: ${row.reason}`
+                    : `Contingency release approved: ${row.reason}`,
               },
               ctx,
               { skipPolicy: true, audit: false },
             );
-            journalId = t.journal.id;
+            journalId = t.journal!.id;
           }
         }
         const [updated] = await tx

@@ -35,6 +35,99 @@ export interface AuthorityQuery {
 const active = (l: { validFrom: string; validTo: string | null }, date: string) =>
   l.validFrom <= date && (l.validTo === null || date <= l.validTo);
 
+/** Maximum delegation duration in days (062 spec). */
+export const MAX_DELEGATION_DAYS = 30;
+
+function daysBetween(fromIso: string, toIso: string): number {
+  const a = Date.parse(`${fromIso}T00:00:00Z`);
+  const b = Date.parse(`${toIso}T00:00:00Z`);
+  return Math.round((b - a) / 86_400_000);
+}
+
+/**
+ * Validates out-of-office delegation hygiene:
+ * - Cannot delegate to yourself
+ * - End date on or after start date, at most 30 days
+ * - Cap (if given) cannot exceed the delegator's own DoA limit
+ * - No circular delegation or re-delegation (cannot delegate to someone who currently delegates to you,
+ *   and a delegate cannot re-delegate)
+ */
+export function validateDelegationHygiene(input: {
+  delegatorPersonId: string;
+  delegatePersonId: string;
+  validFrom: string;
+  validTo: string;
+  requestedLimitMinor?: number | null;
+  delegatorMaxDoaMinor?: number | null;
+  activeDelegations: readonly {
+    delegatorPersonId: string;
+    delegatePersonId: string;
+    validFrom: string;
+    validTo: string | null;
+  }[];
+}): Result<true> {
+  if (input.delegatorPersonId === input.delegatePersonId) {
+    return err('SELF_DELEGATION', 'Choose someone other than yourself.');
+  }
+  if (input.validTo < input.validFrom) {
+    return err('VALIDATION_FAILED', 'The end date is before the start date.', {
+      field: 'validTo',
+    });
+  }
+  const spanDays = daysBetween(input.validFrom, input.validTo);
+  if (spanDays > MAX_DELEGATION_DAYS) {
+    return err(
+      'DELEGATION_TOO_LONG',
+      `Delegations can last at most ${MAX_DELEGATION_DAYS} days; longer absences need a DoA change.`,
+      { maxDays: MAX_DELEGATION_DAYS, requestedDays: spanDays },
+    );
+  }
+  if (
+    input.requestedLimitMinor !== undefined &&
+    input.requestedLimitMinor !== null &&
+    input.delegatorMaxDoaMinor !== undefined &&
+    input.delegatorMaxDoaMinor !== null &&
+    input.requestedLimitMinor > input.delegatorMaxDoaMinor
+  ) {
+    return err(
+      'DELEGATION_EXCEEDS_DOA',
+      "A delegation cap cannot exceed the delegator's own delegation-of-authority limit.",
+      {
+        requestedLimitMinor: input.requestedLimitMinor,
+        delegatorLimitMinor: input.delegatorMaxDoaMinor,
+      },
+    );
+  }
+
+  // Overlap helper for date ranges
+  const overlaps = (aFrom: string, aTo: string | null, bFrom: string, bTo: string) =>
+    aFrom <= bTo && (aTo === null || bFrom <= aTo);
+
+  // Check circular delegation / chain: walk from delegatePersonId along overlapping delegations
+  const visited = new Set<string>([input.delegatorPersonId]);
+  const frontier = [input.delegatePersonId];
+  while (frontier.length > 0) {
+    const current = frontier.shift()!;
+    if (visited.has(current)) {
+      return err(
+        'CIRCULAR_DELEGATION',
+        'Circular delegation is not allowed: this person already delegates approvals to you in that period.',
+      );
+    }
+    visited.add(current);
+    for (const d of input.activeDelegations) {
+      if (
+        d.delegatorPersonId === current &&
+        overlaps(d.validFrom, d.validTo, input.validFrom, input.validTo)
+      ) {
+        frontier.push(d.delegatePersonId);
+      }
+    }
+  }
+
+  return ok(true);
+}
+
 /** The most specific applicable limit: person over role, exact spend type and entity over wildcards, then highest. */
 export function resolveLimit(
   limits: readonly DoaLimit[],

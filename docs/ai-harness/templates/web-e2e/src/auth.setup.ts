@@ -8,9 +8,14 @@ import { ROLES } from './support/roles';
 /** Dev-only seed password: BF_E2E_PASSWORD, else the value documented in infra/.env.example. */
 function password(): string {
   if (process.env.BF_E2E_PASSWORD) return process.env.BF_E2E_PASSWORD;
-  const line = readFileSync('infra/.env.example', 'utf8').split('\n').find((l) => l.startsWith('BF_E2E_PASSWORD='));
+  const line = readFileSync('infra/.env.example', 'utf8')
+    .split('\n')
+    .find((l) => l.startsWith('BF_E2E_PASSWORD='));
   const value = line?.slice('BF_E2E_PASSWORD='.length).trim();
-  if (!value) throw new Error('Set BF_E2E_PASSWORD or document the dev-only seed value in infra/.env.example');
+  if (!value)
+    throw new Error(
+      'Set BF_E2E_PASSWORD or document the dev-only seed value in infra/.env.example',
+    );
   return value;
 }
 

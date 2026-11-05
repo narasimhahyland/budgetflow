@@ -10,7 +10,10 @@ export default defineConfig({
   workers: process.env.API_E2E_ISOLATED === '1' ? undefined : 1,
   forbidOnly: !!process.env.CI,
   retries: 0,
-  reporter: [['list'], ['html', { outputFolder: '../../dist/.playwright/apps/api-e2e/report', open: 'never' }]],
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: '../../dist/.playwright/apps/api-e2e/report', open: 'never' }],
+  ],
   use: {
     baseURL: process.env.API_URL ?? 'http://localhost:3000',
     extraHTTPHeaders: { accept: 'application/json' },
