@@ -43,7 +43,11 @@ export function isInside(p, dirs) {
 }
 
 const TEMP_DIRS = [
-  ...new Set(['/tmp', '/private/tmp', '/var/folders', '/private/var/folders', tmpdir(), process.env.TMPDIR].filter(Boolean).flatMap((d) => [path.resolve(d), real(d)])),
+  ...new Set(
+    ['/tmp', '/private/tmp', '/var/folders', '/private/var/folders', tmpdir(), process.env.TMPDIR]
+      .filter(Boolean)
+      .flatMap((d) => [path.resolve(d), real(d)]),
+  ),
 ];
 
 export function isTemp(p) {
@@ -70,7 +74,8 @@ export function sensitivePathReason(abs, roots = []) {
     const dir = path.join(HOME, d);
     if (abs.startsWith(dir + path.sep)) {
       const base = path.basename(abs);
-      if (!/\.pub$|^known_hosts|^config$|^authorized_keys$/.test(base)) return `~/${d} private keys`;
+      if (!/\.pub$|^known_hosts|^config$|^authorized_keys$/.test(base))
+        return `~/${d} private keys`;
     }
   }
   const base = path.basename(abs);
@@ -85,7 +90,8 @@ export function forbiddenFileReason(abs) {
   const posix = abs.split(path.sep).join('/');
   for (const rule of FORBIDDEN_FILES) {
     if (rule.id === 'har-capture' || rule.id === 'playwright-trace') continue;
-    if (rule.re.test(posix) && !(rule.allow && rule.allow.test(posix))) return `${rule.id} files can hold secrets`;
+    if (rule.re.test(posix) && !(rule.allow && rule.allow.test(posix)))
+      return `${rule.id} files can hold secrets`;
   }
   return null;
 }
@@ -144,7 +150,12 @@ export function commandOf(tokens) {
     const t = tokens[i];
     if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(t)) i++;
     else if (['sudo', 'command', 'nice', 'time', 'nohup', 'exec'].includes(t)) i++;
-    else if (t === 'env' && i + 1 < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=|^-/.test(tokens[i + 1])) i++;
+    else if (
+      t === 'env' &&
+      i + 1 < tokens.length &&
+      /^[A-Za-z_][A-Za-z0-9_]*=|^-/.test(tokens[i + 1])
+    )
+      i++;
     else break;
   }
   const name = tokens[i] ? path.basename(tokens[i]) : '';
