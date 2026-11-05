@@ -1,14 +1,16 @@
 import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
-import {
-  CHANNEL_DELIVER_TOPIC,
-  ChannelsService,
-  type ChannelDeliverJob,
-} from '@bf/api/channels';
+import { CHANNEL_DELIVER_TOPIC, ChannelsService, type ChannelDeliverJob } from '@bf/api/channels';
 import { DB } from '@bf/api/core';
 import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
 import { LEDGER_CHECK_TOPIC, RebuildService } from '@bf/api/integrity';
 import { EMAIL_TOPIC, NotificationsService, type EmailPayload } from '@bf/api/notifications';
+import {
+  REPORT_DELIVER_TOPIC,
+  REPORT_SWEEP_TOPIC,
+  ReportDeliveryService,
+  type ReportDeliverJob,
+} from '@bf/api/reports';
 import { BUDGET_THRESHOLD_TOPIC, BudgetAlertsConsumer, type ThresholdCrossed } from '@bf/api/spend';
 import {
   Inject,
@@ -44,6 +46,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly alerts: BudgetAlertsConsumer,
     private readonly channels: ChannelsService,
     private readonly slaSweep: SlaSweepService,
+    private readonly reportDelivery: ReportDeliveryService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -77,6 +80,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       BUDGET_CONTROL_TOPIC,
       BUDGET_THRESHOLD_TOPIC,
       CHANNEL_DELIVER_TOPIC,
+      REPORT_DELIVER_TOPIC,
     ]) {
       await boss.createQueue(topic, {
         retryLimit: 5,
@@ -107,6 +111,11 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     await boss.work<ChannelDeliverJob>(CHANNEL_DELIVER_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.channels.deliverChannelJob(job.data);
     });
+    // Scheduled report delivery (screen 091): render with the owner's scope, email the recipients
+    // who may see the same data, post headline figures to the allowed channels.
+    await boss.work<ReportDeliverJob>(REPORT_DELIVER_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.reportDelivery.deliver(job.data);
+    });
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();
       this.log.log(`nightly ledger rebuild check ran for ${n} tenant(s)`);
@@ -131,6 +140,23 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     await boss.schedule(
       SLA_SWEEP_TOPIC,
       process.env.SLA_SWEEP_CRON ?? '*/30 * * * *',
+      {},
+      { tz: 'UTC' },
+    );
+    // Queues the scheduled report deliveries that fell due.
+    await boss.createQueue(REPORT_SWEEP_TOPIC, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(REPORT_SWEEP_TOPIC, async () => {
+      const queued = await this.reportDelivery.sweepAllTenants();
+      if (queued) this.log.log(`queued ${queued} scheduled report delivery job(s)`);
+    });
+    await boss.schedule(
+      REPORT_SWEEP_TOPIC,
+      process.env.REPORT_SWEEP_CRON ?? '*/5 * * * *',
       {},
       { tz: 'UTC' },
     );

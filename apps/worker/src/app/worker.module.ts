@@ -4,6 +4,7 @@ import { ChannelsModule } from '@bf/api/channels';
 import { CoreModule } from '@bf/api/core';
 import { EventsModule } from '@bf/api/events';
 import { NotificationsModule } from '@bf/api/notifications';
+import { ReportsModule } from '@bf/api/reports';
 import { SpendModule } from '@bf/api/spend';
 import { IntegrityModule } from '@bf/api/integrity';
 import { Controller, Get, HttpException, Module } from '@nestjs/common';
@@ -31,6 +32,7 @@ class WorkerHealthController {
     EventsModule,
     ChannelsModule,
     ApprovalsModule,
+    ReportsModule,
   ],
   providers: [JobsService],
   controllers: [WorkerHealthController],

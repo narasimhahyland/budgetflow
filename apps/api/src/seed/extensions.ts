@@ -5,6 +5,7 @@ import { seedChannels } from './channels';
 import { seedEvents } from './events';
 import { seedEventsDepth } from './events-depth';
 import { seedOrg } from './org';
+import { seedReports } from './reports';
 import { seedRules } from './rules';
 
 /**
@@ -35,4 +36,5 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     phase: 'P9',
     run: seedEventsDepth,
   },
+  { name: 'saved report views, scheduled deliveries and exports', phase: 'P10', run: seedReports },
 ];

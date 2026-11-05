@@ -1,0 +1,522 @@
+{
+  "reportId": "utilization",
+  "name": "Utilization",
+  "question": "How much of each budget is pending, committed, spent and still available?",
+  "generatedAt": "2026-11-05T18:52:30.767Z",
+  "currency": "USD",
+  "scope": {
+    "tenantWide": true,
+    "label": "Hyland",
+    "budgetIds": 556,
+    "note": null
+  },
+  "filters": {
+    "groupBy": "location",
+    "fiscalYearId": "22000000-0000-4000-8000-012026000000"
+  },
+  "groupBy": "location",
+  "kpis": [
+    {
+      "key": "authorized",
+      "label": "Authorized",
+      "money": {
+        "amountMinor": 3412149100,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "pending",
+      "label": "Pending requests",
+      "money": {
+        "amountMinor": 2163601,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "committed",
+      "label": "Approved commitments",
+      "money": {
+        "amountMinor": 10177979,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "actual",
+      "label": "Actual",
+      "money": {
+        "amountMinor": 6047955,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "available",
+      "label": "Available",
+      "money": {
+        "amountMinor": 3387398314,
+        "currency": "USD"
+      },
+      "hint": "Company-wide: Authorized \u2212 Held \u2212 Pre-encumbered \u2212 Encumbered \u2212 Actual."
+    },
+    {
+      "key": "utilization",
+      "label": "Utilization",
+      "bps": 73
+    }
+  ],
+  "columns": [
+    {
+      "key": "label",
+      "label": "Budget",
+      "type": "text",
+      "align": "start",
+      "drillable": false
+    },
+    {
+      "key": "owner",
+      "label": "Owner",
+      "type": "text",
+      "align": "start",
+      "drillable": false
+    },
+    {
+      "key": "budgets",
+      "label": "Budgets",
+      "type": "number",
+      "align": "end",
+      "drillable": false
+    },
+    {
+      "key": "authorized",
+      "label": "Authorized",
+      "type": "money",
+      "align": "end",
+      "drillable": true
+    },
+    {
+      "key": "pending",
+      "label": "Pending",
+      "type": "money",
+      "align": "end",
+      "drillable": true
+    },
+    {
+      "key": "held",
+      "label": "Held",
+      "type": "money",
+      "align": "end",
+      "drillable": true
+    },
+    {
+      "key": "committed",
+      "label": "Commitments",
+      "type": "money",
+      "align": "end",
+      "drillable": true
+    },
+    {
+      "key": "actual",
+      "label": "Actual",
+      "type": "money",
+      "align": "end",
+      "drillable": true
+    },
+    {
+      "key": "available",
+      "label": "Available",
+      "type": "money",
+      "align": "end",
+      "drillable": false,
+      "hint": "Authorized \u2212 Held \u2212 Pre-encumbered \u2212 Encumbered \u2212 Actual."
+    },
+    {
+      "key": "utilization",
+      "label": "Utilization",
+      "type": "percent",
+      "align": "end",
+      "drillable": false
+    }
+  ],
+  "rows": [
+    {
+      "key": "none",
+      "label": "Not set",
+      "budgetId": null,
+      "eventId": null,
+      "orgUnitId": null,
+      "status": null,
+      "tags": [],
+      "cells": {
+        "owner": {
+          "text": null
+        },
+        "budgets": {
+          "number": 540
+        },
+        "authorized": {
+          "money": {
+            "amountMinor": 3401022700,
+            "currency": "USD"
+          },
+          "bucket": "authorized"
+        },
+        "pending": {
+          "money": {
+            "amountMinor": 2142001,
+            "currency": "USD"
+          },
+          "bucket": "pre_encumbered"
+        },
+        "held": {
+          "money": {
+            "amountMinor": 6031251,
+            "currency": "USD"
+          },
+          "bucket": "held"
+        },
+        "committed": {
+          "money": {
+            "amountMinor": 9427402,
+            "currency": "USD"
+          },
+          "bucket": "encumbered"
+        },
+        "actual": {
+          "money": {
+            "amountMinor": 5314153,
+            "currency": "USD"
+          },
+          "bucket": "actual"
+        },
+        "available": {
+          "money": {
+            "amountMinor": 3378107893,
+            "currency": "USD"
+          }
+        },
+        "utilization": {
+          "bps": 67
+        }
+      }
+    },
+    {
+      "key": "30000000-0000-4000-8000-000000000005",
+      "label": "Europe",
+      "budgetId": null,
+      "eventId": null,
+      "orgUnitId": "30000000-0000-4000-8000-000000000005",
+      "status": null,
+      "tags": [],
+      "cells": {
+        "owner": {
+          "text": null
+        },
+        "budgets": {
+          "number": 2
+        },
+        "authorized": {
+          "money": {
+            "amountMinor": 2200000,
+            "currency": "USD"
+          },
+          "bucket": "authorized"
+        },
+        "pending": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "pre_encumbered"
+        },
+        "held": {
+          "money": {
+            "amountMinor": 15652,
+            "currency": "USD"
+          },
+          "bucket": "held"
+        },
+        "committed": {
+          "money": {
+            "amountMinor": 8348,
+            "currency": "USD"
+          },
+          "bucket": "encumbered"
+        },
+        "actual": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "actual"
+        },
+        "available": {
+          "money": {
+            "amountMinor": 2176000,
+            "currency": "USD"
+          }
+        },
+        "utilization": {
+          "bps": 109
+        }
+      }
+    },
+    {
+      "key": "30000000-0000-4000-8000-000000000008",
+      "label": "New York",
+      "budgetId": null,
+      "eventId": null,
+      "orgUnitId": "30000000-0000-4000-8000-000000000008",
+      "status": null,
+      "tags": [],
+      "cells": {
+        "owner": {
+          "text": null
+        },
+        "budgets": {
+          "number": 2
+        },
+        "authorized": {
+          "money": {
+            "amountMinor": 2000000,
+            "currency": "USD"
+          },
+          "bucket": "authorized"
+        },
+        "pending": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "pre_encumbered"
+        },
+        "held": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "held"
+        },
+        "committed": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "encumbered"
+        },
+        "actual": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "actual"
+        },
+        "available": {
+          "money": {
+            "amountMinor": 2000000,
+            "currency": "USD"
+          }
+        },
+        "utilization": {
+          "bps": 0
+        }
+      }
+    }
+  ],
+  "totals": {
+    "key": "totals",
+    "label": "Total",
+    "budgetId": null,
+    "eventId": null,
+    "orgUnitId": null,
+    "status": null,
+    "tags": [],
+    "cells": {
+      "owner": {
+        "text": null
+      },
+      "budgets": {
+        "number": 556
+      },
+      "authorized": {
+        "money": {
+          "amountMinor": 3412149100,
+          "currency": "USD"
+        }
+      },
+      "pending": {
+        "money": {
+          "amountMinor": 2163601,
+          "currency": "USD"
+        }
+      },
+      "held": {
+        "money": {
+          "amountMinor": 6361251,
+          "currency": "USD"
+        }
+      },
+      "committed": {
+        "money": {
+          "amountMinor": 10177979,
+          "currency": "USD"
+        }
+      },
+      "actual": {
+        "money": {
+          "amountMinor": 6047955,
+          "currency": "USD"
+        }
+      },
+      "available": {
+        "money": {
+          "amountMinor": 3387398314,
+          "currency": "USD"
+        }
+      },
+      "utilization": {
+        "bps": 73
+      }
+    }
+  },
+  "series": [
+    {
+      "key": "actual",
+      "label": "Actual",
+      "unit": "money",
+      "points": [
+        {
+          "key": "none",
+          "label": "Not set",
+          "value": 5314153
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000005",
+          "label": "Europe",
+          "value": 0
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000008",
+          "label": "New York",
+          "value": 0
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000004",
+          "label": "United States",
+          "value": 480000
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000007",
+          "label": "Hyderabad",
+          "value": 0
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000003",
+          "label": "India",
+          "value": 85213
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000006",
+          "label": "Bengaluru",
+          "value": 168589
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000009",
+          "label": "Berlin",
+          "value": 0
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000001",
+          "label": "Hyland",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "key": "available",
+      "label": "Available",
+      "unit": "money",
+      "points": [
+        {
+          "key": "none",
+          "label": "Not set",
+          "value": 3378107893
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000005",
+          "label": "Europe",
+          "value": 2176000
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000008",
+          "label": "New York",
+          "value": 2000000
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000004",
+          "label": "United States",
+          "value": 1319900
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000007",
+          "label": "Hyderabad",
+          "value": 1494375
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000003",
+          "label": "India",
+          "value": 1191975
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000006",
+          "label": "Bengaluru",
+          "value": 308171
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000009",
+          "label": "Berlin",
+          "value": 800000
+        },
+        {
+          "key": "30000000-0000-4000-8000-000000000001",
+          "label": "Hyland",
+          "value": 0
+        }
+      ]
+    }
+  ],
+  "rowCount": 9,
+  "truncated": false,
+  "reconciliation": {
+    "source": "ledger_balances",
+    "budgetsCounted": 556,
+    "authorized": {
+      "amountMinor": 3412149100,
+      "currency": "USD"
+    },
+    "held": {
+      "amountMinor": 6361251,
+      "currency": "USD"
+    },
+    "preEncumbered": {
+      "amountMinor": 2163601,
+      "currency": "USD"
+    },
+    "encumbered": {
+      "amountMinor": 10177979,
+      "currency": "USD"
+    },
+    "actual": {
+      "amountMinor": 6047955,
+      "currency": "USD"
+    },
+    "accrued": {
+      "amountMinor": 69640,
+      "currency": "USD"
+    },
+    "available": {
+      "amountMinor": 3387398314,
+      "currency": "USD"
+    },
+    "ties": true,
+    "differences": []
+  }
+}

@@ -53,6 +53,7 @@ export const ACTIONS = [
   'actuals.read',
   'gl.sign_off',
   'report.read',
+  'report.schedule',
   'audit.read',
   'integrity.run',
   'integrity.read',
@@ -83,6 +84,7 @@ const OWNER: Grants = {
   'contribution.decide': 'owned',
   'event.manage': 'owned',
   'report.read': 'owned',
+  'report.schedule': 'owned',
 };
 
 export const ROLE_GRANTS: Record<RoleId, Grants> = {
@@ -103,6 +105,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'ledger.read': 'tenant',
     'budget.create_root': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
     'audit.read': 'tenant',
     'org.read': 'tenant',
     'doa.read': 'tenant',
@@ -131,6 +134,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'actuals.read': 'tenant',
     'gl.sign_off': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
     'audit.read': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
@@ -149,6 +153,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'actuals.read': 'tenant',
     'request.approve': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
     'audit.read': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
@@ -177,6 +182,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'ledger.read': 'tenant',
     'actuals.read': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
     'audit.read': 'tenant',
     'integrity.read': 'tenant',
     'org.read': 'tenant',
@@ -190,6 +196,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'budget.read': 'tenant',
     'ledger.read': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
   },
 };
 
