@@ -1,0 +1,14 @@
+scripts/gate.sh all (lint typecheck build functional-api functional-e2e visual) — 2026-11-05T03:26:47Z — commit 05c3368 — logs tmp/gate/20261105-085647
+PASS|secrets|1s
+PASS|lint|6s
+PASS|styles|3s
+PASS|satori|46s
+PASS|typecheck|5s
+PASS|build|5s
+PASS|openapi|2s
+PASS|db|1s
+PASS|stack|68s
+PASS|functional-api|64s
+PASS|functional-e2e|54s
+PASS|reseed|45s
+PASS|visual|49s
