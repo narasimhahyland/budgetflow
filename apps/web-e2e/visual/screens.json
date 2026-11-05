@@ -885,6 +885,9 @@
             },
             {
               "waitFor": "text=Approved amount"
+            },
+            {
+              "scrollTop": true
             }
           ]
         }
