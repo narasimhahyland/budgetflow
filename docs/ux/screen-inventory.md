@@ -6,7 +6,7 @@ All 124 specified screens plus the screens added by the product and finance revi
 
 Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 107, 107a, 108 and 108a as 13 pages (`/org/*` and `/finance/*`). Screens 22c, 107 and 108 follow their proposed Stitch designs (parity notes in `evidence/phase-03/visual-qa/design-parity.md`); the others were built from the design system without a Stitch design and await design review. Specs: `docs/ux/screens/` (022c-hr-headcount-import, 033, 038, 039, 041, 042, 102a, 104a, 106a, 106b, 106c, 107-exchange-rates, 108-fiscal-calendar).
 
-Phase 8, 9 and 10 screens are specified spec-first in `docs/ux/screens/` (images pending a later Stitch session; status in [review-log.md](review-log.md)). Screens 47e, 59b, 59c, 61d and 61e were added with that batch for plan features of Phases 8 and 9 that had no screen. Phase 10 reports share the report frame defined in `079-reports-dashboard.md`.
+Phase 8 to 12 screens are specified spec-first in `docs/ux/screens/` (images pending a later Stitch session; status in [review-log.md](review-log.md)). Screens 47e, 59b, 59c, 61d and 61e (Phases 8 and 9), 80g, 80h and 87c (Phase 11) and 94a, 94b and 99b (Phase 12) were added with those batches for plan features that had no screen. Phase 10 reports share the report frame defined in `079-reports-dashboard.md`; Phase 12 connectors share the connector frame defined in `092-integrations-dashboard.md`.
 
 ## Group 1: Authentication and onboarding
 
@@ -187,6 +187,8 @@ Phase 8, 9 and 10 screens are specified spec-first in `docs/ux/screens/` (images
 | 80d | Accrual proposals                        | P6          | FC, FA                              | review-added |
 | 80e | Period close and lock                    | P11         | FC, FA                              | review-added |
 | 80f | Transaction matching review (AI)         | P13         | FC, FA                              | review-added |
+| 80g | Tax-aware consumption (GST/VAT recovery) | P11         | FA, FC, tax approver                | review-added |
+| 80h | Employee benefit ledger and thresholds   | P11         | FA, FC, AUD                         | review-added |
 | 81  | Allocation report                        | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
 | 82  | Utilization report                       | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
 | 83  | Location comparison report               | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
@@ -198,6 +200,7 @@ Phase 8, 9 and 10 screens are specified spec-first in `docs/ux/screens/` (images
 | 87  | Forecast and variance report             | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
 | 87a | Forecast cycle with variance commentary  | P11         | Owners, FA                          | review-added |
 | 87b | Year-end run                             | P11         | FA, FC                              | review-added |
+| 87c | Rollover, lapse and sweep policies       | P11         | FA; FC, AUD read                    | review-added |
 | 88  | Audit log                                | P5          | AUD, FA, FC, CEO                    | start 9      |
 | 88a | One-click evidence pack                  | P10         | AUD, FC                             | review-added |
 | 89  | Allocation history                       | P4          | FA, FC, AUD; owners scoped          |              |
@@ -215,12 +218,15 @@ Phase 8, 9 and 10 screens are specified spec-first in `docs/ux/screens/` (images
 | 92d  | Partner marketplace                                  | P16         | EO, FA, IA    | review-added |
 | 93   | HR system integration                                | P12         | IA; FA read   |              |
 | 94   | ERP integration                                      | P12         | IA; FA read   |              |
+| 94a  | Planning integration (Adaptive Planning)             | P12         | IA, FA, CEO   | review-added |
+| 94b  | Finance and payroll exports                          | P12         | FA, FC        | review-added |
 | 95   | Expense-management integration                       | P12         | IA; FA read   |              |
 | 96   | Corporate-card integration                           | P12         | IA; FA read   |              |
 | 97   | Calendar integration                                 | P12         | IA; FA read   |              |
 | 98   | Identity and SSO integration                         | P12         | IA; FA read   |              |
 | 99   | Data synchronization status                          | P12         | IA; FA read   |              |
 | 99a  | Cross-source duplicate review                        | P12         | FC, IA        | review-added |
+| 99b  | Event-code and card-limit push                       | P12         | IA; FA read   | review-added |
 | 100  | Integration error and retry screen                   | P12         | IA; FA read   |              |
 | 101  | API key and webhook management                       | P12         | IA; FA read   |              |
 | 101a | Public API docs and sandbox                          | P12         | IA            | review-added |
@@ -291,13 +297,13 @@ Phase 8, 9 and 10 screens are specified spec-first in `docs/ux/screens/` (images
 | P8    | 10                                   |
 | P9    | 9                                    |
 | P10   | 24                                   |
-| P11   | 4                                    |
-| P12   | 13                                   |
+| P11   | 7                                    |
+| P12   | 16                                   |
 | P13   | 7                                    |
 | P14   | 14                                   |
 | P15   | 11                                   |
 | P16   | 7                                    |
-| Total | 215 (124 specified, 91 review-added) |
+| Total | 221 (124 specified, 97 review-added) |
 
 ## Role-to-screen matrix
 
@@ -316,7 +322,7 @@ Access by screen group: **F** full use, **S** scoped to owned budgets, org subtr
 | G9 Integrations                              |  –  |  –  |  –  |  R  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  R  |  F  |  –  |
 | G10 Administration                           |  S  |  F  |  –  |  F  |  R  |  –  |  –  |  –  |  –  |  –  |  –  |  R  |  S  |  –  |
 | G11 Employee experience                      |  –  |  –  |  S  |  S  |  –  |  S  |  S  |  S  |  S  |  S  |  F  |  –  |  –  |  –  |
-| Finance operations (80a-80f, 85a-87b)        |  –  |  –  |  R  |  F  |  F  |  S  |  S  |  S  |  S  |  –  |  –  |  R  |  –  |  R  |
+| Finance operations (80a-80h, 85a-87c)        |  –  |  –  |  R  |  F  |  F  |  S  |  S  |  S  |  S  |  –  |  –  |  R  |  –  |  R  |
 | Channels and AI surfaces (59a-64a, 11a, 69a) |  –  |  S  |  S  |  S  |  S  |  S  |  S  |  S  |  S  |  S  |  S  |  S  |  S  |  S  |
 
 Super Admin (SA) sees tenant financial data only under an audited break-glass grant. Approval authority on G6 screens also requires a delegation-of-authority limit; ownership alone never satisfies an approval.
