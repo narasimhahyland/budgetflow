@@ -1,9 +1,4 @@
-import {
-  ApprovalsService,
-  budgetResourceOf,
-  personNames,
-  systemActor,
-} from '@bf/api/approvals';
+import { ApprovalsService, budgetResourceOf, personNames, systemActor } from '@bf/api/approvals';
 import { AuditService } from '@bf/api/audit';
 import { BudgetViews } from '@bf/api/budgets';
 import {
@@ -92,17 +87,7 @@ import type {
   UpdateNotificationSettingsRequest,
 } from '@bf/contracts';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  gte,
-  inArray,
-  isNull,
-  ne,
-  sql,
-} from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNull, ne, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import {
   buildSlackApprovalBlockKit,
@@ -159,6 +144,7 @@ export interface ChannelDeliverJob {
   tone?: 'neutral' | 'info' | 'warning' | 'important' | 'success';
   amountMinor?: number | null;
   currency?: string | null;
+  createdAtIso?: string | null;
 }
 
 @Injectable()
@@ -181,7 +167,11 @@ export class ChannelsService {
 
   // 123 Notifications and tasks -----------------------------------------------------------------
 
-  private itemLink(itemType: string | null, itemId: string | null, commentId: string | null): string | null {
+  private itemLink(
+    itemType: string | null,
+    itemId: string | null,
+    commentId: string | null,
+  ): string | null {
     if (!itemType || !itemId) return null;
     const suffix = commentId ? `?discussion=open#comment-${commentId}` : '';
     if (itemType === 'budget') return `/budgets/${itemId}${suffix}`;
@@ -206,7 +196,14 @@ export class ChannelsService {
       const [e] = await tx.select().from(events).where(eq(events.id, itemId));
       if (!e) return false;
       if (e.organizerPersonId === actor.personId) return true;
-      if (this.policy.can(actor, 'budget.read', { kind: 'budget', tenantId: actor.tenantId, id: '', path: '/' }).allowed)
+      if (
+        this.policy.can(actor, 'budget.read', {
+          kind: 'budget',
+          tenantId: actor.tenantId,
+          id: '',
+          path: '/',
+        }).allowed
+      )
         return true;
       if (e.budgetId) {
         const [b] = await tx.select().from(budgets).where(eq(budgets.id, e.budgetId));
@@ -216,7 +213,12 @@ export class ChannelsService {
         const [p] = await tx
           .select({ id: eventParticipants.id })
           .from(eventParticipants)
-          .where(and(eq(eventParticipants.eventId, itemId), eq(eventParticipants.personId, actor.personId)));
+          .where(
+            and(
+              eq(eventParticipants.eventId, itemId),
+              eq(eventParticipants.personId, actor.personId),
+            ),
+          );
         if (p) return true;
       }
       return false;
@@ -388,9 +390,7 @@ export class ChannelsService {
           nextCursor: null,
         };
       }
-      const cutoff = new Date(
-        Date.now() - Math.min(q.periodDays ?? 90, 90) * 24 * 60 * 60 * 1000,
-      );
+      const cutoff = new Date(Date.now() - Math.min(q.periodDays ?? 90, 90) * 24 * 60 * 60 * 1000);
       const archiveCutoff = new Date(Date.now() - ARCHIVE_DAYS_MS);
       const allRows = await tx
         .select()
@@ -408,7 +408,9 @@ export class ChannelsService {
       const tasks = await this.deriveTasks(tx, actor);
       const unreadCount = allRows.filter((n) => !n.readAt).length;
       const mentionsCount = allRows.filter((n) => n.type === 'discussion.mentioned').length;
-      const followingCount = allRows.filter((n) => n.type === 'discussion.followed_activity').length;
+      const followingCount = allRows.filter(
+        (n) => n.type === 'discussion.followed_activity',
+      ).length;
 
       let filtered = allRows.filter((n) => n.createdAt >= cutoff);
       if (q.tab === 'mentions') {
@@ -494,10 +496,7 @@ export class ChannelsService {
           .select({ n: sql<number>`count(*)` })
           .from(notifications)
           .where(
-            and(
-              eq(notifications.recipientPersonId, actor.personId),
-              isNull(notifications.readAt),
-            ),
+            and(eq(notifications.recipientPersonId, actor.personId), isNull(notifications.readAt)),
           );
         return {
           updated: updatedRows.length,
@@ -558,7 +557,9 @@ export class ChannelsService {
       .from(chatAccountLinks)
       .where(eq(chatAccountLinks.personId, actor.personId));
     const roleLabel = actor.roles.map((r) => ROLE_LABELS[r] ?? r).join(', ');
-    const toLinkView = (l: typeof chatAccountLinks.$inferSelect | undefined): ChatAccountLinkView | null =>
+    const toLinkView = (
+      l: typeof chatAccountLinks.$inferSelect | undefined,
+    ): ChatAccountLinkView | null =>
       l
         ? {
             id: l.id,
@@ -584,9 +585,8 @@ export class ChannelsService {
 
     const allTemplates = await tx.select().from(digests).orderBy(asc(digests.createdAt));
     const defaultTemplate =
-      allTemplates.find((d) =>
-        actor.roles.some((r) => (d.audienceRoles ?? []).includes(r)),
-      ) ?? allTemplates[0];
+      allTemplates.find((d) => actor.roles.some((r) => (d.audienceRoles ?? []).includes(r))) ??
+      allTemplates[0];
     const selectedTemplate =
       (pref?.digestTemplateId
         ? allTemplates.find((d) => d.id === pref.digestTemplateId)
@@ -668,10 +668,7 @@ export class ChannelsService {
           if (!spec) {
             throw new ApiProblem(400, 'VALIDATION_FAILED', 'Unknown notification preference type.');
           }
-          if (
-            spec.required &&
-            (rowInput.inApp === false || rowInput.email === false)
-          ) {
+          if (spec.required && (rowInput.inApp === false || rowInput.email === false)) {
             throw new ApiProblem(
               422,
               'NOTIFICATION_REQUIRED',
@@ -709,8 +706,7 @@ export class ChannelsService {
           quietStart,
           quietEnd,
           weekendQuiet: req.quietHours?.weekendQuiet ?? existing?.weekendQuiet ?? true,
-          showAmountsInPush:
-            req.privacy?.showAmountsInPush ?? existing?.showAmountsInPush ?? false,
+          showAmountsInPush: req.privacy?.showAmountsInPush ?? existing?.showAmountsInPush ?? false,
           updatedAt: new Date(),
         };
 
@@ -802,9 +798,7 @@ export class ChannelsService {
         const [d] = await tx
           .select()
           .from(pushSubscriptions)
-          .where(
-            and(eq(pushSubscriptions.id, id), eq(pushSubscriptions.personId, actor.personId)),
-          );
+          .where(and(eq(pushSubscriptions.id, id), eq(pushSubscriptions.personId, actor.personId)));
         if (!d) throw ApiProblem.notFound('push device');
         await tx.delete(pushSubscriptions).where(eq(pushSubscriptions.id, id));
         await this.audit.append(tx, {
@@ -984,9 +978,7 @@ export class ChannelsService {
       ref: r.ref,
       status: r.status,
       closedAt: r.decidedAt,
-      isAutoFollower: Boolean(
-        actor.personId && (r.requesterPersonId === actor.personId || myTask),
-      ),
+      isAutoFollower: Boolean(actor.personId && (r.requesterPersonId === actor.personId || myTask)),
     };
   }
 
@@ -1012,8 +1004,7 @@ export class ChannelsService {
 
   private canRoleComment(actor: RequestActor): { allowed: boolean; reason: string | null } {
     const readOnlyOnly =
-      actor.roles.length > 0 &&
-      actor.roles.every((r) => r === 'auditor' || r === 'analyst');
+      actor.roles.length > 0 && actor.roles.every((r) => r === 'auditor' || r === 'analyst');
     if (readOnlyOnly) {
       return {
         allowed: false,
@@ -1036,11 +1027,9 @@ export class ChannelsService {
     if (!rows.length) return [];
     const personIds = [
       ...new Set(
-        rows.flatMap((r) => [
-          r.authorPersonId,
-          r.removedByPersonId,
-          ...(r.mentions ?? []),
-        ]).filter((x): x is string => Boolean(x)),
+        rows
+          .flatMap((r) => [r.authorPersonId, r.removedByPersonId, ...(r.mentions ?? [])])
+          .filter((x): x is string => Boolean(x)),
       ),
     ];
     const pRows = personIds.length
@@ -1174,13 +1163,7 @@ export class ChannelsService {
 
       const mentionCandidates: MentionCandidate[] = [];
       for (const p of directory) {
-        const hasAccess = await this.canPersonReadItem(
-          tx,
-          actor.tenantId,
-          p.id,
-          itemType,
-          itemId,
-        );
+        const hasAccess = await this.canPersonReadItem(tx, actor.tenantId, p.id, itemType, itemId);
         mentionCandidates.push({
           personId: p.id,
           displayName: p.name,
@@ -1199,13 +1182,7 @@ export class ChannelsService {
         commentCount: rows.filter((r) => !r.removedAt).length,
         canComment,
         readOnlyReason,
-        follow: await this.followStateOf(
-          tx,
-          actor.personId,
-          itemType,
-          itemId,
-          item.isAutoFollower,
-        ),
+        follow: await this.followStateOf(tx, actor.personId, itemType, itemId, item.isAutoFollower),
         comments: await this.commentViews(tx, rows, actor.personId),
         systemEntries,
         mentionCandidates,
@@ -1257,24 +1234,15 @@ export class ChannelsService {
             );
           if (!parent) throw ApiProblem.notFound('comment');
           if (parent.parentCommentId) {
-            throw new ApiProblem(
-              422,
-              'VALIDATION_FAILED',
-              'Replies are one level deep.',
-              { field: 'parentCommentId' },
-            );
+            throw new ApiProblem(422, 'VALIDATION_FAILED', 'Replies are one level deep.', {
+              field: 'parentCommentId',
+            });
           }
         }
 
         const mentionedIds = [...new Set(req.mentionedPersonIds ?? [])];
         for (const mId of mentionedIds) {
-          const hasAccess = await this.canPersonReadItem(
-            tx,
-            actor.tenantId,
-            mId,
-            itemType,
-            itemId,
-          );
+          const hasAccess = await this.canPersonReadItem(tx, actor.tenantId, mId, itemType, itemId);
           if (!hasAccess) {
             throw new ApiProblem(
               422,
@@ -1691,9 +1659,7 @@ export class ChannelsService {
       .from(people)
       .innerJoin(memberships, eq(memberships.personId, people.id))
       .innerJoin(roleGrants, eq(roleGrants.membershipId, memberships.id))
-      .where(
-        and(eq(memberships.status, 'active'), inArray(roleGrants.role, approverRoles)),
-      )
+      .where(and(eq(memberships.status, 'active'), inArray(roleGrants.role, approverRoles)))
       .orderBy(asc(people.displayName));
     const map = new Map<
       string,
@@ -1719,20 +1685,15 @@ export class ChannelsService {
     approverIds: Set<string>,
   ): Promise<ChatInstallationView> {
     const installer = row.installedByPersonId
-      ? (await personNames(tx, [row.installedByPersonId])).get(row.installedByPersonId) ?? 'Nadia Farouk'
+      ? ((await personNames(tx, [row.installedByPersonId])).get(row.installedByPersonId) ??
+        'Nadia Farouk')
       : row.status === 'connected'
         ? 'Nadia Farouk'
         : null;
-    const cutoff = new Date(Date.now() - 24 * 3600_000);
     const dels = await tx
       .select()
       .from(channelDeliveries)
-      .where(
-        and(
-          eq(channelDeliveries.channel, row.provider),
-          gte(channelDeliveries.createdAt, cutoff),
-        ),
-      );
+      .where(eq(channelDeliveries.channel, row.provider));
     const sent = dels.filter((d) => d.status === 'sent' || d.status === 'updated').length;
     const retried = dels.filter((d) => d.status === 'retried' || d.attempts > 1).length;
     const failed = dels.filter((d) => d.status === 'failed').length;
@@ -1797,7 +1758,9 @@ export class ChannelsService {
       this.policy.can(actor, 'master_data.manage', tenantRes).allowed ||
       this.policy.can(actor, 'audit.read', tenantRes).allowed;
     if (!canReadAdmin) {
-      throw ApiProblem.forbidden('Only Integration, Organization or Finance Admins can open Channels.');
+      throw ApiProblem.forbidden(
+        'Only Integration, Organization or Finance Admins can open Channels.',
+      );
     }
 
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
@@ -1813,7 +1776,12 @@ export class ChannelsService {
         ? await tx
             .select({ id: people.id, name: people.displayName, title: people.jobTitle })
             .from(people)
-            .where(inArray(people.id, links.map((l) => l.personId)))
+            .where(
+              inArray(
+                people.id,
+                links.map((l) => l.personId),
+              ),
+            )
         : [];
       const pMap = new Map(pRows.map((p) => [p.id, p]));
 
@@ -1993,10 +1961,7 @@ export class ChannelsService {
         status: 200,
       },
       async (tx) => {
-        const [link] = await tx
-          .select()
-          .from(chatAccountLinks)
-          .where(eq(chatAccountLinks.id, id));
+        const [link] = await tx.select().from(chatAccountLinks).where(eq(chatAccountLinks.id, id));
         if (!link) throw ApiProblem.notFound('chat account link');
         const isSelf = actor.personId !== null && link.personId === actor.personId;
         const canManage = this.policy.can(actor, 'integration.manage', {
@@ -2319,7 +2284,14 @@ export class ChannelsService {
       stateHeadline = `Connect your BudgetFlow account to decide from ${provider === 'slack' ? 'Slack' : 'Teams'}`;
       canApprove = false;
       canReject = false;
-    } else if (opts?.readOnlyViewer || (t.taskStatus === 'pending' && !isApprover && !t.onHold && !d.impact?.blocked && d.doa.message === 'Shown to the approver.')) {
+    } else if (
+      opts?.readOnlyViewer ||
+      (t.taskStatus === 'pending' &&
+        !isApprover &&
+        !t.onHold &&
+        !d.impact?.blocked &&
+        d.doa.message === 'Shown to the approver.')
+    ) {
       state = 'read_only';
       const [taskRow] = await tx
         .select({ assignee: approvalTasks.assigneePersonId })
@@ -2353,9 +2325,7 @@ export class ChannelsService {
     } else if (d.impact?.blocked || t.onHold) {
       state = 'hard_block';
       stateHeadline =
-        d.impact?.blocked ??
-        t.holdReason ??
-        `New approvals are paused: ${t.budgetName} is frozen`;
+        d.impact?.blocked ?? t.holdReason ?? `New approvals are paused: ${t.budgetName} is frozen`;
       canApprove = false;
     } else if (!d.doa.withinLimit) {
       state = 'outside_doa';
@@ -2543,18 +2513,16 @@ export class ChannelsService {
       // 2. Approval decision from Slack / Teams card
       if (body.kind === 'decision') {
         if (!body.taskId || !body.decision) {
-          throw new ApiProblem(
-            400,
-            'VALIDATION_FAILED',
-            'taskId and decision are required.',
-          );
+          throw new ApiProblem(400, 'VALIDATION_FAILED', 'taskId and decision are required.');
         }
         if (body.decision === 'reject') {
           if (!body.reasonCode || !body.reason?.trim()) {
             throw new ApiProblem(
               422,
               'REASON_REQUIRED',
-              !body.reasonCode ? 'Choose a reason code.' : 'Give a reason so the requester knows why.',
+              !body.reasonCode
+                ? 'Choose a reason code.'
+                : 'Give a reason so the requester knows why.',
             );
           }
         }
@@ -2562,11 +2530,7 @@ export class ChannelsService {
         const cardBefore = await this.renderCardTx(tx, actor, provider, body.taskId).catch(
           () => null,
         );
-        if (
-          body.decision === 'approve' &&
-          cardBefore &&
-          cardBefore.state === 'outside_doa'
-        ) {
+        if (body.decision === 'approve' && cardBefore && cardBefore.state === 'outside_doa') {
           return {
             provider,
             kind: 'step_up',
@@ -2894,12 +2858,7 @@ export class ChannelsService {
       .selectDistinct({ personId: memberships.personId })
       .from(memberships)
       .innerJoin(roleGrants, eq(roleGrants.membershipId, memberships.id))
-      .where(
-        and(
-          eq(memberships.status, 'active'),
-          inArray(roleGrants.role, roles as RoleId[]),
-        ),
-      );
+      .where(and(eq(memberships.status, 'active'), inArray(roleGrants.role, roles as RoleId[])));
     return rows.filter((r) => Boolean(r.personId)).length;
   }
 
@@ -2971,7 +2930,9 @@ export class ChannelsService {
       !this.policy.can(actor, 'notification.manage', tenantRes).allowed &&
       !this.policy.can(actor, 'tenant.settings.manage', tenantRes).allowed
     ) {
-      throw ApiProblem.forbidden('Only Finance Admins or Organization Admins can edit digest templates.');
+      throw ApiProblem.forbidden(
+        'Only Finance Admins or Organization Admins can edit digest templates.',
+      );
     }
 
     return this.commands.run(
@@ -2992,27 +2953,19 @@ export class ChannelsService {
 
         const nextSections = (req.sections ?? existing.sections ?? []) as DigestSectionConfig[];
         if (!nextSections.some((s) => s.enabled)) {
-          throw new ApiProblem(
-            422,
-            'VALIDATION_FAILED',
-            'Choose at least one section.',
-            { field: 'sections' },
-          );
+          throw new ApiProblem(422, 'VALIDATION_FAILED', 'Choose at least one section.', {
+            field: 'sections',
+          });
         }
         const nextChannels = req.channelsAllowed ?? existing.channelsAllowed ?? ['email'];
         if (!nextChannels.length) {
-          throw new ApiProblem(
-            422,
-            'VALIDATION_FAILED',
-            'Choose at least one channel.',
-            { field: 'channelsAllowed' },
-          );
+          throw new ApiProblem(422, 'VALIDATION_FAILED', 'Choose at least one channel.', {
+            field: 'channelsAllowed',
+          });
         }
 
         const nextVersion = req.publish ? existing.version + 1 : existing.version;
-        const nextStatus = req.publish
-          ? 'published'
-          : (req.status ?? existing.status);
+        const nextStatus = req.publish ? 'published' : (req.status ?? existing.status);
 
         const [updated] = await tx
           .update(digests)
@@ -3069,11 +3022,9 @@ export class ChannelsService {
     const [person] = await tx.select().from(people).where(eq(people.id, targetPersonId));
     if (!person) throw ApiProblem.notFound('recipient');
 
-    const recipientActor = await this.actorForPersonIdTx(
-      tx,
-      actor.tenantId,
-      targetPersonId,
-    ).catch(() => actor);
+    const recipientActor = await this.actorForPersonIdTx(tx, actor.tenantId, targetPersonId).catch(
+      () => actor,
+    );
 
     const enabledSections = ((template.sections ?? []) as DigestSectionConfig[]).filter(
       (s) => s.enabled,
@@ -3097,9 +3048,7 @@ export class ChannelsService {
       } else if (sec.key === 'delegations') {
         const dels = await this.approvals.delegations(recipientActor);
         for (const d of dels.items.slice(0, sec.maxItems)) {
-          lines.push(
-            `${d.delegatorName} → ${d.delegateName} (${d.validFrom} to ${d.validTo})`,
-          );
+          lines.push(`${d.delegatorName} → ${d.delegateName} (${d.validFrom} to ${d.validTo})`);
         }
       } else if (
         sec.key === 'budget_position' ||
@@ -3115,8 +3064,7 @@ export class ChannelsService {
           .orderBy(asc(budgets.path));
         const scoped = allB
           .filter(
-            (b) =>
-              this.policy.can(recipientActor, 'budget.read', budgetResourceOf(b)).allowed,
+            (b) => this.policy.can(recipientActor, 'budget.read', budgetResourceOf(b)).allowed,
           )
           .slice(0, sec.maxItems);
         const details = await this.budgetViews.details(tx, recipientActor, scoped);
@@ -3160,9 +3108,7 @@ export class ChannelsService {
           .limit(sec.maxItems);
         for (const e of evs) {
           if (await this.isItemAvailable(tx, recipientActor, 'event', e.id)) {
-            lines.push(
-              `${e.name} (${e.eventCode}) · ${e.status.replace(/_/g, ' ')}`,
-            );
+            lines.push(`${e.name} (${e.eventCode}) · ${e.status.replace(/_/g, ' ')}`);
           }
         }
       } else if (sec.key === 'receipts_missing') {
@@ -3413,9 +3359,7 @@ export class ChannelsService {
               job.tenantId,
               job.recipientPersonId,
             ).catch(() => systemActor(job.tenantId));
-            const card = await this.renderCardTx(tx, actor, provider, job.taskId).catch(
-              () => null,
-            );
+            const card = await this.renderCardTx(tx, actor, provider, job.taskId).catch(() => null);
             if (card) {
               payload =
                 provider === 'slack'
@@ -3476,12 +3420,9 @@ export class ChannelsService {
           itemRef: job.subjectRef ?? null,
           commentId: job.commentId ?? null,
           channelsDelivered: delivered,
+          ...(job.createdAtIso ? { createdAt: new Date(job.createdAtIso) } : {}),
         });
       }
     });
   }
 }
-
-
-
-

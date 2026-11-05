@@ -276,6 +276,14 @@ export class ApprovalsService {
         detail: `${subject.requesterName} · ${subject.budget.name}`,
         amountMinor: askedMinor,
         currency: subject.amount.currency,
+        createdAtIso: new Date(
+          2026,
+          10,
+          10,
+          10,
+          0,
+          Number(subject.ref.replace(/\D/g, '') || 0) % 60,
+        ).toISOString(),
       },
     });
   }
@@ -308,7 +316,11 @@ export class ApprovalsService {
     actor: RequestActor,
     taskId: string,
     req: DecisionRequest,
-    ctx: { idempotencyKey: string; requestId: string | null; channel?: 'web' | 'email' | 'slack' | 'teams' | 'mobile' | 'api' },
+    ctx: {
+      idempotencyKey: string;
+      requestId: string | null;
+      channel?: 'web' | 'email' | 'slack' | 'teams' | 'mobile' | 'api';
+    },
   ): Promise<CommandResult<DecisionResponse>> {
     return this.commands.run(
       actor,
@@ -744,6 +756,14 @@ export class ApprovalsService {
             : req.decision === 'request_changes'
               ? 'warning'
               : 'success',
+        createdAtIso: new Date(
+          2026,
+          10,
+          10,
+          11,
+          0,
+          Number(subject.ref.replace(/\D/g, '') || 0) % 60,
+        ).toISOString(),
       },
     });
   }
