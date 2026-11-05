@@ -134,6 +134,25 @@ export async function seedActuals(app: INestApplicationContext): Promise<void> {
             ctx,
           ),
         );
+        if (kind === 'encumber') {
+          // The funding line records the amount and rates first posted; every later movement reuses them.
+          const line = draft.lines.find((l) => l.budgetId === budget.id)!;
+          await tx.insert(s.commitmentFundingLines).values({
+            tenantId: T,
+            commitmentId: c.id,
+            budgetId: budget.id,
+            amountMinor: c.amountMinor,
+            currency: c.currency,
+            budgetAmountMinor: Math.abs(line.budget!.amountMinor),
+            budgetCurrency: budget.currency,
+            rateType: line.budgetRate?.type ?? 'plan',
+            budgetRate: line.budgetRate?.value ?? '1',
+            budgetRateIds: line.budgetRate?.rateIds ?? [],
+            reportingCurrency: line.reporting.currency,
+            reportingRate: line.reportingRate.value,
+            reportingRateIds: line.reportingRate.rateIds,
+          });
+        }
         await ledger.post(tx, draft, {
           actor: admin,
           command: 'seed.commitment',

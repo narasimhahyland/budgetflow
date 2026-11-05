@@ -80,29 +80,11 @@ test.describe('actuals import and matching', () => {
       },
     });
     const body = (await (await api.get(`/api/actuals?status=all&q=${ref}`)).json()) as {
-      items: {
-        id: string;
-        sourceRef: string;
-        status: string;
-        budget: { amountMinor: number } | null;
-      }[];
+      items: { sourceRef: string; status: string; budget: { amountMinor: number } | null }[];
     };
     const byRef = Object.fromEntries(body.items.map((i) => [i.sourceRef, i]));
     expect(byRef[`${ref}-1`]).toMatchObject({ status: 'matched' });
     expect(byRef[`${ref}-2`]).toMatchObject({ status: 'excluded' });
-
-    // Bengaluru Events is a visual-baseline budget: reverse the charge and exclude the line so its seeded
-    // balances stay as seeded when the visual gate runs after the journeys.
-    const cleanup = async (path: string, data: Record<string, string>) =>
-      expect(
-        (await api.post(path, { data, headers: { 'idempotency-key': randomUUID() } })).status(),
-      ).toBe(200);
-    const charged = byRef[`${ref}-1`].id;
-    await cleanup(`/api/actuals/${charged}/reversals`, {
-      reasonCode: 'WRONG-BUDGET',
-      reason: 'Journey clean-up',
-    });
-    await cleanup(`/api/actuals/${charged}/exclusion`, { reason: 'Journey clean-up' });
     await api.dispose();
   });
 
@@ -153,7 +135,8 @@ test.describe('accruals, commitment hygiene and event close', () => {
     await expect(page.getByTestId('blocker-EVENT_HAS_UNMATCHED_ACTUALS')).toContainText(
       'Match or exclude every actual',
     );
-    await page.getByTestId('close-reason').fill('Trying to close early');
-    await expect(page.getByTestId('close-event')).toBeDisabled();
+    // Finance reconciles; the organizers close (Phase 5's close runs these same checks).
+    await expect(page.getByTestId('close-organizer-note')).toBeVisible();
+    await expect(page.getByTestId('close-event')).toHaveCount(0);
   });
 });

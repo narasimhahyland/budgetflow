@@ -8,9 +8,9 @@ import {
 import {
   AccrualsQuery,
   ActualsQuery,
+  ImportsQuery,
   AsOfRequest,
   CancelCommitmentRequest,
-  CloseEventRequest,
   CommitmentsQuery,
   CreateMappingRuleRequest,
   CreateOverBudgetRequest,
@@ -85,8 +85,8 @@ export class ActualsController {
   }
 
   @Get('imports')
-  listImports(@CurrentActor() actor: RequestActor) {
-    return this.imports.list(actor);
+  listImports(@CurrentActor() actor: RequestActor, @Query() query: unknown) {
+    return this.imports.list(actor, parseWith(ImportsQuery, query));
   }
 
   @Get('imports/:batchId')
@@ -388,27 +388,6 @@ export class ActualsController {
   @Get('events/:eventId/reconciliation')
   getEvent(@CurrentActor() actor: RequestActor, @Param('eventId') eid: string) {
     return this.eventsClose.get(actor, id(eid));
-  }
-
-  @Post('events/:eventId/close')
-  @HttpCode(200)
-  async closeReconciledEvent(
-    @CurrentActor() actor: RequestActor,
-    @IdempotencyKey() key: string,
-    @RequestId() rid: string | null,
-    @Param('eventId') eid: string,
-    @Body() body: unknown,
-    @Res({ passthrough: true }) res: ResponseLike,
-  ) {
-    return replayed(
-      res,
-      await this.eventsClose.close(
-        actor,
-        id(eid),
-        parseWith(CloseEventRequest, body),
-        ctx(key, rid),
-      ),
-    );
   }
 
   // Over-budget requests

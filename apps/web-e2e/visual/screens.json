@@ -504,7 +504,7 @@
               "click": "[data-testid=set-to-zero]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"7,911.71\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"4,797.71\")"
             }
           ]
         },
@@ -515,13 +515,13 @@
               "click": "[data-testid=set-to-zero]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"7,911.71\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"4,797.71\")"
             },
             {
               "waitFor": "[data-testid=confirm-text]"
             },
             {
-              "fill": ["[data-testid=confirm-text]", "Bangalore"]
+              "fill": ["[data-testid=confirm-text]", "EX-IN-BLR"]
             }
           ]
         }

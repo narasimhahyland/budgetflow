@@ -82,12 +82,13 @@ export class ImportsService {
     private readonly analytics: AnalyticsService,
   ) {}
 
-  list(actor: RequestActor): Promise<ImportBatchList> {
+  list(actor: RequestActor, q: { fileName?: string } = {}): Promise<ImportBatchList> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       this.policy.assert(actor, 'actuals.read', tenantOf(actor));
       const rows = await tx
         .select()
         .from(importBatches)
+        .where(q.fileName ? eq(importBatches.fileName, q.fileName) : undefined)
         .orderBy(desc(importBatches.createdAt))
         .limit(50);
       return { items: await Promise.all(rows.map((b) => this.dtos.batch(tx, b))) };

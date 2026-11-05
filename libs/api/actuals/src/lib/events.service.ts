@@ -5,61 +5,60 @@ import {
   contributionRequests,
   events,
   rechargeSchedules,
-  surplusReturns,
   withTenant,
   type Db,
   type Tx,
 } from '@bf/api/db';
-import { AuditService } from '@bf/api/audit';
-import {
-  ApiProblem,
-  CommandRunner,
-  DB,
-  PolicyService,
-  unwrap,
-  type CommandResult,
-  type RequestActor,
-} from '@bf/api/core';
-import { LedgerReads, LedgerService, toPostingBudget } from '@bf/api/ledger';
+import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { IntercompanyService } from '@bf/api/contributions';
+import { EventCloseChecks, EventsService } from '@bf/api/events';
+import { FundingSourcesService } from '@bf/api/spend';
 import type { EventReconciliation, EventReconciliationList } from '@bf/contracts';
-import {
-  checkEventClose,
-  contributionMachine,
-  eventMachine,
-  postCommitmentMovement,
-  type ContributionStatus,
-} from '@bf/domain';
-import { Inject, Injectable } from '@nestjs/common';
+import { needsAccrual } from '@bf/domain';
+import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { and, asc, eq, inArray, isNull, or, sql } from 'drizzle-orm';
-import { ActualsReads, tenantOf, todayUtc, type CommandContext } from './actuals-reads';
+import { ActualsReads, tenantOf, todayUtc } from './actuals-reads';
 import { CommitmentsService } from './commitments.service';
 
 type EventRow = typeof events.$inferSelect;
-const FUNDED: ContributionStatus[] = [
-  'approved_full',
-  'approved_partial',
-  'earmarked',
-  'transferred',
-  'settled',
-];
+
+const UNMATCHED = 'Match or exclude every actual before closing the event.';
+const UNACCRUED =
+  'Release or accrue every commitment whose service has ended before closing the event.';
 
 /**
- * Event reconciliation and close: no close while actuals are unmatched, a cross-entity contribution
- * lacks its recharge, or a commitment is open without an accrual. Closing releases what is still
- * earmarked on each contributor's budget (the surplus returned per contributor).
+ * Event reconciliation. The close itself is Phase 5's (`POST /api/events/{id}/close`: it releases open
+ * commitments and returns each funding source's surplus); this service registers the Phase 6 checks that
+ * block it - actuals with the event code still unmatched, and commitments past their service end with
+ * neither an invoice nor an accrual - and shows everything the close depends on.
  */
 @Injectable()
-export class EventsCloseService {
+export class EventsCloseService implements OnModuleInit {
   constructor(
     @Inject(DB) private readonly db: Db,
-    private readonly commands: CommandRunner,
     private readonly policy: PolicyService,
     private readonly reads: ActualsReads,
-    private readonly ledgerReads: LedgerReads,
-    private readonly ledger: LedgerService,
     private readonly commitmentsSvc: CommitmentsService,
-    private readonly audit: AuditService,
+    private readonly closeChecks: EventCloseChecks,
+    private readonly events: EventsService,
+    private readonly intercompany: IntercompanyService,
+    private readonly sources: FundingSourcesService,
   ) {}
+
+  onModuleInit(): void {
+    this.closeChecks.register(async (tx, eventId) => {
+      const [e] = await tx
+        .select({ eventCode: events.eventCode })
+        .from(events)
+        .where(eq(events.id, eventId));
+      const count = e ? (await this.actualStats(tx, e.eventCode)).unmatched : 0;
+      return count > 0 ? { code: 'EVENT_HAS_UNMATCHED_ACTUALS', message: UNMATCHED, count } : null;
+    });
+    this.closeChecks.register(async (tx, eventId) => {
+      const count = await this.unaccrued(tx, eventId);
+      return count > 0 ? { code: 'EVENT_HAS_OPEN_COMMITMENTS', message: UNACCRUED, count } : null;
+    });
+  }
 
   list(actor: RequestActor): Promise<EventReconciliationList> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
@@ -98,155 +97,9 @@ export class EventsCloseService {
     });
   }
 
-  close(
-    actor: RequestActor,
-    eventId: string,
-    req: { reason: string },
-    ctx: CommandContext,
-  ): Promise<CommandResult<EventReconciliation>> {
-    return this.commands.run(
-      actor,
-      {
-        idempotencyKey: ctx.idempotencyKey,
-        operation: `actuals.event.close:${eventId}`,
-        request: req,
-        status: 200,
-      },
-      async (tx) => {
-        this.policy.assert(actor, 'actuals.manage', tenantOf(actor));
-        const [e] = await tx.select().from(events).where(eq(events.id, eventId)).for('update');
-        if (!e) throw ApiProblem.notFound('event');
-        const before = await this.reconciliation(tx, actor, e);
-        unwrap(
-          checkEventClose({
-            status: e.status,
-            unmatchedActuals: before.actuals.unmatched,
-            crossEntityContributionsWithoutRecharge:
-              before.blockers.find((b) => b.code === 'EVENT_MISSING_RECHARGE')?.count ?? 0,
-            unaccruedOpenCommitments:
-              before.blockers.find((b) => b.code === 'EVENT_HAS_OPEN_COMMITMENTS')?.count ?? 0,
-          }),
-        );
-        const contribs = await tx
-          .select()
-          .from(contributionRequests)
-          .where(
-            and(
-              eq(contributionRequests.eventId, e.id),
-              inArray(contributionRequests.status, FUNDED),
-            ),
-          )
-          .orderBy(asc(contributionRequests.id))
-          .for('update');
-        const held = await this.reads.heldByContribution(
-          tx,
-          contribs.map((c) => c.id),
-        );
-        const giverIds = [...new Set(contribs.map((c) => c.giverBudgetId))];
-        await this.ledgerReads.lockBudgets(tx, giverIds);
-        const rows = await this.ledgerReads.budgetRows(tx, giverIds);
-        const returns: {
-          contributionId: string;
-          budgetId: string;
-          amountMinor: number;
-          currency: string;
-          journalId: string;
-        }[] = [];
-        for (const c of contribs) {
-          const h = held.get(c.id);
-          if (h && h.heldMinor > 0) {
-            const budget = toPostingBudget(rows.get(h.budgetId)!);
-            const balances = (await this.ledgerReads.balances(tx, [budget.id])).get(
-              budget.id,
-            )!.budget;
-            const draft = unwrap(
-              postCommitmentMovement(
-                {
-                  kind: 'release_hold',
-                  budget: { ...budget, balances },
-                  amount: { amountMinor: h.heldMinor, currency: budget.currency },
-                  provenance: { contributionId: c.id, eventId: e.id },
-                },
-                {
-                  reportingCurrency: actor.reportingCurrency,
-                  rates: await this.ledgerReads.planRates(tx, budget.fiscalYearId),
-                  accountingDate: todayUtc(),
-                },
-              ),
-            );
-            const journalId = await this.ledger.post(tx, draft, {
-              actor,
-              command: 'actuals.event.close',
-              fiscalYearId: budget.fiscalYearId,
-              requestId: ctx.requestId,
-              idempotencyKey: ctx.idempotencyKey,
-            });
-            await tx.insert(surplusReturns).values({
-              tenantId: actor.tenantId,
-              eventId: e.id,
-              contributionRequestId: c.id,
-              budgetId: budget.id,
-              amountMinor: h.heldMinor,
-              currency: budget.currency,
-              journalId,
-            });
-            returns.push({
-              contributionId: c.id,
-              budgetId: budget.id,
-              amountMinor: h.heldMinor,
-              currency: budget.currency,
-              journalId,
-            });
-          }
-          const settled = contributionMachine.next(c.status, 'settle');
-          if (settled.ok)
-            await tx
-              .update(contributionRequests)
-              .set({ status: settled.value, updatedAt: new Date() })
-              .where(eq(contributionRequests.id, c.id));
-        }
-        const reconciling =
-          e.status === 'completed' ? unwrap(eventMachine.next(e.status, 'reconcile')) : e.status;
-        const closed = unwrap(eventMachine.next(reconciling, 'close'));
-        await tx
-          .update(events)
-          .set({ status: closed, updatedAt: new Date() })
-          .where(eq(events.id, e.id));
-        await this.audit.append(tx, {
-          tenantId: actor.tenantId,
-          actorPersonId: actor.personId,
-          actorSubject: actor.subject,
-          action: 'event.closed',
-          resourceType: 'event',
-          resourceId: e.id,
-          legalEntityId: e.legalEntityId,
-          requestId: ctx.requestId,
-          reason: req.reason,
-          changes: {
-            status: { from: e.status, to: closed },
-            surplusReturns: {
-              from: null,
-              to: returns.map((r) => ({
-                contributionId: r.contributionId,
-                budgetId: r.budgetId,
-                amountMinor: r.amountMinor,
-              })),
-            },
-          },
-        });
-        const [after] = await tx.select().from(events).where(eq(events.id, e.id));
-        return this.reconciliation(tx, actor, after);
-      },
-    );
-  }
-
-  private async reconciliation(
-    tx: Tx,
-    actor: RequestActor,
-    e: EventRow,
-  ): Promise<EventReconciliation> {
-    const reporting = actor.reportingCurrency;
-    const [stats] = await tx
+  /** Actuals carrying the event code, from manual entries and posted imports. */
+  private async actualStats(tx: Tx, eventCode: string) {
+    const [s] = await tx
       .select({
         matched: sql<number>`count(*) filter (where ${actuals.matchStatus} = 'matched')`,
         unmatched: sql<number>`count(*) filter (where ${actuals.matchStatus} in ('unmatched','partially_matched'))`,
@@ -258,74 +111,113 @@ export class EventsCloseService {
       .from(actuals)
       .where(
         and(
-          eq(actuals.eventCode, e.eventCode),
+          eq(actuals.eventCode, eventCode),
           or(
             isNull(actuals.importBatchId),
             sql`${actuals.importBatchId} in (select id from import_batches where status = 'posted')`,
           ),
         ),
       );
+    return {
+      matched: Number(s.matched),
+      unmatched: Number(s.unmatched),
+      excluded: Number(s.excluded),
+      matchedReporting: Number(s.matchedReporting),
+      unmatchedReporting: Number(s.unmatchedReporting),
+      fx: Number(s.fx),
+    };
+  }
+
+  /** Open commitments past their service end with encumbrance left and no live accrual. */
+  private async unaccrued(tx: Tx, eventId: string): Promise<number> {
+    const open = await tx
+      .select({ id: commitments.id, serviceEnd: commitments.serviceEnd })
+      .from(commitments)
+      .where(
+        and(
+          eq(commitments.eventId, eventId),
+          inArray(commitments.status, ['encumbered', 'partially_consumed']),
+        ),
+      );
+    const balances = await this.reads.commitmentBalances(
+      tx,
+      open.map((c) => c.id),
+    );
+    const asOf = todayUtc();
+    return open.filter((c) => {
+      const b = balances.get(c.id);
+      return needsAccrual({
+        serviceEnd: c.serviceEnd,
+        remainingMinor: b?.encumberedMinor ?? 0,
+        hasLiveAccrual: (b?.accruedMinor ?? 0) > 0,
+        asOf,
+      });
+    }).length;
+  }
+
+  private async reconciliation(
+    tx: Tx,
+    actor: RequestActor,
+    e: EventRow,
+  ): Promise<EventReconciliation> {
+    const reporting = actor.reportingCurrency;
+    const stats = await this.actualStats(tx, e.eventCode);
     const cRows = await tx
       .select()
       .from(commitments)
       .where(eq(commitments.eventId, e.id))
       .orderBy(asc(commitments.id));
     const items = await this.commitmentsSvc.items(tx, actor, cRows, todayUtc());
-    const unaccrued = items.filter(
-      (c) =>
-        (c.status === 'encumbered' || c.status === 'partially_consumed') &&
-        c.encumbered.amountMinor > 0 &&
-        c.accrued.amountMinor === 0,
-    ).length;
-    const contribs = await tx
-      .select({
-        c: contributionRequests,
-        giverName: budgets.name,
-        giverEntity: budgets.legalEntityId,
-        giverCurrency: budgets.currency,
-      })
-      .from(contributionRequests)
-      .innerJoin(budgets, eq(budgets.id, contributionRequests.giverBudgetId))
-      .where(
-        and(eq(contributionRequests.eventId, e.id), inArray(contributionRequests.status, FUNDED)),
-      );
-    const held = await this.reads.heldByContribution(
+    const unaccrued = await this.unaccrued(tx, e.id);
+    const missingRecharge = await this.intercompany.missingRecharges(tx, e.id);
+
+    const srcs = await this.sources.list(tx, e.id);
+    const names = await this.reads.budgetNames(
       tx,
-      contribs.map((c) => c.c.id),
+      srcs.map((s) => s.originBudgetId),
     );
-    const recharges = contribs.length
+    const contributionIds = srcs
+      .map((s) => s.contributionRequestId)
+      .filter((x): x is string => Boolean(x));
+    const contribs = contributionIds.length
       ? await tx
-          .select()
-          .from(rechargeSchedules)
-          .where(
-            inArray(
-              rechargeSchedules.contributionRequestId,
-              contribs.map((c) => c.c.id),
-            ),
-          )
+          .select({
+            id: contributionRequests.id,
+            recharge: contributionRequests.rechargeScheduleId,
+            giverEntity: budgets.legalEntityId,
+          })
+          .from(contributionRequests)
+          .innerJoin(budgets, eq(budgets.id, contributionRequests.giverBudgetId))
+          .where(inArray(contributionRequests.id, contributionIds))
       : [];
-    let missingRecharge = 0;
-    const contributions = contribs.map(({ c, giverName, giverEntity, giverCurrency }) => {
-      const cross = giverEntity !== e.legalEntityId;
-      const rc = recharges.find(
-        (r) =>
-          r.contributionRequestId === c.id && r.status !== 'cancelled' && r.status !== 'blocked',
-      );
-      if (cross && !rc && c.status !== 'settled') missingRecharge++;
-      const h = held.get(c.id)?.heldMinor ?? 0;
+    const rechargeIds = contribs.map((c) => c.recharge).filter((x): x is string => Boolean(x));
+    const recharges = rechargeIds.length
+      ? await tx
+          .select({ id: rechargeSchedules.id, status: rechargeSchedules.status })
+          .from(rechargeSchedules)
+          .where(inArray(rechargeSchedules.id, rechargeIds))
+      : [];
+    const sources = srcs.map((s) => {
+      const c = contribs.find((x) => x.id === s.contributionRequestId);
+      const left =
+        s.status === 'active' ? Math.max(0, s.fundedMinor - s.consumedMinor - s.returnedMinor) : 0;
       return {
-        id: c.id,
-        giverBudgetId: c.giverBudgetId,
-        giverBudgetName: giverName,
-        mode: c.mode,
-        status: c.status,
-        approved: { amountMinor: c.approvedMinor ?? 0, currency: c.currency },
-        held: { amountMinor: h, currency: giverCurrency },
-        surplusShare: { amountMinor: e.status === 'closed' ? 0 : h, currency: giverCurrency },
-        crossEntity: cross,
-        rechargeStatus: rc?.status ?? null,
+        id: s.id,
+        kind: s.kind === 'own' ? ('own' as const) : ('contribution' as const),
+        budgetId: s.originBudgetId,
+        budgetName: names.get(s.originBudgetId) ?? '',
+        contributionId: s.contributionRequestId,
+        mode: s.mode,
+        status: s.status,
+        funded: { amountMinor: s.fundedMinor, currency: s.currency },
+        consumed: { amountMinor: s.consumedMinor, currency: s.currency },
+        surplusShare: { amountMinor: left, currency: s.currency },
+        returned: { amountMinor: s.returnedMinor, currency: s.currency },
+        crossEntity: c ? c.giverEntity !== e.legalEntityId : false,
+        rechargeStatus: recharges.find((r) => r.id === c?.recharge)?.status ?? null,
       };
     });
+
     const blockers: EventReconciliation['blockers'] = [];
     if (!['completed', 'reconciling', 'closed'].includes(e.status))
       blockers.push({
@@ -333,33 +225,26 @@ export class EventsCloseService {
         message: 'The event is not completed yet.',
         count: 1,
       });
-    if (Number(stats.unmatched) > 0)
+    if (stats.unmatched > 0)
       blockers.push({
         code: 'EVENT_HAS_UNMATCHED_ACTUALS',
-        message: 'Match or exclude every actual before closing the event.',
-        count: Number(stats.unmatched),
+        message: UNMATCHED,
+        count: stats.unmatched,
       });
     if (missingRecharge > 0)
       blockers.push({
         code: 'EVENT_MISSING_RECHARGE',
-        message: 'Cross-entity contributions need their recharge before the event can close.',
+        message:
+          'Cross-entity contributions need their recharge approved before the event can close.',
         count: missingRecharge,
       });
     if (unaccrued > 0)
-      blockers.push({
-        code: 'EVENT_HAS_OPEN_COMMITMENTS',
-        message: 'Release or accrue every open commitment before closing the event.',
-        count: unaccrued,
-      });
-    const returned = await tx.select().from(surplusReturns).where(eq(surplusReturns.eventId, e.id));
-    const names = await this.reads.budgetNames(
-      tx,
-      returned.map((r) => r.budgetId),
-    );
+      blockers.push({ code: 'EVENT_HAS_OPEN_COMMITMENTS', message: UNACCRUED, count: unaccrued });
+
     const [b] = e.budgetId
       ? await tx.select({ name: budgets.name }).from(budgets).where(eq(budgets.id, e.budgetId))
       : [];
-    const surplus = contributions.reduce((s, c) => s + c.surplusShare.amountMinor, 0);
+    const currency = srcs[0]?.currency ?? reporting;
     return {
       event: {
         id: e.id,
@@ -371,26 +256,31 @@ export class EventsCloseService {
         budgetName: b?.name ?? null,
       },
       actuals: {
-        matched: Number(stats.matched),
-        unmatched: Number(stats.unmatched),
-        excluded: Number(stats.excluded),
-        matchedReporting: { amountMinor: Number(stats.matchedReporting), currency: reporting },
-        unmatchedReporting: { amountMinor: Number(stats.unmatchedReporting), currency: reporting },
-        fxEffect: { amountMinor: Number(stats.fx), currency: reporting },
+        matched: stats.matched,
+        unmatched: stats.unmatched,
+        excluded: stats.excluded,
+        matchedReporting: { amountMinor: stats.matchedReporting, currency: reporting },
+        unmatchedReporting: { amountMinor: stats.unmatchedReporting, currency: reporting },
+        fxEffect: { amountMinor: stats.fx, currency: reporting },
       },
       commitments: items,
-      contributions,
-      spent: { amountMinor: Number(stats.matchedReporting), currency: reporting },
-      surplus: { amountMinor: surplus, currency: contributions[0]?.held.currency ?? reporting },
+      sources,
+      spent: { amountMinor: stats.matchedReporting, currency: reporting },
+      surplus: {
+        amountMinor: sources.reduce((s, x) => s + x.surplusShare.amountMinor, 0),
+        currency,
+      },
       blockers: e.status === 'closed' ? [] : blockers,
       canClose: e.status !== 'closed' && blockers.length === 0,
-      surplusReturns: returned.map((r) => ({
-        contributionId: r.contributionRequestId,
-        budgetId: r.budgetId,
-        budgetName: names.get(r.budgetId) ?? '',
-        amount: { amountMinor: r.amountMinor, currency: r.currency },
-        journalId: r.journalId,
-      })),
+      canManage: await this.events.canManage(tx, actor, e),
+      surplusReturns: sources
+        .filter((s) => s.returned.amountMinor > 0)
+        .map((s) => ({
+          sourceId: s.id,
+          budgetId: s.budgetId,
+          budgetName: s.budgetName,
+          amount: s.returned,
+        })),
     };
   }
 }

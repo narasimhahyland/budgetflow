@@ -1,21 +1,15 @@
-Full gate: scripts/gate.sh all on feat/p6-actuals at 315f0cc (rebased on main after Phase 4), 2026-11-05T01:38Z
-Logs: tmp/gate/20261105-070843 (not committed)
-
-PASS  secrets  4s
-PASS  lint  16s
-PASS  styles  4s
-PASS  satori  15s
-PASS  typecheck  2s
-PASS  build  1s
-PASS  openapi  1s
-PASS  db  1s
-PASS  stack  41s
-PASS  functional-api  40s
-PASS  functional-e2e  60s
-PASS  visual  38s
-
-Counts: API scenarios 223 passed (Playwright report of the gate run; 22 in apps/api-e2e/src/actuals); visual 137 passed.
-Re-run on a freshly reset stack with the list reporter (evidence/phase-06/functional/): API scenarios 223 passed;
-journeys 193 passed, 30 skipped (mutating journeys run on desktop only), 0 failed.
-CI on PR #16 at 315f0cc: Preflight, Harness, Lint/typecheck/build/Satori, Functional (API scenarios + journeys on Compose)
-and Visual regression all pass.
+scripts/gate.sh lint typecheck build functional-api functional-e2e visual — 2026-11-05T05:51:38Z — commit 2f1c218
+PASS|secrets|1s
+PASS|lint|1s
+PASS|styles|1s
+PASS|satori|19s
+PASS|typecheck|1s
+PASS|build|1s
+PASS|openapi|1s
+PASS|db|1s
+PASS|stack|42s
+PASS|functional-api|75s
+PASS|functional-e2e|75s
+PASS|reseed|40s
+PASS|visual|53s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report

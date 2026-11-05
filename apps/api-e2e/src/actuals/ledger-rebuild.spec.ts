@@ -40,25 +40,25 @@ test.describe('ledger rebuild after actuals and accounting postings', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const c1 = await createCommitment({
+    const c1 = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 150_000,
       serviceEnd: '2026-10-30',
     });
-    const c2 = await createCommitment({ budgetId: budget.id, amountMinor: 30_000 });
-    const c3 = await createCommitment({
+    const c2 = await createCommitment(request, { budgetId: budget.id, amountMinor: 30_000 });
+    const c3 = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 50_000,
       serviceStart: '2026-12-01',
       serviceEnd: '2026-12-02',
       nonRefundableDepositMinor: 10_000,
     });
-    const c4 = await createCommitment({
+    const c4 = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 20_000,
       serviceEnd: '2026-10-15',
     });
-    const c5 = await createCommitment({ budgetId: budget.id, amountMinor: 70_000 });
+    const c5 = await createCommitment(request, { budgetId: budget.id, amountMinor: 70_000 });
 
     const accruals = await expectContract(
       await request.post('/api/actuals/accruals/proposals', {

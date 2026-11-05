@@ -21,7 +21,7 @@ test.describe('refunds, credit notes and reversals', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const c = await createCommitment({
+    const c = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 50_000,
       description: 'Catering',
@@ -63,7 +63,7 @@ test.describe('refunds, credit notes and reversals', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const c = await createCommitment({
+    const c = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 20_000,
       description: 'Transport',

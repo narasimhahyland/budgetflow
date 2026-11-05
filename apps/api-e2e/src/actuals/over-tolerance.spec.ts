@@ -20,13 +20,13 @@ test.describe('over tolerance needs an over-budget request', () => {
   test('an actual above commitment + tolerance waits in the queue until an over-budget request is approved within DoA', async ({
     request,
   }) => {
-    const budget = await spendBudget(request, { owner: 'location-manager' });
-    const c = await createCommitment({
+    const budget = await spendBudget(request);
+    const c = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 100_000,
       description: 'Offsite catering',
     });
-    const big = await createCommitment({
+    const big = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 100_000,
       description: 'Offsite venue',
@@ -36,7 +36,7 @@ test.describe('over tolerance needs an over-budget request', () => {
       request,
       csv([
         `${p}-1,2026-11-03,1300.00,USD,HYL-IN,,6100,,,Catering with extra guests,${c.reference},,charge`,
-        `${p}-2,2026-11-03,4000.00,USD,HYL-IN,,6100,,,Venue upgrade,${big.reference},,charge`,
+        `${p}-2,2026-11-03,12000.00,USD,HYL-IN,,6100,,,Venue upgrade,${big.reference},,charge`,
       ]),
     );
     expect(batch.summary).toMatchObject({ unmatched: 2 });
@@ -89,7 +89,7 @@ test.describe('over tolerance needs an over-budget request', () => {
     );
     const approved = await expectContract(
       await request.post(`/api/actuals/over-budget-requests/${req.id}/decision`, {
-        headers: await mutate('location-manager'),
+        headers: await mutate('department-head'),
         data: { decision: 'approve' },
       }),
       200,
@@ -117,7 +117,7 @@ test.describe('over tolerance needs an over-budget request', () => {
     );
     expect(await commitmentState(request, budget.id, c.id)).toMatchObject({ status: 'consumed' });
 
-    // A USD 3,000 excess is above the location manager's USD 2,500 limit: the finance controller approves instead.
+    // A USD 11,000 excess is above the department head's USD 10,000 limit: the finance controller approves instead.
     const second = await actualByRef(request, `${p}-2`);
     const bigReq = await expectContract(
       await request.post(`/api/actuals/${second.actual.id}/over-budget-requests`, {
@@ -129,7 +129,7 @@ test.describe('over tolerance needs an over-budget request', () => {
     );
     await expectProblem(
       await request.post(`/api/actuals/over-budget-requests/${bigReq.id}/decision`, {
-        headers: await mutate('location-manager'),
+        headers: await mutate('department-head'),
         data: { decision: 'approve' },
       }),
       409,

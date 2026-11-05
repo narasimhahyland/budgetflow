@@ -22,8 +22,14 @@ test.describe('actuals in local currency at the locked plan rate', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const inrCommitment = await createCommitment({ budgetId: budget.id, amountMinor: 150_000 });
-    const eurCommitment = await createCommitment({ budgetId: budget.id, amountMinor: 100_000 });
+    const inrCommitment = await createCommitment(request, {
+      budgetId: budget.id,
+      amountMinor: 150_000,
+    });
+    const eurCommitment = await createCommitment(request, {
+      budgetId: budget.id,
+      amountMinor: 100_000,
+    });
     const before = await buckets(request, budget.id);
     const p = `F${uniq()}`;
     // October lines: their period is soft-closed, so they post to the next open period, flagged late.
@@ -101,7 +107,7 @@ test.describe('actuals in local currency at the locked plan rate', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const c = await createCommitment({ budgetId: budget.id, amountMinor: 10_000 });
+    const c = await createCommitment(request, { budgetId: budget.id, amountMinor: 10_000 });
     const p = `D${uniq()}`;
     const line = (n: number) =>
       `${p}-${n},2026-11-0${n + 1},2775.00,INR,HYL-IN,,6100,,,Instalment ${n},${c.reference},,charge`;

@@ -27,7 +27,7 @@ test.describe('prepaids and commitment hygiene', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const venue = await createCommitment({
+    const venue = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 200_000,
       serviceStart: '2026-12-05',
@@ -104,14 +104,14 @@ test.describe('prepaids and commitment hygiene', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const stale = await createCommitment({
+    const stale = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 30_000,
       serviceStart: '2026-09-01',
       serviceEnd: '2026-09-02',
       description: 'Old team lunch',
     });
-    const booked = await createCommitment({
+    const booked = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 120_000,
       serviceStart: '2026-12-10',
@@ -155,7 +155,7 @@ test.describe('prepaids and commitment hygiene', () => {
       released: { amountMinor: 30_000 },
     });
 
-    const available = (await buckets(request, budget.id)).balances.available.amountMinor;
+    const before = await buckets(request, budget.id);
     const cancelled = await expectContract(
       await request.post(`/api/actuals/commitments/${booked.id}/cancellation`, {
         headers: await mutate('finance-controller'),
@@ -177,7 +177,12 @@ test.describe('prepaids and commitment hygiene', () => {
     });
     const after = await buckets(request, budget.id);
     expect(after.balances.budgetCurrency.actual.amountMinor).toBe(40_000);
-    expect(after.balances.available.amountMinor).toBe(available + 80_000);
+    // The rest goes back to the event's own funds (held) until the event closes and returns its surplus.
+    expect(after.balances.available).toEqual(before.balances.available);
+    expect(
+      after.balances.budgetCurrency.held.amountMinor -
+        before.balances.budgetCurrency.held.amountMinor,
+    ).toBe(80_000);
     await expectProblem(
       await request.post(`/api/actuals/commitments/${booked.id}/release`, {
         headers: await mutate('finance-controller'),

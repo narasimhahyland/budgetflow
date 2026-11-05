@@ -2,14 +2,15 @@ import {
   accruals,
   actualMatches,
   actuals,
+  commitmentFundingLines,
   commitments,
   ledgerLines,
   prepaids,
   requests,
   type Tx,
 } from '@bf/api/db';
-import { BudgetViews } from '@bf/api/budgets';
 import { ApiProblem, unwrap, type RequestActor } from '@bf/api/core';
+import { BudgetViews } from '@bf/api/budgets';
 import { LedgerReads, LedgerService, toPostingBudget, type PostingBudget } from '@bf/api/ledger';
 import {
   acceptsNewActivity,
@@ -26,9 +27,9 @@ import {
   DEFAULT_MATCH_TOLERANCE_BPS,
   divRoundHalfEven,
   postActualCharge,
-  postCommitmentMovement,
   postFxEffect,
   reverseJournal,
+  splitByWeights,
   type BucketBalances,
   type CommitmentStatus,
   type CurrencyCode,
@@ -37,8 +38,14 @@ import {
   type PostingContext,
 } from '@bf/domain';
 import { Injectable } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { ActualsReads, type ActualRow, type CommitmentRow } from './actuals-reads';
+import {
+  applyJournals,
+  CommitmentRelief,
+  journalDeltas,
+  type FundingRemainder,
+} from './commitment-relief';
 
 export interface MatchPartInput {
   commitmentId?: string;
@@ -122,9 +129,13 @@ function domainLines(rows: (typeof ledgerLines.$inferSelect)[]): (JournalLine & 
 /**
  * Posts and reverses matches inside the caller's transaction (callers own the idempotency key and the
  * audit entry). Ordered locks: the actual, commitments by id, then budgets parent-before-child.
- * - Charge: Dr actual / Cr obligations in the transaction currency at the locked plan rate.
- * - Relief: Dr obligations / Cr encumbered in the budget currency, never more than the commitment
- *   still has encumbered, so relief reuses the amounts posted on the commitment (no FX drift).
+ * - Charge: Dr actual / Cr obligations in the transaction currency at the locked plan rate, carrying the
+ *   actual's cost center, GL account and event code (what the GL tie-out compares).
+ * - Relief: Dr obligations / Cr encumbered in the commitment's currency at the rates stored on its
+ *   funding lines, pro rata across its funding budgets and never more than each still has, so relief
+ *   reuses the amounts posted on the commitment (no FX drift). The charge lands on the same budgets.
+ * - A match that closes the commitment short of its amount releases the rest through Phase 5 (event-funded
+ *   lines go back to their funding source).
  * - FX effect (actual rate minus plan rate) on counter accounts only, proportional to the part matched.
  * - Matching a commitment auto-reverses its posted accruals (an accrual never consumes twice).
  */
@@ -134,6 +145,7 @@ export class MatchEngine {
     private readonly ledger: LedgerService,
     private readonly ledgerReads: LedgerReads,
     private readonly reads: ActualsReads,
+    private readonly relief: CommitmentRelief,
     private readonly views: BudgetViews,
   ) {}
 
@@ -160,6 +172,18 @@ export class MatchEngine {
     return t.ok ? t.value.budget.amountMinor : c.amountMinor;
   }
 
+  /** The commitment in its budgets' currency: as first posted on its funding lines, else at the locked plan rate. */
+  async budgetTotalOf(tx: Tx, actor: Actor, c: CommitmentRow): Promise<number> {
+    const stored = await this.relief.budgetTotal(tx, c);
+    if (stored !== null) return stored;
+    const row = (await this.ledgerReads.budgetRows(tx, [c.budgetId])).get(c.budgetId)!;
+    const budget = toPostingBudget(row);
+    return this.commitmentTotal(c, budget, {
+      reportingCurrency: actor.reportingCurrency,
+      rates: await this.ledgerReads.planRates(tx, budget.fiscalYearId),
+    });
+  }
+
   /** A budget-currency amount expressed in the commitment's own currency (for its consumed and released figures). */
   async toCommitmentMinor(
     tx: Tx,
@@ -167,30 +191,18 @@ export class MatchEngine {
     c: CommitmentRow,
     budgetMinor: number,
   ): Promise<number> {
-    const row = (await this.ledgerReads.budgetRows(tx, [c.budgetId])).get(c.budgetId)!;
-    const budget = toPostingBudget(row);
-    const total = this.commitmentTotal(c, budget, {
-      reportingCurrency: actor.reportingCurrency,
-      rates: await this.ledgerReads.planRates(tx, budget.fiscalYearId),
-    });
-    return total === 0 ? 0 : half(BigInt(c.amountMinor) * BigInt(budgetMinor), BigInt(total));
+    return this.relief.toCommitmentMinor(c, await this.budgetTotalOf(tx, actor, c), budgetMinor);
   }
 
-  /** An amount in the commitment's currency expressed in its budget's currency at the locked plan rate. */
+  /** An amount in the commitment's currency expressed in its budgets' currency. */
   async toBudgetMinor(
     tx: Tx,
     actor: Actor,
     c: CommitmentRow,
     commitmentMinor: number,
   ): Promise<number> {
-    if (commitmentMinor === 0 || c.amountMinor === 0) return 0;
-    const row = (await this.ledgerReads.budgetRows(tx, [c.budgetId])).get(c.budgetId)!;
-    const budget = toPostingBudget(row);
-    const total = this.commitmentTotal(c, budget, {
-      reportingCurrency: actor.reportingCurrency,
-      rates: await this.ledgerReads.planRates(tx, budget.fiscalYearId),
-    });
-    return half(BigInt(total) * BigInt(commitmentMinor), BigInt(c.amountMinor));
+    if (commitmentMinor === 0) return 0;
+    return this.relief.toBudgetMinor(c, await this.budgetTotalOf(tx, actor, c), commitmentMinor);
   }
 
   /** Deposits matched as prepaids and not yet recognized, per commitment (budget currency). */
@@ -215,7 +227,7 @@ export class MatchEngine {
 
   async match(
     tx: Tx,
-    actor: RequestActor,
+    actor: Actor,
     actualId: string,
     parts: MatchPartInput[],
     opts: MatchOptions,
@@ -245,21 +257,27 @@ export class MatchEngine {
       : [];
     const cById = new Map(cRows.map((c) => [c.id, c]));
     for (const id of commitmentIds) if (!cById.has(id)) throw ApiProblem.notFound('commitment');
+    const funding = new Map<string, FundingRemainder[]>();
+    for (const c of cRows) funding.set(c.id, await this.relief.remaining(tx, c));
     const budgetIds = parts.map((p) =>
       p.commitmentId ? cById.get(p.commitmentId)!.budgetId : p.budgetId!,
     );
-    await this.ledgerReads.lockBudgets(tx, budgetIds);
-    const bRows = await this.ledgerReads.budgetRows(tx, budgetIds);
-    for (const id of budgetIds) if (!bRows.has(id)) throw ApiProblem.notFound('budget');
+    const lockIds = [
+      ...new Set([...budgetIds, ...[...funding.values()].flat().map((r) => r.budgetId)]),
+    ];
+    await this.ledgerReads.lockBudgets(tx, lockIds);
+    const bRows = await this.ledgerReads.budgetRows(tx, lockIds);
+    for (const id of lockIds) if (!bRows.has(id)) throw ApiProblem.notFound('budget');
     const touched = [...new Set(budgetIds)];
     const utilizationBefore = opts.dryRun ? null : await this.views.utilizations(tx, touched);
-    const balances = new Map<string, BucketBalances>(
-      [...(await this.ledgerReads.balances(tx, budgetIds)).entries()].map(([k, v]) => [
-        k,
-        v.budget,
-      ]),
-    );
-    const cBal = await this.reads.commitmentBalances(tx, commitmentIds);
+    const readBalances = async () =>
+      new Map<string, BucketBalances>(
+        [...(await this.ledgerReads.balances(tx, lockIds)).entries()].map(([k, v]) => [
+          k,
+          v.budget,
+        ]),
+      );
+    let balances = await readBalances();
     const relieved = await this.prepaidOutstanding(tx, commitmentIds);
     const tolerance = opts.toleranceBps ?? DEFAULT_MATCH_TOLERANCE_BPS;
     let matchedAbs = Math.abs(a.matchedMinor);
@@ -269,6 +287,7 @@ export class MatchEngine {
     let lastMatchId: string | null = null;
     let budgetSum = a.budgetAmountMinor ?? 0;
     let firstBudget: { id: string; currency: string; commitmentId: string | null } | null = null;
+    const seen = new Set<string>();
 
     for (const [i, p] of parts.entries()) {
       const left = totalAbs - matchedAbs;
@@ -320,13 +339,17 @@ export class MatchEngine {
           ctx,
         ),
       );
-      const budgetMinor = charge.budgetAmount.amountMinor;
+      let budgetMinor = charge.budgetAmount.amountMinor;
       let fit: string = sign < 0 ? 'refund' : 'direct';
       let relief = 0;
       let released = 0;
       let excess = sign > 0 && !c ? budgetMinor : 0;
       let closes = false;
       let overBudgetApproved = false;
+      let reliefTx = 0;
+      // Journals per budget: the primary budget alone, or every funding budget of the commitment.
+      const perBudget = new Map<string, JournalDraft[]>();
+      if (!opts.prepaid) perBudget.set(budget.id, [charge.journal]);
       if (c && sign > 0) {
         if (c.status !== 'encumbered' && c.status !== 'partially_consumed') {
           throw new ApiProblem(
@@ -338,11 +361,24 @@ export class MatchEngine {
             },
           );
         }
-        const remaining = (cBal.get(c.id)?.encumberedMinor ?? 0) - (relieved.get(c.id) ?? 0);
+        const rems = seen.has(c.id) ? await this.relief.remaining(tx, c) : funding.get(c.id)!;
+        seen.add(c.id);
+        for (const r of rems) {
+          if (toPostingBudget(bRows.get(r.budgetId)!).currency !== budget.currency)
+            throw new ApiProblem(
+              422,
+              'CURRENCY_MISMATCH',
+              'The budgets funding this commitment use different currencies.',
+            );
+        }
+        const outstanding = relieved.get(c.id) ?? 0;
+        const remaining = rems.reduce((s, r) => s + r.rem.budgetMinor, 0) - outstanding;
+        const total =
+          (await this.relief.budgetTotal(tx, c)) ?? this.commitmentTotal(c, budget, ctx);
         const f = classifyFit({
           actualMinor: budgetMinor,
           remainingMinor: remaining,
-          commitmentTotalMinor: this.commitmentTotal(c, budget, ctx),
+          commitmentTotalMinor: total,
           toleranceBps: tolerance,
           final: p.final,
         });
@@ -356,82 +392,158 @@ export class MatchEngine {
           );
         }
         fit = f.fit;
-        relief = opts.prepaid ? 0 : f.reliefMinor;
-        released = opts.prepaid ? 0 : f.releasedMinor;
         excess = f.excessMinor;
         closes = f.closesCommitment;
         overBudgetApproved = approved > 0 && approved >= f.excessMinor;
-        relieved.set(
-          c.id,
-          (relieved.get(c.id) ?? 0) + (opts.prepaid ? budgetMinor : f.reliefMinor),
-        );
+        if (opts.prepaid) {
+          relieved.set(c.id, outstanding + budgetMinor);
+        } else {
+          released = f.releasedMinor;
+          const remTx = rems.reduce((s, r) => s + r.rem.transactionMinor, 0);
+          const prepaidTx =
+            outstanding > 0 ? this.relief.toCommitmentMinor(c, total, outstanding) : 0;
+          const openTx = Math.max(remTx - prepaidTx, 0);
+          // Exact or above: everything left. Short (partial, or closing within tolerance): what the actual consumes.
+          const want: number | 'all' =
+            closes && released === 0
+              ? outstanding === 0
+                ? 'all'
+                : openTx
+              : Math.min(
+                  openTx,
+                  currency === c.currency
+                    ? amountAbs
+                    : this.relief.toCommitmentMinor(c, total, f.reliefMinor - f.releasedMinor),
+                );
+          const reliefDrafts = await this.relief.drafts(
+            tx,
+            actor,
+            c,
+            rems,
+            'release_encumbrance',
+            want,
+            { actualId: a.id },
+            a.accountingDate,
+            (id) => balances.get(id)!,
+          );
+          reliefTx = reliefDrafts.reduce((s, d) => s + d.transactionMinor, 0);
+          relief = reliefDrafts.reduce((s, d) => s + d.budgetMinor, 0) + released;
+          relieved.set(c.id, outstanding);
+          // The actual lands where the encumbrance was relieved; anything above it on the commitment's budget.
+          const weights = new Map(reliefDrafts.map((d) => [d.budget.id, d.budgetMinor]));
+          weights.set(budget.id, (weights.get(budget.id) ?? 0) + excess);
+          if ([...weights.values()].every((w) => w === 0)) weights.set(budget.id, 1);
+          const ids = [...weights.keys()];
+          const txParts = unwrap(
+            splitByWeights(
+              amountAbs,
+              ids.map((id) => weights.get(id)!),
+            ),
+          );
+          perBudget.clear();
+          budgetMinor = 0;
+          for (const [k, id] of ids.entries()) {
+            const target = toPostingBudget(bRows.get(id)!);
+            const js: JournalDraft[] = [];
+            if (txParts[k] > 0) {
+              const part =
+                id === budget.id && txParts[k] === amountAbs
+                  ? charge
+                  : unwrap(
+                      postActualCharge(
+                        {
+                          budget: target,
+                          amount: { amountMinor: txParts[k], currency },
+                          dims,
+                          commitmentId: c.id,
+                        },
+                        {
+                          ...ctx,
+                          rates: await this.ledgerReads.planRates(tx, target.fiscalYearId),
+                        },
+                      ),
+                    );
+              js.push(part.journal);
+              budgetMinor += part.budgetAmount.amountMinor;
+            }
+            js.push(...reliefDrafts.filter((d) => d.budget.id === id).flatMap((d) => d.journals));
+            if (js.length) perBudget.set(id, js);
+          }
+        }
       } else if (!c && sign > 0) {
         const approved = await this.approvedExcess(tx, a, budget.id);
         const shortfall =
           budgetMinor - Math.max(availableOf(balances.get(budget.id)!, budget.control.basis), 0);
         overBudgetApproved = approved > 0 && approved >= shortfall;
       }
-      const drafts: JournalDraft[] = [];
-      if (!opts.prepaid) {
-        drafts.push(charge.journal);
-        if (relief > 0) {
-          drafts.push(
-            unwrap(
-              postCommitmentMovement(
-                {
-                  kind: 'release_encumbrance',
-                  budget: { ...budget, balances: balances.get(budget.id)! },
-                  amount: { amountMinor: relief, currency: budget.currency },
-                  provenance: { commitmentId: c!.id, actualId: a.id },
-                },
-                ctx,
-              ),
-            ),
-          );
-        }
+      for (const [id, js] of perBudget) {
+        unwrap(
+          checkMatchAvailability({
+            budgetId: id,
+            balances: balances.get(id)!,
+            control: toPostingBudget(bRows.get(id)!).control,
+            deltas: journalDeltas(js, id),
+            overBudgetApproved: id === budget.id && overBudgetApproved,
+          }),
+        );
       }
-      const deltas = drafts.flatMap((d) =>
-        d.lines
-          .filter((l) => l.budgetId === budget.id)
-          .map((l) => ({ account: l.account, budgetAmountMinor: l.budget!.amountMinor })),
-      );
-      unwrap(
-        checkMatchAvailability({
-          budgetId: budget.id,
-          balances: balances.get(budget.id)!,
-          control: budget.control,
-          deltas,
-          overBudgetApproved,
-        }),
-      );
+      const applyAll = () => {
+        for (const [id, js] of perBudget)
+          balances.set(id, applyJournals(balances.get(id)!, js, id));
+      };
       if (opts.dryRun) {
-        balances.set(budget.id, applyDelta(balances.get(budget.id)!, deltas));
+        applyAll();
         matchedAbs += amountAbs;
         status = matchedAbs === totalAbs ? 'matched' : 'partially_matched';
         continue;
       }
       const partJournals: string[] = [];
-      for (const d of drafts) {
-        partJournals.push(
-          await this.ledger.post(tx, d, {
-            actor,
-            command: opts.command,
-            fiscalYearId: budget.fiscalYearId,
-            requestId: opts.requestId,
-            idempotencyKey: opts.idempotencyKey,
-          }),
-        );
+      for (const [id, js] of perBudget) {
+        const fy = bRows.get(id)!.fiscalYearId;
+        for (const d of js)
+          partJournals.push(
+            await this.ledger.post(tx, d, {
+              actor,
+              command: opts.command,
+              fiscalYearId: fy,
+              requestId: opts.requestId,
+              idempotencyKey: opts.idempotencyKey,
+            }),
+          );
       }
-      balances.set(budget.id, applyDelta(balances.get(budget.id)!, deltas));
+      applyAll();
       if (c && sign > 0 && !opts.prepaid) {
-        await this.applyCommitmentProgress(tx, c, {
-          relief,
-          released,
-          closes,
-          partialFinal: fit === 'partial' && closes,
-          budget,
-          ctx,
-        });
+        const releaseRest = closes && released > 0;
+        await this.applyProgress(tx, c, { reliefTx, closes, releaseRest });
+        if (releaseRest) {
+          const pre = await this.relief.consumeOutstandingPrepaids(
+            tx,
+            actor,
+            c,
+            a.accountingDate,
+            opts,
+          );
+          partJournals.push(...pre.journalIds);
+          partJournals.push(
+            ...(await this.relief.releaseRest(tx, actor, c, a.accountingDate, opts)),
+          );
+          const [after] = await tx.select().from(commitments).where(eq(commitments.id, c.id));
+          const finalStatus: CommitmentStatus =
+            fit === 'under_within_tolerance' ? 'consumed' : after.status;
+          await tx
+            .update(commitments)
+            .set({
+              status: finalStatus,
+              consumedMinor: after.consumedMinor + pre.transactionMinor,
+              updatedAt: new Date(),
+            })
+            .where(eq(commitments.id, c.id));
+          Object.assign(c, after, {
+            status: finalStatus,
+            consumedMinor: after.consumedMinor + pre.transactionMinor,
+          });
+          balances = await readBalances();
+        }
         partJournals.push(...(await this.reverseAccruals(tx, actor, c.id, a, opts)));
       }
       if (opts.prepaid && c) {
@@ -500,7 +612,7 @@ export class MatchEngine {
         matchedBy: actor.personId,
       })
       .where(eq(actuals.id, a.id));
-    await this.views.emitThresholds(tx, actor, utilizationBefore!, touched);
+    if (utilizationBefore) await this.views.emitThresholds(tx, actor, utilizationBefore, touched);
     return { journalIds };
   }
 
@@ -542,45 +654,25 @@ export class MatchEngine {
     });
   }
 
-  /** Commitment consumed and released amounts (its own currency) and lifecycle status after a match. */
-  async applyCommitmentProgress(
+  /**
+   * Commitment consumed amount (its own currency) and status after a match. A match that closes the
+   * commitment short of its amount stays partially consumed here; releasing the rest closes it.
+   */
+  private async applyProgress(
     tx: Tx,
     c: CommitmentRow,
-    m: {
-      relief: number;
-      released: number;
-      closes: boolean;
-      partialFinal: boolean;
-      budget: PostingBudget;
-      ctx: PostingContext;
-    },
+    m: { reliefTx: number; closes: boolean; releaseRest: boolean },
   ): Promise<void> {
-    const total = this.commitmentTotal(c, m.budget, m.ctx);
-    const toCommit = (minor: number) =>
-      total === 0 ? 0 : half(BigInt(c.amountMinor) * BigInt(minor), BigInt(total));
-    let consumed = c.consumedMinor + toCommit(m.relief - m.released);
-    let released = c.releasedMinor;
-    let status: CommitmentStatus = c.status;
-    if (m.closes) {
-      consumed = Math.min(consumed, c.amountMinor - c.releasedMinor - c.feesMinor);
-      released = c.amountMinor - consumed - c.feesMinor;
-      status = m.partialFinal
-        ? unwrap(
-            commitmentMachine.next(
-              unwrap(commitmentMachine.next(status, 'match_partial')),
-              'release',
-            ),
-          )
-        : unwrap(commitmentMachine.next(status, 'match_full'));
-    } else {
-      status = unwrap(commitmentMachine.next(status, 'match_partial'));
-    }
+    const full = m.closes && !m.releaseRest;
+    const consumed = full
+      ? c.amountMinor - c.releasedMinor - c.feesMinor
+      : Math.min(c.consumedMinor + m.reliefTx, c.amountMinor - c.releasedMinor - c.feesMinor);
+    const status = unwrap(commitmentMachine.next(c.status, full ? 'match_full' : 'match_partial'));
     await tx
       .update(commitments)
-      .set({ consumedMinor: consumed, releasedMinor: released, status, updatedAt: new Date() })
+      .set({ consumedMinor: consumed, status, updatedAt: new Date() })
       .where(eq(commitments.id, c.id));
     c.consumedMinor = consumed;
-    c.releasedMinor = released;
     c.status = status;
   }
 
@@ -719,6 +811,24 @@ export class MatchEngine {
       .for('update');
     if (live.length === 0)
       throw new ApiProblem(409, 'INVALID_TRANSITION', 'This actual has no match to undo.');
+    for (const m of live) {
+      if (!m.commitmentId || m.prepaid || m.releasedMinor <= 0) continue;
+      const toSource = await tx
+        .select({ id: commitmentFundingLines.id })
+        .from(commitmentFundingLines)
+        .where(
+          and(
+            eq(commitmentFundingLines.commitmentId, m.commitmentId),
+            isNotNull(commitmentFundingLines.fundingSourceId),
+          ),
+        );
+      if (toSource.length)
+        throw new ApiProblem(
+          409,
+          'INVALID_TRANSITION',
+          "This match closed the commitment and returned the rest to the event's funding sources. Correct it with a credit note or a reversal line instead.",
+        );
+    }
     const journalIds: string[] = [];
     for (const m of live) {
       if (m.prepaid) {
@@ -750,15 +860,13 @@ export class MatchEngine {
           .from(commitments)
           .where(eq(commitments.id, m.commitmentId))
           .for('update');
-        const consumed = Math.max(
+        // The reversals restored the encumbrance; the commitment row follows the ledger.
+        const left = (await this.relief.remaining(tx, c)).reduce(
+          (s, r) => s + r.rem.transactionMinor,
           0,
-          c.consumedMinor -
-            (await this.toCommitmentMinor(tx, actor, c, m.reliefMinor - m.releasedMinor)),
         );
-        const released = Math.max(
-          0,
-          c.releasedMinor - (await this.toCommitmentMinor(tx, actor, c, m.releasedMinor)),
-        );
+        const released = m.releasedMinor > 0 ? 0 : c.releasedMinor;
+        const consumed = Math.max(0, c.amountMinor - left - released - c.feesMinor);
         await tx
           .update(commitments)
           .set({

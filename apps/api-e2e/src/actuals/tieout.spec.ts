@@ -61,8 +61,8 @@ test.describe('GL tie-out and monthly sign-off', () => {
   }) => {
     const e = await entityWithAccounts(request);
     const budget = await spendBudget(request, { legalEntityId: e.id });
-    const c1 = await createCommitment({ budgetId: budget.id, amountMinor: 100_000 });
-    const c2 = await createCommitment({ budgetId: budget.id, amountMinor: 10_000 });
+    const c1 = await createCommitment(request, { budgetId: budget.id, amountMinor: 100_000 });
+    const c2 = await createCommitment(request, { budgetId: budget.id, amountMinor: 10_000 });
     const p = `T${uniq()}`;
     await importAndPost(
       request,

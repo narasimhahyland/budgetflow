@@ -30,7 +30,7 @@ test.describe('unmatched queue and manual matching', () => {
       data: { name: vendorName, status: 'approved', country: 'IN' },
     });
     expect(vendor.status()).toBe(201);
-    const c1 = await createCommitment({
+    const c1 = await createCommitment(request, {
       budgetId: b1.id,
       amountMinor: 60_000,
       description: 'Shared offsite venue',

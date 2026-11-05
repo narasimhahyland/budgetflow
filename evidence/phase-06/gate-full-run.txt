@@ -1,0 +1,96 @@
+
+▶ secrets         sh scripts/secret-scan.sh --all --quiet
+  ✓ secrets (1s)
+
+▶ lint            nx_run run-many -t lint
+  ✓ lint (2s)
+
+▶ styles          npx stylelint {apps,libs}/**/*.scss --allow-empty-input
+  ✓ styles (1s)
+
+▶ satori          npx sdsc check all
+  ✓ satori (21s)
+
+▶ typecheck       nx_run run-many -t typecheck
+  ✓ typecheck (6s)
+
+▶ build           nx_run run-many -t build
+  ✓ build (1s)
+
+▶ openapi         nx_run run-many -t openapi-check
+  ✓ openapi (1s)
+
+▶ db              nx_run run-many -t db-check
+  ✓ db (2s)
+
+▶ stack           bash -c bash scripts/stack.sh up && bash scripts/stack.sh reset
+  ✓ stack (49s)
+
+▶ functional-api  nx_run run-many -t functional-api
+  ✓ functional-api (86s)
+
+▶ functional-e2e  nx_run run-many -t functional-e2e
+  ✓ functional-e2e (65s)
+
+▶ reseed          bash scripts/stack.sh reset
+  ✓ reseed (38s)
+
+▶ visual          npm run e2e:visual
+  ✗ visual failed — last 40 lines of tmp/gate/20261105-110039/visual.log:
+    
+            npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-082-utilization-report-default-desktop-visual-light/trace.zip
+    
+        ────────────────────────────────────────────────────────────────────────────────────────────────
+    
+      28 failed
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 021-budget-details default › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 021-budget-details default › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 021-budget-details default › mobile 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 021-budget-details controls-drawer › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 021-budget-details controls-drawer › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 023-budget-hierarchy default › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 028-set-to-zero dialog › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 028-set-to-zero dialog › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 028-set-to-zero dialog › mobile 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 028-set-to-zero validation › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 028-set-to-zero validation › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 028-set-to-zero validation › mobile 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 059-approval-inbox default › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 059-approval-inbox default › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 059-approval-inbox default › mobile 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 060-request-details approver › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 060-request-details requester › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 060-request-details requester › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 060-request-details rejected › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 060-request-details rejected › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 061-approval-decision approve-part › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 064-request-history rejected › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 064-request-history rejected › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 064-request-history rejected › mobile 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 064-request-history pending › desktop 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 064-request-history pending › tablet 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 064-request-history pending › mobile 
+        [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 082-utilization-report default › desktop 
+      211 passed (1.6m)
+    npm notice
+    npm notice New major version of npm available! 11.20.0 -> 12.2.2
+    npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+    npm notice To update run: npm install -g npm@12.2.2
+    npm notice
+  note: the local stack is still running (scripts/stack.sh down to stop it)
+
+Gate summary (lint typecheck build functional-api functional-e2e visual) — logs in tmp/gate/20261105-110039
+  PASS secrets             1s
+  PASS lint                2s
+  PASS styles              1s
+  PASS satori             21s
+  PASS typecheck           6s
+  PASS build               1s
+  PASS openapi             1s
+  PASS db                  2s
+  PASS stack              49s
+  PASS functional-api     86s
+  PASS functional-e2e     65s
+  PASS reseed             38s
+  FAIL visual            101s  tmp/gate/20261105-110039/visual.log
+Evidence: evidence/phase-06//gate-summary.txt

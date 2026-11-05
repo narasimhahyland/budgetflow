@@ -201,27 +201,6 @@ export class ActualsReads {
     return out;
   }
 
-  /** Earmarks still held per contribution (giver budget currency). */
-  async heldByContribution(
-    tx: Tx,
-    ids: readonly string[],
-  ): Promise<Map<string, { budgetId: string; heldMinor: number }>> {
-    const out = new Map<string, { budgetId: string; heldMinor: number }>();
-    if (ids.length === 0) return out;
-    const rows = await tx
-      .select({
-        contributionId: ledgerLines.contributionId,
-        budgetId: ledgerLines.budgetId,
-        total: sql<string>`sum(${ledgerLines.budgetAmountMinor})`,
-      })
-      .from(ledgerLines)
-      .where(and(inArray(ledgerLines.contributionId, [...ids]), eq(ledgerLines.account, 'held')))
-      .groupBy(ledgerLines.contributionId, ledgerLines.budgetId);
-    for (const r of rows)
-      out.set(r.contributionId!, { budgetId: r.budgetId!, heldMinor: toSafeMinor(r.total) });
-    return out;
-  }
-
   async budgetNames(tx: Tx, ids: readonly (string | null)[]): Promise<Map<string, string>> {
     const list = [...new Set(ids.filter((x): x is string => Boolean(x)))];
     if (list.length === 0) return new Map();

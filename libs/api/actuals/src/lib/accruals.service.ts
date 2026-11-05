@@ -39,6 +39,7 @@ import {
   tenantOf,
   type CommandContext,
 } from './actuals-reads';
+import { CommitmentRelief } from './commitment-relief';
 import { MatchEngine } from './match-engine';
 
 type AccrualRow = typeof accruals.$inferSelect;
@@ -55,6 +56,7 @@ export class AccrualsService {
     private readonly ledgerReads: LedgerReads,
     private readonly ledger: LedgerService,
     private readonly engine: MatchEngine,
+    private readonly relief: CommitmentRelief,
     private readonly audit: AuditService,
   ) {}
 
@@ -461,40 +463,39 @@ export class AccrualsService {
           });
           const delta = target - p.consumedMinor;
           if (delta <= 0 || !p.budgetId) continue;
-          await this.ledgerReads.lockBudgets(tx, [p.budgetId]);
-          const row = (await this.ledgerReads.budgetRows(tx, [p.budgetId])).get(p.budgetId)!;
-          const budget = toPostingBudget(row);
-          const balances = (await this.ledgerReads.balances(tx, [budget.id])).get(
-            budget.id,
-          )!.budget;
+          const [c] = await tx
+            .select()
+            .from(commitments)
+            .where(eq(commitments.id, p.commitmentId))
+            .for('update');
+          const rems = await this.relief.remaining(tx, c);
+          const ids = rems.map((r) => r.budgetId);
+          await this.ledgerReads.lockBudgets(tx, ids);
+          const balances = await this.ledgerReads.balances(tx, ids);
           const [a] = p.actualId
             ? await tx.select().from(actuals).where(eq(actuals.id, p.actualId))
             : [];
-          const draft = unwrap(
-            postCommitmentMovement(
-              {
-                kind: 'consume',
-                budget: { ...budget, balances },
-                amount: { amountMinor: delta, currency: budget.currency },
-                provenance: { commitmentId: p.commitmentId, actualId: p.actualId },
-              },
-              {
-                reportingCurrency: actor.reportingCurrency,
-                rates: await this.ledgerReads.planRates(tx, budget.fiscalYearId),
-                accountingDate: req.asOfDate,
-              },
-            ),
-          );
-          draft.lines = draft.lines.map((l) => ({
-            ...l,
-            costCenterId: a?.costCenterId ?? l.costCenterId,
-            glAccountId: a?.glAccountId ?? null,
-            eventCode: a?.eventCode ?? null,
-          }));
-          await this.ledger.post(tx, draft, {
+          const drafts = await this.relief.drafts(
+            tx,
             actor,
+            c,
+            rems,
+            'consume',
+            await this.engine.toCommitmentMinor(tx, actor, c, delta),
+            { actualId: p.actualId },
+            req.asOfDate,
+            (id) => balances.get(id)!.budget,
+          );
+          for (const d of drafts)
+            for (const j of d.journals)
+              j.lines = j.lines.map((l) => ({
+                ...l,
+                costCenterId: a?.costCenterId ?? l.costCenterId,
+                glAccountId: a?.glAccountId ?? null,
+                eventCode: a?.eventCode ?? null,
+              }));
+          await this.relief.post(tx, actor, drafts, {
             command: 'actuals.prepaids.recognize',
-            fiscalYearId: budget.fiscalYearId,
             requestId: ctx.requestId,
             idempotencyKey: ctx.idempotencyKey,
           });
@@ -503,26 +504,21 @@ export class AccrualsService {
             .set({ consumedMinor: target, recognizedThrough: req.asOfDate })
             .where(eq(prepaids.id, p.id))
             .returning();
-          const [c] = await tx
-            .select()
-            .from(commitments)
-            .where(eq(commitments.id, p.commitmentId))
-            .for('update');
-          const remaining =
-            (await this.reads.commitmentBalances(tx, [c.id])).get(c.id)?.encumberedMinor ?? 0;
-          const event = remaining <= 0 ? 'match_full' : 'match_partial';
-          const next = commitmentMachine.next(c.status, event);
+          const left = (await this.relief.remaining(tx, c)).reduce(
+            (s, r) => s + r.rem.transactionMinor,
+            0,
+          );
+          const next = commitmentMachine.next(c.status, left <= 0 ? 'match_full' : 'match_partial');
           await tx
             .update(commitments)
             .set({
-              consumedMinor:
-                c.consumedMinor + (await this.engine.toCommitmentMinor(tx, actor, c, delta)),
+              consumedMinor: c.consumedMinor + drafts.reduce((s, d) => s + d.transactionMinor, 0),
               ...(next.ok ? { status: next.value } : {}),
               updatedAt: new Date(),
             })
             .where(eq(commitments.id, c.id));
           total += delta;
-          currency = budget.currency;
+          currency = p.currency;
           touched.push(after);
         }
         await this.audit.append(tx, {

@@ -3,7 +3,7 @@
 // event code with cost center and vendor with amount; matched lines post (encumbered to actual), the rest
 // go to the unmatched queue. Import and match are recorded as product analytics events.
 import { expect, test } from '@playwright/test';
-import { ActualList, Journal } from '@bf/contracts';
+import { ActualList, ImportBatchList, Journal } from '@bf/contracts';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { asOwner } from '../support/db';
@@ -36,40 +36,39 @@ test.describe('actuals import with auto-match', () => {
   }) => {
     const r = await refs();
     const budget = await spendBudget(request);
-    const e1 = await createEvent({
+    const e1 = await createEvent(request, {
       budgetId: budget.id,
       status: 'in_progress',
       costCenterId: CC.bengaluru,
     });
-    const e2 = await createEvent({
+    const e2 = await createEvent(request, {
       budgetId: budget.id,
       status: 'in_progress',
       costCenterId: CC.hyderabad,
     });
-    const cExact = await createCommitment({
+    const cExact = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 8_325_000,
       currency: 'INR',
       description: 'Catering (INR)',
     });
-    const cEvent = await createCommitment({
+    const cEvent = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 50_000,
       eventId: e1.id,
-      costCenterId: CC.bengaluru,
       vendorId: r.vendor('Spice Route Caterers'),
     });
-    const cVendor = await createCommitment({
+    const cVendor = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 30_000,
       vendorId: r.vendor('Deccan Event Studio'),
     });
-    const cPartial = await createCommitment({
+    const cPartial = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 200_000,
       eventId: e2.id,
-      costCenterId: CC.hyderabad,
     });
+    const before = await buckets(request, budget.id);
     const p = `S${uniq()}`;
     const content = csv([
       `${p}-1,2026-11-03,83250.00,INR,HYL-IN,CC-IN-BLR-200,6100,,,Catering invoice,${cExact.reference},,charge`,
@@ -129,13 +128,18 @@ test.describe('actuals import with auto-match', () => {
     expect(posted.summary.posted).toMatchObject({ matched: 4, toQueue: 1 });
     expect(posted.summary.posted!.period?.label).toBeTruthy();
 
+    // Every actual stayed within its commitment: available is unchanged, and the USD 3.00 the vendor
+    // invoice left on its commitment went back to that event's own funds (held), not to available.
     const b = await buckets(request, budget.id);
     expect(b.balances.budgetCurrency.actual).toEqual({
       amountMinor: 100_000 + 50_000 + 29_700 + 80_000,
       currency: 'USD',
     });
     expect(b.balances.budgetCurrency.encumbered).toEqual({ amountMinor: 120_000, currency: 'USD' });
-    expect(b.balances.available.amountMinor).toBe(5_000_000 - 120_000 - 259_700);
+    expect(b.balances.available).toEqual(before.balances.available);
+    expect(
+      b.balances.budgetCurrency.held.amountMinor - before.balances.budgetCurrency.held.amountMinor,
+    ).toBe(300);
 
     expect((await commitmentState(request, budget.id, cExact.id)).status).toBe('consumed');
     expect((await commitmentState(request, budget.id, cEvent.id)).status).toBe('consumed');
@@ -211,6 +215,15 @@ test.describe('actuals import with auto-match', () => {
     });
     const problem = await expectProblem(again, 409, 'IMPORT_ALREADY_UPLOADED');
     expect(problem.params?.['batchId']).toBe(batch.id);
+    // A link to one import finds it however many files came after it.
+    const byFile = await expectContract(
+      await request.get(`/api/actuals/imports?fileName=${encodeURIComponent(batch.fileName)}`, {
+        headers: await as('finance-controller'),
+      }),
+      200,
+      ImportBatchList,
+    );
+    expect(byFile.items.map((b) => b.id)).toEqual([batch.id]);
 
     const second = await upload(
       request,

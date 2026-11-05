@@ -20,14 +20,14 @@ test.describe('accruals', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const c = await createCommitment({
+    const c = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 80_000,
       serviceStart: '2026-10-20',
       serviceEnd: '2026-10-22',
       description: 'Workshop facilitation',
     });
-    await createCommitment({
+    await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 10_000,
       serviceStart: '2026-12-01',
@@ -138,14 +138,14 @@ test.describe('accruals', () => {
     request,
   }) => {
     const budget = await spendBudget(request);
-    const c = await createCommitment({
+    const c = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 25_000,
       serviceStart: '2026-10-01',
       serviceEnd: '2026-10-02',
       description: 'Speaker fee',
     });
-    const other = await createCommitment({
+    const other = await createCommitment(request, {
       budgetId: budget.id,
       amountMinor: 5_000,
       serviceStart: '2026-10-01',

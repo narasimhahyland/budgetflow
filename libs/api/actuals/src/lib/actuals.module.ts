@@ -1,11 +1,15 @@
 import { AuditModule } from '@bf/api/audit';
 import { BudgetsModule } from '@bf/api/budgets';
+import { ContributionsModule } from '@bf/api/contributions';
+import { EventsModule } from '@bf/api/events';
 import { LedgerModule } from '@bf/api/ledger';
+import { SpendModule } from '@bf/api/spend';
 import { TenancyModule } from '@bf/api/tenancy';
 import { Module } from '@nestjs/common';
 import { AccrualsService } from './accruals.service';
 import { ActualsController } from './actuals.controller';
 import { ActualsReads } from './actuals-reads';
+import { CommitmentRelief } from './commitment-relief';
 import { CommitmentsService } from './commitments.service';
 import { ActualsDtos } from './dto';
 import { EventsCloseService } from './events.service';
@@ -18,6 +22,7 @@ import { TieOutService } from './tieout.service';
 const SERVICES = [
   ActualsReads,
   ActualsDtos,
+  CommitmentRelief,
   MatchEngine,
   ImportsService,
   QueueService,
@@ -30,7 +35,15 @@ const SERVICES = [
 
 /** Actuals and accounting services (also used by the seed). */
 @Module({
-  imports: [AuditModule, BudgetsModule, LedgerModule, TenancyModule],
+  imports: [
+    AuditModule,
+    BudgetsModule,
+    LedgerModule,
+    TenancyModule,
+    SpendModule,
+    ContributionsModule,
+    EventsModule,
+  ],
   providers: SERVICES,
   exports: SERVICES,
 })

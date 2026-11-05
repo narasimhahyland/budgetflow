@@ -1,0 +1,15 @@
+
+▶ secrets         sh scripts/secret-scan.sh --all --quiet
+  ✓ secrets (1s)
+
+▶ stack           bash -c bash scripts/stack.sh up && bash scripts/stack.sh reset
+  ✓ stack (46s)
+
+▶ visual          npm run e2e:visual
+  ✓ visual (49s)
+  note: the local stack is still running (scripts/stack.sh down to stop it)
+
+Gate summary (visual) — logs in tmp/gate/20261105-110917
+  PASS secrets             1s
+  PASS stack              46s
+  PASS visual             49s

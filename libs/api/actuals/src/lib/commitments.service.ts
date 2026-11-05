@@ -20,7 +20,7 @@ import {
   type CommandResult,
   type RequestActor,
 } from '@bf/api/core';
-import { LedgerReads, LedgerService, toPostingBudget } from '@bf/api/ledger';
+import { LedgerReads } from '@bf/api/ledger';
 import type { CommitmentHygieneItem, CommitmentHygieneList } from '@bf/contracts';
 import {
   AGING_BUCKETS,
@@ -28,7 +28,6 @@ import {
   cancellationFee,
   commitmentAging,
   commitmentMachine,
-  postCommitmentMovement,
   type CommitmentStatus,
 } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
@@ -41,6 +40,7 @@ import {
   type CommandContext,
   type CommitmentRow,
 } from './actuals-reads';
+import { CommitmentRelief } from './commitment-relief';
 import { MatchEngine } from './match-engine';
 
 const OPEN: CommitmentStatus[] = ['encumbered', 'partially_consumed'];
@@ -54,8 +54,8 @@ export class CommitmentsService {
     private readonly policy: PolicyService,
     private readonly reads: ActualsReads,
     private readonly ledgerReads: LedgerReads,
-    private readonly ledger: LedgerService,
     private readonly engine: MatchEngine,
+    private readonly relief: CommitmentRelief,
     private readonly audit: AuditService,
   ) {}
 
@@ -245,95 +245,76 @@ export class CommitmentsService {
     const nextStatus = unwrap(
       commitmentMachine.next(c.status, o.kind === 'release' ? 'release' : 'cancel_with_fees'),
     );
-    await this.ledgerReads.lockBudgets(tx, [c.budgetId]);
-    const row = (await this.ledgerReads.budgetRows(tx, [c.budgetId])).get(c.budgetId)!;
-    const budget = toPostingBudget(row);
-    const ctxP = {
-      reportingCurrency: actor.reportingCurrency,
-      rates: await this.ledgerReads.planRates(tx, budget.fiscalYearId),
-      accountingDate: todayUtc(),
-    };
-    let balances = (await this.ledgerReads.balances(tx, [budget.id])).get(budget.id)!.budget;
-    const remaining =
-      (await this.reads.commitmentBalances(tx, [c.id])).get(c.id)?.encumberedMinor ?? 0;
+    const accountingDate = todayUtc();
     const opts = {
-      actor,
       command: `actuals.commitment.${o.kind}`,
-      fiscalYearId: budget.fiscalYearId,
       requestId: ctx.requestId,
       idempotencyKey: ctx.idempotencyKey,
     };
     const journals: string[] = [];
-    const post = async (kind: 'consume' | 'release_encumbrance', minor: number) => {
-      if (minor <= 0) return;
-      const d = unwrap(
-        postCommitmentMovement(
-          {
-            kind,
-            budget: { ...budget, balances },
-            amount: { amountMinor: minor, currency: budget.currency },
-            provenance: { commitmentId: c.id },
-          },
-          ctxP,
-        ),
-      );
-      journals.push(await this.ledger.post(tx, d, opts));
-      balances = (await this.ledgerReads.balances(tx, [budget.id])).get(budget.id)!.budget;
-    };
-    let fee = 0;
     // A deposit already paid (prepaid not yet recognized) is spent either way: consume it now.
-    let deposit = 0;
-    const pp = await tx
-      .select()
-      .from(prepaids)
-      .where(eq(prepaids.commitmentId, c.id))
-      .for('update');
-    for (const p of pp) {
-      const left = p.amountMinor - p.consumedMinor;
-      if (left <= 0) continue;
-      deposit += left;
-      await tx
-        .update(prepaids)
-        .set({ consumedMinor: p.amountMinor, recognizedThrough: ctxP.accountingDate })
-        .where(eq(prepaids.id, p.id));
-    }
+    const deposit = await this.relief.consumeOutstandingPrepaids(
+      tx,
+      actor,
+      c,
+      accountingDate,
+      opts,
+    );
+    journals.push(...deposit.journalIds);
+    let fee = 0;
+    let feeTx = 0;
     if (o.kind === 'cancel') {
-      const nonRefundable = await this.engine.toBudgetMinor(
-        tx,
-        actor,
-        c,
-        c.nonRefundableDepositMinor,
-      );
+      const total = await this.engine.budgetTotalOf(tx, actor, c);
+      const rems = await this.relief.remaining(tx, c);
+      const remaining = rems.reduce((s, r) => s + r.rem.budgetMinor, 0);
+      const nonRefundable = this.relief.toBudgetMinor(c, total, c.nonRefundableDepositMinor);
       fee = unwrap(
         cancellationFee({
           feeMinor: o.feeMinor,
-          nonRefundableDepositMinor: Math.max(nonRefundable - deposit, 0),
-          remainingMinor: remaining - deposit,
+          nonRefundableDepositMinor: Math.max(nonRefundable - deposit.budgetMinor, 0),
+          remainingMinor: remaining,
         }),
       );
+      if (fee > 0) {
+        const ids = rems.map((r) => r.budgetId);
+        await this.ledgerReads.lockBudgets(tx, ids);
+        const balances = await this.ledgerReads.balances(tx, ids);
+        const drafts = await this.relief.drafts(
+          tx,
+          actor,
+          c,
+          rems,
+          'consume',
+          fee === remaining ? 'all' : this.relief.toCommitmentMinor(c, total, fee),
+          {},
+          accountingDate,
+          (id) => balances.get(id)!.budget,
+        );
+        feeTx = drafts.reduce((s, d) => s + d.transactionMinor, 0);
+        journals.push(...(await this.relief.post(tx, actor, drafts, opts)));
+      }
     }
-    await post('consume', deposit + fee);
-    await post('release_encumbrance', remaining - deposit - fee);
+    const consumed = c.consumedMinor + deposit.transactionMinor + feeTx;
+    await tx
+      .update(commitments)
+      .set({ consumedMinor: consumed, feesMinor: c.feesMinor + feeTx, updatedAt: new Date() })
+      .where(eq(commitments.id, c.id));
+    Object.assign(c, { consumedMinor: consumed, feesMinor: c.feesMinor + feeTx });
+    journals.push(...(await this.relief.releaseRest(tx, actor, c, accountingDate, opts)));
     journals.push(
       ...(await this.engine.reverseAccruals(
         tx,
         actor,
         c.id,
-        { sourceRef: '', accountingDate: ctxP.accountingDate },
-        { command: opts.command, idempotencyKey: ctx.idempotencyKey, requestId: ctx.requestId },
+        { sourceRef: '', accountingDate },
+        opts,
         'release',
       )),
     );
-    const consumedNow = await this.engine.toCommitmentMinor(tx, actor, c, deposit + fee);
-    const consumed = c.consumedMinor + consumedNow;
     await tx
       .update(commitments)
       .set({
         status: nextStatus,
-        consumedMinor: consumed,
-        feesMinor:
-          c.feesMinor +
-          (o.kind === 'cancel' ? await this.engine.toCommitmentMinor(tx, actor, c, fee) : 0),
         releasedMinor: Math.max(c.amountMinor - consumed, 0),
         updatedAt: new Date(),
       })
@@ -352,7 +333,7 @@ export class CommitmentsService {
         status: { from: c.status, to: nextStatus },
         releasedMinor: { from: c.releasedMinor, to: Math.max(c.amountMinor - consumed, 0) },
         feeMinor: { from: 0, to: fee },
-        depositConsumedMinor: { from: 0, to: deposit },
+        depositConsumedMinor: { from: 0, to: deposit.budgetMinor },
         journals: { from: null, to: journals },
       },
     });

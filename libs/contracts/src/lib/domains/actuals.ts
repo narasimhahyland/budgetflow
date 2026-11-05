@@ -242,6 +242,18 @@ export const ActualLine = named(
 );
 export type ActualLine = z.infer<typeof ActualLine>;
 
+export const ImportsQuery = z
+  .object({
+    fileName: z
+      .string()
+      .trim()
+      .min(1)
+      .max(255)
+      .optional()
+      .describe('Only imports of this file (a link to one import).'),
+  })
+  .strict();
+
 export const ActualsQuery = CursorQuery.extend({
   status: z
     .enum(['queue', 'unmatched', 'partially_matched', 'matched', 'excluded', 'all'])
@@ -830,17 +842,20 @@ export const EventReconciliation = named(
         })
         .strict(),
       commitments: z.array(CommitmentHygieneItem),
-      contributions: z.array(
+      sources: z.array(
         z
           .object({
             id: Id,
-            giverBudgetId: Id,
-            giverBudgetName: z.string(),
+            kind: z.enum(['own', 'contribution']),
+            budgetId: Id.describe('The budget the money came from (the contributor).'),
+            budgetName: z.string(),
+            contributionId: Id.nullable(),
             mode: z.enum(['earmark', 'transfer']),
             status: z.string(),
-            approved: Money,
-            held: Money.describe('Still earmarked on the giver’s budget.'),
-            surplusShare: Money.describe('Returned to this contributor when the event closes.'),
+            funded: Money,
+            consumed: Money,
+            surplusShare: Money.describe('Returned to this source when the event closes.'),
+            returned: Money,
             crossEntity: z.boolean(),
             rechargeStatus: z.string().nullable(),
           })
@@ -850,14 +865,16 @@ export const EventReconciliation = named(
       surplus: Money,
       blockers: z.array(EventBlocker),
       canClose: z.boolean(),
+      canManage: z
+        .boolean()
+        .describe('Whether the signed-in person organizes the event and may close it.'),
       surplusReturns: z.array(
         z
           .object({
-            contributionId: Id.nullable(),
+            sourceId: Id,
             budgetId: Id,
             budgetName: z.string(),
             amount: Money,
-            journalId: Id.nullable(),
           })
           .strict(),
       ),
@@ -886,8 +903,6 @@ export const EventReconciliationList = named(
     })
     .strict(),
 );
-
-export const CloseEventRequest = named('CloseEventRequest', z.object({ reason: Reason }).strict());
 
 export type ImportBatchList = z.infer<typeof ImportBatchList>;
 export type ActualList = z.infer<typeof ActualList>;
@@ -946,6 +961,7 @@ export const actualsEndpoints = {
     summary: 'Recent actuals imports',
     tags,
     auth: true,
+    query: ImportsQuery,
     response: { status: 200, schema: ImportBatchList },
     errors: READ_ERRORS,
   },
@@ -1322,24 +1338,12 @@ export const actualsEndpoints = {
     operationId: 'getEventReconciliation',
     method: 'get',
     path: '/api/actuals/events/{eventId}/reconciliation',
-    summary: 'Event reconciliation: actuals, commitments, contributions, surplus and blockers',
+    summary:
+      'Event reconciliation: actuals, commitments, funding sources, surplus and what blocks the close',
     tags,
     auth: true,
     params: EventParams,
     response: { status: 200, schema: EventReconciliation },
     errors: READ_ERRORS,
-  },
-  closeReconciledEvent: {
-    operationId: 'closeReconciledEvent',
-    method: 'post',
-    path: '/api/actuals/events/{eventId}/close',
-    summary: 'Close a reconciled event and return the surplus to each contributor',
-    tags,
-    auth: true,
-    idempotent: true,
-    params: EventParams,
-    body: CloseEventRequest,
-    response: { status: 200, schema: EventReconciliation },
-    errors: WRITE_ERRORS,
   },
 } as const satisfies Record<string, Endpoint>;

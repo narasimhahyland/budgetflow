@@ -1,13 +1,5 @@
 import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  resource,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -15,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
-import { SessionStore } from '@bf/web/data-access';
 import { formatMoney, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
@@ -133,7 +124,7 @@ import { LoadState } from './load-state';
                 ></sat-banner
               >
             }
-            @if (canManage()) {
+            @if (r.canManage) {
               <mat-form-field appearance="outline">
                 <mat-label>Reason</mat-label>
                 <input
@@ -163,6 +154,11 @@ import { LoadState } from './load-state';
               @if (!r.canClose) {
                 <p class="bf-muted">Resolve the items above first.</p>
               }
+            } @else {
+              <p class="bf-muted" data-testid="close-organizer-note">
+                The event's organizers close it once nothing above blocks it. Closing releases open
+                commitments and returns each funding source's surplus.
+              </p>
             }
           }
         </div>
@@ -220,20 +216,25 @@ import { LoadState } from './load-state';
       <section class="bf-card" aria-labelledby="contrib-title">
         <div class="bf-card__header">
           <h2 class="bf-card__title" id="contrib-title">
-            Contributors (Inter-Director Budget Contribution Requests)
+            Funding (own funds and Inter-Director Budget Contribution Requests)
           </h2>
         </div>
-        @if (r.contributions.length === 0 && r.surplusReturns.length === 0) {
-          <p class="bf-empty">No co-funding on this event.</p>
+        @if (r.sources.length === 0) {
+          <p class="bf-empty">No funding sources on this event.</p>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="r.contributions" aria-label="Contributors">
+            <table mat-table [dataSource]="r.sources" aria-label="Funding sources">
               <ng-container matColumnDef="giver">
-                <th mat-header-cell *matHeaderCellDef>Contributor</th>
+                <th mat-header-cell *matHeaderCellDef>Source</th>
                 <td mat-cell *matCellDef="let c">
-                  <span class="bf-cell__primary">{{ c.giverBudgetName }}</span>
+                  <span class="bf-cell__primary">{{ c.budgetName }}</span>
                   <span class="bf-cell__secondary"
-                    >{{ c.mode === 'earmark' ? 'Earmark' : 'Transfer'
+                    >{{
+                      c.kind === 'own'
+                        ? 'Own funds'
+                        : c.mode === 'earmark'
+                          ? 'Contribution, earmark'
+                          : 'Contribution, transfer'
                     }}{{
                       c.crossEntity
                         ? ' · cross-entity, recharge ' + (c.rechargeStatus ?? 'missing')
@@ -243,18 +244,18 @@ import { LoadState } from './load-state';
                 </td>
               </ng-container>
               <ng-container matColumnDef="approved">
-                <th mat-header-cell *matHeaderCellDef class="bf-num">Approved</th>
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Funded</th>
                 <td mat-cell *matCellDef="let c" class="bf-num">
-                  <bf-money
-                    [amountMinor]="c.approved.amountMinor"
-                    [currency]="c.approved.currency"
-                  />
+                  <bf-money [amountMinor]="c.funded.amountMinor" [currency]="c.funded.currency" />
                 </td>
               </ng-container>
               <ng-container matColumnDef="held">
-                <th mat-header-cell *matHeaderCellDef class="bf-num">Still earmarked</th>
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Committed or spent</th>
                 <td mat-cell *matCellDef="let c" class="bf-num">
-                  <bf-money [amountMinor]="c.held.amountMinor" [currency]="c.held.currency" />
+                  <bf-money
+                    [amountMinor]="c.consumed.amountMinor"
+                    [currency]="c.consumed.currency"
+                  />
                 </td>
               </ng-container>
               <ng-container matColumnDef="surplus">
@@ -270,8 +271,8 @@ import { LoadState } from './load-state';
                 <th mat-header-cell *matHeaderCellDef>Status</th>
                 <td mat-cell *matCellDef="let c">
                   <sat-status-tag
-                    [status]="c.status === 'settled' ? 'success' : 'neutral'"
-                    [hideIcon]="c.status !== 'settled'"
+                    [status]="c.status === 'returned' ? 'success' : 'neutral'"
+                    [hideIcon]="c.status !== 'returned'"
                     >{{ statusText(c.status) }}</sat-status-tag
                   >
                 </td>
@@ -280,7 +281,7 @@ import { LoadState } from './load-state';
               <tr mat-row *matRowDef="let row; columns: contribColumns"></tr>
             </table>
           </div>
-          @for (s of r.surplusReturns; track s.budgetId + s.contributionId) {
+          @for (s of r.surplusReturns; track s.sourceId) {
             <p class="bf-card__body bf-muted">
               Returned
               <bf-money [amountMinor]="s.amount.amountMinor" [currency]="s.amount.currency" /> to
@@ -296,12 +297,10 @@ import { LoadState } from './load-state';
 })
 export class EventPage {
   private readonly api = injectApi();
-  private readonly session = inject(SessionStore);
   readonly eventId = input.required<string>();
   protected readonly valueOf = valueOf;
   protected readonly commitmentColumns = ['commitment', 'encumbered', 'accrued', 'status'];
   protected readonly contribColumns = ['giver', 'approved', 'held', 'surplus', 'status'];
-  protected readonly canManage = computed(() => this.session.can('actuals.manage'));
   protected readonly recon = resource({
     params: () => ({ eventId: this.eventId() }),
     loader: ({ params }) => data(this.api.getEventReconciliation({ params })),
@@ -325,13 +324,13 @@ export class EventPage {
     this.failure.set(null);
     try {
       const r = await data(
-        this.api.closeReconciledEvent({
+        this.api.closeEvent({
           params: { eventId: this.eventId() },
           body: { reason: this.reason() },
         }),
       );
       this.notice.set(
-        `${r.event.name} closed; surplus returned to ${r.surplusReturns.length} contributor(s).`,
+        `${r.event.name} closed; surplus returned to ${r.surplusReturns.length} funding source(s).`,
       );
       this.recon.reload();
     } catch (e) {

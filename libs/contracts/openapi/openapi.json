@@ -3692,20 +3692,6 @@
         ],
         "description": "A web event with exactly the properties its name allows."
       },
-      "CloseEventRequest": {
-        "type": "object",
-        "properties": {
-          "reason": {
-            "type": "string",
-            "minLength": 5,
-            "maxLength": 1000
-          }
-        },
-        "required": [
-          "reason"
-        ],
-        "additionalProperties": false
-      },
       "CloseEventResponse": {
         "type": "object",
         "properties": {
@@ -8729,7 +8715,7 @@
               "$ref": "#/components/schemas/CommitmentHygieneItem"
             }
           },
-          "contributions": {
+          "sources": {
             "type": "array",
             "items": {
               "type": "object",
@@ -8740,14 +8726,34 @@
                   "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                   "description": "Opaque identifier (UUID)."
                 },
-                "giverBudgetId": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "own",
+                    "contribution"
+                  ]
+                },
+                "budgetId": {
                   "type": "string",
                   "format": "uuid",
                   "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                  "description": "Opaque identifier (UUID)."
+                  "description": "The budget the money came from (the contributor)."
                 },
-                "giverBudgetName": {
+                "budgetName": {
                   "type": "string"
+                },
+                "contributionId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                      "description": "Opaque identifier (UUID)."
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "mode": {
                   "type": "string",
@@ -8759,15 +8765,17 @@
                 "status": {
                   "type": "string"
                 },
-                "approved": {
+                "funded": {
                   "$ref": "#/components/schemas/Money"
                 },
-                "held": {
-                  "description": "Still earmarked on the giver’s budget.",
+                "consumed": {
                   "$ref": "#/components/schemas/Money"
                 },
                 "surplusShare": {
-                  "description": "Returned to this contributor when the event closes.",
+                  "description": "Returned to this source when the event closes.",
+                  "$ref": "#/components/schemas/Money"
+                },
+                "returned": {
                   "$ref": "#/components/schemas/Money"
                 },
                 "crossEntity": {
@@ -8782,13 +8790,16 @@
               },
               "required": [
                 "id",
-                "giverBudgetId",
-                "giverBudgetName",
+                "kind",
+                "budgetId",
+                "budgetName",
+                "contributionId",
                 "mode",
                 "status",
-                "approved",
-                "held",
+                "funded",
+                "consumed",
                 "surplusShare",
+                "returned",
                 "crossEntity",
                 "rechargeStatus"
               ],
@@ -8835,23 +8846,20 @@
           "canClose": {
             "type": "boolean"
           },
+          "canManage": {
+            "type": "boolean",
+            "description": "Whether the signed-in person organizes the event and may close it."
+          },
           "surplusReturns": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "contributionId": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                      "description": "Opaque identifier (UUID)."
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                "sourceId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "description": "Opaque identifier (UUID)."
                 },
                 "budgetId": {
                   "type": "string",
@@ -8864,27 +8872,13 @@
                 },
                 "amount": {
                   "$ref": "#/components/schemas/Money"
-                },
-                "journalId": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                      "description": "Opaque identifier (UUID)."
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
                 }
               },
               "required": [
-                "contributionId",
+                "sourceId",
                 "budgetId",
                 "budgetName",
-                "amount",
-                "journalId"
+                "amount"
               ],
               "additionalProperties": false
             }
@@ -8894,11 +8888,12 @@
           "event",
           "actuals",
           "commitments",
-          "contributions",
+          "sources",
           "spent",
           "surplus",
           "blockers",
           "canClose",
+          "canManage",
           "surplusReturns"
         ],
         "additionalProperties": false
@@ -33373,6 +33368,17 @@
         ],
         "parameters": [
           {
+            "name": "fileName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Only imports of this file (a link to one import).",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          {
             "name": "X-Tenant-Id",
             "in": "header",
             "required": false,
@@ -36988,7 +36994,7 @@
     "/api/actuals/events/{eventId}/reconciliation": {
       "get": {
         "operationId": "getEventReconciliation",
-        "summary": "Event reconciliation: actuals, commitments, contributions, surplus and blockers",
+        "summary": "Event reconciliation: actuals, commitments, funding sources, surplus and what blocks the close",
         "tags": [
           "actuals"
         ],
@@ -37062,136 +37068,6 @@
             }
           },
           "404": {
-            "description": "Problem details",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/actuals/events/{eventId}/close": {
-      "post": {
-        "operationId": "closeReconciledEvent",
-        "summary": "Close a reconciled event and return the surplus to each contributor",
-        "tags": [
-          "actuals"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "eventId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-              "description": "Opaque identifier (UUID)."
-            }
-          },
-          {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": false,
-            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "description": "Unique per user action; a replay returns the first response without posting again.",
-            "schema": {
-              "type": "string",
-              "minLength": 8,
-              "maxLength": 200
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloseEventRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventReconciliation"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Problem details",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Problem details",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Problem details",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Problem details",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Problem details",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "422": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {

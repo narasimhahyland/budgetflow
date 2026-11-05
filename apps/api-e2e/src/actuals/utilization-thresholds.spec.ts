@@ -70,13 +70,16 @@ test.describe('actuals feed utilization and owner alerts', () => {
     request,
   }) => {
     const budget = await spendBudget(request, { amountMinor: 100_000 });
-    const c = await createCommitment({ budgetId: budget.id, amountMinor: 60_000 });
-    expect((await buckets(request, budget.id)).utilizationBps).toBe(6_000);
-    await charge(request, `U${uniq()}-1`, '600.00', { commitmentId: c.id });
+    const c = await createCommitment(request, {
+      budgetId: budget.id,
+      amountMinor: 40_000,
+    });
+    expect((await buckets(request, budget.id)).utilizationBps).toBe(4_000);
+    await charge(request, `U${uniq()}-1`, '400.00', { commitmentId: c.id });
     const after = await buckets(request, budget.id);
-    expect(after.balances.budgetCurrency.actual.amountMinor).toBe(60_000);
+    expect(after.balances.budgetCurrency.actual.amountMinor).toBe(40_000);
     expect(after.balances.budgetCurrency.encumbered.amountMinor).toBe(0);
-    expect(after.utilizationBps).toBe(6_000);
+    expect(after.utilizationBps).toBe(4_000);
     expect(await thresholdEvents(budget.id)).toEqual([]);
   });
 });
