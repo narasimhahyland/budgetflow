@@ -1,1529 +1,293 @@
+
 Running 223 tests using 8 workers
-  ✓    1 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as org-admin (2.2s)
-  ✓    3 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as department-head (2.3s)
-  ✓    8 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as ceo (2.3s)
-  ✓    4 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as regional-manager (2.4s)
-  ✓    2 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-admin (2.4s)
-  ✓    6 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as budget-owner (2.6s)
-  ✓    7 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-controller (2.6s)
-  ✓    5 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as super-admin (2.7s)
-  ✓    9 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as location-manager (1.3s)
-  ✓   10 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as event-organizer (1.3s)
-  ✓   11 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as employee (1.3s)
-  ✓   12 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as auditor (1.2s)
-  ✓   13 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as integration-admin (1.2s)
-  ✓   14 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as analyst (1.1s)
-  ✓   17 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate (1.5s)
-  ✓   16 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:120:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment (1.4s)
-  ✓   15 [desktop] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off (1.6s)
-  ✓   19 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:105:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit (1.5s)
-  ✓   20 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:131:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched (2.0s)
-  ✓   18 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:91:7 › actuals import and matching › employees cannot open the actuals screens (2.2s)
-  ✓   26 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:21:7 › sign-in › a wrong password is refused with a plain message and no session (1.9s)
-  ✓   25 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:7:7 › sign-in › a deep link asks the user to sign in, then opens the page they asked for (2.2s)
-  ✓   22 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API (4.1s)
-  ✓   21 [desktop] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off (4.0s)
-  ✓   27 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:29:7 › sign-in › single sign-on: a new tab in the same browser opens without asking again (2.2s)
-  ✓   24 [desktop] › apps/web-e2e/src/auth/mfa.spec.ts:6:5 › the authenticator code is required: wrong code refused, right code signs in (3.1s)
-  ✓   23 [desktop] › apps/web-e2e/src/auth/forgot-password.spec.ts:13:5 › a reset email lets the user set a new password and sign in (3.1s)
-  ✓   28 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:43:7 › sign-in › sign-out ends the session; signing in again asks for credentials (3.2s)
-  ✓   30 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (2.0s)
-  ✓   33 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked (1.6s)
-  ✓   29 [desktop] › apps/web-e2e/src/auth/sso.spec.ts:7:5 › signing in with Hyland SSO lands in BudgetFlow as the linked employee (2.4s)
-  ✓   32 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (2.6s)
-  ✓   37 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (1.1s)
-  ✓   36 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (1.7s)
-  ✓   39 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (1.5s)
-  ✓   31 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order (3.5s)
-  ✓   34 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (3.6s)
-  ✓   35 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code (3.7s)
-  ✓   40 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason (1.8s)
-  ✓   41 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (1.9s)
-  ✓   42 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (1.6s)
-  ✓   44 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (1.9s)
-  ✓   46 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (1.2s)
-  ✓   45 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (1.6s)
-  ✓   43 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (2.3s)
-  ✓   38 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history (3.9s)
-  ✓   48 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date (1.3s)
-  ✓   47 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file (1.9s)
-  ✓   51 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:36:7 › regional manager in Bengaluru › INR amounts use lakh grouping with the USD equivalent; times show IST (1.2s)
-  ✓   52 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:79:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (1.2s)
-  ✓   55 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (872ms)
-  ✓   53 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:79:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (1.2s)
-  ✓   49 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it (2.1s)
-  ✓   56 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (1.2s)
-  ✓   57 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (1.1s)
-  ✓   58 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (1.2s)
-  ✓   59 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (1.0s)
-  ✓   60 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (1.1s)
-  ✓   61 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (1.3s)
-  ✓   62 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (833ms)
-  ✓   54 [desktop] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (2.6s)
-  ✓   63 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (890ms)
-  ✓   65 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for employee › employee sees exactly the areas their permissions allow (851ms)
-  ✓   64 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (884ms)
-  ✓   66 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (918ms)
-  ✓   67 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (888ms)
-  ✓   68 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (849ms)
-  ✓   69 [desktop] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (954ms)
-  ✓   50 [desktop] › apps/web-e2e/src/shell/analytics.spec.ts:10:5 › sign-in and navigation send product analytics events the API accepts (4.0s)
-  ✓   70 [desktop] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (852ms)
-  ✓   71 [desktop] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (6.7s)
-  ✓   72 [desktop] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (6.7s)
-  ✓   73 [desktop] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (6.6s)
-  ✓   78 [desktop] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (6.2s)
-  ✓   77 [desktop] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (6.4s)
-  ✓   75 [desktop] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (6.7s)
-  ✓   74 [desktop] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (7.3s)
-  ✓   76 [desktop] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (7.1s)
-  -   79 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API
-  -   86 [tablet] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off
-  -   88 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
-  ✓   82 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:120:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment (1.2s)
-  -   90 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked
-  ✓   83 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:105:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit (1.5s)
-  ✓   80 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate (1.8s)
-  -   92 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code
-  ✓   85 [tablet] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off (1.6s)
-  ✓   84 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:131:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched (2.1s)
-  ✓   81 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:91:7 › actuals import and matching › employees cannot open the actuals screens (2.3s)
-  -   96 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history
-  -   97 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason
-  ✓   87 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (2.4s)
-  ✓   94 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (917ms)
-  ✓   95 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (1.1s)
-  ✓   93 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (1.7s)
-  ✓   98 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (1.2s)
-  -  104 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file
-  ✓   99 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (1.2s)
-  ✓   89 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (2.8s)
-  -  105 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date
-  -  106 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it
-  ✓  100 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (1.6s)
-  ✓  101 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (1.8s)
-  ✓  103 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (1.2s)
-  ✓  102 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (1.6s)
-  ✓   91 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (3.5s)
-  ✓  109 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:79:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (1.3s)
-  ✓  108 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:36:7 › regional manager in Bengaluru › INR amounts use lakh grouping with the USD equivalent; times show IST (1.6s)
-  ✓  107 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:79:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (1.7s)
-  ✓  112 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (904ms)
-  ✓  111 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (1.0s)
-  ✓  113 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (1.2s)
-  ✓  114 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (1.1s)
-  ✓  115 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (1.1s)
-  ✓  117 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (836ms)
-  ✓  116 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (1.0s)
-  ✓  118 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (1.0s)
-  ✓  119 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (945ms)
-  ✓  120 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (816ms)
-  ✓  121 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for employee › employee sees exactly the areas their permissions allow (1.0s)
-  ✓  110 [tablet] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (2.9s)
-  ✓  122 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (1.2s)
-  ✓  124 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (1.2s)
-  ✓  123 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (1.6s)
-  ✓  126 [tablet] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (1.5s)
-  ✓  128 [tablet] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (1.1s)
-  ✓  127 [tablet] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (1.5s)
-  ✓  125 [tablet] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (1.7s)
-  ✓  129 [tablet] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (1.5s)
-  ✓  131 [tablet] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (905ms)
-  ✓  133 [tablet] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (1.0s)
-  ✓  134 [tablet] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (960ms)
-  ✓  130 [tablet] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (1.9s)
-  ✓  132 [tablet] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (1.5s)
-  ✓  135 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:91:7 › actuals import and matching › employees cannot open the actuals screens (416ms)
-  ✓  136 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (631ms)
-  -  139 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
-  ✓  137 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:120:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment (488ms)
-  -  141 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked
-  ✓  138 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate (460ms)
-  -  143 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code
-  ✓  140 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (653ms)
-  ✓  144 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (659ms)
-  -  146 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API
-  ✓  145 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (451ms)
-  -  149 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history
-  -  150 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason
-  ✓  142 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (1.4s)
-  ✓  148 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (641ms)
-  ✓  152 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (529ms)
-  ✓  147 [mobile] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off (992ms)
-  ✓  151 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (809ms)
-  -  157 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file
-  -  158 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date
-  -  159 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it
-  ✓  156 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (763ms)
-  ✓  155 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (947ms)
-  ✓  153 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (1.2s)
-  ✓  154 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (1.2s)
-  ✓  160 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:36:7 › regional manager in Bengaluru › INR amounts use lakh grouping with the USD equivalent; times show IST (859ms)
-  ✓  161 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:79:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (833ms)
-  ✓  164 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (776ms)
-  ✓  162 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:79:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (962ms)
-  ✓  165 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (787ms)
-  ✓  166 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (598ms)
-  ✓  168 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (547ms)
-  ✓  167 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (700ms)
-  ✓  163 [mobile] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (1.6s)
-  ✓  170 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (708ms)
-  ✓  169 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (864ms)
-  ✓  171 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (787ms)
-  ✓  173 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (834ms)
-  ✓  172 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (1.1s)
-  ✓  174 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for employee › employee sees exactly the areas their permissions allow (884ms)
-  ✓  176 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (726ms)
-  ✓  175 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (941ms)
-  ✓  178 [mobile] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (537ms)
-  ✓  177 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:102:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (790ms)
-  ✓  180 [mobile] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (467ms)
-  ✓  179 [mobile] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (563ms)
-  ✓  181 [mobile] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (682ms)
-  ✓  186 [mobile] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (636ms)
-  ✓  184 [mobile] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (1.0s)
-  ✓  182 [mobile] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (1.3s)
-  ✓  183 [mobile] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (1.4s)
-  ✓  185 [mobile] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (1.2s)
-  ✓  187 [mobile] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (408ms)
-  -  188 [mobile] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off
-  ✓  190 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:105:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit (438ms)
-  ✓  189 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:131:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched (630ms)
-  ✘  191 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › mobile (1.3s)
-  ✘  192 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › tablet (935ms)
-  ✘  193 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › tablet (872ms)
-  ✘  194 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › desktop (904ms)
-  ✘  195 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › desktop (791ms)
-  ✘  196 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › mobile (657ms)
-  ✘  197 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › mobile (643ms)
-  ✘  198 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › desktop (884ms)
-  ✘  199 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › tablet (811ms)
-  ✘  200 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › mobile (705ms)
-  ✘  202 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › tablet (697ms)
-  ✘  201 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › desktop (785ms)
-  ✘  203 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › desktop (1.8s)
-  ✘  204 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › tablet (1.7s)
-  ✘  205 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › mobile (617ms)
-  ✘  206 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › desktop (718ms)
-  ✘  208 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › mobile (555ms)
-  ✘  207 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › tablet (664ms)
-  ✘  209 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › desktop (707ms)
-  ✘  210 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › tablet (644ms)
-  ✘  211 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › mobile (580ms)
-  ✓  218 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages signed-out › desktop (293ms)
-  ✘  213 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › tablet (665ms)
-  ✘  214 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › mobile (563ms)
-  ✘  215 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › desktop (725ms)
-  ✘  212 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › desktop (701ms)
-  ✘  217 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › mobile (549ms)
-  ✘  220 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages signed-out › mobile (408ms)
-  ✓  221 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages sign-in-problem › desktop (292ms)
-  ✘  219 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages signed-out › tablet (527ms)
-  ✘  216 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › tablet (688ms)
-  ✘  222 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages sign-in-problem › tablet (548ms)
-  ✘  223 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages sign-in-problem › mobile (482ms)
-  1) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      6282 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--default--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--default--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 6282 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 6282 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--default--desktop (image/png) ────────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--default--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-desktop-visual-light/000a-app-shell--default--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-desktop-visual-light/000a-app-shell--default--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  2) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      6268 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--default--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--default--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 6268 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 6268 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--default--tablet (image/png) ─────────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--default--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-tablet-visual-light/000a-app-shell--default--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-tablet-visual-light/000a-app-shell--default--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  3) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      4240 pixels (ratio 0.02 of all image pixels) are different.
-      Snapshot: 000a-app-shell--default--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--default--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 4240 pixels (ratio 0.02 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 4240 pixels (ratio 0.02 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--default--mobile (image/png) ─────────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--default--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-mobile-visual-light/000a-app-shell--default--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-mobile-visual-light/000a-app-shell--default--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-default-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  4) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      6513 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--nav-drawer-open--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--nav-drawer-open--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 6513 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 6513 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--nav-drawer-open--desktop (image/png) ────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--nav-drawer-open--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-desktop-visual-light/000a-app-shell--nav-drawer-open--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-desktop-visual-light/000a-app-shell--nav-drawer-open--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  5) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      6281 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--nav-drawer-open--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--nav-drawer-open--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 6281 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 6281 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--nav-drawer-open--tablet (image/png) ─────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--nav-drawer-open--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-tablet-visual-light/000a-app-shell--nav-drawer-open--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-tablet-visual-light/000a-app-shell--nav-drawer-open--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  6) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      3998 pixels (ratio 0.02 of all image pixels) are different.
-      Snapshot: 000a-app-shell--nav-drawer-open--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--nav-drawer-open--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 3998 pixels (ratio 0.02 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 3998 pixels (ratio 0.02 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--nav-drawer-open--mobile (image/png) ─────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--nav-drawer-open--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-mobile-visual-light/000a-app-shell--nav-drawer-open--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-mobile-visual-light/000a-app-shell--nav-drawer-open--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-nav-drawer-open-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  7) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      7938 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--notifications-open--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--notifications-open--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 7938 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 7938 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--notifications-open--desktop (image/png) ─────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--notifications-open--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-desktop-visual-light/000a-app-shell--notifications-open--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-desktop-visual-light/000a-app-shell--notifications-open--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  8) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      7924 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--notifications-open--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--notifications-open--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 7924 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 7924 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--notifications-open--tablet (image/png) ──────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--notifications-open--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-tablet-visual-light/000a-app-shell--notifications-open--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-tablet-visual-light/000a-app-shell--notifications-open--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  9) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      5071 pixels (ratio 0.02 of all image pixels) are different.
-      Snapshot: 000a-app-shell--notifications-open--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--notifications-open--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 5071 pixels (ratio 0.02 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 5071 pixels (ratio 0.02 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--notifications-open--mobile (image/png) ──────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--notifications-open--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-mobile-visual-light/000a-app-shell--notifications-open--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-mobile-visual-light/000a-app-shell--notifications-open--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-notifications-open-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  10) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      6862 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--account-menu-open--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--account-menu-open--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 6862 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 6862 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--account-menu-open--desktop (image/png) ──────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--account-menu-open--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-desktop-visual-light/000a-app-shell--account-menu-open--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-desktop-visual-light/000a-app-shell--account-menu-open--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  11) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      6848 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--account-menu-open--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--account-menu-open--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 6848 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 6848 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--account-menu-open--tablet (image/png) ───────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--account-menu-open--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-tablet-visual-light/000a-app-shell--account-menu-open--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-tablet-visual-light/000a-app-shell--account-menu-open--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  12) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      4823 pixels (ratio 0.02 of all image pixels) are different.
-      Snapshot: 000a-app-shell--account-menu-open--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--account-menu-open--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 4823 pixels (ratio 0.02 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 4823 pixels (ratio 0.02 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--account-menu-open--mobile (image/png) ───────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--account-menu-open--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-mobile-visual-light/000a-app-shell--account-menu-open--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-mobile-visual-light/000a-app-shell--account-menu-open--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-account-menu-open-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  13) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      3155 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--employee-forbidden--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--employee-forbidden--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 3155 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 3155 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--employee-forbidden--desktop (image/png) ─────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--employee-forbidden--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-desktop-visual-light/000a-app-shell--employee-forbidden--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-desktop-visual-light/000a-app-shell--employee-forbidden--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  14) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      3155 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--employee-forbidden--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--employee-forbidden--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 3155 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 3155 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--employee-forbidden--tablet (image/png) ──────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--employee-forbidden--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-tablet-visual-light/000a-app-shell--employee-forbidden--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-tablet-visual-light/000a-app-shell--employee-forbidden--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  15) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      3138 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--employee-forbidden--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--employee-forbidden--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 3138 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 3138 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--employee-forbidden--mobile (image/png) ──────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--employee-forbidden--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-mobile-visual-light/000a-app-shell--employee-forbidden--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-mobile-visual-light/000a-app-shell--employee-forbidden--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-forbidden-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  16) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      7170 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--employee-home--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--employee-home--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 7170 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 7170 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--employee-home--desktop (image/png) ──────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--employee-home--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-desktop-visual-light/000a-app-shell--employee-home--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-desktop-visual-light/000a-app-shell--employee-home--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  17) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      7170 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--employee-home--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--employee-home--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 7170 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 7170 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--employee-home--tablet (image/png) ───────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--employee-home--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-tablet-visual-light/000a-app-shell--employee-home--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-tablet-visual-light/000a-app-shell--employee-home--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  18) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      8922 pixels (ratio 0.03 of all image pixels) are different.
-      Snapshot: 000a-app-shell--employee-home--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--employee-home--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 8922 pixels (ratio 0.03 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 8922 pixels (ratio 0.03 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--employee-home--mobile (image/png) ───────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--employee-home--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-mobile-visual-light/000a-app-shell--employee-home--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-mobile-visual-light/000a-app-shell--employee-home--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-employee-home-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  19) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      4966 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--placeholder--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--placeholder--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 4966 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 4966 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--placeholder--desktop (image/png) ────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--placeholder--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-desktop-visual-light/000a-app-shell--placeholder--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-desktop-visual-light/000a-app-shell--placeholder--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  20) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      4966 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--placeholder--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--placeholder--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 4966 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 4966 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--placeholder--tablet (image/png) ─────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--placeholder--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-tablet-visual-light/000a-app-shell--placeholder--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-tablet-visual-light/000a-app-shell--placeholder--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  21) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      3495 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--placeholder--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--placeholder--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 3495 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 3495 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--placeholder--mobile (image/png) ─────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--placeholder--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-mobile-visual-light/000a-app-shell--placeholder--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-mobile-visual-light/000a-app-shell--placeholder--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-placeholder-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  22) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      2706 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--not-found--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--not-found--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 2706 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 2706 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--not-found--desktop (image/png) ──────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--not-found--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-desktop-visual-light/000a-app-shell--not-found--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-desktop-visual-light/000a-app-shell--not-found--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  23) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      2706 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--not-found--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--not-found--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 2706 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 2706 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--not-found--tablet (image/png) ───────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--not-found--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-tablet-visual-light/000a-app-shell--not-found--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-tablet-visual-light/000a-app-shell--not-found--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  24) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      2001 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--not-found--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--not-found--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 2001 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 2001 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--not-found--mobile (image/png) ───────────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--not-found--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-mobile-visual-light/000a-app-shell--not-found--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-mobile-visual-light/000a-app-shell--not-found--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-not-found-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  25) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › desktop 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      3106 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--platform-operator--desktop.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--platform-operator--desktop.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 3106 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 3106 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--platform-operator--desktop (image/png) ──────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--platform-operator--desktop.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-desktop-visual-light/000a-app-shell--platform-operator--desktop-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-desktop-visual-light/000a-app-shell--platform-operator--desktop-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-desktop-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-desktop-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-desktop-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-desktop-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  26) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      3000 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--platform-operator--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--platform-operator--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 3000 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 3000 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--platform-operator--tablet (image/png) ───────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--platform-operator--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-tablet-visual-light/000a-app-shell--platform-operator--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-tablet-visual-light/000a-app-shell--platform-operator--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  27) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      2387 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000a-app-shell--platform-operator--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000a-app-shell--platform-operator--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 2387 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 2387 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000a-app-shell--platform-operator--mobile (image/png) ───────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000a-app-shell--platform-operator--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-mobile-visual-light/000a-app-shell--platform-operator--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-mobile-visual-light/000a-app-shell--platform-operator--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000a-app-shell-platform-operator-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  28) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages signed-out › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      1938 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000b-sign-in-pages--signed-out--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000b-sign-in-pages--signed-out--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 1938 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 1938 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000b-sign-in-pages--signed-out--tablet (image/png) ──────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000b-sign-in-pages--signed-out--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-tablet-visual-light/000b-sign-in-pages--signed-out--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-tablet-visual-light/000b-sign-in-pages--signed-out--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  29) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages signed-out › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      1938 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000b-sign-in-pages--signed-out--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000b-sign-in-pages--signed-out--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 1938 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 1938 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000b-sign-in-pages--signed-out--mobile (image/png) ──────────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000b-sign-in-pages--signed-out--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-mobile-visual-light/000b-sign-in-pages--signed-out--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-mobile-visual-light/000b-sign-in-pages--signed-out--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-signed-out-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  30) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages sign-in-problem › tablet 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      2064 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000b-sign-in-pages--sign-in-problem--tablet.png
-    Call log:
-      - Expect "toHaveScreenshot(000b-sign-in-pages--sign-in-problem--tablet.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 2064 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 2064 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000b-sign-in-pages--sign-in-problem--tablet (image/png) ─────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000b-sign-in-pages--sign-in-problem--tablet.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-tablet-visual-light/000b-sign-in-pages--sign-in-problem--tablet-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-tablet-visual-light/000b-sign-in-pages--sign-in-problem--tablet-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-tablet-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-tablet-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-tablet-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-tablet-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  31) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages sign-in-problem › mobile 
-    Error: expect(page).toHaveScreenshot(expected) failed
-      2066 pixels (ratio 0.01 of all image pixels) are different.
-      Snapshot: 000b-sign-in-pages--sign-in-problem--mobile.png
-    Call log:
-      - Expect "toHaveScreenshot(000b-sign-in-pages--sign-in-problem--mobile.png)" with timeout 15000ms
-        - verifying given screenshot expectation
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - 2066 pixels (ratio 0.01 of all image pixels) are different.
-      - waiting 100ms before taking screenshot
-      - taking page screenshot
-        - disabled all CSS animations
-      - waiting for fonts to load...
-      - fonts loaded
-      - captured a stable screenshot
-      - 2066 pixels (ratio 0.01 of all image pixels) are different.
-      67 |             (s) => page.locator(s),
-      68 |           );
-    > 69 |           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
-         |                              ^
-      70 |             fullPage: state.fullPage ?? true,
-      71 |             mask,
-      72 |           });
-        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p6-actuals/apps/web-e2e/src/visual/visual.spec.ts:69:30
-    attachment #1: 000b-sign-in-pages--sign-in-problem--mobile (image/png) ─────────────────────────
-    Expected: apps/web-e2e/src/__screenshots__/visual-light/000b-sign-in-pages--sign-in-problem--mobile.png
-    Received: dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-mobile-visual-light/000b-sign-in-pages--sign-in-problem--mobile-actual.png
-    Diff:     dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-mobile-visual-light/000b-sign-in-pages--sign-in-problem--mobile-diff.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-mobile-visual-light/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-    Error Context: dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-mobile-visual-light/error-context.md
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-mobile-visual-light/trace.zip
-    Usage:
-        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/visual-visual-000b-sign-in-pages-sign-in-problem-mobile-visual-light/trace.zip
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-  31 failed
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell default › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell nav-drawer-open › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell notifications-open › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell account-menu-open › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-forbidden › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell employee-home › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell placeholder › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell not-found › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › desktop 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000a-app-shell platform-operator › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages signed-out › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages signed-out › mobile 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages sign-in-problem › tablet 
-    [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:51:13 › 000b-sign-in-pages sign-in-problem › mobile 
-  20 skipped
-  172 passed (1.5m)
+
+(node:68755) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68756) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68753) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68749) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68757) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68754) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68752) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68751) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓    4 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as ceo (3.5s)
+  ✓    7 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as department-head (3.5s)
+  ✓    6 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-controller (3.5s)
+  ✓    5 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as budget-owner (3.5s)
+  ✓    8 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as super-admin (3.9s)
+  ✓    2 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as regional-manager (4.3s)
+  ✓    1 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as org-admin (4.4s)
+  ✓    3 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-admin (4.6s)
+  ✓   11 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as employee (3.0s)
+  ✓   10 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as event-organizer (3.2s)
+  ✓   13 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as integration-admin (2.9s)
+  ✓    9 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as location-manager (3.5s)
+  ✓   12 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as auditor (3.5s)
+  ✓   14 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as analyst (2.8s)
+(node:71742) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:71740) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:71738) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:71741) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:71743) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:71737) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:71744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:71739) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   16 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate (3.1s)
+  ✓   20 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:136:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment (4.0s)
+  ✓   17 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:123:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit (4.5s)
+  ✓   19 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:109:7 › actuals import and matching › employees cannot open the actuals screens (4.5s)
+  ✓   18 [desktop] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off (4.5s)
+  ✓   15 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:147:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched (4.8s)
+  ✓   26 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:21:7 › sign-in › a wrong password is refused with a plain message and no session (2.3s)
+  ✓   22 [desktop] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off (7.8s)
+  ✓   25 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:7:7 › sign-in › a deep link asks the user to sign in, then opens the page they asked for (3.6s)
+  ✓   23 [desktop] › apps/web-e2e/src/auth/forgot-password.spec.ts:13:5 › a reset email lets the user set a new password and sign in (5.3s)
+  ✓   27 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:29:7 › sign-in › single sign-on: a new tab in the same browser opens without asking again (4.5s)
+  ✓   24 [desktop] › apps/web-e2e/src/auth/mfa.spec.ts:6:5 › the authenticator code is required: wrong code refused, right code signs in (5.2s)
+  ✓   21 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API (10.1s)
+  ✓   30 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules (2.4s)
+  ✓   29 [desktop] › apps/web-e2e/src/auth/sso.spec.ts:7:5 › signing in with Hyland SSO lands in BudgetFlow as the linked employee (3.6s)
+  ✓   32 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India (2.2s)
+  ✓   28 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:43:7 › sign-in › sign-out ends the session; signing in again asks for credentials (6.0s)
+  ✓   31 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request (2.8s)
+  ✓   33 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab (2.0s)
+  ✓   39 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:238:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel (920ms)
+  ✓   36 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:156:7 › finance admin controls a program › validates a plan spreadsheet with column mapping (1.6s)
+  ✓   40 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (1.4s)
+  ✓   35 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change (3.6s)
+  ✓   38 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:216:7 › per-head driver › allocates rate x eligible headcount from the HR import (3.4s)
+  ✓   43 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked (2.7s)
+  ✓   41 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order (4.2s)
+  ✓   42 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (3.4s)
+  ✓   47 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (1.0s)
+  ✓   44 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (3.7s)
+  ✓   46 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (2.0s)
+  ✓   49 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (1.9s)
+  ✓   37 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:172:7 › increase request › the location manager asks; the regional manager approves part of it (7.0s)
+  ✓   51 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (2.1s)
+  ✓   52 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (1.9s)
+  ✓   50 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason (2.5s)
+  ✓   45 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code (5.1s)
+  ✓   48 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history (3.7s)
+  ✓   54 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (1.7s)
+  ✓   55 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (1.6s)
+  ✓   53 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (2.9s)
+  ✓   56 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (2.0s)
+  ✓   58 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date (1.8s)
+  ✓   34 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero (11.2s)
+  ✓   57 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file (2.8s)
+  ✓   61 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST (1.6s)
+  ✓   59 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it (3.0s)
+  ✓   63 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (2.0s)
+  ✓   66 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (1.2s)
+  ✓   64 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (1.8s)
+  ✓   67 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (1.6s)
+  ✓   68 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (1.8s)
+  ✓   69 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (1.5s)
+  ✓   60 [desktop] › apps/web-e2e/src/shell/analytics.spec.ts:10:5 › sign-in and navigation send product analytics events the API accepts (4.1s)
+  ✓   62 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:58:7 › regional manager in Bengaluru › an INR amount uses lakh grouping (3.9s)
+  ✓   70 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (1.6s)
+  ✓   71 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (1.8s)
+  ✓   72 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (1.4s)
+  ✓   76 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for employee › employee sees exactly the areas their permissions allow (1.2s)
+  ✓   75 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (1.7s)
+  ✓   73 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (1.8s)
+  ✓   74 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (1.9s)
+  ✓   78 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (1.3s)
+  ✓   77 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (1.6s)
+  ✓   65 [desktop] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (5.1s)
+  ✓   79 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (1.6s)
+  ✓   80 [desktop] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (1.2s)
+  ✓   81 [desktop] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (1.2s)
+  ✓   82 [desktop] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (1.4s)
+  ✓   83 [desktop] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (1.4s)
+  ✓   86 [desktop] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (1.3s)
+  ✓   84 [desktop] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (1.9s)
+  ✓   89 [desktop] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (992ms)
+  ✓   85 [desktop] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (2.1s)
+  ✓   87 [desktop] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (1.4s)
+  ✓   88 [desktop] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (1.1s)
+(node:72481) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:72482) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -   90 [tablet] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off
+  ✓   91 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:123:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit (551ms)
+  ✓   92 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules (560ms)
+  ✓   93 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request (717ms)
+  ✓   94 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India (525ms)
+  -   96 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero
+  -   97 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change
+  ✓   95 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab (545ms)
+  -   99 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:172:7 › increase request › the location manager asks; the regional manager approves part of it
+  -  100 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:216:7 › per-head driver › allocates rate x eligible headcount from the HR import
+  ✓   98 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:156:7 › finance admin controls a program › validates a plan spreadsheet with column mapping (874ms)
+  ✓  101 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:238:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel (823ms)
+  -  103 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
+  ✓  102 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (825ms)
+  -  105 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked
+  ✓  104 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (721ms)
+  -  107 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code
+  ✓  108 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (1.0s)
+  ✓  106 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (1.5s)
+  ✓  109 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (495ms)
+  -  111 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history
+  -  112 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason
+  ✓  110 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (652ms)
+  ✓  113 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (457ms)
+  ✓  114 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (452ms)
+  ✓  116 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (783ms)
+  ✓  115 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (954ms)
+  ✓  117 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (591ms)
+  ✓  118 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (496ms)
+  -  119 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file
+  -  121 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it
+  -  120 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date
+  -  123 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:58:7 › regional manager in Bengaluru › an INR amount uses lakh grouping
+  ✓  122 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST (494ms)
+  ✓  124 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (567ms)
+  ✓  125 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (618ms)
+  ✓  127 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (513ms)
+  ✓  128 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (471ms)
+  ✓  126 [tablet] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (1.5s)
+  ✓  129 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (587ms)
+  ✓  130 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (526ms)
+  ✓  131 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (644ms)
+  ✓  132 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (681ms)
+  ✓  133 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (516ms)
+  ✓  134 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (484ms)
+  ✓  136 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (507ms)
+  ✓  135 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (541ms)
+  ✓  137 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for employee › employee sees exactly the areas their permissions allow (608ms)
+  ✓  138 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (627ms)
+  ✓  139 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (609ms)
+  ✓  140 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (583ms)
+  ✓  142 [tablet] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (412ms)
+  ✓  141 [tablet] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (429ms)
+  ✓  144 [tablet] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (408ms)
+  ✓  143 [tablet] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (428ms)
+  ✓  145 [tablet] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (638ms)
+  ✓  146 [tablet] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (892ms)
+  ✓  147 [tablet] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (451ms)
+  ✓  149 [tablet] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (635ms)
+  ✓  148 [tablet] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (1.0s)
+  ✓  150 [tablet] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (543ms)
+(node:73348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73349) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73350) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -  152 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API
+  ✓  151 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate (511ms)
+  ✓  153 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:109:7 › actuals import and matching › employees cannot open the actuals screens (600ms)
+(node:73372) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73375) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  154 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:136:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment (631ms)
+  ✓  155 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:147:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched (893ms)
+  ✓  156 [tablet] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off (929ms)
+(node:73391) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -  158 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API
+  ✓  157 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate (607ms)
+  ✓  159 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules (575ms)
+  ✓  160 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request (707ms)
+  ✓  161 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India (518ms)
+  -  163 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero
+  -  164 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change
+  ✓  162 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab (559ms)
+  -  166 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:172:7 › increase request › the location manager asks; the regional manager approves part of it
+  -  167 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:216:7 › per-head driver › allocates rate x eligible headcount from the HR import
+  ✓  168 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:238:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel (481ms)
+  ✓  165 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:156:7 › finance admin controls a program › validates a plan spreadsheet with column mapping (837ms)
+  -  170 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
+  ✓  169 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (650ms)
+  -  172 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked
+  ✓  171 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately (902ms)
+  -  174 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code
+  ✓  175 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold (903ms)
+  ✓  173 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly (1.8s)
+  ✓  176 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix (581ms)
+  -  178 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history
+  -  179 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason
+  ✓  177 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history (572ms)
+  ✓  180 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it (762ms)
+  ✓  181 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team (895ms)
+  ✓  183 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history (665ms)
+  ✓  182 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import (1.3s)
+(node:73596) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73607) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  184 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only (796ms)
+  ✓  185 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import (565ms)
+  -  188 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file
+(node:73626) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -  189 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date
+  -  190 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it
+  -  193 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:58:7 › regional manager in Bengaluru › an INR amount uses lakh grouping
+(node:73669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  186 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:123:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit (1.6s)
+  ✓  192 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST (1.5s)
+  ✓  191 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:136:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment (1.5s)
+  ✓  194 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset (1.4s)
+  ✓  187 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:109:7 › actuals import and matching › employees cannot open the actuals screens (2.2s)
+(node:73728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73729) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  199 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (675ms)
+  -  202 [mobile] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off
+  ✓  198 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (1.7s)
+  ✓  196 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:97:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset (1.9s)
+  ✓  195 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:147:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched (2.0s)
+  ✓  200 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (1.5s)
+  ✓  203 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (1.8s)
+  ✓  201 [mobile] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off (1.9s)
+  ✓  205 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (1.3s)
+  ✓  204 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (1.7s)
+  ✓  197 [mobile] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport (3.3s)
+  ✓  207 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (1.4s)
+  ✓  206 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (1.7s)
+  ✓  208 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (1.6s)
+  ✓  209 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (1.1s)
+  ✓  212 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (911ms)
+  ✓  210 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for employee › employee sees exactly the areas their permissions allow (1.2s)
+  ✓  211 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (1.3s)
+  ✓  213 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:125:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (1.4s)
+  ✓  216 [mobile] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access (1.1s)
+  ✓  214 [mobile] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL (1.2s)
+  ✓  215 [mobile] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell (1.3s)
+  ✓  217 [mobile] › apps/web-e2e/src/shell/states.spec.ts:36:7 › finance controller › an allowed area that opens later shows its placeholder (1.4s)
+  ✓  220 [mobile] › apps/web-e2e/src/shell/states.spec.ts:87:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end (995ms)
+  ✓  218 [mobile] › apps/web-e2e/src/shell/states.spec.ts:42:7 › finance controller › a server error shows the error state and recovers on retry (1.5s)
+  ✓  223 [mobile] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors (979ms)
+  ✓  219 [mobile] › apps/web-e2e/src/shell/states.spec.ts:66:7 › finance controller › a rejected token ends the session and offers to sign in again (1.9s)
+  ✓  222 [mobile] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) (1.4s)
+  ✓  221 [mobile] › apps/web-e2e/src/shell/states.spec.ts:112:7 › super admin › a platform operator sees no tenant financial data (1.7s)
+
+  30 skipped
+  193 passed (2.0m)

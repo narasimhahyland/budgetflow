@@ -1,62 +1,26 @@
-            command            | journal_type | journals | late 
--------------------------------+--------------+----------+------
- actuals.accrual.approve       | accrual      |        9 |    0
- actuals.accruals.auto_reverse | reversal     |        4 |    0
- actuals.commitment.cancel     | commitment   |        4 |    0
- actuals.commitment.release    | commitment   |       10 |    0
- actuals.event.close           | contribution |        2 |    0
- actuals.import.post           | commitment   |       41 |    6
- actuals.import.post           | actual       |       75 |   12
- actuals.import.post           | reversal     |       14 |    0
- actuals.match                 | commitment   |        6 |    0
- actuals.match                 | actual       |       21 |    0
- actuals.prepaids.recognize    | commitment   |        6 |    0
- actuals.unmatch               | reversal     |        6 |    0
- seed.commitment               | commitment   |       14 |    0
-(13 rows)
-
-     account     | lines | reporting_minor 
------------------+-------+-----------------
- held            |     2 |          -80000
- encumbered      |    73 |        -3626985
- actual          |    84 |         4438300
- accrued         |    17 |           39640
- obligations     |   186 |         -834042
- earmark_reserve |     2 |           80000
- fx_variance     |    32 |          -16913
-(7 rows)
-
- status | count 
---------+-------
- review |     2
- posted |    40
-(2 rows)
-
-   match_status    | count 
--------------------+-------
- unmatched         |    14
- partially_matched |     2
- matched           |    65
- excluded          |    10
-(4 rows)
-
-   status   | count 
-------------+-------
- signed_off |     4
- exceptions |     1
- reconciled |     5
-(3 rows)
-
-  status  | count 
-----------+-------
- posted   |     1
- reversed |     8
- proposed |     2
- rejected |     2
-(4 rows)
-
-          kind          | count 
-------------------------+-------
- cross_source_duplicate |     3
-(1 row)
+            command            |  journal_type   | journals | late 
+-------------------------------+-----------------+----------+------
+ actuals.accrual.approve       | accrual         |        5 |    0
+ actuals.accruals.auto_reverse | reversal        |        2 |    0
+ actuals.commitment.cancel     | commitment      |        2 |    0
+ actuals.commitment.release    | commitment      |        5 |    0
+ actuals.event.close           | contribution    |        1 |    0
+ actuals.import.post           | commitment      |       23 |    3
+ actuals.import.post           | actual          |       43 |    6
+ actuals.import.post           | reversal        |        7 |    0
+ actuals.match                 | commitment      |        4 |    0
+ actuals.match                 | actual          |       15 |    0
+ actuals.prepaids.recognize    | commitment      |        3 |    0
+ actuals.unmatch               | reversal        |        5 |    0
+ budgets.allocate              | allocation      |      191 |    4
+ budgets.create                | original_budget |      111 |    0
+ budgets.reduce                | reduction       |       12 |    0
+ budgets.transfer              | transfer        |        5 |    0
+ ledger.manual_journal         | manual          |       29 |    0
+ ledger.reverse                | reversal        |       10 |    0
+ plan.apply                    | increase        |        1 |    0
+ seed.commitment               | commitment      |       14 |    0
+ test.fixture                  | commitment      |       56 |    0
+ test.fixture                  | contribution    |        1 |    0
+(22 rows)
 
