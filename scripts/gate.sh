@@ -173,7 +173,10 @@ for m in functional-api functional-e2e visual; do
   case "$m" in
     functional-api|functional-e2e) run_target "$m" "$m" ;;
     visual)
-      if [ -f apps/web-e2e/visual/screens.json ]; then step visual npm run e2e:visual; else skip visual "apps/web-e2e/visual/screens.json not created yet"; fi
+      if [ ! -f apps/web-e2e/visual/screens.json ]; then skip visual "apps/web-e2e/visual/screens.json not created yet"; continue; fi
+      # Baselines come from the deterministic seed (as in CI's own visual job); functional runs add data.
+      if want functional-api || want functional-e2e; then step reseed bash scripts/stack.sh reset; fi
+      step visual npm run e2e:visual
       ;;
   esac
 done

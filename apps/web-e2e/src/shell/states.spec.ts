@@ -34,9 +34,9 @@ test.describe('finance controller', () => {
   test.use({ storageState: authFile('finance-controller') });
 
   test('an allowed area that opens later shows its placeholder', async ({ page }) => {
-    await page.goto('/audit-log');
-    await expect(page.getByRole('heading', { level: 1, name: 'Audit log' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Audit log is not open yet' })).toBeVisible();
+    await page.goto('/reports');
+    await expect(page.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Reports is not open yet' })).toBeVisible();
   });
 
   test('a server error shows the error state and recovers on retry', async ({ page }) => {
