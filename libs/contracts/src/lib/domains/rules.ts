@@ -1232,6 +1232,7 @@ export const ApprovalHistoryQuery = CursorQuery.extend({
   aboveSlaOnly: z.enum(['true', 'false']).optional(),
   ruleCode: z.string().max(30).optional(),
 }).strict();
+export type ApprovalHistoryQuery = z.infer<typeof ApprovalHistoryQuery>;
 
 export const SlaSweepRequest = named(
   'SlaSweepRequest',
@@ -1248,6 +1249,7 @@ export const SlaSweepResponse = named(
     })
     .strict(),
 );
+export type SlaSweepResponse = z.infer<typeof SlaSweepResponse>;
 
 // Counter-offer on requests (065) ---------------------------------------------------------------
 
@@ -1579,3 +1581,28 @@ export const rulesEndpoints = {
     errors: [401, 403],
   },
 } as const satisfies Record<string, Endpoint>;
+
+export type ThresholdBand = z.infer<typeof ThresholdBand>;
+export type ThresholdTableFamily = z.infer<typeof ThresholdTableFamily>;
+export type PolicyTemplateCard = z.infer<typeof PolicyTemplateCard>;
+export type WorkflowStepDef = z.infer<typeof WorkflowStepDef>;
+export type RuleAction = z.infer<typeof RuleAction>;
+export type ConditionGroup = z.infer<typeof ConditionGroup>;
+export type ConditionLeaf = z.infer<typeof ConditionLeaf>;
+export type RuleScope = z.infer<typeof RuleScope>;
+export type SlaStepPolicy = z.infer<typeof SlaStepPolicy>;
+export type NotificationEventMatrixRow = z.infer<typeof NotificationEventMatrixRow>;
+export type SpendingLimitItem = z.infer<typeof SpendingLimitItem>;
+export type CategoryPolicyItem = z.infer<typeof CategoryPolicyItem>;
+export type GiftsEntertainmentPolicy = z.infer<typeof GiftsEntertainmentPolicy>;
+export type LocationPolicyRow = z.infer<typeof LocationPolicyRow>;
+export type VendorControlItem = z.infer<typeof VendorControlItem>;
+export type OverBudgetPolicyView = z.infer<typeof OverBudgetPolicyView>;
+export type FreezeZeroPolicyView = z.infer<typeof FreezeZeroPolicyView>;
+export type EmployeeCapSummary = z.infer<typeof EmployeeCapSummary>;
+export type SlaAndNotificationPolicy = z.infer<typeof SlaAndNotificationPolicy>;
+export type DoaAdminRow = z.infer<typeof DoaAdminRow>;
+export type DoaMatrixVersionSummary = z.infer<typeof DoaMatrixVersionSummary>;
+export type RuleConflictItem = z.infer<typeof RuleConflictItem>;
+export type SimulatedMatch = z.infer<typeof SimulatedMatch>;
+export type BacktestItem = z.infer<typeof BacktestItem>;

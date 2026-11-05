@@ -1412,7 +1412,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       const trip = buildTriplet(
         { amountMinor: r.counterOfferMinor, currency: r.counterOfferCurrency as CurrencyCode },
         {
-          budgetCurrency: s.budget.currency,
+          budgetCurrency: s.budget.currency as CurrencyCode,
           reportingCurrency: actor.reportingCurrency,
           rates: pctx.rates,
         },

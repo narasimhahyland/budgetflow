@@ -2,6 +2,7 @@ import {
   checkApprovalHygiene,
   checkAuthority,
   delegatedLimit,
+  resolveLimit,
   type Approver,
   type Delegation,
   type DoaLimit,
