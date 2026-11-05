@@ -11,7 +11,15 @@
 // A state with saved HTML is served as that HTML with its links rewritten; any other state is served as its
 // exported PNG with hotspots on the labels links.json knows about.
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -28,15 +36,41 @@ const die = (msg) => {
 };
 
 // ---------- text helpers ----------
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', bull: '•', middot: '·', rarr: '→', larr: '←', times: '×', mdash: '—', ndash: '–' };
+const ENTITIES = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  bull: '•',
+  middot: '·',
+  rarr: '→',
+  larr: '←',
+  times: '×',
+  mdash: '—',
+  ndash: '–',
+};
 const decode = (s) =>
   s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e) => {
-    if (e[0] === '#') return String.fromCodePoint(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10));
+    if (e[0] === '#')
+      return String.fromCodePoint(
+        e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10),
+      );
     return ENTITIES[e.toLowerCase()] ?? m;
   });
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const esc = (s) =>
+  String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 /** Lowercase word tokens; "and" and punctuation are dropped so "Actuals & matching" equals "Actuals and matching". */
-const tokens = (s) => decode(String(s ?? '')).toLowerCase().split(/[^a-z0-9]+/).filter((t) => t && t !== 'and');
+const tokens = (s) =>
+  decode(String(s ?? ''))
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t && t !== 'and');
 const norm = (s) => tokens(s).join(' ');
 const sentence = (slug) => slug.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
@@ -53,15 +87,28 @@ function loadScreens() {
     for (const [file, info] of Object.entries(meta.files ?? {})) {
       const m = /^(.+?)--(desktop|tablet|mobile)(?:--(light|dark))?\.png$/.exec(file);
       if (!m || m[3] === 'dark') continue;
-      states.push({ state: m[1], viewport: m[2], file, size: info.size, stitchScreen: info.stitchScreen, status: info.status ?? '' });
+      states.push({
+        state: m[1],
+        viewport: m[2],
+        file,
+        size: info.size,
+        stitchScreen: info.stitchScreen,
+        status: info.status ?? '',
+      });
     }
     const seen = new Map();
     for (const s of states) seen.set(s.state, (seen.get(s.state) ?? 0) + 1);
-    for (const s of states) if (seen.get(s.state) > 1 && s.viewport !== 'desktop') s.state = `${s.state}-${s.viewport}`;
+    for (const s of states)
+      if (seen.get(s.state) > 1 && s.viewport !== 'desktop') s.state = `${s.state}-${s.viewport}`;
     states.sort((a, b) => (a.state === 'default' ? -1 : b.state === 'default' ? 1 : 0));
     if (!states.length) continue;
     const number = id.split('-')[0];
-    screens.push({ id, number, title: links.titles?.[id] ?? sentence(id.slice(number.length + 1)), states });
+    screens.push({
+      id,
+      number,
+      title: links.titles?.[id] ?? sentence(id.slice(number.length + 1)),
+      states,
+    });
   }
   return screens;
 }
@@ -115,7 +162,11 @@ function linkMap(page) {
       const key = (prefix ? `${prefix}:` : '') + norm(text);
       if (!norm(text)) continue;
       if (target === '') map.delete(key);
-      else map.set(key, { label: prefix === 'icon' ? sentence(text.replace(/_/g, '-')) : text, to: ref(target, `links["${scope}"]["${label}"]`) });
+      else
+        map.set(key, {
+          label: prefix === 'icon' ? sentence(text.replace(/_/g, '-')) : text,
+          to: ref(target, `links["${scope}"]["${label}"]`),
+        });
     }
   }
   return map;
@@ -129,7 +180,28 @@ const missingHref = (label) => `../index.html?missing=${encodeURIComponent(label
 const targetHref = (hit) => (hit.to ? `../screens/${hit.to}.html` : missingHref(hit.label));
 
 // ---------- minimal HTML tree (enough for Stitch exports) ----------
-const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'stop']);
+const VOID = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'source',
+  'track',
+  'wbr',
+  'path',
+  'circle',
+  'rect',
+  'line',
+  'polyline',
+  'polygon',
+  'stop',
+]);
 const RAW = new Set(['script', 'style', 'textarea', 'title']);
 
 function parseAttrs(raw) {
@@ -145,7 +217,8 @@ function parseAttrs(raw) {
 function parse(html) {
   const top = { tag: '#root', children: [], attrs: {} };
   const stack = [top];
-  const re = /<!--[\s\S]*?-->|<![^>]*>|<\/([a-zA-Z][\w:-]*)\s*>|<([a-zA-Z][\w:-]*)((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
+  const re =
+    /<!--[\s\S]*?-->|<![^>]*>|<\/([a-zA-Z][\w:-]*)\s*>|<([a-zA-Z][\w:-]*)((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
   let last = 0;
   let m;
   const text = (s) => s.trim() && stack.at(-1).children.push({ tag: '#text', text: decode(s) });
@@ -160,7 +233,15 @@ function parse(html) {
       continue;
     }
     const tag = m[2].toLowerCase();
-    const node = { tag, attrs: parseAttrs(m[3]), attrsRaw: m[3], start: m.index, openEnd: re.lastIndex, selfClose: m[4] === '/', children: [] };
+    const node = {
+      tag,
+      attrs: parseAttrs(m[3]),
+      attrsRaw: m[3],
+      start: m.index,
+      openEnd: re.lastIndex,
+      selfClose: m[4] === '/',
+      children: [],
+    };
     stack.at(-1).children.push(node);
     if (RAW.has(tag)) {
       const close = html.toLowerCase().indexOf(`</${tag}`, re.lastIndex);
@@ -207,15 +288,23 @@ function resolveElement(n, map) {
   const parts = chunks(n);
   const full = norm(parts.join(' '));
   const label = parts.join(' ').trim() || n.attrs.title || n.attrs['aria-label'] || '';
-  const tries = [full, full.replace(/\s\d+$/, ''), norm(n.attrs.title), norm(n.attrs['aria-label'])];
+  const tries = [
+    full,
+    full.replace(/\s\d+$/, ''),
+    norm(n.attrs.title),
+    norm(n.attrs['aria-label']),
+  ];
   if (n.tag !== 'tr' && full.length <= 120) tries.push(...parts.map(norm));
   for (const t of tries) if (t && map.has(t)) return { label, hit: map.get(t) };
   if (full.length <= 400) {
     for (const [key, hit] of map) {
-      if (key.startsWith('row:') && ` ${full} `.includes(` ${key.slice(4)} `)) return { label, hit };
+      if (key.startsWith('row:') && ` ${full} `.includes(` ${key.slice(4)} `))
+        return { label, hit };
     }
   }
-  if (full.length <= 3) for (const i of icons(n)) if (map.has(`icon:${i}`)) return { label: label || i, hit: map.get(`icon:${i}`) };
+  if (full.length <= 3)
+    for (const i of icons(n))
+      if (map.has(`icon:${i}`)) return { label: label || i, hit: map.get(`icon:${i}`) };
   return { label, hit: null };
 }
 
@@ -223,7 +312,8 @@ function rewriteHtml(page, html) {
   const map = linkMap(page);
   const tree = parse(html);
   const ids = new Set([...html.matchAll(/\sid\s*=\s*["']([^"']+)["']/g)].map((m) => m[1]));
-  const deadHref = (href) => !href || href === '#' || (href.startsWith('#') && !ids.has(href.slice(1)));
+  const deadHref = (href) =>
+    !href || href === '#' || (href.startsWith('#') && !ids.has(href.slice(1)));
   const edits = [];
   const report = { linked: [], missing: [] };
   for (const n of walk(tree)) {
@@ -232,7 +322,10 @@ function rewriteHtml(page, html) {
     if (ignored.has(norm(label))) continue;
     let extra = null;
     if (hit) {
-      extra = n.tag === 'a' ? `href="${esc(targetHref(hit))}" target="_top"` : `data-bf-href="${esc(targetHref(hit))}"`;
+      extra =
+        n.tag === 'a'
+          ? `href="${esc(targetHref(hit))}" target="_top"`
+          : `data-bf-href="${esc(targetHref(hit))}"`;
       extra += hit.to ? ` data-bf-to="${hit.to}"` : ` data-bf-missing="${esc(hit.label)}"`;
       report.linked.push(`${label.slice(0, 50)} -> ${hit.to ?? 'not designed yet'}`);
     } else if (n.tag === 'a' && deadHref(n.attrs.href)) {
@@ -243,8 +336,15 @@ function rewriteHtml(page, html) {
       report.missing.push(`${n.tag}: ${label.slice(0, 50)}`);
     }
     if (!extra) continue;
-    const attrs = n.tag === 'a' ? n.attrsRaw.replace(/\s+(href|target)\s*=\s*("[^"]*"|'[^']*'|[^\s"'>]+)/gi, '') : n.attrsRaw;
-    edits.push({ start: n.start, end: n.openEnd, text: `<${n.tag}${attrs.replace(/\s*$/, '')} ${extra}${n.selfClose ? '/' : ''}>` });
+    const attrs =
+      n.tag === 'a'
+        ? n.attrsRaw.replace(/\s+(href|target)\s*=\s*("[^"]*"|'[^']*'|[^\s"'>]+)/gi, '')
+        : n.attrsRaw;
+    edits.push({
+      start: n.start,
+      end: n.openEnd,
+      text: `<${n.tag}${attrs.replace(/\s*$/, '')} ${extra}${n.selfClose ? '/' : ''}>`,
+    });
   }
   edits.sort((a, b) => b.start - a.start);
   let out = html;
@@ -271,7 +371,8 @@ function ocrHotspots(page, map) {
     const lineKey = flat.map((w) => w.t).join(' ');
     // Icon glyphs often come back as a short leading token ("2 Approval inbox", "Il Reports"); badges as a trailing number.
     const keys = [lineKey, lineKey.replace(/\s\d+$/, '')];
-    if (flat.length > 1 && flat[0].t.length <= 2) keys.push(...keys.map((k) => k.slice(k.indexOf(' ') + 1)));
+    if (flat.length > 1 && flat[0].t.length <= 2)
+      keys.push(...keys.map((k) => k.slice(k.indexOf(' ') + 1)));
     const whole = keys.map((k) => map.get(k)).find(Boolean);
     if (whole) {
       found.push({ hit: whole, box: line.box });
@@ -280,7 +381,9 @@ function ocrHotspots(page, map) {
     // Labels inside a longer line: breadcrumb segments ("Home / Budgets") and row labels ("row:" keys).
     const crumb = /\s[/›>]\s/.test(line.text);
     const used = new Set();
-    const keysLongestFirst = [...map.keys()].sort((a, b) => b.split(' ').length - a.split(' ').length);
+    const keysLongestFirst = [...map.keys()].sort(
+      (a, b) => b.split(' ').length - a.split(' ').length,
+    );
     for (const key of keysLongestFirst) {
       const hit = map.get(key);
       const row = key.startsWith('row:');
@@ -292,7 +395,15 @@ function ocrHotspots(page, map) {
           const bs = flat.slice(i, i + want.length).map((w) => w.box);
           const x = Math.min(...bs.map((b) => b[0]));
           const y = Math.min(...bs.map((b) => b[1]));
-          found.push({ hit, box: [x, y, Math.max(...bs.map((b) => b[0] + b[2])) - x, Math.max(...bs.map((b) => b[1] + b[3])) - y] });
+          found.push({
+            hit,
+            box: [
+              x,
+              y,
+              Math.max(...bs.map((b) => b[0] + b[2])) - x,
+              Math.max(...bs.map((b) => b[1] + b[3])) - y,
+            ],
+          });
           break;
         }
       }
@@ -309,11 +420,23 @@ function imagePage(page) {
   const pad = 10;
   for (const s of ocrHotspots(page, map)) {
     const [x, y, w, h] = s.box;
-    spots.push({ hit: s.hit, x: Math.max(0, x - pad), y: Math.max(0, y - pad), w: w + 2 * pad, h: h + 2 * pad });
+    spots.push({
+      hit: s.hit,
+      x: Math.max(0, x - pad),
+      y: Math.max(0, y - pad),
+      w: w + 2 * pad,
+      h: h + 2 * pad,
+    });
   }
   for (const extra of links.hotspots?.[`${page.screen.id}/${page.state}`] ?? []) {
     const [x, y, w, h] = extra.box.map((v) => v * scale);
-    spots.push({ hit: { label: extra.label, to: ref(extra.to, `hotspots["${page.screen.id}/${page.state}"]`) }, x, y, w, h });
+    spots.push({
+      hit: { label: extra.label, to: ref(extra.to, `hotspots["${page.screen.id}/${page.state}"]`) },
+      x,
+      y,
+      w,
+      h,
+    });
   }
   const uniq = new Map();
   for (const s of spots) uniq.set(`${Math.round(s.x / 8)}:${Math.round(s.y / 8)}:${s.hit.to}`, s);
@@ -342,7 +465,13 @@ ${anchors}
 </body>
 </html>
 `;
-  return { out, report: { linked: [...uniq.values()].map((s) => `${s.hit.label} -> ${s.hit.to ?? 'not designed yet'}`), missing: [] } };
+  return {
+    out,
+    report: {
+      linked: [...uniq.values()].map((s) => `${s.hit.label} -> ${s.hit.to ?? 'not designed yet'}`),
+      missing: [],
+    },
+  };
 }
 
 // ---------- shell page (navigation bar + frame) ----------
@@ -365,7 +494,13 @@ ${pageScript(page)}
 
 function pageScript(page) {
   const j = journey.indexOf(page.id);
-  const step = (id) => (id ? { href: pageHref(id), title: `${pageById.get(id).screen.number} ${pageById.get(id).screen.title} (${pageById.get(id).stateLabel})` } : null);
+  const step = (id) =>
+    id
+      ? {
+          href: pageHref(id),
+          title: `${pageById.get(id).screen.number} ${pageById.get(id).screen.title} (${pageById.get(id).stateLabel})`,
+        }
+      : null;
   const resume = journey.find((id) => pageById.get(id).screen.id === page.screen.id) ?? journey[0];
   const data = {
     id: page.id,
@@ -374,7 +509,11 @@ function pageScript(page) {
     state: page.state,
     stateLabel: page.stateLabel,
     mode: page.mode,
-    states: page.screen.states.map((s) => ({ label: links.stateLabels?.[s.state] ?? sentence(s.state), href: pageHref(`${page.screen.id}--${s.state}`), current: s.state === page.state })),
+    states: page.screen.states.map((s) => ({
+      label: links.stateLabels?.[s.state] ?? sentence(s.state),
+      href: pageHref(`${page.screen.id}--${s.state}`),
+      current: s.state === page.state,
+    })),
     step: j >= 0 ? j + 1 : null,
     steps: journey.length,
     prev: j > 0 ? step(journey[j - 1]) : null,
@@ -387,7 +526,10 @@ function pageScript(page) {
 
 // ---------- index ----------
 function indexPage() {
-  const areas = (links.areas ?? []).map((a) => ({ ...a, screens: a.screens.filter((id) => screens.some((s) => s.id === id)) }));
+  const areas = (links.areas ?? []).map((a) => ({
+    ...a,
+    screens: a.screens.filter((id) => screens.some((s) => s.id === id)),
+  }));
   const listed = new Set(areas.flatMap((a) => a.screens));
   const rest = screens.filter((s) => !listed.has(s.id)).map((s) => s.id);
   if (rest.length) areas.push({ name: 'Other screens', screens: rest });
@@ -408,8 +550,21 @@ ${inFlow ? '<span class="flow">In the guided flow</span>' : ''}
 <div class="chips">${chips}</div></div>
 </article>`;
   };
-  const sections = areas.map((a) => `<section><h2>${esc(a.name)}</h2><div class="grid">${a.screens.map(card).join('\n')}</div></section>`).join('\n');
-  const placeholders = [...new Set(Object.entries(links.links ?? {}).flatMap(([, m]) => Object.entries(m).filter(([, t]) => t === null).map(([l]) => l.replace(/^row:/, ''))))].sort();
+  const sections = areas
+    .map(
+      (a) =>
+        `<section><h2>${esc(a.name)}</h2><div class="grid">${a.screens.map(card).join('\n')}</div></section>`,
+    )
+    .join('\n');
+  const placeholders = [
+    ...new Set(
+      Object.entries(links.links ?? {}).flatMap(([, m]) =>
+        Object.entries(m)
+          .filter(([, t]) => t === null)
+          .map(([l]) => l.replace(/^row:/, '')),
+      ),
+    ),
+  ].sort();
   const htmlCount = pages.filter((p) => p.mode === 'html').length;
   return `<!DOCTYPE html>
 <html lang="en">
@@ -464,46 +619,68 @@ function thumb(src, dest) {
 function build() {
   const out = resolve(opt('--out', join(here, 'dist')));
   rmSync(out, { recursive: true, force: true });
-  for (const d of ['screens', 'frames', 'images', 'thumbs', 'assets']) mkdirSync(join(out, d), { recursive: true });
-  for (const f of readdirSync(join(here, 'assets'))) copyFileSync(join(here, 'assets', f), join(out, 'assets', f));
+  for (const d of ['screens', 'frames', 'images', 'thumbs', 'assets'])
+    mkdirSync(join(out, d), { recursive: true });
+  for (const f of readdirSync(join(here, 'assets')))
+    copyFileSync(join(here, 'assets', f), join(out, 'assets', f));
   const summary = [];
   for (const page of pages) {
-    const result = page.mode === 'html' ? rewriteHtml(page, readFileSync(page.html, 'utf8')) : imagePage(page);
+    const result =
+      page.mode === 'html' ? rewriteHtml(page, readFileSync(page.html, 'utf8')) : imagePage(page);
     if (page.mode === 'image') copyFileSync(page.png, join(out, 'images', `${page.id}.png`));
     writeFileSync(join(out, 'frames', `${page.id}.html`), result.out);
     writeFileSync(join(out, 'screens', `${page.id}.html`), shellPage(page));
     thumb(page.png, join(out, 'thumbs', `${page.id}.png`));
-    summary.push({ page: page.id, mode: page.mode, linked: result.report.linked.length, notDesigned: result.report.missing.length });
+    summary.push({
+      page: page.id,
+      mode: page.mode,
+      linked: result.report.linked.length,
+      notDesigned: result.report.missing.length,
+    });
   }
   writeFileSync(join(out, 'index.html'), indexPage());
   writeFileSync(join(out, '.nojekyll'), '');
   writeFileSync(join(out, 'pages.json'), JSON.stringify(summary, null, 2));
   const images = pages.filter((p) => p.mode === 'image');
   const noOcr = images.filter((p) => !p.ocr).map((p) => p.id);
-  console.log(`design-preview: built ${pages.length} pages (${pages.length - images.length} HTML, ${images.length} image) into ${out}`);
-  if (noOcr.length) console.log(`design-preview: no OCR yet (only links.json hotspots): ${noOcr.join(', ')}`);
+  console.log(
+    `design-preview: built ${pages.length} pages (${pages.length - images.length} HTML, ${images.length} image) into ${out}`,
+  );
+  if (noOcr.length)
+    console.log(`design-preview: no OCR yet (only links.json hotspots): ${noOcr.join(', ')}`);
 }
 
 function importHtml() {
   const from = opt('--from');
   const screenId = opt('--screen');
   const state = opt('--state');
-  if (!from || !screenId || !state) die('usage: build.mjs import --from <file> --screen <NNN-slug> --state <state>');
-  if (!pageById.has(`${screenId}--${state}`)) die(`no exported state ${screenId}/${state} in design/stitch (check meta.json)`);
+  if (!from || !screenId || !state)
+    die('usage: build.mjs import --from <file> --screen <NNN-slug> --state <state>');
+  if (!pageById.has(`${screenId}--${state}`))
+    die(`no exported state ${screenId}/${state} in design/stitch (check meta.json)`);
   let html = readFileSync(from, 'utf8');
-  if (html.trimStart().startsWith('{')) html = JSON.parse(html).html ?? die(`${from} has no "html" field`);
+  if (html.trimStart().startsWith('{'))
+    html = JSON.parse(html).html ?? die(`${from} has no "html" field`);
   if (!/<html[\s>]/i.test(html)) die(`${from} does not look like HTML`);
   mkdirSync(join(htmlDir, screenId), { recursive: true });
   writeFileSync(join(htmlDir, screenId, `${state}.html`), html);
-  console.log(`design-preview: saved design/preview/html/${screenId}/${state}.html (${html.length} bytes)`);
+  console.log(
+    `design-preview: saved design/preview/html/${screenId}/${state}.html (${html.length} bytes)`,
+  );
 }
 
 function report() {
   const lines = [];
   for (const page of pages) {
-    const result = page.mode === 'html' ? rewriteHtml(page, readFileSync(page.html, 'utf8')) : imagePage(page);
-    lines.push(`## ${page.id} [${page.mode}${page.mode === 'image' && !page.ocr ? ', no OCR' : ''}]`);
-    lines.push(...result.report.linked.map((l) => `  + ${l}`), ...result.report.missing.map((l) => `  - ${l}`));
+    const result =
+      page.mode === 'html' ? rewriteHtml(page, readFileSync(page.html, 'utf8')) : imagePage(page);
+    lines.push(
+      `## ${page.id} [${page.mode}${page.mode === 'image' && !page.ocr ? ', no OCR' : ''}]`,
+    );
+    lines.push(
+      ...result.report.linked.map((l) => `  + ${l}`),
+      ...result.report.missing.map((l) => `  - ${l}`),
+    );
   }
   const file = opt('--out');
   if (file) writeFileSync(file, lines.join('\n') + '\n');

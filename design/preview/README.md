@@ -9,14 +9,14 @@ Every exported screen state is one page. Sidebar items, header links, primary bu
 
 ## How it is built
 
-| File | Purpose |
-| --- | --- |
-| `build.mjs` | Builds `dist/` (gitignored): `index.html`, `screens/<NNN-slug>--<state>.html` (navigation bar around an iframe), `frames/` (the design itself), thumbnails, assets |
-| `links.json` | Guided flow (`journey`), index areas, titles, the label-to-screen link map and extra hotspots |
-| `html/<NNN-slug>/<state>.html` | Stitch HTML saved through the Stitch MCP, kept as exported (Tailwind CDN included) |
-| `ocr/<NNN-slug>--<state>.json` | Text positions for states without saved HTML (written by `ocr.swift`, macOS Vision) |
-| `assets/` | Navigation bar (`overlay.js`, `shell.css`), link routing inside frames (`frame.js`, `overlay.css`), index styles |
-| `deploy.sh` | Builds and publishes only `dist/` to the `gh-pages` branch, then enables Pages |
+| File                           | Purpose                                                                                                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `build.mjs`                    | Builds `dist/` (gitignored): `index.html`, `screens/<NNN-slug>--<state>.html` (navigation bar around an iframe), `frames/` (the design itself), thumbnails, assets |
+| `links.json`                   | Guided flow (`journey`), index areas, titles, the label-to-screen link map and extra hotspots                                                                      |
+| `html/<NNN-slug>/<state>.html` | Stitch HTML saved through the Stitch MCP, kept as exported (Tailwind CDN included)                                                                                 |
+| `ocr/<NNN-slug>--<state>.json` | Text positions for states without saved HTML (written by `ocr.swift`, macOS Vision)                                                                                |
+| `assets/`                      | Navigation bar (`overlay.js`, `shell.css`), link routing inside frames (`frame.js`, `overlay.css`), index styles                                                   |
+| `deploy.sh`                    | Builds and publishes only `dist/` to the `gh-pages` branch, then enables Pages                                                                                     |
 
 A state with saved HTML is served as that HTML with its links rewritten by visible text. Any other state is served as its exported PNG with hotspots on the labels `links.json` knows about, placed from the OCR positions.
 
