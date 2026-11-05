@@ -401,7 +401,8 @@ export class ChannelsService {
             gte(notifications.createdAt, archiveCutoff),
           ),
         )
-        .orderBy(desc(notifications.createdAt))
+        // Id breaks ties so notifications created in the same transaction keep a stable order.
+        .orderBy(desc(notifications.createdAt), desc(notifications.id))
         .limit(200);
 
       const tasks = await this.deriveTasks(tx, actor);
@@ -2635,10 +2636,15 @@ export class ChannelsService {
           .select()
           .from(budgets)
           .where(ne(budgets.status, 'cancelled'))
-          .orderBy(asc(budgets.path));
-        const scoped = allRows.filter(
-          (b) => this.policy.can(actor, 'budget.read', budgetResourceOf(b)).allowed,
-        );
+          .orderBy(asc(budgets.createdAt), asc(budgets.path));
+        const scoped = allRows
+          .filter((b) => this.policy.can(actor, 'budget.read', budgetResourceOf(b)).allowed)
+          .sort(
+            (a, b) =>
+              Number(b.ownerPersonId === actor.personId) -
+                Number(a.ownerPersonId === actor.personId) ||
+              a.createdAt.getTime() - b.createdAt.getTime(),
+          );
         const query = body.budgetQuery?.trim().toLowerCase() ?? '';
         let matched = scoped;
         if (query) {
@@ -2678,7 +2684,7 @@ export class ChannelsService {
           };
         }
 
-        const details = await this.budgetViews.details(tx, actor, matched.slice(0, 6));
+        const details = await this.budgetViews.details(tx, actor, matched.slice(0, 20));
         const lines = details.map((d) => {
           const b = d.balances.budgetCurrency;
           const avail = d.balances.available;

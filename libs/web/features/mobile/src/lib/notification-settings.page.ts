@@ -518,6 +518,8 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
   `,
   styles: `
     .bf-settings__channel-row {
+      /* .bf-list__item is content-box with 20px side padding, so 100% width would overrun the card. */
+      box-sizing: border-box;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -566,7 +568,8 @@ export class NotificationSettingsPage {
     this.failure.set('');
     try {
       await call();
-      this.snack.open(message, undefined, { duration: 3000 });
+      // An empty message means the call already showed its own confirmation.
+      if (message) this.snack.open(message, undefined, { duration: 3000 });
       this.settings.reload();
     } catch (e) {
       this.failure.set(errorMessage(e));

@@ -49,7 +49,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    { name: 'setup', testMatch: /auth\.setup\.ts/, workers: 2 },
     {
       name: 'desktop',
       dependencies: ['setup'],
@@ -72,7 +72,8 @@ export default defineConfig({
       name: 'visual-light',
       dependencies: ['setup'],
       testMatch: /visual\/.*\.spec\.ts/,
-      use: { colorScheme: 'light' },
+      workers: 2,
+      use: { colorScheme: 'light', trace: 'off' },
     },
   ],
 });

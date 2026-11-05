@@ -14,6 +14,9 @@ export const usdText = (minor: number) =>
 export const suffix = () => randomUUID().slice(0, 6);
 export const desktopOnly = (name: string) =>
   name === 'desktop' ? undefined : 'mutating journey runs once, on desktop';
+/** Phone-only journeys (the `/m/*` app) run once, on the emulated phone with touch. */
+export const mobileOnly = (name: string) =>
+  name === 'mobile' ? undefined : 'phone journey runs once, on the mobile project';
 
 interface Detail {
   id: string;

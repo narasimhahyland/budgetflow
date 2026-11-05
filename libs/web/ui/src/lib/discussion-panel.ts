@@ -103,6 +103,12 @@ import { DateTimePipe } from './date-time';
             Follow
           </button>
         }
+      } @else {
+        <!-- Keeps the bar at its final height while the thread loads, so the page never shifts. -->
+        <button mat-stroked-button type="button" disabled>
+          <mat-icon svgIcon="bell" aria-hidden="true" />
+          Follow
+        </button>
       }
     </div>
 
@@ -334,7 +340,7 @@ import { DateTimePipe } from './date-time';
   `,
   styles: `
     .bf-disc-bar {
-      display: inline-flex;
+      display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 8px;

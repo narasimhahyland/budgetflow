@@ -385,7 +385,6 @@ const REASONS = [
               @if (d.allowedDecisions.includes('approve')) {
                 <button
                   mat-flat-button
-                  satImportantButton
                   type="button"
                   [disabled]="busy() || offline() || !!d.impact?.blocked || d.task.onHold"
                   (click)="approve(d.task.taskId, d.task.ref)"

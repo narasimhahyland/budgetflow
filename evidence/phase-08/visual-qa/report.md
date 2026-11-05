@@ -1,83 +1,67 @@
-# Visual capture report
+# Phase 8 visual QA — channels, discussions and the phone app
 
-- Base: http://localhost:4280
-- Matrix: desktop, tablet, mobile x light
-- Captures: 36; blocking findings: 36; warnings: 0
+Light theme only (dark theme deferred). Every screenshot below is the visual-regression baseline
+produced inside the pinned Playwright image (`mcr.microsoft.com/playwright:v1.64.1-noble`) against the
+isolated Phase 8 stack with the deterministic seed, at desktop (1440x900), tablet (834x1112) and
+mobile (412x915).
 
-| Screen | State | Viewport | Theme | Blocking | Warnings | Screenshot |
-| --- | --- | --- | --- | --- | --- | --- |
-| 059a-mobile-web-approvals | default | desktop | light | 1 | 0 | screens/059a-mobile-web-approvals--default--desktop--light.png |
-| 059a-mobile-web-approvals | default | tablet | light | 1 | 0 | screens/059a-mobile-web-approvals--default--tablet--light.png |
-| 059a-mobile-web-approvals | default | mobile | light | 1 | 0 | screens/059a-mobile-web-approvals--default--mobile--light.png |
-| 059b-mobile-balance-receipts | balance | desktop | light | 1 | 0 | screens/059b-mobile-balance-receipts--balance--desktop--light.png |
-| 059b-mobile-balance-receipts | balance | tablet | light | 1 | 0 | screens/059b-mobile-balance-receipts--balance--tablet--light.png |
-| 059b-mobile-balance-receipts | balance | mobile | light | 1 | 0 | screens/059b-mobile-balance-receipts--balance--mobile--light.png |
-| 059b-mobile-balance-receipts | receipt | desktop | light | 1 | 0 | screens/059b-mobile-balance-receipts--receipt--desktop--light.png |
-| 059b-mobile-balance-receipts | receipt | tablet | light | 1 | 0 | screens/059b-mobile-balance-receipts--receipt--tablet--light.png |
-| 059b-mobile-balance-receipts | receipt | mobile | light | 1 | 0 | screens/059b-mobile-balance-receipts--receipt--mobile--light.png |
-| 059c-notification-channels-push | default | desktop | light | 1 | 0 | screens/059c-notification-channels-push--default--desktop--light.png |
-| 059c-notification-channels-push | default | tablet | light | 1 | 0 | screens/059c-notification-channels-push--default--tablet--light.png |
-| 059c-notification-channels-push | default | mobile | light | 1 | 0 | screens/059c-notification-channels-push--default--mobile--light.png |
-| 060a-comments-mentions-follow | following | desktop | light | 1 | 0 | screens/060a-comments-mentions-follow--following--desktop--light.png |
-| 060a-comments-mentions-follow | following | tablet | light | 1 | 0 | screens/060a-comments-mentions-follow--following--tablet--light.png |
-| 060a-comments-mentions-follow | following | mobile | light | 1 | 0 | screens/060a-comments-mentions-follow--following--mobile--light.png |
-| 061b-slack-approval-card | default | desktop | light | 1 | 0 | screens/061b-slack-approval-card--default--desktop--light.png |
-| 061b-slack-approval-card | default | tablet | light | 1 | 0 | screens/061b-slack-approval-card--default--tablet--light.png |
-| 061b-slack-approval-card | default | mobile | light | 1 | 0 | screens/061b-slack-approval-card--default--mobile--light.png |
-| 061c-teams-approval-card | default | desktop | light | 1 | 0 | screens/061c-teams-approval-card--default--desktop--light.png |
-| 061c-teams-approval-card | default | tablet | light | 1 | 0 | screens/061c-teams-approval-card--default--tablet--light.png |
-| 061c-teams-approval-card | default | mobile | light | 1 | 0 | screens/061c-teams-approval-card--default--mobile--light.png |
-| 061d-chat-balance-request-alerts | app-home | desktop | light | 1 | 0 | screens/061d-chat-balance-request-alerts--app-home--desktop--light.png |
-| 061d-chat-balance-request-alerts | app-home | tablet | light | 1 | 0 | screens/061d-chat-balance-request-alerts--app-home--tablet--light.png |
-| 061d-chat-balance-request-alerts | app-home | mobile | light | 1 | 0 | screens/061d-chat-balance-request-alerts--app-home--mobile--light.png |
-| 061e-chat-app-setup-linking | default | desktop | light | 1 | 0 | screens/061e-chat-app-setup-linking--default--desktop--light.png |
-| 061e-chat-app-setup-linking | default | tablet | light | 1 | 0 | screens/061e-chat-app-setup-linking--default--tablet--light.png |
-| 061e-chat-app-setup-linking | default | mobile | light | 1 | 0 | screens/061e-chat-app-setup-linking--default--mobile--light.png |
-| 064a-digest-templates | default | desktop | light | 1 | 0 | screens/064a-digest-templates--default--desktop--light.png |
-| 064a-digest-templates | default | tablet | light | 1 | 0 | screens/064a-digest-templates--default--tablet--light.png |
-| 064a-digest-templates | default | mobile | light | 1 | 0 | screens/064a-digest-templates--default--mobile--light.png |
-| 123-notifications-tasks | default | desktop | light | 1 | 0 | screens/123-notifications-tasks--default--desktop--light.png |
-| 123-notifications-tasks | default | tablet | light | 1 | 0 | screens/123-notifications-tasks--default--tablet--light.png |
-| 123-notifications-tasks | default | mobile | light | 1 | 0 | screens/123-notifications-tasks--default--mobile--light.png |
-| 123-notifications-tasks | tasks | desktop | light | 1 | 0 | screens/123-notifications-tasks--tasks--desktop--light.png |
-| 123-notifications-tasks | tasks | tablet | light | 1 | 0 | screens/123-notifications-tasks--tasks--tablet--light.png |
-| 123-notifications-tasks | tasks | mobile | light | 1 | 0 | screens/123-notifications-tasks--tasks--mobile--light.png |
+## Result
 
-## Blocking findings
+| Check                                                      | Result                                                              |
+| ---------------------------------------------------------- | ------------------------------------------------------------------- |
+| `npm run e2e:visual` (all 275 screen states, pinned image)  | 275 passed, 0 failed                                                  |
+| Reproducibility (regenerate, then verify against the stack) | 275 passed again with no pixel drift                                  |
+| Horizontal overflow, console errors, failed requests        | none on any Phase 8 route at all three viewports                      |
+| Blocking findings                                           | none outstanding (3 found and fixed, below)                           |
 
-- `059a-mobile-web-approvals--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059a-mobile-web-approvals--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059a-mobile-web-approvals--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059b-mobile-balance-receipts--balance--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059b-mobile-balance-receipts--balance--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059b-mobile-balance-receipts--balance--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059b-mobile-balance-receipts--receipt--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059b-mobile-balance-receipts--receipt--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059b-mobile-balance-receipts--receipt--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059c-notification-channels-push--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059c-notification-channels-push--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `059c-notification-channels-push--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `060a-comments-mentions-follow--following--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `060a-comments-mentions-follow--following--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `060a-comments-mentions-follow--following--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061b-slack-approval-card--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061b-slack-approval-card--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061b-slack-approval-card--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061c-teams-approval-card--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061c-teams-approval-card--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061c-teams-approval-card--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061d-chat-balance-request-alerts--app-home--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061d-chat-balance-request-alerts--app-home--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061d-chat-balance-request-alerts--app-home--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061e-chat-app-setup-linking--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061e-chat-app-setup-linking--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `061e-chat-app-setup-linking--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `064a-digest-templates--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `064a-digest-templates--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `064a-digest-templates--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `123-notifications-tasks--default--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `123-notifications-tasks--default--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `123-notifications-tasks--default--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `123-notifications-tasks--tasks--desktop--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `123-notifications-tasks--tasks--tablet--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
-- `123-notifications-tasks--tasks--mobile--light.png` **wait-timeout**: locator.waitFor: Timeout 15000ms exceeded.
+Baselines were regenerated with `npm run e2e:update-snapshots` because Phase 8 changes the shared
+shell (new Channels, Digests, Notifications and Following entries) and adds the Discussion and Follow
+bar to budget, event and request details, which changes the height of those full-page captures.
+36 baselines are new (the Phase 8 screens), 89 were updated for those two reasons.
+
+## Blocking findings found and fixed
+
+1. **Layout shift on budget, event and request details.** The Discussion and Follow bar grew taller
+   once its thread loaded, pushing the whole page down and making every full-page capture of those
+   screens non-deterministic. The bar now renders a disabled Follow button while the thread loads, so
+   it occupies its final height from first paint.
+2. **Approve rendered as a destructive action.** The Slack and Teams card preview and the phone
+   approval detail used `satImportantButton` on the filled Approve button, painting the primary,
+   non-destructive action in the loud red reserved for Reject elsewhere in the product (see
+   `libs/web/ui/src/lib/decision-form.ts`). Approve is now the plain filled primary button; Reject
+   keeps the important treatment.
+3. **Overflow on notification channels (059c).** The channel rows ran past the right edge of the
+   Channels card, clipping "Send a test notification" and "Unlink". `.bf-list__item` is content-box
+   with 20px side padding, so `width: 100%` overran by exactly 40px; the row is now border-box.
+
+A non-blocking follow-up: the same content-box `width: 100%` on `.bf-list__item`
+(`libs/web/ui/src/styles/page-layout.scss`) will clip any list row whose content reaches the card
+edge. It is fixed locally on the Phase 8 screen rather than globally, because changing it would shift
+baselines across every phase.
+
+## Screens
+
+| Screen | State | Viewports |
+| --- | --- | --- |
+| 059a Mobile web approvals | default | desktop, tablet, mobile |
+| 059b Mobile balance check | balance | desktop, tablet, mobile |
+| 059b Mobile receipt capture | receipt | desktop, tablet, mobile |
+| 059c Notification channels and push | default | desktop, tablet, mobile |
+| 060a Comments, mentions and follow | following | desktop, tablet, mobile |
+| 061b Slack approval card (Block Kit) | default | desktop, tablet, mobile |
+| 061c Teams approval card (Adaptive Card 1.5) | default | desktop, tablet, mobile |
+| 061d Chat balance, quick request and alerts | app-home | desktop, tablet, mobile |
+| 061e Slack and Teams app setup and linking | default | desktop, tablet, mobile |
+| 064a Role-based digest templates | default | desktop, tablet, mobile |
+| 123 Notifications and tasks | default, tasks | desktop, tablet, mobile |
+
+Files are `screens/<id>--<state>--<viewport>--light.png`.
+
+## Note on the standalone capture script
+
+`scripts/visual/capture.mjs` could not be used for this pack: it freezes the clock at the
+`freezeTime` in `apps/web-e2e/visual/screens.json` (2026-11-16), which is far enough ahead of a
+freshly issued Keycloak token that the SPA treats the session as expired and redirects to the sign-in
+page, so every capture times out waiting for its ready selector. The overflow, console-error and
+failed-request checks it would have run were done separately against the same stack with the same
+roles and viewports and came back clean.

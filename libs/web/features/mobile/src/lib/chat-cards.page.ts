@@ -232,7 +232,6 @@ const REASONS = [
             @if (c.canApprove) {
               <button
                 mat-flat-button
-                satImportantButton
                 type="button"
                 [disabled]="busy()"
                 (click)="decideFromCard(c, 'approve')"

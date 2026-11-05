@@ -13,25 +13,30 @@ import {
   desktopOnly,
   directorTree,
   getRequest,
+  mobileOnly,
   pageAs,
   spendingRequest,
   taskOf,
 } from '../spend/api';
 
-test.describe('mobile web approvals, balance check and receipts (059a, 059b)', () => {
+test.describe('mobile web approvals, balance check, receipts and alerts (059a, 059b)', () => {
   test.use({ storageState: authFile('department-head') });
 
-  test('approver decides a request from the mobile web app (/m/approvals) at 412px width', async ({
+  test('an approver works the whole phone app: waiting list, decision, balance, receipt and alerts', async ({
     page,
     browser,
   }, info) => {
-    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.skip(!!mobileOnly(info.project.name), mobileOnly(info.project.name));
     test.slow();
-    await page.setViewportSize({ width: 412, height: 915 });
 
     const { team } = await directorTree();
     const r = await spendingRequest(team.id, 140_000);
     const taskId = await taskOf(r.id, 'department-head', 'requests');
+
+    // The waiting list is the phone entry point and carries the tab bar on every screen.
+    await page.goto('/m/approvals');
+    await expect(page.getByTestId('mobile-approval-cards')).toBeVisible();
+    await expect(page.locator('bf-mobile-tab-bar')).toBeVisible();
 
     await page.goto(`/m/approvals/${taskId}`);
     await expect(page.getByTestId('mobile-approval-detail')).toBeVisible();
@@ -55,6 +60,11 @@ test.describe('mobile web approvals, balance check and receipts (059a, 059b)', (
     await page.goto('/m/balance');
     await expect(page.getByRole('heading', { name: 'Mobile balance check' })).toBeVisible();
     await expect(page.getByText("Available under this budget's rules").first()).toBeVisible();
+
+    // Alerts are the same feed, reachable from the phone tab bar.
+    await page.goto('/m/alerts');
+    await expect(page.getByTestId('notifications-list')).toBeVisible();
+    await expect(page.locator('bf-mobile-tab-bar')).toBeVisible();
 
     // Verify mobile receipt capture & offline queue simulation as requester
     const organizerPage = await pageAs(browser, 'event-organizer');
