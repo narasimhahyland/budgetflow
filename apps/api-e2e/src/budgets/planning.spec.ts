@@ -542,7 +542,7 @@ test.describe('budget rules: phasing, limits, settings, alerts', () => {
       async (db) =>
         (
           await db.query<{ payload: Record<string, unknown> }>(
-            `select payload from outbox_messages where topic = 'budget.threshold_crossed' and payload->>'budgetId' = $1`,
+            `select payload from outbox_messages where topic = 'budget.threshold_crossed' and payload->>'budgetId' = $1 order by created_at`,
             [c.id],
           )
         ).rows,

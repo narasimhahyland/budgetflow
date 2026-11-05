@@ -172,8 +172,10 @@
                     <span class="bf-cell-error">{{ err }}</span>
                   }
                 </td>
-                <td class="bf-num" [class.bf-good]="(deltaOf(r) ?? 0) > 0">
-                  @if ((deltaOf(r) ?? 0) !== 0) {
+                <td class="bf-num" [class.bf-good]="r.childId && (deltaOf(r) ?? 0) > 0">
+                  @if (!r.childId) {
+                    Draft, nothing allocated
+                  } @else if ((deltaOf(r) ?? 0) !== 0) {
                     {{ (deltaOf(r) ?? 0) > 0 ? '+' : ''
                     }}<bf-money [amountMinor]="deltaOf(r) ?? 0" [currency]="p.currency" />
                   } @else {
