@@ -264,7 +264,13 @@ export class BudgetsService {
     actor: RequestActor,
     req: CreateBudgetRequest,
     ctx: CommandContext,
-    options: { recordPlanLine?: boolean; skipPolicy?: boolean; reason?: string } = {},
+    options: {
+      recordPlanLine?: boolean;
+      skipPolicy?: boolean;
+      reason?: string;
+      /** `false` when the calling command writes the one audit entry itself. */
+      audit?: boolean;
+    } = {},
   ): Promise<string> {
     const id = ctx.fixedId ?? randomUUID();
     let parent: BudgetRow | undefined;
@@ -444,24 +450,25 @@ export class BudgetsService {
       if (options.recordPlanLine !== false)
         await this.recordPlanLine(tx, actor, row, req, journalId);
     }
-    await this.audit.append(tx, {
-      tenantId: actor.tenantId,
-      actorPersonId: actor.personId,
-      actorSubject: actor.subject,
-      action: 'budget.created',
-      resourceType: 'budget',
-      resourceId: id,
-      legalEntityId: entity.id,
-      requestId: ctx.requestId,
-      changes: {
-        name: { from: null, to: req.name },
-        parentId: { from: null, to: parent?.id ?? null },
-        currency: { from: null, to: currency },
-        status: { from: null, to: row.status },
-        ...(req.originalAmount ? { originalAmount: { from: null, to: req.originalAmount } } : {}),
-        ...(journalId ? { journalId: { from: null, to: journalId } } : {}),
-      },
-    });
+    if (options.audit !== false)
+      await this.audit.append(tx, {
+        tenantId: actor.tenantId,
+        actorPersonId: actor.personId,
+        actorSubject: actor.subject,
+        action: 'budget.created',
+        resourceType: 'budget',
+        resourceId: id,
+        legalEntityId: entity.id,
+        requestId: ctx.requestId,
+        changes: {
+          name: { from: null, to: req.name },
+          parentId: { from: null, to: parent?.id ?? null },
+          currency: { from: null, to: currency },
+          status: { from: null, to: row.status },
+          ...(req.originalAmount ? { originalAmount: { from: null, to: req.originalAmount } } : {}),
+          ...(journalId ? { journalId: { from: null, to: journalId } } : {}),
+        },
+      });
     await this.views.snapshot(tx, actor, id, options.reason ?? 'Created');
     return id;
   }
@@ -555,7 +562,8 @@ export class BudgetsService {
     },
     ctx: CommandContext,
     auditAction: string,
-    options: { skipPolicy?: boolean } = {},
+    /** `audit: false` when the calling command writes the one audit entry itself. */
+    options: { skipPolicy?: boolean; audit?: boolean } = {},
   ): Promise<string> {
     const found = await this.reads.budgetRows(tx, [parentId, req.childBudgetId]);
     const parentRow = found.get(parentId);
@@ -598,26 +606,27 @@ export class BudgetsService {
       requestId: ctx.requestId,
       idempotencyKey: ctx.idempotencyKey,
     });
-    await this.audit.append(tx, {
-      tenantId: actor.tenantId,
-      actorPersonId: actor.personId,
-      actorSubject: actor.subject,
-      action: auditAction,
-      resourceType: 'budget',
-      resourceId: parentId,
-      legalEntityId: parent.legalEntityId,
-      requestId: ctx.requestId,
-      reason: req.memo ?? null,
-      changes: {
-        childBudgetId: { from: null, to: child.id },
-        allocatedOut: {
-          from: balances.get(parentId)!.budget.allocated_out,
-          to: balances.get(parentId)!.budget.allocated_out + result.parentAmount.amountMinor,
+    if (options.audit !== false)
+      await this.audit.append(tx, {
+        tenantId: actor.tenantId,
+        actorPersonId: actor.personId,
+        actorSubject: actor.subject,
+        action: auditAction,
+        resourceType: 'budget',
+        resourceId: parentId,
+        legalEntityId: parent.legalEntityId,
+        requestId: ctx.requestId,
+        reason: req.memo ?? null,
+        changes: {
+          childBudgetId: { from: null, to: child.id },
+          allocatedOut: {
+            from: balances.get(parentId)!.budget.allocated_out,
+            to: balances.get(parentId)!.budget.allocated_out + result.parentAmount.amountMinor,
+          },
+          childAuthorizedDelta: { from: null, to: result.childAmount },
+          journalId: { from: null, to: journalId },
         },
-        childAuthorizedDelta: { from: null, to: result.childAmount },
-        journalId: { from: null, to: journalId },
-      },
-    });
+      });
     await this.views.snapshot(tx, actor, child.id, req.memo ?? 'Allocation received');
     await this.analytics.track(tx, actor, 'allocation.created', {
       depth: locked.get(req.childBudgetId)!.depth,

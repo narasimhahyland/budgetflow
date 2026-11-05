@@ -924,7 +924,8 @@ export class ControlsService {
     id: string,
     req: TransferRequest,
     ctx: CommandContext,
-    options: { skipPolicy: boolean; auditAction?: string },
+    /** `audit: false` when the calling command writes the one audit entry itself. */
+    options: { skipPolicy: boolean; audit?: boolean },
   ): Promise<TransferResult> {
     const source = await this.views.row(tx, id);
     const dest = (await this.reads.budgetRows(tx, [req.toBudgetId])).get(req.toBudgetId);
@@ -995,22 +996,23 @@ export class ControlsService {
       req,
       ctx,
     );
-    await this.audit.append(tx, {
-      tenantId: actor.tenantId,
-      actorPersonId: actor.personId,
-      actorSubject: actor.subject,
-      action: options.auditAction ?? 'budget.transferred',
-      resourceType: 'budget',
-      resourceId: source.id,
-      legalEntityId: source.legalEntityId,
-      requestId: ctx.requestId,
-      reason: `${req.reasonCode}: ${req.reason}`,
-      changes: {
-        toBudgetId: { from: null, to: dest.id },
-        amount: { from: null, to: { amountMinor: req.amountMinor, currency: source.currency } },
-        journalId: { from: null, to: journalId },
-      },
-    });
+    if (options.audit !== false)
+      await this.audit.append(tx, {
+        tenantId: actor.tenantId,
+        actorPersonId: actor.personId,
+        actorSubject: actor.subject,
+        action: 'budget.transferred',
+        resourceType: 'budget',
+        resourceId: source.id,
+        legalEntityId: source.legalEntityId,
+        requestId: ctx.requestId,
+        reason: `${req.reasonCode}: ${req.reason}`,
+        changes: {
+          toBudgetId: { from: null, to: dest.id },
+          amount: { from: null, to: { amountMinor: req.amountMinor, currency: source.currency } },
+          journalId: { from: null, to: journalId },
+        },
+      });
     await this.views.snapshot(tx, actor, source.id, `Transferred out: ${req.reason}`);
     await this.views.snapshot(tx, actor, dest.id, `Transferred in from ${source.name}`);
     await this.views.emitThresholds(tx, actor, before, [source.id]);

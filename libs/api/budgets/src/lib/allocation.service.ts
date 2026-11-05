@@ -160,6 +160,7 @@ export class AllocationService {
           .filter((l) => l.outcome === 'error')
           .map((l) => ({ path: `lines.${l.index}`, message: l.message ?? '' })),
       );
+    const audited: Record<string, unknown>[] = [];
     for (const [i, l] of req.lines.entries()) {
       let childId = l.childBudgetId;
       if (!childId) {
@@ -174,25 +175,47 @@ export class AllocationService {
             fiscalYearId: parent.fiscalYearId,
           },
           { ...ctx, fixedId: undefined },
-          { reason: 'Created in the allocation grid' },
+          { reason: 'Created in the allocation grid', audit: false },
         );
         lines[i].childBudgetId = childId;
       }
-      result.journalIds.push(
-        await this.budgetsService.allocateInTx(
-          tx,
-          actor,
-          parentId,
-          {
-            childBudgetId: childId,
-            amount: { amountMinor: l.amountMinor, currency: parent.currency },
-            memo: req.memo ?? 'Allocation grid',
-          },
-          ctx,
-          'budget.allocated',
-        ),
+      const journalId = await this.budgetsService.allocateInTx(
+        tx,
+        actor,
+        parentId,
+        {
+          childBudgetId: childId,
+          amount: { amountMinor: l.amountMinor, currency: parent.currency },
+          memo: req.memo ?? 'Allocation grid',
+        },
+        ctx,
+        'budget.allocated',
+        { audit: false },
       );
+      result.journalIds.push(journalId);
+      audited.push({
+        childBudgetId: childId,
+        name: lines[i].name,
+        created: !l.childBudgetId,
+        amountMinor: l.amountMinor,
+        journalId,
+      });
     }
+    await this.audit.append(tx, {
+      tenantId: actor.tenantId,
+      actorPersonId: actor.personId,
+      actorSubject: actor.subject,
+      action: 'budget.allocation_grid_applied',
+      resourceType: 'budget',
+      resourceId: parentId,
+      legalEntityId: parent.legalEntityId,
+      requestId: ctx.requestId,
+      reason: req.memo ?? null,
+      changes: {
+        allocatedOut: { from: balances.allocated_out, to: balances.allocated_out + total },
+        lines: { from: null, to: audited },
+      },
+    });
     result.parent = await this.views.detailById(tx, actor, parentId);
     return result;
   }
@@ -439,6 +462,7 @@ export class AllocationService {
         },
         ctx,
         'budget.per_head_allocated',
+        { audit: false },
       );
     } else if (preview.deltaMinor < 0) {
       journalId = await this.controls.returnToParentInTx(
@@ -475,6 +499,8 @@ export class AllocationService {
           to: preview.eligibleHeadcountMilli,
         },
         snapshotId: { from: null, to: preview.snapshotId },
+        parentId: { from: null, to: parent.id },
+        authorizedDelta: { from: null, to: preview.deltaMinor },
         journalId: { from: null, to: journalId },
       },
     });
@@ -874,6 +900,7 @@ export class AllocationService {
               },
               ctx,
               'budget.increase_approved',
+              { audit: false },
             );
           } else {
             const t = await this.controls.transferInTx(
@@ -887,7 +914,7 @@ export class AllocationService {
                 reason: `Contingency release approved: ${row.reason}`,
               },
               ctx,
-              { skipPolicy: true, auditAction: 'budget.contingency_released' },
+              { skipPolicy: true, audit: false },
             );
             journalId = t.journal.id;
           }
@@ -917,6 +944,9 @@ export class AllocationService {
           reason: req.note ?? null,
           changes: {
             status: { from: 'pending', to: updated.status },
+            kind: { from: null, to: row.kind },
+            budgetId: { from: null, to: target.id },
+            sourceBudgetId: { from: null, to: source.id },
             approvedAmountMinor: { from: null, to: approved },
             journalId: { from: null, to: journalId },
           },
