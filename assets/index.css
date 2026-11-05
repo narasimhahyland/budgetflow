@@ -63,6 +63,18 @@ h1 {
 .primary:hover {
   background: #e2dfff;
 }
+.secondary {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+.secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 .hint {
   font-size: 13px;
   opacity: 0.85;
