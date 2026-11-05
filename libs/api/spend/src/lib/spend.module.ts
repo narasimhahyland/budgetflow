@@ -6,6 +6,7 @@ import { LedgerModule } from '@bf/api/ledger';
 import { NotificationsModule } from '@bf/api/notifications';
 import { TenancyModule } from '@bf/api/tenancy';
 import { Module } from '@nestjs/common';
+import { BudgetAlertsConsumer } from './budget-alerts.consumer';
 import { CommitmentsService } from './commitments.service';
 import { FundingSourcesService } from './funding-sources.service';
 import { PostingSupport } from './posting-support';
@@ -19,6 +20,7 @@ const SERVICES = [
   CommitmentsService,
   RequestsService,
   SpendHooks,
+  BudgetAlertsConsumer,
 ];
 
 /** Requests and commitments. Phase 6 imports SpendModule and uses CommitmentsService (consume, release). */
