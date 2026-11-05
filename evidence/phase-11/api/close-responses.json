@@ -1,0 +1,557 @@
+{
+  "GET /api/close/periods?fiscalYearId=FY2026": {
+    "items": [
+      {
+        "id": "23000000-0000-4000-8000-012026010000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Jan 2026",
+        "periodNumber": 1,
+        "startDate": "2026-01-01",
+        "endDate": "2026-01-31",
+        "status": "locked",
+        "targetCloseDate": "2026-02-04",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026020000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Feb 2026",
+        "periodNumber": 2,
+        "startDate": "2026-02-01",
+        "endDate": "2026-02-28",
+        "status": "locked",
+        "targetCloseDate": "2026-03-04",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026030000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Mar 2026",
+        "periodNumber": 3,
+        "startDate": "2026-03-01",
+        "endDate": "2026-03-31",
+        "status": "locked",
+        "targetCloseDate": "2026-04-03",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026040000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Apr 2026",
+        "periodNumber": 4,
+        "startDate": "2026-04-01",
+        "endDate": "2026-04-30",
+        "status": "locked",
+        "targetCloseDate": "2026-05-05",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026050000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "May 2026",
+        "periodNumber": 5,
+        "startDate": "2026-05-01",
+        "endDate": "2026-05-31",
+        "status": "locked",
+        "targetCloseDate": "2026-06-03",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026060000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Jun 2026",
+        "periodNumber": 6,
+        "startDate": "2026-06-01",
+        "endDate": "2026-06-30",
+        "status": "locked",
+        "targetCloseDate": "2026-07-03",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026070000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Jul 2026",
+        "periodNumber": 7,
+        "startDate": "2026-07-01",
+        "endDate": "2026-07-31",
+        "status": "closed",
+        "targetCloseDate": "2026-08-05",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026080000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Aug 2026",
+        "periodNumber": 8,
+        "startDate": "2026-08-01",
+        "endDate": "2026-08-31",
+        "status": "closed",
+        "targetCloseDate": "2026-09-03",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026090000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Sep 2026",
+        "periodNumber": 9,
+        "startDate": "2026-09-01",
+        "endDate": "2026-09-30",
+        "status": "closed",
+        "targetCloseDate": "2026-10-05",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026100000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Oct 2026",
+        "periodNumber": 10,
+        "startDate": "2026-10-01",
+        "endDate": "2026-10-31",
+        "status": "soft_closed",
+        "targetCloseDate": "2026-11-04",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026110000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Nov 2026",
+        "periodNumber": 11,
+        "startDate": "2026-11-01",
+        "endDate": "2026-11-30",
+        "status": "open",
+        "targetCloseDate": "2026-12-03",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      },
+      {
+        "id": "23000000-0000-4000-8000-012026120000",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "label": "Dec 2026",
+        "periodNumber": 12,
+        "startDate": "2026-12-01",
+        "endDate": "2026-12-31",
+        "status": "open",
+        "targetCloseDate": "2027-01-05",
+        "snapshotCount": 0,
+        "lateItemCount": 0,
+        "reopenRequestPending": false
+      }
+    ]
+  },
+  "GET /api/close/periods/{Nov 2026}": {
+    "period": {
+      "id": "23000000-0000-4000-8000-012026110000",
+      "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+      "fiscalYearLabel": "FY2026",
+      "label": "Nov 2026",
+      "periodNumber": 11,
+      "startDate": "2026-11-01",
+      "endDate": "2026-11-30",
+      "status": "open",
+      "targetCloseDate": "2026-12-03",
+      "snapshotCount": 0,
+      "lateItemCount": 0,
+      "reopenRequestPending": false
+    },
+    "entities": [
+      {
+        "legalEntityId": "20000000-0000-4000-8000-000000000003",
+        "legalEntityCode": "HYL-DE",
+        "legalEntityName": "Hyland Europe GmbH",
+        "checks": [
+          {
+            "code": "gl_tieout_signed_off",
+            "kind": "hard",
+            "status": "fail",
+            "title": "GL tie-out signed off",
+            "detail": "HYL-DE has no tie-out for this period.",
+            "count": 1,
+            "amount": null,
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "journals_balanced",
+            "kind": "hard",
+            "status": "pass",
+            "title": "No unbalanced journals",
+            "detail": "7 journal(s) in the period balance.",
+            "count": 7,
+            "amount": null,
+            "blocking": false,
+            "acknowledgement": null
+          },
+          {
+            "code": "ledger_check_clean",
+            "kind": "hard",
+            "status": "fail",
+            "title": "Nightly ledger check clean",
+            "detail": "No ledger rebuild check has run yet; run one before the close.",
+            "count": 1,
+            "amount": null,
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "audit_chain_verified",
+            "kind": "hard",
+            "status": "fail",
+            "title": "Audit chain verified",
+            "detail": "No check has verified the audit chain yet.",
+            "count": 1,
+            "amount": null,
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "actuals_imported",
+            "kind": "soft",
+            "status": "pass",
+            "title": "Actuals imported for every source",
+            "detail": "No import batch is waiting in review.",
+            "count": 0,
+            "amount": null,
+            "blocking": false,
+            "acknowledgement": null
+          },
+          {
+            "code": "unmatched_actuals_cleared",
+            "kind": "soft",
+            "status": "warn",
+            "title": "Unmatched actuals cleared or carried",
+            "detail": "1 actual(s) worth 5000.00 USD are unmatched; they post to the next open period flagged late.",
+            "count": 1,
+            "amount": {
+              "amountMinor": 500000,
+              "currency": "USD"
+            },
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "accruals_reviewed",
+            "kind": "soft",
+            "status": "warn",
+            "title": "Accrual proposals reviewed",
+            "detail": "1 accrual proposal(s) worth 2000.00 USD are still waiting for a decision.",
+            "count": 1,
+            "amount": {
+              "amountMinor": 200000,
+              "currency": "USD"
+            },
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "prepaids_recognized",
+            "kind": "soft",
+            "status": "pass",
+            "title": "Prepaids recognized through the period end",
+            "detail": "Every prepaid in service is recognized through the period end.",
+            "count": 0,
+            "amount": null,
+            "blocking": false,
+            "acknowledgement": null
+          },
+          {
+            "code": "commitments_accrued",
+            "kind": "soft",
+            "status": "pass",
+            "title": "Commitments past their service date accrued",
+            "detail": "Every commitment that ended in the period is accrued or invoiced.",
+            "count": 0,
+            "amount": null,
+            "blocking": false,
+            "acknowledgement": null
+          }
+        ],
+        "blocking": true
+      },
+      {
+        "legalEntityId": "20000000-0000-4000-8000-000000000001",
+        "legalEntityCode": "HYL-US",
+        "legalEntityName": "Hyland North America, Inc.",
+        "checks": [
+          {
+            "code": "gl_tieout_signed_off",
+            "kind": "hard",
+            "status": "fail",
+            "title": "GL tie-out signed off",
+            "detail": "HYL-US's tie-out is reconciled; sign it off before the close.",
+            "count": 1,
+            "amount": null,
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "journals_balanced",
+            "kind": "hard",
+            "status": "pass",
+            "title": "No unbalanced journals",
+            "detail": "13 journal(s) in the period balance.",
+            "count": 13,
+            "amount": null,
+            "blocking": false,
+            "acknowledgement": null
+          },
+          {
+            "code": "ledger_check_clean",
+            "kind": "hard",
+            "status": "fail",
+            "title": "Nightly ledger check clean",
+            "detail": "No ledger rebuild check has run yet; run one before the close.",
+            "count": 1,
+            "amount": null,
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "audit_chain_verified",
+            "kind": "hard",
+            "status": "fail",
+            "title": "Audit chain verified",
+            "detail": "No check has verified the audit chain yet.",
+            "count": 1,
+            "amount": null,
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "actuals_imported",
+            "kind": "soft",
+            "status": "pass",
+            "title": "Actuals imported for every source",
+            "detail": "No import batch is waiting in review.",
+            "count": 0,
+            "amount": null,
+            "blocking": false,
+            "acknowledgement": null
+          },
+          {
+            "code": "unmatched_actuals_cleared",
+            "kind": "soft",
+            "status": "warn",
+            "title": "Unmatched actuals cleared or carried",
+            "detail": "1 actual(s) worth 640.00 USD are unmatched; they post to the next open period flagged late.",
+            "count": 1,
+            "amount": {
+              "amountMinor": 64000,
+              "currency": "USD"
+            },
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "accruals_reviewed",
+            "kind": "soft",
+            "status": "warn",
+            "title": "Accrual proposals reviewed",
+            "detail": "1 accrual proposal(s) worth 2000.00 USD are still waiting for a decision.",
+            "count": 1,
+            "amount": {
+              "amountMinor": 200000,
+              "currency": "USD"
+            },
+            "blocking": true,
+            "acknowledgement": null
+          },
+          {
+            "code": "prepaids_recognized",
+            "kind": "soft",
+            "status": "pass",
+            "title": "Prepaids recognized through the period end",
+            "detail": "Every prepaid in service is recognized through the period end.",
+            "count": 0,
+            "amount": null,
+            "blocking": false,
+            "acknowledgement": null
+          },
+          {
+            "code": "commitments_accrued",
+            "kind": "soft",
+            "status": "pass",
+            "title": "Commitments past their service date accrued",
+            "detail": "Every commitment that ended in the period is accrued or invoiced.",
+            "count": 0,
+            "amount": null,
+            "blocking": false,
+            "acknowledgement": null
+          }
+        ],
+        "blocking": true
+      }
+    ],
+    "blockingReasons": [
+      "10 checks must pass or be acknowledged before this period closes: HYL-DE gl tieout signed off; HYL-DE ledger check clean; HYL-DE audit chain verified; HYL-DE unmatched actuals cleared; HYL-DE accruals reviewed; HYL-US gl tieout signed off; HYL-US ledger check clean; HYL-US audit chain verified; HYL-US unmatched actuals cleared; HYL-US accruals reviewed."
+    ],
+    "allowedActions": ["soft_close"],
+    "snapshots": [],
+    "reopenRequest": null,
+    "closeConfirmation": "CLOSE NOV 2026"
+  },
+  "GET /api/close/rollover-policies": {
+    "items": [
+      {
+        "id": "66000000-0000-4000-8000-000000000002",
+        "code": "CARRY-25",
+        "name": "Carry up to 25%",
+        "mode": "carry_capped",
+        "capBps": 2500,
+        "sweepTo": "parent",
+        "budgetCount": 2
+      },
+      {
+        "id": "80000000-0000-4000-8000-000000000002",
+        "code": "CARRY-APPROVAL",
+        "name": "Carry with Finance Controller approval",
+        "mode": "carry_with_approval",
+        "capBps": null,
+        "sweepTo": "parent",
+        "budgetCount": 1
+      },
+      {
+        "id": "80000000-0000-4000-8000-000000000001",
+        "code": "CARRY-FULL",
+        "name": "Carry everything left",
+        "mode": "carry_full",
+        "capBps": null,
+        "sweepTo": "parent",
+        "budgetCount": 1
+      },
+      {
+        "id": "66000000-0000-4000-8000-000000000001",
+        "code": "LAPSE",
+        "name": "Lapse at year end",
+        "mode": "lapse",
+        "capBps": null,
+        "sweepTo": "parent",
+        "budgetCount": 5
+      },
+      {
+        "id": "80000000-0000-4000-8000-000000000003",
+        "code": "LAPSE-CORP",
+        "name": "Lapse and sweep to corporate",
+        "mode": "lapse",
+        "capBps": null,
+        "sweepTo": "corporate",
+        "budgetCount": 1
+      }
+    ]
+  },
+  "GET /api/close/year-end-runs": {
+    "items": [
+      {
+        "id": "80000000-0000-4000-8000-000000000010",
+        "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+        "fiscalYearLabel": "FY2026",
+        "targetFiscalYearId": "22000000-0000-4000-8000-012027000000",
+        "targetFiscalYearLabel": "FY2027",
+        "targetPlanVersionId": null,
+        "rootBudgetId": "70000000-0000-4000-8000-000000000001",
+        "rootBudgetName": "Employee Experience FY2026",
+        "status": "draft",
+        "commitmentFreezeDate": "2026-12-15",
+        "createdByName": "Priya Raman",
+        "createdAt": "2026-11-05T18:58:29.737Z",
+        "executedAt": null,
+        "executedByName": null,
+        "error": null,
+        "readiness": [
+          {
+            "code": "target_year_exists",
+            "title": "Target fiscal year and periods exist",
+            "passed": true,
+            "detail": "FY2027 runs 2027-01-01 to 2027-12-31.",
+            "blocksExecution": true
+          },
+          {
+            "code": "target_plan_rates_locked",
+            "title": "Target year plan rates locked",
+            "passed": true,
+            "detail": "3 plan rate(s) locked for the target year.",
+            "blocksExecution": true
+          },
+          {
+            "code": "target_budgets_exist",
+            "title": "Target year budgets rolled forward",
+            "passed": true,
+            "detail": "0 carrying budget(s) have a counterpart in the target year.",
+            "blocksExecution": true
+          },
+          {
+            "code": "prior_periods_closed",
+            "title": "Earlier periods of the ending year are closed",
+            "passed": false,
+            "detail": "1 earlier period(s) are still open (Nov 2026). Close them so the year-end figures stop moving.",
+            "blocksExecution": false
+          },
+          {
+            "code": "posting_periods_open",
+            "title": "A period is open in each year to receive the postings",
+            "passed": true,
+            "detail": "Dec 2026 is open and receives the ending year's lapses and carries; close it after the run.",
+            "blocksExecution": true
+          },
+          {
+            "code": "rollover_policies_assigned",
+            "title": "Every budget has a rollover policy",
+            "passed": false,
+            "detail": "Run a dry run to list the budgets.",
+            "blocksExecution": true
+          },
+          {
+            "code": "carry_approvals_decided",
+            "title": "Carry approvals decided",
+            "passed": true,
+            "detail": "No carry request is waiting.",
+            "blocksExecution": true
+          }
+        ],
+        "totals": {
+          "currency": "USD",
+          "carryMinor": 0,
+          "lapseMinor": 0,
+          "commitmentCarryMinor": 0,
+          "commitmentCount": 0,
+          "budgetCount": 0
+        },
+        "lines": [],
+        "executeConfirmation": "RUN YEAR END FY2026",
+        "journalIds": []
+      }
+    ]
+  }
+}
