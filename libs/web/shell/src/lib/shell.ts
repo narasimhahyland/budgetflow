@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,11 +7,12 @@ import {
   effect,
   inject,
   signal,
+  viewChildren,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import {
   ActivatedRoute,
   NavigationEnd,
@@ -55,6 +57,10 @@ type Crumb = { label: string; routerLink?: string };
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(keydown.escape)': 'closeNavOnEscape()',
+    '(document:keydown.escape)': 'closeNavFromBody($event)',
+  },
 })
 export class Shell {
   protected readonly session = inject(SessionStore);
@@ -64,6 +70,8 @@ export class Shell {
   private readonly route = inject(ActivatedRoute);
   private readonly analytics = inject(AnalyticsTracker);
   private readonly denied = inject(AccessDenied);
+  private readonly document = inject(DOCUMENT);
+  private readonly menuTriggers = viewChildren(MatMenuTrigger);
 
   protected readonly me = this.session.me;
   protected readonly nav = computed(() => visibleNav(this.session.permissions()));
@@ -94,8 +102,7 @@ export class Shell {
         const leaf = this.leaf();
         this.crumbs.set(this.crumbsFor(leaf));
         this.analytics.track('page.viewed', { route: this.template(leaf) });
-        // The expanded navigation is an overlay: close it once the user has picked a page.
-        if (!this.navState.collapsed()) this.navState.toggleCollapsed();
+        this.closeNav();
       });
     effect(() => {
       if (this.auth.justSignedIn() && this.session.state() === 'ready') {
@@ -103,6 +110,24 @@ export class Shell {
         this.analytics.track('session.started');
       }
     });
+  }
+
+  /**
+   * Satori's expanded navigation is a modal overlay at every width (it has no docked mode), so it
+   * closes once a page is picked, on Escape and on the scrim; the collapsed rail never covers content.
+   */
+  protected closeNav(): void {
+    if (!this.navState.collapsed()) this.navState.toggleCollapsed();
+  }
+
+  /** An open menu takes Escape first; a menu opened by mouse leaves focus on its trigger in the shell. */
+  protected closeNavOnEscape(): void {
+    if (!this.menuTriggers().some((t) => t.menuOpen)) this.closeNav();
+  }
+
+  /** Menus and dialogs render outside the shell and take their own Escape; this covers an unfocused page. */
+  protected closeNavFromBody(event: Event): void {
+    if (event.target === this.document.body) this.closeNavOnEscape();
   }
 
   protected signOut(): void {

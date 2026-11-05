@@ -6,6 +6,42 @@
   box-sizing: border-box;
 }
 
+// Satori's menu area only scrolls while hovered and clips flush against the account row, so the menu
+// scrolls in its own box above a divider; touch, wheel and keyboard reach every item.
+.bf-shell__nav {
+  box-sizing: border-box;
+  height: 100%;
+  padding-block-end: 8px;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  border-block-end: 1px solid var(--sat-sys-on-primary-opacity-12);
+}
+
+// Same thin scrollbar as Satori's menu, shown on hover; the width swap matches Satori's hover padding.
+.bf-shell__nav::-webkit-scrollbar {
+  width: 0;
+}
+
+.bf-shell__nav:hover::-webkit-scrollbar {
+  width: 4px;
+}
+
+.bf-shell__nav::-webkit-scrollbar-thumb {
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-outline-variant);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .bf-shell__nav {
+    scrollbar-width: none;
+  }
+
+  .bf-shell__nav:hover {
+    scrollbar-color: var(--mat-sys-outline-variant) transparent;
+    scrollbar-width: thin;
+  }
+}
+
 .bf-shell__brand {
   display: flex;
   flex-direction: column;
