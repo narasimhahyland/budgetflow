@@ -1,4 +1,5 @@
 // Shared helpers for BudgetFlow Cursor hooks. Dependency-free; Node 20+.
+import { spawnSync } from 'node:child_process';
 import { readFileSync, realpathSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
@@ -40,6 +41,49 @@ export function workspaceRoots(input) {
 export function isInside(p, dirs) {
   const abs = path.resolve(p);
   return dirs.some((d) => abs === d || abs.startsWith(d.endsWith(path.sep) ? d : d + path.sep));
+}
+
+let worktreeCache;
+
+/**
+ * Worktrees of the repository checked out at the workspace roots: every `git worktree list` entry, plus the
+ * sibling `<repo>-worktrees/` folder scripts/worktree.sh creates them in. Listed at most once per hook run.
+ * A root only counts when it is a checkout's top level, so an enclosing repository (say a git-tracked home)
+ * never widens the set. Empty when git fails.
+ */
+export function repoWorktrees(roots) {
+  if (worktreeCache) return worktreeCache;
+  const dirs = new Set();
+  const containers = new Set();
+  for (const root of new Set(roots.map(real))) {
+    if (dirs.has(root)) continue;
+    const r = spawnSync('git', ['-C', root, 'worktree', 'list', '--porcelain'], {
+      encoding: 'utf8',
+      timeout: 3000,
+    });
+    if (r.status !== 0) continue;
+    const listed = r.stdout
+      .split('\n')
+      .filter((l) => l.startsWith('worktree '))
+      .map((l) => l.slice('worktree '.length));
+    const forms = (d) => [path.resolve(d), real(d)];
+    if (!listed.flatMap(forms).includes(root)) continue;
+    listed.flatMap(forms).forEach((d) => dirs.add(d));
+    forms(`${listed[0]}-worktrees`).forEach((c) => containers.add(c));
+  }
+  worktreeCache = { dirs: [...dirs], containers: [...containers] };
+  return worktreeCache;
+}
+
+/** The worktree directory from repoWorktrees() that holds p (p itself included), or null. */
+export function worktreeRootOf(p, worktrees) {
+  const abs = path.resolve(p);
+  const listed = worktrees.dirs
+    .filter((d) => isInside(abs, [d]))
+    .sort((a, b) => b.length - a.length)[0];
+  if (listed) return listed;
+  const box = worktrees.containers.find((c) => abs.startsWith(c + path.sep));
+  return box ? path.join(box, abs.slice(box.length + 1).split(path.sep)[0]) : null;
 }
 
 const TEMP_DIRS = [

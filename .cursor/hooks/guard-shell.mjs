@@ -1,5 +1,5 @@
 // beforeShellExecution: blocks credential reads, secret printing, force pushes to main,
-// deletes outside the repo, and commits that contain secrets.
+// deletes outside the repo and its worktrees, and commits that contain secrets.
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -10,11 +10,13 @@ import {
   commandOf,
   isInside,
   isTemp,
+  repoWorktrees,
   resolvePath,
   runHook,
   sensitivePathReason,
   splitSegments,
   workspaceRoots,
+  worktreeRootOf,
 } from './lib.mjs';
 
 const SCAN = fileURLToPath(new URL('../../scripts/secret-scan.mjs', import.meta.url));
@@ -138,6 +140,13 @@ function checkRm(name, args, cwd, roots, verdict) {
     if (roots.some((r) => abs === r))
       return verdict.deny(`${name} on the whole workspace (${abs})`);
     if (isInside(abs, roots) || isTemp(abs)) continue;
+    const worktrees = repoWorktrees(roots);
+    const owner = worktreeRootOf(abs, worktrees);
+    if (owner && (isInside(cwd, roots) || worktreeRootOf(cwd, worktrees))) {
+      if (abs === owner)
+        return verdict.deny(`${name} on a whole worktree (${abs}); use scripts/worktree.sh remove`);
+      continue;
+    }
     return verdict.deny(
       `${name} outside the repository (${abs}); use scripts/worktree.sh remove for worktrees`,
     );

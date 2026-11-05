@@ -154,6 +154,47 @@ const askShell = [
 ];
 for (const c of askShell) expect(`shell ask: ${c}`, shell(c), 'ask');
 
+// Deletes inside this repository's own worktrees are allowed; other projects stay blocked.
+const wtSibling = path.join(sandbox, 'repo-worktrees', 'wt');
+const wtElsewhere = path.join(sandbox, 'agent-worktrees', 'wt2');
+const otherProject = path.join(sandbox, 'other-project');
+sh('git', ['worktree', 'add', '-q', '-b', 'agent/wt', wtSibling]);
+sh('git', ['worktree', 'add', '-q', '-b', 'agent/wt2', wtElsewhere]);
+mkdirSync(otherProject);
+const worktreeShell = [
+  [
+    'allow',
+    'rm inside a sibling worktree',
+    `rm -f ${path.join(wtSibling, 'tmp', 'scratch.txt')}`,
+    repo,
+  ],
+  [
+    'allow',
+    'rm inside a registered worktree elsewhere',
+    `rm -rf ${path.join(wtElsewhere, 'dist')}`,
+    repo,
+  ],
+  ['allow', 'relative rm with cwd in a worktree', 'rm -rf tmp/scratch', wtSibling],
+  ['allow', 'cd into a worktree, then rm', `cd ${wtSibling} && rm -f notes.txt`, repo],
+  ['deny', 'rm of a whole worktree', `rm -rf ${wtSibling}`, repo],
+  ['deny', 'rm of the worktrees folder', `rm -rf ${path.dirname(wtSibling)}`, repo],
+  ['deny', 'rm in another project', `rm -rf ${path.join(otherProject, 'src')}`, repo],
+  [
+    'deny',
+    'rm in another project from a worktree',
+    `rm -rf ${path.join(otherProject, 'src')}`,
+    wtSibling,
+  ],
+  [
+    'deny',
+    'rm in a worktree from another project',
+    `rm -f ${path.join(wtSibling, 'x')}`,
+    otherProject,
+  ],
+];
+for (const [want, name, c, cwd] of worktreeShell)
+  expect(`shell ${want}: ${name}`, shell(c, cwd), want);
+
 writeFileSync(path.join(repo, 'config.ts'), `export const token = '${fake.github}';\n`);
 sh('git', ['add', 'config.ts']);
 expect('shell deny: git commit with a staged token', shell('git commit -m "feat: config"'), 'deny');
