@@ -143,10 +143,14 @@ const MARKER_LABELS: Record<string, string> = {
                   <td>{{ spendType(row.spendType) }}</td>
                   <td>{{ row.legalEntityCode ?? 'Any entity' }}</td>
                   <td class="bf-num">
-                    <bf-money
-                      [amountMinor]="row.limit.amountMinor"
-                      [currency]="row.limit.currency"
-                    />
+                    @if (row.changeMarker === 'removed') {
+                      No authority
+                    } @else {
+                      <bf-money
+                        [amountMinor]="row.limit.amountMinor"
+                        [currency]="row.limit.currency"
+                      />
+                    }
                   </td>
                   <td class="bf-num">
                     @if (row.previousLimitMinor !== null && row.previousLimitMinor !== undefined) {
@@ -187,8 +191,17 @@ const MARKER_LABELS: Record<string, string> = {
             <tbody>
               @for (ver of v.versions; track ver.id) {
                 <tr>
-                  <td class="bf-cell__primary">v{{ ver.version }}</td>
-                  <td>{{ ver.status.replace('_', ' ') }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="bf-list__item"
+                      [disabled]="ver.id === shown()"
+                      (click)="show(ver.id)"
+                    >
+                      v{{ ver.version }}
+                    </button>
+                  </td>
+                  <td>{{ versionStatus(ver.status) }}</td>
                   <td>{{ ver.validFrom }}{{ ver.validTo ? ' to ' + ver.validTo : ' onwards' }}</td>
                   <td>{{ ver.approvedByName ?? 'Not approved yet' }}</td>
                 </tr>
@@ -209,7 +222,20 @@ export class DoaAdminPage {
   protected readonly busy = signal(false);
   protected readonly failure = signal('');
   protected readonly notice = signal('');
-  protected readonly view = resource({ loader: () => data(this.api.getDoaMatrixAdmin({})) });
+  protected readonly shown = signal<string | undefined>(undefined);
+  protected readonly view = resource({
+    params: () => ({ versionId: this.shown() }),
+    loader: ({ params }) =>
+      data(
+        this.api.getDoaMatrixAdmin({
+          query: params.versionId ? { versionId: params.versionId } : {},
+        }),
+      ),
+  });
+
+  protected show(versionId: string): void {
+    this.shown.set(versionId);
+  }
   private readonly current = computed(() => valueOf(this.view));
 
   protected can(action: string): boolean {
@@ -217,6 +243,18 @@ export class DoaAdminPage {
   }
 
   protected readonly spendType = spendTypeLabel;
+
+  protected versionStatus(status: string): string {
+    return (
+      {
+        draft: 'Draft',
+        awaiting_approval: 'Waiting for approval',
+        active: 'In force',
+        scheduled: 'Starts later',
+        superseded: 'Replaced',
+      }[status] ?? status
+    );
+  }
 
   protected who(row: { personName?: string | null; role: string | null }): string {
     return row.personName ?? (row.role ? approverLabel(row.role) : 'Anyone');

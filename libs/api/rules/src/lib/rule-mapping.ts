@@ -111,7 +111,7 @@ export function formatFactValue(fact: string, value: unknown): string {
   if (MONEY_FACTS.has(fact) && typeof value === 'number') return usd(value);
   if (fact === 'remaining_pct' && typeof value === 'number') return `${value}%`;
   if (typeof value === 'boolean') return value ? 'yes' : 'no';
-  return String(value);
+  return String(value).replace(/_/g, ' ');
 }
 
 export function conditionText(leaf: { fact: string; op: string; value: unknown }): string {

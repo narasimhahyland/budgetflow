@@ -19,6 +19,7 @@ export const P7_RULES = {
   eventThresholds: seedId('80000000', 12),
   perHeadLimits: seedId('80000000', 14),
   smallWellbeing: seedId('80000000', 19),
+  receiptRequired: seedId('80000000', 22),
   giftCap: seedId('80000000', 24),
   clientEntertainment: seedId('80000000', 25),
   alcohol: seedId('80000000', 26),
@@ -231,6 +232,25 @@ export const P7_RULE_SEEDS: RuleSeed[] = [
         ],
         explanation:
           'Wellbeing items up to USD 25.00 go through without an approval step while the budget has room.',
+        validFrom: '2026-01-01',
+      },
+    ],
+  },
+  {
+    id: P7_RULES.receiptRequired,
+    code: 'R-22',
+    name: 'Receipts above the limit',
+    family: 'spending_limits',
+    templateCode: null,
+    publishedBy: 'finance-controller',
+    versions: [
+      {
+        version: 1,
+        priority: 250,
+        effect: 'warn',
+        conditions: [{ fact: 'amount_reporting_minor', op: 'gt', value: 2_500 }],
+        explanation:
+          'Spend above USD 25.00 needs an itemised receipt. Finance checks for the receipt after the spend lands.',
         validFrom: '2026-01-01',
       },
     ],

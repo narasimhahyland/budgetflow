@@ -64,9 +64,17 @@ export const approverLabel = (key: string): string =>
 /** Spend types and categories are stored as codes; `*` is the wildcard the DoA matrix uses. */
 export const spendTypeLabel = (code: string): string => {
   if (code === '*') return 'Any spend type';
-  const text = code.replace(/_/g, ' ');
+  return sentenceCase(code);
+};
+
+/** Turns a stored code such as `all_employees` into copy a reader expects. */
+export const sentenceCase = (code: string): string => {
+  const text = code.replace(/[_-]/g, ' ').trim();
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
+
+export const codeList = (codes: readonly string[]): string =>
+  codes.length ? codes.map(sentenceCase).join(', ') : 'Nobody';
 
 export const approverList = (keys: readonly string[]): string =>
   keys.length ? keys.map(approverLabel).join(', ') : 'No extra approver';

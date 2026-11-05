@@ -253,11 +253,11 @@ export function evaluateRules(
 
 /** What each outcome does, phrased to drop into a sentence about two rules disagreeing. */
 const EFFECT_TEXT: Record<RuleEffect, string> = {
-  block: 'block them',
-  freeze: 'hold them until the budget is available again',
-  require_approval: 'send them for approval',
-  warn: 'let them through with a warning',
-  auto_approve: 'let them through with no approval step',
+  block: 'block the request',
+  freeze: 'hold the request until the budget is available again',
+  require_approval: 'send the request for approval',
+  warn: 'let the request through with a warning',
+  auto_approve: 'let the request through with no approval step',
 };
 
 export interface DetectedConflict {
@@ -360,7 +360,7 @@ export function detectRuleConflicts(
       const theirs = EFFECT_TEXT[other.effect];
       const reason = SamePriorityCollision
         ? `${other.code} ${other.name} has the same priority (${candidate.priority}) but a different outcome: it would ${theirs} while ${candidate.code} would ${mine}. Give one of them a higher priority so the outcome is never decided by chance.`
-        : `${other.code} ${other.name} (priority ${other.priority}) would ${theirs} for requests that ${candidate.code} would ${mine}. The stricter outcome wins, so ${EFFECT_TEXT[winningEffect]} is what happens.`;
+        : `${other.code} ${other.name} (priority ${other.priority}) would ${theirs} where ${candidate.code} would ${mine}. The stricter outcome wins, so BudgetFlow would ${EFFECT_TEXT[winningEffect]}.`;
       conflicts.push({
         otherRule: other,
         winningEffect,

@@ -81,7 +81,7 @@ import { RulesTabs } from './rules-tabs';
                     <td class="bf-cell__primary">{{ s.label }}</td>
                     <td>{{ s.conditionLabel ?? 'Always' }}</td>
                     <td>{{ order(s) }}</td>
-                    <td class="bf-num">{{ s.slaBusinessHours }} working hours</td>
+                    <td class="bf-num">{{ decideBy(s.slaBusinessHours) }}</td>
                     <td>{{ s.applyDoa ? 'Yes' : 'No' }}</td>
                   </tr>
                 }
@@ -100,6 +100,12 @@ import { RulesTabs } from './rules-tabs';
       }
     }
   `,
+  styles: `
+    /* "Inter-Director Budget Contribution Requests" is the exact term and must not be clipped. */
+    .bf-filters mat-form-field {
+      min-width: 22rem;
+    }
+  `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -111,6 +117,15 @@ export class RoutingPage {
   protected readonly selected = computed(() =>
     (valueOf(this.routes)?.items ?? []).find((r) => r.requestKind === this.kind()),
   );
+
+  /**
+   * Service levels are stored in hours; the response-times policy screen states the same figures
+   * in days, so both screens have to agree on what a day is.
+   */
+  protected decideBy(hours: number): string {
+    const days = Math.round(hours / 24);
+    return days >= 1 ? `${days} working ${days === 1 ? 'day' : 'days'}` : `${hours} hours`;
+  }
 
   /** One sentence for how a step runs, instead of two labels that look contradictory. */
   protected order(step: { mode: string; groupRule: string }): string {

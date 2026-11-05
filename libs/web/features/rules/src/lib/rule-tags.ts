@@ -26,6 +26,11 @@ const STATUS_TONES: Record<RuleStatus, Tone> = {
   selector: 'bf-rule-effect',
   imports: [SatStatusTag],
   template: `<sat-status-tag [status]="tone()">{{ label() }}</sat-status-tag>`,
+  styles: `
+    :host {
+      white-space: nowrap;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RuleEffectTag {
@@ -39,6 +44,11 @@ export class RuleEffectTag {
   selector: 'bf-rule-status',
   imports: [SatStatusTag],
   template: `<sat-status-tag [status]="tone()">{{ label() }}</sat-status-tag>`,
+  styles: `
+    :host {
+      white-space: nowrap;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RuleStatusTag {

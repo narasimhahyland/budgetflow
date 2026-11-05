@@ -52,7 +52,7 @@ export const DEFAULT_THRESHOLD_FAMILIES: ThresholdTableFamily[] = [
     family: 'contributions',
     label: 'Inter-Director Budget Contribution Requests',
     remainingPctBelow: 10,
-    remainingApprover: 'parent_owner',
+    remainingApprover: 'finance_controller',
     generatedRuleCode: 'R-30',
     bands: [
       { minMinor: 0, maxMinor: 1_000_000, approvers: ['giving_director'] },
@@ -115,7 +115,7 @@ export const DEFAULT_POLICY_TEMPLATES: PolicyTemplateCard[] = [
     name: 'Alcohol at events',
     description:
       'Disallows alcohol by default; allows it at approved events up to USD 20.00 per attendee with parent-owner sign-off.',
-    defaultEffect: 'block',
+    defaultEffect: 'require_approval',
     parameters: [
       {
         key: 'capPerAttendeeMinor',
@@ -331,7 +331,7 @@ export const DEFAULT_POLICY_CONFIGS: Omit<PolicyConfigsBundle, 'allowedActions'>
     {
       categoryCode: 'alcohol',
       categoryName: 'Alcohol',
-      status: 'not_allowed',
+      status: 'allowed_with_approval',
       requesterGroups: ['event_organizers'],
       receiptAboveUsdMinor: 100,
       itemisedReceipt: true,
@@ -370,7 +370,7 @@ export const DEFAULT_POLICY_CONFIGS: Omit<PolicyConfigsBundle, 'allowedActions'>
       employeeGlCode: '6420',
       clientGlCode: '6440',
       postSpendRecheck: true,
-      generatedRuleCodes: ['R-24'],
+      generatedRuleCodes: ['R-07'],
       explanation: 'Cash, gift cards and vouchers are never allowed under company policy.',
     },
   ],
@@ -491,7 +491,7 @@ export const DEFAULT_POLICY_CONFIGS: Omit<PolicyConfigsBundle, 'allowedActions'>
     autoFreezeOnOwnerDeparture: true,
     notifyParentAt90Pct: true,
     hardModeBudgetCount: 18,
-    generatedRuleCodes: ['R-05', 'R-06', 'R-29'],
+    generatedRuleCodes: ['R-05'],
   },
   slaNotifications: {
     steps: [

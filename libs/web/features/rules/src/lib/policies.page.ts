@@ -14,7 +14,13 @@ import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { approverList, POLICY_SECTIONS, type PolicySectionKey } from './labels';
+import {
+  approverList,
+  codeList,
+  POLICY_SECTIONS,
+  sentenceCase,
+  type PolicySectionKey,
+} from './labels';
 import { LoadState } from './load-state';
 import { RuleEffectTag } from './rule-tags';
 import { RulesTabs } from './rules-tabs';
@@ -104,7 +110,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                   @for (l of v.spendingLimits.items; track l.id) {
                     <tr>
                       <td class="bf-cell__primary">{{ l.name }}</td>
-                      <td>{{ l.appliesTo }}</td>
+                      <td>{{ sentenceCase(l.appliesTo) }}</td>
                       <td>{{ measure(l.measure) }}</td>
                       <td>{{ l.location }}</td>
                       <td class="bf-num">
@@ -139,7 +145,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                   />
                 </dd>
                 <dt>Counts towards it</dt>
-                <dd>{{ v.spendingLimits.employeeCap.includedCategories.join(', ') }}</dd>
+                <dd>{{ codeList(v.spendingLimits.employeeCap.includedCategories) }}</dd>
                 <dt>Warn at</dt>
                 <dd>{{ v.spendingLimits.employeeCap.warnAtPct }}%</dd>
                 <dt>Block at</dt>
@@ -203,7 +209,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                           categoryLabel(c.status)
                         }}</sat-status-tag>
                       </td>
-                      <td>{{ c.requesterGroups.join(', ') || 'Nobody' }}</td>
+                      <td>{{ codeList(c.requesterGroups) }}</td>
                       <td class="bf-num">
                         <bf-money [amountMinor]="c.receiptAboveUsdMinor" currency="USD" />
                       </td>
@@ -390,7 +396,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                     @for (vendor of v.vendors.items; track vendor.vendorId) {
                       <tr>
                         <td class="bf-cell__primary">{{ vendor.vendorName }}</td>
-                        <td>{{ vendor.status }}</td>
+                        <td>{{ sentenceCase(vendor.status) }}</td>
                         <td>{{ vendor.reason ?? '—' }}</td>
                         <td class="bf-num">{{ vendor.requests90d | number }}</td>
                         <td class="bf-num">{{ vendor.openCommitmentsCount | number }}</td>
@@ -402,9 +408,9 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
             } @else {
               <div class="bf-card__body">
                 <p>
-                  No vendor is preferred or blocked yet. Vendors are managed in
-                  <a routerLink="/admin/vendors">master data</a>; blocking one there stops new
-                  requests from using it.
+                  No vendor is marked preferred or blocked at the moment. Vendors are managed in
+                  <a routerLink="/admin/vendors">master data</a>; marking one blocked there stops
+                  new requests from using it, while commitments already made still finish.
                 </p>
               </div>
             }
@@ -473,7 +479,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                 <dt>Who can reduce</dt>
                 <dd>{{ approverList(v.freezeZero.reduceAllowedRoles) }}</dd>
                 <dt>Money released goes to</dt>
-                <dd>{{ v.freezeZero.reduceDestinations.join(', ') }}</dd>
+                <dd>{{ codeList(v.freezeZero.reduceDestinations) }}</dd>
                 <dt>Who can set to zero</dt>
                 <dd>{{ approverList(v.freezeZero.zeroAllowedRoles) }}</dd>
                 <dt>Requests already in flight when set to zero</dt>
@@ -516,7 +522,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                         {{ s.remindAt50Pct ? 'Halfway' : '' }}
                         {{ s.remind1HourBeforeDue ? 'and an hour before it is due' : '' }}
                       </td>
-                      <td>{{ escalation(s.escalateTo) }}</td>
+                      <td>{{ escalation(s.stepType, s.escalateTo) }}</td>
                     </tr>
                   }
                 </tbody>
@@ -547,7 +553,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                   @for (e of v.slaNotifications.events; track e.eventKey) {
                     <tr>
                       <td>{{ e.label }}</td>
-                      <td>{{ e.audiences.join(', ') }}</td>
+                      <td>{{ codeList(e.audiences) }}</td>
                       <td>{{ e.inApp ? 'Yes' : 'No' }}</td>
                       <td>{{ e.email ? 'Yes' : 'No' }}</td>
                       <td>{{ e.required ? 'No' : 'Yes' }}</td>
@@ -576,6 +582,8 @@ export class PoliciesPage {
   private readonly router = inject(Router);
   protected readonly valueOf = valueOf;
   protected readonly approverList = approverList;
+  protected readonly codeList = codeList;
+  protected readonly sentenceCase = sentenceCase;
   protected readonly sections = POLICY_SECTIONS;
   protected readonly view = resource({ loader: () => data(this.api.getPolicyConfigs({})) });
   protected readonly intro = computed(() => SECTION_INTROS[this.policySection()] ?? '');
@@ -620,7 +628,9 @@ export class PoliciesPage {
     );
   }
 
-  protected escalation(target: string): string {
+  protected escalation(stepType: string, target: string): string {
+    // The last step has nobody above it, so it waits rather than escalating to itself.
+    if (stepType === target) return 'Nobody above this step; it stays here';
     return (
       {
         next_doa_authority: 'The next approval authority',

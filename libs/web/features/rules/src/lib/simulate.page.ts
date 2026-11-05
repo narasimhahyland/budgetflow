@@ -184,7 +184,7 @@ const OUTCOME_TEXT: Record<string, string> = {
                     <td><bf-rule-effect [effect]="m.effect" /></td>
                     <td>{{ approverList(m.approvers) }}</td>
                     <td>
-                      {{ m.decisive ? 'Decided the outcome' : 'Outranked by a stricter rule' }}
+                      {{ m.decisive ? 'Decided the outcome' : 'Also matched' }}
                     </td>
                   </tr>
                 }
