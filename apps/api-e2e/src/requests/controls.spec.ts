@@ -158,7 +158,7 @@ test.describe('budget controls on waiting requests', () => {
     );
     const task = await taskOf(request, 'department-head', 'request', r.id);
     const cut = await applyControl(request, team.id, 'reduce', 10_000);
-    expect(cut.budget.status).toBe('active');
+    expect(cut.budget.status).toBe('reduced');
     const after = await getRequest(request, 'budget-owner', r.id);
     expect(after).toMatchObject({ status: 'pending_approval', onHold: false });
     const ok = await decideOk(request, 'department-head', task, { decision: 'approve' });

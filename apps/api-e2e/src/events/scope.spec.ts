@@ -24,8 +24,17 @@ test.describe('Phase 5 scope', () => {
       200,
       RequestableBudgetList,
     );
-    expect(list.items.map((b) => b.budgetId)).toEqual([SEED.budgets.hyderabad]);
-    expect(list.items[0].available).toBeNull();
+    // Their location's budget (scenarios may add more at the same location), nothing elsewhere, no totals.
+    const ids = list.items.map((b) => b.budgetId);
+    expect(ids).toContain(SEED.budgets.hyderabad);
+    for (const elsewhere of [
+      SEED.budgets.bengaluru,
+      SEED.budgets.india,
+      SEED.budgets.europe,
+      SEED.budgets.employeeExperience,
+    ])
+      expect(ids).not.toContain(elsewhere);
+    expect(list.items.every((b) => b.available === null)).toBe(true);
     const { team } = await directorTree(request);
     // Outside their scope: not found. Inside it, the (side-effect free) route preview is allowed.
     await expectProblem(
@@ -95,6 +104,7 @@ test.describe('Phase 5 scope', () => {
     const diwali = board.events.find((e) => e.id === P5_IDS.event)!;
     expect(diwali.contributions.map((c) => c.status).sort()).toEqual([
       'earmarked',
+      'earmarked',
       'pending_approval',
     ]);
     expect(Object.keys(diwali.contributions[0]).sort()).toEqual(
@@ -145,7 +155,7 @@ test.describe('Phase 5 scope', () => {
       200,
       EventDetail,
     );
-    expect(seeded.sources.map((s) => s.kind)).toEqual(['own', 'contribution']);
+    expect(seeded.sources.map((s) => s.kind)).toEqual(['own', 'contribution', 'contribution']);
     const funded = seeded.sources.reduce((a, s) => a + s.funded.amountMinor, 0);
     expect(seeded.funding.cap.amountMinor).toBe(funded);
     expect(seeded.allowedActions).toContain('commit');
