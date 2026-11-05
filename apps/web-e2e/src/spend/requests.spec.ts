@@ -13,6 +13,7 @@ import {
   spendingRequest,
   suffix,
   taskOf,
+  usd,
   usdText,
 } from './api';
 
@@ -33,8 +34,12 @@ test.describe('requester', () => {
 
     await page.goto(`/requests/${r.id}`);
     await expect(page.getByText('Changes requested: Align catering')).toBeVisible();
+    const resubmit = page.getByRole('button', { name: 'Resubmit' });
+    await expect(resubmit).toBeDisabled();
     await page.getByLabel(/^Amount/).fill('600');
-    await page.getByRole('button', { name: 'Resubmit' }).click();
+    await expect(page.getByTestId('what-changed')).toContainText('Changed');
+    await page.getByLabel('Note to the approver').fill('Catering cut to the regional benchmark.');
+    await resubmit.click();
     await expect.poll(async () => (await getRequest(r.id)).status).toBe('pending_approval');
 
     await page.getByTestId('tab-history').click();
@@ -94,6 +99,34 @@ test.describe('requester', () => {
       buffer: Buffer.from('not a receipt'),
     });
     await expect(page.getByTestId('upload-failure')).toContainText('This file type is not allowed');
+  });
+
+  test('accepts an approver counter-offer in one step (065)', async ({ page }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
+    const { team } = await directorTree();
+    const r = await spendingRequest(
+      team.id,
+      80_000,
+      'budget-owner',
+      `Conference ticket ${suffix()}`,
+    );
+    await decide(await taskOf(r.id, 'department-head', 'requests'), 'department-head', {
+      decision: 'request_changes',
+      counterOfferAmount: usd(50_000),
+      comment: 'Book the early-bird ticket; I can approve USD 500.00.',
+    });
+
+    await page.goto(`/requests/${r.id}`);
+    const offer = page.getByTestId('counter-offer');
+    await expect(offer).toContainText('offered a smaller amount');
+    await expect(offer).toContainText(usdText(80_000));
+    await expect(offer.getByTestId('offer-amount')).toContainText(usdText(50_000));
+    await page.getByTestId('accept-offer').click();
+
+    // Accepting approves at the offered amount with no further review: a partial approval.
+    await expect.poll(async () => (await getRequest(r.id)).status).toBe('partially_approved');
+    await expect(page.getByTestId('counter-offer')).toHaveCount(0);
   });
 
   test('sees what was approved with used and open amounts', async ({ page }, info) => {

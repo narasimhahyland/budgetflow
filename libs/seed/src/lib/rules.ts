@@ -7,7 +7,7 @@ import { userById, type SeedUserId } from './roles';
  * draft that demonstrates conflict detection, approval routing per request kind, a delegation-of-
  * authority version awaiting approval, and the post-spend exception queue.
  * Id prefixes: 80 rules, 81 rule versions, 82 workflow templates, 83 DoA v2 and its limits,
- * 84 post-spend exceptions.
+ * 84 post-spend exceptions, 85 rule executions, 86 the counter-offered request.
  */
 const T = TENANTS.acme;
 
@@ -654,6 +654,25 @@ export const P7_EXCEPTIONS = [
     relatedItems: [],
   },
 ];
+
+/**
+ * A request the approver answered with a smaller amount, so screen 065 has a counter-offer to
+ * accept. Id prefix 85.
+ */
+export const P7_COUNTER_OFFER = {
+  requestId: seedId('86000000', 1),
+  budgetId: BUDGETS.bengaluru,
+  requester: 'event-organizer' as const,
+  approver: 'location-manager' as const,
+  title: 'Conference ticket: platform engineering summit',
+  purpose: 'Two-day platform engineering summit in Bengaluru, including workshops.',
+  spendType: 'conferences',
+  category: 'conferences',
+  amountMinor: 21_557,
+  currency: 'USD',
+  offerMinor: 15_000,
+  comment: 'Book the early-bird ticket without the workshop day; I can approve USD 150.00.',
+} as const;
 
 /** Figures the Phase 7 scenarios and journeys assert against. */
 export const P7_SEED = {
