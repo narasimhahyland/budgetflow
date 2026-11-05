@@ -2,6 +2,7 @@ import {
   BUDGET_STATUSES,
   BUDGET_TYPES,
   CALENDAR_TYPES,
+  CLOSE_CHECK_CODES,
   COMMITMENT_STATUSES,
   CONTRIBUTION_STATUSES,
   CONTROL_MODES,
@@ -17,6 +18,7 @@ import {
   REQUEST_KINDS,
   REQUEST_STATUSES,
   ROLE_IDS,
+  YEAR_END_LINE_STATUSES,
 } from '@bf/domain';
 import { pgEnum } from 'drizzle-orm/pg-core';
 
@@ -148,3 +150,13 @@ export const tieoutStatus = pgEnum('tieout_status', [
   'exceptions',
   'signed_off',
 ]);
+
+// Period close and year end (P11)
+export const closeCheckCode = pgEnum('close_check_code', tuple(CLOSE_CHECK_CODES));
+export const reopenAction = pgEnum('reopen_action', ['reopen', 'unlock']);
+export const reopenRequestStatus = pgEnum('reopen_request_status', [
+  'pending',
+  'approved',
+  'declined',
+]);
+export const yearEndLineStatus = pgEnum('year_end_line_status', tuple(YEAR_END_LINE_STATUSES));

@@ -140,6 +140,8 @@ export const commitments = pgTable(
     createdByPersonId: uuid('created_by_person_id'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
+    /** Year-end carry-forward: the commitment in the ending year this one continues. */
+    carriedFromCommitmentId: uuid('carried_from_commitment_id'),
   },
   (t) => [
     index('commitments_tenant_budget').on(t.tenantId, t.budgetId, t.status),

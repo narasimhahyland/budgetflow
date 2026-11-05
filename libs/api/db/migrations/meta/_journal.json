@@ -85,6 +85,13 @@
       "when": 1793892681197,
       "tag": "0011_p8_channels",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793902637606,
+      "tag": "0012_p11_period_close",
+      "breakpoints": true
     }
   ]
 }

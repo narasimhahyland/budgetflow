@@ -513,6 +513,54 @@ export function postHierarchyMove(
 }
 
 /**
+ * The target year's leg of a year-end carry: money the ending year released to `savings` arrives in
+ * the new year as Dr `savings` / Cr root `authorized` and is then allocated down to the destination
+ * budget in the same journal. Because the root grows by exactly what savings gives up, the target
+ * year's plan tie-out (plan total = root authorized + savings) still holds, and no money is minted:
+ * the ending year posted the mirror reduction (`postHierarchyMove` to savings) for the same amount
+ * at its own locked plan rate. Chains list the destination budget first and the root last.
+ */
+export function postYearEndCarryIn(
+  input: {
+    destinationChain: readonly BudgetRef[];
+    /** In the destination budget's currency. */
+    amount: Money;
+    planVersionId: string | null;
+    reasonCode?: string | null;
+    reason?: string | null;
+  },
+  ctx: PostingContext,
+): Result<JournalDraft> {
+  const pos = requirePositive(input.amount);
+  if (!pos.ok) return pos;
+  const chain = input.destinationChain;
+  if (chain.length === 0) return err('TRANSFER_INVALID', 'Choose the budget the money carries to.');
+  const root = chain[chain.length - 1];
+  const rt = hierarchyTriplet(input.amount, root.currency, 'authorized', -1, ctx);
+  if (!rt.ok) return rt;
+  const prov = { planVersionId: input.planVersionId };
+  const lines: JournalLine[] = [
+    counterLine('savings', root.legalEntityId, 1, rt.value, prov),
+    budgetLine(root, 'authorized', -1, rt.value, prov),
+  ];
+  const down = [...chain].reverse();
+  for (let i = 0; i + 1 < down.length; i++) {
+    const parent = down[i];
+    const child = down[i + 1];
+    const pt = hierarchyTriplet(input.amount, parent.currency, 'allocated_out', 1, ctx);
+    if (!pt.ok) return pt;
+    const ct = hierarchyTriplet(input.amount, child.currency, 'authorized', -1, ctx);
+    if (!ct.ok) return ct;
+    lines.push(budgetLine(parent, 'allocated_out', 1, pt.value));
+    lines.push(budgetLine(child, 'authorized', -1, ct.value));
+  }
+  return draft('rollover', input.amount, ctx, lines, {
+    reasonCode: input.reasonCode ?? undefined,
+    reason: input.reason ?? undefined,
+  });
+}
+
+/**
  * Applying a plan version to a root budget: an increase is Dr `plan_funding` / Cr root `authorized`,
  * a decrease the opposite; both lines carry the plan version so the root ties to it.
  */
@@ -549,7 +597,9 @@ export type CommitmentPosting =
   | 'accrue'
   | 'reverse_accrual'
   | 'hold'
-  | 'release_hold';
+  | 'release_hold'
+  /** Year-end carry-forward: the new year re-posts what the ending year released. */
+  | 'carry_encumbrance';
 
 const COMMITMENT_PAIRS: Record<CommitmentPosting, { debit: LedgerAccount; credit: LedgerAccount }> =
   {
@@ -562,6 +612,7 @@ const COMMITMENT_PAIRS: Record<CommitmentPosting, { debit: LedgerAccount; credit
     reverse_accrual: { debit: 'obligations', credit: 'accrued' },
     hold: { debit: 'held', credit: 'earmark_reserve' },
     release_hold: { debit: 'earmark_reserve', credit: 'held' },
+    carry_encumbrance: { debit: 'encumbered', credit: 'obligations' },
   };
 
 export function postCommitmentMovement(
@@ -587,7 +638,9 @@ export function postCommitmentMovement(
       ? 'accrual'
       : input.kind === 'hold' || input.kind === 'release_hold'
         ? 'contribution'
-        : 'commitment';
+        : input.kind === 'carry_encumbrance'
+          ? 'rollover'
+          : 'commitment';
   const built = draft(type, input.amount, ctx, [make(pair.debit, 1), make(pair.credit, -1)]);
   if (!built.ok) return built;
   if (input.kind === 'pre_encumber' || input.kind === 'hold') {

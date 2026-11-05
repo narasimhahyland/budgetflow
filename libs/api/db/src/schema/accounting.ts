@@ -328,8 +328,20 @@ export const periodCloseSnapshots = pgTable(
     balances: jsonb('balances').notNull(),
     takenBy: uuid('taken_by'),
     takenAt: ts('taken_at').notNull().defaultNow(),
+    /** Re-closing a reopened period takes the next version; earlier versions stay for audit. */
+    version: integer('version').notNull().default(1),
+    currency: ccy('currency'),
+    budgetCount: integer('budget_count').notNull().default(0),
   },
-  (t) => [index('period_close_snapshots_period').on(t.tenantId, t.fiscalPeriodId)],
+  (t) => [
+    index('period_close_snapshots_period').on(t.tenantId, t.fiscalPeriodId),
+    uniqueIndex('period_close_snapshots_version').on(
+      t.tenantId,
+      t.fiscalPeriodId,
+      t.legalEntityId,
+      t.version,
+    ),
+  ],
 );
 
 export const yearEndRuns = pgTable(
@@ -346,6 +358,13 @@ export const yearEndRuns = pgTable(
     summary: jsonb('summary'),
     createdBy: uuid('created_by'),
     createdAt: createdAt(),
+    /** The year the money moves into, the plan version it ties to and the tree the run covers. */
+    targetFiscalYearId: uuid('target_fiscal_year_id').references(() => fiscalYears.id),
+    targetPlanVersionId: uuid('target_plan_version_id'),
+    rootBudgetId: uuid('root_budget_id').references(() => budgets.id),
+    executedAt: ts('executed_at'),
+    executedBy: uuid('executed_by'),
+    error: text('error'),
   },
   (t) => [index('year_end_runs_year').on(t.tenantId, t.fiscalYearId)],
 );
