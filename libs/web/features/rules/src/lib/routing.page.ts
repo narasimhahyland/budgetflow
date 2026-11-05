@@ -1,0 +1,128 @@
+import { ChangeDetectionStrategy, Component, computed, resource, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { data, injectApi, valueOf } from './api';
+import { approverLabel } from './labels';
+import { LoadState } from './load-state';
+import { RulesTabs } from './rules-tabs';
+
+/** Screen 070: the approval steps each kind of request goes through, and when each step applies. */
+@Component({
+  selector: 'bf-routing-page',
+  imports: [
+    FormsModule,
+    LoadState,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    RulesTabs,
+    SAT_BANNER_IMPORTS,
+  ],
+  template: `
+    <header class="bf-page__header">
+      <div class="bf-page__heading">
+        <h1 class="bf-page__title">Approval routing</h1>
+        <p class="bf-page__subtitle">
+          The steps a request goes through, in order. A step is skipped when its condition does not
+          apply, and every step still checks the approver's own approval limit.
+        </p>
+      </div>
+    </header>
+    <bf-rules-tabs current="routing" />
+    <bf-load-state
+      [loading]="routes.isLoading() && !routes.hasValue()"
+      [error]="routes.error()"
+      what="approval routing"
+      (retry)="routes.reload()"
+    />
+    @if (routes.hasValue()) {
+      <section class="bf-card" aria-labelledby="kind-title">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" id="kind-title">Which requests</h2>
+        </div>
+        <div class="bf-filters">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Kind of request</mat-label>
+            <mat-select [ngModel]="kind()" (ngModelChange)="kind.set($event)" name="kind">
+              @for (r of valueOf(routes)?.items ?? []; track r.id) {
+                <mat-option [value]="r.requestKind">{{ r.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </section>
+
+      @if (selected(); as route) {
+        <section class="bf-card" aria-labelledby="steps-title">
+          <div class="bf-card__header">
+            <h2 class="bf-card__title" id="steps-title">
+              {{ route.label }} — version {{ route.activeVersion }}
+            </h2>
+            <p class="bf-card__hint">In force from {{ route.validFrom }}.</p>
+          </div>
+          <div class="bf-table-scroll">
+            <table class="bf-split-table" aria-label="Approval steps">
+              <thead>
+                <tr>
+                  <th scope="col" class="bf-num">Step</th>
+                  <th scope="col">Who decides</th>
+                  <th scope="col">When this step applies</th>
+                  <th scope="col">Order</th>
+                  <th scope="col" class="bf-num">Time to decide</th>
+                  <th scope="col">Approval limit applies</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of route.steps; track s.stepNo) {
+                  <tr>
+                    <td class="bf-num">{{ s.stepNo }}</td>
+                    <td>
+                      <span class="bf-cell__primary">{{ s.label }}</span>
+                      <span class="bf-cell__secondary">{{ resolver(s.resolver) }}</span>
+                    </td>
+                    <td>{{ s.conditionLabel ?? 'Always' }}</td>
+                    <td>
+                      {{
+                        s.mode === 'parallel'
+                          ? 'At the same time as other steps'
+                          : 'One after another'
+                      }}
+                      <span class="bf-cell__secondary">{{
+                        s.groupRule === 'all' ? 'Everyone named must agree' : 'Any one of them'
+                      }}</span>
+                    </td>
+                    <td class="bf-num">{{ s.slaBusinessHours }} working hours</td>
+                    <td>{{ s.applyDoa ? 'Yes' : 'No' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="bf-card__body">
+            <sat-banner variant="info">
+              <sat-banner-message>
+                A step whose approver does not hold a high enough approval limit passes the decision
+                up to the next authority instead of being skipped.
+              </sat-banner-message>
+            </sat-banner>
+          </div>
+        </section>
+      }
+    }
+  `,
+  host: { class: 'bf-page-layout' },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class RoutingPage {
+  private readonly api = injectApi();
+  protected readonly valueOf = valueOf;
+  protected readonly resolver = approverLabel;
+  protected readonly kind = signal('spending');
+  protected readonly routes = resource({ loader: () => data(this.api.listWorkflowRoutes({})) });
+  protected readonly selected = computed(() =>
+    (valueOf(this.routes)?.items ?? []).find((r) => r.requestKind === this.kind()),
+  );
+}
