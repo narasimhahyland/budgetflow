@@ -90,8 +90,8 @@ export const appRoutes: Route[] = [
         loadChildren: () => import('@bf/web/features/insights').then((m) => m.auditLogRoutes),
       },
       {
-        path: 'reports/utilization',
-        loadChildren: () => import('@bf/web/features/insights').then((m) => m.utilizationRoutes),
+        path: 'reports',
+        loadChildren: () => import('@bf/web/features/reports').then((m) => m.reportsRoutes),
       },
       ...accountingRoutes,
       ...shellChildRoutes,
