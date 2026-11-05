@@ -8,6 +8,7 @@ import {
   requests,
   type Tx,
 } from '@bf/api/db';
+import { BudgetViews } from '@bf/api/budgets';
 import { ApiProblem, unwrap, type RequestActor } from '@bf/api/core';
 import { LedgerReads, LedgerService, toPostingBudget, type PostingBudget } from '@bf/api/ledger';
 import {
@@ -133,6 +134,7 @@ export class MatchEngine {
     private readonly ledger: LedgerService,
     private readonly ledgerReads: LedgerReads,
     private readonly reads: ActualsReads,
+    private readonly views: BudgetViews,
   ) {}
 
   async lockActual(tx: Tx, actualId: string): Promise<ActualRow> {
@@ -213,7 +215,7 @@ export class MatchEngine {
 
   async match(
     tx: Tx,
-    actor: Actor,
+    actor: RequestActor,
     actualId: string,
     parts: MatchPartInput[],
     opts: MatchOptions,
@@ -249,6 +251,8 @@ export class MatchEngine {
     await this.ledgerReads.lockBudgets(tx, budgetIds);
     const bRows = await this.ledgerReads.budgetRows(tx, budgetIds);
     for (const id of budgetIds) if (!bRows.has(id)) throw ApiProblem.notFound('budget');
+    const touched = [...new Set(budgetIds)];
+    const utilizationBefore = opts.dryRun ? null : await this.views.utilizations(tx, touched);
     const balances = new Map<string, BucketBalances>(
       [...(await this.ledgerReads.balances(tx, budgetIds)).entries()].map(([k, v]) => [
         k,
@@ -496,6 +500,7 @@ export class MatchEngine {
         matchedBy: actor.personId,
       })
       .where(eq(actuals.id, a.id));
+    await this.views.emitThresholds(tx, actor, utilizationBefore!, touched);
     return { journalIds };
   }
 

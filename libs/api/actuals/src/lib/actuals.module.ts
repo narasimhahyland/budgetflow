@@ -1,4 +1,5 @@
 import { AuditModule } from '@bf/api/audit';
+import { BudgetsModule } from '@bf/api/budgets';
 import { LedgerModule } from '@bf/api/ledger';
 import { TenancyModule } from '@bf/api/tenancy';
 import { Module } from '@nestjs/common';
@@ -29,7 +30,7 @@ const SERVICES = [
 
 /** Actuals and accounting services (also used by the seed). */
 @Module({
-  imports: [AuditModule, LedgerModule, TenancyModule],
+  imports: [AuditModule, BudgetsModule, LedgerModule, TenancyModule],
   providers: SERVICES,
   exports: SERVICES,
 })
