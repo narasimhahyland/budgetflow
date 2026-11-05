@@ -736,7 +736,7 @@ export const TieOutList = named(
   'TieOutList',
   z.object({ month: MonthKey, items: z.array(TieOut) }).strict(),
 );
-export const TieOutQuery = z
+export const GlTieOutQuery = z
   .object({ month: MonthKey.optional(), legalEntityId: Id.optional() })
   .strict();
 
@@ -1233,7 +1233,7 @@ export const actualsEndpoints = {
     summary: 'Latest GL tie-out per legal entity for a month',
     tags,
     auth: true,
-    query: TieOutQuery,
+    query: GlTieOutQuery,
     response: { status: 200, schema: TieOutList },
     errors: READ_ERRORS,
   },

@@ -22,7 +22,7 @@ import {
   RejectAccrualRequest,
   ReleaseCommitmentRequest,
   SignOffTieOutRequest,
-  TieOutQuery,
+  GlTieOutQuery,
   UnmatchActualRequest,
   UpdateMappingRuleRequest,
   UploadActualsImportRequest,
@@ -298,7 +298,7 @@ export class ActualsController {
   // GL tie-out
   @Get('tie-outs')
   listTieOuts(@CurrentActor() actor: RequestActor, @Query() query: unknown) {
-    return this.tieouts.list(actor, parseWith(TieOutQuery, query));
+    return this.tieouts.list(actor, parseWith(GlTieOutQuery, query));
   }
 
   @Post('tie-outs')
