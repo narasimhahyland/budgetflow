@@ -21,6 +21,7 @@ export const SERVER_ANALYTICS_EVENTS = [
   'event.submitted',
   'actual.imported',
   'actual.matched',
+  'tieout.signed_off',
 ] as const;
 export const ANALYTICS_EVENTS = [...CLIENT_ANALYTICS_EVENTS, ...SERVER_ANALYTICS_EVENTS] as const;
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[number];

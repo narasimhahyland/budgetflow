@@ -1,0 +1,132 @@
+{
+  "request": "GET /api/actuals/tie-outs?month=2026-11&legalEntityId=20000000-0000-4000-8000-000000000002",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "month": "2026-11",
+    "items": [
+      {
+        "id": "cf57b98e-aad6-44c7-96e8-c2dcd08233ec",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "legalEntityCode": "HYL-IN",
+        "legalEntityName": "Hyland Technologies India Private Limited",
+        "functionalCurrency": "INR",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026",
+          "startDate": "2026-11-01",
+          "endDate": "2026-11-30"
+        },
+        "status": "exceptions",
+        "currency": "USD",
+        "tolerance": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "glTotal": {
+          "amountMinor": 310859,
+          "currency": "USD"
+        },
+        "budgetflowTotal": {
+          "amountMinor": 253802,
+          "currency": "USD"
+        },
+        "difference": {
+          "amountMinor": 57057,
+          "currency": "USD"
+        },
+        "exceptions": 1,
+        "unexplainedExceptions": 1,
+        "unmatchedActuals": 8,
+        "sourceFileName": "gl-trial-balance-HYL-IN-2026-11.csv",
+        "preparedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "preparedByName": "Daniel Weber",
+        "signedOffByPersonId": null,
+        "signedOffByName": null,
+        "signedOffAt": null,
+        "signOffComment": null,
+        "createdAt": "2026-11-04T22:56:48.693Z",
+        "lines": [
+          {
+            "id": "85784977-537a-458d-a902-eaa8f785e1b2",
+            "costCenterId": "31000000-0000-4000-8000-000000000002",
+            "costCenterCode": "CC-IN-BLR-200",
+            "costCenterName": "Bengaluru office",
+            "glAccountId": "25000000-0000-4000-8000-000000000201",
+            "glAccountCode": "6100",
+            "glAccountName": "Employee events and team building",
+            "gl": {
+              "amountMinor": 168589,
+              "currency": "USD"
+            },
+            "budgetflow": {
+              "amountMinor": 168589,
+              "currency": "USD"
+            },
+            "difference": {
+              "amountMinor": 0,
+              "currency": "USD"
+            },
+            "withinTolerance": true,
+            "explanation": null,
+            "explainedByName": null,
+            "explainedAt": null,
+            "unmatchedActuals": 0
+          },
+          {
+            "id": "d4eb0bb4-c70d-473a-a608-6b590ac3c343",
+            "costCenterId": "31000000-0000-4000-8000-000000000003",
+            "costCenterCode": "CC-IN-HYD-210",
+            "costCenterName": "Hyderabad office",
+            "glAccountId": "25000000-0000-4000-8000-000000000201",
+            "glAccountCode": "6100",
+            "glAccountName": "Employee events and team building",
+            "gl": {
+              "amountMinor": 62462,
+              "currency": "USD"
+            },
+            "budgetflow": {
+              "amountMinor": 62462,
+              "currency": "USD"
+            },
+            "difference": {
+              "amountMinor": 0,
+              "currency": "USD"
+            },
+            "withinTolerance": true,
+            "explanation": null,
+            "explainedByName": null,
+            "explainedAt": null,
+            "unmatchedActuals": 0
+          },
+          {
+            "id": "57965534-5026-4996-b91e-526bbe41478a",
+            "costCenterId": "31000000-0000-4000-8000-000000000003",
+            "costCenterCode": "CC-IN-HYD-210",
+            "costCenterName": "Hyderabad office",
+            "glAccountId": "25000000-0000-4000-8000-000000000205",
+            "glAccountCode": "6140",
+            "glAccountName": "Travel and subsistence",
+            "gl": {
+              "amountMinor": 79808,
+              "currency": "USD"
+            },
+            "budgetflow": {
+              "amountMinor": 22751,
+              "currency": "USD"
+            },
+            "difference": {
+              "amountMinor": 57057,
+              "currency": "USD"
+            },
+            "withinTolerance": false,
+            "explanation": null,
+            "explainedByName": null,
+            "explainedAt": null,
+            "unmatchedActuals": 2
+          }
+        ]
+      }
+    ]
+  }
+}

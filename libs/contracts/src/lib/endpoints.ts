@@ -1,4 +1,5 @@
 import { ProblemDetails } from './common';
+import { actualsEndpoints } from './domains/actuals';
 import { analyticsEndpoints } from './domains/analytics';
 import { approvalEndpoints } from './domains/approvals';
 import { auditEndpoints } from './domains/audit';
@@ -37,6 +38,7 @@ export const endpoints = {
   ...approvalEndpoints,
   ...contributionEndpoints,
   ...documentEndpoints,
+  ...actualsEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;

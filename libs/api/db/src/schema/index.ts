@@ -7,6 +7,7 @@ export * from './ledger';
 export * from './spend';
 export * from './authority';
 export * from './accounting';
+export * from './actuals';
 export * from './platform';
 export * from './cofunding';
 export * from './documents';

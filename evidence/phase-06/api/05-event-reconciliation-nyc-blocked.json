@@ -1,0 +1,107 @@
+{
+  "request": "GET /api/actuals/events/77000000-0000-4000-8000-000000000003/reconciliation",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "event": {
+      "id": "77000000-0000-4000-8000-000000000003",
+      "name": "New York Team Offsite",
+      "eventCode": "NYC-OFFSITE-26",
+      "status": "completed",
+      "legalEntityId": "20000000-0000-4000-8000-000000000001",
+      "budgetId": "70000000-0000-4000-8000-000000000003",
+      "budgetName": "United States Region"
+    },
+    "actuals": {
+      "matched": 1,
+      "unmatched": 1,
+      "excluded": 0,
+      "matchedReporting": {
+        "amountMinor": 480000,
+        "currency": "USD"
+      },
+      "unmatchedReporting": {
+        "amountMinor": 64000,
+        "currency": "USD"
+      },
+      "fxEffect": {
+        "amountMinor": 0,
+        "currency": "USD"
+      }
+    },
+    "commitments": [
+      {
+        "id": "78000000-0000-4000-8000-000000000005",
+        "reference": "CMT-00000005",
+        "description": "Offsite venue and AV",
+        "status": "consumed",
+        "budgetId": "70000000-0000-4000-8000-000000000003",
+        "budgetName": "United States Region",
+        "legalEntityId": "20000000-0000-4000-8000-000000000001",
+        "eventId": "77000000-0000-4000-8000-000000000003",
+        "eventCode": "NYC-OFFSITE-26",
+        "vendorName": "Lakeside Banquets",
+        "serviceStart": "2026-10-15",
+        "serviceEnd": "2026-10-16",
+        "amount": {
+          "amountMinor": 480000,
+          "currency": "USD"
+        },
+        "encumbered": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "encumberedReporting": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "consumed": {
+          "amountMinor": 480000,
+          "currency": "USD"
+        },
+        "released": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "fees": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "nonRefundableDeposit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "accrued": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "prepaid": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "daysPast": 0,
+        "agingBucket": "current",
+        "releasePrompt": false,
+        "lastActualOn": "2026-11-02"
+      }
+    ],
+    "contributions": [],
+    "spent": {
+      "amountMinor": 480000,
+      "currency": "USD"
+    },
+    "surplus": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "blockers": [
+      {
+        "code": "EVENT_HAS_UNMATCHED_ACTUALS",
+        "message": "Match or exclude every actual before closing the event.",
+        "count": 1
+      }
+    ],
+    "canClose": false,
+    "surplusReturns": []
+  }
+}

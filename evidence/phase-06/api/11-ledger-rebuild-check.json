@@ -1,0 +1,31 @@
+{
+  "request": "GET /api/integrity/ledger-checks/58da796c-f7ac-4744-aa8e-45bbc02fed97",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "id": "58da796c-f7ac-4744-aa8e-45bbc02fed97",
+    "kind": "ledger_rebuild",
+    "status": "clean",
+    "requestedAt": "2026-11-05T01:52:35.100Z",
+    "startedAt": "2026-11-05T01:52:36.237Z",
+    "finishedAt": "2026-11-05T01:52:36.286Z",
+    "flagsRaised": 0,
+    "summary": {
+      "auditChain": {
+        "valid": true,
+        "checked": 746,
+        "firstBrokenSeq": null
+      },
+      "linesChecked": 1115,
+      "balanceDrifts": [],
+      "budgetsChecked": 261,
+      "journalsChecked": 542,
+      "negativeBuckets": [],
+      "planTieMismatches": [],
+      "tripletMismatches": [],
+      "unbalancedJournals": [],
+      "hierarchyMismatches": [],
+      "overAllocatedBudgets": []
+    }
+  }
+}

@@ -1,0 +1,470 @@
+{
+  "generatedAt": "2026-11-04T22:52:36.337Z",
+  "base": "http://localhost:4260",
+  "screensFile": "evidence/phase-06/visual-qa/screens.p6.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 54,
+  "blocking": 0,
+  "warnings": 4,
+  "results": [
+    {
+      "id": "080a-actuals-import",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--default--tablet--light.png",
+      "findings": [
+        {
+          "type": "layout-shift",
+          "severity": "warning",
+          "message": "cumulative layout shift 0.101 (> 0.1)"
+        }
+      ]
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "upload",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--upload--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "upload",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--upload--tablet--light.png",
+      "findings": [
+        {
+          "type": "layout-shift",
+          "severity": "warning",
+          "message": "cumulative layout shift 0.100 (> 0.1)"
+        }
+      ]
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "upload",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--upload--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "auditor-read-only",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--auditor-read-only--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "auditor-read-only",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--auditor-read-only--tablet--light.png",
+      "findings": [
+        {
+          "type": "layout-shift",
+          "severity": "warning",
+          "message": "cumulative layout shift 0.101 (> 0.1)"
+        }
+      ]
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "auditor-read-only",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--auditor-read-only--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "employee-forbidden",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--employee-forbidden--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "employee-forbidden",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--employee-forbidden--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-actuals-import",
+      "state": "employee-forbidden",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-actuals-import--employee-forbidden--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "match-drawer-over-tolerance",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--match-drawer-over-tolerance--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "match-drawer-over-tolerance",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--match-drawer-over-tolerance--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "match-drawer-over-tolerance",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--match-drawer-over-tolerance--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "match-drawer-no-rule",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--match-drawer-no-rule--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "match-drawer-no-rule",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--match-drawer-no-rule--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "state": "match-drawer-no-rule",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080b-unmatched-actuals--match-drawer-no-rule--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "drill-down",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--drill-down--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "drill-down",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--drill-down--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "drill-down",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--drill-down--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "finance-admin-blocked",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--finance-admin-blocked--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "finance-admin-blocked",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--finance-admin-blocked--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "finance-admin-blocked",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--finance-admin-blocked--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "us-tied",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--us-tied--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "us-tied",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--us-tied--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "state": "us-tied",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080c-gl-tie-out--us-tied--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080d-accruals-prepaids",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080d-accruals-prepaids--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080d-accruals-prepaids",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080d-accruals-prepaids--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080d-accruals-prepaids",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080d-accruals-prepaids--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "085a-commitment-hygiene",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/085a-commitment-hygiene--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "085a-commitment-hygiene",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/085a-commitment-hygiene--default--tablet--light.png",
+      "findings": [
+        {
+          "type": "layout-shift",
+          "severity": "warning",
+          "message": "cumulative layout shift 0.143 (> 0.1)"
+        }
+      ]
+    },
+    {
+      "id": "085a-commitment-hygiene",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/085a-commitment-hygiene--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "053-event-reconciliation",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/053-event-reconciliation--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "053-event-reconciliation",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/053-event-reconciliation--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "053-event-reconciliation",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/053-event-reconciliation--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "054-close-event",
+      "state": "blocked",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/054-close-event--blocked--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "054-close-event",
+      "state": "blocked",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/054-close-event--blocked--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "054-close-event",
+      "state": "blocked",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/054-close-event--blocked--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "054-close-event",
+      "state": "hack-week-blocked",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/054-close-event--hack-week-blocked--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "054-close-event",
+      "state": "hack-week-blocked",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/054-close-event--hack-week-blocked--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "054-close-event",
+      "state": "hack-week-blocked",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/054-close-event--hack-week-blocked--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-matched-actuals",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-matched-actuals--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-matched-actuals",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-matched-actuals--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-matched-actuals",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-matched-actuals--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-mapping-rules",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-mapping-rules--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-mapping-rules",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-mapping-rules--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080a-mapping-rules",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-06/visual-qa/iter-3/screens/080a-mapping-rules--default--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

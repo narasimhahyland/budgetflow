@@ -1,0 +1,399 @@
+{
+  "request": "GET /api/actuals/accruals",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "items": [
+      {
+        "id": "10c48b89-96f1-4ca0-8c98-424d82402b92",
+        "commitmentId": "71f5044a-5229-4322-beb4-eba9432c195b",
+        "commitmentReference": "CMT-432C195B",
+        "description": "Scenario commitment",
+        "budgetId": "63af3c7f-321b-43bb-9ac7-f716a63105db",
+        "budgetName": "Scenario child USD 99c7d698",
+        "amount": {
+          "amountMinor": 20000,
+          "currency": "USD"
+        },
+        "status": "reversed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "774633bf-4b8c-467e-b4cd-8f80c4e63a6f",
+        "reversalJournalId": "78454473-82da-413e-9d62-ef3ac83658c6",
+        "reversalTrigger": "period",
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T23:01:28.719Z",
+        "decisionReason": null,
+        "exportedAt": null,
+        "createdAt": "2026-11-04T23:01:28.706Z"
+      },
+      {
+        "id": "a055e433-84ad-4c46-bea1-87e8a1423c90",
+        "commitmentId": "a8dd3a18-2685-4132-a68a-9d51b305a98b",
+        "commitmentReference": "CMT-B305A98B",
+        "description": "Scenario commitment",
+        "budgetId": "63af3c7f-321b-43bb-9ac7-f716a63105db",
+        "budgetName": "Scenario child USD 99c7d698",
+        "amount": {
+          "amountMinor": 150000,
+          "currency": "USD"
+        },
+        "status": "reversed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "98af2a91-c488-4268-a50f-f1a504d5c2f8",
+        "reversalJournalId": "0ede5fbb-b377-41cc-90c2-8c0065d05b00",
+        "reversalTrigger": "actual",
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T23:01:28.726Z",
+        "decisionReason": null,
+        "exportedAt": null,
+        "createdAt": "2026-11-04T23:01:28.706Z"
+      },
+      {
+        "id": "dc7ca1b1-fd89-4b91-ac7a-4f25c4df21d9",
+        "commitmentId": "28a0b5fa-5c81-41a8-9046-30d2201eb374",
+        "commitmentReference": "CMT-201EB374",
+        "description": "Gifts (in dispute)",
+        "budgetId": "c675a3d3-9b84-4bb0-84cb-51a382948d98",
+        "budgetName": "Scenario child USD 7a404c91",
+        "amount": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "status": "rejected",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": null,
+        "reversalJournalId": null,
+        "reversalTrigger": null,
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T23:01:27.285Z",
+        "decisionReason": "Supplier dispute, no liability yet",
+        "exportedAt": null,
+        "createdAt": "2026-11-04T23:01:27.258Z"
+      },
+      {
+        "id": "05042fac-0d7c-423e-80cd-a405725f2b74",
+        "commitmentId": "da37357c-05cf-47fb-92b6-99d6b80d2a65",
+        "commitmentReference": "CMT-B80D2A65",
+        "description": "Speaker fee",
+        "budgetId": "c675a3d3-9b84-4bb0-84cb-51a382948d98",
+        "budgetName": "Scenario child USD 7a404c91",
+        "amount": {
+          "amountMinor": 25000,
+          "currency": "USD"
+        },
+        "status": "reversed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "fe063ada-bb42-4ab9-b173-1f72df5de8e4",
+        "reversalJournalId": "39f8d745-f85a-4d48-a5e5-e28b8cfab7ae",
+        "reversalTrigger": "period",
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T23:01:27.274Z",
+        "decisionReason": null,
+        "exportedAt": null,
+        "createdAt": "2026-11-04T23:01:27.258Z"
+      },
+      {
+        "id": "8450ac4c-0962-4fdd-aaa9-b55609ef921d",
+        "commitmentId": "359f6602-6633-4c5a-8655-891d97393304",
+        "commitmentReference": "CMT-97393304",
+        "description": "Workshop facilitation",
+        "budgetId": "ff3aac70-180d-409b-b79c-b8f475a98b49",
+        "budgetName": "Scenario child USD ebf04483",
+        "amount": {
+          "amountMinor": 80000,
+          "currency": "USD"
+        },
+        "status": "reversed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "33a84565-dc98-4350-b2ef-adcac5b70cb1",
+        "reversalJournalId": "9798aa3a-c93c-4dba-ad53-cadced024756",
+        "reversalTrigger": "actual",
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T23:01:27.072Z",
+        "decisionReason": null,
+        "exportedAt": "2026-11-04T23:01:27.095Z",
+        "createdAt": "2026-11-04T23:01:27.011Z"
+      },
+      {
+        "id": "8aef1b92-9765-4a32-8f23-34d660010cb9",
+        "commitmentId": "c2cc705d-ce9e-4452-b931-a5cd9df5dc46",
+        "commitmentReference": "CMT-9DF5DC46",
+        "description": "Scenario commitment",
+        "budgetId": "5c96a950-4191-41e2-ae63-6e32bb7be5bc",
+        "budgetName": "Scenario child USD a4be311e",
+        "amount": {
+          "amountMinor": 20000,
+          "currency": "USD"
+        },
+        "status": "reversed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "8e8cd18b-93c3-4f16-9591-562c53430571",
+        "reversalJournalId": "6d999451-4d69-4e23-9f08-09a4740e74ba",
+        "reversalTrigger": "period",
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T22:56:54.841Z",
+        "decisionReason": null,
+        "exportedAt": null,
+        "createdAt": "2026-11-04T22:56:54.820Z"
+      },
+      {
+        "id": "8a33cfa6-1977-41ae-9625-3ab45454490f",
+        "commitmentId": "eb54269b-0579-4010-a001-6514388c7112",
+        "commitmentReference": "CMT-388C7112",
+        "description": "Scenario commitment",
+        "budgetId": "5c96a950-4191-41e2-ae63-6e32bb7be5bc",
+        "budgetName": "Scenario child USD a4be311e",
+        "amount": {
+          "amountMinor": 150000,
+          "currency": "USD"
+        },
+        "status": "reversed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "c8f95edc-1bc4-4b1e-87a9-06146758f423",
+        "reversalJournalId": "c7fd3f7d-84a3-4aca-b095-4e285c9df205",
+        "reversalTrigger": "actual",
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T22:56:54.832Z",
+        "decisionReason": null,
+        "exportedAt": null,
+        "createdAt": "2026-11-04T22:56:54.820Z"
+      },
+      {
+        "id": "1061529b-2f08-4159-bc50-68f376f12196",
+        "commitmentId": "d96ebafb-d5eb-493e-b369-89ea5649bd4b",
+        "commitmentReference": "CMT-5649BD4B",
+        "description": "Speaker fee",
+        "budgetId": "14b963f7-766d-405d-9fd9-e289f2bb3dc1",
+        "budgetName": "Scenario child USD 6d0dfef2",
+        "amount": {
+          "amountMinor": 25000,
+          "currency": "USD"
+        },
+        "status": "reversed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "155c3135-ee1f-4bed-a5fd-95117a39e3ac",
+        "reversalJournalId": "5e4fd640-37f1-4390-b5b5-427d9ca28b42",
+        "reversalTrigger": "period",
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T22:56:52.950Z",
+        "decisionReason": null,
+        "exportedAt": null,
+        "createdAt": "2026-11-04T22:56:52.927Z"
+      },
+      {
+        "id": "2d253ec0-0070-4a01-949b-276f688df3de",
+        "commitmentId": "6ec8cabd-2c0b-4998-a62b-0fd4826b0764",
+        "commitmentReference": "CMT-826B0764",
+        "description": "Gifts (in dispute)",
+        "budgetId": "14b963f7-766d-405d-9fd9-e289f2bb3dc1",
+        "budgetName": "Scenario child USD 6d0dfef2",
+        "amount": {
+          "amountMinor": 5000,
+          "currency": "USD"
+        },
+        "status": "rejected",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": null,
+        "reversalJournalId": null,
+        "reversalTrigger": null,
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T22:56:52.970Z",
+        "decisionReason": "Supplier dispute, no liability yet",
+        "exportedAt": null,
+        "createdAt": "2026-11-04T22:56:52.927Z"
+      },
+      {
+        "id": "eea45ea6-7b52-4e93-a334-52dfcdbf3ae2",
+        "commitmentId": "6be9bb31-6185-4354-bfc6-8a622cc36d34",
+        "commitmentReference": "CMT-2CC36D34",
+        "description": "Workshop facilitation",
+        "budgetId": "55823600-46ee-4e2a-aded-ce5b85ec44b5",
+        "budgetName": "Scenario child USD 6e299bb7",
+        "amount": {
+          "amountMinor": 80000,
+          "currency": "USD"
+        },
+        "status": "reversed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "3d684998-ec9d-41fe-957a-304e11d53264",
+        "reversalJournalId": "f6b372f8-5497-461e-91c2-195d9a1ea341",
+        "reversalTrigger": "actual",
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T22:56:52.613Z",
+        "decisionReason": null,
+        "exportedAt": "2026-11-04T22:56:52.649Z",
+        "createdAt": "2026-11-04T22:56:52.524Z"
+      },
+      {
+        "id": "01cfa574-a638-473c-b076-20b2ac6e6d4b",
+        "commitmentId": "78000000-0000-4000-8000-000000000006",
+        "commitmentReference": "CMT-00000006",
+        "description": "Quarterly team lunch (no invoice received)",
+        "budgetId": "70000000-0000-4000-8000-000000000003",
+        "budgetName": "United States Region",
+        "amount": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "status": "proposed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-012026110000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-012026120000",
+          "label": "Dec 2026"
+        },
+        "journalId": null,
+        "reversalJournalId": null,
+        "reversalTrigger": null,
+        "decidedByPersonId": null,
+        "decidedAt": null,
+        "decisionReason": null,
+        "exportedAt": null,
+        "createdAt": "2026-11-04T22:56:48.670Z"
+      },
+      {
+        "id": "21c475d8-b27e-454f-8e39-9d3e96786ee4",
+        "commitmentId": "78000000-0000-4000-8000-000000000003",
+        "commitmentReference": "CMT-00000003",
+        "description": "Hack Week meals and venue",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "India Region",
+        "amount": {
+          "amountMinor": 3300000,
+          "currency": "INR"
+        },
+        "status": "posted",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": "0c7dfc64-f322-4f01-ae22-b60ef248d0c5",
+        "reversalJournalId": null,
+        "reversalTrigger": null,
+        "decidedByPersonId": "40000000-0000-4000-8000-000000000005",
+        "decidedAt": "2026-11-04T22:56:48.690Z",
+        "decisionReason": null,
+        "exportedAt": "2026-11-04T22:56:52.649Z",
+        "createdAt": "2026-11-04T22:56:48.670Z"
+      },
+      {
+        "id": "09daa938-adf0-4469-86d8-95942fed0125",
+        "commitmentId": "78000000-0000-4000-8000-000000000004",
+        "commitmentReference": "CMT-00000004",
+        "description": "Hack Week team travel",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "India Region",
+        "amount": {
+          "amountMinor": 2106000,
+          "currency": "INR"
+        },
+        "status": "proposed",
+        "accrualDate": "2026-11-05",
+        "period": {
+          "id": "23000000-0000-4000-8000-022027080000",
+          "label": "Nov 2026"
+        },
+        "autoReversePeriod": {
+          "id": "23000000-0000-4000-8000-022027090000",
+          "label": "Dec 2026"
+        },
+        "journalId": null,
+        "reversalJournalId": null,
+        "reversalTrigger": null,
+        "decidedByPersonId": null,
+        "decidedAt": null,
+        "decisionReason": null,
+        "exportedAt": null,
+        "createdAt": "2026-11-04T22:56:48.670Z"
+      }
+    ]
+  }
+}

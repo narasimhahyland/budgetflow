@@ -2,7 +2,7 @@ import type { Tx } from '@bf/api/db';
 import { Injectable } from '@nestjs/common';
 
 export interface CloseBlock {
-  code: 'EVENT_HAS_UNMATCHED_ACTUALS' | 'EVENT_MISSING_RECHARGE';
+  code: 'EVENT_HAS_UNMATCHED_ACTUALS' | 'EVENT_MISSING_RECHARGE' | 'EVENT_HAS_OPEN_COMMITMENTS';
   message: string;
   count: number;
 }

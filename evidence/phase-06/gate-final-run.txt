@@ -1,0 +1,28 @@
+
+▶ secrets         sh scripts/secret-scan.sh --all --quiet
+  ✓ secrets (0s)
+
+▶ stack           bash -c bash scripts/stack.sh up && bash scripts/stack.sh reset
+  ✓ stack (44s)
+
+▶ functional-api  nx_run run-many -t functional-api
+  ✓ functional-api (77s)
+
+▶ functional-e2e  nx_run run-many -t functional-e2e
+  ✓ functional-e2e (56s)
+
+▶ reseed          bash scripts/stack.sh reset
+  ✓ reseed (38s)
+
+▶ visual          npm run e2e:visual
+  ✓ visual (48s)
+  note: the local stack is still running (scripts/stack.sh down to stop it)
+
+Gate summary (functional-api functional-e2e visual) — logs in tmp/gate/20261105-111152
+  PASS secrets             0s
+  PASS stack              44s
+  PASS functional-api     77s
+  PASS functional-e2e     56s
+  PASS reseed             38s
+  PASS visual             48s
+Evidence: evidence/phase-06//gate-summary.txt

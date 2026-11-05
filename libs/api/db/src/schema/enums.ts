@@ -141,6 +141,7 @@ export const yearEndRunStatus = pgEnum('year_end_run_status', [
   'completed',
   'failed',
 ]);
+export const importBatchStatus = pgEnum('import_batch_status', ['review', 'posted', 'discarded']);
 export const tieoutStatus = pgEnum('tieout_status', [
   'draft',
   'reconciled',

@@ -1,0 +1,475 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">GL tie-out</h1>
+    <p class="bf-page__subtitle">
+      Compare BudgetFlow actuals with the general ledger by entity, cost center, account and period
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    @if (canPrepare() && !preparing()) {
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="preparing.set(true); prepEntity.set(run()?.legalEntityId ?? null)"
+      >
+        Run tie-out
+      </button>
+    }
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="!run() || busy()"
+      (click)="exportCsv()"
+      data-testid="export-tieout"
+    >
+      <mat-icon svgIcon="download" aria-hidden="true" /> Export CSV
+    </button>
+  </div>
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="tieout-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="tieout-error"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+<section class="bf-card bf-filters" aria-label="Filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Period</mat-label>
+    <mat-select [ngModel]="month()" (ngModelChange)="month.set($event); entityId.set(null)">
+      @for (m of months; track m) {
+        <mat-option [value]="m">{{ monthLabel(m) }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Entity</mat-label>
+    <mat-select
+      [ngModel]="run()?.legalEntityId ?? entityId()"
+      (ngModelChange)="entityId.set($event)"
+    >
+      @for (e of valueOf(entities)?.items ?? []; track e.id) {
+        <mat-option [value]="e.id">{{ e.code }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  @if (run(); as r) {
+    <span class="bf-chip-row"
+      ><span class="bf-muted">Tolerance</span>
+      <strong
+        ><bf-money
+          [amountMinor]="r.tolerance.amountMinor"
+          [currency]="r.tolerance.currency" /></strong
+    ></span>
+  }
+</section>
+
+@if (preparing()) {
+  <section class="bf-card" aria-labelledby="prep-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="prep-title">Run a tie-out for {{ monthLabel(month()) }}</h2>
+        <p class="bf-card__hint">
+          Upload the general ledger balances (cost_center, gl_account, amount, currency) exported
+          from the ERP. Amounts convert to USD at the locked plan rate.
+        </p>
+      </div>
+    </div>
+    <div class="bf-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Entity</mat-label>
+        <mat-select
+          [ngModel]="prepEntity()"
+          (ngModelChange)="prepEntity.set($event)"
+          data-testid="prep-entity"
+        >
+          @for (e of valueOf(entities)?.items ?? []; track e.id) {
+            <mat-option [value]="e.id">{{ e.code }} · {{ e.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Tolerance (USD)</mat-label>
+        <input
+          matInput
+          inputmode="decimal"
+          [ngModel]="prepTolerance()"
+          (ngModelChange)="prepTolerance.set($event)"
+        />
+      </mat-form-field>
+    </div>
+    <div class="bf-card__body">
+      <bf-file-input
+        [(value)]="prepContent"
+        [(fileName)]="prepFile"
+        label="General ledger balances CSV"
+        hint="One row per cost center and account."
+      />
+    </div>
+    <div class="bf-form__actions">
+      <button mat-button type="button" (click)="preparing.set(false)">Cancel</button>
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="busy() || !prepEntity() || !prepContent().trim()"
+        (click)="prepare()"
+      >
+        Compare with BudgetFlow
+      </button>
+    </div>
+  </section>
+}
+
+@if (runs().length) {
+  <div class="bf-chip-row" aria-label="Entities">
+    <span class="bf-muted">ENTITIES:</span>
+    @for (r of runs(); track r.id) {
+      <button
+        type="button"
+        class="bf-chip"
+        [class.bf-chip--warn]="r.exceptions > 0 && r.status !== 'signed_off'"
+        [class.bf-chip--ok]="r.exceptions === 0 || r.status === 'signed_off'"
+        [class.bf-chip--selected]="run()?.id === r.id"
+        (click)="entityId.set(r.legalEntityId)"
+        [attr.data-testid]="'entity-chip-' + r.legalEntityCode"
+      >
+        @if (r.status === 'signed_off') {
+          <mat-icon svgIcon="lock" aria-hidden="true" />
+        }
+        {{ r.legalEntityCode }} · {{ chipText(r) }}
+      </button>
+    }
+  </div>
+}
+
+@if (list.isLoading() && !valueOf(list)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the tie-out" /></section>
+} @else if (list.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="list.error()" what="the tie-out" (retry)="list.reload()" />
+  </section>
+} @else if (run(); as r) {
+  <div class="bf-two-col">
+    <section class="bf-card" aria-labelledby="recon-title">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="recon-title">
+          Reconciliation table <span class="bf-muted">({{ r.lines.length }} accounts)</span>
+        </h2>
+        <span class="bf-muted">Amounts in {{ r.currency }}</span>
+      </div>
+      <div class="bf-table-scroll">
+        <table
+          mat-table
+          [dataSource]="r.lines"
+          [attr.aria-label]="'Tie-out ' + r.legalEntityCode + ' ' + r.period.label"
+        >
+          <caption class="bf-sr">
+            {{
+              r.legalEntityCode
+            }}
+            {{
+              r.period.label
+            }}
+            tie-out
+          </caption>
+          <ng-container matColumnDef="account">
+            <th mat-header-cell *matHeaderCellDef>GL account</th>
+            <td mat-cell *matCellDef="let l">
+              <span class="bf-cell__primary"
+                >{{ l.glAccountCode ?? 'No account' }} {{ l.glAccountName ?? '' }}</span
+              >
+              @if (l.unmatchedActuals) {
+                <span class="bf-cell__secondary bf-difference"
+                  >{{ l.unmatchedActuals }} unmatched line{{
+                    l.unmatchedActuals === 1 ? '' : 's'
+                  }}</span
+                >
+              }
+            </td>
+            <td mat-footer-cell *matFooterCellDef>Total ({{ r.lines.length }} accounts)</td>
+          </ng-container>
+          <ng-container matColumnDef="costCenter">
+            <th mat-header-cell *matHeaderCellDef>Cost center</th>
+            <td mat-cell *matCellDef="let l">
+              <span class="bf-cell__primary bf-nowrap">{{ l.costCenterCode ?? '—' }}</span>
+              <span class="bf-cell__secondary">{{ l.costCenterName ?? '' }}</span>
+            </td>
+            <td mat-footer-cell *matFooterCellDef>—</td>
+          </ng-container>
+          <ng-container matColumnDef="gl">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">General ledger</th>
+            <td mat-cell *matCellDef="let l" class="bf-num">
+              <bf-money [amountMinor]="l.gl.amountMinor" [currency]="l.gl.currency" />
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="bf-num">
+              <bf-money [amountMinor]="r.glTotal.amountMinor" [currency]="r.currency" />
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="budgetflow">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">BudgetFlow actuals</th>
+            <td mat-cell *matCellDef="let l" class="bf-num">
+              <bf-money
+                [amountMinor]="l.budgetflow.amountMinor"
+                [currency]="l.budgetflow.currency"
+              />
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="bf-num">
+              <bf-money [amountMinor]="r.budgetflowTotal.amountMinor" [currency]="r.currency" />
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="difference">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Difference</th>
+            <td
+              mat-cell
+              *matCellDef="let l"
+              class="bf-num"
+              [class.bf-difference]="!l.withinTolerance"
+            >
+              <bf-money
+                [amountMinor]="l.difference.amountMinor"
+                [currency]="l.difference.currency"
+              />
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="bf-num">
+              <bf-money [amountMinor]="r.difference.amountMinor" [currency]="r.currency" />
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let l">
+              @if (l.withinTolerance) {
+                <sat-status-tag status="success">Tied</sat-status-tag>
+              } @else if (l.explanation) {
+                <sat-status-tag status="info">Explained</sat-status-tag>
+              } @else {
+                <sat-status-tag status="warning">Difference</sat-status-tag>
+              }
+            </td>
+            <td mat-footer-cell *matFooterCellDef>
+              <sat-status-tag [status]="r.exceptions ? 'warning' : 'success'">{{
+                r.exceptions ? 'Unreconciled' : 'Tied'
+              }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: columns"
+            class="bf-row--clickable"
+            [class.bf-row--difference]="!row.withinTolerance"
+            [class.bf-row--selected]="row.id === selectedLine()"
+            tabindex="0"
+            (click)="selectLine(row)"
+            (keydown.enter)="selectLine(row)"
+            [attr.data-testid]="'tieout-row-' + row.glAccountCode + '-' + row.costCenterCode"
+          ></tr>
+          <tr mat-footer-row *matFooterRowDef="columns" class="bf-total-row"></tr>
+        </table>
+      </div>
+      @for (l of r.lines; track l.id) {
+        @if (l.explanation) {
+          <p class="bf-card__body bf-muted">
+            <strong>{{ l.glAccountCode }} {{ l.costCenterCode }}:</strong> {{ l.explanation }}
+            {{ l.explainedByName ? '— ' + l.explainedByName : '' }}
+          </p>
+        }
+      }
+      @if (selectedLine()) {
+        <div class="bf-card__body" data-testid="tieout-drill">
+          @if (valueOf(drill); as d) {
+            <h3 class="bf-card__title">
+              BudgetFlow lines for {{ d.line.glAccountCode }} ·
+              {{ d.line.costCenterCode ?? 'no cost center' }}
+            </h3>
+            @for (x of d.ledgerLines; track x.lineId) {
+              <p class="bf-chip-row">
+                <span>{{ x.accountingDate | date: 'd MMM' }}</span>
+                <span>{{ x.sourceRef ?? 'Adjustment' }} {{ x.merchant ?? '' }}</span>
+                <bf-money
+                  [amountMinor]="x.transaction.amountMinor"
+                  [currency]="x.transaction.currency"
+                />
+                <span class="bf-muted"
+                  >=
+                  <bf-money
+                    [amountMinor]="x.reporting.amountMinor"
+                    [currency]="x.reporting.currency"
+                /></span>
+              </p>
+            } @empty {
+              <p class="bf-muted">No posted actuals for this row.</p>
+            }
+            @if (d.unmatchedActuals.length) {
+              <h3 class="bf-card__title">Unmatched actuals (probable cause)</h3>
+              @for (u of d.unmatchedActuals; track u.id) {
+                <p class="bf-chip-row">
+                  <span>{{ u.sourceRef }}</span>
+                  <span>{{ u.memo ?? u.merchant ?? '' }}</span>
+                  <bf-money
+                    [amountMinor]="u.transaction.amountMinor"
+                    [currency]="u.transaction.currency"
+                  />
+                  <sat-status-tag status="warning">In the unmatched queue</sat-status-tag>
+                </p>
+              }
+            }
+          } @else {
+            <bf-load-state
+              [loading]="drill.isLoading()"
+              [error]="drill.error()"
+              what="the lines"
+              [lines]="2"
+            />
+          }
+        </div>
+      }
+    </section>
+
+    <section class="bf-card" aria-labelledby="signoff-title" data-testid="signoff-card">
+      <div class="bf-signoff">
+        <div>
+          <h2 class="bf-card__title" id="signoff-title">
+            Monthly sign-off – {{ r.period.label }} – {{ r.legalEntityCode }}
+          </h2>
+          <p class="bf-card__hint">Reconciliation compliance checklist</p>
+        </div>
+        <p class="bf-check">
+          <mat-icon svgIcon="circle_check" class="bf-check__icon--ok" aria-hidden="true" />
+          <span
+            >All actual files imported<br /><span class="bf-muted"
+              >Prepared {{ r.createdAt | bfDateTime: timezone() }}</span
+            ></span
+          >
+        </p>
+        <p class="bf-check">
+          <mat-icon
+            [svgIcon]="r.unmatchedActuals ? 'info' : 'circle_check'"
+            [class.bf-check__icon--warn]="r.unmatchedActuals"
+            [class.bf-check__icon--ok]="!r.unmatchedActuals"
+            aria-hidden="true"
+          />
+          <span
+            >Unmatched queue cleared<br />
+            @if (r.unmatchedActuals) {
+              <span class="bf-check__detail--warn"
+                >({{ r.unmatchedActuals }} line{{ r.unmatchedActuals === 1 ? '' : 's' }} pending
+                review)</span
+              >
+            } @else {
+              <span class="bf-muted">Nothing pending</span>
+            }
+          </span>
+        </p>
+        <p class="bf-check">
+          <mat-icon
+            [svgIcon]="r.unexplainedExceptions ? 'error' : 'circle_check'"
+            [class.bf-check__icon--bad]="r.unexplainedExceptions"
+            [class.bf-check__icon--ok]="!r.unexplainedExceptions"
+            aria-hidden="true"
+          />
+          <span
+            >Differences within tolerance<br />
+            @if (r.unexplainedExceptions) {
+              <span class="bf-check__detail--bad"
+                >({{ money(aboveTolerance(), r.currency) }} above
+                {{ money(r.tolerance.amountMinor, r.currency) }})</span
+              >
+            } @else if (r.exceptions) {
+              <span class="bf-muted">All differences explained</span>
+            } @else {
+              <span class="bf-muted">Every row tied</span>
+            }
+          </span>
+        </p>
+        <dl class="bf-signoff__people">
+          <dt>Prepared by:</dt>
+          <dd>{{ r.preparedByName ?? '—' }}</dd>
+          <dt>Reviewer:</dt>
+          <dd>{{ r.signedOffByName ?? 'Finance admin' }}</dd>
+        </dl>
+        @if (r.status === 'signed_off') {
+          <sat-banner variant="info" data-testid="signed-off"
+            ><sat-banner-message
+              ><mat-icon svgIcon="lock" aria-hidden="true" /> Signed off by {{ r.signedOffByName }}
+              {{ r.signedOffAt | bfDateTime: timezone()
+              }}{{ r.signOffComment ? ' — ' + r.signOffComment : '' }}</sat-banner-message
+            ></sat-banner
+          >
+        } @else {
+          @if (canSign() && !signBlockedReason()) {
+            <mat-form-field appearance="outline">
+              <mat-label>Comment (optional)</mat-label>
+              <input matInput [ngModel]="comment()" (ngModelChange)="comment.set($event)" />
+            </mat-form-field>
+          }
+          <button
+            mat-flat-button
+            type="button"
+            [disabled]="busy() || signBlockedReason() !== null"
+            (click)="signOff()"
+            data-testid="sign-off"
+          >
+            Sign off {{ r.period.label
+            }}{{ r.exceptions && !r.unexplainedExceptions ? ' with explanations' : '' }}
+          </button>
+          @if (signBlockedReason(); as why) {
+            <p class="bf-muted" data-testid="signoff-blocked">{{ why }}</p>
+          }
+          @if (canPrepare() && r.exceptions > 0) {
+            @if (explaining()) {
+              <mat-form-field appearance="outline">
+                <mat-label>Explanation for the difference</mat-label>
+                <textarea
+                  matInput
+                  rows="3"
+                  [ngModel]="explanation()"
+                  (ngModelChange)="explanation.set($event)"
+                  data-testid="explanation"
+                ></textarea>
+              </mat-form-field>
+              <div class="bf-chip-row">
+                <button mat-button type="button" (click)="explaining.set(null)">Cancel</button>
+                <button
+                  mat-flat-button
+                  type="button"
+                  [disabled]="busy() || explanation().trim().length < 5"
+                  (click)="explain()"
+                  data-testid="save-explanation"
+                >
+                  Save explanation
+                </button>
+              </div>
+            } @else {
+              <button
+                mat-button
+                type="button"
+                (click)="startExplain()"
+                data-testid="add-explanation"
+              >
+                Add explanation
+              </button>
+            }
+          }
+        }
+        <p class="bf-muted">
+          <mat-icon svgIcon="lock" aria-hidden="true" /> Sign-off locks the tie-out for the period
+          and is audited.
+        </p>
+      </div>
+    </section>
+  </div>
+} @else {
+  <section class="bf-card">
+    <sat-empty-state>
+      <h2 satEmptyStateHeadline>No tie-out for {{ monthLabel(month()) }} yet</h2>
+      <p satEmptyStateDescription>
+        Run a tie-out with the general ledger balances to compare them with BudgetFlow actuals.
+      </p>
+    </sat-empty-state>
+  </section>
+}

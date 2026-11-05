@@ -1,0 +1,133 @@
+{
+  "request": "GET /api/actuals?status=queue&batchId=f314b0bd-3857-4d26-966d-6a5dcedfb902",
+  "user": "finance.controller@example.test",
+  "status": 200,
+  "response": {
+    "items": [
+      {
+        "id": "3fd21149-65e7-4cb3-ae5b-be29ccb9dd8f",
+        "batchId": "f314b0bd-3857-4d26-966d-6a5dcedfb902",
+        "lineNo": 10,
+        "source": "erp",
+        "sourceRef": "ERP-2611-0009",
+        "kind": "charge",
+        "status": "unmatched",
+        "transactionDate": "2026-11-04",
+        "accountingDate": "2026-11-04",
+        "legalEntityId": "20000000-0000-4000-8000-000000000001",
+        "legalEntityCode": "HYL-US",
+        "costCenterId": "31000000-0000-4000-8000-000000000004",
+        "costCenterCode": "CC-US-NYC-300",
+        "glAccountId": "25000000-0000-4000-8000-000000000101",
+        "glAccountCode": "6100",
+        "eventCode": "NYC-OFFSITE-26",
+        "vendorId": null,
+        "vendorName": null,
+        "merchant": "Northside Print",
+        "memo": "Offsite name badges",
+        "reference": null,
+        "originalRef": null,
+        "cardProgram": null,
+        "transaction": {
+          "amountMinor": 64000,
+          "currency": "USD"
+        },
+        "reporting": {
+          "amountMinor": 64000,
+          "currency": "USD"
+        },
+        "planRate": "1.000000000000",
+        "actualRate": null,
+        "actualReporting": null,
+        "fxEffect": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "matched": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "budget": null,
+        "suggestion": null,
+        "note": "No matching rule found.",
+        "duplicateOfActualId": null,
+        "excludedReason": null,
+        "overBudgetRequest": null,
+        "matchedAt": null
+      },
+      {
+        "id": "0af354d9-0f9a-4288-9f76-2ab2bccf66b2",
+        "batchId": "f314b0bd-3857-4d26-966d-6a5dcedfb902",
+        "lineNo": 5,
+        "source": "erp",
+        "sourceRef": "ERP-2611-0004",
+        "kind": "charge",
+        "status": "unmatched",
+        "transactionDate": "2026-11-03",
+        "accountingDate": "2026-11-03",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "legalEntityCode": "HYL-IN",
+        "costCenterId": "31000000-0000-4000-8000-000000000003",
+        "costCenterCode": "CC-IN-HYD-210",
+        "glAccountId": "25000000-0000-4000-8000-000000000205",
+        "glAccountCode": "6140",
+        "eventCode": "HYD-HACK-26",
+        "vendorId": null,
+        "vendorName": null,
+        "merchant": null,
+        "memo": "Hack Week team travel",
+        "reference": null,
+        "originalRef": null,
+        "cardProgram": null,
+        "transaction": {
+          "amountMinor": 4750000,
+          "currency": "INR"
+        },
+        "reporting": {
+          "amountMinor": 57057,
+          "currency": "USD"
+        },
+        "planRate": "0.012012012012",
+        "actualRate": {
+          "type": "spot",
+          "value": "0.011894849530"
+        },
+        "actualReporting": {
+          "amountMinor": 56501,
+          "currency": "USD"
+        },
+        "fxEffect": {
+          "amountMinor": -556,
+          "currency": "USD"
+        },
+        "matched": {
+          "amountMinor": 0,
+          "currency": "INR"
+        },
+        "budget": null,
+        "suggestion": {
+          "rule": "event_cost_center",
+          "confidence": 70,
+          "commitmentId": "78000000-0000-4000-8000-000000000004",
+          "commitmentReference": "CMT-00000004",
+          "budgetId": "70000000-0000-4000-8000-000000000002",
+          "budgetName": "",
+          "fit": null,
+          "differenceMinor": null
+        },
+        "note": "Above the commitment plus its tolerance. Request over-budget approval for the difference.",
+        "duplicateOfActualId": null,
+        "excludedReason": null,
+        "overBudgetRequest": null,
+        "matchedAt": null
+      }
+    ],
+    "nextCursor": null,
+    "counts": {
+      "queue": 14,
+      "matched": 65,
+      "excluded": 10,
+      "review": 2
+    }
+  }
+}

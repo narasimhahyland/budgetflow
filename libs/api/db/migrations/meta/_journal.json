@@ -43,6 +43,13 @@
       "when": 1793839762493,
       "tag": "0005_events_cofunding",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793841000000,
+      "tag": "0006_actuals_accounting",
+      "breakpoints": true
     }
   ]
 }

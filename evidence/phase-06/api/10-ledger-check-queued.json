@@ -1,0 +1,10 @@
+{
+    "id": "3b5fcd86-592d-40f8-98e0-6a9565fe390c",
+    "kind": "ledger_rebuild",
+    "status": "queued",
+    "requestedAt": "2026-11-04T23:03:58.397Z",
+    "startedAt": null,
+    "finishedAt": null,
+    "flagsRaised": 0,
+    "summary": null
+}

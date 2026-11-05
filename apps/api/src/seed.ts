@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { ActualsModule } from '@bf/api/actuals';
 import { AuditModule } from '@bf/api/audit';
 import { BudgetsModule, BudgetsService } from '@bf/api/budgets';
 import { ActorResolver, CoreModule, DB } from '@bf/api/core';
@@ -21,7 +22,7 @@ if (!ownerUrl) {
 process.env.DATABASE_URL = ownerUrl;
 process.env.KEYCLOAK_ISSUER ??= 'http://localhost:8080/realms/budgetflow';
 
-@Module({ imports: [CoreModule, AuditModule, LedgerModule, BudgetsModule] })
+@Module({ imports: [CoreModule, AuditModule, LedgerModule, BudgetsModule, ActualsModule] })
 class SeedModule {}
 
 async function main(): Promise<void> {
