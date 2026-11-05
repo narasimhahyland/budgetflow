@@ -1,21 +1,27 @@
 import { ApiProblem, PolicyService, type RequestActor } from '@bf/api/core';
 import { budgets, budgetVersions, outboxMessages, type Tx } from '@bf/api/db';
-import { LedgerReads, todayUtc, toPostingBudget, type BalancePair } from '@bf/api/ledger';
+import {
+  LedgerReads,
+  ThresholdAlerts,
+  todayUtc,
+  toPostingBudget,
+  type BalancePair,
+} from '@bf/api/ledger';
 import type { BudgetDetail, PerHeadDriverConfig } from '@bf/contracts';
 import {
   allocationAvailable,
   allocationBadge,
   availableOf,
   explainAvailable,
+  rollupUtilizationBps,
   thresholdsReached,
-  utilizationBps,
   type Action,
   type BucketBalances,
   type Resource,
   type SubtreeTotals,
 } from '@bf/domain';
 import { Injectable } from '@nestjs/common';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 export type BudgetRow = typeof budgets.$inferSelect;
 
@@ -75,6 +81,7 @@ export class BudgetViews {
   constructor(
     private readonly policy: PolicyService,
     private readonly reads: LedgerReads,
+    private readonly alerts: ThresholdAlerts,
   ) {}
 
   async row(tx: Tx, id: string): Promise<BudgetRow> {
@@ -121,32 +128,11 @@ export class BudgetViews {
       );
   }
 
-  async subtreeTotals(tx: Tx, rows: readonly BudgetRow[]): Promise<Map<string, SubtreeTotals>> {
-    const out = new Map<string, SubtreeTotals>(
-      rows.map((r) => [r.id, { preEncumberedMinor: 0, encumberedMinor: 0, actualMinor: 0 }]),
+  subtreeTotals(tx: Tx, rows: readonly BudgetRow[]): Promise<Map<string, SubtreeTotals>> {
+    return this.alerts.subtreeTotals(
+      tx,
+      rows.map((r) => r.id),
     );
-    if (!rows.length) return out;
-    const res = await tx.execute<{ id: string; pre: string; enc: string; act: string }>(sql`
-      select b.id,
-        coalesce(sum(lb.reporting_amount_minor) filter (where lb.bucket = 'pre_encumbered'), 0)::text as pre,
-        coalesce(sum(lb.reporting_amount_minor) filter (where lb.bucket = 'encumbered'), 0)::text as enc,
-        coalesce(sum(lb.reporting_amount_minor) filter (where lb.bucket = 'actual'), 0)::text as act
-      from budgets b
-      join budgets d on d.tenant_id = b.tenant_id and left(d.path, length(b.path)) = b.path
-      join ledger_balances lb on lb.budget_id = d.id and lb.bucket in ('pre_encumbered', 'encumbered', 'actual')
-      where b.id in (${sql.join(
-        rows.map((r) => sql`${r.id}::uuid`),
-        sql`, `,
-      )})
-      group by b.id`);
-    for (const r of res.rows) {
-      out.set(r.id, {
-        preEncumberedMinor: Number(r.pre),
-        encumberedMinor: Number(r.enc),
-        actualMinor: Number(r.act),
-      });
-    }
-    return out;
   }
 
   private async displays(tx: Tx, rows: readonly BudgetRow[]): Promise<Map<string, Display>> {
@@ -255,7 +241,7 @@ export class BudgetViews {
       accrued: m(b.accrued, c),
     });
     const explanation = explainAvailable(pair.reporting, posting.control, subtree);
-    const util = utilizationBps(pair.budget);
+    const util = rollupUtilizationBps(pair.reporting.authorized, subtree);
     const actions: string[] = this.policy.allowed(actor, budgetResource(row), BUDGET_ACTIONS);
     const controls = this.canControl(actor, row, parent);
     if (controls) actions.push('budget.control');
@@ -366,35 +352,18 @@ export class BudgetViews {
     await tx.insert(outboxMessages).values({ tenantId, topic, payload });
   }
 
-  /** Emits `budget.threshold_crossed` for owner alert thresholds newly reached (utilization rose). */
-  async emitThresholds(
+  /** Publishes `budget.threshold_crossed` for thresholds newly reached on roll-up utilization (ancestors included). */
+  emitThresholds(
     tx: Tx,
     actor: RequestActor,
     before: Map<string, number>,
     ids: readonly string[],
   ): Promise<void> {
-    const rows = await tx
-      .select()
-      .from(budgets)
-      .where(inArray(budgets.id, [...ids]));
-    const balances = await this.reads.balances(tx, ids);
-    for (const r of rows) {
-      const after = utilizationBps(balances.get(r.id)!.budget);
-      for (const t of thresholdsReached(before.get(r.id) ?? 0, after, r.alertThresholdsPct)) {
-        await this.outbox(tx, actor.tenantId, 'budget.threshold_crossed', {
-          tenantId: actor.tenantId,
-          budgetId: r.id,
-          ownerPersonId: r.ownerPersonId,
-          thresholdPct: t,
-          utilizationBps: after,
-          occurredAt: new Date().toISOString(),
-        });
-      }
-    }
+    return this.alerts.emit(tx, actor.tenantId, before, ids);
   }
 
-  async utilizations(tx: Tx, ids: readonly string[]): Promise<Map<string, number>> {
-    const balances = await this.reads.balances(tx, ids);
-    return new Map(ids.map((id) => [id, utilizationBps(balances.get(id)!.budget)]));
+  /** Roll-up utilization of the budgets and their ancestors, read before a change for `emitThresholds`. */
+  utilizations(tx: Tx, ids: readonly string[]): Promise<Map<string, number>> {
+    return this.alerts.utilizations(tx, ids);
   }
 }

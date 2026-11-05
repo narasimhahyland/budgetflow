@@ -9,9 +9,13 @@ The November 2026 product and finance review left several questions open: which 
 - **One company.** BudgetFlow runs for Hyland. The seed has one product tenant named Hyland; the shell shows the company name only, with no tenant switcher and no organization switcher. `tenant_id` and row-level security stay as built so a second company can be added later. Globex and Initech Sandbox remain scenario-only tenants (isolation and destructive checks), never shown as product data.
 - **Seed data.** Apart from the company name and real office cities, seed data is fictional: no real employee names, internal figures or internal tools.
 - **Currency.** The reporting currency is fixed per tenant and is USD for Hyland. Budgets are held in USD; transactions in local currency (for example INR, EUR) convert to the USD budget currency at the plan rate locked for the fiscal year, with the currency triplet stored and the FX effect reported separately (FX never consumes budget).
-- **Available on the executive dashboard.** Company-wide Available = Authorized − Pre-encumbered − Encumbered − Actual, with child allocations counted once in roll-ups. Each budget's control basis still governs enforcement; drilling down to a budget shows "Available under this budget's rules" with a tooltip explaining any difference from the company-wide figure.
+- **Available on the executive dashboard.** Company-wide Available = Authorized − Held − Pending (pre-encumbered) − Committed (encumbered) − Actual, with child allocations counted once in roll-ups; held money (earmarks, reserve holds) cannot be spent, matching the impact preview. Parent utilization is a roll-up too: (encumbered + actual of the budget and everything below it) / authorized, so owner alerts on a parent fire from spend in its children. Each budget's control basis still governs enforcement; drilling down to a budget shows "Available under this budget's rules" with a tooltip explaining any difference from the company-wide figure.
 - **Sharing.** Dashboards and reports offer Export only (CSV, XLSX, PDF); there is no Share action anywhere in the product.
 - **Theme.** Light theme only (unchanged from ADR 0004).
+
+## Amendment (5 Nov 2026)
+
+The Phase 4 domain review found that company-wide Available ignored held money and that parent utilization counted only the parent's own spend. The product owner decided that Available also subtracts held amounts and that utilization on budget detail, the hierarchy and the summary uses the same roll-up; the decision above is updated accordingly.
 
 ## Consequences
 

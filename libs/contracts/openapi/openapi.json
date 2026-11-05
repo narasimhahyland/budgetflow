@@ -509,7 +509,7 @@
         "type": "object",
         "properties": {
           "companyWide": {
-            "description": "Authorized − pre-encumbered − encumbered − actual over this budget and everything below it (child allocations counted once).",
+            "description": "Authorized − held − pre-encumbered − encumbered − actual over this budget and everything below it (child allocations counted once).",
             "$ref": "#/components/schemas/Money"
           },
           "underRules": {
@@ -1161,7 +1161,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "(encumbered + actual) / authorized in basis points; pending shown separately."
+            "description": "Roll-up utilization: (encumbered + actual of this budget and everything below it) / authorized in basis points, child spend counted once; pending shown separately."
           },
           "thresholdsReachedPct": {
             "type": "array",
@@ -1679,6 +1679,10 @@
           "authorized": {
             "$ref": "#/components/schemas/Money"
           },
+          "held": {
+            "description": "Earmarks and reserve holds across the scope; held money cannot be spent.",
+            "$ref": "#/components/schemas/Money"
+          },
           "preEncumbered": {
             "$ref": "#/components/schemas/Money"
           },
@@ -1689,7 +1693,7 @@
             "$ref": "#/components/schemas/Money"
           },
           "available": {
-            "description": "Company-wide Available: authorized − pre-encumbered − encumbered − actual, child allocations counted once.",
+            "description": "Company-wide Available: authorized − held − pre-encumbered − encumbered − actual, child allocations counted once.",
             "$ref": "#/components/schemas/Money"
           },
           "utilizationBps": {
@@ -1735,6 +1739,7 @@
           "rootId",
           "currency",
           "authorized",
+          "held",
           "preEncumbered",
           "encumbered",
           "actual",

@@ -109,7 +109,7 @@ export const AvailableExplanation = named(
   z
     .object({
       companyWide: Money.describe(
-        'Authorized − pre-encumbered − encumbered − actual over this budget and everything below it (child allocations counted once).',
+        'Authorized − held − pre-encumbered − encumbered − actual over this budget and everything below it (child allocations counted once).',
       ),
       underRules: Money.describe("Available under this budget's own control basis."),
       difference: Money,
@@ -153,7 +153,9 @@ export const BudgetDetail = named(
       available: AvailableExplanation,
       utilizationBps: z
         .int()
-        .describe('(encumbered + actual) / authorized in basis points; pending shown separately.'),
+        .describe(
+          'Roll-up utilization: (encumbered + actual of this budget and everything below it) / authorized in basis points, child spend counted once; pending shown separately.',
+        ),
       thresholdsReachedPct: z.array(z.int()).describe('Owner alert thresholds already reached.'),
       allocationDriver: z.enum(['fixed', 'per_head']),
       driver: PerHeadDriverConfig.nullable(),
@@ -274,11 +276,14 @@ export const BudgetSummary = named(
       rootId: Id.nullable(),
       currency: CurrencyCode,
       authorized: Money,
+      held: Money.describe(
+        'Earmarks and reserve holds across the scope; held money cannot be spent.',
+      ),
       preEncumbered: Money,
       encumbered: Money,
       actual: Money,
       available: Money.describe(
-        'Company-wide Available: authorized − pre-encumbered − encumbered − actual, child allocations counted once.',
+        'Company-wide Available: authorized − held − pre-encumbered − encumbered − actual, child allocations counted once.',
       ),
       utilizationBps: z.int(),
       budgetCount: z.int(),

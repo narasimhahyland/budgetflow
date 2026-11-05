@@ -68,6 +68,12 @@ Other topics: `budget.threshold_crossed` (`tenantId`, `budgetId`, `ownerPersonId
 
 Not in Phase 4: executive dashboard (P10), commitments and actuals tabs on budget details (P5, P6), delivery of control and threshold notifications (P5, P8), the budget calendar (screen 32) as its own page (the phasing tab covers it), editing plan version lines in the UI (import or copy instead), expired and closed controls (P11).
 
+### Phase 4 review follow-up (fix/p4-review)
+
+- **Roll-up utilization and alerts.** Utilization on budget detail, the hierarchy and the summary is `(encumbered + actual of the budget and everything below it) / authorized`. Owner alerts use the same roll-up through `ThresholdAlerts` (`libs/api/ledger`): read `utilizations(tx, budgetIds)` after locking and call `emit(tx, tenantId, before, budgetIds)` after posting. Manual journals and reversals already do; Phase 5 (commitments) and Phase 6 (actuals) call it when they post, so a parent's owner is alerted by spend in its children.
+- **Company-wide Available** subtracts held money: authorized − held − pre-encumbered − encumbered − actual over the subtree (`BudgetSummary.held` added).
+- **One audit entry per command.** `BudgetsService.createInTx` / `allocateInTx` and `ControlsService.transferInTx` take `audit: false` when the calling command writes the single entry itself (grid, per-head, request decisions, roll forward, plan apply).
+
 ## Rules for every phase agent
 
 1. **Owned paths only.** Each phase below lists the paths it owns. Shared surfaces belong to the integrator (`git-worktree-workflow.mdc`): `package.json`, lockfile, `nx.json`, `tsconfig.base.json`, `eslint.config.mjs`, `.stylelintrc.mjs`, `libs/contracts/src/lib/{common,endpoint,endpoints,registry}.ts` and `index.ts`, `libs/api/db/**`, `libs/domain/src/index.ts` and `authorization/policy.ts`, `apps/api/src/app/app.module.ts`, `apps/worker/src/app/worker.module.ts`, `apps/api/src/seed/extensions.ts`, `apps/web/src/app/**`, `libs/web/ui/**`, `libs/web/data-access/**`, `apps/web-e2e/visual/screens.json`, `docs/testing/invariant-scenarios.md`, `infra/**`, `.cursor/**`, `.github/**`. Put requested changes to them in your report.

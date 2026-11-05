@@ -140,20 +140,38 @@ export function thresholdsReached(
 }
 
 export interface SubtreeTotals {
+  heldMinor: number;
   preEncumberedMinor: number;
   encumberedMinor: number;
   actualMinor: number;
 }
 
 /**
- * Company-wide Available for a budget and everything below it: authorized − pre-encumbered −
+ * Company-wide Available for a budget and everything below it: authorized − held − pre-encumbered −
  * encumbered − actual summed over the subtree. Money allocated to children is counted once (it is
- * still available until a child commits or spends it).
+ * still available until a child holds, commits or spends it); held money (earmarks, reserve holds)
+ * cannot be spent.
  */
 export function companyAvailable(authorizedMinor: number, subtree: SubtreeTotals): number {
   return (
-    authorizedMinor - subtree.preEncumberedMinor - subtree.encumberedMinor - subtree.actualMinor
+    authorizedMinor -
+    subtree.heldMinor -
+    subtree.preEncumberedMinor -
+    subtree.encumberedMinor -
+    subtree.actualMinor
   );
+}
+
+/**
+ * Roll-up utilization of a budget: (encumbered + actual of the budget and everything below it) /
+ * its authorized, so a parent's owner sees (and is alerted on) spend in the children, counted once.
+ */
+export function rollupUtilizationBps(authorizedMinor: number, subtree: SubtreeTotals): number {
+  return utilizationBps({
+    authorized: authorizedMinor,
+    encumbered: subtree.encumberedMinor,
+    actual: subtree.actualMinor,
+  });
 }
 
 export interface AvailableExplanation {
@@ -177,6 +195,8 @@ export function explainAvailable(
   const underRules = availableOf(own, control.basis);
   const reasons: AvailableExplanation['reasons'] = [];
   const childrenSpend =
+    subtree.heldMinor -
+    own.held +
     subtree.preEncumberedMinor -
     own.pre_encumbered +
     subtree.encumberedMinor -
@@ -186,9 +206,7 @@ export function explainAvailable(
   if (control.basis.includes('allocated_out') && own.allocated_out)
     reasons.push({ kind: 'allocated_to_children', amountMinor: own.allocated_out });
   if (childrenSpend) reasons.push({ kind: 'children_spend', amountMinor: -childrenSpend });
-  if (control.basis.includes('held') && own.held)
-    reasons.push({ kind: 'held', amountMinor: own.held });
-  const excluded = (['pre_encumbered', 'encumbered', 'actual'] as const)
+  const excluded = (['held', 'pre_encumbered', 'encumbered', 'actual'] as const)
     .filter((b) => !control.basis.includes(b))
     .reduce((s, b) => s + own[b], 0);
   if (excluded) reasons.push({ kind: 'basis_excludes', amountMinor: -excluded });

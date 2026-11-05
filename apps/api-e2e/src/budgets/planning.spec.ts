@@ -547,7 +547,35 @@ test.describe('budget rules: phasing, limits, settings, alerts', () => {
           )
         ).rows,
     );
-    expect(events.map((e) => e.payload['thresholdPct'])).toEqual([80]);
+    // 50% was reached by the actual itself (alerts fire from spend), 80% by the reduction.
+    expect(events.map((e) => e.payload['thresholdPct'])).toEqual([50, 80]);
+  });
+
+  test("a parent's owner is alerted when spend in a child crosses the parent's threshold", async ({
+    request,
+  }) => {
+    const root = await createRoot(request, { amountMinor: 10_000, owner: 'regional-manager' });
+    const c = await createChild(request, root.id, { currency: 'USD', as: 'finance-admin' });
+    await allocateOk(request, root.id, c.id, USD(9_000), { as: 'finance-admin' });
+    const thresholds = async (budgetId: string) =>
+      asOwner(async (db) =>
+        (
+          await db.query<{ payload: Record<string, unknown> }>(
+            `select payload from outbox_messages where topic = 'budget.threshold_crossed' and payload->>'budgetId' = $1 order by created_at`,
+            [budgetId],
+          )
+        ).rows.map((r) => r.payload),
+      );
+    await openingBalance(request, c.id, 'actual', 6_000);
+    expect((await budget(request, root.id)).utilizationBps).toBe(6_000);
+    await openingBalance(request, c.id, 'encumbered', 2_500);
+    const parent = await budget(request, root.id);
+    expect(parent.utilizationBps).toBe(8_500);
+    expect(parent.thresholdsReachedPct).toEqual([50, 80]);
+    const events = await thresholds(root.id);
+    expect(events.map((e) => e['thresholdPct'])).toEqual([50, 80]);
+    expect(events[0]['ownerPersonId']).toBe(root.ownerPersonId);
+    expect((await thresholds(c.id)).map((e) => e['thresholdPct'])).toEqual([50, 80]);
   });
 });
 
@@ -596,6 +624,48 @@ test.describe('Available, roll-ups and scope', () => {
       amount: USD(30_000),
     });
     expect(history.items[0].counterparties).toEqual([{ budgetId: root.id, name: root.name }]);
+  });
+
+  test('company-wide Available subtracts held money; parent utilization rolls up child spend once', async ({
+    request,
+  }) => {
+    const root = await createRoot(request, { amountMinor: 100_000 });
+    const c = await createChild(request, root.id, { currency: 'USD' });
+    await allocateOk(request, root.id, c.id, USD(50_000));
+    await openingBalance(request, c.id, 'held', 2_000);
+    await openingBalance(request, root.id, 'held', 1_000);
+    await openingBalance(request, c.id, 'pre_encumbered', 1_000);
+    await openingBalance(request, c.id, 'encumbered', 5_000);
+    await openingBalance(request, c.id, 'actual', 3_000);
+    const s = await expectContract(
+      await request.get(`/api/budgets/summary?rootId=${root.id}`, { headers: await as('ceo') }),
+      200,
+      BudgetSummary,
+    );
+    expect(s).toMatchObject({
+      authorized: USD(100_000),
+      held: USD(3_000),
+      preEncumbered: USD(1_000),
+      encumbered: USD(5_000),
+      actual: USD(3_000),
+      available: USD(88_000),
+      utilizationBps: 800,
+    });
+    const r = await budget(request, root.id, 'ceo');
+    expect(r.available.companyWide).toEqual(s.available);
+    expect(r.available.underRules).toEqual(USD(49_000));
+    expect(r.available.reasons).toEqual([
+      { kind: 'allocated_to_children', amountMinor: 50_000 },
+      { kind: 'children_spend', amountMinor: -11_000 },
+    ]);
+    expect(r.utilizationBps).toBe(s.utilizationBps);
+    expect((await budget(request, c.id, 'ceo')).utilizationBps).toBe(1_600);
+    const hierarchy = await expectContract(
+      await request.get(`/api/budgets?rootId=${root.id}`, { headers: await as('ceo') }),
+      200,
+      BudgetList,
+    );
+    expect(hierarchy.items.find((b) => b.id === root.id)?.utilizationBps).toBe(800);
   });
 
   test('owners see their subtree only, in lists, roll-ups and controls', async ({ request }) => {

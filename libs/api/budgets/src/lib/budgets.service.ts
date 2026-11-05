@@ -40,8 +40,10 @@ import {
   DEFAULT_CONTROL,
   postAllocation,
   postOriginalBudget,
+  rollupUtilizationBps,
   utilizationBps,
   type CurrencyCode,
+  type SubtreeTotals,
 } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, asc, eq, gt, ilike, inArray, isNull, like, or, sql, type SQL } from 'drizzle-orm';
@@ -152,8 +154,8 @@ export class BudgetsService {
   }
 
   /**
-   * Company-wide roll-up: authorized of the top budgets in scope minus pre-encumbered, encumbered and
-   * actual of every budget below them, so money allocated to children is counted once.
+   * Company-wide roll-up: authorized of the top budgets in scope minus held, pre-encumbered, encumbered
+   * and actual of every budget below them, so money allocated to children is counted once.
    */
   async summary(
     actor: RequestActor,
@@ -195,8 +197,8 @@ export class BudgetsService {
       );
       const subtree = await this.views.subtreeTotals(tx, tops);
       const authorized = tops.reduce((s, t) => s + balances.get(t.id)!.reporting.authorized, 0);
-      const sum = (k: 'preEncumberedMinor' | 'encumberedMinor' | 'actualMinor') =>
-        tops.reduce((s, t) => s + subtree.get(t.id)![k], 0);
+      const sum = (k: keyof SubtreeTotals) => tops.reduce((s, t) => s + subtree.get(t.id)![k], 0);
+      const held = sum('heldMinor');
       const pre = sum('preEncumberedMinor');
       const enc = sum('encumberedMinor');
       const act = sum('actualMinor');
@@ -211,11 +213,15 @@ export class BudgetsService {
         tx,
         all.map((b) => b.id),
       );
+      const allSubtrees = await this.views.subtreeTotals(tx, all);
       const byStatus: Record<string, number> = {};
       let over = 0;
       for (const b of all) {
         byStatus[b.status] = (byStatus[b.status] ?? 0) + 1;
-        const util = utilizationBps(allBalances.get(b.id)!.budget);
+        const util = rollupUtilizationBps(
+          allBalances.get(b.id)!.reporting.authorized,
+          allSubtrees.get(b.id)!,
+        );
         if (b.alertThresholdsPct.some((t) => util >= t * 100)) over++;
       }
       return {
@@ -224,10 +230,11 @@ export class BudgetsService {
         rootId: q.rootId ?? null,
         currency: rep,
         authorized: m(authorized),
+        held: m(held),
         preEncumbered: m(pre),
         encumbered: m(enc),
         actual: m(act),
-        available: m(authorized - pre - enc - act),
+        available: m(authorized - held - pre - enc - act),
         utilizationBps: utilizationBps({ authorized, encumbered: enc, actual: act }),
         budgetCount: all.length,
         byStatus,

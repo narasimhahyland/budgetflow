@@ -22,6 +22,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { LedgerReads, toPostingBudget } from './ledger-reads.service';
 import { LedgerService } from './ledger.service';
+import { ThresholdAlerts } from './threshold-alerts.service';
 
 export const todayUtc = (): string => new Date().toISOString().slice(0, 10);
 
@@ -48,6 +49,7 @@ export class LedgerCommands {
     private readonly reads: LedgerReads,
     private readonly ledger: LedgerService,
     private readonly audit: AuditService,
+    private readonly alerts: ThresholdAlerts,
   ) {}
 
   reverse(
@@ -78,6 +80,7 @@ export class LedgerCommands {
           ...new Set(lines.map((l) => l.budgetId).filter((b): b is string => Boolean(b))),
         ];
         await this.reads.lockBudgets(tx, budgetIds);
+        const before = await this.alerts.utilizations(tx, budgetIds);
         const draft = unwrap(
           reverseJournal(
             {
@@ -120,6 +123,7 @@ export class LedgerCommands {
           idempotencyKey: ctx.idempotencyKey,
           allowSoftClosed: true,
         });
+        await this.alerts.emit(tx, actor.tenantId, before, budgetIds);
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
@@ -159,6 +163,7 @@ export class LedgerCommands {
           ...new Set(req.lines.map((l) => l.budgetId).filter((b): b is string => Boolean(b))),
         ];
         await this.reads.lockBudgets(tx, budgetIds);
+        const before = await this.alerts.utilizations(tx, budgetIds);
         const rows = await this.reads.budgetRows(tx, budgetIds);
         for (const id of budgetIds) if (!rows.has(id)) throw ApiProblem.notFound('budget');
         const fiscalYears = new Set([...rows.values()].map((r) => r.fiscalYearId));
@@ -225,6 +230,7 @@ export class LedgerCommands {
           idempotencyKey: ctx.idempotencyKey,
           allowSoftClosed: true,
         });
+        await this.alerts.emit(tx, actor.tenantId, before, budgetIds);
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
