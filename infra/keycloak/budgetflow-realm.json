@@ -509,6 +509,23 @@
         }
       ],
       "realmRoles": ["employee"]
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000019",
+      "username": "finance.admin2@example.test",
+      "email": "finance.admin2@example.test",
+      "emailVerified": true,
+      "firstName": "Marco",
+      "lastName": "Bianchi",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BF_E2E_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["finance-admin"]
     }
   ]
 }

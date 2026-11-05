@@ -589,6 +589,7 @@ export class ControlsService {
     type: 'reduction' | 'transfer',
     reason: { reasonCode: string | null; reason: string; accountingDate?: string },
     ctx: CommandContext,
+    allowCrossRoot = false,
   ): Promise<string> {
     const chain = await this.views.chain(tx, source);
     const root = chain[chain.length - 1];
@@ -608,6 +609,7 @@ export class ControlsService {
           amount: { amountMinor, currency: source.currency as CurrencyCode },
           reasonCode: reason.reasonCode,
           reason: reason.reason,
+          allowCrossRoot,
         },
         {
           reportingCurrency: actor.reportingCurrency,
@@ -974,9 +976,12 @@ export class ControlsService {
         'TRANSFER_INVALID',
         'Choose a different budget to receive the money.',
       );
+    const crossRootContingencyRelease =
+      source.budgetType === 'contingency' && !source.parentId && options.skipPolicy;
     if (
-      source.path.split('/')[1] !== dest.path.split('/')[1] ||
-      source.fiscalYearId !== dest.fiscalYearId
+      !crossRootContingencyRelease &&
+      (source.path.split('/')[1] !== dest.path.split('/')[1] ||
+        source.fiscalYearId !== dest.fiscalYearId)
     )
       throw new ApiProblem(
         422,
@@ -1038,6 +1043,7 @@ export class ControlsService {
       'transfer',
       req,
       ctx,
+      crossRootContingencyRelease,
     );
     if (options.audit !== false)
       await this.audit.append(tx, {

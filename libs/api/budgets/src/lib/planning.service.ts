@@ -146,7 +146,10 @@ export class PlanningService {
     );
   }
 
-  /** Root authorized and savings returned out of each root (savings lines share a journal with the root's debit). */
+  /**
+   * Root authorized (from plan funding, before cross-root contingency releases, which net to zero across
+   * roots of the year) and savings returned out of each root.
+   */
   private async rootFigures(
     tx: Tx,
     rootIds: string[],
@@ -155,17 +158,27 @@ export class PlanningService {
     if (!rootIds.length) return out;
     const balances = await this.reads.balances(tx, rootIds);
     for (const id of rootIds) out.get(id)!.authorizedMinor = balances.get(id)!.reporting.authorized;
+    const list = sql.join(
+      rootIds.map((id) => sql`${id}::uuid`),
+      sql`, `,
+    );
     const res = await tx.execute<{ budget_id: string; savings: string }>(sql`
       select r.budget_id, (-sum(s.reporting_amount_minor))::text as savings
       from ledger_lines s
       join ledger_lines r on r.journal_id = s.journal_id and r.account = 'authorized'
-        and r.budget_id in (${sql.join(
-          rootIds.map((id) => sql`${id}::uuid`),
-          sql`, `,
-        )})
+        and r.budget_id in (${list})
       where s.account = 'savings'
       group by r.budget_id`);
     for (const r of res.rows) out.get(r.budget_id)!.savingsMinor = Number(r.savings);
+    const xfer = await tx.execute<{ budget_id: string; net: string }>(sql`
+      select l.budget_id, sum(l.reporting_amount_minor)::text as net
+      from ledger_lines l
+      join ledger_journals j on j.id = l.journal_id
+      where j.journal_type = 'transfer'
+        and l.account = 'authorized'
+        and l.budget_id in (${list})
+      group by l.budget_id`);
+    for (const r of xfer.rows) out.get(r.budget_id)!.authorizedMinor += Number(r.net);
     return out;
   }
 
@@ -296,14 +309,44 @@ export class PlanningService {
         tiedOut: true,
         rootCount: 0,
       };
-    const lines = await tx
+    const ctrlLines = await tx
       .select()
       .from(planVersionLines)
       .where(eq(planVersionLines.planVersionId, pv.id));
+    const approvedIds = (
+      await tx
+        .select({ id: planVersions.id })
+        .from(planVersions)
+        .where(
+          and(
+            eq(planVersions.fiscalYearId, fiscalYearId),
+            eq(planVersions.status, 'approved'),
+            sql`${planVersions.kind} <> 'forecast'`,
+          ),
+        )
+    )
+      .map((p) => p.id)
+      .filter((id) => id !== pv.id);
+    const additiveLines = approvedIds.length
+      ? (
+          await tx
+            .select()
+            .from(planVersionLines)
+            .where(inArray(planVersionLines.planVersionId, approvedIds))
+        ).filter(
+          (l) =>
+            l.budgetId !== null &&
+            !ctrlLines.some(
+              (c) => c.budgetId === l.budgetId || c.code.toLowerCase() === l.code.toLowerCase(),
+            ),
+        )
+      : [];
+    const lines = [...ctrlLines, ...additiveLines];
+    const tiedVersionIds = [pv.id, ...new Set(additiveLines.map((l) => l.planVersionId))];
     const roots = await tx
       .select({ id: budgets.id })
       .from(budgets)
-      .where(and(isNull(budgets.parentId), eq(budgets.planVersionId, pv.id)));
+      .where(and(isNull(budgets.parentId), inArray(budgets.planVersionId, tiedVersionIds)));
     const figures = await this.rootFigures(
       tx,
       roots.map((r) => r.id),
@@ -393,17 +436,20 @@ export class PlanningService {
               .length
           )
             throw ApiProblem.notFound('plan version');
+          const overrideCodes = new Set(lines.map((l) => l.code.toLowerCase()));
           lines = [
-            ...src.map((s) => ({
-              code: s.code,
-              name: s.name,
-              amountMinor: s.amountMinor,
-              budgetId: s.budgetId ?? undefined,
-              legalEntityId: s.legalEntityId ?? undefined,
-              costCenterId: s.costCenterId ?? undefined,
-              ownerPersonId: s.ownerPersonId ?? undefined,
-              categoryCode: s.categoryCode ?? undefined,
-            })),
+            ...src
+              .filter((s) => !overrideCodes.has(s.code.toLowerCase()))
+              .map((s) => ({
+                code: s.code,
+                name: s.name,
+                amountMinor: s.amountMinor,
+                budgetId: s.budgetId ?? undefined,
+                legalEntityId: s.legalEntityId ?? undefined,
+                costCenterId: s.costCenterId ?? undefined,
+                ownerPersonId: s.ownerPersonId ?? undefined,
+                categoryCode: s.categoryCode ?? undefined,
+              })),
             ...lines,
           ];
         }
@@ -646,17 +692,125 @@ export class PlanningService {
             'PLAN_VERSION_NOT_EDITABLE',
             `This plan version is already ${pv.status}.`,
           );
-        const [{ n }] = await tx
-          .select({ n: sql<string>`count(*)::text` })
+        const draftLines = await tx
+          .select()
           .from(planVersionLines)
           .where(eq(planVersionLines.planVersionId, id));
-        if (Number(n) === 0)
+        if (draftLines.length === 0)
           throw new ApiProblem(422, 'VALIDATION_FAILED', 'Add at least one line before approving.');
-        const [updated] = await tx
-          .update(planVersions)
-          .set({ status: 'approved', approvedAt: new Date(), approvedBy: actor.personId })
-          .where(eq(planVersions.id, id))
-          .returning();
+        const draftTotal = draftLines.reduce((s, l) => s + l.amountMinor, 0);
+        const controlling = await this.controlling(tx, pv.fiscalYearId);
+        const ctrlLines = controlling
+          ? await tx
+              .select()
+              .from(planVersionLines)
+              .where(eq(planVersionLines.planVersionId, controlling.id))
+          : [];
+        const ctrlTotal = ctrlLines.reduce((s, l) => s + l.amountMinor, 0);
+        const draftCodes = new Set(draftLines.map((l) => l.code.toLowerCase()));
+        const effectiveTotal =
+          draftTotal +
+          ctrlLines
+            .filter((c) => !draftCodes.has(c.code.toLowerCase()))
+            .reduce((s, c) => s + c.amountMinor, 0);
+        const needsNewMoney =
+          Boolean(controlling) && pv.kind !== 'forecast' && effectiveTotal > ctrlTotal;
+        let next = { ...pv };
+        if (needsNewMoney) {
+          if (pv.createdBy && pv.createdBy === actor.personId)
+            throw new ApiProblem(
+              409,
+              'SELF_APPROVAL',
+              'The person who drafted this revision cannot approve new money.',
+            );
+          const finance = actor.roles.includes('finance-admin');
+          const ceo = actor.roles.includes('ceo');
+          if (
+            !pv.newMoneyFinanceApprovedAt &&
+            finance &&
+            actor.personId !== pv.newMoneyCeoApprovedBy
+          ) {
+            const both = Boolean(pv.newMoneyCeoApprovedAt);
+            [next] = await tx
+              .update(planVersions)
+              .set({
+                newMoneyFinanceApprovedAt: new Date(),
+                newMoneyFinanceApprovedBy: actor.personId,
+                ...(both
+                  ? {
+                      status: 'approved' as const,
+                      approvedAt: new Date(),
+                      approvedBy: actor.personId,
+                    }
+                  : {}),
+              })
+              .where(eq(planVersions.id, id))
+              .returning();
+          } else if (
+            !pv.newMoneyCeoApprovedAt &&
+            ceo &&
+            actor.personId !== pv.newMoneyFinanceApprovedBy
+          ) {
+            const both = Boolean(pv.newMoneyFinanceApprovedAt);
+            [next] = await tx
+              .update(planVersions)
+              .set({
+                newMoneyCeoApprovedAt: new Date(),
+                newMoneyCeoApprovedBy: actor.personId,
+                ...(both
+                  ? {
+                      status: 'approved' as const,
+                      approvedAt: new Date(),
+                      approvedBy: actor.personId,
+                    }
+                  : {}),
+              })
+              .where(eq(planVersions.id, id))
+              .returning();
+          } else {
+            throw new ApiProblem(
+              409,
+              'PLAN_SIGNOFF_REQUIRED',
+              'New money needs a Finance Admin and the CEO (two people, neither the drafter) before this revision can be approved.',
+            );
+          }
+          if (next.status !== 'approved') {
+            await this.audit.append(tx, {
+              tenantId: actor.tenantId,
+              actorPersonId: actor.personId,
+              actorSubject: actor.subject,
+              action: 'plan_version.signoff_recorded',
+              resourceType: 'plan_version',
+              resourceId: id,
+              requestId: ctx.requestId,
+              changes: {
+                newMoneyFinanceApprovedBy: {
+                  from: pv.newMoneyFinanceApprovedBy,
+                  to: next.newMoneyFinanceApprovedBy,
+                },
+                newMoneyCeoApprovedBy: {
+                  from: pv.newMoneyCeoApprovedBy,
+                  to: next.newMoneyCeoApprovedBy,
+                },
+              },
+            });
+            return this.detail(tx, actor, next);
+          }
+        } else {
+          [next] = await tx
+            .update(planVersions)
+            .set({
+              status: 'approved',
+              approvedAt: new Date(),
+              approvedBy: actor.personId,
+              newMoneyFinanceApprovedAt: null,
+              newMoneyFinanceApprovedBy: null,
+              newMoneyCeoApprovedAt: null,
+              newMoneyCeoApprovedBy: null,
+            })
+            .where(eq(planVersions.id, id))
+            .returning();
+        }
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
@@ -665,9 +819,12 @@ export class PlanningService {
           resourceType: 'plan_version',
           resourceId: id,
           requestId: ctx.requestId,
-          changes: { status: { from: 'draft', to: 'approved' } },
+          changes: {
+            status: { from: 'draft', to: 'approved' },
+            newMoney: { from: null, to: needsNewMoney },
+          },
         });
-        return this.detail(tx, actor, updated);
+        return this.detail(tx, actor, next);
       },
     );
   }

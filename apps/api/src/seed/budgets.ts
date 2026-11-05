@@ -63,7 +63,7 @@ export async function seedBudgets(app: INestApplicationContext): Promise<void> {
           {
             name: step.name,
             code: step.code,
-            parentId: step.parentId,
+            parentId: step.parentId ?? null,
             legalEntityId: step.legalEntityId,
             costCenterId: step.costCenterId ?? null,
             orgUnitId: step.orgUnitId ?? null,
@@ -71,6 +71,8 @@ export async function seedBudgets(app: INestApplicationContext): Promise<void> {
             categoryCode: step.categoryCode,
             budgetType: step.budgetType,
             fiscalYearId: FISCAL_YEARS.acmeFy2026,
+            planVersionId: step.planVersionId,
+            originalAmount: step.originalAmount,
             accountingDate: SEED_ACCOUNTING_DATE,
           },
           { ...ctx(`create:${step.id}`), fixedId: step.id },

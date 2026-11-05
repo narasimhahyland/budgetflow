@@ -59,8 +59,9 @@ test.describe('per-head driver', () => {
       headcount: 86,
       eligibleHeadcount: 86,
       eligibleHeadcountMilli: 81_750,
-      amountMinor: 122_625,
-      deltaMinor: 122_625,
+      monthsLeft: 3,
+      amountMinor: 367_875,
+      deltaMinor: 367_875,
       currency: 'USD',
       fits: true,
     });
@@ -70,14 +71,15 @@ test.describe('per-head driver', () => {
       headcount: 130,
       eligibleHeadcount: 120,
       excludedHeadcount: 10,
-      amountMinor: 177_750,
+      monthsLeft: 3,
+      amountMinor: 533_250,
     });
     expect(b.preview.byType.find((t) => t.employmentType === 'contractor')).toMatchObject({
       headcount: 10,
       eligible: false,
     });
     const whole = await preview(hyd.id, { prorate: false });
-    expect(whole.preview.amountMinor).toBe(86 * RATE);
+    expect(whole.preview.amountMinor).toBe(86 * RATE * 3);
     expect(bal(await budget(request, hyd.id)).authorized).toBe(0);
   });
 
@@ -102,28 +104,29 @@ test.describe('per-head driver', () => {
     expect(first.child).toMatchObject({ allocationDriver: 'per_head' });
     expect(first.child?.driver).toMatchObject({
       rateMinor: RATE,
-      amountMinor: 122_625,
+      amountMinor: 367_875,
       eligibleHeadcountMilli: 81_750,
       asOfDate: '2026-10-31',
     });
-    expect(bal(await budget(request, hyd.id)).authorized).toBe(122_625);
+    expect(bal(await budget(request, hyd.id)).authorized).toBe(367_875);
 
     const trueUp = (asOf: string, dryRun: boolean) =>
       post(request, `/api/budgets/${hyd.id}/per-head/true-up`, { asOf, dryRun }, 'ceo');
     const dry = await expectContract(await trueUp('2026-11-01', true), 200, PerHeadResult);
     expect(dry.preview).toMatchObject({
-      amountMinor: 132_000,
-      currentDriverAmountMinor: 122_625,
-      deltaMinor: 9_375,
+      monthsLeft: 2,
+      amountMinor: 386_625,
+      currentDriverAmountMinor: 367_875,
+      deltaMinor: 18_750,
       asOfDate: '2026-11-01',
     });
     const up = await expectContract(await trueUp('2026-11-01', false), 200, PerHeadResult);
-    expect(up.child?.driver?.amountMinor).toBe(132_000);
-    expect(bal(await budget(request, hyd.id)).authorized).toBe(132_000);
+    expect(up.child?.driver?.amountMinor).toBe(386_625);
+    expect(bal(await budget(request, hyd.id)).authorized).toBe(386_625);
     const down = await expectContract(await trueUp('2026-10-31', false), 200, PerHeadResult);
-    expect(down.preview.deltaMinor).toBe(-9_375);
-    expect(bal(await budget(request, hyd.id)).authorized).toBe(122_625);
-    expect(bal(await budget(request, root.id)).allocatedOut).toBe(122_625);
+    expect(down.preview.deltaMinor).toBe(-18_750);
+    expect(bal(await budget(request, hyd.id)).authorized).toBe(367_875);
+    expect(bal(await budget(request, root.id)).allocatedOut).toBe(367_875);
   });
 
   test('a driver amount above the parent is a hard block; a unit without headcount is explained', async ({

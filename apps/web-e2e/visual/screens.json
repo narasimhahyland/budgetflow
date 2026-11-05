@@ -322,7 +322,7 @@
               "waitFor": "role=heading[name=\"Set budget to zero\"]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"1,226.25\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"3,678.75\")"
             }
           ]
         }

@@ -456,8 +456,10 @@ export class BudgetsService {
         requestId: ctx.requestId,
         idempotencyKey: ctx.idempotencyKey,
       });
+      const reportingMinor = -draft.lines.find((l) => l.account === 'authorized')!.reporting
+        .amountMinor;
       if (options.recordPlanLine !== false)
-        await this.recordPlanLine(tx, actor, row, req, journalId);
+        await this.linkPlanLine(tx, actor, row, req, reportingMinor);
     }
     if (options.audit !== false)
       await this.audit.append(tx, {
@@ -482,40 +484,63 @@ export class BudgetsService {
     return id;
   }
 
-  /** A root funded from an approved plan version is recorded as a line of that version, so the root ties out. */
-  private async recordPlanLine(
+  /** Links a new root to an existing unlinked line on its approved plan version (approved lines are immutable). */
+  private async linkPlanLine(
     tx: Tx,
     actor: RequestActor,
     row: BudgetRow,
     req: CreateBudgetRequest,
-    journalId: string,
+    reportingAmountMinor: number,
   ): Promise<void> {
-    const lines = await this.ledger.linesOf(tx, journalId);
-    const rootLine = lines.find((l) => l.account === 'authorized')!;
-    // Serialize line numbers per plan version (roots may be created concurrently).
+    const code = req.code?.trim();
+    if (!code) {
+      throw new ApiProblem(
+        409,
+        'PLAN_REVISION_REQUIRED',
+        'This root is not on the approved plan. Add it through a plan revision with Finance Admin and CEO sign-off, then apply the version.',
+        { amountMinor: reportingAmountMinor },
+      );
+    }
+    const approvedIds = (
+      await tx
+        .select({ id: planVersions.id })
+        .from(planVersions)
+        .where(
+          and(
+            eq(planVersions.tenantId, actor.tenantId),
+            eq(planVersions.fiscalYearId, row.fiscalYearId),
+            eq(planVersions.status, 'approved'),
+          ),
+        )
+    ).map((p) => p.id);
+    const candidates = approvedIds.length
+      ? await tx
+          .select()
+          .from(planVersionLines)
+          .where(
+            and(
+              inArray(planVersionLines.planVersionId, approvedIds),
+              eq(planVersionLines.tenantId, actor.tenantId),
+              sql`lower(${planVersionLines.code}) = lower(${code})`,
+              eq(planVersionLines.amountMinor, reportingAmountMinor),
+              isNull(planVersionLines.budgetId),
+            ),
+          )
+          .for('update')
+      : [];
+    const line = candidates.find((c) => c.planVersionId === row.planVersionId) ?? candidates[0];
+    if (!line) {
+      throw new ApiProblem(
+        409,
+        'PLAN_REVISION_REQUIRED',
+        'This root is not on the approved plan. Add it through a plan revision with Finance Admin and CEO sign-off, then apply the version.',
+        { code, amountMinor: reportingAmountMinor },
+      );
+    }
     await tx
-      .select({ id: planVersions.id })
-      .from(planVersions)
-      .where(eq(planVersions.id, row.planVersionId!))
-      .for('update');
-    const [{ next }] = await tx
-      .select({ next: sql<number>`coalesce(max(${planVersionLines.lineNo}), 0) + 1` })
-      .from(planVersionLines)
-      .where(eq(planVersionLines.planVersionId, row.planVersionId!));
-    await tx.insert(planVersionLines).values({
-      tenantId: actor.tenantId,
-      planVersionId: row.planVersionId!,
-      lineNo: Number(next),
-      budgetId: row.id,
-      code: row.code ?? row.id.slice(0, 8).toUpperCase(),
-      name: row.name,
-      legalEntityId: row.legalEntityId,
-      costCenterId: row.costCenterId,
-      ownerPersonId: row.ownerPersonId,
-      categoryCode: req.categoryCode ?? null,
-      amountMinor: -rootLine.reportingAmountMinor,
-      currency: actor.reportingCurrency,
-    });
+      .update(planVersionLines)
+      .set({ budgetId: row.id })
+      .where(eq(planVersionLines.id, line.id));
   }
 
   allocate(

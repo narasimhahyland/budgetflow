@@ -181,7 +181,7 @@ const TYPES: { key: EmploymentType; label: string }[] = [
             <div class="bf-card__body">
               <div class="bf-form" style="padding: 0">
                 <mat-form-field
-                  ><mat-label>Rate per eligible head (USD)</mat-label
+                  ><mat-label>Rate per eligible employee per month (USD)</mat-label
                   ><input
                     matInput
                     inputmode="decimal"

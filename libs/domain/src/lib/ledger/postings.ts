@@ -422,6 +422,8 @@ export function postHierarchyMove(
     amount: Money;
     reasonCode?: string | null;
     reason?: string | null;
+    /** True when releasing a root contingency reserve into another root's tree. */
+    allowCrossRoot?: boolean;
   },
   ctx: PostingContext,
 ): Result<JournalDraft> {
@@ -431,16 +433,23 @@ export function postHierarchyMove(
   if (!source) return err('TRANSFER_INVALID', 'Choose the budget the money comes from.');
   let up: readonly BudgetRef[];
   let down: BudgetRef[] = [];
+  let crossRoot = false;
   if (input.destination.kind === 'budget') {
     const dest = input.destination.chain;
     if (dest.length === 0 || dest[0].id === source.id)
       return err('TRANSFER_INVALID', 'Choose a different budget to receive the money.');
     const lcaIdx = input.sourceChain.findIndex((b) => dest.some((d) => d.id === b.id));
-    if (lcaIdx < 0)
-      return err('TRANSFER_INVALID', 'Money can only move between budgets of the same tree.');
-    const lcaId = input.sourceChain[lcaIdx].id;
-    up = input.sourceChain.slice(0, lcaIdx + 1);
-    down = [...dest.slice(0, dest.findIndex((d) => d.id === lcaId) + 1)].reverse();
+    if (lcaIdx < 0) {
+      if (!input.allowCrossRoot)
+        return err('TRANSFER_INVALID', 'Money can only move between budgets of the same tree.');
+      crossRoot = true;
+      up = input.sourceChain;
+      down = [...dest].reverse();
+    } else {
+      const lcaId = input.sourceChain[lcaIdx].id;
+      up = input.sourceChain.slice(0, lcaIdx + 1);
+      down = [...dest.slice(0, dest.findIndex((d) => d.id === lcaId) + 1)].reverse();
+    }
   } else {
     up = input.sourceChain;
   }
@@ -454,6 +463,16 @@ export function postHierarchyMove(
     if (!pt.ok) return pt;
     lines.push(budgetLine(child, 'authorized', 1, ct.value));
     lines.push(budgetLine(parent, 'allocated_out', -1, pt.value));
+  }
+  if (crossRoot) {
+    const sourceRoot = up[up.length - 1];
+    const destRoot = down[0];
+    const st = hierarchyTriplet(input.amount, sourceRoot.currency, 'authorized', 1, ctx);
+    if (!st.ok) return st;
+    const dt = hierarchyTriplet(input.amount, destRoot.currency, 'authorized', -1, ctx);
+    if (!dt.ok) return dt;
+    lines.push(budgetLine(sourceRoot, 'authorized', 1, st.value));
+    lines.push(budgetLine(destRoot, 'authorized', -1, dt.value));
   }
   for (let i = 0; i + 1 < down.length; i++) {
     const parent = down[i];

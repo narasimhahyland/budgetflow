@@ -13614,7 +13614,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 9007199254740991,
-            "description": "Rate per eligible head in the budget currency."
+            "description": "Rate per eligible employee per month in the budget currency."
           },
           "eligibleTypes": {
             "minItems": 1,
@@ -13754,6 +13754,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "monthsLeft": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
           "headcount": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -13871,7 +13876,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 9007199254740991,
-            "description": "Per eligible head, in the parent's budget currency."
+            "description": "Rate per eligible employee per month, in the parent's budget currency."
           },
           "eligibleTypes": {
             "minItems": 1,
@@ -15460,6 +15465,8 @@
               "REQUEST_ALREADY_DECIDED",
               "PHASING_TOTAL_MISMATCH",
               "PLAN_VERSION_NOT_EDITABLE",
+              "PLAN_REVISION_REQUIRED",
+              "PLAN_SIGNOFF_REQUIRED",
               "LIMIT_EXCEEDED",
               "HEADCOUNT_MISSING",
               "VERSION_CONFLICT",
