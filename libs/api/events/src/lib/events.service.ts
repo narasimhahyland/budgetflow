@@ -70,9 +70,9 @@ import { randomBytes } from 'node:crypto';
 import { asFundingSource } from '@bf/api/spend';
 import { EventCloseChecks } from './event-close-checks';
 
-type EventRow = typeof events.$inferSelect;
+export type EventRow = typeof events.$inferSelect;
 /** `fixedId`: seed only, never exposed through the API. */
-type Ctx = { idempotencyKey: string; requestId: string | null; fixedId?: string };
+export type Ctx = { idempotencyKey: string; requestId: string | null; fixedId?: string };
 
 const LIFECYCLE: { status: EventStatus; label: string }[] = [
   { status: 'draft', label: 'Draft' },
@@ -157,7 +157,7 @@ export class EventsService implements OnModuleInit {
     return c?.e ? this.row(tx, c.e) : undefined;
   }
 
-  private pc(actor: RequestActor, command: string, ctx: Partial<Ctx>): PostCtx {
+  pc(actor: RequestActor, command: string, ctx: Partial<Ctx>): PostCtx {
     return {
       actor,
       command,
@@ -166,7 +166,7 @@ export class EventsService implements OnModuleInit {
     };
   }
 
-  private async row(tx: Tx, id: string, lock = false): Promise<EventRow | undefined> {
+  async row(tx: Tx, id: string, lock = false): Promise<EventRow | undefined> {
     const q = tx.select().from(events).where(eq(events.id, id));
     return (lock ? await q.for('update') : await q)[0];
   }
@@ -175,7 +175,7 @@ export class EventsService implements OnModuleInit {
     return e.budgetId ? this.posting.budget(tx, e.budgetId) : undefined;
   }
 
-  private async coOrganizers(tx: Tx, eventId: string): Promise<string[]> {
+  async coOrganizers(tx: Tx, eventId: string): Promise<string[]> {
     return (
       await tx
         .select({ p: eventCoOrganizers.personId })
@@ -208,12 +208,7 @@ export class EventsService implements OnModuleInit {
     return Boolean(p);
   }
 
-  private async visible(
-    tx: Tx,
-    actor: RequestActor,
-    id: string,
-    manage = false,
-  ): Promise<EventRow> {
+  async visible(tx: Tx, actor: RequestActor, id: string, manage = false): Promise<EventRow> {
     const e = await this.row(tx, id);
     if (!e || !(await this.canRead(tx, actor, e))) throw ApiProblem.notFound('event');
     if (manage && !(await this.canManage(tx, actor, e)))
@@ -370,122 +365,130 @@ export class EventsService implements OnModuleInit {
         request: body,
         status: 201,
       },
-      async (tx) => {
-        if (!actor.personId) throw ApiProblem.forbidden('Only people can organize events.');
-        const home = await this.posting.budget(tx, body.homeBudgetId);
-        if (!home) throw ApiProblem.notFound('budget');
-        this.policy.assert(actor, 'event.manage', budgetResourceOf(home), 'budget');
-        if (body.endsAt < body.startsAt)
-          throw new ApiProblem(422, 'VALIDATION_FAILED', 'The event ends before it starts.', {
-            field: 'endsAt',
-          });
-        await this.validateUnits(tx, body.locationOrgUnitIds);
-        const currency = home.currency;
-        if (
-          body.ownFunds.currency !== currency ||
-          (body.estimate && body.estimate.currency !== currency)
-        ) {
-          throw new ApiProblem(
-            422,
-            'CURRENCY_MISMATCH',
-            `Event amounts are in the home budget currency (${currency}).`,
-          );
-        }
-        const id =
-          ctx.fixedId ??
-          (await tx.execute<{ id: string }>(sql`select gen_random_uuid() as id`)).rows[0].id;
-        const lines = this.costLineRows(actor.tenantId, id, currency, body.costLines ?? []);
-        const estimate =
-          body.estimate?.amountMinor ?? lines.reduce((a, l) => a + (l.amountMinor as number), 0);
-        if (estimate <= 0)
-          throw new ApiProblem(422, 'VALIDATION_FAILED', 'Give an estimate or cost lines.', {
-            field: 'estimate',
-          });
-        const ceiling = estimate + Math.floor((estimate * body.toleranceBps) / 10_000);
-        if (body.ownFunds.amountMinor < 0 || body.ownFunds.amountMinor > ceiling)
-          throw new ApiProblem(
-            422,
-            'FUNDING_CAP_EXCEEDED',
-            'Own funds cannot be more than the estimate plus its tolerance.',
-            { field: 'ownFunds', ceilingMinor: ceiling },
-          );
-        const code =
-          body.eventCode ??
-          `EV-${new Date().getUTCFullYear()}-${randomBytes(3).toString('hex').toUpperCase()}`;
-        const [dup] = await tx
-          .select({ id: events.id })
-          .from(events)
-          .where(eq(events.eventCode, code));
-        if (dup)
-          throw new ApiProblem(409, 'DUPLICATE_CODE', 'Another event uses this event code.', {
-            field: 'eventCode',
-          });
-        const [e] = await tx
-          .insert(events)
-          .values({
-            id,
-            tenantId: actor.tenantId,
-            name: body.name,
-            eventType: body.eventType,
-            spendType: body.spendType ?? 'employee_events',
-            organizerPersonId: actor.personId,
-            legalEntityId: home.legalEntityId,
-            costCenterId: body.costCenterId ?? home.costCenterId,
-            eventCode: code,
-            budgetId: home.id,
-            startsAt: new Date(body.startsAt),
-            endsAt: new Date(body.endsAt),
-            venue: body.venue ?? null,
-            description: body.description ?? null,
-            expectedAttendance: body.expectedAttendance ?? null,
-            estimateMinor: estimate,
-            currency,
-            toleranceBps: body.toleranceBps,
-            ownFundsMinor: body.ownFunds.amountMinor,
-            perHeadLimitMinor: body.perHeadLimit?.amountMinor ?? null,
-            templateId: body.templateId ?? null,
-          })
-          .returning();
-        await tx.insert(eventLocations).values(
-          [...new Set(body.locationOrgUnitIds)].map((orgUnitId) => ({
-            tenantId: actor.tenantId,
-            eventId: id,
-            orgUnitId,
-          })),
-        );
-        if (lines.length) await tx.insert(eventCostLines).values(lines);
-        const co = [...new Set(body.coOrganizerPersonIds ?? [])].filter(
-          (p) => p !== actor.personId,
-        );
-        if (co.length)
-          await tx
-            .insert(eventCoOrganizers)
-            .values(co.map((personId) => ({ tenantId: actor.tenantId, eventId: id, personId })));
-        const parts = await this.participantRows(tx, actor.tenantId, e, [
-          ...new Set(body.participantPersonIds ?? []),
-        ]);
-        if (parts.length) await tx.insert(eventParticipants).values(parts);
-        await this.audit.append(tx, {
-          tenantId: actor.tenantId,
-          actorPersonId: actor.personId,
-          actorSubject: actor.subject,
-          action: 'event.created',
-          resourceType: 'event',
-          resourceId: id,
-          legalEntityId: home.legalEntityId,
-          requestId: ctx.requestId,
-          changes: {
-            name: { from: null, to: body.name },
-            eventCode: { from: null, to: code },
-            homeBudgetId: { from: null, to: home.id },
-            estimate: { from: null, to: { amountMinor: estimate, currency } },
-            ownFunds: { from: null, to: body.ownFunds },
-            participants: { from: null, to: parts.length },
-          },
-        });
-        return this.detailTx(tx, actor, id);
-      },
+      (tx) => this.createTx(tx, actor, body, ctx),
     );
+  }
+
+  /**
+   * Creates one draft event inside an open transaction. `create` wraps it in a command; Phase 9
+   * recurring series (45a) and clone create several events in the transaction of their own command.
+   */
+  async createTx(
+    tx: Tx,
+    actor: RequestActor,
+    body: CreateEventBody,
+    ctx: Pick<Ctx, 'requestId' | 'fixedId'> & { seriesId?: string | null },
+  ): Promise<EventDetail> {
+    if (!actor.personId) throw ApiProblem.forbidden('Only people can organize events.');
+    const home = await this.posting.budget(tx, body.homeBudgetId);
+    if (!home) throw ApiProblem.notFound('budget');
+    this.policy.assert(actor, 'event.manage', budgetResourceOf(home), 'budget');
+    if (body.endsAt < body.startsAt)
+      throw new ApiProblem(422, 'VALIDATION_FAILED', 'The event ends before it starts.', {
+        field: 'endsAt',
+      });
+    await this.validateUnits(tx, body.locationOrgUnitIds);
+    const currency = home.currency;
+    if (
+      body.ownFunds.currency !== currency ||
+      (body.estimate && body.estimate.currency !== currency)
+    ) {
+      throw new ApiProblem(
+        422,
+        'CURRENCY_MISMATCH',
+        `Event amounts are in the home budget currency (${currency}).`,
+      );
+    }
+    const id =
+      ctx.fixedId ??
+      (await tx.execute<{ id: string }>(sql`select gen_random_uuid() as id`)).rows[0].id;
+    const lines = this.costLineRows(actor.tenantId, id, currency, body.costLines ?? []);
+    const estimate =
+      body.estimate?.amountMinor ?? lines.reduce((a, l) => a + (l.amountMinor as number), 0);
+    if (estimate <= 0)
+      throw new ApiProblem(422, 'VALIDATION_FAILED', 'Give an estimate or cost lines.', {
+        field: 'estimate',
+      });
+    const ceiling = estimate + Math.floor((estimate * body.toleranceBps) / 10_000);
+    if (body.ownFunds.amountMinor < 0 || body.ownFunds.amountMinor > ceiling)
+      throw new ApiProblem(
+        422,
+        'FUNDING_CAP_EXCEEDED',
+        'Own funds cannot be more than the estimate plus its tolerance.',
+        { field: 'ownFunds', ceilingMinor: ceiling },
+      );
+    const code =
+      body.eventCode ??
+      `EV-${new Date().getUTCFullYear()}-${randomBytes(3).toString('hex').toUpperCase()}`;
+    const [dup] = await tx.select({ id: events.id }).from(events).where(eq(events.eventCode, code));
+    if (dup)
+      throw new ApiProblem(409, 'DUPLICATE_CODE', 'Another event uses this event code.', {
+        field: 'eventCode',
+      });
+    const [e] = await tx
+      .insert(events)
+      .values({
+        id,
+        tenantId: actor.tenantId,
+        name: body.name,
+        eventType: body.eventType,
+        spendType: body.spendType ?? 'employee_events',
+        organizerPersonId: actor.personId,
+        legalEntityId: home.legalEntityId,
+        costCenterId: body.costCenterId ?? home.costCenterId,
+        eventCode: code,
+        budgetId: home.id,
+        startsAt: new Date(body.startsAt),
+        endsAt: new Date(body.endsAt),
+        venue: body.venue ?? null,
+        description: body.description ?? null,
+        expectedAttendance: body.expectedAttendance ?? null,
+        estimateMinor: estimate,
+        currency,
+        toleranceBps: body.toleranceBps,
+        ownFundsMinor: body.ownFunds.amountMinor,
+        perHeadLimitMinor: body.perHeadLimit?.amountMinor ?? null,
+        templateId: body.templateId ?? null,
+        seriesId: ctx.seriesId ?? null,
+      })
+      .returning();
+    await tx.insert(eventLocations).values(
+      [...new Set(body.locationOrgUnitIds)].map((orgUnitId) => ({
+        tenantId: actor.tenantId,
+        eventId: id,
+        orgUnitId,
+      })),
+    );
+    if (lines.length) await tx.insert(eventCostLines).values(lines);
+    const co = [...new Set(body.coOrganizerPersonIds ?? [])].filter((p) => p !== actor.personId);
+    if (co.length)
+      await tx
+        .insert(eventCoOrganizers)
+        .values(co.map((personId) => ({ tenantId: actor.tenantId, eventId: id, personId })));
+    const parts = await this.participantRows(tx, actor.tenantId, e, [
+      ...new Set(body.participantPersonIds ?? []),
+    ]);
+    if (parts.length) await tx.insert(eventParticipants).values(parts);
+    await this.audit.append(tx, {
+      tenantId: actor.tenantId,
+      actorPersonId: actor.personId,
+      actorSubject: actor.subject,
+      action: 'event.created',
+      resourceType: 'event',
+      resourceId: id,
+      legalEntityId: home.legalEntityId,
+      requestId: ctx.requestId,
+      changes: {
+        name: { from: null, to: body.name },
+        eventCode: { from: null, to: code },
+        homeBudgetId: { from: null, to: home.id },
+        estimate: { from: null, to: { amountMinor: estimate, currency } },
+        ownFunds: { from: null, to: body.ownFunds },
+        participants: { from: null, to: parts.length },
+        ...(ctx.seriesId ? { seriesId: { from: null, to: ctx.seriesId } } : {}),
+      },
+    });
+    return this.detailTx(tx, actor, id);
   }
 
   update(
@@ -1174,7 +1177,7 @@ export class EventsService implements OnModuleInit {
 
   // Reads -----------------------------------------------------------------------------------------
 
-  private async participantsOf(tx: Tx, eventId: string) {
+  async participantsOf(tx: Tx, eventId: string) {
     return tx
       .select()
       .from(eventParticipants)
@@ -1182,7 +1185,7 @@ export class EventsService implements OnModuleInit {
       .orderBy(asc(eventParticipants.createdAt));
   }
 
-  private async funding(tx: Tx, e: EventRow, srcs?: SourceRow[]) {
+  async funding(tx: Tx, e: EventRow, srcs?: SourceRow[]) {
     const sources = srcs ?? (await this.sources.list(tx, e.id));
     const own = sources
       .filter((s) => s.kind === 'own' && s.status !== 'cancelled')
@@ -1206,7 +1209,7 @@ export class EventsService implements OnModuleInit {
     });
   }
 
-  private async participantViews(tx: Tx, e: EventRow): Promise<EventParticipant[]> {
+  async participantViews(tx: Tx, e: EventRow): Promise<EventParticipant[]> {
     const parts = await this.participantsOf(tx, e.id);
     const funding = await this.funding(tx, e);
     const base = funding.capMinor > 0 ? funding.capMinor : e.estimateMinor;
@@ -1326,7 +1329,7 @@ export class EventsService implements OnModuleInit {
     }));
   }
 
-  private async summariesOf(tx: Tx, rows: EventRow[]): Promise<EventSummary[]> {
+  async summariesOf(tx: Tx, rows: EventRow[]): Promise<EventSummary[]> {
     if (!rows.length) return [];
     const ids = rows.map((r) => r.id);
     const homes = await tx
@@ -1390,7 +1393,7 @@ export class EventsService implements OnModuleInit {
   }
 
   /** Events the viewer organizes, attends, funds, or may see through budget scope. */
-  private async visibleRows(
+  async visibleRows(
     tx: Tx,
     actor: RequestActor,
     filters: SQL[] = [],

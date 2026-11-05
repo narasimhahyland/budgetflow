@@ -1518,6 +1518,22 @@ export const UpdateScorecardNotesBody = named(
   z.object({ notes: z.string().trim().max(2000) }).strict(),
 );
 
+export type EventTemplateList = z.infer<typeof EventTemplateList>;
+export type ApplyTemplateToEventBody = z.infer<typeof ApplyTemplateToEventBody>;
+export type UpdateChecklistTaskBody = z.infer<typeof UpdateChecklistTaskBody>;
+export type UpdateAgendaItemBody = z.infer<typeof UpdateAgendaItemBody>;
+export type RemindInvitationsBody = z.infer<typeof RemindInvitationsBody>;
+export type SetEventRsvpStateBody = z.infer<typeof SetEventRsvpStateBody>;
+export type EventNeedsIndividual = EventNeedsSummaryView['individuals'][number];
+export type ExportCatererNeedsBody = z.infer<typeof ExportCatererNeedsBody>;
+export type ExportCatererNeedsResult = z.infer<typeof ExportCatererNeedsResult>;
+export type AttendanceSplitShare = z.infer<typeof AttendanceSplitShare>;
+export type EventQuoteRequestView = z.infer<typeof EventQuoteRequestView>;
+export type GalleryPhotoView = z.infer<typeof GalleryPhotoView>;
+export type ModerateGalleryPhotoBody = z.infer<typeof ModerateGalleryPhotoBody>;
+export type ModerateSurveyCommentBody = z.infer<typeof ModerateSurveyCommentBody>;
+export type UpdateScorecardNotesBody = z.infer<typeof UpdateScorecardNotesBody>;
+
 const EventParams = z.object({ eventId: Id }).strict();
 
 const transition = <Op extends string>(operationId: Op, verb: string, summary: string) => ({
