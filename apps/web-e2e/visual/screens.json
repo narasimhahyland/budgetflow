@@ -1111,6 +1111,7 @@
       "role": "integration-admin",
       "path": "/admin/channels",
       "waitFor": "[data-testid=slack-card]",
+      "mask": ["[data-testid=slack-approvers-linked]"],
       "states": [
         {
           "state": "default"
