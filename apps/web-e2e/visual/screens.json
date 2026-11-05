@@ -872,6 +872,12 @@
           "state": "approve-part",
           "actions": [
             {
+              "waitFor": "text=Check before you decide"
+            },
+            {
+              "waitFor": "text=Company-wide Available"
+            },
+            {
               "click": "mat-button-toggle:has-text(\"Approve part\") button"
             },
             {
@@ -968,7 +974,7 @@
               "click": "[data-testid=submit-event-funding]"
             },
             {
-              "waitFor": "[data-testid=error-summary]"
+              "waitFor": "[data-testid=error-summary]:focus"
             }
           ]
         }

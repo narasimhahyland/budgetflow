@@ -177,7 +177,11 @@ const REASONS = [
       grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr);
       gap: 16px;
     }
-    @media (width < 900px) {
+    :host {
+      display: block;
+      container-type: inline-size;
+    }
+    @container (width < 760px) {
       .bf-decision {
         grid-template-columns: minmax(0, 1fr);
       }
