@@ -21,22 +21,20 @@ SET
  connector:adaptive_planning | aes-256-gcm |               48 | f
  connector:adaptive_planning | aes-256-gcm |               36 | f
  connector:adaptive_planning | aes-256-gcm |               36 | f
- connector:adaptive_planning | aes-256-gcm |               36 | f
- connector:adaptive_planning | aes-256-gcm |               36 | f
- connector:adaptive_planning | aes-256-gcm |               36 | f
- connector:adaptive_planning | aes-256-gcm |               36 | f
- connector:adaptive_planning | aes-256-gcm |               36 | f
- connector:adaptive_planning | aes-256-gcm |               36 | f
  connector:concur            | aes-256-gcm |               36 | f
-(10 rows)
+ connector:erpnext           | aes-256-gcm |               36 | f
+ connector:hr_file           | aes-256-gcm |               36 | f
+ connector:outlook           | aes-256-gcm |               36 | f
+ connector:ramp              | aes-256-gcm |               32 | f
+(8 rows)
 
     kind    |    prefix    | hash_chars | scopes | rate_limit_per_minute 
 ------------+--------------+------------+--------+-----------------------
- public_api | bf_live_d0c3 |         64 |      2 |                   120
- scim       | bf_scim_e991 |         64 |      0 |                   120
- scim       | bf_scim_4de2 |         64 |      0 |                   120
- public_api | bf_live_c3d9 |         64 |      1 |                   120
- scim       | bf_scim_a0e1 |         64 |      0 |                   120
+ public_api | bf_live_6603 |         64 |      2 |                   120
+ scim       | bf_scim_b643 |         64 |      0 |                   120
+ scim       | bf_scim_0232 |         64 |      0 |                   120
+ public_api | bf_live_ed97 |         64 |      1 |                   120
+ scim       | bf_scim_606d |         64 |      0 |                   120
 (5 rows)
 
 SET
