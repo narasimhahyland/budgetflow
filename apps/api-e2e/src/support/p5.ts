@@ -4,6 +4,7 @@ import { expect, request as pwRequest, type APIRequestContext } from '@playwrigh
 import {
   BudgetDetail,
   ContributionDetail,
+  ControlResult,
   DecisionResponse,
   EventDetail,
   IntegrityCheckRun,
@@ -15,9 +16,9 @@ import { SEED, userById, type SeedUserId } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from './auth';
 import { expectContract } from './contract';
-import { asOwner } from './db';
 import { env } from './env';
 import { allocateOk, createRoot, type Money } from './factory';
+import { post, preview } from '../budgets/p4';
 
 export const usd = (amountMinor: number): Money => ({ amountMinor, currency: 'USD' });
 
@@ -330,18 +331,36 @@ export function emailTokens(mail: { text: string }): { approve: string; reject: 
 // Budget controls --------------------------------------------------------------------------------
 
 /**
- * Freeze, unfreeze or set a scenario budget to zero the way Phase 4's control command does: the budget
- * status changes and `budget.control_changed` goes through the outbox to the worker.
- * TODO(P4 rebase): call the Phase 4 control endpoints instead.
+ * Applies a budget control through Phase 4's control endpoints as the finance admin; each publishes
+ * `budget.control_changed` through the outbox, which the worker consumes.
  */
-export async function applyControl(budgetId: string, status: 'frozen' | 'set_to_zero' | 'active') {
-  await asOwner(async (c) => {
-    await c.query('begin');
-    await c.query(`update budgets set status = $1 where id = $2`, [status, budgetId]);
-    await c.query(
-      `insert into outbox_messages (tenant_id, topic, payload) select tenant_id, 'budget.control_changed', jsonb_build_object('budgetId', id::text, 'status', $2::text) from budgets where id = $1`,
-      [budgetId, status],
-    );
-    await c.query('commit');
-  });
+export async function applyControl(
+  request: APIRequestContext,
+  budgetId: string,
+  action: 'freeze' | 'unfreeze' | 'reduce' | 'set_to_zero' | 'restore',
+  amountMinor = 1_000,
+) {
+  const reason = { reason: `Scenario ${action}` };
+  const path = `/api/budgets/${budgetId}/${action.replace(/_/g, '-')}`;
+  let data: Record<string, unknown> = reason;
+  if (action === 'freeze') data = { ...reason, reasonCode: 'FRZ-POLICY' };
+  if (action === 'reduce' || action === 'set_to_zero') {
+    const pv = await preview(request, budgetId, {
+      action,
+      destination: 'parent',
+      ...(action === 'reduce' ? { amountMinor } : {}),
+    });
+    data = {
+      ...reason,
+      reasonCode: 'RED-REPRIORITIZE',
+      destination: 'parent',
+      confirmedFloorMinor: pv.floorMinor,
+    };
+    if (action === 'reduce') data['amountMinor'] = amountMinor;
+    else {
+      const b = await budget(request, budgetId);
+      data['confirmText'] = b.code ?? b.name;
+    }
+  }
+  return expectContract(await post(request, path, data), 200, ControlResult);
 }

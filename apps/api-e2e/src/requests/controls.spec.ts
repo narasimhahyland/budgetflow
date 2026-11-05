@@ -2,7 +2,8 @@
 // Contribution Requests still waiting on it are cancelled with the reason "budget set to zero", their
 // pre-encumbrance is released and the requesters are emailed; when it is frozen they are held and no one
 // can decide them until it is active again. New requests are refused with the reason; approved
-// commitments stay visible and untouched. The worker reacts to budget.control_changed.
+// commitments stay visible and untouched; a reduction keeps them waiting. The worker reacts to the
+// budget.control_changed messages Phase 4's control commands publish.
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { ContributionDetail, RequestDetail } from '@bf/contracts';
 import { expectContract, expectProblem } from '../support/contract';
@@ -75,7 +76,7 @@ test.describe('budget controls on waiting requests', () => {
     );
     expect(asked.status).toBe('pending_approval');
 
-    await applyControl(team.id, 'set_to_zero');
+    await applyControl(request, team.id, 'set_to_zero');
     await pollRequest(request, waiting.id, (r) => r.status).toBe('cancelled');
     const cancelled = await getRequest(request, 'budget-owner', waiting.id);
     expect(cancelled.cancelReason).toBe('budget set to zero');
@@ -128,7 +129,7 @@ test.describe('budget controls on waiting requests', () => {
     );
     const task = await taskOf(request, 'department-head', 'request', r.id);
 
-    await applyControl(team.id, 'frozen');
+    await applyControl(request, team.id, 'freeze');
     await pollRequest(request, r.id, (x) => x.onHold).toBe(true);
     expect((await getRequest(request, 'budget-owner', r.id)).status).toBe('pending_approval');
     await expectProblem(
@@ -142,8 +143,24 @@ test.describe('budget controls on waiting requests', () => {
       'BUDGET_FROZEN',
     );
 
-    await applyControl(team.id, 'active');
+    await applyControl(request, team.id, 'unfreeze');
     await pollRequest(request, r.id, (x) => x.onHold).toBe(false);
+    const ok = await decideOk(request, 'department-head', task, { decision: 'approve' });
+    expect(ok.subjectStatus).toBe('approved');
+  });
+
+  test('a reduction keeps waiting requests decidable', async ({ request }) => {
+    const { team } = await directorTree(request);
+    const r = await expectContract(
+      await spendingRequest(request, 'budget-owner', team.id, usd(80_000)),
+      201,
+      RequestDetail,
+    );
+    const task = await taskOf(request, 'department-head', 'request', r.id);
+    const cut = await applyControl(request, team.id, 'reduce', 10_000);
+    expect(cut.budget.status).toBe('active');
+    const after = await getRequest(request, 'budget-owner', r.id);
+    expect(after).toMatchObject({ status: 'pending_approval', onHold: false });
     const ok = await decideOk(request, 'department-head', task, { decision: 'approve' });
     expect(ok.subjectStatus).toBe('approved');
   });

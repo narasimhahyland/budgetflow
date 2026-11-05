@@ -1,3 +1,4 @@
+import { BudgetViews } from '@bf/api/budgets';
 import { ApiProblem, type RequestActor } from '@bf/api/core';
 import { ledgerLines, type Tx } from '@bf/api/db';
 import { LedgerReads, LedgerService, toPostingBudget, type PostingBudget } from '@bf/api/ledger';
@@ -29,6 +30,7 @@ export class PostingSupport {
   constructor(
     readonly reads: LedgerReads,
     private readonly ledger: LedgerService,
+    private readonly views: BudgetViews,
   ) {}
 
   async budget(tx: Tx, id: string): Promise<BudgetRow | undefined> {
@@ -63,12 +65,17 @@ export class PostingSupport {
     };
   }
 
+  /** Posts the journals, then raises owner alerts for thresholds the touched budgets newly reached. */
   async post(
     tx: Tx,
     journals: readonly JournalDraft[],
     fiscalYearId: string | null,
     c: PostCtx,
   ): Promise<string[]> {
+    const budgetIds = [
+      ...new Set(journals.flatMap((j) => j.lines.flatMap((l) => (l.budgetId ? [l.budgetId] : [])))),
+    ];
+    const before = await this.views.utilizations(tx, budgetIds);
     const ids: string[] = [];
     for (const j of journals) {
       ids.push(
@@ -81,6 +88,7 @@ export class PostingSupport {
         }),
       );
     }
+    await this.views.emitThresholds(tx, c.actor, before, budgetIds);
     return ids;
   }
 

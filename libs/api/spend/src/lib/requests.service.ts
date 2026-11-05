@@ -12,6 +12,7 @@ import {
   type HandlerOutcome,
 } from '@bf/api/approvals';
 import { AuditService } from '@bf/api/audit';
+import { PlanningService } from '@bf/api/budgets';
 import {
   ApiProblem,
   CommandRunner,
@@ -47,8 +48,9 @@ import type {
 } from '@bf/contracts';
 import {
   acceptsNewActivity,
+  buildTriplet,
   checkFundingCeiling,
-  checkSpend,
+  err,
   postSpendMovement,
   requestMachine,
   type CurrencyCode,
@@ -59,7 +61,7 @@ import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { and, desc, eq, inArray, like, ne, notInArray, or, sql, type SQL } from 'drizzle-orm';
 import { CommitmentsService } from './commitments.service';
 import { FundingSourcesService } from './funding-sources.service';
-import { PostingSupport, todayUtc, type PostCtx } from './posting-support';
+import { PostingSupport, type PostCtx } from './posting-support';
 import { SpendHooks } from './spend-hooks';
 
 type RequestRow = typeof requests.$inferSelect;
@@ -113,6 +115,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     private readonly analytics: AnalyticsService,
     private readonly documents: DocumentsService,
     private readonly hooks: SpendHooks,
+    private readonly planning: PlanningService,
   ) {}
 
   onModuleInit(): void {
@@ -591,9 +594,25 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     return r.id;
   }
 
+  /** Budget-currency amount other live requests on the same budget and spend type hold. */
+  private async categoryCommittedMinor(tx: Tx, r: RequestRow): Promise<number> {
+    const [row] = await tx
+      .select({ v: sql<string>`coalesce(sum(${requests.budgetAmountMinor}), 0)` })
+      .from(requests)
+      .where(
+        and(
+          eq(requests.budgetId, r.budgetId!),
+          eq(requests.spendType, r.spendType),
+          ne(requests.id, r.id),
+          inArray(requests.status, ['pending_approval', 'approved', 'partially_approved']),
+        ),
+      );
+    return Number(row.v);
+  }
+
   /**
-   * Submit: blocks frozen and zeroed budgets, checks available per the control mode (soft warning
-   * flags an over-budget request with a finance review), pre-encumbers, routes and notifies.
+   * Submit: blocks frozen and zeroed budgets, runs the budget spend check (control mode, tolerance and
+   * limits; a warning flags the request for finance review), pre-encumbers, routes and notifies.
    */
   private async submitTx(
     tx: Tx,
@@ -607,6 +626,28 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     unwrap(acceptsNewActivity(locked.status));
     const pc = this.postCtx(actor, 'requests.submit', ctx);
     const pctx = await this.posting.context(tx, locked, actor.reportingCurrency);
+    const check = await this.planning.spendCheckInTx(tx, locked.row, {
+      amountMinor: unwrap(
+        buildTriplet(
+          { amountMinor: r.amountMinor, currency: r.currency as CurrencyCode },
+          {
+            budgetCurrency: locked.currency,
+            reportingCurrency: actor.reportingCurrency,
+            rates: pctx.rates,
+          },
+        ),
+      ).budget.amountMinor,
+      categoryCode: r.spendType,
+      categoryCommittedMinor: await this.categoryCommittedMinor(tx, r),
+    });
+    if (check.outcome === 'blocked') {
+      const limit = check.limits.find((f) => f.outcome === 'blocked');
+      unwrap(
+        limit
+          ? err('LIMIT_EXCEEDED', limit.message)
+          : err('INSUFFICIENT_AVAILABLE', check.reasons[0]?.message ?? 'Not enough available.'),
+      );
+    }
     let budgetAmount: Money;
     let commitmentId: string | null = null;
     if (isEventFunding(r)) {
@@ -637,9 +678,8 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       budgetAmount = res.budgetAmount;
       commitmentId = res.commitmentId;
     }
-    const spend = checkSpend(locked.balances, locked.control, budgetAmount.amountMinor);
-    const overBudget = spend.outcome === 'warning' || r.kind === 'over_budget';
-    const after = spend.availableMinor - budgetAmount.amountMinor;
+    const overBudget = check.outcome === 'warning' || r.kind === 'over_budget';
+    const after = check.availableMinor - budgetAmount.amountMinor;
     const submitted = unwrap(
       requestMachine.next(r.status, r.status === 'changes_requested' ? 'resubmit' : 'submit'),
     );

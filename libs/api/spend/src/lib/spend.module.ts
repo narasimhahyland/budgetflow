@@ -1,5 +1,6 @@
 import { ApprovalsModule } from '@bf/api/approvals';
 import { AuditModule } from '@bf/api/audit';
+import { BudgetsModule } from '@bf/api/budgets';
 import { DocumentsModule } from '@bf/api/documents';
 import { LedgerModule } from '@bf/api/ledger';
 import { NotificationsModule } from '@bf/api/notifications';
@@ -24,6 +25,7 @@ const SERVICES = [
 @Module({
   imports: [
     AuditModule,
+    BudgetsModule,
     LedgerModule,
     ApprovalsModule,
     NotificationsModule,
