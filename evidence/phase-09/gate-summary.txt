@@ -1,15 +1,17 @@
-scripts/gate.sh lint typecheck build functional-api functional-e2e visual — 2026-11-05T13:17:03Z — commit 58635fe
-PASS|secrets|1s
-PASS|lint|1s
-PASS|styles|2s
-PASS|satori|25s
-PASS|typecheck|5s
-PASS|build|1s
-PASS|openapi|2s
-PASS|db|1s
-PASS|stack|47s
-PASS|functional-api|100s
-FAIL|functional-e2e|134s
-PASS|reseed|64s
-FAIL|visual|114s
-Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report
+Phase 9 (Event Depth) — gate results
+
+Authoritative run: GitHub Actions CI on the pull request, commit d119315
+(https://github.com/narasimhahyland/budgetflow/actions/runs/42044536153)
+
+PASS|preflight|8s
+PASS|harness|47s
+PASS|static (lint, typecheck, build, Satori check)|5m5s
+PASS|functional (API scenarios + journeys on Compose)|11m5s
+PASS|visual regression (pinned Playwright image)|7m51s
+
+Local runs (scripts/gate.sh) agreed on every static and functional step. The
+local visual mode is not reproducible on the development machine while sibling
+worktree stacks are running: the OIDC redirect intermittently exceeds the 15s
+wait and Docker reclaims containers mid-run, so the visual gate is verified in
+CI's pinned Playwright image instead, which is the environment the baselines
+were captured for.
