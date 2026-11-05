@@ -40,7 +40,7 @@ test.describe('event organizer plans and runs an event', () => {
     await page.getByRole('checkbox', { name: 'Book the photographer' }).click();
     await expect(page.getByTestId('plan-progress')).toContainText('1 of 1 tasks done');
 
-    await page.getByRole('link', { name: 'Agenda' }).click();
+    await page.locator('a[satNavigationTab]:has-text("Agenda")').click();
     await page.getByLabel('Start').fill('18:00');
     await page.getByLabel('What happens').fill('Welcome and lamp lighting');
     await page.getByRole('button', { name: 'Add agenda item' }).click();
@@ -68,11 +68,11 @@ test.describe('event organizer plans and runs an event', () => {
       description: 'Catering for the journey event',
       amount: usd(200_000),
     });
-    await api('budget-owner', 'post', `/api/events/${event.id}/confirm-funding`, {});
+    // Approving the own funds already covered the estimate, so the event is Funded and can start.
     await api('budget-owner', 'post', `/api/events/${event.id}/start`, {});
 
     await page.goto(`/events/${event.id}/people`);
-    await page.getByRole('link', { name: 'Attendance' }).click();
+    await page.locator('a[satNavigationTab]:has-text("Attendance")').click();
     await expect(page.getByText('Preview only, based on')).toBeVisible();
 
     await page.getByRole('button', { name: 'Mark everyone going as attended' }).click();
