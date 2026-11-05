@@ -39,7 +39,9 @@ export const NotificationItem = named(
       itemRef: z.string().nullable(),
       itemLink: z.string().nullable(),
       commentId: Id.nullable(),
-      available: z.boolean().describe('False when the related item was deleted or is out of scope.'),
+      available: z
+        .boolean()
+        .describe('False when the related item was deleted or is out of scope.'),
       channelsDelivered: z.array(NotificationChannel),
       readAt: IsoDateTime.nullable(),
       createdAt: IsoDateTime,
@@ -678,7 +680,9 @@ export const ChatApprovalCardView = named(
       stepUpUrl: z.string().nullable(),
       detailsUrl: z.string(),
       blockKit: z.record(z.string(), z.unknown()).describe('Slack Block Kit payload.'),
-      adaptiveCard: z.record(z.string(), z.unknown()).describe('Microsoft Teams Adaptive Card 1.5 payload.'),
+      adaptiveCard: z
+        .record(z.string(), z.unknown())
+        .describe('Microsoft Teams Adaptive Card 1.5 payload.'),
     })
     .strict(),
 );
@@ -740,7 +744,15 @@ export const ChatWebhookResponse = named(
   z
     .object({
       provider: ChatProvider,
-      kind: z.enum(['decision', 'balance', 'app_home', 'quick_request', 'card_view', 'not_linked', 'step_up']),
+      kind: z.enum([
+        'decision',
+        'balance',
+        'app_home',
+        'quick_request',
+        'card_view',
+        'not_linked',
+        'step_up',
+      ]),
       ephemeral: z.boolean(),
       headline: z.string(),
       text: z.string(),
@@ -842,7 +854,10 @@ export const UpdateDigestTemplateRequest = named(
         .string()
         .regex(/^\d{2}:\d{2}$/)
         .optional(),
-      channelsAllowed: z.array(z.enum(['email', 'slack', 'teams'])).min(1).optional(),
+      channelsAllowed: z
+        .array(z.enum(['email', 'slack', 'teams']))
+        .min(1)
+        .optional(),
       introLine: z.string().trim().max(300).optional(),
       sections: z.array(DigestSectionConfig).min(1).optional(),
       skipWhenEmpty: z.boolean().optional(),
@@ -1002,7 +1017,8 @@ export const channelEndpoints = {
     operationId: 'getDiscussion',
     method: 'get',
     path: '/api/discussions/{itemType}/{itemId}',
-    summary: 'Discussion thread, follow state and mention candidates for a budget, event or request',
+    summary:
+      'Discussion thread, follow state and mention candidates for a budget, event or request',
     tags: ['channels'],
     auth: true,
     params: DiscussionParams,
@@ -1013,7 +1029,8 @@ export const channelEndpoints = {
     operationId: 'createComment',
     method: 'post',
     path: '/api/discussions/{itemType}/{itemId}/comments',
-    summary: 'Post a comment with optional @mentions (checks read access of every mentioned person)',
+    summary:
+      'Post a comment with optional @mentions (checks read access of every mentioned person)',
     tags: ['channels'],
     auth: true,
     idempotent: true,
@@ -1133,7 +1150,8 @@ export const channelEndpoints = {
     operationId: 'completeChatLink',
     method: 'post',
     path: '/api/channels/link-complete',
-    summary: 'Bind the chat account to the signed-in BudgetFlow person (requires exact email match)',
+    summary:
+      'Bind the chat account to the signed-in BudgetFlow person (requires exact email match)',
     tags: ['channels'],
     auth: true,
     idempotent: true,

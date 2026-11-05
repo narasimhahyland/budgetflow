@@ -716,10 +716,16 @@ export const ScimUserResponse = named(
       meta: z.object({ resourceType: z.literal('User'), lastModified: IsoDateTime }).strict(),
       budgetflow: z
         .object({
-          handedOverApprovals: z.int(),
-          endedDelegations: z.int(),
-          budgetsFlaggedForNewOwner: z.int(),
-          held: z.boolean(),
+          openApprovals: z
+            .int()
+            .describe(
+              'Tasks the person still holds; they escalate on the next service-level sweep.',
+            ),
+          endedRoleGrants: z.int().describe('Role grants closed with the membership.'),
+          budgetsFlaggedForNewOwner: z
+            .int()
+            .describe('Ownership is never moved silently; the gap is flagged instead.'),
+          held: z.boolean().describe('Deactivation is waiting for an Organization Admin.'),
         })
         .strict()
         .describe('What the deprovisioning rule did; nothing is ever deleted.'),
@@ -1097,8 +1103,46 @@ export const RemoveWebhookEndpointResult = named(
   z.object({ removed: z.boolean() }).strict(),
 );
 
+// Inferred types for every schema the API and the web client use.
+export type IntegrationCategory = z.infer<typeof IntegrationCategory>;
+export type IntegrationMode = z.infer<typeof IntegrationMode>;
+export type ConnectionStatus = z.infer<typeof ConnectionStatus>;
+export type SyncDirection = z.infer<typeof SyncDirection>;
+export type SyncStatus = z.infer<typeof SyncStatus>;
+export type IntegrationErrorClass = z.infer<typeof IntegrationErrorClass>;
+export type IntegrationMessageStatus = z.infer<typeof IntegrationMessageStatus>;
+export type MappingKind = z.infer<typeof MappingKind>;
+export type SecretReference = z.infer<typeof SecretReference>;
+export type MappingEntry = z.infer<typeof MappingEntry>;
+export type IntegrationsHealth = z.infer<typeof IntegrationsHealth>;
+export type PutMappingsRequest = z.infer<typeof PutMappingsRequest>;
+export type SyncRunList = z.infer<typeof SyncRunList>;
+export type SyncRunsQuery = z.infer<typeof SyncRunsQuery>;
+export type IntegrationMessageList = z.infer<typeof IntegrationMessageList>;
+export type IntegrationMessagesQuery = z.infer<typeof IntegrationMessagesQuery>;
+export type RetryMessagesRequest = z.infer<typeof RetryMessagesRequest>;
+export type DiscardMessagesRequest = z.infer<typeof DiscardMessagesRequest>;
+export type PushKind = z.infer<typeof PushKind>;
+export type PushItemList = z.infer<typeof PushItemList>;
+export type DuplicateLine = z.infer<typeof DuplicateLine>;
+export type DuplicateGroupList = z.infer<typeof DuplicateGroupList>;
+export type AdaptivePlanLine = z.infer<typeof AdaptivePlanLine>;
+export type AdaptivePlanImportRequest = z.infer<typeof AdaptivePlanImportRequest>;
+export type ScimTokenView = z.infer<typeof ScimTokenView>;
+export type ProvisioningLogEntry = z.infer<typeof ProvisioningLogEntry>;
+export type CreateScimTokenRequest = z.infer<typeof CreateScimTokenRequest>;
+export type ApiKeyList = z.infer<typeof ApiKeyList>;
+export type RotateApiKeyRequest = z.infer<typeof RotateApiKeyRequest>;
+export type RevokeApiKeyRequest = z.infer<typeof RevokeApiKeyRequest>;
+export type WebhookEndpointList = z.infer<typeof WebhookEndpointList>;
+export type UpdateWebhookEndpointRequest = z.infer<typeof UpdateWebhookEndpointRequest>;
+export type WebhookDeliveryList = z.infer<typeof WebhookDeliveryList>;
+export type WebhookDeliveriesQuery = z.infer<typeof WebhookDeliveriesQuery>;
+export type PublicBudgetList = z.infer<typeof PublicBudgetList>;
+export type PublicEvent = z.infer<typeof PublicEvent>;
+export type PublicEventList = z.infer<typeof PublicEventList>;
+
 const ConnectionParams = z.object({ connectionId: Id }).strict();
-const MessageParams = z.object({ messageId: Id }).strict();
 const KeyParams = z.object({ keyId: Id }).strict();
 const EndpointParams = z.object({ endpointId: Id }).strict();
 const DeliveryParams = z.object({ deliveryId: Id }).strict();

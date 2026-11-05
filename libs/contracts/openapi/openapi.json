@@ -29308,28 +29308,32 @@
           "budgetflow": {
             "type": "object",
             "properties": {
-              "handedOverApprovals": {
+              "openApprovals": {
                 "type": "integer",
                 "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+                "maximum": 9007199254740991,
+                "description": "Tasks the person still holds; they escalate on the next service-level sweep."
               },
-              "endedDelegations": {
+              "endedRoleGrants": {
                 "type": "integer",
                 "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+                "maximum": 9007199254740991,
+                "description": "Role grants closed with the membership."
               },
               "budgetsFlaggedForNewOwner": {
                 "type": "integer",
                 "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+                "maximum": 9007199254740991,
+                "description": "Ownership is never moved silently; the gap is flagged instead."
               },
               "held": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Deactivation is waiting for an Organization Admin."
               }
             },
             "required": [
-              "handedOverApprovals",
-              "endedDelegations",
+              "openApprovals",
+              "endedRoleGrants",
               "budgetsFlaggedForNewOwner",
               "held"
             ],
