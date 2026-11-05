@@ -77,7 +77,7 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
   ],
   template: `
     <bf-load-state
-      [loading]="item.isLoading() && !item.hasValue()"
+      [loading]="(item.isLoading() && !item.hasValue()) || (item.hasValue() && !r())"
       [error]="item.error()"
       what="the request"
       (retry)="item.reload()"
@@ -460,7 +460,12 @@ export class RequestDetailPage {
       return r;
     },
   });
-  protected readonly r = computed(() => valueOf(this.item));
+  /** The request, shown once the viewer's decision task (if any) has loaded too, so nothing shifts. */
+  protected readonly r = computed(() => {
+    const v = valueOf(this.item);
+    if (v?.myTaskId && !this.task.hasValue() && !this.task.error()) return undefined;
+    return v;
+  });
   protected readonly history = computed(() =>
     [...(this.r()?.activity ?? [])].sort((a, b) => b.at.localeCompare(a.at)),
   );
@@ -491,7 +496,10 @@ export class RequestDetailPage {
     };
   });
   protected readonly task = resource({
-    params: () => (this.r()?.myTaskId ? { taskId: this.r()!.myTaskId! } : undefined),
+    params: () => {
+      const taskId = valueOf(this.item)?.myTaskId;
+      return taskId ? { taskId } : undefined;
+    },
     loader: ({ params }) => data(this.api.getApprovalTask({ params })),
   });
 

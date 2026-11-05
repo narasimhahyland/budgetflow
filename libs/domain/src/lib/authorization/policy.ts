@@ -216,7 +216,12 @@ export const HOME_UNIT_ACTIONS: readonly Action[] = [
 function scopeCovers(scope: Scope, actor: Actor, resource: Resource, action?: Action): boolean {
   if (scope === 'tenant') return true;
   if (resource.kind === 'tenant')
-    return scope === 'owned' ? actor.ownedBudgetPaths.length > 0 : true;
+    return scope === 'owned'
+      ? actor.ownedBudgetPaths.length > 0 ||
+          Boolean(
+            action && HOME_UNIT_ACTIONS.includes(action) && (actor.homeOrgUnitIds ?? []).length > 0,
+          )
+      : true;
   if (resource.kind === 'budget') {
     if (actor.ownedBudgetPaths.some((p) => resource.path.startsWith(p))) return true;
     return Boolean(

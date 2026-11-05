@@ -69,26 +69,26 @@ const RECEIPT: Record<Row['receipt'], string> = {
       } @else {
         <div class="bf-kpis" data-testid="approved-summary">
           <div class="bf-kpi">
-            <span class="bf-kpi__label">Approved</span>
-            <span class="bf-kpi__value"
-              ><bf-money [amountMinor]="totals().approved" [currency]="totals().currency"
-            /></span>
+            <p class="bf-kpi__label">Approved</p>
+            <p class="bf-kpi__value">
+              <bf-money [amountMinor]="totals().approved" [currency]="totals().currency" />
+            </p>
           </div>
           <div class="bf-kpi">
-            <span class="bf-kpi__label">Used (receipts matched)</span>
-            <span class="bf-kpi__value"
-              ><bf-money [amountMinor]="totals().used" [currency]="totals().currency"
-            /></span>
+            <p class="bf-kpi__label">Used (receipts matched)</p>
+            <p class="bf-kpi__value">
+              <bf-money [amountMinor]="totals().used" [currency]="totals().currency" />
+            </p>
           </div>
           <div class="bf-kpi">
-            <span class="bf-kpi__label">Open</span>
-            <span class="bf-kpi__value"
-              ><bf-money [amountMinor]="totals().open" [currency]="totals().currency"
-            /></span>
+            <p class="bf-kpi__label">Open</p>
+            <p class="bf-kpi__value">
+              <bf-money [amountMinor]="totals().open" [currency]="totals().currency" />
+            </p>
           </div>
           <div class="bf-kpi">
-            <span class="bf-kpi__label">Receipts due</span>
-            <span class="bf-kpi__value">{{ totals().due }}</span>
+            <p class="bf-kpi__label">Receipts due</p>
+            <p class="bf-kpi__value">{{ totals().due }}</p>
           </div>
         </div>
         <section class="bf-card" aria-labelledby="approved-title">
@@ -99,7 +99,42 @@ const RECEIPT: Record<Row['receipt'], string> = {
               commitment is released.</span
             >
           </div>
-          <div class="bf-table-scroll">
+          <ul class="bf-approved__cards" aria-label="Approved for you">
+            @for (row of rows(); track row.r.id) {
+              <li class="bf-approved__card">
+                <span class="bf-chip">{{ receiptLabel(row.receipt) }}</span>
+                <a class="bf-cell__primary" [routerLink]="['/requests', row.r.id]">{{
+                  row.r.title
+                }}</a>
+                <span class="bf-cell__secondary">{{ row.r.ref }} · {{ row.r.budgetName }}</span>
+                <dl class="bf-approved__figures">
+                  <div>
+                    <dt>Approved</dt>
+                    <dd>
+                      <bf-money [amountMinor]="row.approvedMinor" [currency]="row.currency" />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Used</dt>
+                    <dd><bf-money [amountMinor]="row.usedMinor" [currency]="row.currency" /></dd>
+                  </div>
+                  <div>
+                    <dt>Open</dt>
+                    <dd><bf-money [amountMinor]="row.openMinor" [currency]="row.currency" /></dd>
+                  </div>
+                </dl>
+                @if (row.receipt === 'due' || row.receipt === 'partly') {
+                  <a
+                    mat-stroked-button
+                    routerLink="/requests/upload"
+                    [queryParams]="{ request: row.r.id }"
+                    >Upload receipt</a
+                  >
+                }
+              </li>
+            }
+          </ul>
+          <div class="bf-table-scroll bf-approved__table">
             <table
               mat-table
               satTableWithRowStates
@@ -173,6 +208,47 @@ const RECEIPT: Record<Row['receipt'], string> = {
     }
   `,
   styles: `
+    .bf-approved__cards {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      margin: 0;
+      padding: 0 16px 16px;
+      list-style: none;
+    }
+    .bf-approved__card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid var(--mat-sys-outline-variant);
+      border-radius: var(--mat-sys-corner-medium);
+    }
+    .bf-approved__figures {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      width: 100%;
+      margin: 0;
+    }
+    .bf-approved__figures dt {
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-small);
+    }
+    .bf-approved__figures dd {
+      margin: 0;
+      font: var(--mat-sys-body-medium);
+      font-variant-numeric: tabular-nums;
+    }
+    @media (width < 600px) {
+      .bf-approved__cards {
+        display: flex;
+      }
+      .bf-approved__table {
+        display: none;
+      }
+    }
     .bf-sr-only {
       position: absolute;
       width: 1px;
