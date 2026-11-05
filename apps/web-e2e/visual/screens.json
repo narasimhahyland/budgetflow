@@ -504,7 +504,7 @@
               "click": "[data-testid=set-to-zero]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"4,797.71\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"3,297.71\")"
             }
           ]
         },
@@ -515,7 +515,7 @@
               "click": "[data-testid=set-to-zero]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"4,797.71\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"3,297.71\")"
             },
             {
               "waitFor": "[data-testid=confirm-text]"
