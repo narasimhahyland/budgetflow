@@ -19,4 +19,13 @@
 
 ## Live check (after deploy)
 
-Recorded after the pull request merged and `design/preview/deploy.sh` published the site.
+- Merged in [#28](https://github.com/narasimhahyland/budgetflow/pull/28) (merge commit `ba9a1f0`), then published with `design/preview/deploy.sh` from that commit.
+- Checked: 2026-11-05 02:32 UTC, curl and Playwright 1.64.1 (Chromium) against https://narasimhahyland.github.io/budgetflow/overview/
+
+| Check                                                                                 | Expected                                                | Result |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------ |
+| `curl -sI` on the live URL ([live-curl-headers.txt](live-curl-headers.txt))           | HTTP 200, `text/html`                                   | pass   |
+| Live index "Product overview" link ([live-preview-index.png](live-preview-index.png)) | Opens `/budgetflow/overview/`, title "Product overview" | pass   |
+| Live page at 1440 px ([live-desktop-1440.png](live-desktop-1440.png))                 | 5 sections, 8 steps, 11 feature pillars, 9 roles        | pass   |
+| Live page on a phone ([live-mobile-390.png](live-mobile-390.png))                     | HTTP 200, no horizontal overflow                        | pass   |
+| Console and page errors                                                               | None                                                    | pass   |
