@@ -604,7 +604,8 @@ export const WorkflowRouteView = named(
   'WorkflowRouteView',
   z
     .object({
-      id: Id,
+      /** Null until the route is saved: a kind can still be running the shipped default. */
+      id: Id.nullable(),
       requestKind: z.enum([
         'spending',
         'budget',

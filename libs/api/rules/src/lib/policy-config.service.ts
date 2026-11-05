@@ -182,7 +182,7 @@ export class PolicyConfigService {
         const draft = forKind.find((r) => r.status === 'draft');
         const shown = active ?? draft;
         return {
-          id: shown?.id ?? `${kind}-default`,
+          id: shown?.id ?? null,
           requestKind: kind,
           label: ROUTE_LABELS[kind],
           activeVersion: active?.version ?? 1,

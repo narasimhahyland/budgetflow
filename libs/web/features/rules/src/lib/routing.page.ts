@@ -46,7 +46,7 @@ import { RulesTabs } from './rules-tabs';
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Kind of request</mat-label>
             <mat-select [ngModel]="kind()" (ngModelChange)="kind.set($event)" name="kind">
-              @for (r of valueOf(routes)?.items ?? []; track r.id) {
+              @for (r of valueOf(routes)?.items ?? []; track r.requestKind) {
                 <mat-option [value]="r.requestKind">{{ r.label }}</mat-option>
               }
             </mat-select>

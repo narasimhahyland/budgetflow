@@ -219,7 +219,7 @@ export function evaluateRules(
       if (c.passed) matchedFacts[c.fact] = c.actual;
     }
     rawMatches.push({
-      ruleId: r.code || r.id,
+      ruleId: r.id,
       ruleCode: r.code,
       ruleName: r.name,
       version: r.version,
