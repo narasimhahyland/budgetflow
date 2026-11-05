@@ -1073,6 +1073,9 @@
             },
             {
               "waitFor": "role=heading[name=\"What would happen\"]"
+            },
+            {
+              "scrollTop": true
             }
           ]
         }
