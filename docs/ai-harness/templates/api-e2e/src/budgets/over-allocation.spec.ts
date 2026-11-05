@@ -6,13 +6,18 @@ import { bearer } from '../support/auth';
 import { seed } from '../support/seed';
 
 test.describe('allocation against parent available', () => {
-  test('one minor unit over the parent available is rejected with the remaining amount', async ({ request }) => {
+  test('one minor unit over the parent available is rejected with the remaining amount', async ({
+    request,
+  }) => {
     const headers = await bearer('regional-manager', { 'idempotency-key': randomUUID() });
     const before = await (await request.get(`/api/budgets/${seed.india.id}`, { headers })).json();
 
     const res = await request.post(`/api/budgets/${seed.india.id}/allocations`, {
       headers,
-      data: { childId: seed.hyderabad.id, amount: { amountMinor: before.available.amountMinor + 1, currency: 'INR' } },
+      data: {
+        childId: seed.hyderabad.id,
+        amount: { amountMinor: before.available.amountMinor + 1, currency: 'INR' },
+      },
     });
 
     expect(res.status()).toBe(409);

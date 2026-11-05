@@ -21,7 +21,10 @@ export async function token(role: RoleId): Promise<string> {
       password: process.env.BF_E2E_PASSWORD ?? '',
     },
   });
-  if (!res.ok()) throw new Error(`token for ${role}: HTTP ${res.status()} (is the stack up and BF_E2E_PASSWORD set?)`);
+  if (!res.ok())
+    throw new Error(
+      `token for ${role}: HTTP ${res.status()} (is the stack up and BF_E2E_PASSWORD set?)`,
+    );
   const { access_token } = await res.json();
   await ctx.dispose();
   cache.set(role, access_token);

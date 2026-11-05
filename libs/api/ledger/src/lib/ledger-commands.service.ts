@@ -7,6 +7,7 @@ import {
   type RequestActor,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
+import type { Tx } from '@bf/api/db';
 import type { Journal } from '@bf/contracts';
 import {
   applyDelta,
@@ -73,72 +74,88 @@ export class LedgerCommands {
           { kind: 'tenant', tenantId: actor.tenantId },
           'journal',
         );
-        const original = await this.ledger.journalRow(tx, journalId);
-        if (!original) throw ApiProblem.notFound('journal');
-        const lines = await this.ledger.linesOf(tx, journalId);
-        const budgetIds = [
-          ...new Set(lines.map((l) => l.budgetId).filter((b): b is string => Boolean(b))),
-        ];
-        await this.reads.lockBudgets(tx, budgetIds);
-        const before = await this.alerts.utilizations(tx, budgetIds);
-        const draft = unwrap(
-          reverseJournal(
-            {
-              id: original.id,
-              type: original.journalType,
-              reversalOfJournalId: original.reversalOfJournalId,
-              transactionCurrency: original.transactionCurrency as CurrencyCode,
-              reportingCurrency: original.reportingCurrency as CurrencyCode,
-              lines: lines.map((l) => ({ ...toDomainLine(l), id: l.id })),
-            },
-            {
-              accountingDate: req.accountingDate ?? todayUtc(),
-              reasonCode: req.reasonCode,
-              reason: req.reason,
-              alreadyReversed: (await this.ledger.reversedBy(tx, journalId)) !== null,
-            },
-          ),
-        );
-        const rows = await this.reads.budgetRows(tx, budgetIds);
-        const balances = await this.reads.balances(tx, budgetIds);
-        for (const id of budgetIds) {
-          const budget = toPostingBudget(rows.get(id)!);
-          const deltas = draft.lines
-            .filter((l) => l.budgetId === id)
-            .map((l) => ({ account: l.account, budgetAmountMinor: l.budget!.amountMinor }));
-          unwrap(
-            checkNotOverdrawn(
-              applyDelta(balances.get(id)!.budget, deltas),
-              budget.control,
-              id,
-              'REVERSAL_WOULD_OVERDRAW',
-            ),
-          );
-        }
-        const reversalId = await this.ledger.post(tx, draft, {
-          actor,
-          command: 'ledger.reverse',
-          fiscalYearId: budgetIds.length ? rows.get(budgetIds[0])!.fiscalYearId : null,
-          requestId: ctx.requestId,
-          idempotencyKey: ctx.idempotencyKey,
-          allowSoftClosed: true,
-        });
-        await this.alerts.emit(tx, actor.tenantId, before, budgetIds);
-        await this.audit.append(tx, {
-          tenantId: actor.tenantId,
-          actorPersonId: actor.personId,
-          actorSubject: actor.subject,
-          action: 'ledger.journal.reversed',
-          resourceType: 'journal',
-          resourceId: journalId,
-          legalEntityId: lines[0]?.legalEntityId ?? null,
-          requestId: ctx.requestId,
-          reason: `${req.reasonCode}: ${req.reason}`,
-          changes: { reversedBy: { from: null, to: reversalId } },
-        });
+        const reversalId = await this.reverseInTx(tx, actor, journalId, req, ctx);
         return this.ledger.journalDto(tx, reversalId);
       },
     );
+  }
+
+  /**
+   * Posts the reversal inside the caller's transaction and returns the new journal id, so commands
+   * that correct something else (a post-spend reclassification, for example) stay atomic with it.
+   * Callers authorize first; this method assumes the check already passed.
+   */
+  async reverseInTx(
+    tx: Tx,
+    actor: RequestActor,
+    journalId: string,
+    req: { reasonCode: string; reason: string; accountingDate?: string },
+    ctx: { idempotencyKey: string; requestId: string | null },
+  ): Promise<string> {
+    const original = await this.ledger.journalRow(tx, journalId);
+    if (!original) throw ApiProblem.notFound('journal');
+    const lines = await this.ledger.linesOf(tx, journalId);
+    const budgetIds = [
+      ...new Set(lines.map((l) => l.budgetId).filter((b): b is string => Boolean(b))),
+    ];
+    await this.reads.lockBudgets(tx, budgetIds);
+    const before = await this.alerts.utilizations(tx, budgetIds);
+    const draft = unwrap(
+      reverseJournal(
+        {
+          id: original.id,
+          type: original.journalType,
+          reversalOfJournalId: original.reversalOfJournalId,
+          transactionCurrency: original.transactionCurrency as CurrencyCode,
+          reportingCurrency: original.reportingCurrency as CurrencyCode,
+          lines: lines.map((l) => ({ ...toDomainLine(l), id: l.id })),
+        },
+        {
+          accountingDate: req.accountingDate ?? todayUtc(),
+          reasonCode: req.reasonCode,
+          reason: req.reason,
+          alreadyReversed: (await this.ledger.reversedBy(tx, journalId)) !== null,
+        },
+      ),
+    );
+    const rows = await this.reads.budgetRows(tx, budgetIds);
+    const balances = await this.reads.balances(tx, budgetIds);
+    for (const id of budgetIds) {
+      const budget = toPostingBudget(rows.get(id)!);
+      const deltas = draft.lines
+        .filter((l) => l.budgetId === id)
+        .map((l) => ({ account: l.account, budgetAmountMinor: l.budget!.amountMinor }));
+      unwrap(
+        checkNotOverdrawn(
+          applyDelta(balances.get(id)!.budget, deltas),
+          budget.control,
+          id,
+          'REVERSAL_WOULD_OVERDRAW',
+        ),
+      );
+    }
+    const reversalId = await this.ledger.post(tx, draft, {
+      actor,
+      command: 'ledger.reverse',
+      fiscalYearId: budgetIds.length ? rows.get(budgetIds[0])!.fiscalYearId : null,
+      requestId: ctx.requestId,
+      idempotencyKey: ctx.idempotencyKey,
+      allowSoftClosed: true,
+    });
+    await this.alerts.emit(tx, actor.tenantId, before, budgetIds);
+    await this.audit.append(tx, {
+      tenantId: actor.tenantId,
+      actorPersonId: actor.personId,
+      actorSubject: actor.subject,
+      action: 'ledger.journal.reversed',
+      resourceType: 'journal',
+      resourceId: journalId,
+      legalEntityId: lines[0]?.legalEntityId ?? null,
+      requestId: ctx.requestId,
+      reason: `${req.reasonCode}: ${req.reason}`,
+      changes: { reversedBy: { from: null, to: reversalId } },
+    });
+    return reversalId;
   }
 
   postManual(

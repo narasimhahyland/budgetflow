@@ -16,6 +16,7 @@ import { orgEndpoints } from './domains/org';
 import { planningEndpoints } from './domains/planning';
 import { requestEndpoints } from './domains/requests';
 import { channelEndpoints } from './domains/channels';
+import { rulesEndpoints } from './domains/rules';
 
 export type { Endpoint } from './endpoint';
 
@@ -41,6 +42,7 @@ export const endpoints = {
   ...documentEndpoints,
   ...actualsEndpoints,
   ...channelEndpoints,
+  ...rulesEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;

@@ -8,15 +8,21 @@ import {
 } from '@bf/api/core';
 import { DocumentsService } from '@bf/api/documents';
 import {
+  ApprovalHistoryQuery,
   CreateDelegationRequest,
   DecisionRequest,
   EmailActionRequest,
   InboxQuery,
+  ReturnEscalationRequest,
+  RevokeDelegationRequest,
+  SlaSweepRequest,
+  type ApprovalHistoryResponse,
   type ApprovalInbox,
   type ApprovalTaskDetail,
   type DecisionResponse,
   type DelegationView,
   type EmailActionPreview,
+  type SlaSweepResponse,
 } from '@bf/contracts';
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Res } from '@nestjs/common';
 import { z } from 'zod';
@@ -107,6 +113,69 @@ export class ApprovalsController {
         requestId,
       },
     );
+    if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
+    return r.body;
+  }
+
+  @Post('delegations/:delegationId/revoke')
+  @HttpCode(200)
+  async revokeDelegation(
+    @CurrentActor() actor: RequestActor,
+    @Param('delegationId') rawId: string,
+    @IdempotencyKey() idempotencyKey: string,
+    @RequestId() requestId: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ): Promise<DelegationView> {
+    const r = await this.approvals.revokeDelegation(
+      actor,
+      parseWith(TaskId, rawId),
+      parseWith(RevokeDelegationRequest, body),
+      { idempotencyKey, requestId },
+    );
+    if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
+    return r.body;
+  }
+
+  @Post('tasks/:taskId/return')
+  @HttpCode(200)
+  async returnTask(
+    @CurrentActor() actor: RequestActor,
+    @Param('taskId') rawId: string,
+    @IdempotencyKey() idempotencyKey: string,
+    @RequestId() requestId: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ): Promise<DecisionResponse> {
+    const r = await this.approvals.returnEscalatedTask(
+      actor,
+      parseWith(TaskId, rawId),
+      parseWith(ReturnEscalationRequest, body),
+      { idempotencyKey, requestId },
+    );
+    if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
+    return r.body;
+  }
+
+  @Get('history')
+  history(
+    @CurrentActor() actor: RequestActor,
+    @Query() rawQuery: unknown,
+  ): Promise<ApprovalHistoryResponse> {
+    return this.approvals.history(actor, parseWith(ApprovalHistoryQuery, rawQuery));
+  }
+
+  @Post('sla-sweep')
+  @HttpCode(200)
+  async slaSweep(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() idempotencyKey: string,
+    @RequestId() requestId: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ): Promise<SlaSweepResponse> {
+    const req = parseWith(SlaSweepRequest, body);
+    const r = await this.approvals.runSlaSweep(actor, req.asOf, { idempotencyKey, requestId });
     if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
     return r.body;
   }

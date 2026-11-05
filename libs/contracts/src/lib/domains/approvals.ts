@@ -229,6 +229,9 @@ export const DecisionRequest = named(
     .object({
       decision: Decision,
       approvedAmount: Money.optional().describe('Required for approve_partial.'),
+      counterOfferAmount: Money.optional().describe(
+        'Optional counter-offer amount when decision is request_changes.',
+      ),
       mode: z
         .enum(['earmark', 'transfer'])
         .optional()
@@ -318,10 +321,15 @@ export const DelegationView = named(
       delegateName: z.string(),
       spendType: z.string().nullable(),
       limit: Money.nullable(),
+      effectiveLimit: Money.nullable()
+        .optional()
+        .describe('The lower of delegator DoA, delegate DoA and cap.'),
       validFrom: IsoDate,
       validTo: IsoDate,
       reason: z.string(),
       active: z.boolean(),
+      status: z.enum(['active', 'scheduled', 'ended', 'revoked']).optional(),
+      revokedAt: IsoDateTime.nullable().optional(),
     })
     .strict(),
 );
@@ -343,11 +351,24 @@ export const CreateDelegationRequest = named(
     .strict(),
 );
 
+export const RevokeDelegationRequest = named(
+  'RevokeDelegationRequest',
+  z.object({ reason: z.string().trim().max(500).optional() }).strict(),
+);
+
+export const ReturnEscalationRequest = named(
+  'ReturnEscalationRequest',
+  z.object({ comment: z.string().trim().min(3).max(1000) }).strict(),
+);
+
 export type DelegationView = z.infer<typeof DelegationView>;
 export type CreateDelegationRequest = z.infer<typeof CreateDelegationRequest>;
+export type RevokeDelegationRequest = z.infer<typeof RevokeDelegationRequest>;
+export type ReturnEscalationRequest = z.infer<typeof ReturnEscalationRequest>;
 export type EmailActionRequest = z.infer<typeof EmailActionRequest>;
 
 const TaskParams = z.object({ taskId: Id }).strict();
+const DelegationParams = z.object({ delegationId: Id }).strict();
 const TokenParams = z.object({ token: z.string().min(20).max(300) }).strict();
 
 export const approvalEndpoints = {
@@ -429,6 +450,32 @@ export const approvalEndpoints = {
     idempotent: true,
     body: CreateDelegationRequest,
     response: { status: 201, schema: DelegationView },
-    errors: [400, 401, 403, 422],
+    errors: [400, 401, 403, 409, 422],
+  },
+  revokeDelegation: {
+    operationId: 'revokeDelegation',
+    method: 'post',
+    path: '/api/approvals/delegations/{delegationId}/revoke',
+    summary: 'End a delegation immediately and return open items to the delegator',
+    tags: ['approvals'],
+    auth: true,
+    idempotent: true,
+    params: DelegationParams,
+    body: RevokeDelegationRequest,
+    response: { status: 200, schema: DelegationView },
+    errors: [400, 401, 403, 404, 409],
+  },
+  returnEscalatedTask: {
+    operationId: 'returnEscalatedTask',
+    method: 'post',
+    path: '/api/approvals/tasks/{taskId}/return',
+    summary: 'Return an SLA-escalated task to the original approver with a note',
+    tags: ['approvals'],
+    auth: true,
+    idempotent: true,
+    params: TaskParams,
+    body: ReturnEscalationRequest,
+    response: { status: 200, schema: DecisionResponse },
+    errors: [400, 401, 403, 404, 409, 422],
   },
 } as const satisfies Record<string, Endpoint>;

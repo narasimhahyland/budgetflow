@@ -153,8 +153,24 @@ test.describe('approval hygiene', () => {
     request,
   }) => {
     const { team } = await directorTree(request);
-    // Lena's own limit for travel is USD 10,000.00; the delegation says USD 20,000.00: the lower applies.
-    await delegate(request, 'department-head', 'finance-admin', { limitMinor: 2_000_000 });
+    // Lena's own limit for travel is USD 10,000.00. Delegation hygiene (P7) refuses a cap above
+    // that, so the delegation is set at her limit and the delegate is capped by it.
+    await expectProblem(
+      await request.post('/api/approvals/delegations', {
+        headers: await mutate('department-head'),
+        data: {
+          delegatePersonId: userById('finance-admin').personId,
+          validFrom: today,
+          validTo: today,
+          reason: 'A cap above my own limit should be refused.',
+          spendType: 'travel',
+          limit: usd(2_000_000),
+        },
+      }),
+      422,
+      'DELEGATION_EXCEEDS_DOA',
+    );
+    await delegate(request, 'department-head', 'finance-admin', { limitMinor: 1_000_000 });
     const within = await expectContract(
       await spendingRequest(request, 'budget-owner', team.id, usd(900_000), TRAVEL),
       201,

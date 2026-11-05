@@ -44,13 +44,15 @@
       "@bf/api/spend": ["./libs/api/spend/src/index.ts"],
       "@bf/api/contributions": ["./libs/api/contributions/src/index.ts"],
       "@bf/api/events": ["./libs/api/events/src/index.ts"],
+      "@bf/api/rules": ["./libs/api/rules/src/index.ts"],
       "@bf/web/features/events": ["./libs/web/features/events/src/index.ts"],
       "@bf/web/features/requests": ["./libs/web/features/requests/src/index.ts"],
       "@bf/web/features/approvals": ["./libs/web/features/approvals/src/index.ts"],
       "@bf/web/features/employee": ["./libs/web/features/employee/src/index.ts"],
       "@bf/web/features/insights": ["./libs/web/features/insights/src/index.ts"],
       "@bf/api/channels": ["./libs/api/channels/src/index.ts"],
-      "@bf/web/features/mobile": ["./libs/web/features/mobile/src/index.ts"]
+      "@bf/web/features/mobile": ["./libs/web/features/mobile/src/index.ts"],
+      "@bf/web/features/rules": ["./libs/web/features/rules/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

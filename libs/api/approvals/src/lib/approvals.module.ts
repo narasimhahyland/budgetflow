@@ -11,6 +11,7 @@ import { ApprovalsController } from './approvals.controller';
 import { ApprovalsService } from './approvals.service';
 import { BudgetImpactService } from './budget-impact';
 import { RoutingService } from './routing.service';
+import { SlaSweepService } from './sla-sweep.service';
 
 const SERVICES = [
   ApprovalHandlers,
@@ -18,6 +19,7 @@ const SERVICES = [
   ApprovalsService,
   BudgetImpactService,
   RoutingService,
+  SlaSweepService,
 ];
 
 /** Approval engine; subject modules (spend, contributions) register their handlers with ApprovalHandlers. */

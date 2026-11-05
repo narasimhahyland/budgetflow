@@ -41,6 +41,9 @@ export const ACTIONS = [
   'fx.manage',
   'doa.manage',
   'doa.read',
+  'rules.read',
+  'rules.manage',
+  'exception.resolve',
   'request.create',
   'request.approve',
   'contribution.request',
@@ -103,6 +106,9 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'audit.read': 'tenant',
     'org.read': 'tenant',
     'doa.read': 'tenant',
+    // The CEO approves submitted DoA matrix versions; Finance drafts them.
+    'doa.manage': 'tenant',
+    'rules.read': 'tenant',
   },
   'finance-admin': {
     ...OWNER,
@@ -129,6 +135,9 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
     'notification.manage': 'tenant',
+    'rules.read': 'tenant',
+    'rules.manage': 'tenant',
+    'exception.resolve': 'tenant',
   },
   'finance-controller': {
     'tenant.read': 'tenant',
@@ -145,6 +154,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'integrity.read': 'tenant',
     'org.read': 'tenant',
     'doa.read': 'tenant',
+    'rules.read': 'tenant',
+    'exception.resolve': 'tenant',
   },
   'budget-owner': OWNER,
   'department-head': OWNER,
@@ -170,6 +181,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'integrity.read': 'tenant',
     'org.read': 'tenant',
     'doa.read': 'tenant',
+    'rules.read': 'tenant',
   },
   'integration-admin': { 'tenant.read': 'tenant', 'integration.manage': 'tenant' },
   analyst: {

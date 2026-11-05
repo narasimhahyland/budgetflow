@@ -213,6 +213,11 @@ async function runJob(browser, job) {
       else if (action.press) await page.keyboard.press(action.press);
       else if (action.waitFor)
         await page.locator(action.waitFor).first().waitFor({ state: 'visible', timeout: 15000 });
+      else if (action.scrollTop)
+        await page.evaluate(() => {
+          for (const el of document.querySelectorAll('*')) el.scrollTop = 0;
+          window.scrollTo(0, 0);
+        });
     }
     await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     await page.evaluate(() =>

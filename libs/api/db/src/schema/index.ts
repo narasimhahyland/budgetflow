@@ -12,3 +12,4 @@ export * from './platform';
 export * from './cofunding';
 export * from './documents';
 export * from './channels';
+export * from './rules';

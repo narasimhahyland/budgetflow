@@ -12,6 +12,9 @@ type Action = {
   hover?: string;
   press?: string;
   waitFor?: string;
+  // Clicking a control below the fold scrolls the shell's content box, and a full-page shot keeps
+  // that offset. States that interact before capturing use this to return to a fixed position.
+  scrollTop?: boolean;
 };
 type State = {
   state: string;
@@ -61,6 +64,11 @@ for (const screen of config.screens) {
             else if (a.hover) await page.locator(a.hover).first().hover();
             else if (a.press) await page.keyboard.press(a.press);
             else if (a.waitFor) await expect(page.locator(a.waitFor).first()).toBeVisible();
+            else if (a.scrollTop)
+              await page.evaluate(() => {
+                for (const el of document.querySelectorAll('*')) el.scrollTop = 0;
+                window.scrollTo(0, 0);
+              });
           }
           await page.evaluate(() => document.fonts.ready);
           const mask = [...(config.mask ?? []), ...(screen.mask ?? []), ...(state.mask ?? [])].map(

@@ -78,7 +78,12 @@ export interface ApprovalSubjectHandler {
     opts: { mode?: 'earmark' | 'transfer' },
   ): Promise<HandlerOutcome>;
   reject(tx: Tx, subject: ApprovalSubject, ctx: DecisionContext): Promise<HandlerOutcome>;
-  requestChanges(tx: Tx, subject: ApprovalSubject, ctx: DecisionContext): Promise<HandlerOutcome>;
+  requestChanges(
+    tx: Tx,
+    subject: ApprovalSubject,
+    ctx: DecisionContext,
+    counterOffer?: Money | null,
+  ): Promise<HandlerOutcome>;
   impact(tx: Tx, subject: ApprovalSubject, actor: RequestActor): Promise<BudgetImpact | null>;
   /** Whether a viewer who is not the approver may see the subject (requester, owners, finance). */
   canView(tx: Tx, actor: RequestActor, subject: ApprovalSubject): Promise<boolean>;

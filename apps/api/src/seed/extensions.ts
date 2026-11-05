@@ -4,6 +4,7 @@ import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
 import { seedEvents } from './events';
 import { seedOrg } from './org';
+import { seedRules } from './rules';
 
 /**
  * Seed steps added by later phases, run in order after the Phase 1 reference data and budget tree.
@@ -23,4 +24,9 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
   { name: 'events, co-funding and requests', phase: 'P5', run: seedEvents },
   { name: 'actuals feeds, commitments, accruals and tie-outs', phase: 'P6', run: seedActuals },
   { name: 'channels, notifications, comments and digests', phase: 'P8', run: seedChannels },
+  {
+    name: 'policy rules, approval routes, DoA draft and post-spend exceptions',
+    phase: 'P7',
+    run: seedRules,
+  },
 ];
