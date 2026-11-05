@@ -186,6 +186,12 @@ const REASONS = [
       display: flex;
       flex-direction: column;
       gap: 12px;
+      min-width: 0;
+    }
+    .bf-decision__form mat-button-toggle-group {
+      flex-wrap: wrap;
+      align-self: flex-start;
+      max-width: 100%;
     }
     .bf-decision__actions {
       display: flex;

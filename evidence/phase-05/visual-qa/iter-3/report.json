@@ -1,0 +1,332 @@
+{
+  "generatedAt": "2026-11-05T02:26:37.659Z",
+  "base": "http://localhost:4250",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 39,
+  "blocking": 0,
+  "warnings": 1,
+  "results": [
+    {
+      "id": "059-approval-inbox",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/059-approval-inbox--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "059-approval-inbox",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/059-approval-inbox--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "059-approval-inbox",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/059-approval-inbox--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "approver",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--approver--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "approver",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--approver--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "approver",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--approver--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "requester",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--requester--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "requester",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--requester--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "requester",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--requester--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "rejected",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--rejected--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "rejected",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--rejected--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "060-request-details",
+      "state": "rejected",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/060-request-details--rejected--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "061-approval-decision",
+      "state": "approve-part",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/061-approval-decision--approve-part--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "061-approval-decision",
+      "state": "approve-part",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/061-approval-decision--approve-part--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "061-approval-decision",
+      "state": "approve-part",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/061-approval-decision--approve-part--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "064-request-history",
+      "state": "rejected",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/064-request-history--rejected--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "064-request-history",
+      "state": "rejected",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/064-request-history--rejected--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "064-request-history",
+      "state": "rejected",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/064-request-history--rejected--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "064-request-history",
+      "state": "pending",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/064-request-history--pending--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "064-request-history",
+      "state": "pending",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/064-request-history--pending--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "064-request-history",
+      "state": "pending",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/064-request-history--pending--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "118-request-event-funding",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/118-request-event-funding--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "118-request-event-funding",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/118-request-event-funding--default--tablet--light.png",
+      "findings": [
+        {
+          "type": "layout-shift",
+          "severity": "warning",
+          "message": "cumulative layout shift 0.127 (> 0.1)"
+        }
+      ]
+    },
+    {
+      "id": "118-request-event-funding",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/118-request-event-funding--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "118-request-event-funding",
+      "state": "validation",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/118-request-event-funding--validation--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "118-request-event-funding",
+      "state": "validation",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/118-request-event-funding--validation--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "118-request-event-funding",
+      "state": "validation",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/118-request-event-funding--validation--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "120-approved-allocations",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/120-approved-allocations--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "120-approved-allocations",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/120-approved-allocations--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "120-approved-allocations",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/120-approved-allocations--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "120-approved-allocations",
+      "state": "empty",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/120-approved-allocations--empty--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "120-approved-allocations",
+      "state": "empty",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/120-approved-allocations--empty--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "120-approved-allocations",
+      "state": "empty",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/120-approved-allocations--empty--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "121-upload-receipt",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/121-upload-receipt--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "121-upload-receipt",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/121-upload-receipt--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "121-upload-receipt",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/121-upload-receipt--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "121-upload-receipt",
+      "state": "amount-check",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/121-upload-receipt--amount-check--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "121-upload-receipt",
+      "state": "amount-check",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/121-upload-receipt--amount-check--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "121-upload-receipt",
+      "state": "amount-check",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/phase-05/visual-qa/iter-3/screens/121-upload-receipt--amount-check--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

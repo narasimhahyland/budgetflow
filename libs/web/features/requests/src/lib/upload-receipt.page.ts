@@ -78,7 +78,7 @@ const KINDS: { id: DocumentKind; label: string }[] = [
           <h2 class="bf-card__title" id="for-title">1. What is it for</h2>
         </div>
         <div class="bf-form">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="bf-form__wide">
             <mat-label>Request</mat-label>
             <mat-select [(ngModel)]="requestId" name="request" (ngModelChange)="touch()">
               @for (r of requests(); track r.id) {

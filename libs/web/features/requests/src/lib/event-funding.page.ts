@@ -2,9 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
   resource,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -62,7 +64,7 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
       (retry)="requestable.reload()"
     />
     @if (errors().length && showErrors()) {
-      <sat-banner variant="important" data-testid="error-summary"
+      <sat-banner #summary tabindex="-1" variant="important" data-testid="error-summary"
         ><sat-banner-message
           >Fix these before submitting: {{ errors().join('; ') }}.</sat-banner-message
         ></sat-banner
@@ -266,6 +268,7 @@ export class EventFundingPage {
   protected readonly failure = signal('');
   protected readonly showErrors = signal(false);
   private readonly version = signal(0);
+  private readonly summary = viewChild('summary', { read: ElementRef });
 
   protected readonly units = resource({ loader: () => data(this.api.listOrgUnits({ query: {} })) });
   protected readonly locations = computed(() =>
@@ -336,7 +339,10 @@ export class EventFundingPage {
 
   protected async save(submit: boolean): Promise<void> {
     this.showErrors.set(true);
-    if (this.errors().length) return;
+    if (this.errors().length) {
+      setTimeout(() => this.summary()?.nativeElement.focus());
+      return;
+    }
     this.busy.set(true);
     this.failure.set('');
     const ccy = this.currency();
