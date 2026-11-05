@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { PerHeadResult } from '@bf/contracts';
-import { BudgetStatus, Money } from '@bf/web/ui';
+import { BudgetStatus, DiscussionBox, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { balancesOf, can, data, errorMessage, injectApi, pct, valueOf } from './api';
@@ -48,6 +48,7 @@ const TABS = [
     BudgetStatus,
     ChangeRequests,
     ChildrenTab,
+    DiscussionBox,
     HistoryTab,
     LedgerTab,
     LimitsTab,

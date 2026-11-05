@@ -22,6 +22,10 @@ export const SERVER_ANALYTICS_EVENTS = [
   'actual.imported',
   'actual.matched',
   'tieout.signed_off',
+  'notification.preferences_updated',
+  'item.followed',
+  'item.unfollowed',
+  'chat.balance_checked',
 ] as const;
 export const ANALYTICS_EVENTS = [...CLIENT_ANALYTICS_EVENTS, ...SERVER_ANALYTICS_EVENTS] as const;
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[number];

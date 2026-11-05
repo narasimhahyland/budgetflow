@@ -5,3 +5,4 @@ export * from './lib/org';
 export * from './lib/budgets';
 export * from './lib/events';
 export * from './lib/actuals';
+export * from './lib/channels';

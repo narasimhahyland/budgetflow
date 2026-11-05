@@ -114,6 +114,7 @@
               <p class="bf-notifications__hint">
                 Approvals, budget alerts and changes to your budgets will appear here.
               </p>
+              <a mat-button routerLink="/notifications">See all</a>
             </div>
           </mat-menu>
           <button
@@ -134,6 +135,14 @@
               <span class="bf-account__meta">{{ userSubtitle() }}</span>
               <span class="bf-account__meta">{{ me()?.tenantName }}</span>
             </div>
+            <a mat-menu-item routerLink="/me/notifications">
+              <mat-icon svgIcon="bell" aria-hidden="true" />
+              Notification settings
+            </a>
+            <a mat-menu-item routerLink="/me/following">
+              <mat-icon svgIcon="bookmark" aria-hidden="true" />
+              Following
+            </a>
             <button mat-menu-item type="button" (click)="signOut()">
               <mat-icon svgIcon="logout" aria-hidden="true" />
               Sign out

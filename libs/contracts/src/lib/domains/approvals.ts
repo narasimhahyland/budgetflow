@@ -238,6 +238,7 @@ export const DecisionRequest = named(
       noConflictAttested: z
         .boolean()
         .describe('"I have no conflict of interest" (required to approve or approve part).'),
+      channel: ApprovalChannel.optional().describe('Channel used when deciding from mobile or chat.'),
     })
     .strict(),
 );

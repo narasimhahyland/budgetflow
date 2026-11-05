@@ -124,6 +124,7 @@ export const ROLE_IDS = [
   'analyst',
 ] as const;
 export const RoleId = z.enum(ROLE_IDS);
+export type RoleId = z.infer<typeof RoleId>;
 
 export const PROBLEM_CODES = [
   // Platform
@@ -228,6 +229,19 @@ export const PROBLEM_CODES = [
   'ACTUAL_ENTITY_MISMATCH',
   'ACTUAL_DUPLICATE_FLAGGED',
   'COMMITMENT_NOT_OPEN',
+  // Phase 8: channels, notifications, comments, chat links
+  'NOTIFICATION_REQUIRED',
+  'QUIET_HOURS_INVALID',
+  'MENTION_NO_ACCESS',
+  'COMMENT_EDIT_WINDOW_EXPIRED',
+  'COMMENT_THREAD_CLOSED',
+  'CHAT_LINK_EMAIL_MISMATCH',
+  'CHAT_LINK_INVALID',
+  'CHAT_ACCOUNT_NOT_LINKED',
+  'CHAT_SIGNATURE_INVALID',
+  'CHAT_TIMESTAMP_EXPIRED',
+  'CHAT_STEP_UP_REQUIRED',
+  'CHAT_INSTALLATION_NOT_CONNECTED',
 ] as const;
 export const ProblemCode = z.enum(PROBLEM_CODES);
 export type ProblemCode = z.infer<typeof ProblemCode>;

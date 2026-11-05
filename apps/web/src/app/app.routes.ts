@@ -13,6 +13,10 @@ export const appRoutes: Route[] = [
     loadChildren: () => import('@bf/web/features/approvals').then((m) => m.approvalEmailRoutes),
   },
   {
+    path: 'link/chat',
+    loadChildren: () => import('@bf/web/features/mobile').then((m) => m.chatLinkRoutes),
+  },
+  {
     path: '',
     component: Shell,
     canActivate: [authGuard, sessionGuard],
@@ -48,6 +52,26 @@ export const appRoutes: Route[] = [
       {
         path: 'my',
         loadChildren: () => import('@bf/web/features/employee').then((m) => m.employeeRoutes),
+      },
+      {
+        path: 'notifications',
+        loadChildren: () => import('@bf/web/features/mobile').then((m) => m.notificationsRoutes),
+      },
+      {
+        path: 'me',
+        loadChildren: () => import('@bf/web/features/mobile').then((m) => m.meChannelsRoutes),
+      },
+      {
+        path: 'admin/channels',
+        loadChildren: () => import('@bf/web/features/mobile').then((m) => m.adminChannelsRoutes),
+      },
+      {
+        path: 'admin/digests',
+        loadChildren: () => import('@bf/web/features/mobile').then((m) => m.digestsRoutes),
+      },
+      {
+        path: 'm',
+        loadChildren: () => import('@bf/web/features/mobile').then((m) => m.mobileAppRoutes),
       },
       {
         path: 'audit-log',

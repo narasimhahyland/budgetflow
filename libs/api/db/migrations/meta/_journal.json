@@ -57,6 +57,13 @@
       "when": 1793862880737,
       "tag": "0007_p4_plan_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793866790028,
+      "tag": "0008_p8_channels",
+      "breakpoints": true
     }
   ]
 }

@@ -16,6 +16,7 @@ import {
   approvalInstances,
   approvalTasks,
   memberships,
+  outboxMessages,
   people,
   withTenant,
   type Db,
@@ -256,7 +257,27 @@ export class ApprovalsService {
       detailsUrl: `${this.notifications.webBaseUrl}/approvals?task=${task.id}`,
       expiresAt,
     });
-    await this.notifications.queueEmail(tx, task.tenantId, recipient, email, 'approval.requested');
+    await this.notifications.queueEmail(tx, task.tenantId, recipient, email, 'approval.requested', {
+      subjectType: subject.type,
+      subjectId: subject.id,
+      subjectRef: subject.ref,
+    });
+    await tx.insert(outboxMessages).values({
+      tenantId: task.tenantId,
+      topic: 'channel.deliver',
+      payload: {
+        kind: 'approval.assigned',
+        recipientPersonId: task.assigneePersonId,
+        taskId: task.id,
+        subjectType: subject.type,
+        subjectId: subject.id,
+        subjectRef: subject.ref,
+        title: `${subject.ref} ${subject.title}, ${formatMoney(amount)}, waits for you`,
+        detail: `${subject.requesterName} · ${subject.budget.name}`,
+        amountMinor: askedMinor,
+        currency: subject.amount.currency,
+      },
+    });
   }
 
   /** Cancels the open route of a subject (withdrawn, cancelled by a budget control, resubmitted). */
@@ -287,7 +308,7 @@ export class ApprovalsService {
     actor: RequestActor,
     taskId: string,
     req: DecisionRequest,
-    ctx: { idempotencyKey: string; requestId: string | null },
+    ctx: { idempotencyKey: string; requestId: string | null; channel?: 'web' | 'email' | 'slack' | 'teams' | 'mobile' | 'api' },
   ): Promise<CommandResult<DecisionResponse>> {
     return this.commands.run(
       actor,
@@ -299,7 +320,7 @@ export class ApprovalsService {
       },
       (tx) =>
         this.decideTx(tx, actor, taskId, req, {
-          channel: 'web',
+          channel: ctx.channel ?? 'web',
           requestId: ctx.requestId,
           idempotencyKey: ctx.idempotencyKey,
         }),
@@ -346,7 +367,11 @@ export class ApprovalsService {
     actor: RequestActor,
     taskId: string,
     req: DecisionRequest,
-    opts: { channel: 'web' | 'email'; requestId: string | null; idempotencyKey: string | null },
+    opts: {
+      channel: 'web' | 'email' | 'slack' | 'teams' | 'mobile' | 'api';
+      requestId: string | null;
+      idempotencyKey: string | null;
+    },
   ): Promise<DecisionResponse> {
     const [task] = await tx
       .select()
@@ -700,7 +725,27 @@ export class ApprovalsService {
         detailsUrl: `${this.notifications.webBaseUrl}${subject.detailsPath}`,
       }),
       'approval.decided',
+      { subjectType: subject.type, subjectId: subject.id, subjectRef: subject.ref },
     );
+    await tx.insert(outboxMessages).values({
+      tenantId: subject.budget.tenantId,
+      topic: 'channel.deliver',
+      payload: {
+        kind: 'approval.decided',
+        recipientPersonId: subject.requesterId,
+        subjectType: subject.type,
+        subjectId: subject.id,
+        subjectRef: subject.ref,
+        title: headline,
+        detail: `${subject.ref} · ${subject.title}`,
+        tone:
+          req.decision === 'reject'
+            ? 'important'
+            : req.decision === 'request_changes'
+              ? 'warning'
+              : 'success',
+      },
+    });
   }
 
   // Email links --------------------------------------------------------------------------------

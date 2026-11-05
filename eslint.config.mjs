@@ -76,7 +76,12 @@ export default [
             { sourceTag: 'type:feature', notDependOnLibsWithTags: ['type:feature', 'type:app'] },
             {
               sourceTag: 'type:ui',
-              onlyDependOnLibsWithTags: ['type:ui', 'type:domain', 'type:contracts'],
+              onlyDependOnLibsWithTags: [
+                'type:ui',
+                'type:data-access',
+                'type:domain',
+                'type:contracts',
+              ],
             },
             {
               sourceTag: 'type:data-access',

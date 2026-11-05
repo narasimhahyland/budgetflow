@@ -59,18 +59,15 @@ export class ApprovalsController {
     @Param('taskId') raw: string,
     @IdempotencyKey() idempotencyKey: string,
     @RequestId() requestId: string | null,
-    @Body() body: unknown,
+    @Body() rawBody: unknown,
     @Res({ passthrough: true }) res: ResponseLike,
   ): Promise<DecisionResponse> {
-    const r = await this.approvals.decide(
-      actor,
-      parseWith(TaskId, raw),
-      parseWith(DecisionRequest, body),
-      {
-        idempotencyKey,
-        requestId,
-      },
-    );
+    const body = parseWith(DecisionRequest, rawBody);
+    const r = await this.approvals.decide(actor, parseWith(TaskId, raw), body, {
+      idempotencyKey,
+      requestId,
+      channel: body.channel ?? 'web',
+    });
     if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
     return r.body;
   }

@@ -48,7 +48,9 @@
       "@bf/web/features/requests": ["./libs/web/features/requests/src/index.ts"],
       "@bf/web/features/approvals": ["./libs/web/features/approvals/src/index.ts"],
       "@bf/web/features/employee": ["./libs/web/features/employee/src/index.ts"],
-      "@bf/web/features/insights": ["./libs/web/features/insights/src/index.ts"]
+      "@bf/web/features/insights": ["./libs/web/features/insights/src/index.ts"],
+      "@bf/api/channels": ["./libs/api/channels/src/index.ts"],
+      "@bf/web/features/mobile": ["./libs/web/features/mobile/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
