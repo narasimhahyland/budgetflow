@@ -5,13 +5,35 @@ import { DocumentsModule } from '@bf/api/documents';
 import { LedgerModule } from '@bf/api/ledger';
 import { SpendModule } from '@bf/api/spend';
 import { TenancyModule } from '@bf/api/tenancy';
+import { BudgetsModule } from '@bf/api/budgets';
 import { Module } from '@nestjs/common';
+import { EventAttendanceService } from './depth/attendance.service';
+import { EventDepthSupport } from './depth/event-depth.support';
+import { EventPlanService } from './depth/event-plan.service';
+import { EventsDepthController } from './depth/events-depth.controller';
+import { EventFeedbackService } from './depth/feedback.service';
+import { EventInvitationsService } from './depth/invitations.service';
+import { EventQuotesService } from './depth/quotes.service';
+import { EventScorecardService } from './depth/scorecard.service';
+import { EventTemplatesService } from './depth/templates.service';
 import { EventCloseChecks } from './event-close-checks';
 import { EventsController } from './events.controller';
 import { EventsService } from './events.service';
 import { InsightsService } from './insights.service';
 
-const SERVICES = [EventsService, InsightsService, EventCloseChecks];
+/** Phase 9 event depth: templates and series, the plan, people, quotes, feedback and the scorecard. */
+const DEPTH_SERVICES = [
+  EventDepthSupport,
+  EventTemplatesService,
+  EventPlanService,
+  EventInvitationsService,
+  EventAttendanceService,
+  EventQuotesService,
+  EventFeedbackService,
+  EventScorecardService,
+];
+
+const SERVICES = [EventsService, InsightsService, EventCloseChecks, ...DEPTH_SERVICES];
 
 /** Events; Phase 6 registers its unmatched-actuals close check on EventCloseChecks. */
 @Module({
@@ -19,6 +41,7 @@ const SERVICES = [EventsService, InsightsService, EventCloseChecks];
     AuditModule,
     LedgerModule,
     ApprovalsModule,
+    BudgetsModule,
     SpendModule,
     ContributionsModule,
     DocumentsModule,
@@ -29,5 +52,12 @@ const SERVICES = [EventsService, InsightsService, EventCloseChecks];
 })
 export class EventsModule {}
 
-@Module({ imports: [EventsModule], controllers: [EventsController] })
+/**
+ * The depth controller is registered first so that `events/dashboard` and `events/templates` match
+ * before the Phase 5 `events/:eventId` route.
+ */
+@Module({
+  imports: [EventsModule],
+  controllers: [EventsDepthController, EventsController],
+})
 export class EventsApiModule {}

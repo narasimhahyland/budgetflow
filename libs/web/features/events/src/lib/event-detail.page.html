@@ -282,6 +282,15 @@
       tabindex="0"
       >Overview</a
     >
+    <a satNavigationTab [routerLink]="['/events', e.id, 'plan']">Plan</a>
+    <a satNavigationTab [routerLink]="['/events', e.id, 'people']"
+      >People <span class="bf-chip">{{ e.participantCount }}</span></a
+    >
+    <a satNavigationTab [routerLink]="['/events', e.id, 'quotes']">Quotes</a>
+    <a satNavigationTab [routerLink]="['/events', e.id, 'feedback']">Feedback</a>
+    @if (showScorecard()) {
+      <a satNavigationTab [routerLink]="['/events', e.id, 'scorecard']">Scorecard</a>
+    }
     <a
       satNavigationTab
       [active]="tab() === 'participants'"

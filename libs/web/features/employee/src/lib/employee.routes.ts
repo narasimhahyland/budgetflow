@@ -19,3 +19,25 @@ export const employeeRoutes: Routes = [
     loadComponent: () => import('./my-budgets.page').then((m) => m.MyBudgetsPage),
   },
 ];
+
+/** /invitations/:invitationId: the employee's own event invitation (47a, 47b). */
+export const invitationRoutes: Routes = [
+  {
+    path: ':invitationId',
+    title: 'Event invitation',
+    data: { pageTitle: 'Event invitation', section: 'Requests' },
+    canActivate: [requirePermission('tenant.read', 'Event invitation')],
+    loadComponent: () => import('./invitation.page').then((m) => m.InvitationPage),
+  },
+];
+
+/** /surveys/:surveyId: the anonymous post-event survey (54a). */
+export const surveyRoutes: Routes = [
+  {
+    path: ':surveyId',
+    title: 'Event survey',
+    data: { pageTitle: 'Event survey', section: 'Requests' },
+    canActivate: [requirePermission('tenant.read', 'Event survey')],
+    loadComponent: () => import('./survey.page').then((m) => m.SurveyPage),
+  },
+];

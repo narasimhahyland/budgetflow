@@ -245,6 +245,17 @@ export const PROBLEM_CODES = [
   'COUNTER_OFFER_NOT_OPEN',
   'NO_COUNTER_OFFER',
   'COUNTER_OFFER_EXPIRED',
+  // Event depth (P9)
+  'EVENT_DATE_IN_CLOSED_PERIOD',
+  'VENDOR_NOT_APPROVED',
+  'VENDOR_BLOCKED',
+  'EXCEEDS_EVENT_AVAILABLE',
+  'QUOTE_EXPIRED',
+  'SHARE_EXCEEDS_CONTRIBUTION',
+  'RSVP_CLOSED',
+  'ATTENDANCE_NOT_FINAL',
+  'SURVEY_ALREADY_ANSWERED',
+  'SURVEY_NOT_OPEN',
 ] as const;
 export const ProblemCode = z.enum(PROBLEM_CODES);
 export type ProblemCode = z.infer<typeof ProblemCode>;

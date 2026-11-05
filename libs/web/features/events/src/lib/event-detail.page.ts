@@ -120,6 +120,10 @@ export class EventDetailPage {
         : s.byCostCenter;
   });
   protected readonly participantsCount = computed(() => this.e()?.participantCount ?? 0);
+  /** The ROI scorecard (54b) opens once the event is completed and is final at closed. */
+  protected readonly showScorecard = computed(() =>
+    ['completed', 'reconciling', 'closed'].includes(this.e()?.status ?? ''),
+  );
 
   // Request contribution form
   protected giverBudgetId = '';
