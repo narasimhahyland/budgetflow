@@ -3,7 +3,8 @@
 #
 #   scripts/worktree.sh new <name> [--base <ref>]     create ../<repo>-worktrees/<name> on branch agent/<name>, then install deps
 #   scripts/worktree.sh check <name|branch> [--base <ref>] <allowed-glob>...
-#                                                     fail if the branch changed files outside the allowed globs
+#                                                     fail if the worktree's current branch (or the named branch)
+#                                                     changed files outside the allowed globs
 #   scripts/worktree.sh list
 #   scripts/worktree.sh remove <name>                 git worktree remove (refuses when the worktree is dirty)
 #
@@ -18,7 +19,7 @@ root=$(cd "$root/.." && pwd)
 parent_dir=${BF_WORKTREE_DIR:-"$(dirname "$root")/$(basename "$root")-worktrees"}
 
 cmd=${1:-}
-[ -n "$cmd" ] || { sed -n '2,11p' "$0"; exit 2; }
+[ -n "$cmd" ] || { sed -n '2,12p' "$0"; exit 2; }
 shift
 
 parse_base() {
@@ -55,10 +56,17 @@ case "$cmd" in
     shift
     parse_base "$@"
     [ "${#rest[@]}" -gt 0 ] || die "give at least one allowed glob"
-    branch=$target
-    git -C "$root" rev-parse --verify -q "refs/heads/$branch" >/dev/null || branch="agent/$target"
-    git -C "$root" rev-parse --verify -q "refs/heads/$branch" >/dev/null || die "no branch $target or agent/$target"
-    mb=$(git -C "$root" merge-base "$base" "$branch")
+    if [ -d "$parent_dir/$target" ]; then
+      branch=$(git -C "$parent_dir/$target" symbolic-ref -q --short HEAD) ||
+        die "$parent_dir/$target is not on a branch; pass the branch name instead"
+    elif git -C "$root" rev-parse --verify -q "refs/heads/$target" >/dev/null; then
+      branch=$target
+    elif git -C "$root" rev-parse --verify -q "refs/heads/agent/$target" >/dev/null; then
+      branch="agent/$target"
+    else
+      die "no worktree $parent_dir/$target and no branch $target or agent/$target"
+    fi
+    mb=$(git -C "$root" merge-base "$base" "$branch") || die "no merge base between $base and $branch; pass --base <ref>"
     violations=0
     changed=0
     while IFS= read -r file; do
@@ -74,8 +82,12 @@ case "$cmd" in
         violations=$((violations + 1))
       fi
     done < <(git -C "$root" diff --name-only "$mb" "$branch")
-    dirty=$(git -C "$parent_dir/$target" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-    [ "${dirty:-0}" = 0 ] || echo "  note: worktree has $dirty uncommitted change(s); only commits are checked"
+    wt=$(git -C "$root" worktree list --porcelain |
+      awk -v b="branch refs/heads/$branch" '/^worktree /{p=substr($0,10)} $0==b && !f{print p; f=1}')
+    if [ -n "$wt" ] && [ -d "$wt" ]; then
+      dirty=$(git -C "$wt" status --porcelain | wc -l | tr -d ' ')
+      [ "$dirty" = 0 ] || echo "  note: worktree has $dirty uncommitted change(s); only commits are checked"
+    fi
     if [ "$violations" -gt 0 ]; then
       die "$branch changed $violations file(s) outside its scope ($changed changed in total vs $base)"
     fi
