@@ -340,7 +340,11 @@ export class EventFundingPage {
   protected async save(submit: boolean): Promise<void> {
     this.showErrors.set(true);
     if (this.errors().length) {
-      setTimeout(() => this.summary()?.nativeElement.focus());
+      setTimeout(() => {
+        const el = this.summary()?.nativeElement as HTMLElement | undefined;
+        el?.focus({ preventScroll: true });
+        el?.scrollIntoView({ block: 'start' });
+      });
       return;
     }
     this.busy.set(true);

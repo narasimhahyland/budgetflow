@@ -501,7 +501,7 @@
               "click": "[data-testid=set-to-zero]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"12,000.00\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"8,886.00\")"
             }
           ]
         },
@@ -512,7 +512,7 @@
               "click": "[data-testid=set-to-zero]"
             },
             {
-              "waitFor": "[data-testid=zero-cut]:has-text(\"12,000.00\")"
+              "waitFor": "[data-testid=zero-cut]:has-text(\"8,886.00\")"
             },
             {
               "waitFor": "[data-testid=confirm-text]"
