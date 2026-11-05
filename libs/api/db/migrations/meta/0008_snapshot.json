@@ -1,5 +1,5 @@
 {
-  "id": "8dbb2d06-5058-46e3-adae-8a7afebf0097",
+  "id": "3b48ad13-9852-4cb0-860f-26ef4ce23ac4",
   "prevId": "710c77c3-44d6-4414-8b99-6ff09b73aa44",
   "version": "7",
   "dialect": "postgresql",
@@ -7528,25 +7528,6 @@
           "notNull": true,
           "default": "'invited'"
         },
-        "rsvp_responded_at": {
-          "name": "rsvp_responded_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "waitlist_position": {
-          "name": "waitlist_position",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reminders_sent_count": {
-          "name": "reminders_sent_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
         "attendance_status": {
           "name": "attendance_status",
           "type": "varchar(20)",
@@ -7560,18 +7541,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'::jsonb"
-        },
-        "needs_submitted_at": {
-          "name": "needs_submitted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "needs_deleted_at": {
-          "name": "needs_deleted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -7873,55 +7842,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "template_id": {
-          "name": "template_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "series_id": {
-          "name": "series_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attendance_final": {
-          "name": "attendance_final",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "attendance_final_at": {
-          "name": "attendance_final_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "split_applied_at": {
-          "name": "split_applied_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "split_applied_by_person_id": {
-          "name": "split_applied_by_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "split_keep_reason": {
-          "name": "split_keep_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "organizer_notes": {
-          "name": "organizer_notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "version": {
           "name": "version",
           "type": "integer",
@@ -8084,19 +8004,6 @@
           ],
           "columnsTo": [
             "code"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "events_split_applied_by_person_id_people_id_fk": {
-          "name": "events_split_applied_by_person_id_people_id_fk",
-          "tableFrom": "events",
-          "tableTo": "people",
-          "columnsFrom": [
-            "split_applied_by_person_id"
-          ],
-          "columnsTo": [
-            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -8294,6 +8201,36 @@
           "primaryKey": false,
           "notNull": false
         },
+        "counter_offer_minor": {
+          "name": "counter_offer_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "counter_offer_currency": {
+          "name": "counter_offer_currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "counter_offered_by": {
+          "name": "counter_offered_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "counter_offered_at": {
+          "name": "counter_offered_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "counter_offer_expires_at": {
+          "name": "counter_offer_expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -8484,6 +8421,32 @@
           ],
           "columnsTo": [
             "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "requests_counter_offer_currency_currencies_code_fk": {
+          "name": "requests_counter_offer_currency_currencies_code_fk",
+          "tableFrom": "requests",
+          "tableTo": "currencies",
+          "columnsFrom": [
+            "counter_offer_currency"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "requests_counter_offered_by_people_id_fk": {
+          "name": "requests_counter_offered_by_people_id_fk",
+          "tableFrom": "requests",
+          "tableTo": "people",
+          "columnsFrom": [
+            "counter_offered_by"
+          ],
+          "columnsTo": [
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -8970,6 +8933,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revoked_by": {
+          "name": "revoked_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -9050,6 +9025,19 @@
           ],
           "columnsTo": [
             "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "approval_delegations_revoked_by_people_id_fk": {
+          "name": "approval_delegations_revoked_by_people_id_fk",
+          "tableFrom": "approval_delegations",
+          "tableTo": "people",
+          "columnsFrom": [
+            "revoked_by"
+          ],
+          "columnsTo": [
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -13796,8 +13784,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.event_agenda_items": {
-      "name": "event_agenda_items",
+    "public.post_spend_exceptions": {
+      "name": "post_spend_exceptions",
       "schema": "",
       "columns": {
         "id": {
@@ -13813,199 +13801,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "event_id": {
-          "name": "event_id",
-          "type": "uuid",
+        "type": {
+          "name": "type",
+          "type": "varchar(40)",
           "primaryKey": false,
           "notNull": true
-        },
-        "start_time": {
-          "name": "start_time",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "end_time": {
-          "name": "end_time",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "location_room": {
-          "name": "location_room",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "host_name": {
-          "name": "host_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "visible_to_invitees": {
-          "name": "visible_to_invitees",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "sort_order": {
-          "name": "sort_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "event_agenda_items_event": {
-          "name": "event_agenda_items_event",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "sort_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "event_agenda_items_tenant_id_tenants_id_fk": {
-          "name": "event_agenda_items_tenant_id_tenants_id_fk",
-          "tableFrom": "event_agenda_items",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_agenda_items_event_id_events_id_fk": {
-          "name": "event_agenda_items_event_id_events_id_fk",
-          "tableFrom": "event_agenda_items",
-          "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.event_checklists": {
-      "name": "event_checklists",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event_id": {
-          "name": "event_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "section": {
-          "name": "section",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'before'"
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "assignee_person_id": {
-          "name": "assignee_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "due_date": {
-          "name": "due_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reminder": {
-          "name": "reminder",
-          "type": "varchar(30)",
-          "primaryKey": false,
-          "notNull": false
         },
         "status": {
           "name": "status",
@@ -14014,47 +13814,155 @@
           "notNull": true,
           "default": "'open'"
         },
-        "linked_item_type": {
-          "name": "linked_item_type",
-          "type": "varchar(30)",
+        "source_kind": {
+          "name": "source_kind",
+          "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "linked_item_id": {
-          "name": "linked_item_id",
+        "source_ref": {
+          "name": "source_ref",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_id": {
+          "name": "source_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "linked_label": {
-          "name": "linked_label",
-          "type": "text",
+        "budget_id": {
+          "name": "budget_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "is_system": {
-          "name": "is_system",
-          "type": "boolean",
+        "person_name": {
+          "name": "person_name",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": false
+          "notNull": true
         },
-        "sort_order": {
-          "name": "sort_order",
+        "transaction_amount_minor": {
+          "name": "transaction_amount_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_currency": {
+          "name": "transaction_currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reporting_amount_minor": {
+          "name": "reporting_amount_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reporting_currency": {
+          "name": "reporting_currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rule_code": {
+          "name": "rule_code",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rule_version": {
+          "name": "rule_version",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": 1
         },
-        "comments": {
-          "name": "comments",
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "facts": {
+          "name": "facts",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "related_items": {
+          "name": "related_items",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
           "default": "'[]'::jsonb"
         },
-        "completed_at": {
-          "name": "completed_at",
+        "owner_explanation": {
+          "name": "owner_explanation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolution_reason_code": {
+          "name": "resolution_reason_code",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolution_reason": {
+          "name": "resolution_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "repayment_minor": {
+          "name": "repayment_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reclassified_to_gl_code": {
+          "name": "reclassified_to_gl_code",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reversal_journal_id": {
+          "name": "reversal_journal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolved_by": {
+          "name": "resolved_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolved_at": {
+          "name": "resolved_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -14065,18 +13973,11 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {
-        "event_checklists_event": {
-          "name": "event_checklists_event",
+        "post_spend_exceptions_status": {
+          "name": "post_spend_exceptions_status",
           "columns": [
             {
               "expression": "tenant_id",
@@ -14085,19 +13986,34 @@
               "nulls": "last"
             },
             {
-              "expression": "event_id",
+              "expression": "status",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
-              "expression": "section",
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "post_spend_exceptions_budget": {
+          "name": "post_spend_exceptions_budget",
+          "columns": [
+            {
+              "expression": "tenant_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
-              "expression": "sort_order",
+              "expression": "budget_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -14110,9 +14026,9 @@
         }
       },
       "foreignKeys": {
-        "event_checklists_tenant_id_tenants_id_fk": {
-          "name": "event_checklists_tenant_id_tenants_id_fk",
-          "tableFrom": "event_checklists",
+        "post_spend_exceptions_tenant_id_tenants_id_fk": {
+          "name": "post_spend_exceptions_tenant_id_tenants_id_fk",
+          "tableFrom": "post_spend_exceptions",
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
@@ -14123,12 +14039,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "event_checklists_event_id_events_id_fk": {
-          "name": "event_checklists_event_id_events_id_fk",
-          "tableFrom": "event_checklists",
-          "tableTo": "events",
+        "post_spend_exceptions_budget_id_budgets_id_fk": {
+          "name": "post_spend_exceptions_budget_id_budgets_id_fk",
+          "tableFrom": "post_spend_exceptions",
+          "tableTo": "budgets",
           "columnsFrom": [
-            "event_id"
+            "budget_id"
           ],
           "columnsTo": [
             "id"
@@ -14136,12 +14052,51 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "event_checklists_assignee_person_id_people_id_fk": {
-          "name": "event_checklists_assignee_person_id_people_id_fk",
-          "tableFrom": "event_checklists",
+        "post_spend_exceptions_person_id_people_id_fk": {
+          "name": "post_spend_exceptions_person_id_people_id_fk",
+          "tableFrom": "post_spend_exceptions",
           "tableTo": "people",
           "columnsFrom": [
-            "assignee_person_id"
+            "person_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "post_spend_exceptions_transaction_currency_currencies_code_fk": {
+          "name": "post_spend_exceptions_transaction_currency_currencies_code_fk",
+          "tableFrom": "post_spend_exceptions",
+          "tableTo": "currencies",
+          "columnsFrom": [
+            "transaction_currency"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "post_spend_exceptions_reporting_currency_currencies_code_fk": {
+          "name": "post_spend_exceptions_reporting_currency_currencies_code_fk",
+          "tableFrom": "post_spend_exceptions",
+          "tableTo": "currencies",
+          "columnsFrom": [
+            "reporting_currency"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "post_spend_exceptions_resolved_by_people_id_fk": {
+          "name": "post_spend_exceptions_resolved_by_people_id_fk",
+          "tableFrom": "post_spend_exceptions",
+          "tableTo": "people",
+          "columnsFrom": [
+            "resolved_by"
           ],
           "columnsTo": [
             "id"
@@ -14156,8 +14111,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.event_gallery_photos": {
-      "name": "event_gallery_photos",
+    "public.rule_executions": {
+      "name": "rule_executions",
       "schema": "",
       "columns": {
         "id": {
@@ -14173,51 +14128,53 @@
           "primaryKey": false,
           "notNull": true
         },
-        "event_id": {
-          "name": "event_id",
-          "type": "uuid",
+        "subject_type": {
+          "name": "subject_type",
+          "type": "varchar(30)",
           "primaryKey": false,
           "notNull": true
         },
-        "document_id": {
-          "name": "document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "caption": {
-          "name": "caption",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "file_name": {
-          "name": "file_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "uploaded_by_person_id": {
-          "name": "uploaded_by_person_id",
+        "subject_id": {
+          "name": "subject_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "status": {
-          "name": "status",
-          "type": "varchar(20)",
+        "rule_id": {
+          "name": "rule_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "effect": {
+          "name": "effect",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "matched_rules": {
+          "name": "matched_rules",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'visible'"
+          "default": "'[]'::jsonb"
         },
-        "removal_reason": {
-          "name": "removal_reason",
+        "facts": {
+          "name": "facts",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "explanation": {
+          "name": "explanation",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "''"
         },
-        "removal_requested_by_person_id": {
-          "name": "removal_requested_by_person_id",
+        "evaluated_by": {
+          "name": "evaluated_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -14228,18 +14185,11 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {
-        "event_gallery_photos_event": {
-          "name": "event_gallery_photos_event",
+        "rule_executions_subject": {
+          "name": "rule_executions_subject",
           "columns": [
             {
               "expression": "tenant_id",
@@ -14248,7 +14198,253 @@
               "nulls": "last"
             },
             {
-              "expression": "event_id",
+              "expression": "subject_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "subject_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "rule_executions_rule": {
+          "name": "rule_executions_rule",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "rule_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "rule_executions_tenant_id_tenants_id_fk": {
+          "name": "rule_executions_tenant_id_tenants_id_fk",
+          "tableFrom": "rule_executions",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "rule_executions_rule_id_rules_id_fk": {
+          "name": "rule_executions_rule_id_rules_id_fk",
+          "tableFrom": "rule_executions",
+          "tableTo": "rules",
+          "columnsFrom": [
+            "rule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "rule_executions_evaluated_by_people_id_fk": {
+          "name": "rule_executions_evaluated_by_people_id_fk",
+          "tableFrom": "rule_executions",
+          "tableTo": "people",
+          "columnsFrom": [
+            "evaluated_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.rule_versions": {
+      "name": "rule_versions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rule_id": {
+          "name": "rule_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "priority": {
+          "name": "priority",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 50
+        },
+        "effect": {
+          "name": "effect",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'require_approval'"
+        },
+        "conditions": {
+          "name": "conditions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "actions": {
+          "name": "actions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "scope": {
+          "name": "scope",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "explanation": {
+          "name": "explanation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valid_to": {
+          "name": "valid_to",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_by": {
+          "name": "published_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "rule_versions_unique": {
+          "name": "rule_versions_unique",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "rule_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "version",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "rule_versions_rule_status": {
+          "name": "rule_versions_rule_status",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "rule_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -14267,9 +14463,9 @@
         }
       },
       "foreignKeys": {
-        "event_gallery_photos_tenant_id_tenants_id_fk": {
-          "name": "event_gallery_photos_tenant_id_tenants_id_fk",
-          "tableFrom": "event_gallery_photos",
+        "rule_versions_tenant_id_tenants_id_fk": {
+          "name": "rule_versions_tenant_id_tenants_id_fk",
+          "tableFrom": "rule_versions",
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
@@ -14280,12 +14476,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "event_gallery_photos_event_id_events_id_fk": {
-          "name": "event_gallery_photos_event_id_events_id_fk",
-          "tableFrom": "event_gallery_photos",
-          "tableTo": "events",
+        "rule_versions_rule_id_rules_id_fk": {
+          "name": "rule_versions_rule_id_rules_id_fk",
+          "tableFrom": "rule_versions",
+          "tableTo": "rules",
           "columnsFrom": [
-            "event_id"
+            "rule_id"
           ],
           "columnsTo": [
             "id"
@@ -14293,25 +14489,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "event_gallery_photos_document_id_documents_id_fk": {
-          "name": "event_gallery_photos_document_id_documents_id_fk",
-          "tableFrom": "event_gallery_photos",
-          "tableTo": "documents",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_gallery_photos_uploaded_by_person_id_people_id_fk": {
-          "name": "event_gallery_photos_uploaded_by_person_id_people_id_fk",
-          "tableFrom": "event_gallery_photos",
+        "rule_versions_published_by_people_id_fk": {
+          "name": "rule_versions_published_by_people_id_fk",
+          "tableFrom": "rule_versions",
           "tableTo": "people",
           "columnsFrom": [
-            "uploaded_by_person_id"
+            "published_by"
           ],
           "columnsTo": [
             "id"
@@ -14319,12 +14502,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "event_gallery_photos_removal_requested_by_person_id_people_id_fk": {
-          "name": "event_gallery_photos_removal_requested_by_person_id_people_id_fk",
-          "tableFrom": "event_gallery_photos",
+        "rule_versions_created_by_people_id_fk": {
+          "name": "rule_versions_created_by_people_id_fk",
+          "tableFrom": "rule_versions",
           "tableTo": "people",
           "columnsFrom": [
-            "removal_requested_by_person_id"
+            "created_by"
           ],
           "columnsTo": [
             "id"
@@ -14339,8 +14522,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.event_invitations": {
-      "name": "event_invitations",
+    "public.rules": {
+      "name": "rules",
       "schema": "",
       "columns": {
         "id": {
@@ -14356,699 +14539,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "event_id": {
-          "name": "event_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "message": {
-          "name": "message",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
-        },
-        "deadline": {
-          "name": "deadline",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "capacity": {
-          "name": "capacity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "waitlist_enabled": {
-          "name": "waitlist_enabled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "auto_promote_waitlist": {
-          "name": "auto_promote_waitlist",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "attach_calendar_invite": {
-          "name": "attach_calendar_invite",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "collect_travel_needs": {
-          "name": "collect_travel_needs",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "reminder_schedule": {
-          "name": "reminder_schedule",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'not_sent'"
-        },
-        "sent_by_person_id": {
-          "name": "sent_by_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sent_at": {
-          "name": "sent_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closed_at": {
-          "name": "closed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reminders_sent_count": {
-          "name": "reminders_sent_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "event_invitations_event": {
-          "name": "event_invitations_event",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "event_invitations_tenant_id_tenants_id_fk": {
-          "name": "event_invitations_tenant_id_tenants_id_fk",
-          "tableFrom": "event_invitations",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_invitations_event_id_events_id_fk": {
-          "name": "event_invitations_event_id_events_id_fk",
-          "tableFrom": "event_invitations",
-          "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_invitations_sent_by_person_id_people_id_fk": {
-          "name": "event_invitations_sent_by_person_id_people_id_fk",
-          "tableFrom": "event_invitations",
-          "tableTo": "people",
-          "columnsFrom": [
-            "sent_by_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.event_quote_requests": {
-      "name": "event_quote_requests",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event_id": {
-          "name": "event_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "category": {
-          "name": "category",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'catering'"
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "needed_by": {
-          "name": "needed_by",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "respond_by": {
-          "name": "respond_by",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "include_dietary_counts": {
-          "name": "include_dietary_counts",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "emailed": {
-          "name": "emailed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "created_by_person_id": {
-          "name": "created_by_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "event_quote_requests_event": {
-          "name": "event_quote_requests_event",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "event_quote_requests_tenant_id_tenants_id_fk": {
-          "name": "event_quote_requests_tenant_id_tenants_id_fk",
-          "tableFrom": "event_quote_requests",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quote_requests_event_id_events_id_fk": {
-          "name": "event_quote_requests_event_id_events_id_fk",
-          "tableFrom": "event_quote_requests",
-          "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quote_requests_created_by_person_id_people_id_fk": {
-          "name": "event_quote_requests_created_by_person_id_people_id_fk",
-          "tableFrom": "event_quote_requests",
-          "tableTo": "people",
-          "columnsFrom": [
-            "created_by_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.event_quotes": {
-      "name": "event_quotes",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event_id": {
-          "name": "event_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quote_request_id": {
-          "name": "quote_request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "vendor_id": {
-          "name": "vendor_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'received'"
-        },
-        "amount_minor": {
-          "name": "amount_minor",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "currency": {
-          "name": "currency",
-          "type": "char(3)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'USD'"
-        },
-        "budget_amount_minor": {
-          "name": "budget_amount_minor",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "budget_currency": {
-          "name": "budget_currency",
-          "type": "char(3)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'USD'"
-        },
-        "per_head_minor": {
-          "name": "per_head_minor",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "deposit_pct": {
-          "name": "deposit_pct",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "deposit_minor": {
-          "name": "deposit_minor",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "deposit_refundable": {
-          "name": "deposit_refundable",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "deposit_terms": {
-          "name": "deposit_terms",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cancellation_terms": {
-          "name": "cancellation_terms",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "valid_until": {
-          "name": "valid_until",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "includes_text": {
-          "name": "includes_text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "document_id": {
-          "name": "document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "commitment_id": {
-          "name": "commitment_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "selection_reason": {
-          "name": "selection_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "selected_by_person_id": {
-          "name": "selected_by_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "selected_at": {
-          "name": "selected_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "event_quotes_event": {
-          "name": "event_quotes_event",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "event_quotes_request": {
-          "name": "event_quotes_request",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "quote_request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "event_quotes_tenant_id_tenants_id_fk": {
-          "name": "event_quotes_tenant_id_tenants_id_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quotes_event_id_events_id_fk": {
-          "name": "event_quotes_event_id_events_id_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quotes_quote_request_id_event_quote_requests_id_fk": {
-          "name": "event_quotes_quote_request_id_event_quote_requests_id_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "event_quote_requests",
-          "columnsFrom": [
-            "quote_request_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quotes_vendor_id_vendors_id_fk": {
-          "name": "event_quotes_vendor_id_vendors_id_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "vendors",
-          "columnsFrom": [
-            "vendor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quotes_currency_currencies_code_fk": {
-          "name": "event_quotes_currency_currencies_code_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "currencies",
-          "columnsFrom": [
-            "currency"
-          ],
-          "columnsTo": [
-            "code"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quotes_budget_currency_currencies_code_fk": {
-          "name": "event_quotes_budget_currency_currencies_code_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "currencies",
-          "columnsFrom": [
-            "budget_currency"
-          ],
-          "columnsTo": [
-            "code"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quotes_document_id_documents_id_fk": {
-          "name": "event_quotes_document_id_documents_id_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "documents",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quotes_commitment_id_commitments_id_fk": {
-          "name": "event_quotes_commitment_id_commitments_id_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "commitments",
-          "columnsFrom": [
-            "commitment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_quotes_selected_by_person_id_people_id_fk": {
-          "name": "event_quotes_selected_by_person_id_people_id_fk",
-          "tableFrom": "event_quotes",
-          "tableTo": "people",
-          "columnsFrom": [
-            "selected_by_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.event_series": {
-      "name": "event_series",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
+        "code": {
+          "name": "code",
+          "type": "varchar(30)",
           "primaryKey": false,
           "notNull": true
         },
@@ -15058,48 +14551,55 @@
           "primaryKey": false,
           "notNull": true
         },
-        "template_id": {
-          "name": "template_id",
-          "type": "uuid",
+        "family": {
+          "name": "family",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'general'"
+        },
+        "template_code": {
+          "name": "template_code",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": false
         },
-        "organizer_person_id": {
-          "name": "organizer_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "frequency": {
-          "name": "frequency",
+        "status": {
+          "name": "status",
           "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'draft'"
         },
-        "first_date": {
-          "name": "first_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "end_count": {
-          "name": "end_count",
+        "active_version": {
+          "name": "active_version",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "end_date": {
-          "name": "end_date",
-          "type": "date",
+        "draft_version": {
+          "name": "draft_version",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "custom_dates": {
-          "name": "custom_dates",
-          "type": "jsonb",
+        "retired_reason": {
+          "name": "retired_reason",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
+          "notNull": false
+        },
+        "retired_at": {
+          "name": "retired_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -15117,8 +14617,8 @@
         }
       },
       "indexes": {
-        "event_series_tenant": {
-          "name": "event_series_tenant",
+        "rules_tenant_code": {
+          "name": "rules_tenant_code",
           "columns": [
             {
               "expression": "tenant_id",
@@ -15127,7 +14627,28 @@
               "nulls": "last"
             },
             {
-              "expression": "organizer_person_id",
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "rules_tenant_status": {
+          "name": "rules_tenant_status",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -15140,9 +14661,9 @@
         }
       },
       "foreignKeys": {
-        "event_series_tenant_id_tenants_id_fk": {
-          "name": "event_series_tenant_id_tenants_id_fk",
-          "tableFrom": "event_series",
+        "rules_tenant_id_tenants_id_fk": {
+          "name": "rules_tenant_id_tenants_id_fk",
+          "tableFrom": "rules",
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
@@ -15153,25 +14674,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "event_series_template_id_event_templates_id_fk": {
-          "name": "event_series_template_id_event_templates_id_fk",
-          "tableFrom": "event_series",
-          "tableTo": "event_templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_series_organizer_person_id_people_id_fk": {
-          "name": "event_series_organizer_person_id_people_id_fk",
-          "tableFrom": "event_series",
+        "rules_created_by_people_id_fk": {
+          "name": "rules_created_by_people_id_fk",
+          "tableFrom": "rules",
           "tableTo": "people",
           "columnsFrom": [
-            "organizer_person_id"
+            "created_by"
           ],
           "columnsTo": [
             "id"
@@ -15186,8 +14694,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.event_survey_responses": {
-      "name": "event_survey_responses",
+    "public.workflow_templates": {
+      "name": "workflow_templates",
       "schema": "",
       "columns": {
         "id": {
@@ -15203,466 +14711,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "survey_id": {
-          "name": "survey_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event_id": {
-          "name": "event_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "respondent_token_hash": {
-          "name": "respondent_token_hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "location_org_unit_id": {
-          "name": "location_org_unit_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "location_name": {
-          "name": "location_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "rating": {
-          "name": "rating",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "would_attend_again": {
-          "name": "would_attend_again",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "comment": {
-          "name": "comment",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "answers": {
-          "name": "answers",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "comment_hidden": {
-          "name": "comment_hidden",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "comment_hidden_reason": {
-          "name": "comment_hidden_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "event_survey_responses_survey": {
-          "name": "event_survey_responses_survey",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "event_survey_responses_token": {
-          "name": "event_survey_responses_token",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "respondent_token_hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "event_survey_responses_tenant_id_tenants_id_fk": {
-          "name": "event_survey_responses_tenant_id_tenants_id_fk",
-          "tableFrom": "event_survey_responses",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_survey_responses_survey_id_event_surveys_id_fk": {
-          "name": "event_survey_responses_survey_id_event_surveys_id_fk",
-          "tableFrom": "event_survey_responses",
-          "tableTo": "event_surveys",
-          "columnsFrom": [
-            "survey_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_survey_responses_event_id_events_id_fk": {
-          "name": "event_survey_responses_event_id_events_id_fk",
-          "tableFrom": "event_survey_responses",
-          "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.event_surveys": {
-      "name": "event_surveys",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event_id": {
-          "name": "event_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'draft'"
-        },
-        "anonymous": {
-          "name": "anonymous",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "questions": {
-          "name": "questions",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
-        "scheduled_for": {
-          "name": "scheduled_for",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closes_at": {
-          "name": "closes_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sent_at": {
-          "name": "sent_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closed_at": {
-          "name": "closed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "event_surveys_event": {
-          "name": "event_surveys_event",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "event_surveys_tenant_id_tenants_id_fk": {
-          "name": "event_surveys_tenant_id_tenants_id_fk",
-          "tableFrom": "event_surveys",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_surveys_event_id_events_id_fk": {
-          "name": "event_surveys_event_id_events_id_fk",
-          "tableFrom": "event_surveys",
-          "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.event_templates": {
-      "name": "event_templates",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "scope": {
-          "name": "scope",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'personal'"
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'draft'"
-        },
-        "owner_person_id": {
-          "name": "owner_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "category": {
-          "name": "category",
+        "request_kind": {
+          "name": "request_kind",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'employee_events'"
-        },
-        "event_type": {
-          "name": "event_type",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'celebration'"
-        },
-        "typical_duration": {
-          "name": "typical_duration",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'Half day'"
-        },
-        "location_type": {
-          "name": "location_type",
-          "type": "varchar(30)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'office'"
-        },
-        "estimate_per_attendee_minor": {
-          "name": "estimate_per_attendee_minor",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "use_location_limit": {
-          "name": "use_location_limit",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "currency": {
-          "name": "currency",
-          "type": "char(3)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'USD'"
-        },
-        "tolerance_bps": {
-          "name": "tolerance_bps",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 500
-        },
-        "cost_split_rule": {
-          "name": "cost_split_rule",
-          "type": "varchar(30)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'location'"
-        },
-        "checklist_tasks": {
-          "name": "checklist_tasks",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
-        "agenda_items": {
-          "name": "agenda_items",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
-        "invitation_defaults": {
-          "name": "invitation_defaults",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "needs_config": {
-          "name": "needs_config",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "survey_questions": {
-          "name": "survey_questions",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
-        "preferred_vendor_ids": {
-          "name": "preferred_vendor_ids",
-          "type": "uuid[]",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'"
+          "notNull": true
         },
         "version": {
           "name": "version",
@@ -15671,15 +14724,46 @@
           "notNull": true,
           "default": 1
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "default": "'active'"
         },
-        "updated_at": {
-          "name": "updated_at",
+        "steps": {
+          "name": "steps",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valid_to": {
+          "name": "valid_to",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_by": {
+          "name": "published_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
@@ -15687,8 +14771,8 @@
         }
       },
       "indexes": {
-        "event_templates_tenant_scope": {
-          "name": "event_templates_tenant_scope",
+        "workflow_templates_kind_version": {
+          "name": "workflow_templates_kind_version",
           "columns": [
             {
               "expression": "tenant_id",
@@ -15697,7 +14781,34 @@
               "nulls": "last"
             },
             {
-              "expression": "scope",
+              "expression": "request_kind",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "version",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "workflow_templates_lookup": {
+          "name": "workflow_templates_lookup",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "request_kind",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -15713,33 +14824,12 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "event_templates_owner": {
-          "name": "event_templates_owner",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "owner_person_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
-        "event_templates_tenant_id_tenants_id_fk": {
-          "name": "event_templates_tenant_id_tenants_id_fk",
-          "tableFrom": "event_templates",
+        "workflow_templates_tenant_id_tenants_id_fk": {
+          "name": "workflow_templates_tenant_id_tenants_id_fk",
+          "tableFrom": "workflow_templates",
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
@@ -15750,28 +14840,15 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "event_templates_owner_person_id_people_id_fk": {
-          "name": "event_templates_owner_person_id_people_id_fk",
-          "tableFrom": "event_templates",
+        "workflow_templates_published_by_people_id_fk": {
+          "name": "workflow_templates_published_by_people_id_fk",
+          "tableFrom": "workflow_templates",
           "tableTo": "people",
           "columnsFrom": [
-            "owner_person_id"
+            "published_by"
           ],
           "columnsTo": [
             "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "event_templates_currency_currencies_code_fk": {
-          "name": "event_templates_currency_currencies_code_fk",
-          "tableFrom": "event_templates",
-          "tableTo": "currencies",
-          "columnsFrom": [
-            "currency"
-          ],
-          "columnsTo": [
-            "code"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"

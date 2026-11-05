@@ -1024,6 +1024,218 @@
       ]
     },
     {
+      "id": "066-rules-overview",
+      "role": "finance-admin",
+      "path": "/admin/rules",
+      "waitFor": "role=heading[name=\"Rules and policies\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "067-rules-list",
+      "role": "finance-admin",
+      "path": "/admin/rules/list",
+      "waitFor": "role=heading[name=\"All rules\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "068-rule-detail",
+      "role": "finance-admin",
+      "path": "/admin/rules/80000000-0000-4000-8000-000000000012",
+      "waitFor": "text=This draft cannot be published yet",
+      "states": [
+        {
+          "state": "conflicting-draft"
+        }
+      ]
+    },
+    {
+      "id": "069-rule-simulation",
+      "role": "finance-admin",
+      "path": "/admin/rules/simulate",
+      "waitFor": "role=heading[name=\"Test a request\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "blocked-outcome",
+          "actions": [
+            {
+              "click": "role=button[name=\"See what would happen\"]"
+            },
+            {
+              "waitFor": "role=heading[name=\"What would happen\"]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "070-approval-routing",
+      "role": "finance-admin",
+      "path": "/admin/rules/routing",
+      "waitFor": "role=heading[name=\"Approval routing\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "070a-approval-limits",
+      "role": "finance-admin",
+      "path": "/admin/rules/doa",
+      "waitFor": "role=heading[name=\"Approval limits\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "071-spending-limits",
+      "role": "finance-admin",
+      "path": "/admin/rules/policies/limits",
+      "waitFor": "role=heading[name=\"Spending limits\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "071a-thresholds-templates",
+      "role": "finance-admin",
+      "path": "/admin/rules/thresholds",
+      "waitFor": "role=heading[name=\"Approval thresholds and templates\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "072-category-policy",
+      "role": "finance-admin",
+      "path": "/admin/rules/policies/categories",
+      "waitFor": "role=heading[name=\"What can be bought\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "072a-gifts-entertainment",
+      "role": "finance-admin",
+      "path": "/admin/rules/policies/gifts",
+      "waitFor": "role=heading[name=\"Gifts, entertainment and alcohol\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "073-location-policy",
+      "role": "finance-admin",
+      "path": "/admin/rules/policies/locations",
+      "waitFor": "role=heading[name=\"Location settings\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "073a-vendor-policy",
+      "role": "finance-admin",
+      "path": "/admin/rules/policies/vendors",
+      "waitFor": "role=heading[name=\"Vendors\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "074-over-budget-policy",
+      "role": "finance-admin",
+      "path": "/admin/rules/policies/over-budget",
+      "waitFor": "role=heading[name=\"Going over budget\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "074a-post-spend-exceptions",
+      "role": "finance-admin",
+      "path": "/admin/rules/exceptions",
+      "waitFor": "role=heading[name=\"Post-spend exceptions\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "075-freeze-zero-policy",
+      "role": "finance-admin",
+      "path": "/admin/rules/policies/freeze",
+      "waitFor": "role=heading[name=\"Freeze, reduce and set to zero\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "076-sla-notifications",
+      "role": "finance-admin",
+      "path": "/admin/rules/policies/sla",
+      "waitFor": "role=heading[name=\"How long each step has\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "077-rule-backtest",
+      "role": "finance-admin",
+      "path": "/admin/rules/backtest",
+      "waitFor": "role=heading[name=\"Check against past requests\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "078-rule-history",
+      "role": "finance-admin",
+      "path": "/admin/rules/80000000-0000-4000-8000-000000000012/history",
+      "waitFor": "role=heading[name=\"Compare two versions\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
       "id": "043-events-dashboard",
       "role": "event-organizer",
       "path": "/events",

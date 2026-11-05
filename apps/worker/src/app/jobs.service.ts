@@ -1,3 +1,4 @@
+import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
 import { DB } from '@bf/api/core';
 import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
@@ -36,6 +37,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly notifications: NotificationsService,
     private readonly controls: BudgetControlConsumer,
     private readonly alerts: BudgetAlertsConsumer,
+    private readonly slaSweep: SlaSweepService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -98,6 +100,23 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     await boss.schedule(
       NIGHTLY,
       process.env.NIGHTLY_LEDGER_CHECK_CRON ?? '0 2 * * *',
+      {},
+      { tz: 'UTC' },
+    );
+    // Escalates approvals that passed their service level to the next delegation-of-authority step.
+    await boss.createQueue(SLA_SWEEP_TOPIC, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(SLA_SWEEP_TOPIC, async () => {
+      const escalated = await this.slaSweep.runForAllTenants();
+      this.log.log(`SLA sweep escalated ${escalated} overdue approval(s)`);
+    });
+    await boss.schedule(
+      SLA_SWEEP_TOPIC,
+      process.env.SLA_SWEEP_CRON ?? '*/30 * * * *',
       {},
       { tz: 'UTC' },
     );

@@ -183,6 +183,7 @@ export const P5_DELEGATION = {
   limitMinor: 200_000,
   currency: 'USD',
   validFrom: '2026-11-01',
-  validTo: '2026-12-31',
+  // Delegation hygiene (P7) caps a delegation at 30 days; longer absences need a DoA change.
+  validTo: '2026-11-30',
   reason: 'Travelling for the year-end planning cycle',
 };

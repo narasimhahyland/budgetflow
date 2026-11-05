@@ -47,8 +47,12 @@ test.describe('transfers', () => {
       201,
       TransferResult,
     );
-    expect(sib.journal.type).toBe('transfer');
-    expect(sib.journal.lines.map((l) => [l.budgetId, l.account, l.budget?.amountMinor])).toEqual([
+    // The CEO owns the whole tree, so the transfer posts straight away instead of becoming a
+    // sibling transfer change request for the parent owner.
+    expect(sib.changeRequest ?? null).toBeNull();
+    expect(sib.journal).not.toBeNull();
+    expect(sib.journal!.type).toBe('transfer');
+    expect(sib.journal!.lines.map((l) => [l.budgetId, l.account, l.budget?.amountMinor])).toEqual([
       [blr.id, 'authorized', 2_500],
       [hyd.id, 'authorized', -2_500],
     ]);
@@ -63,7 +67,8 @@ test.describe('transfers', () => {
       201,
       TransferResult,
     );
-    expect(cousins.journal.balanced).toBe(true);
+    expect(cousins.journal).not.toBeNull();
+    expect(cousins.journal!.balanced).toBe(true);
     expect(bal(await budget(request, india.id))).toMatchObject({
       authorized: 29_000,
       allocatedOut: 9_000,

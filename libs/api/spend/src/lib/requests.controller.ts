@@ -128,4 +128,21 @@ export class RequestsController {
     if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
     return r.body;
   }
+
+  @Post(':requestId/accept-offer')
+  @HttpCode(200)
+  async acceptOffer(
+    @CurrentActor() actor: RequestActor,
+    @Param('requestId') raw: string,
+    @IdempotencyKey() idempotencyKey: string,
+    @RequestId() requestId: string | null,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ): Promise<RequestDetail> {
+    const r = await this.requests.acceptCounterOffer(actor, parseWith(RequestIdParam, raw), {
+      idempotencyKey,
+      requestId,
+    });
+    if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
+    return r.body;
+  }
 }

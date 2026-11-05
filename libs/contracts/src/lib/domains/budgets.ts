@@ -465,9 +465,44 @@ export const TransferRequest = named(
     .describe('Move money to another budget of the same tree, along the hierarchy.'),
 );
 export type TransferRequest = z.infer<typeof TransferRequest>;
+
+export const BudgetChangeRequest = named(
+  'BudgetChangeRequest',
+  z
+    .object({
+      id: Id,
+      kind: z.enum(['increase', 'contingency_release', 'sibling_transfer']),
+      budgetId: Id,
+      budgetName: z.string(),
+      sourceBudgetId: Id,
+      sourceBudgetName: z.string(),
+      amount: Money,
+      approvedAmount: Money.nullable(),
+      reason: z.string(),
+      status: z.enum(['pending', 'approved', 'rejected', 'cancelled']),
+      requestedByName: z.string().nullable(),
+      createdAt: IsoDateTime,
+      decidedAt: IsoDateTime.nullable(),
+      decidedByName: z.string().nullable(),
+      decisionNote: z.string().nullable(),
+      journalId: Id.nullable(),
+      canDecide: z.boolean(),
+      sourceAvailableMinor: z.int().nullable(),
+    })
+    .strict(),
+);
+export type BudgetChangeRequest = z.infer<typeof BudgetChangeRequest>;
+
 export const TransferResult = named(
   'TransferResult',
-  z.object({ journal: Journal, from: BudgetDetail, to: BudgetDetail }).strict(),
+  z
+    .object({
+      journal: Journal.nullable(),
+      from: BudgetDetail,
+      to: BudgetDetail,
+      changeRequest: BudgetChangeRequest.nullable().optional(),
+    })
+    .strict(),
 );
 export type TransferResult = z.infer<typeof TransferResult>;
 
@@ -791,33 +826,7 @@ export const TrueUpRequest = named(
   z.object({ dryRun: z.boolean(), asOf: IsoDate.optional() }).strict(),
 );
 
-// Increase requests and contingency releases --------------------------------------------------
-export const BudgetChangeRequest = named(
-  'BudgetChangeRequest',
-  z
-    .object({
-      id: Id,
-      kind: z.enum(['increase', 'contingency_release']),
-      budgetId: Id,
-      budgetName: z.string(),
-      sourceBudgetId: Id,
-      sourceBudgetName: z.string(),
-      amount: Money,
-      approvedAmount: Money.nullable(),
-      reason: z.string(),
-      status: z.enum(['pending', 'approved', 'rejected', 'cancelled']),
-      requestedByName: z.string().nullable(),
-      createdAt: IsoDateTime,
-      decidedAt: IsoDateTime.nullable(),
-      decidedByName: z.string().nullable(),
-      decisionNote: z.string().nullable(),
-      journalId: Id.nullable(),
-      canDecide: z.boolean(),
-      sourceAvailableMinor: z.int().nullable(),
-    })
-    .strict(),
-);
-export type BudgetChangeRequest = z.infer<typeof BudgetChangeRequest>;
+// Increase requests, contingency releases and sibling transfer requests -----------------------
 export const BudgetChangeRequestList = named(
   'BudgetChangeRequestList',
   z.object({ items: z.array(BudgetChangeRequest) }).strict(),
@@ -826,7 +835,7 @@ export const ChangeRequestQuery = z
   .object({
     status: z.enum(['pending', 'approved', 'rejected', 'cancelled']).optional(),
     budgetId: Id.optional(),
-    kind: z.enum(['increase', 'contingency_release']).optional(),
+    kind: z.enum(['increase', 'contingency_release', 'sibling_transfer']).optional(),
   })
   .strict();
 export const CreateIncreaseRequest = named(

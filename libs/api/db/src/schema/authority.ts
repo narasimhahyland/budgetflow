@@ -72,6 +72,8 @@ export const approvalDelegations = pgTable(
     validFrom: validFrom(),
     validTo: validTo(),
     reason: text('reason').notNull(),
+    revokedAt: ts('revoked_at'),
+    revokedBy: uuid('revoked_by').references(() => people.id),
     createdAt: createdAt(),
   },
   (t) => [index('approval_delegations_delegator').on(t.tenantId, t.delegatorPersonId)],

@@ -61,8 +61,22 @@
     {
       "idx": 8,
       "version": "7",
-      "when": 1793866557821,
-      "tag": "0008_p9_event_depth",
+      "when": 1793866943046,
+      "tag": "0008_p7_rules_workflows",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793875549513,
+      "tag": "0009_p7_policy_configs",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793887505442,
+      "tag": "0010_p9_event_depth",
       "breakpoints": true
     }
   ]

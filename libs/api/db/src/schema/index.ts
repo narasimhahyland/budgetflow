@@ -11,4 +11,5 @@ export * from './actuals';
 export * from './platform';
 export * from './cofunding';
 export * from './documents';
+export * from './rules';
 export * from './events-depth';
