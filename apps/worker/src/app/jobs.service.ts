@@ -76,11 +76,16 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     await boss.work<EmailPayload>(EMAIL_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.notifications.deliver(job.data);
     });
-    await boss.work<{ tenantId: string; budgetId: string }>(
+    await boss.work<{ tenantId: string; budgetId: string; unfitRequestIds?: string[] }>(
       BUDGET_CONTROL_TOPIC,
       fast,
       async (jobs) => {
-        for (const job of jobs) await this.controls.handle(job.data.tenantId, job.data.budgetId);
+        for (const job of jobs)
+          await this.controls.handle(
+            job.data.tenantId,
+            job.data.budgetId,
+            job.data.unfitRequestIds ?? [],
+          );
       },
     );
     await boss.work<ThresholdCrossed>(BUDGET_THRESHOLD_TOPIC, fast, async (jobs) => {

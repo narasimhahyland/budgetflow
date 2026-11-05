@@ -11,13 +11,15 @@ import { ContributionsService } from './contributions.service';
 export const BUDGET_CONTROL_TOPIC = 'budget.control_changed';
 
 export const SET_TO_ZERO_REASON = 'budget set to zero';
+export const REDUCED_REASON = 'budget reduced';
 export const FROZEN_REASON = 'Budget frozen: decisions wait until it is unfrozen';
 
 /**
  * Reacts to budget controls (worker job on `budget.control_changed`). It reads the budget's current
  * status rather than trusting the message, so replays and out-of-order messages are harmless:
  * set to zero cancels requests and contribution requests still waiting on the budget (releasing
- * pre-encumbrances, notifying requesters); frozen holds them; active again releases the holds.
+ * pre-encumbrances, notifying requesters); frozen holds them; active again releases the holds, and
+ * a reduction returns the requests it listed as no longer fitting (`unfitRequestIds`) the same way.
  * Existing commitments are untouched and can complete.
  */
 @Injectable()
@@ -33,6 +35,7 @@ export class BudgetControlConsumer {
   async handle(
     tenantId: string,
     budgetId: string,
+    unfitRequestIds: readonly string[] = [],
   ): Promise<{ status: string; cancelled: number; held: number; released: number }> {
     return withTenant(this.db, { tenantId, subject: 'system:worker' }, async (tx) => {
       const [b] = await tx
@@ -71,6 +74,13 @@ export class BudgetControlConsumer {
           FROZEN_REASON,
         );
       } else if (acceptsNewActivity(b.status).ok) {
+        out.cancelled += await this.requests.cancelUnfitForBudget(
+          tx,
+          actor,
+          budgetId,
+          unfitRequestIds,
+          REDUCED_REASON,
+        );
         out.released += await this.requests.holdWaitingForBudget(
           tx,
           actor,

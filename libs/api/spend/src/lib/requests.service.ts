@@ -888,6 +888,29 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     return this.cancelRows(tx, actor, rows, reason);
   }
 
+  /** A reduction returns the waiting requests that no longer fit (`unfitRequestIds` on the control event). */
+  async cancelUnfitForBudget(
+    tx: Tx,
+    actor: RequestActor,
+    budgetId: string,
+    requestIds: readonly string[],
+    reason: string,
+  ): Promise<number> {
+    if (!requestIds.length) return 0;
+    const rows = await tx
+      .select()
+      .from(requests)
+      .where(
+        and(
+          eq(requests.budgetId, budgetId),
+          inArray(requests.id, [...requestIds]),
+          inArray(requests.status, WAITING),
+        ),
+      )
+      .for('update');
+    return this.cancelRows(tx, actor, rows, reason);
+  }
+
   /** A cancelled event cancels its own funding requests still waiting for a decision. */
   async cancelWaitingForEvent(
     tx: Tx,

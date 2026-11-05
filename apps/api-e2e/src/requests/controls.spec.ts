@@ -2,8 +2,9 @@
 // Contribution Requests still waiting on it are cancelled with the reason "budget set to zero", their
 // pre-encumbrance is released and the requesters are emailed; when it is frozen they are held and no one
 // can decide them until it is active again. New requests are refused with the reason; approved
-// commitments stay visible and untouched; a reduction keeps them waiting. The worker reacts to the
-// budget.control_changed messages Phase 4's control commands publish.
+// commitments stay visible and untouched; a reduction keeps the ones that still fit and returns the
+// newest ones that no longer fit ("budget reduced"). The worker reacts to the budget.control_changed
+// messages Phase 4's control commands publish.
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { ContributionDetail, RequestDetail } from '@bf/contracts';
 import { expectContract, expectProblem } from '../support/contract';
@@ -163,5 +164,38 @@ test.describe('budget controls on waiting requests', () => {
     expect(after).toMatchObject({ status: 'pending_approval', onHold: false });
     const ok = await decideOk(request, 'department-head', task, { decision: 'approve' });
     expect(ok.subjectStatus).toBe('approved');
+  });
+
+  test('a reduction below the waiting requests returns the newest that no longer fit', async ({
+    request,
+  }) => {
+    const { team } = await directorTree(request);
+    const older = await expectContract(
+      await spendingRequest(request, 'budget-owner', team.id, usd(60_000)),
+      201,
+      RequestDetail,
+    );
+    const newer = await expectContract(
+      await spendingRequest(request, 'budget-owner', team.id, usd(80_000)),
+      201,
+      RequestDetail,
+    );
+    // USD 50,000.00 authorized with USD 1,400.00 pending: down to USD 1,000.00 only the older one fits.
+    const cut = await applyControl(request, team.id, 'reduce', 4_900_000);
+    expect(cut.event).toMatchObject({
+      pendingRequestPolicy: 'return_unfit',
+      unfitRequestIds: [newer.id],
+    });
+    await pollRequest(request, newer.id, (r) => r.status).toBe('cancelled');
+    const returned = await getRequest(request, 'budget-owner', newer.id);
+    expect(returned.cancelReason).toBe('budget reduced');
+    const kept = await getRequest(request, 'budget-owner', older.id);
+    expect(kept).toMatchObject({ status: 'pending_approval', onHold: false });
+    const b = await budget(request, team.id);
+    expect(b.balances.available.amountMinor).toBe(100_000 - 60_000);
+    await waitForMail(
+      'budget.owner@example.test',
+      `Your request ${newer.ref} was cancelled: budget reduced`,
+    );
   });
 });
