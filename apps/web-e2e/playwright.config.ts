@@ -22,7 +22,9 @@ export default defineConfig({
   // No {platform} segment: baselines are only produced in the pinned Linux image, locally and in CI.
   snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{arg}{ext}',
   fullyParallel: true,
-  workers: 2,
+  // One local stack serves every worker, so a machine with many cores can starve the API and
+  // Keycloak and time journeys out. BF_E2E_WORKERS caps the fan-out; unset, the default stands.
+  workers: process.env.BF_E2E_WORKERS ? Number(process.env.BF_E2E_WORKERS) : 2,
   forbidOnly: !!process.env.CI,
   retries: 1,
   reporter: [
