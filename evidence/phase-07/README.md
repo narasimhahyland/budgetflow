@@ -39,10 +39,12 @@ and 12 moved from `planned (P5)` to `passing` and now also name the Phase 7 scen
 openapi, db, functional-api, functional-e2e, visual) — every mode passing:
 
 ```
-PASS secrets 1s / lint 4s / styles 1s / satori 21s / typecheck 3s / build 1s
-PASS openapi 1s / db 1s / stack 42s / functional-api 84s / functional-e2e 77s
-PASS reseed 39s / visual 80s
+PASS secrets 6s / lint 5s / styles 4s / satori 28s / typecheck 3s / build 2s
+PASS openapi 1s / db 1s / stack 46s / functional-api 97s / functional-e2e 141s
+PASS reseed 39s / visual 177s
 ```
+
+That run is on top of `main` with Phases 8 and 9 merged, not on the Phase 7 branch in isolation.
 
 Earlier runs surfaced four real problems, all fixed and re-verified:
 
@@ -59,8 +61,8 @@ blocked-outcome`) clicked a control below the fold, which scrolls the shell's co
    it, so no other baseline moved.
 4. `functional-e2e` — a host with many cores starved the single local stack (one API, one Postgres,
    one Keycloak) and timed journeys out on a different unrelated screen each run; the same specs
-   passed seven times out of seven in isolation. `BF_E2E_WORKERS` now caps the fan-out when a
-   machine needs it and changes nothing when unset. The final run used `BF_E2E_WORKERS=4`.
+   passed seven times out of seven in isolation. `main` already caps Playwright at two workers with
+   retries on, which holds the fan-out down, so nothing further was needed here.
 
 ## Screenshots
 
@@ -84,6 +86,6 @@ negative amount passing validation and invalid input silently reading as "nothin
   yet, so nothing records which rule versions shaped a route. The service used to infer `R-12 v3`
   from the amount; that guess is gone rather than shown as evidence. Export, sorting, a decision
   drawer, a date-range filter and filters in the address are listed as open in the screen spec.
-- Migrations `0008_p7_rules_workflows.sql` and `0009_p7_policy_configs.sql` are new here. The
-  sibling Wave 3 branches each add their own `0008_*`; the integrator renumbers on merge rather
-  than any branch renumbering the others.
+- Migrations `0008_p7_rules_workflows.sql` and `0009_p7_policy_configs.sql` landed with the bulk of
+  Phase 7. The sibling Wave 3 branches each added their own `0008_*` and were renumbered on merge
+  (Phase 9 took `0010`, Phase 8 `0011`), so this change adds no migration of its own.
