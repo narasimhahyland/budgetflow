@@ -1142,7 +1142,7 @@
       "id": "054a-survey-photo-gallery",
       "role": "event-organizer",
       "path": "/events/78000000-0000-4000-8000-000000000020/feedback",
-      "waitFor": "[data-testid=response-count]",
+      "waitFor": "role=heading[name=\"How people rated it\"]",
       "states": [
         {
           "state": "default"

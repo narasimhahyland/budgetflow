@@ -29,7 +29,7 @@ test.describe('event organizer plans and runs an event', () => {
     });
 
     await page.goto(`/events/${event.id}/plan`);
-    await expect(page.getByRole('heading', { name: 'Plan' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Plan', exact: true })).toBeVisible();
     await expect(page.getByText('No plan yet')).toBeVisible();
 
     await page.getByLabel('Add a task').fill('Book the photographer');
