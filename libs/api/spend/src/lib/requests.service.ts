@@ -374,15 +374,53 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     return { status, changes: { journalIds } };
   }
 
-  async requestChanges(tx: Tx, s: ApprovalSubject, ctx: DecisionContext): Promise<HandlerOutcome> {
+  async requestChanges(
+    tx: Tx,
+    s: ApprovalSubject,
+    ctx: DecisionContext,
+    counterOffer?: Money | null,
+  ): Promise<HandlerOutcome> {
     const r = await this.row(tx, s.id);
+    if (
+      counterOffer &&
+      (counterOffer.currency !== r.currency ||
+        counterOffer.amountMinor <= 0 ||
+        counterOffer.amountMinor >= r.amountMinor)
+    ) {
+      throw new ApiProblem(
+        422,
+        'VALIDATION_FAILED',
+        `A counter-offer must be in ${r.currency}, greater than zero and less than the requested amount.`,
+        { field: 'counterOfferAmount' },
+      );
+    }
     const journalIds = await this.releasePending(
       tx,
       r,
       this.postCtx(ctx.actor, 'requests.request_changes', ctx),
     );
     const status = unwrap(requestMachine.next(r.status, 'request_changes'));
-    await this.decided(tx, r, { status, reasonCode: ctx.reasonCode, decisionReason: ctx.reason });
+    const now = new Date();
+    await this.decided(tx, r, {
+      status,
+      reasonCode: ctx.reasonCode,
+      decisionReason: ctx.reason,
+      ...(counterOffer
+        ? {
+            counterOfferMinor: counterOffer.amountMinor,
+            counterOfferCurrency: counterOffer.currency,
+            counterOfferedBy: ctx.actor.personId,
+            counterOfferedAt: now,
+            counterOfferExpiresAt: new Date(now.getTime() + 7 * 86_400_000),
+          }
+        : {
+            counterOfferMinor: null,
+            counterOfferCurrency: null,
+            counterOfferedBy: null,
+            counterOfferedAt: null,
+            counterOfferExpiresAt: null,
+          }),
+    });
     if (isEventFunding(r) && r.eventId)
       await this.hooks.fundingDecided(
         tx,
@@ -391,7 +429,13 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         'changes_requested',
         r.kind as 'budget',
       );
-    return { status, changes: { journalIds } };
+    return {
+      status,
+      changes: {
+        journalIds,
+        ...(counterOffer ? { counterOffer } : {}),
+      },
+    };
   }
 
   // Commands --------------------------------------------------------------------------------------
@@ -861,11 +905,142 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
             title: body.title ?? r.title,
             purpose: body.purpose ?? r.purpose,
             neededBy: body.neededBy ?? r.neededBy,
+            counterOfferMinor: null,
+            counterOfferCurrency: null,
+            counterOfferedBy: null,
+            counterOfferedAt: null,
+            counterOfferExpiresAt: null,
             version: r.version + 1,
             updatedAt: new Date(),
           })
           .where(eq(requests.id, r.id));
         await this.submitTx(tx, actor, id, ctx, 'request.resubmitted');
+        return this.detailTx(tx, actor, id);
+      },
+    );
+  }
+
+  /** Screen 065: accept an approver counter-offer to approve the request at the offered amount in one step. */
+  acceptCounterOffer(
+    actor: RequestActor,
+    id: string,
+    ctx: Ctx,
+  ): Promise<CommandResult<RequestDetail>> {
+    return this.commands.run(
+      actor,
+      {
+        idempotencyKey: ctx.idempotencyKey,
+        operation: `requests.accept_offer:${id}`,
+        request: {},
+        status: 200,
+      },
+      async (tx) => {
+        const r = await this.mine(tx, actor, id);
+        if (r.status !== 'changes_requested' || r.counterOfferMinor === null) {
+          throw new ApiProblem(
+            409,
+            'NO_COUNTER_OFFER',
+            'There is no active counter-offer on this request.',
+          );
+        }
+        if (r.counterOfferExpiresAt && r.counterOfferExpiresAt.getTime() < Date.now()) {
+          throw new ApiProblem(
+            409,
+            'COUNTER_OFFER_EXPIRED',
+            'This counter-offer has expired; edit and resubmit the request instead.',
+          );
+        }
+        const offeredMinor = r.counterOfferMinor;
+        const locked = (await this.posting.lock(tx, [r.budgetId!])).get(r.budgetId!)!;
+        unwrap(acceptsNewActivity(locked.status));
+        const pc = this.postCtx(actor, 'requests.accept_offer', ctx);
+        const pctx = await this.posting.context(tx, locked, actor.reportingCurrency);
+        const journalIds: string[] = [];
+        let commitmentId = r.commitmentId;
+
+        if (isEventFunding(r)) {
+          const pre = unwrap(
+            postSpendMovement(
+              {
+                kind: 'pre_encumber',
+                budget: locked,
+                amount: { amountMinor: offeredMinor, currency: r.currency as CurrencyCode },
+                journalType: 'commitment',
+                provenance: { requestId: r.id, eventId: r.eventId },
+              },
+              pctx,
+            ),
+          );
+          journalIds.push(...(await this.posting.post(tx, pre.journals, locked.fiscalYearId, pc)));
+          const remaining = await this.posting.requestRemaining(tx, r.id, locked.id);
+          const held = unwrap(
+            postSpendMovement(
+              {
+                kind: 'hold_from_pre_encumbrance',
+                budget: locked,
+                amount: { amountMinor: offeredMinor, currency: r.currency as CurrencyCode },
+                journalType: 'commitment',
+                provenance: { requestId: r.id, eventId: r.eventId },
+                remaining,
+                reason: 'Counter-offer accepted: held for the event',
+              },
+              pctx,
+            ),
+          );
+          journalIds.push(...(await this.posting.post(tx, held.journals, locked.fiscalYearId, pc)));
+          await this.sources.add(tx, {
+            tenantId: actor.tenantId,
+            eventId: r.eventId!,
+            kind: 'own',
+            budgetId: locked.id,
+            originBudgetId: locked.id,
+            requestId: r.id,
+            mode: 'earmark',
+            fundedMinor: held.budgetAmount.amountMinor,
+            currency: locked.currency,
+          });
+        } else {
+          const pre = await this.commitments.preEncumberForRequest(tx, pc, {
+            budget: locked,
+            requestId: r.id,
+            eventId: null,
+            description: r.title,
+            amount: { amountMinor: offeredMinor, currency: r.currency as CurrencyCode },
+          });
+          commitmentId = pre.commitmentId;
+          const enc = await this.commitments.encumberApproved(tx, pc, commitmentId, offeredMinor);
+          journalIds.push(...enc.journalIds);
+        }
+
+        await tx
+          .update(requests)
+          .set({
+            status: 'partially_approved',
+            approvedMinor: offeredMinor,
+            commitmentId,
+            decidedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(requests.id, r.id));
+
+        await this.audit.append(tx, {
+          tenantId: actor.tenantId,
+          actorPersonId: actor.personId,
+          actorSubject: actor.subject,
+          action: 'request.counter_offer_accepted',
+          resourceType: 'request',
+          resourceId: r.id,
+          legalEntityId: locked.legalEntityId,
+          requestId: ctx.requestId,
+          changes: {
+            status: { from: r.status, to: 'partially_approved' },
+            approvedAmount: {
+              from: null,
+              to: { amountMinor: offeredMinor, currency: r.currency },
+            },
+            journalIds: { from: null, to: journalIds },
+          },
+        });
         return this.detailTx(tx, actor, id);
       },
     );
@@ -1215,13 +1390,47 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     const allowed: RequestDetail['allowedActions'] = [];
     if (mine && r.status === 'draft') allowed.push('submit');
     if (mine && WAITING.includes(r.status)) allowed.push('withdraw');
-    if (mine && r.status === 'changes_requested') allowed.push('resubmit');
+    if (mine && r.status === 'changes_requested') {
+      allowed.push('resubmit');
+      if (
+        r.counterOfferMinor !== null &&
+        (!r.counterOfferExpiresAt || r.counterOfferExpiresAt.getTime() >= Date.now())
+      ) {
+        allowed.push('accept_offer');
+      }
+    }
     if (myTaskId) allowed.push('decide');
     if (mine) allowed.push('upload');
     const showImpact =
       mine ||
       Boolean(myTaskId) ||
       this.policy.can(actor, 'budget.read', budgetResourceOf(s.budget)).allowed;
+    let counterOffer: RequestDetail['counterOffer'] = null;
+    if (r.counterOfferMinor !== null && r.counterOfferCurrency) {
+      const offerNames = await personNames(tx, [r.counterOfferedBy]);
+      const pctx = await this.posting.context(tx, s.budget, actor.reportingCurrency);
+      const trip = buildTriplet(
+        { amountMinor: r.counterOfferMinor, currency: r.counterOfferCurrency as CurrencyCode },
+        {
+          budgetCurrency: s.budget.currency,
+          reportingCurrency: actor.reportingCurrency,
+          rates: pctx.rates,
+        },
+      );
+      const offeredAt = r.counterOfferedAt ?? r.updatedAt;
+      const expiresAt = r.counterOfferExpiresAt ?? new Date(offeredAt.getTime() + 7 * 86_400_000);
+      counterOffer = {
+        amount: { amountMinor: r.counterOfferMinor, currency: r.counterOfferCurrency },
+        budgetAmount: trip.ok ? trip.value.budget : null,
+        offeredByName: r.counterOfferedBy
+          ? (offerNames.get(r.counterOfferedBy) ?? 'Approver')
+          : 'Approver',
+        offeredAt: offeredAt.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+        expired: expiresAt.getTime() < Date.now(),
+        comment: r.decisionReason,
+      };
+    }
     return {
       ...summary,
       purpose: r.purpose,
@@ -1230,6 +1439,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       neededBy: r.neededBy,
       overBudget: r.overBudget,
       commitmentId: r.commitmentId,
+      counterOffer,
       route: await this.approvals.routeView(tx, 'request', id),
       impact: showImpact ? await this.impact(tx, s) : null,
       activity: await this.approvals.activity(tx, [{ type: 'request', id }]),

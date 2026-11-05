@@ -240,8 +240,9 @@ export function buildApprovalRoute(input: RouteInput): Result<ApprovalRoute> {
 
 /**
  * Re-checked at decision time under lock: the actor is the step's approver, or an active delegate of
- * the approver (authority capped by the delegator's own limit and the delegation's dates); hygiene
- * applies to both people; the amount to approve is within the effective limit.
+ * the approver (authority capped by the lower of the delegator's own limit, the delegate's own limit
+ * if any, and the delegation's cap, within the delegation's dates); hygiene applies to both people;
+ * the amount to approve is within the effective limit.
  */
 export function checkDecisionAuthority(input: {
   actor: Approver;
@@ -282,6 +283,10 @@ export function checkDecisionAuthority(input: {
     const d = delegatedLimit(input.delegation!, effective, input.date);
     if (!d.ok) return d;
     effective = d.value;
+    const actorOwn = resolveLimit(input.limits, input.actor, q);
+    if (actorOwn) {
+      effective = Math.min(effective, actorOwn.limitMinor);
+    }
   }
   if (input.amountMinor > effective) {
     return err(

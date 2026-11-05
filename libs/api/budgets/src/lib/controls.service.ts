@@ -7,7 +7,14 @@ import {
   type RequestActor,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
-import { budgets, reasonCodes, withTenant, type Db, type Tx } from '@bf/api/db';
+import {
+  budgetChangeRequests,
+  budgets,
+  reasonCodes,
+  withTenant,
+  type Db,
+  type Tx,
+} from '@bf/api/db';
 import { LedgerReads, LedgerService, toPostingBudget } from '@bf/api/ledger';
 import { AnalyticsService } from '@bf/api/tenancy';
 import type {
@@ -1000,16 +1007,116 @@ export class ControlsService {
     };
     if (!options.skipPolicy) {
       this.policy.assert(actor, 'budget.read', budgetResource(dest), 'destination budget');
-      // Owning both siblings is enough; other sibling transfers become a request to the parent owner in Phase 7.
       const ownsBothSiblings =
         source.parentId !== null &&
         source.parentId === dest.parentId &&
         this.policy.can(actor, 'budget.allocate', budgetResource(source)).allowed &&
         this.policy.can(actor, 'budget.allocate', budgetResource(dest)).allowed;
-      if (!ownsBothSiblings && !this.policy.can(actor, 'budget.allocate', lca).allowed)
-        throw ApiProblem.forbidden(
-          'Only the owner of both budgets, the owner of their common parent or finance can move money between them.',
+      if (!ownsBothSiblings && !this.policy.can(actor, 'budget.allocate', lca).allowed) {
+        // Phase 7: a sibling transfer where the caller owns the source (or can request on the target)
+        // but does not own both siblings routes to the parent owner as a sibling_transfer request.
+        const sameParent = source.parentId !== null && source.parentId === dest.parentId;
+        const canRequestTransfer =
+          sameParent &&
+          (this.policy.can(actor, 'budget.allocate', budgetResource(source)).allowed ||
+            this.policy.can(actor, 'request.create', budgetResource(dest)).allowed);
+        if (!canRequestTransfer) {
+          throw ApiProblem.forbidden(
+            'Only the owner of both budgets, the owner of their common parent or finance can move money between them.',
+          );
+        }
+        await this.assertReasonCode(tx, req.reasonCode, ['transfer', 'reduction']);
+        await this.lockMoveChains(tx, source, dest);
+        const [lockedSource, lockedDest] = [
+          await this.views.row(tx, source.id),
+          await this.views.row(tx, dest.id),
+        ];
+        unwrap(acceptsNewActivity(lockedSource.status));
+        unwrap(acceptsNewActivity(lockedDest.status));
+        const balances = (await this.reads.balances(tx, [source.id])).get(source.id)!.budget;
+        const available = availableOf(
+          Object.fromEntries(
+            Object.entries(balances).map(([k, v]) => [k, Math.max(v, 0)]),
+          ) as BucketBalances,
+          CONSUMING_BUCKETS,
         );
+        if (req.amountMinor > available) {
+          throw new ApiProblem(
+            409,
+            'INSUFFICIENT_AVAILABLE',
+            `Only ${available} ${source.currency} minor units can be transferred from ${source.name}.`,
+            {
+              availableMinor: available,
+              requestedMinor: req.amountMinor,
+              currency: source.currency,
+            },
+          );
+        }
+        const [inserted] = await tx
+          .insert(budgetChangeRequests)
+          .values({
+            tenantId: actor.tenantId,
+            kind: 'sibling_transfer',
+            budgetId: dest.id,
+            sourceBudgetId: source.id,
+            amountMinor: req.amountMinor,
+            currency: source.currency,
+            reason: `${req.reasonCode}: ${req.reason}`,
+            requestedBy: actor.personId,
+          })
+          .returning();
+        await this.audit.append(tx, {
+          tenantId: actor.tenantId,
+          actorPersonId: actor.personId,
+          actorSubject: actor.subject,
+          action: 'budget.sibling_transfer_requested',
+          resourceType: 'budget_change_request',
+          resourceId: inserted.id,
+          legalEntityId: source.legalEntityId,
+          requestId: ctx.requestId,
+          reason: `${req.reasonCode}: ${req.reason}`,
+          changes: {
+            budgetId: { from: null, to: dest.id },
+            sourceBudgetId: { from: null, to: source.id },
+            amount: { from: null, to: { amountMinor: req.amountMinor, currency: source.currency } },
+          },
+        });
+        await this.views.outbox(tx, actor.tenantId, 'budget.change_requested', {
+          tenantId: actor.tenantId,
+          requestId: inserted.id,
+          kind: 'sibling_transfer',
+          budgetId: dest.id,
+          sourceBudgetId: source.id,
+          amountMinor: req.amountMinor,
+          currency: source.currency,
+          requestedBy: actor.personId,
+        });
+        return {
+          journal: null,
+          from: await this.views.detailById(tx, actor, source.id),
+          to: await this.views.detailById(tx, actor, dest.id),
+          changeRequest: {
+            id: inserted.id,
+            kind: 'sibling_transfer',
+            budgetId: dest.id,
+            budgetName: dest.name,
+            sourceBudgetId: source.id,
+            sourceBudgetName: source.name,
+            amount: { amountMinor: req.amountMinor, currency: source.currency },
+            approvedAmount: null,
+            reason: inserted.reason,
+            status: 'pending',
+            requestedByName: actor.displayName,
+            createdAt: inserted.createdAt.toISOString(),
+            decidedAt: null,
+            decidedByName: null,
+            decisionNote: null,
+            journalId: null,
+            canDecide: false,
+            sourceAvailableMinor: available,
+          },
+        };
+      }
       await this.assertReasonCode(tx, req.reasonCode, ['transfer', 'reduction']);
     }
     await this.lockMoveChains(tx, source, dest);
