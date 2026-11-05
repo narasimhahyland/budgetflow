@@ -125,18 +125,17 @@ const isReportId = (value: string | null): value is ReportId =>
     </header>
 
     @if (notice(); as text) {
-      <sat-banner status="success" data-testid="report-notice">
-        <span satBannerTitle>{{ text }}</span>
-        <span satBannerDescription>
-          Exports are recorded for audit and expire after 7 days. BudgetFlow does not produce a file
-          yet — the figures stay on this screen and in
+      <sat-banner variant="success" data-testid="report-notice">
+        <sat-banner-message>
+          <strong>{{ text }}</strong> Exports are recorded for audit and expire after 7 days.
+          BudgetFlow does not produce a file yet — the figures stay on this screen and in
           <a routerLink="/reports/schedules">scheduled reports</a>.
-        </span>
+        </sat-banner-message>
       </sat-banner>
     }
     @if (failure(); as text) {
-      <sat-banner status="error" data-testid="report-failure">
-        <span satBannerTitle>{{ text }}</span>
+      <sat-banner variant="important" data-testid="report-failure">
+        <sat-banner-message>{{ text }}</sat-banner-message>
       </sat-banner>
     }
 
@@ -293,10 +292,10 @@ const isReportId = (value: string | null): value is ReportId =>
           </div>
         </div>
         @if (r.truncated) {
-          <sat-banner class="bf-banner" status="warning">
-            <span satBannerTitle>Showing the first {{ r.rows.length }} rows</span>
-            <span satBannerDescription
-              >Narrow the filters to see the rest. The totals below cover every row in scope.</span
+          <sat-banner class="bf-banner" variant="warning">
+            <sat-banner-message
+              ><strong>Showing the first {{ r.rows.length }} rows.</strong> Narrow the filters to
+              see the rest. The totals below cover every row in scope.</sat-banner-message
             >
           </sat-banner>
         }

@@ -29,7 +29,7 @@ const BUCKETS: Record<string, Bucket> = {
   selector: 'bf-drilldown-panel',
   imports: [DatePipe, LoadState, MatButtonModule, MatIconModule, Money, SAT_BANNER_IMPORTS],
   template: `
-    <section class="bf-card" aria-labelledby="drill-title">
+    <section class="bf-card" aria-labelledby="drill-title" data-testid="report-drilldown">
       <div class="bf-card__header">
         <div>
           <h2 class="bf-card__title" id="drill-title">
@@ -55,11 +55,10 @@ const BUCKETS: Record<string, Bucket> = {
           in the {{ bucketLabel(d.bucket) }} bucket.
         </p>
         @if (d.truncated) {
-          <sat-banner class="bf-banner" status="info">
-            <span satBannerTitle>Showing the most recent lines only</span>
-            <span satBannerDescription
-              >This figure has more lines than the drill-down shows. Export the report or open the
-              budget for the full history.</span
+          <sat-banner class="bf-banner" variant="info">
+            <sat-banner-message
+              ><strong>Showing the most recent lines only.</strong> This figure has more lines than
+              the drill-down shows. Open the budget for the full history.</sat-banner-message
             >
           </sat-banner>
         }

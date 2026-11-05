@@ -63,8 +63,8 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
     </header>
 
     @if (failure(); as text) {
-      <sat-banner status="error">
-        <span satBannerTitle>{{ text }}</span>
+      <sat-banner variant="important">
+        <sat-banner-message>{{ text }}</sat-banner-message>
       </sat-banner>
     }
 
@@ -154,7 +154,11 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
           <ul class="bf-reports">
             @for (report of group.reports; track report.reportId) {
               <li>
-                <a class="bf-report" [routerLink]="['/reports', report.reportId]">
+                <a
+                  class="bf-report"
+                  [attr.data-testid]="'report-card-' + report.reportId"
+                  [routerLink]="['/reports', report.reportId]"
+                >
                   <span class="bf-report__name">{{ report.name }}</span>
                   <span class="bf-report__question">{{ report.question }}</span>
                   <span class="bf-report__meta">Screen {{ report.screen }}</span>

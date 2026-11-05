@@ -31,9 +31,11 @@ export interface DrillRequest {
   imports: [SAT_BANNER_IMPORTS],
   template: `
     @if (note()) {
-      <sat-banner class="bf-banner" status="info" data-testid="report-scope-note">
-        <span satBannerTitle>{{ note() }}</span>
-        <span satBannerDescription>{{ label() }} · {{ budgetIds() }} budgets in scope.</span>
+      <sat-banner class="bf-banner" variant="info" data-testid="report-scope-note">
+        <sat-banner-message
+          ><strong>{{ note() }}</strong> {{ label() }} · {{ budgetIds() }} budgets in
+          scope.</sat-banner-message
+        >
       </sat-banner>
     }
   `,
@@ -63,13 +65,13 @@ export class ScopeNote {
           <bf-money [amountMinor]="r.available.amountMinor" [currency]="r.available.currency" />.
         </p>
       } @else {
-        <sat-banner class="bf-banner" status="error" data-testid="reconciliation-broken">
-          <span satBannerTitle>These figures do not tie to the ledger</span>
-          <span satBannerDescription>
-            The table disagrees with the ledger buckets for
-            {{ r.differences.length }} figure{{ r.differences.length === 1 ? '' : 's' }}. Treat the
-            report as unverified and tell finance before you use it.
-          </span>
+        <sat-banner class="bf-banner" variant="important" data-testid="reconciliation-broken">
+          <sat-banner-message>
+            <strong>These figures do not tie to the ledger.</strong> The table disagrees with the
+            ledger buckets for {{ r.differences.length }} figure{{
+              r.differences.length === 1 ? '' : 's'
+            }}. Treat the report as unverified and tell finance before you use it.
+          </sat-banner-message>
         </sat-banner>
         <table class="bf-split-table" aria-label="Figures that do not tie to the ledger">
           <thead>
@@ -154,20 +156,15 @@ export class Reconciliation {
             <tr>
               @for (c of columns(); track c.key) {
                 <td [class.bf-num]="c.align === 'end'">
-                  @let cell = row.cells[c.key];
-                  @if (drillable(c, row, cell)) {
+                  @let cell = cellFor(row, c);
+                  @let request = drillRequest(row, c);
+                  @if (request) {
                     <button
                       class="bf-drill"
                       type="button"
+                      data-testid="report-drill"
                       [attr.aria-label]="'Ledger lines behind ' + c.label + ' for ' + row.label"
-                      (click)="
-                        drill.emit({
-                          budgetId: row.budgetId!,
-                          bucket: cell.bucket!,
-                          rowLabel: row.label,
-                          columnLabel: c.label,
-                        })
-                      "
+                      (click)="drill.emit(request)"
                     >
                       <ng-container
                         [ngTemplateOutlet]="value"
@@ -190,7 +187,7 @@ export class Reconciliation {
                 <td [class.bf-num]="c.align === 'end'">
                   <ng-container
                     [ngTemplateOutlet]="value"
-                    [ngTemplateOutletContext]="{ $implicit: t.cells[c.key], column: c }"
+                    [ngTemplateOutletContext]="{ $implicit: cellFor(t, c), column: c }"
                   />
                 </td>
               }
@@ -284,8 +281,21 @@ export class ReportTable {
   readonly drill = output<DrillRequest>();
   protected readonly percentOf = percentOf;
 
-  protected drillable(c: ReportColumn, row: ReportRow, cell: ReportCell | undefined): boolean {
-    return Boolean(c.drillable && cell?.money && cell.bucket && row.budgetId);
+  /** The `label` column names the row and is carried on the row itself, not among its cells. */
+  protected cellFor(row: ReportRow, c: ReportColumn): ReportCell | undefined {
+    return row.cells[c.key] ?? (c.key === 'label' ? { text: row.label } : undefined);
+  }
+
+  /** A drill-down needs a budget to read the ledger for and the bucket the figure came from. */
+  protected drillRequest(row: ReportRow, c: ReportColumn): DrillRequest | null {
+    const cell = this.cellFor(row, c);
+    if (!c.drillable || !cell?.money || !cell.bucket || !row.budgetId) return null;
+    return {
+      budgetId: row.budgetId,
+      bucket: cell.bucket,
+      rowLabel: row.label,
+      columnLabel: c.label,
+    };
   }
 
   protected toneClass(cell: ReportCell): string {

@@ -92,23 +92,22 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
       </div>
     </header>
 
-    <sat-banner status="info" data-testid="delivery-note">
-      <span satBannerTitle>Deliveries carry figures, not files</span>
-      <span satBannerDescription>
-        Email and chat deliveries carry the headline figures and a sign-in link. BudgetFlow records
-        the export for audit and expires it after 7 days, but does not produce a file to download
-        yet.
-      </span>
+    <sat-banner variant="info" data-testid="delivery-note">
+      <sat-banner-message>
+        <strong>Deliveries carry figures, not files.</strong> Email and chat deliveries carry the
+        headline figures and a sign-in link. BudgetFlow records the export for audit and expires it
+        after 7 days, but does not produce a file to download yet.
+      </sat-banner-message>
     </sat-banner>
 
     @if (notice(); as text) {
-      <sat-banner status="success" data-testid="schedule-notice">
-        <span satBannerTitle>{{ text }}</span>
+      <sat-banner variant="success" data-testid="schedule-notice">
+        <sat-banner-message>{{ text }}</sat-banner-message>
       </sat-banner>
     }
     @if (failure(); as text) {
-      <sat-banner status="error" data-testid="schedule-failure">
-        <span satBannerTitle>{{ text }}</span>
+      <sat-banner variant="important" data-testid="schedule-failure">
+        <sat-banner-message>{{ text }}</sat-banner-message>
       </sat-banner>
     }
 
@@ -219,7 +218,11 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
     @if (valueOf(schedules); as list) {
       @if (list.items.length) {
         @for (schedule of list.items; track schedule.id) {
-          <section class="bf-card" [attr.aria-labelledby]="'schedule-' + schedule.id">
+          <section
+            class="bf-card"
+            [attr.data-testid]="'schedule-' + schedule.id"
+            [attr.aria-labelledby]="'schedule-' + schedule.id"
+          >
             <div class="bf-card__header">
               <div>
                 <h2 class="bf-card__title" [id]="'schedule-' + schedule.id">
@@ -273,8 +276,8 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
             </div>
 
             @if (schedule.pausedReason) {
-              <sat-banner class="bf-banner" status="warning">
-                <span satBannerTitle>Paused: {{ schedule.pausedReason }}</span>
+              <sat-banner class="bf-banner" variant="warning">
+                <sat-banner-message>Paused: {{ schedule.pausedReason }}</sat-banner-message>
               </sat-banner>
             }
 

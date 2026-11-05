@@ -113,7 +113,7 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
     />
 
     @if (overview(); as o) {
-      <div class="bf-kpis">
+      <div class="bf-kpis" data-testid="health-summary">
         <div class="bf-kpi">
           <p class="bf-kpi__label">Budgets checked</p>
           <p class="bf-kpi__value">{{ o.summary.budgets | number }}</p>
@@ -210,7 +210,7 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
               </thead>
               <tbody>
                 @for (row of o.rows; track row.budgetId) {
-                  <tr>
+                  <tr [attr.data-testid]="'health-row-' + row.budgetId">
                     <td>
                       <a class="bf-cell__primary" [routerLink]="['/budgets', row.budgetId]">{{
                         row.name
