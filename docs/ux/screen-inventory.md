@@ -8,6 +8,8 @@ Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 10
 
 Phase 8 to 12 screens are specified spec-first in `docs/ux/screens/` (images pending a later Stitch session; status in [review-log.md](review-log.md)). Screens 47e, 59b, 59c, 61d and 61e (Phases 8 and 9), 80g, 80h and 87c (Phase 11) and 94a, 94b and 99b (Phase 12) were added with those batches for plan features that had no screen. Phase 10 reports share the report frame defined in `079-reports-dashboard.md`; Phase 12 connectors share the connector frame defined in `092-integrations-dashboard.md`.
 
+Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and 113a (Phase 13) were added for plan features that had no screen (questions in Slack and Teams; AI feature switches and the AI query log). Every AI surface uses the AI output pattern defined in `011a-ai-assistant-panel.md`.
+
 ## Group 1: Authentication and onboarding
 
 | #   | Screen                                  | Build phase | Primary roles                       | Notes        |
@@ -145,6 +147,7 @@ Phase 8 to 12 screens are specified spec-first in `docs/ux/screens/` (images pen
 | 61c | Microsoft Teams approval card                                     | P8          | Approvers                                          | review-added                                |
 | 61d | Slack and Teams: balance check, quick request and alerts          | P8          | Owners, requesters, approvers                      | review-added                                |
 | 61e | Slack and Teams app setup and account linking                     | P8          | IA; OA, FA read; all users link                    | review-added                                |
+| 61f | Slack and Teams: ask BudgetFlow (plain-language questions)        | P13         | All roles within scope (linked accounts)           | review-added                                |
 | 62  | Delegated approval screen                                         | P7          | Delegates                                          |                                             |
 | 63  | Escalated approval screen                                         | P7          | Escalation approvers (FC, CEO)                     |                                             |
 | 64  | Request history                                                   | P5          | All requesters; approvers within DoA               | Stitch                                      |
@@ -260,6 +263,7 @@ Phase 8 to 12 screens are specified spec-first in `docs/ux/screens/` (images pen
 | 111  | Data-retention settings                            | P14         | OA, FA, SA (system health) |              |
 | 112  | Security settings                                  | P14         | OA, FA, SA (system health) |              |
 | 113  | Audit and compliance settings                      | P14         | OA, FA, SA (system health) |              |
+| 113a | AI settings and query log                          | P13         | OA; FA, AUD read           | review-added |
 | 114  | System health dashboard                            | P14         | SA, OA                     |              |
 
 ## Group 11: Employee experience
@@ -299,11 +303,11 @@ Phase 8 to 12 screens are specified spec-first in `docs/ux/screens/` (images pen
 | P10   | 24                                   |
 | P11   | 7                                    |
 | P12   | 16                                   |
-| P13   | 7                                    |
+| P13   | 9                                    |
 | P14   | 14                                   |
 | P15   | 11                                   |
 | P16   | 7                                    |
-| Total | 221 (124 specified, 97 review-added) |
+| Total | 223 (124 specified, 99 review-added) |
 
 ## Role-to-screen matrix
 
