@@ -63,7 +63,20 @@ import {
   type CurrencyCode,
 } from '@bf/domain';
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
-import { and, asc, desc, eq, inArray, isNotNull, like, ne, or, sql, type SQL } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNotNull,
+  like,
+  ne,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm';
 import { IntercompanyService } from './intercompany.service';
 
 type ContributionRow = typeof contributionRequests.$inferSelect;
@@ -1013,10 +1026,15 @@ export class ContributionsService implements ApprovalSubjectHandler, OnModuleIni
   }
 
   /** Budgets a contribution can be asked from: names, owners and the intercompany treatment, never balances. */
-  candidates(actor: RequestActor, eventId: string): Promise<{ items: CandidateGivingBudget[] }> {
+  candidates(
+    actor: RequestActor,
+    eventId: string,
+    search?: string,
+  ): Promise<{ items: CandidateGivingBudget[] }> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       const e = await this.event(tx, eventId);
       if (!e || !(await this.canSeeEvent(tx, actor, e))) throw ApiProblem.notFound('event');
+      const pattern = search ? `%${search.replace(/[%_\\]/g, (c) => `\\${c}`)}%` : null;
       const rows = await tx
         .select()
         .from(budgets)
@@ -1025,6 +1043,7 @@ export class ContributionsService implements ApprovalSubjectHandler, OnModuleIni
             ne(budgets.status, 'cancelled'),
             eq(budgets.currency, e.currency),
             e.budgetId ? ne(budgets.id, e.budgetId) : undefined,
+            pattern ? or(ilike(budgets.name, pattern), ilike(budgets.code, pattern)) : undefined,
           ),
         )
         .orderBy(asc(budgets.depth), asc(budgets.name))

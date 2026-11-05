@@ -15,6 +15,7 @@ import {
   type DecisionResponse,
   type IntercompanyPolicyView,
   type RechargeView,
+  CandidateGivingBudgetsQuery,
 } from '@bf/contracts';
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Res } from '@nestjs/common';
 import { z } from 'zod';
@@ -43,8 +44,8 @@ export class ContributionsController {
     @CurrentActor() actor: RequestActor,
     @Query() raw: unknown,
   ): Promise<{ items: CandidateGivingBudget[] }> {
-    const q = parseWith(z.object({ eventId: Uuid }).strict(), raw);
-    return this.contributions.candidates(actor, q.eventId);
+    const q = parseWith(CandidateGivingBudgetsQuery, raw);
+    return this.contributions.candidates(actor, q.eventId, q.q);
   }
 
   @Post('contributions')

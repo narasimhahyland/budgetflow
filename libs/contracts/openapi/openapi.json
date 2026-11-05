@@ -28722,6 +28722,17 @@
             }
           },
           {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Matches the budget name or code (case-insensitive).",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
             "name": "X-Tenant-Id",
             "in": "header",
             "required": false,

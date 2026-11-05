@@ -55,18 +55,22 @@ test.describe('intercompany policy on contributions', () => {
     expect(event.legalEntityId).toBe(ENTITIES.india);
 
     // The candidate list says up front which givers are blocked (names and treatment only, no balances).
-    const candidates = await expectContract(
-      await request.get(`/api/contributions/candidate-budgets?eventId=${event.id}`, {
-        headers: await as('budget-owner'),
-      }),
-      200,
-      CandidateGivingBudgetList,
-    );
-    expect(candidates.items.find((c) => c.budgetId === uk.id)).toMatchObject({
+    const candidate = async (b: { id: string; name: string }) =>
+      (
+        await expectContract(
+          await request.get(
+            `/api/contributions/candidate-budgets?eventId=${event.id}&q=${encodeURIComponent(b.name)}`,
+            { headers: await as('budget-owner') },
+          ),
+          200,
+          CandidateGivingBudgetList,
+        )
+      ).items.find((c) => c.budgetId === b.id);
+    expect(await candidate(uk)).toMatchObject({
       crossEntity: true,
       intercompanyMode: 'block',
     });
-    expect(candidates.items.find((c) => c.budgetId === germany.id)).toMatchObject({
+    expect(await candidate(germany)).toMatchObject({
       intercompanyMode: 'recharge_with_markup',
     });
 

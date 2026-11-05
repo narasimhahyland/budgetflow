@@ -236,6 +236,20 @@ export type IntercompanyPolicyView = z.infer<typeof IntercompanyPolicyView>;
 const ContributionParams = z.object({ contributionId: Id }).strict();
 const RechargeParams = z.object({ rechargeId: Id }).strict();
 
+export const CandidateGivingBudgetsQuery = z
+  .object({
+    eventId: Id,
+    q: z
+      .string()
+      .trim()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Matches the budget name or code (case-insensitive).'),
+  })
+  .strict();
+export type CandidateGivingBudgetsQuery = z.infer<typeof CandidateGivingBudgetsQuery>;
+
 export const contributionEndpoints = {
   listContributions: {
     operationId: 'listContributions',
@@ -269,7 +283,7 @@ export const contributionEndpoints = {
       'Budgets a contribution can be asked from (names, owners and intercompany treatment only)',
     tags: ['contributions'],
     auth: true,
-    query: z.object({ eventId: Id }).strict(),
+    query: CandidateGivingBudgetsQuery,
     response: { status: 200, schema: CandidateGivingBudgetList },
     errors: [400, 401, 403, 404],
   },
