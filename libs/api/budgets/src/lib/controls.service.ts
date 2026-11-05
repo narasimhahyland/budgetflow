@@ -31,15 +31,17 @@ import {
   postHierarchyMove,
   previewReduction,
   reductionFloor,
+  unfitPendingRequests,
   validateReduction,
   type BucketBalances,
+  type PendingRequestAmount,
   type BudgetStatus,
   type CurrencyCode,
   type HierarchyDestination,
   type ReductionDestination,
 } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, inArray, like } from 'drizzle-orm';
+import { and, eq, inArray, like, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { budgetResource, BudgetViews, type BudgetRow, type CommandContext } from './budget-views';
 
@@ -227,6 +229,10 @@ export class ControlsService {
     const policy = pendingRequestPolicy(
       req.action === 'freeze' ? 'frozen' : req.action === 'reduce' ? 'reduced' : 'set_to_zero',
     );
+    const unfitRequestIds =
+      req.action === 'reduce' && !problem
+        ? unfitPendingRequests(await this.pendingRequests(tx, row.id), impact.availableAfterMinor)
+        : [];
     return {
       action: req.action,
       budgetId: row.id,
@@ -245,6 +251,7 @@ export class ControlsService {
       cascade: req.action === 'reduce' ? false : cascade,
       blocksNewRequests: req.action !== 'reduce',
       pendingRequestPolicy: policy,
+      unfitRequestIds,
       destination: req.action === 'freeze' ? null : (req.destination ?? null),
       destinationBudgetId: req.destinationBudgetId ?? null,
       destinationName,
@@ -323,6 +330,24 @@ export class ControlsService {
       );
   }
 
+  /** Open pending requests on a budget: pre-encumbered commitments linked to a request, in budget currency. */
+  private async pendingRequests(tx: Tx, budgetId: string): Promise<PendingRequestAmount[]> {
+    const res = await tx.execute<{ request_id: string; open: string; submitted: string }>(sql`
+      select c.request_id, sum(l.budget_amount_minor)::text as open,
+             to_char(min(c.created_at) at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US') as submitted
+      from ledger_lines l
+      join commitments c on c.id = l.commitment_id
+      where l.budget_id = ${budgetId}::uuid and l.account = 'pre_encumbered'
+        and c.status = 'pre_encumbered' and c.request_id is not null
+      group by c.request_id
+      having sum(l.budget_amount_minor) > 0`);
+    return res.rows.map((r) => ({
+      requestId: r.request_id,
+      openMinor: Number(r.open),
+      submittedAt: r.submitted,
+    }));
+  }
+
   private async event(
     tx: Tx,
     actor: RequestActor,
@@ -337,6 +362,7 @@ export class ControlsService {
       journalId: string | null;
       authorizedBeforeMinor: number;
       authorizedAfterMinor: number;
+      unfitRequestIds?: string[];
     },
   ): Promise<void> {
     await this.views.outbox(tx, actor.tenantId, 'budget.control_changed', {
@@ -350,6 +376,7 @@ export class ControlsService {
       actorPersonId: actor.personId,
       occurredAt: new Date().toISOString(),
       ...fields,
+      unfitRequestIds: fields.unfitRequestIds ?? [],
     });
   }
 
@@ -387,6 +414,7 @@ export class ControlsService {
     action: ControlEventAction,
     journalId: string | null,
     affected: string[],
+    unfitRequestIds: string[] = [],
   ): Promise<ControlResult> {
     return this.views.detailById(tx, actor, id).then((budget) => ({
       budget,
@@ -396,6 +424,7 @@ export class ControlsService {
         topic: 'budget.control_changed' as const,
         action,
         pendingRequestPolicy: pendingRequestPolicy(action),
+        unfitRequestIds,
       },
     }));
   }
@@ -646,6 +675,10 @@ export class ControlsService {
             confirmedPreview: { floorMinor: req.confirmedFloorMinor },
           }),
         );
+        const unfitRequestIds = unfitPendingRequests(
+          await this.pendingRequests(tx, id),
+          impact.availableAfterMinor,
+        );
         const next: BudgetStatus =
           locked.status === 'frozen'
             ? 'frozen'
@@ -675,6 +708,9 @@ export class ControlsService {
             destinationBudgetId: { from: null, to: destination.row?.id ?? null },
             floorMinor: { from: null, to: impact.floorMinor },
             journalId: { from: null, to: journalId },
+            ...(unfitRequestIds.length
+              ? { unfitRequestIds: { from: null, to: unfitRequestIds } }
+              : {}),
           },
         );
         await this.event(tx, actor, locked, 'reduced', {
@@ -686,6 +722,7 @@ export class ControlsService {
           journalId,
           authorizedBeforeMinor: impact.currentAuthorizedMinor,
           authorizedAfterMinor: impact.newAuthorizedMinor,
+          unfitRequestIds,
         });
         await this.views.snapshot(tx, actor, id, `Reduced: ${req.reason}`);
         if (destination.row)
@@ -702,7 +739,7 @@ export class ControlsService {
           affected: 1,
           destination: req.destination,
         });
-        return this.result(tx, actor, id, 'reduced', journalId, [id]);
+        return this.result(tx, actor, id, 'reduced', journalId, [id], unfitRequestIds);
       },
     );
   }
@@ -958,9 +995,15 @@ export class ControlsService {
     };
     if (!options.skipPolicy) {
       this.policy.assert(actor, 'budget.read', budgetResource(dest), 'destination budget');
-      if (!this.policy.can(actor, 'budget.allocate', lca).allowed)
+      // Owning both siblings is enough; other sibling transfers become a request to the parent owner in Phase 7.
+      const ownsBothSiblings =
+        source.parentId !== null &&
+        source.parentId === dest.parentId &&
+        this.policy.can(actor, 'budget.allocate', budgetResource(source)).allowed &&
+        this.policy.can(actor, 'budget.allocate', budgetResource(dest)).allowed;
+      if (!ownsBothSiblings && !this.policy.can(actor, 'budget.allocate', lca).allowed)
         throw ApiProblem.forbidden(
-          'Only the owner of both budgets (their common parent) or finance can move money between them.',
+          'Only the owner of both budgets, the owner of their common parent or finance can move money between them.',
         );
       await this.assertReasonCode(tx, req.reasonCode, ['transfer', 'reduction']);
     }

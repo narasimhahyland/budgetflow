@@ -42,6 +42,7 @@ test.describe('freeze', () => {
       topic: 'budget.control_changed',
       action: 'frozen',
       pendingRequestPolicy: 'hold',
+      unfitRequestIds: [],
     });
 
     const check = await spendCheck(request, a.id, { amountMinor: 100 });
@@ -158,6 +159,10 @@ test.describe('reduce', () => {
       maxReductionMinor: 31_000,
       newAuthorizedMinor: 19_000,
       destinationName: root.name,
+      // Pending requests no longer fit; Phase 5 returns the listed ones (none are linked here).
+      availableAfterMinor: -6_000,
+      pendingRequestPolicy: 'return_unfit',
+      unfitRequestIds: [],
       problem: null,
     });
     const tooMuch = await preview(request, a.id, {
@@ -189,6 +194,7 @@ test.describe('reduce', () => {
     );
     const done = await expectContract(await reduce(31_000, 19_000), 200, ControlResult);
     expect(done.budget.status).toBe('reduced');
+    expect(done.event).toMatchObject({ pendingRequestPolicy: 'return_unfit', unfitRequestIds: [] });
     expect(bal(done.budget)).toMatchObject({ authorized: 19_000 });
     expect(bal(await budget(request, root.id))).toMatchObject({ allocatedOut: 19_000 });
     const j = await expectContract(
@@ -206,7 +212,8 @@ test.describe('reduce', () => {
     ]);
     expect((await outboxFor(a.id)).at(-1)?.payload).toMatchObject({
       action: 'reduced',
-      pendingRequestPolicy: 'keep',
+      pendingRequestPolicy: 'return_unfit',
+      unfitRequestIds: [],
       authorizedBeforeMinor: 50_000,
       authorizedAfterMinor: 19_000,
       journalId: done.journalId,

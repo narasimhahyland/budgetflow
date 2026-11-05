@@ -93,7 +93,7 @@ test.describe('transfers', () => {
     await expectProblem(await post(request, t5.path, t5.body, 'ceo'), 409, 'BUDGET_FROZEN');
   });
 
-  test('pending requests reduce what can be transferred; only the owner of both subtrees may transfer', async ({
+  test('pending requests reduce what can be transferred; the owner of both siblings or of their parent may transfer', async ({
     request,
   }) => {
     const root = await createRoot(request, { amountMinor: 50_000, owner: 'regional-manager' });
@@ -115,17 +115,37 @@ test.describe('transfers', () => {
       409,
       'INSUFFICIENT_AVAILABLE',
     );
-    const ok = transfer(a.id, b.id, 6_000);
+    const c = await createChild(request, root.id, {
+      currency: 'USD',
+      owner: 'budget-owner',
+      as: 'finance-admin',
+    });
+    // The location manager owns a and b but not c (which they cannot see): a to c is refused, a to b
+    // goes straight through.
+    const ownsOneSide = transfer(a.id, c.id, 1_000);
     await expectProblem(
-      await post(request, ok.path, ok.body, 'location-manager'),
-      403,
-      'FORBIDDEN',
+      await post(request, ownsOneSide.path, ownsOneSide.body, 'location-manager'),
+      404,
+      'NOT_FOUND',
     );
-    await expectContract(
-      await post(request, ok.path, ok.body, 'regional-manager'),
+    expect((await budget(request, a.id, 'location-manager')).allowedActions).toContain(
+      'budget.transfer',
+    );
+    const byOwner = transfer(a.id, b.id, 1_000);
+    const ownsBoth = await expectContract(
+      await post(request, byOwner.path, byOwner.body, 'location-manager'),
       201,
       TransferResult,
     );
+    expect(bal(ownsBoth.to).authorized).toBe(1_000);
+    expect(bal(await budget(request, root.id)).allocatedOut).toBe(10_000);
+    const byParentOwner = transfer(a.id, b.id, 5_000);
+    await expectContract(
+      await post(request, byParentOwner.path, byParentOwner.body, 'regional-manager'),
+      201,
+      TransferResult,
+    );
+    expect(bal(await budget(request, a.id)).authorized).toBe(4_000);
   });
 });
 

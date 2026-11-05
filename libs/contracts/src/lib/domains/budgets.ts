@@ -343,8 +343,13 @@ export const ControlImpact = named(
       cascade: z.boolean(),
       blocksNewRequests: z.boolean(),
       pendingRequestPolicy: z
-        .enum(['cancel', 'hold', 'release', 'keep'])
+        .enum(['cancel', 'hold', 'release', 'return_unfit'])
         .describe('What Phase 5 does with pending requests after this change.'),
+      unfitRequestIds: z
+        .array(Id)
+        .describe(
+          'Reduce: pending requests that no longer fit and go back to their requesters, most recent first.',
+        ),
       destination: ReductionDestination.nullable(),
       destinationBudgetId: Id.nullable(),
       destinationName: z.string().nullable(),
@@ -434,7 +439,8 @@ export const ControlResult = named(
         .object({
           topic: z.literal('budget.control_changed'),
           action: z.enum(['frozen', 'unfrozen', 'reduced', 'set_to_zero', 'restored']),
-          pendingRequestPolicy: z.enum(['cancel', 'hold', 'release', 'keep']),
+          pendingRequestPolicy: z.enum(['cancel', 'hold', 'release', 'return_unfit']),
+          unfitRequestIds: z.array(Id),
         })
         .strict(),
     })

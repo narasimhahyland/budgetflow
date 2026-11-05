@@ -245,7 +245,14 @@ export class BudgetViews {
     const actions: string[] = this.policy.allowed(actor, budgetResource(row), BUDGET_ACTIONS);
     const controls = this.canControl(actor, row, parent);
     if (controls) actions.push('budget.control');
-    if (parent && this.policy.can(actor, 'budget.allocate', budgetResource(parent)).allowed)
+    const parentPath = (p: string) => p.slice(0, p.slice(0, -1).lastIndexOf('/') + 1);
+    const ownsSibling =
+      actions.includes('budget.allocate') &&
+      actor.ownedBudgetPaths.some((p) => p !== row.path && parentPath(p) === parentPath(row.path));
+    if (
+      parent &&
+      (ownsSibling || this.policy.can(actor, 'budget.allocate', budgetResource(parent)).allowed)
+    )
       actions.push('budget.transfer');
     if (parent && actions.includes('request.create')) actions.push('budget.request_increase');
     if (this.policy.can(actor, 'budget.control', budgetResource(row)).allowed)
