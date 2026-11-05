@@ -10,6 +10,7 @@ import { FinanceApiModule } from '@bf/api/finance';
 import { IntegrityApiModule } from '@bf/api/integrity';
 import { LedgerApiModule } from '@bf/api/ledger';
 import { OrgApiModule } from '@bf/api/org';
+import { RulesApiModule } from '@bf/api/rules';
 import { SpendApiModule } from '@bf/api/spend';
 import { TenancyApiModule } from '@bf/api/tenancy';
 import { Module } from '@nestjs/common';
@@ -33,6 +34,7 @@ import { HealthController, OpenApiController } from './health.controller';
     ContributionsApiModule,
     EventsApiModule,
     ActualsApiModule,
+    RulesApiModule,
   ],
   controllers: [HealthController, OpenApiController],
 })

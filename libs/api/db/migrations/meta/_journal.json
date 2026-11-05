@@ -64,6 +64,13 @@
       "when": 1793866943046,
       "tag": "0008_p7_rules_workflows",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793875549513,
+      "tag": "0009_p7_policy_configs",
+      "breakpoints": true
     }
   ]
 }

@@ -122,6 +122,26 @@ export const workflowTemplates = pgTable(
   ],
 );
 
+/**
+ * Policy configuration sections behind screens 071-076 (spending limits, categories, gifts and
+ * entertainment, locations, vendors, over-budget, freeze/zero, SLA and notifications). Each save
+ * bumps `version` and writes an audit entry; the payload shape is validated by the zod contract.
+ */
+export const policyConfigs = pgTable(
+  'policy_configs',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    section: varchar('section', { length: 50 }).notNull(),
+    version: integer('version').notNull().default(1),
+    payload: jsonb('payload').notNull().default({}),
+    updatedBy: uuid('updated_by').references(() => people.id),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex('policy_configs_tenant_section').on(t.tenantId, t.section)],
+);
+
 /** Post-spend policy exceptions queue (074a): alcohol over cap, blocked vendor, split purchase, etc. */
 export const postSpendExceptions = pgTable(
   'post_spend_exceptions',

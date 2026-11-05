@@ -105,7 +105,7 @@ export function validateDelegationHygiene(input: {
 
   // Check circular delegation / chain: walk from delegatePersonId along overlapping delegations
   const visited = new Set<string>([input.delegatorPersonId]);
-  let frontier = [input.delegatePersonId];
+  const frontier = [input.delegatePersonId];
   while (frontier.length > 0) {
     const current = frontier.shift()!;
     if (visited.has(current)) {
