@@ -1,7 +1,7 @@
 # Wave 2 core acceptance proof (P4 + P5 + P6 merged)
 
-- **Commit:** `eb7e88e584bb83474a7caebae5e7f1063ce93bf8` — `feat(p6): actuals import, matching, GL tie-out, accruals, prepaids and event close`
-- **Acceptance spec (local, uncommitted):** `apps/web-e2e/src/acceptance/wave-2-core.spec.ts` — ten named steps with API cross-checks; outcome table in `acceptance/README.md`
+- **Commit:** `e422d7f` (`e422d7f` on `origin/main` — Wave 2 core acceptance merged after Phase 5 PR #35 and Phase 6 PR #16)
+- **Acceptance spec:** `apps/web-e2e/src/acceptance/wave-2-core.spec.ts` — ten named steps with API cross-checks; outcome table in `acceptance/README.md`
 - **Prior merges:** Phase 5 PR #35, Phase 6 PR #16 (CI green at merge)
 - **Stack:** `COMPOSE_PROJECT_NAME=bf-demo scripts/stack.sh reset` (gate re-ran `up && reset` before functional tests)
 - **Demo URLs:** web http://localhost:4200 · API http://localhost:3000 · Keycloak http://localhost:8080

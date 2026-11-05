@@ -63,15 +63,38 @@ export async function api<T>(
   return body as T;
 }
 
-export const createRoot = (opts: { amountMinor: number; owner?: SeedUserId; name?: string }) =>
-  api<Budget>('ceo', 'post', '/api/budgets', {
-    name: opts.name ?? `Journey program ${randomUUID().slice(0, 6)}`,
+export const createRoot = async (opts: {
+  amountMinor: number;
+  owner?: SeedUserId;
+  name?: string;
+}) => {
+  const code = `JRN-${randomUUID().slice(0, 6).toUpperCase()}`;
+  const name = opts.name ?? `Journey program ${code}`;
+  const rev = await api<{ id: string }>('finance-admin', 'post', '/api/plan-versions', {
+    fiscalYearId: SEED.fiscalYears.acmeFy2026,
+    kind: 'current',
+    label: `Journey ${code}`,
+    lines: [
+      {
+        code,
+        name,
+        amountMinor: opts.amountMinor,
+        legalEntityId: SEED.legalEntities.acmeUs,
+      },
+    ],
+  });
+  await api('finance-admin-2', 'post', `/api/plan-versions/${rev.id}/approve`, {});
+  await api('ceo', 'post', `/api/plan-versions/${rev.id}/approve`, {});
+  return api<Budget>('ceo', 'post', '/api/budgets', {
+    name,
+    code,
     legalEntityId: SEED.legalEntities.acmeUs,
     fiscalYearId: SEED.fiscalYears.acmeFy2026,
     planVersionId: SEED.planVersions.acmeFy2026Original,
     originalAmount: { amountMinor: opts.amountMinor, currency: 'USD' },
     ...(opts.owner ? { ownerPersonId: userById(opts.owner).personId } : {}),
   });
+};
 
 export const createChild = (
   parentId: string,

@@ -84,7 +84,7 @@ test.describe('audit trail', () => {
         )
       ).checked;
     const before = await checked();
-    const root = await createRoot(request, { amountMinor: 20_000 }); // +1
+    const root = await createRoot(request, { amountMinor: 20_000 }); // +4 (plan create + 2 sign-offs + root create)
     const child = await createChild(request, root.id, { currency: 'USD' }); // +1
     const key = randomUUID();
     await allocateOk(request, root.id, child.id, { amountMinor: 5_000, currency: 'USD' }); // +1
@@ -140,7 +140,7 @@ test.describe('audit trail', () => {
       });
     expect((await reverse()).status()).toBe(201); // +1
     await expectProblem(await reverse(), 409, 'ALREADY_REVERSED');
-    expect((await checked()) - before).toBe(6);
+    expect((await checked()) - before).toBe(9);
   });
 
   test('deleting the newest event fails verification against the chain head', async ({

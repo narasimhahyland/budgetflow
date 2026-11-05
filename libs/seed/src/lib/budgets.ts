@@ -1,4 +1,12 @@
-import { BUDGETS, COST_CENTERS, LEGAL_ENTITIES, ORG_UNITS, seedId, TENANTS } from './ids';
+import {
+  BUDGETS,
+  COST_CENTERS,
+  LEGAL_ENTITIES,
+  ORG_UNITS,
+  PLAN_VERSIONS,
+  seedId,
+  TENANTS,
+} from './ids';
 import type { SeedUserId } from './roles';
 
 /**
@@ -59,7 +67,7 @@ type P4Step =
       kind: 'create';
       id: string;
       as: SeedUserId;
-      parentId: string;
+      parentId?: string;
       name: string;
       code: string;
       legalEntityId: string;
@@ -68,6 +76,8 @@ type P4Step =
       owner: SeedUserId;
       categoryCode?: string;
       budgetType?: 'operating' | 'event' | 'contingency';
+      planVersionId?: string;
+      originalAmount?: { amountMinor: number; currency: string };
     }
   | { kind: 'allocate'; as: SeedUserId; parentId: string; childId: string; amountMinor: number }
   | {
@@ -98,21 +108,14 @@ export const p4Steps: P4Step[] = [
     kind: 'create',
     id: P4_BUDGETS.contingency,
     as: 'ceo',
-    parentId: BUDGETS.employeeExperience,
     name: 'Central Contingency Reserve',
     code: 'EX-RESERVE',
     legalEntityId: LEGAL_ENTITIES.acmeUs,
     costCenterId: COST_CENTERS.hq,
     owner: 'finance-admin',
     budgetType: 'contingency',
-  },
-  {
-    kind: 'transfer',
-    as: 'ceo',
-    fromId: BUDGETS.unitedStates,
-    toId: P4_BUDGETS.contingency,
-    amountMinor: 300_000,
-    reason: 'Fund the central contingency reserve',
+    planVersionId: PLAN_VERSIONS.acmeFy2026Original,
+    originalAmount: { amountMinor: 300_000, currency: 'USD' },
   },
   {
     kind: 'create',

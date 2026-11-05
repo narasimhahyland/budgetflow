@@ -186,6 +186,15 @@ export const EXTRA_USERS = [
     ['employee'],
     'Office coordinator',
   ),
+  user(
+    19,
+    'finance-admin-2',
+    'finance.admin2@example.test',
+    'Marco',
+    'Bianchi',
+    ['finance-admin'],
+    'Finance planning lead',
+  ),
 ] as const satisfies readonly SeedUser[];
 
 /** Signs in through the simulated corporate identity provider (Hyland SSO) as well as with a password. */

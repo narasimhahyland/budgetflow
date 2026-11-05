@@ -10,6 +10,8 @@ import { AuditService } from '@bf/api/audit';
 import {
   budgetChangeRequests,
   budgets,
+  fiscalPeriods,
+  fiscalYears,
   headcountSnapshots,
   ledgerJournals,
   ledgerLines,
@@ -37,12 +39,14 @@ import {
   acceptsNewActivity,
   allocationAvailable,
   checkAllocation,
+  monthsLeftInFiscalYear,
   perHeadAmount,
+  perHeadTrueUp,
   type DriverHeadcountLine,
   type EmploymentType,
 } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, inArray, lte, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, lte, or, sql, type SQL } from 'drizzle-orm';
 import { todayUtc } from '@bf/api/ledger';
 import { budgetResource, BudgetViews, type BudgetRow, type CommandContext } from './budget-views';
 import { BudgetsService } from './budgets.service';
@@ -283,6 +287,21 @@ export class AllocationService {
     };
   }
 
+  private async fiscalPeriodsForYear(tx: Tx, fiscalYearId: string) {
+    const [fy] = await tx.select().from(fiscalYears).where(eq(fiscalYears.id, fiscalYearId));
+    if (!fy) return [];
+    return tx
+      .select({ startDate: fiscalPeriods.startDate, endDate: fiscalPeriods.endDate })
+      .from(fiscalPeriods)
+      .where(
+        and(
+          eq(fiscalPeriods.fiscalYearId, fy.id),
+          eq(fiscalPeriods.fiscalCalendarId, fy.fiscalCalendarId),
+        ),
+      )
+      .orderBy(asc(fiscalPeriods.periodNumber));
+  }
+
   private async perHeadPreview(
     tx: Tx,
     parent: BudgetRow,
@@ -309,10 +328,33 @@ export class AllocationService {
         'Link the child budget to a location or team so its headcount can drive the amount.',
         { field: 'orgUnitId' },
       );
-    const hc = await this.headcount(tx, orgUnitId, cfg.asOf ?? todayUtc());
-    const r = unwrap(perHeadAmount(hc.lines, cfg));
-    const current = (child.driverConfig as PerHeadDriverConfig | null)?.amountMinor ?? 0;
-    const delta = r.amountMinor - (child.allocationDriver === 'per_head' ? current : 0);
+    const asOf = cfg.asOf ?? todayUtc();
+    const hc = await this.headcount(tx, orgUnitId, asOf);
+    const periods = await this.fiscalPeriodsForYear(tx, parent.fiscalYearId);
+    const prev =
+      child.allocationDriver === 'per_head'
+        ? (child.driverConfig as PerHeadDriverConfig | null)
+        : null;
+    const sameRules =
+      prev !== null &&
+      prev.rateMinor === cfg.rateMinor &&
+      prev.prorate === cfg.prorate &&
+      prev.eligibleTypes.length === cfg.eligibleTypes.length &&
+      prev.eligibleTypes.every((t) => cfg.eligibleTypes.includes(t));
+    const effectiveAsOf =
+      sameRules && prev.asOfDate && prev.asOfDate > hc.asOfDate ? prev.asOfDate : hc.asOfDate;
+    const monthsLeft = monthsLeftInFiscalYear(effectiveAsOf, periods);
+    const r = unwrap(perHeadAmount(hc.lines, { ...cfg, monthsLeft }));
+    const current = prev?.amountMinor ?? 0;
+    const trueUp = sameRules
+      ? perHeadTrueUp(
+          { amountMinor: current, eligibleHeadcountMilli: prev.eligibleHeadcountMilli },
+          r,
+          { rateMinor: cfg.rateMinor, monthsLeft },
+        )
+      : { amountMinor: r.amountMinor, deltaMinor: r.amountMinor - current };
+    const delta = trueUp.deltaMinor;
+    const targetAmount = trueUp.amountMinor;
     const balances = (await this.reads.balances(tx, [parent.id])).get(parent.id)!.budget;
     const parentAvailable = allocationAvailable(balances, toPostingBudget(parent).control);
     const [ou] = (
@@ -330,6 +372,7 @@ export class AllocationService {
       asOfDate: hc.asOfDate,
       currency: parent.currency,
       rateMinor: cfg.rateMinor,
+      monthsLeft,
       headcount: r.headcount,
       eligibleHeadcount: r.eligibleHeadcount,
       eligibleHeadcountMilli: r.eligibleHeadcountMilli,
@@ -338,8 +381,8 @@ export class AllocationService {
         employmentType: t,
         ...r.byType[t],
       })),
-      amountMinor: r.amountMinor,
-      currentDriverAmountMinor: child.allocationDriver === 'per_head' ? current : 0,
+      amountMinor: targetAmount,
+      currentDriverAmountMinor: current,
       deltaMinor: delta,
       parentAvailableMinor: parentAvailable,
       fits: delta <= parentAvailable,
@@ -679,7 +722,13 @@ export class AllocationService {
             'Only a contingency reserve can be released.',
           );
         const target = await this.views.row(tx, req.toBudgetId);
-        if (target.path.split('/')[1] !== reserve.path.split('/')[1] || target.id === reserve.id)
+        if (target.id === reserve.id)
+          throw new ApiProblem(
+            422,
+            'TRANSFER_INVALID',
+            'Choose a different budget to receive the reserve.',
+          );
+        if (reserve.parentId && target.path.split('/')[1] !== reserve.path.split('/')[1])
           throw new ApiProblem(
             422,
             'TRANSFER_INVALID',
@@ -765,11 +814,13 @@ export class AllocationService {
     if (!source || r.status !== 'pending') return false;
     if (r.kind === 'increase')
       return this.policy.can(actor, 'budget.allocate', budgetResource(source)).allowed;
-    return this.views.canControl(
-      actor,
-      source,
-      source.parentId ? rows.get(source.parentId) : undefined,
-    );
+    if (!source.parentId)
+      return (
+        this.views.canControl(actor, source, undefined) ||
+        this.policy.can(actor, 'budget.create_root', { kind: 'tenant', tenantId: actor.tenantId })
+          .allowed
+      );
+    return this.views.canControl(actor, source, rows.get(source.parentId));
   }
 
   private async toDtos(

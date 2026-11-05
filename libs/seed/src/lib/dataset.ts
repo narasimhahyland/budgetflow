@@ -11,7 +11,7 @@ import {
   seedId,
   TENANTS,
 } from './ids';
-import { ALL_USERS, type SeedUserId } from './roles';
+import { ALL_USERS, userById, type SeedUserId } from './roles';
 
 /** Fixed accounting date for seed postings (an open period) and the seed's notion of "as of". */
 export const SEED_ACCOUNTING_DATE = '2026-11-02';
@@ -507,6 +507,12 @@ const PERSON_PLACEMENT: Partial<
     costCenter: COST_CENTERS.berlin,
     seniority: 2,
   },
+  'finance-admin-2': {
+    location: ORG_UNITS.newYork,
+    entity: LEGAL_ENTITIES.acmeUs,
+    costCenter: COST_CENTERS.hq,
+    seniority: 6,
+  },
 };
 
 export const peopleData = ALL_USERS.filter((u) => u.personId).map((u) => {
@@ -586,6 +592,70 @@ export const reasonCodesData = tenantsData.flatMap((t, ti) =>
     label,
   })),
 );
+
+/** Unlinked plan lines inserted while the version is still draft, then approved before roots are created. */
+export const planVersionLinesData = [
+  {
+    id: seedId('72000000', 1),
+    tenantId: TENANTS.acme,
+    planVersionId: PLAN_VERSIONS.acmeFy2026Original,
+    lineNo: 1,
+    budgetId: null as string | null,
+    code: 'EX-2026',
+    name: 'Employee Experience FY2026',
+    legalEntityId: LEGAL_ENTITIES.acmeUs,
+    costCenterId: COST_CENTERS.hq,
+    ownerPersonId: userById('ceo').personId,
+    categoryCode: null,
+    amountMinor: 10_000_000,
+    currency: 'USD',
+  },
+  {
+    id: seedId('72000000', 2),
+    tenantId: TENANTS.acme,
+    planVersionId: PLAN_VERSIONS.acmeFy2026Original,
+    lineNo: 2,
+    budgetId: null,
+    code: 'EX-RESERVE',
+    name: 'Central Contingency Reserve',
+    legalEntityId: LEGAL_ENTITIES.acmeUs,
+    costCenterId: COST_CENTERS.hq,
+    ownerPersonId: userById('finance-admin').personId,
+    categoryCode: null,
+    amountMinor: 300_000,
+    currency: 'USD',
+  },
+  {
+    id: seedId('72000000', 3),
+    tenantId: TENANTS.globex,
+    planVersionId: PLAN_VERSIONS.globexFy2026Original,
+    lineNo: 1,
+    budgetId: null,
+    code: 'GX-2026',
+    name: 'Globex Operations FY2026',
+    legalEntityId: LEGAL_ENTITIES.globex,
+    costCenterId: COST_CENTERS.globex,
+    ownerPersonId: userById('globex-admin').personId,
+    categoryCode: null,
+    amountMinor: 5_000_000,
+    currency: 'EUR',
+  },
+  {
+    id: seedId('72000000', 4),
+    tenantId: TENANTS.sandbox,
+    planVersionId: PLAN_VERSIONS.sandboxFy2026Original,
+    lineNo: 1,
+    budgetId: null,
+    code: 'SB-2026',
+    name: 'Sandbox Program FY2026',
+    legalEntityId: LEGAL_ENTITIES.sandbox,
+    costCenterId: COST_CENTERS.sandbox,
+    ownerPersonId: userById('sandbox-admin').personId,
+    categoryCode: null,
+    amountMinor: 1_000_000,
+    currency: 'USD',
+  },
+] as const;
 
 export const planVersionsData = [
   {
@@ -882,7 +952,7 @@ export const SEED = {
   legalEntities: LEGAL_ENTITIES,
   fiscalYears: FISCAL_YEARS,
   planVersions: PLAN_VERSIONS,
-  budgets: BUDGETS,
+  budgets: { ...BUDGETS, contingency: seedId('71000000', 5) },
   costCenters: COST_CENTERS,
   orgUnits: ORG_UNITS,
   planRates: { INR: '83.25', EUR: '0.92', GBP: '0.79', JPY: '150', KWD: '0.307' },

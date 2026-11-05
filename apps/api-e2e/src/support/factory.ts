@@ -1,6 +1,6 @@
 // Scenario data created through the API (never by writing tables), so every scenario owns its budgets.
 import { expect, type APIRequestContext, type APIResponse } from '@playwright/test';
-import { AllocationResponse, BudgetDetail, type CreateBudgetRequest } from '@bf/contracts';
+import { AllocationResponse, BudgetDetail } from '@bf/contracts';
 import { SEED, userById, type SeedUserId } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from './auth';
@@ -13,33 +13,7 @@ const ENTITY_BY_CURRENCY: Record<string, string> = {
   EUR: SEED.legalEntities.acmeEurope,
 };
 
-export async function createRoot(
-  request: APIRequestContext,
-  opts: {
-    amountMinor: number;
-    currency?: string;
-    as?: SeedUserId;
-    owner?: SeedUserId;
-    control?: CreateBudgetRequest['control'];
-    name?: string;
-  },
-) {
-  const currency = opts.currency ?? 'USD';
-  const res = await request.post('/api/budgets', {
-    headers: await mutate(opts.as ?? 'ceo'),
-    data: {
-      name: opts.name ?? `Scenario root ${randomUUID().slice(0, 8)}`,
-      legalEntityId: SEED.legalEntities.acmeUs,
-      currency,
-      fiscalYearId: SEED.fiscalYears.acmeFy2026,
-      planVersionId: SEED.planVersions.acmeFy2026Original,
-      originalAmount: { amountMinor: opts.amountMinor, currency },
-      ...(opts.owner ? { ownerPersonId: userById(opts.owner).personId } : {}),
-      ...(opts.control ? { control: opts.control } : {}),
-    },
-  });
-  return expectContract(res, 201, BudgetDetail);
-}
+export { createRoot } from './plan-root';
 
 export async function createChild(
   request: APIRequestContext,

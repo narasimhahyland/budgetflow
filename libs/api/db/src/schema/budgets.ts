@@ -82,6 +82,11 @@ export const planVersions = pgTable(
     status: planVersionStatus('status').notNull().default('draft'),
     approvedAt: ts('approved_at'),
     approvedBy: uuid('approved_by'),
+    /** Two-person sign-off when the revision adds money to the controlling plan total. */
+    newMoneyFinanceApprovedAt: ts('new_money_finance_approved_at'),
+    newMoneyFinanceApprovedBy: uuid('new_money_finance_approved_by'),
+    newMoneyCeoApprovedAt: ts('new_money_ceo_approved_at'),
+    newMoneyCeoApprovedBy: uuid('new_money_ceo_approved_by'),
     /** When the version became the controlling plan for its year (root budgets tie to it). */
     appliedAt: ts('applied_at'),
     source: varchar('source', { length: 20 }).notNull().default('manual'),

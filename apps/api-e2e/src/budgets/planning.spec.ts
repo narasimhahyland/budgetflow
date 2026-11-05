@@ -150,7 +150,8 @@ test.describe('plan versions and the root tie-out', () => {
       savingsMinor: 5_000,
       differenceMinor: 10_000,
     });
-    await post(request, `/api/plan-versions/${v2.id}/approve`, {});
+    await post(request, `/api/plan-versions/${v2.id}/approve`, {}, 'finance-admin-2');
+    await post(request, `/api/plan-versions/${v2.id}/approve`, {}, 'ceo');
     const a2 = await expectContract(
       await post(request, `/api/plan-versions/${v2.id}/apply`, {}),
       200,
@@ -283,21 +284,17 @@ test.describe('plan versions and the root tie-out', () => {
     const aa = await createChild(request, a.id, { currency: 'USD' });
     await allocateOk(request, root.id, a.id, USD(30_001));
     await allocateOk(request, a.id, aa.id, USD(10_000));
-    const t = await tieOut(request, FY27);
-    let planVersionId = t.planVersionId;
-    if (!planVersionId) {
-      const v = await nextVersion(request, [
-        {
-          code: `RF-${randomUUID().slice(0, 4)}`,
-          name: 'Seed line',
-          amountMinor: 1_000,
-          legalEntityId: SEED.legalEntities.acmeUs,
-        },
-      ]);
-      await post(request, `/api/plan-versions/${v.id}/approve`, {});
-      await post(request, `/api/plan-versions/${v.id}/apply`, {});
-      planVersionId = v.id;
-    }
+    const rfVersion = await nextVersion(request, [
+      {
+        code: root.code!,
+        name: 'Roll FY2027 program',
+        amountMinor: 88_000,
+        legalEntityId: SEED.legalEntities.acmeUs,
+      },
+    ]);
+    await post(request, `/api/plan-versions/${rfVersion.id}/approve`, {}, 'finance-admin-2');
+    await post(request, `/api/plan-versions/${rfVersion.id}/approve`, {}, 'ceo');
+    const planVersionId = rfVersion.id;
     const body = { targetFiscalYearId: FY27, planVersionId, scalePct: 110 };
     const dry = await expectContract(
       await post(request, `/api/budgets/${root.id}/roll-forward`, { ...body, dryRun: true }),

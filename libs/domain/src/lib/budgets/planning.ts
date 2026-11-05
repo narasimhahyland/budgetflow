@@ -13,10 +13,12 @@ export interface DriverHeadcountLine {
 }
 
 export interface PerHeadConfig {
-  /** Rate per eligible head in the budget currency, minor units. */
+  /** Rate per eligible employee per month in the budget currency, minor units. */
   rateMinor: number;
   eligibleTypes: readonly EmploymentType[];
   prorate: boolean;
+  /** Fiscal months from the as-of date through the end of the fiscal year (inclusive). */
+  monthsLeft: number;
 }
 
 export interface PerHeadResult {
@@ -28,16 +30,31 @@ export interface PerHeadResult {
   amountMinor: number;
 }
 
+/** Count fiscal periods still open on or after the as-of date within the year. */
+export function monthsLeftInFiscalYear(
+  asOf: string,
+  periods: readonly { startDate: string; endDate: string }[],
+): number {
+  return [...periods]
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+    .filter((p) => p.endDate >= asOf).length;
+}
+
 /**
- * Per-head allocation: rate x eligible headcount, prorated (thousandths) when configured. Rounds
- * half-even once on the total so the child never receives more than rate x heads.
+ * Per-head allocation: monthly rate x eligible headcount (prorated thousandths when configured) x
+ * months left in the fiscal year from the as-of date. Rounds half-even once on the total.
  */
 export function perHeadAmount(
   lines: readonly DriverHeadcountLine[],
   config: PerHeadConfig,
 ): Result<PerHeadResult> {
   if (!Number.isSafeInteger(config.rateMinor) || config.rateMinor <= 0)
-    return err('AMOUNT_NOT_POSITIVE', 'Enter a rate per head greater than zero.');
+    return err(
+      'AMOUNT_NOT_POSITIVE',
+      'Enter a rate per eligible employee per month greater than zero.',
+    );
+  if (!Number.isSafeInteger(config.monthsLeft) || config.monthsLeft <= 0)
+    return err('VALIDATION_FAILED', 'The fiscal year has no remaining months for this as-of date.');
   if (config.eligibleTypes.length === 0)
     return err('VALIDATION_FAILED', 'Choose at least one eligible employment type.');
   if (lines.length === 0)
@@ -58,7 +75,10 @@ export function perHeadAmount(
   const eligibleMilli = eligible.reduce((s, t) => s + byType[t].headcountMilli, 0);
   const eligibleHeads = eligible.reduce((s, t) => s + byType[t].headcount, 0);
   const total = EMPLOYMENT_TYPES.reduce((s, t) => s + byType[t].headcount, 0);
-  const amount = roundHalfEven(BigInt(config.rateMinor) * BigInt(eligibleMilli), 1000n);
+  const amount = roundHalfEven(
+    BigInt(config.rateMinor) * BigInt(eligibleMilli) * BigInt(config.monthsLeft),
+    1000n,
+  );
   return ok({
     headcount: total,
     eligibleHeadcount: eligibleHeads,
@@ -77,13 +97,27 @@ function roundHalfEven(numerator: bigint, denominator: bigint): bigint {
   return q;
 }
 
-/** True-up after a headcount refresh: the difference between the new driver amount and what was allocated. */
+/**
+ * Monthly true-up after a headcount refresh: posts rate x headcount change x months left in the
+ * fiscal year, adjusting the current driver amount by that delta.
+ */
 export function perHeadTrueUp(
-  currentDriverAmountMinor: number,
+  previous: { amountMinor: number; eligibleHeadcountMilli: number },
   next: PerHeadResult,
-): { deltaMinor: number; direction: 'allocate' | 'return' | 'none' } {
-  const delta = next.amountMinor - currentDriverAmountMinor;
-  return { deltaMinor: delta, direction: delta > 0 ? 'allocate' : delta < 0 ? 'return' : 'none' };
+  config: { rateMinor: number; monthsLeft: number },
+): { amountMinor: number; deltaMinor: number; direction: 'allocate' | 'return' | 'none' } {
+  const headcountChangeMilli = next.eligibleHeadcountMilli - previous.eligibleHeadcountMilli;
+  const delta = Number(
+    roundHalfEven(
+      BigInt(config.rateMinor) * BigInt(headcountChangeMilli) * BigInt(config.monthsLeft),
+      1000n,
+    ),
+  );
+  return {
+    amountMinor: previous.amountMinor + delta,
+    deltaMinor: delta,
+    direction: delta > 0 ? 'allocate' : delta < 0 ? 'return' : 'none',
+  };
 }
 
 // Period phasing ----------------------------------------------------------------------------------

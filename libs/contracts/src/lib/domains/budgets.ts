@@ -71,7 +71,10 @@ export const PerHeadDriverConfig = named(
   'PerHeadDriverConfig',
   z
     .object({
-      rateMinor: z.int().min(1).describe('Rate per eligible head in the budget currency.'),
+      rateMinor: z
+        .int()
+        .min(1)
+        .describe('Rate per eligible employee per month in the budget currency.'),
       eligibleTypes: z.array(EmploymentType).min(1),
       prorate: z
         .boolean()
@@ -719,7 +722,10 @@ export const PerHeadRequest = named(
   z
     .object({
       childBudgetId: Id,
-      rateMinor: z.int().min(1).describe("Per eligible head, in the parent's budget currency."),
+      rateMinor: z
+        .int()
+        .min(1)
+        .describe("Rate per eligible employee per month, in the parent's budget currency."),
       eligibleTypes: z.array(EmploymentType).min(1),
       prorate: z.boolean(),
       orgUnitId: Id.optional().describe("Defaults to the child budget's org unit."),
@@ -745,6 +751,7 @@ export const PerHeadPreview = named(
       asOfDate: IsoDate,
       currency: CurrencyCode,
       rateMinor: z.int(),
+      monthsLeft: z.int().min(1).optional(),
       headcount: z.int(),
       eligibleHeadcount: z.int(),
       eligibleHeadcountMilli: z.int(),

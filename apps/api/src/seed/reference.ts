@@ -1,5 +1,6 @@
 import * as s from '@bf/api/db';
 import type { Db } from '@bf/api/db';
+import { inArray } from 'drizzle-orm';
 import {
   CURRENCY_EXPONENTS,
   generateFiscalYear,
@@ -19,6 +20,7 @@ import {
   orgUnitsData,
   peopleData,
   periodId,
+  planVersionLinesData,
   planVersionsData,
   ratesData,
   reasonCodesData,
@@ -207,6 +209,7 @@ export async function seedReference(db: Db): Promise<void> {
             ['budget-owner', 'ceo'],
             ['department-head', 'ceo'],
             ['finance-admin', 'ceo'],
+            ['finance-admin-2', 'ceo'],
             ['finance-controller', 'finance-admin'],
             ['location-manager', 'regional-manager'],
             ['event-organizer', 'location-manager'],
@@ -233,11 +236,29 @@ export async function seedReference(db: Db): Promise<void> {
       .values(
         planVersionsData.map((p) => ({
           ...p,
-          approvedAt: p.status === 'approved' ? new Date('2026-01-05T00:00:00Z') : null,
-          approvedBy: p.status === 'approved' ? userById('ceo').personId : null,
+          status: 'draft' as const,
+          approvedAt: null,
+          approvedBy: null,
         })),
       )
       .onConflictDoNothing();
+    await tx
+      .insert(s.planVersionLines)
+      .values([...planVersionLinesData])
+      .onConflictDoNothing();
+    await tx
+      .update(s.planVersions)
+      .set({
+        status: 'approved',
+        approvedAt: new Date('2026-01-05T00:00:00Z'),
+        approvedBy: userById('ceo').personId,
+      })
+      .where(
+        inArray(
+          s.planVersions.id,
+          planVersionsData.filter((p) => p.status === 'approved').map((p) => p.id),
+        ),
+      );
     await tx
       .insert(s.rolloverPolicies)
       .values([
