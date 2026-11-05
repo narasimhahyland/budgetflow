@@ -2,9 +2,9 @@
 
 - Page: `design/preview/overview/index.html`, published with the clickable design preview at https://narasimhahyland.github.io/budgetflow/overview/
 - Audience: company leadership. Plain business language, present tense, describing the finished product; no technical details.
-- Checked locally: 2026-11-05, Playwright 1.64.1 (Chromium) on the built site (`node design/preview/build.mjs`, then `dist/overview/index.html`).
+- Checked locally with Playwright 1.64.1 (Chromium) on the built site (`node design/preview/build.mjs`, then `dist/overview/index.html`). The `local-*.png` screenshots show the current page (revision 2).
 
-## Local checks (before merge)
+## Local checks
 
 | Check                                                                                                           | Expected                                                     | Result |
 | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ------ |
@@ -17,42 +17,38 @@
 | Self-contained                                                                                                  | Inline CSS only; no scripts, external fonts or images        | pass   |
 | Public-content scan (internal tool names, figures, people, office cities, "prototype", emojis, technical terms) | No matches; only generic system categories                   | pass   |
 
-## Revision: "See the screen designs" is the primary action in the hero
+## Revisions
 
-The button moved from the footer to the hero, under the positioning text, as a filled primary button (`#5654ac`, white text). The hero body is now white, with a slim purple brand bar above it, so the button stands out; the footer keeps only its closing line. The `local-*.png` screenshots above show the revised page.
+1. [#30](https://github.com/narasimhahyland/budgetflow/pull/30) (superseded): white hero with a filled primary "See the screen designs" button. Reverted at the user's request because they preferred the original layout.
+2. Current: the page exactly as first merged in [#28](https://github.com/narasimhahyland/budgetflow/pull/28) (identical to `c0a105c`), with one change. The "See the screen designs" link moves from the footer into the purple hero, under the positioning text, as a white button with primary-coloured text (`#322f86` on white, about 11:1 contrast). The footer instance is removed, so the link appears once.
 
-| Check (local, 2026-11-05)                       | Expected                                                         | Result |
-| ----------------------------------------------- | ---------------------------------------------------------------- | ------ |
-| Button style at laptop, tablet and phone widths | Background `rgb(86, 84, 172)`, white text, in the first viewport | pass   |
-| Phone (iPhone 13)                               | Full-width button, no horizontal overflow                        | pass   |
-| Click the button                                | Opens the preview index (`../index.html`)                        | pass   |
-| Print view                                      | Button hidden, no links left in the footer                       | pass   |
+| Check (revision 2, local, 2026-11-05)                                                                                      | Expected                                                         | Result |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------ |
+| Diff against `c0a105c`                                                                                                     | Only the button styles, the hero link and the footer removal     | pass   |
+| Button at laptop, tablet and phone widths                                                                                  | White background, `rgb(50, 47, 134)` text, in the first viewport | pass   |
+| States ([rest](local-hero-link-rest.png), [hover](local-hero-link-hover.png), [keyboard focus](local-hero-link-focus.png)) | Hover turns light lavender; focus shows a white ring             | pass   |
+| Links to the screen designs on the page                                                                                    | Exactly one, in the hero                                         | pass   |
+| Click the button                                                                                                           | Opens the preview index (`../index.html`)                        | pass   |
+| Print view                                                                                                                 | Button hidden, no links in the footer                            | pass   |
+| No horizontal overflow                                                                                                     | At 1440 px, 900 px and phone width                               | pass   |
 
-## Live check (after deploy)
+## Live checks (after each deploy)
 
-- Merged in [#28](https://github.com/narasimhahyland/budgetflow/pull/28) (merge commit `ba9a1f0`), then published with `design/preview/deploy.sh` from that commit.
-- Checked: 2026-11-05 02:32 UTC, curl and Playwright 1.64.1 (Chromium) against https://narasimhahyland.github.io/budgetflow/overview/
+### First publish
+
+- Merged in [#28](https://github.com/narasimhahyland/budgetflow/pull/28) (merge commit `ba9a1f0`) and published with `design/preview/deploy.sh`. Checked 2026-11-05 02:32 UTC.
 
 | Check                                                                                 | Expected                                                | Result |
 | ------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------ |
-| `curl -sI` on the live URL ([live-curl-headers.txt](live-curl-headers.txt))           | HTTP 200, `text/html`                                   | pass   |
+| `curl -sI` on the live URL                                                            | HTTP 200, `text/html`                                   | pass   |
 | Live index "Product overview" link ([live-preview-index.png](live-preview-index.png)) | Opens `/budgetflow/overview/`, title "Product overview" | pass   |
-| Live page at 1440 px ([live-desktop-1440.png](live-desktop-1440.png))                 | 5 sections, 8 steps, 11 feature pillars, 9 roles        | pass   |
-| Live page on a phone ([live-mobile-390.png](live-mobile-390.png))                     | HTTP 200, no horizontal overflow                        | pass   |
+| Live page at 1440 px and on a phone                                                   | 5 sections, 8 steps, 11 feature pillars, 9 roles        | pass   |
 | Console and page errors                                                               | None                                                    | pass   |
 
-The full-page `live-desktop-1440.png` and `live-mobile-390.png` were replaced by the revision check below.
+### Revision 1 (superseded)
 
-### Live check of the hero button revision
+- Merged in [#30](https://github.com/narasimhahyland/budgetflow/pull/30) (merge commit `a7b8b26`), checked live 2026-11-05 02:54 UTC: HTTP 200, filled primary button in a white hero, no footer links, no page errors. Its screenshots were replaced by the revision 2 check below.
 
-- Merged in [#30](https://github.com/narasimhahyland/budgetflow/pull/30) (merge commit `a7b8b26`), then published with `design/preview/deploy.sh` from that commit.
-- Checked: 2026-11-05 02:54 UTC, curl and Playwright 1.64.1 (Chromium) against https://narasimhahyland.github.io/budgetflow/overview/
+### Revision 2
 
-| Check                                                                                                                                | Expected                                                       | Result |
-| ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ------ |
-| `curl -sI` on the live URL ([live-curl-headers.txt](live-curl-headers.txt))                                                          | HTTP 200, `text/html`, new file (31630 bytes)                  | pass   |
-| Laptop, 1440 px ([live-desktop-1440-hero.png](live-desktop-1440-hero.png), full page [live-desktop-1440.png](live-desktop-1440.png)) | "See the screen designs" filled `#5654ac`, white text, in hero | pass   |
-| Phone, iPhone 13 ([live-mobile-390-hero.png](live-mobile-390-hero.png), full page [live-mobile-390.png](live-mobile-390.png))        | Full-width button in the first viewport, no overflow           | pass   |
-| Click the button                                                                                                                     | Opens `/budgetflow/index.html` (clickable design preview)      | pass   |
-| Footer                                                                                                                               | No links left                                                  | pass   |
-| Page errors                                                                                                                          | None                                                           | pass   |
+Recorded after the pull request merged and `design/preview/deploy.sh` published the site.
