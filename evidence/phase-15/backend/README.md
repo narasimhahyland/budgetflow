@@ -46,6 +46,21 @@ which is how the one Phase 13 assertion that hard-coded the number of AI feature
 - `db/wallet-claim-postings.txt` — the ledger lines behind wallet claims: pre-encumbered on submit,
   pre-encumbered reversed and encumbered on approval, released on return.
 
+## Visual baselines
+
+This half adds no screen, but screen 113a (AI settings and query log) renders one row per AI feature
+in its feature list and turn-on dialog, so adding `leadership_summary` and `variance_commentary`
+moved six of its baselines. They were re-recorded with `npm run e2e:update-snapshots` in the pinned
+Playwright image against a freshly reset seed, and the whole `visual-light` project then passed at
+629 screenshots. No other screen moved.
+
+One lesson worth leaving here: the first local visual run compared against the wrong stack, because
+`scripts/visual/pw-docker.sh` forwards only `BASE_URL` and `BF_E2E_*` into the container, so the
+ports came from `.env` (defaults) and the browser reached another worktree's stack on 4200. A
+worktree that runs visual checks has to put its ports in `.env`, not only in the shell. The second
+attempt then failed on budget dashboards because the API scenarios had already posted money into the
+stack; the baselines are only meaningful after `scripts/stack.sh reset`.
+
 ## Known gaps
 
 - Red-flag analytics (017b) is not built: it needs approval open and decision timestamps that
