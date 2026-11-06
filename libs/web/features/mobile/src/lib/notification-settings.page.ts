@@ -205,9 +205,7 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                 <div>
                   <span class="bf-cell__primary">Slack</span>
                   @if (!s.slackInstalled) {
-                    <span class="bf-cell__secondary"
-                      >Your company has not connected Slack yet</span
-                    >
+                    <span class="bf-cell__secondary">Your company has not connected Slack yet</span>
                   } @else if (s.slackLink; as link) {
                     <span class="bf-cell__secondary" data-testid="slack-linked-handle"
                       >Linked as {{ link.handle }} ({{ link.verifiedEmail }})</span
@@ -346,7 +344,9 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                         <mat-checkbox
                           [checked]="row.inApp"
                           [disabled]="row.required || busy()"
-                          [matTooltip]="row.required ? 'Required: you need this to act on time' : ''"
+                          [matTooltip]="
+                            row.required ? 'Required: you need this to act on time' : ''
+                          "
                           [attr.aria-label]="'In-app for ' + row.label"
                           (change)="toggleMatrix(row.type, 'inApp', $event.checked)"
                         />
@@ -355,7 +355,9 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                         <mat-checkbox
                           [checked]="row.email"
                           [disabled]="row.required || busy()"
-                          [matTooltip]="row.required ? 'Required: you need this to act on time' : ''"
+                          [matTooltip]="
+                            row.required ? 'Required: you need this to act on time' : ''
+                          "
                           [attr.aria-label]="'Email for ' + row.label"
                           (change)="toggleMatrix(row.type, 'email', $event.checked)"
                         />
@@ -411,7 +413,9 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                   data-testid="digest-frequency"
                 >
                   <mat-option value="daily">Daily at {{ s.digest.sendTime }}</mat-option>
-                  <mat-option value="weekly">Weekly on Monday at {{ s.digest.sendTime }}</mat-option>
+                  <mat-option value="weekly"
+                    >Weekly on Monday at {{ s.digest.sendTime }}</mat-option
+                  >
                   <mat-option value="off">Off</mat-option>
                 </mat-select>
               </mat-form-field>
@@ -600,19 +604,11 @@ export class NotificationSettingsPage {
     channel?: 'email' | 'slack' | 'teams';
     bundleNonUrgent?: boolean;
   }): void {
-    void this.run(() =>
-      data(this.api.updateNotificationSettings({ body: { digest: patch } })),
-    );
+    void this.run(() => data(this.api.updateNotificationSettings({ body: { digest: patch } })));
   }
 
-  protected saveQuietHours(patch: {
-    start?: string;
-    end?: string;
-    weekendQuiet?: boolean;
-  }): void {
-    void this.run(() =>
-      data(this.api.updateNotificationSettings({ body: { quietHours: patch } })),
-    );
+  protected saveQuietHours(patch: { start?: string; end?: string; weekendQuiet?: boolean }): void {
+    void this.run(() => data(this.api.updateNotificationSettings({ body: { quietHours: patch } })));
   }
 
   protected savePrivacy(showAmountsInPush: boolean): void {
@@ -648,17 +644,12 @@ export class NotificationSettingsPage {
   }
 
   protected removeDevice(id: string): void {
-    void this.run(
-      () => data(this.api.removePushDevice({ params: { id } })),
-      'Device removed',
-    );
+    void this.run(() => data(this.api.removePushDevice({ params: { id } })), 'Device removed');
   }
 
   protected sendTest(channel: NotificationChannel): void {
     void this.run(async () => {
-      const res = await data(
-        this.api.sendTestNotification({ body: { channel } }),
-      );
+      const res = await data(this.api.sendTestNotification({ body: { channel } }));
       this.snack.open(res.message, undefined, { duration: 3500 });
     }, '');
   }
@@ -667,9 +658,7 @@ export class NotificationSettingsPage {
     this.busy.set(true);
     this.failure.set('');
     try {
-      const intent = await data(
-        this.api.createChatLinkIntent({ body: { provider } }),
-      );
+      const intent = await data(this.api.createChatLinkIntent({ body: { provider } }));
       await this.router.navigate(['/link/chat'], {
         queryParams: { token: intent.token },
       });
