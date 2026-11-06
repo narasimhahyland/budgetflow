@@ -3,72 +3,51 @@
 // match command an unaided reviewer would use; and the acceptance is only recorded once that command
 // has actually run, with one hash-chained audit entry and a query-log row linking the two.
 import { expect, test } from '@playwright/test';
-import {
-  ActualDetail,
-  AiMatchSuggestionList,
-  AiQueryLogList,
-  AiSuggestionDecision,
-} from '@bf/contracts';
+import { ActualDetail, AiQueryLogList, AiSuggestionDecision } from '@bf/contracts';
 import type { APIRequestContext } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
+import { suggestionFor, unmatchedLine } from './support';
 
-async function openSuggestions(request: APIRequestContext) {
-  await expectContract(
-    await request.post('/api/ai/matching-suggestions/run', {
-      headers: await as('finance-admin'),
-      data: {},
-    }),
+const detail = async (request: APIRequestContext, actualId: string) =>
+  expectContract(
+    await request.get(`/api/actuals/${actualId}`, { headers: await as('finance-admin') }),
     200,
-    AiMatchSuggestionList,
+    ActualDetail,
   );
-  return expectContract(
-    await request.get('/api/ai/matching-suggestions?status=open', {
-      headers: await as('finance-admin'),
-    }),
-    200,
-    AiMatchSuggestionList,
-  );
-}
 
-test('running the suggestion ranker matches nothing by itself', async ({ request }) => {
-  const list = await openSuggestions(request);
-  expect(list.items.length, 'the seeded import leaves lines for the ranker').toBeGreaterThan(0);
-  for (const suggestion of list.items) {
-    const actual = await expectContract(
-      await request.get(`/api/actuals/${suggestion.actualId}`, {
-        headers: await as('finance-admin'),
-      }),
-      200,
-      ActualDetail,
-    );
-    expect(actual.actual.status, `${suggestion.merchant ?? suggestion.actualId} is untouched`).toBe(
-      'unmatched',
-    );
-    expect(actual.matches, 'and it carries no match parts').toEqual([]);
-  }
+test('running the ranker produces a suggestion and matches nothing', async ({ request }) => {
+  const { actual } = await unmatchedLine(request);
+  const suggestion = await suggestionFor(request, actual.actual.id);
+  expect(suggestion.suggested.targetId).toBeTruthy();
+  expect(suggestion.suggested.reasons.length).toBeGreaterThan(0);
+  expect(suggestion.applyWith.endpoint).toBe('matchActual');
+  expect(suggestion.applyWith.actualId).toBe(actual.actual.id);
+  expect(suggestion.applyWith.parts.length).toBe(1);
+
+  const after = await detail(request, actual.actual.id);
+  expect(after.actual.status, 'the ranker matched nothing').toBe('unmatched');
+  expect(after.matches, 'and posted no match parts').toEqual([]);
 });
 
-test('a suggestion is ordered deterministically and carries the body a person would submit', async ({
+test('the ranker is deterministic: the same line gives the same suggestion twice', async ({
   request,
 }) => {
-  const first = await openSuggestions(request);
-  const second = await openSuggestions(request);
-  expect(second.items.map((i) => i.id)).toEqual(first.items.map((i) => i.id));
-  for (const suggestion of first.items) {
-    expect(suggestion.applyWith.endpoint).toBe('matchActual');
-    expect(suggestion.applyWith.actualId).toBe(suggestion.actualId);
-    expect(suggestion.applyWith.parts.length).toBe(1);
-  }
+  const { actual } = await unmatchedLine(request);
+  const first = await suggestionFor(request, actual.actual.id);
+  const second = await suggestionFor(request, actual.actual.id);
+  expect(second.id).toBe(first.id);
+  expect(second.suggested.targetId).toBe(first.suggested.targetId);
+  expect(second.suggested.confidence).toBe(first.suggested.confidence);
+  expect(second.candidates.map((c) => c.targetId)).toEqual(first.candidates.map((c) => c.targetId));
 });
 
 test('applying a suggestion as someone without actuals.manage is refused and nothing changes', async ({
   request,
 }) => {
-  const list = await openSuggestions(request);
-  const suggestion = list.items[0];
-  expect(suggestion, 'at least one open suggestion to apply').toBeDefined();
+  const { actual } = await unmatchedLine(request);
+  const suggestion = await suggestionFor(request, actual.actual.id);
 
   const refused = await request.post(`/api/actuals/${suggestion.actualId}/matches`, {
     headers: await mutate('employee', randomUUID()),
@@ -79,19 +58,13 @@ test('applying a suggestion as someone without actuals.manage is refused and not
     'an employee cannot match a spend line, whatever the model suggested',
   ).toContain(refused.status());
 
-  const actual = await expectContract(
-    await request.get(`/api/actuals/${suggestion.actualId}`, {
-      headers: await as('finance-admin'),
-    }),
-    200,
-    ActualDetail,
-  );
-  expect(actual.actual.status).toBe('unmatched');
+  const after = await detail(request, actual.actual.id);
+  expect(after.actual.status).toBe('unmatched');
 });
 
 test('recording an acceptance before the match command ran is refused', async ({ request }) => {
-  const list = await openSuggestions(request);
-  const suggestion = list.items[0];
+  const { actual } = await unmatchedLine(request);
+  const suggestion = await suggestionFor(request, actual.actual.id);
   await expectProblem(
     await request.post(`/api/ai/suggestions/${suggestion.id}/decision`, {
       headers: await mutate('finance-admin', randomUUID()),
@@ -104,13 +77,15 @@ test('recording an acceptance before the match command ran is refused', async ({
     409,
     'AI_SUGGESTION_NOT_APPLIED',
   );
+  const after = await detail(request, actual.actual.id);
+  expect(after.actual.status).toBe('unmatched');
 });
 
 test('a reviewer applies the suggestion through the normal match command, and the acceptance is audited', async ({
   request,
 }) => {
-  const list = await openSuggestions(request);
-  const suggestion = list.items[0];
+  const { actual } = await unmatchedLine(request);
+  const suggestion = await suggestionFor(request, actual.actual.id);
 
   const matched = await expectContract(
     await request.post(`/api/actuals/${suggestion.actualId}/matches`, {
@@ -149,8 +124,8 @@ test('a reviewer applies the suggestion through the normal match command, and th
   expect(accepted, 'the confirmation is on the AI audit trail').toBeDefined();
   expect(accepted!.appliedResourceId).toBe(suggestion.actualId);
   expect(accepted!.auditEventId).toBe(decision.auditEventId);
+  expect(accepted!.suggestionId).toBe(suggestion.id);
 
-  // The same suggestion cannot be decided twice.
   await expectProblem(
     await request.post(`/api/ai/suggestions/${suggestion.id}/decision`, {
       headers: await mutate('finance-admin', randomUUID()),
@@ -164,11 +139,11 @@ test('a reviewer applies the suggestion through the normal match command, and th
 test('rejecting a suggestion needs a reason, because the reasons feed the evaluation set', async ({
   request,
 }) => {
-  const list = await openSuggestions(request);
-  const suggestion = list.items.at(-1);
-  expect(suggestion).toBeDefined();
+  const { actual } = await unmatchedLine(request);
+  const suggestion = await suggestionFor(request, actual.actual.id);
+
   await expectProblem(
-    await request.post(`/api/ai/suggestions/${suggestion!.id}/decision`, {
+    await request.post(`/api/ai/suggestions/${suggestion.id}/decision`, {
       headers: await mutate('finance-admin', randomUUID()),
       data: { decision: 'rejected' },
     }),
@@ -176,7 +151,7 @@ test('rejecting a suggestion needs a reason, because the reasons feed the evalua
     'REASON_REQUIRED',
   );
   const rejected = await expectContract(
-    await request.post(`/api/ai/suggestions/${suggestion!.id}/decision`, {
+    await request.post(`/api/ai/suggestions/${suggestion.id}/decision`, {
       headers: await mutate('finance-admin', randomUUID()),
       data: {
         decision: 'rejected',
@@ -188,4 +163,7 @@ test('rejecting a suggestion needs a reason, because the reasons feed the evalua
     AiSuggestionDecision,
   );
   expect(rejected.status).toBe('rejected');
+
+  const after = await detail(request, actual.actual.id);
+  expect(after.actual.status, 'rejecting a suggestion leaves the line for 080b').toBe('unmatched');
 });

@@ -6,6 +6,7 @@ import {
   budgets,
   commitments,
   costCenters,
+  events,
   withTenant,
   type Db,
   type Tx,
@@ -91,6 +92,14 @@ export class AiMatchingService {
             )
             .orderBy(commitments.description, commitments.id)
         : [];
+      const eventCodes = new Map(
+        (
+          await tx
+            .select({ id: events.id, code: events.eventCode })
+            .from(events)
+            .where(eq(events.tenantId, actor.tenantId))
+        ).map((e) => [e.id, e.code]),
+      );
       const centres = new Map(
         (
           await tx
@@ -105,9 +114,21 @@ export class AiMatchingService {
           .map((b) => [b.id, b]),
       );
 
+      const codeOf = (commitment: (typeof open)[number]) =>
+        commitment.eventId ? (eventCodes.get(commitment.eventId) ?? null) : null;
+      const centreOf = (id: string | null) => (id ? (centres.get(id) ?? null) : null);
+
       for (const line of unmatched.slice(0, 50)) {
+        // Only commitments the line could plausibly belong to: the same event, or the same cost
+        // centre. Without one of those there is nothing to rank, and 080b keeps the line.
+        const lineCentre = centreOf(line.costCenterId);
         const candidates = open
           .filter((c) => c.currency === (line.budgetCurrency ?? line.transactionCurrency))
+          .filter(
+            (c) =>
+              (line.eventCode !== null && codeOf(c) === line.eventCode) ||
+              (lineCentre !== null && centreOf(c.costCenterId) === lineCentre),
+          )
           .slice(0, 8);
         const candidateBudgets = [...budgetRows.values()]
           .filter((b) => b.costCenterId && b.costCenterId === line.costCenterId)
@@ -126,7 +147,7 @@ export class AiMatchingService {
             budgetAmountMinor,
             currency: line.transactionCurrency,
             eventCode: line.eventCode,
-            costCenterCode: line.costCenterId ? (centres.get(line.costCenterId) ?? null) : null,
+            costCenterCode: lineCentre,
             source: line.source,
           },
         };
@@ -144,7 +165,7 @@ export class AiMatchingService {
               ),
               daysApart: daysApart(line.transactionDate, c.serviceStart),
               costCenterCode: c.costCenterId ? (centres.get(c.costCenterId) ?? null) : null,
-              eventCode: null,
+              eventCode: codeOf(c),
             },
           })),
           ...candidateBudgets.map((b) => ({
@@ -153,7 +174,7 @@ export class AiMatchingService {
             label: b.name,
             fields: {
               currency: b.currency,
-              costCenterCode: b.costCenterId ? (centres.get(b.costCenterId) ?? null) : null,
+              costCenterCode: centreOf(b.costCenterId),
               amountDifferenceMinor: 0,
               daysApart: 0,
             },

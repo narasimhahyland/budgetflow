@@ -214,11 +214,15 @@ test('receipt extraction prefills values without saving them, and drops card det
   for (const field of result.fields)
     expect(field.needsCheck).toBe(field.value === null || field.confidence === 'low');
 
-  const confirmed = await request.post(`/api/ai/suggestions/${result.id}/decision`, {
-    headers: await mutate('employee', randomUUID()),
-    data: { decision: 'accepted', confirmedFields: { totalMinor: '456000' } },
-  });
-  expect(confirmed.status()).toBe(201);
+  // Accepting an extraction records the values the person checked; it cannot be accepted blind.
+  await expectProblem(
+    await request.post(`/api/ai/suggestions/${result.id}/decision`, {
+      headers: await mutate('employee', randomUUID()),
+      data: { decision: 'accepted' },
+    }),
+    422,
+    'VALIDATION_FAILED',
+  );
 });
 
 test('a low-confidence field is left empty rather than guessed', async ({ request }) => {
