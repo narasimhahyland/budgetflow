@@ -1884,9 +1884,6 @@
       "mask": ["[data-testid=delivery-latency]", "[data-testid=delivery-rate]"],
       "states": [
         {
-          "state": "default"
-        },
-        {
           "state": "add-endpoint",
           "actions": [
             { "click": "[data-testid=create-endpoint]" },

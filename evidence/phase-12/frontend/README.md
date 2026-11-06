@@ -36,7 +36,7 @@ sandbox) and 094b (finance and payroll exports) have no backing endpoints in thi
 | A role without integration permissions is refused in place, and the API refuses it too       | `functional/journeys.txt`, `visual-qa/092-integrations-hub--forbidden--desktop.png`                                                             |
 | An auditor reads everything and is offered no action                                         | `functional/journeys.txt` (who may do what)                                                                                                     |
 | A duplicate is resolved without deleting a line, with the reversal stated first              | `functional/journeys.txt`, `visual-qa/099a-cross-source-duplicates--default--desktop.png`                                                       |
-| 63 visual baselines at desktop, tablet and mobile; stable on a second run                    | `apps/web-e2e/src/__screenshots__/visual-light/`                                                                                                |
+| 60 visual baselines at desktop, tablet and mobile; stable across a reseed                    | `apps/web-e2e/src/__screenshots__/visual-light/`                                                                                                |
 | Static gate green on the affected projects                                                   | `gate-summary.txt`                                                                                                                              |
 
 ## How to reproduce
@@ -51,6 +51,24 @@ npx playwright test -c apps/web-e2e/playwright.config.ts --project=desktop \
   --grep "connector hub|credentials \(092|running a sync|API keys \(101|webhooks \(101|identity and SCIM|cross-source duplicates|who may do what"
 BASE_URL=http://localhost:4350 npm run e2e:visual -- --grep "092-|093-hr-connector|094a-|096-card|098-identity|099-sync|099a-|099b-|100-integration|101-"
 ```
+
+## Keeping the checks deterministic
+
+The gate runs the API scenarios, then the journeys, then reseeds and runs the baselines. Three findings
+came from CI and were reproduced locally by running `apps/api-e2e/src/integrations` first:
+
+- The API scenarios repair the seeded planning connector and break the ERP one, so "the connector that
+  is not working" is a different connector there. The journey now breaks the planning connector itself
+  (replace the credential with the placeholder the mock provider rejects, then test the connection) and
+  asserts on the failure it caused. Same for the duplicate queue: the journey picks a group holding a
+  matched line when one is left and asserts the reversal warning only for that case.
+- An API key's prefix is generated per seed run, so its glyphs sized the key column and moved every
+  column after it. `.bf-key-prefix` gives the prefix a fixed box; the baselines then survive a reseed
+  with a different prefix (verified by capturing, reseeding and re-running the comparison).
+- `101-webhooks` `default` was removed as a baseline state, and its three images deleted: the delivery
+  log and the endpoints' "Last delivery" column reflect whatever ran before the capture, so the state
+  has no stable pixels. The screen keeps its `add-endpoint` baseline, and the delivery log stays
+  covered by the webhook journeys.
 
 ## Notes
 

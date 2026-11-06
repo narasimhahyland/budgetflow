@@ -27,6 +27,7 @@ interface Connection {
   id: string;
   provider: string;
   displayName: string;
+  category: string;
   status: string;
   attention: string | null;
 }
@@ -105,8 +106,8 @@ test.describe('connector hub (092)', () => {
   }) => {
     const hub = await getJson<Hub>('integration-admin', '/api/integrations');
     expect(hub.canManage).toBe(true);
-    const broken = hub.connections.find((c) => c.status === 'needs_attention');
-    expect(broken, 'the seed holds one connector with expired credentials').toBeTruthy();
+    const degraded = hub.connections.filter((c) => c.status === 'needs_attention');
+    expect(degraded.length, 'at least one connector is not working').toBeGreaterThan(0);
 
     await page.goto('/admin/integrations');
     await expectShell(page);
@@ -118,15 +119,16 @@ test.describe('connector hub (092)', () => {
       String(hub.health.needsAttention),
     );
 
-    // A failing connector is stated, with its reason, not hidden behind a green tick.
+    // Every failing connector is stated, with its reason, not hidden behind a green tick.
     const banner = page.getByTestId('hub-attention');
     await expect(banner).toBeVisible();
-    await expect(banner).toContainText(broken!.displayName);
     await expect(banner).toContainText('is not reaching BudgetFlow');
-
-    const tile = page.getByTestId(`connector-tile-${broken!.provider}`);
-    await expect(tile).toContainText('Needs attention');
-    await expect(tile).toContainText(broken!.attention!);
+    for (const c of degraded) {
+      await expect(banner).toContainText(c.displayName);
+      const tile = page.getByTestId(`connector-tile-${c.provider}`);
+      await expect(tile).toContainText('Needs attention');
+      await expect(tile).toContainText(c.attention!);
+    }
 
     for (const c of hub.connections)
       await expect(page.getByTestId(`connector-tile-${c.provider}`)).toContainText(c.displayName);
@@ -134,16 +136,30 @@ test.describe('connector hub (092)', () => {
     await expectNoStoredSecretOnScreen(page);
   });
 
-  test('the degraded connector says what stopped and offers the fix', async ({ page }) => {
+  test('a connector the provider refuses says what stopped and offers the fix', async ({
+    page,
+  }) => {
+    // The journey breaks the planning connector itself instead of trusting the seeded one to still
+    // be broken: other suites on this stack repair it. The credential below is the placeholder the
+    // mock planning provider rejects.
     const hub = await getJson<Hub>('integration-admin', '/api/integrations');
-    const broken = hub.connections.find((c) => c.status === 'needs_attention')!;
+    const planning = hub.connections.find((c) => c.category === 'planning');
+    expect(planning, 'a planning connector is connected').toBeTruthy();
 
-    await page.goto('/admin/integrations');
-    await page.getByTestId(`connector-tile-${broken.provider}`).click();
+    await page.goto(`/admin/integrations/connections/${planning!.id}`);
+    await expect(
+      page.getByRole('heading', { level: 1, name: planning!.displayName }),
+    ).toBeVisible();
+    await page.getByTestId('tab-connection').click();
+    await page.getByTestId('replace-credential').fill('mock-adaptive-expired');
+    await page.getByTestId('replace-credential-submit').click();
 
-    await expect(page.getByRole('heading', { level: 1, name: broken.displayName })).toBeVisible();
+    // The refusal is reported in the provider's own words, not swallowed.
+    await page.getByTestId('test-connection').click();
+    await expect(page.getByTestId('test-result')).toContainText('The provider refused the call');
+
     const degraded = page.getByTestId('connector-degraded');
-    await expect(degraded).toContainText(broken.attention!);
+    await expect(degraded).toBeVisible();
     await expect(degraded).toContainText('stops at the last successful run');
 
     // Its plan import is blocked for the same reason, in the same words.
@@ -397,11 +413,15 @@ test.describe('cross-source duplicates (99a)', () => {
     page,
   }) => {
     const before = await getJson<{
-      items: { flagId: string; lines: { actualId: string }[] }[];
+      items: { flagId: string; lines: { actualId: string; matchStatus: string }[] }[];
       open: number;
     }>('finance-admin', '/api/integrations/duplicates?status=open');
-    expect(before.open, 'the seed holds a cross-source duplicate to decide').toBeGreaterThan(0);
-    const group = before.items[0];
+    expect(before.open, 'there is a cross-source duplicate to decide').toBeGreaterThan(0);
+    // A group holding a matched line is the one worth deciding on screen: excluding that line posts
+    // a reversal. Other suites on this stack may have decided it already, so fall back to any group.
+    const matched = (g: (typeof before.items)[number]) =>
+      g.lines.some((l) => l.matchStatus === 'matched');
+    const group = before.items.find(matched) ?? before.items[0];
 
     await page.goto('/finance/actuals/duplicates');
     await expectShell(page);
@@ -414,8 +434,10 @@ test.describe('cross-source duplicates (99a)', () => {
       await expect(page.getByTestId(`duplicate-line-${line.actualId}`)).toBeVisible();
 
     await page.getByTestId(`decide-${group.flagId}`).click();
-    // One of the lines is already matched, so the screen warns that excluding it posts a reversal.
-    await expect(page.getByTestId('already-matched')).toContainText('writes a reversal');
+    // When a line is already matched, the screen warns that excluding it posts a reversal.
+    if (matched(group))
+      await expect(page.getByTestId('already-matched')).toContainText('writes a reversal');
+    else await expect(page.getByTestId('already-matched')).toBeHidden();
 
     await page.getByTestId('duplicate-reason-code').fill('CARD_ITEMIZATION');
     await page

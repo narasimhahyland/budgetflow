@@ -51,6 +51,15 @@
   white-space: nowrap;
 }
 
+// A key prefix is generated when the key is issued, so the characters differ per environment. The
+// box is sized once so the column, and everything to the right of it, does not move with them.
+.bf-key-prefix {
+  display: inline-block;
+  width: 96px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .bf-row--clickable {
   cursor: pointer;
 }
