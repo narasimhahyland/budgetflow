@@ -13,6 +13,7 @@ import {
 } from './ids';
 import { P9_IDS } from './events-depth';
 import { P10_IDS } from './reports';
+import { P13_IDS } from './ai';
 import { ALL_USERS, userById, type SeedUserId } from './roles';
 
 /** Fixed accounting date for seed postings (an open period) and the seed's notion of "as of". */
@@ -967,6 +968,8 @@ export const SEED = {
   p9: P9_IDS,
   /** Phase 10 reporting: the saved views, scheduled deliveries and export of screens 079 and 091. */
   p10: P10_IDS,
+  /** Phase 13 AI: the receipt and quote files the deterministic fake provider can read (121a). */
+  p13: P13_IDS,
   planRates: { INR: '83.25', EUR: '0.92', GBP: '0.79', JPY: '150', KWD: '0.307' },
   /** Every Hyland budget is held in USD (local-currency actuals convert at the locked plan rate). */
   indiaAuthorizedMinor: 3_000_000,

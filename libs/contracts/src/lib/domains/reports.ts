@@ -708,9 +708,13 @@ export const BoardPackPage = named(
       statement: z
         .string()
         .nullable()
-        .describe('Shown instead of rows when the page has no data, for example "No controls applied in October 2026".'),
+        .describe(
+          'Shown instead of rows when the page has no data, for example "No controls applied in October 2026".',
+        ),
       columns: z.array(ReportColumn),
-      rows: z.array(ReportRow).describe('Ordered by label then key, so a regenerated pack matches.'),
+      rows: z
+        .array(ReportRow)
+        .describe('Ordered by label then key, so a regenerated pack matches.'),
       totals: ReportRow.nullable(),
       series: z.array(ReportSeries),
     })
@@ -724,7 +728,9 @@ export const FxBridgeRow = named(
     .object({
       transactionCurrency: CurrencyCode,
       transaction: Money.describe('Spend as posted, in its transaction currency.'),
-      atPlanRate: Money.describe('The same spend at the locked plan rate: the rate budget control uses.'),
+      atPlanRate: Money.describe(
+        'The same spend at the locked plan rate: the rate budget control uses.',
+      ),
       atReportingRate: Money.describe('The same spend at the reporting rate type.'),
       fxEffect: Money.describe('At reporting rate − at plan rate.'),
       planRate: z.string().nullable().describe('The plan cross rate applied, 12 decimals.'),
@@ -738,7 +744,9 @@ export const FxBridge = named(
   'FxBridge',
   z
     .object({
-      reportingRateType: RateType.describe('The company\u2019s reporting rate type; monthly average by default.'),
+      reportingRateType: RateType.describe(
+        'The company\u2019s reporting rate type; monthly average by default.',
+      ),
       rows: z.array(FxBridgeRow).describe('One row per transaction currency, ordered by code.'),
       totalEffect: Money,
       note: z.string(),
@@ -756,7 +764,9 @@ export const BoardPack = named(
     .object({
       generatedAt: IsoDateTime,
       currency: CurrencyCode,
-      title: z.string().describe('Cover title, for example "Hyland \u2014 budget pack \u2014 October 2026".'),
+      title: z
+        .string()
+        .describe('Cover title, for example "Hyland \u2014 budget pack \u2014 October 2026".'),
       source: BoardPackSource,
       constantCurrency: z.boolean(),
       scope: ReportScope,
@@ -824,10 +834,14 @@ export const BoardPackGeneration = named(
       requestedByName: z.string().nullable(),
       requestedAt: IsoDateTime,
       completedAt: IsoDateTime.nullable(),
-      expiresAt: IsoDateTime.describe('Download links stop working after this; the pack is regenerated.'),
+      expiresAt: IsoDateTime.describe(
+        'Download links stop working after this; the pack is regenerated.',
+      ),
     })
     .strict()
-    .describe('A pack generation. Rendering runs in the worker; the files land in the DocumentStore.'),
+    .describe(
+      'A pack generation. Rendering runs in the worker; the files land in the DocumentStore.',
+    ),
 );
 export type BoardPackGeneration = z.infer<typeof BoardPackGeneration>;
 
@@ -843,7 +857,11 @@ export const CreateBoardPackRequest = named(
       fiscalPeriodId: Id.optional(),
       draft: z.boolean().optional(),
       pages: z.array(BoardPackPageId).min(1).max(BOARD_PACK_PAGES.length).optional(),
-      formats: z.array(z.enum(['pdf', 'xlsx'])).min(1).max(2).optional(),
+      formats: z
+        .array(z.enum(['pdf', 'xlsx']))
+        .min(1)
+        .max(2)
+        .optional(),
       constantCurrency: z.boolean().optional(),
       rootBudgetId: Id.optional(),
       forecastCycleId: Id.optional(),

@@ -332,7 +332,11 @@ export class CloseController {
   ) {
     return replayed(
       res,
-      await this.forecasts.create(actor, parseWith(CreateForecastCycleRequest, body), ctx(key, rid)),
+      await this.forecasts.create(
+        actor,
+        parseWith(CreateForecastCycleRequest, body),
+        ctx(key, rid),
+      ),
     );
   }
 

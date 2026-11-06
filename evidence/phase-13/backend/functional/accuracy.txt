@@ -1,0 +1,18 @@
+# AI accuracy: evaluation sets against the deterministic fake provider (113a Accuracy tab)
+
+allPassed: True
+
+feature                 metric                        kind                      result threshold  cases  pass  labelled false positives
+allocation_suggestions  split_totals_exactly          -                         100.0%    100.0%      2  True  -
+anomaly_flags           flag_precision                possible_duplicate         83.3%     80.0%      6  True  a weekly retainer with a fixed amount
+anomaly_flags           flag_precision                possible_split             83.3%     80.0%      6  True  two separate team events that happen to fall in the same week
+anomaly_flags           flag_precision                unusual_cost_per_head      83.3%     80.0%      6  True  client-facing dinner compared with team dinners
+ask                     cites_only_permitted_records  -                         100.0%    100.0%      2  True  -
+ask                     figures_traceable             -                         100.0%    100.0%      3  True  -
+ask                     refuses_out_of_scope          -                         100.0%    100.0%      2  True  -
+ask                     schema_valid                  -                         100.0%    100.0%      2  True  -
+ask_chat                figures_traceable             -                         100.0%    100.0%      2  True  -
+extraction              field_accuracy                -                         100.0%     95.0%      6  True  -
+matching                high_confidence_precision     -                         100.0%     95.0%      2  True  -
+outlook                 range_contains_likely         -                         100.0%    100.0%      1  True  -
+policy_explain          no_workaround_advice          -                         100.0%    100.0%      2  True  -

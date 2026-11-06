@@ -162,8 +162,5 @@ export const reopenRequestStatus = pgEnum('reopen_request_status', [
   'declined',
 ]);
 export const yearEndLineStatus = pgEnum('year_end_line_status', tuple(YEAR_END_LINE_STATUSES));
-export const forecastCycleStatus = pgEnum(
-  'forecast_cycle_status',
-  tuple(FORECAST_CYCLE_STATUSES),
-);
+export const forecastCycleStatus = pgEnum('forecast_cycle_status', tuple(FORECAST_CYCLE_STATUSES));
 export const boardPackStatus = pgEnum('board_pack_status', tuple(BOARD_PACK_STATUSES));

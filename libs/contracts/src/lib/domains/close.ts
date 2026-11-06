@@ -506,7 +506,10 @@ export const ForecastCycleProgress = named(
   'ForecastCycleProgress',
   z
     .object({
-      budgets: z.int().min(0).describe('Lines in the cycle: budgets in scope plus included events.'),
+      budgets: z
+        .int()
+        .min(0)
+        .describe('Lines in the cycle: budgets in scope plus included events.'),
       notStarted: z.int().min(0),
       draft: z.int().min(0),
       submitted: z.int().min(0),
@@ -524,7 +527,9 @@ export const ForecastCycle = named(
     .object({
       id: Id,
       name: z.string(),
-      asOfDate: IsoDate.describe('The last closed or soft-closed period end the cycle forecasts from.'),
+      asOfDate: IsoDate.describe(
+        'The last closed or soft-closed period end the cycle forecasts from.',
+      ),
       dueDate: IsoDate,
       fiscalYearId: Id,
       fiscalYearLabel: z.string(),
@@ -548,10 +553,14 @@ export const ForecastCycle = named(
       closedByName: z.string().nullable(),
       closeConfirmation: z
         .string()
-        .describe('The phrase closing the cycle must repeat, for example "CLOSE OCTOBER REFORECAST".'),
+        .describe(
+          'The phrase closing the cycle must repeat, for example "CLOSE OCTOBER REFORECAST".',
+        ),
     })
     .strict()
-    .describe('One reforecast round: finance opens it, owners submit, finance accepts, then it closes.'),
+    .describe(
+      'One reforecast round: finance opens it, owners submit, finance accepts, then it closes.',
+    ),
 );
 export type ForecastCycle = z.infer<typeof ForecastCycle>;
 
@@ -614,7 +623,9 @@ export const ForecastSubmission = named(
       updatedAt: IsoDateTime,
     })
     .strict()
-    .describe('One budget or event in a forecast cycle, with the ledger facts behind its variance.'),
+    .describe(
+      'One budget or event in a forecast cycle, with the ledger facts behind its variance.',
+    ),
 );
 export type ForecastSubmission = z.infer<typeof ForecastSubmission>;
 
@@ -638,7 +649,9 @@ export const ForecastCycleDetail = named(
   z
     .object({
       cycle: ForecastCycle,
-      scope: ReportScope.describe('What the viewer may see: finance the whole cycle, owners their own.'),
+      scope: ReportScope.describe(
+        'What the viewer may see: finance the whole cycle, owners their own.',
+      ),
       submissions: z
         .array(ForecastSubmission)
         .describe('Ordered by budget or event name then id, so tied rows never reorder.'),
@@ -659,7 +672,9 @@ export const CreateForecastCycleRequest = named(
       name: z.string().trim().min(1).max(120),
       asOfDate: IsoDate,
       dueDate: IsoDate,
-      fiscalYearId: Id.optional().describe('Defaults to the fiscal year containing the as-of date.'),
+      fiscalYearId: Id.optional().describe(
+        'Defaults to the fiscal year containing the as-of date.',
+      ),
       rootBudgetId: Id.optional().describe('Scope: this budget and everything below it.'),
       varianceThresholdBps: z.int().min(0).max(10_000).optional(),
       varianceThresholdMinor: z.int().min(0).optional(),
@@ -669,7 +684,9 @@ export const CreateForecastCycleRequest = named(
       reminderDaysBefore: z.array(z.int().min(0).max(30)).max(5).optional(),
     })
     .strict()
-    .describe('Opens a cycle. Defaults: at least 10% and at least 1,000.00, run-rate for operating budgets.'),
+    .describe(
+      'Opens a cycle. Defaults: at least 10% and at least 1,000.00, run-rate for operating budgets.',
+    ),
 );
 export type CreateForecastCycleRequest = z.infer<typeof CreateForecastCycleRequest>;
 
@@ -947,7 +964,9 @@ export const closeEndpoints = {
     summary: 'Forecast cycles with their progress, newest first',
     tags: ['close'],
     auth: true,
-    query: z.object({ fiscalYearId: Id.optional(), status: ForecastCycleStatus.optional() }).strict(),
+    query: z
+      .object({ fiscalYearId: Id.optional(), status: ForecastCycleStatus.optional() })
+      .strict(),
     response: { status: 200, schema: ForecastCycleList },
     errors: [400, 401, 403],
   },

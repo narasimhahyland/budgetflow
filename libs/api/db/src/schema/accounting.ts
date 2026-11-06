@@ -319,7 +319,9 @@ export const forecastCycles = pgTable(
       .references(() => currencies.code),
     varianceThresholdBps: integer('variance_threshold_bps').notNull().default(1000),
     varianceThresholdMinor: minor('variance_threshold_minor').notNull().default(100000),
-    defaultMethodOperating: forecastMethod('default_method_operating').notNull().default('run_rate'),
+    defaultMethodOperating: forecastMethod('default_method_operating')
+      .notNull()
+      .default('run_rate'),
     defaultMethodEvent: forecastMethod('default_method_event')
       .notNull()
       .default('committed_pipeline'),
