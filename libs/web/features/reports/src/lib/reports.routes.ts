@@ -15,14 +15,16 @@ const REPORT_TITLES: Record<string, string> = {
   'unused-expired': 'Unused and expired budget',
   'spend-per-head': 'Spend per head by location',
   'participation-reach': 'Participation and reach',
+  'forecast-variance': 'Forecast and variance',
 };
 
 const reportTitle = (route: ActivatedRouteSnapshot): string =>
   REPORT_TITLES[route.paramMap.get('reportId') ?? ''] ?? 'Report';
 
 /**
- * /reports — the Phase 10 catalog (79), budget health (13), scheduled delivery (91) and the shared
- * report frame (80-86, 15a, 15b). The static paths come before `:reportId` so they win the match.
+ * /reports — the Phase 10 catalog (79), budget health (13), scheduled delivery (91), the board and
+ * FP&A pack (16a) and the shared report frame (80-87, 15a, 15b). The static paths come before
+ * `:reportId` so they win the match.
  */
 export const reportsRoutes: Routes = [
   {
@@ -46,6 +48,13 @@ export const reportsRoutes: Routes = [
     data: { pageTitle: 'Scheduled reports', section: 'Insights' },
     canActivate: [requirePermission('report.read', 'Scheduled reports')],
     loadComponent: () => import('./schedules.page').then((m) => m.ReportSchedulesPage),
+  },
+  {
+    path: 'board-pack',
+    title: 'Board and FP&A pack',
+    data: { pageTitle: 'Board and FP&A pack', section: 'Insights' },
+    canActivate: [requirePermission('report.read', 'Board and FP&A pack')],
+    loadComponent: () => import('./board-pack.page').then((m) => m.BoardPackPage),
   },
   {
     path: ':reportId',

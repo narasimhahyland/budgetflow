@@ -1,0 +1,8 @@
+PASS|secrets|1s
+PASS|lint|2s
+PASS|styles|1s
+PASS|satori|28s
+PASS|typecheck|2s
+PASS|build|1s
+PASS|openapi|1s
+PASS|db|1s

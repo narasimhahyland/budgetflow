@@ -58,6 +58,12 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
         <a mat-stroked-button routerLink="/reports/health">
           <mat-icon svgIcon="monitor" aria-hidden="true" />Budget health
         </a>
+        <a mat-stroked-button routerLink="/reports/board-pack">
+          <mat-icon svgIcon="book" />Board and FP&A pack
+        </a>
+        <a mat-stroked-button routerLink="/finance/forecast-cycles">
+          <mat-icon svgIcon="chart_arrow_up" />Forecast cycles
+        </a>
         <a mat-stroked-button routerLink="/reports/schedules">
           <mat-icon svgIcon="calendar" />Scheduled reports
         </a>
@@ -190,6 +196,10 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
       display: flex;
       flex-direction: column;
       gap: 4px;
+      // The 100% height below is the card filling its grid row. Without border-box the row height
+      // becomes the content box and the padding and border are added on top, so the card grows past
+      // its row and lands on the "Screen NNN" line of the card above it.
+      box-sizing: border-box;
       height: 100%;
       padding: 16px;
       border: 1px solid var(--mat-sys-outline-variant);

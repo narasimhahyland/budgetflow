@@ -1,0 +1,331 @@
+{
+  "reportId": "forecast-variance",
+  "name": "Forecast and variance",
+  "question": "Where will the year land against what we authorized, and why?",
+  "generatedAt": "2026-11-06T11:34:53.740Z",
+  "currency": "USD",
+  "scope": {
+    "tenantWide": false,
+    "label": "Bengaluru Events and below",
+    "budgetIds": 1,
+    "note": "Showing budgets you can see."
+  },
+  "filters": {
+    "fiscalYearId": "22000000-0000-4000-8000-012026000000"
+  },
+  "groupBy": "budget",
+  "kpis": [
+    {
+      "key": "authorized",
+      "label": "Authorized",
+      "money": {
+        "amountMinor": 1200000,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "actual",
+      "label": "Actual YTD",
+      "money": {
+        "amountMinor": 168589,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "committed",
+      "label": "Committed",
+      "money": {
+        "amountMinor": 723240,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "forecast",
+      "label": "Forecast at year end",
+      "money": {
+        "amountMinor": 891829,
+        "currency": "USD"
+      },
+      "hint": "Sum of the forecasts shown. Never posted to the ledger."
+    },
+    {
+      "key": "variance",
+      "label": "Variance against authorized",
+      "money": {
+        "amountMinor": 308171,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "commentaryDue",
+      "label": "Variances needing commentary",
+      "number": 1
+    }
+  ],
+  "columns": [
+    {
+      "key": "label",
+      "label": "Budget",
+      "type": "text",
+      "align": "start",
+      "drillable": false
+    },
+    {
+      "key": "owner",
+      "label": "Owner",
+      "type": "text",
+      "align": "start",
+      "drillable": false
+    },
+    {
+      "key": "authorized",
+      "label": "Authorized",
+      "type": "money",
+      "align": "end",
+      "drillable": true
+    },
+    {
+      "key": "actual",
+      "label": "Actual YTD",
+      "type": "money",
+      "align": "end",
+      "drillable": true
+    },
+    {
+      "key": "committed",
+      "label": "Committed",
+      "type": "money",
+      "align": "end",
+      "drillable": true
+    },
+    {
+      "key": "forecast",
+      "label": "Forecast at year end",
+      "type": "money",
+      "align": "end",
+      "drillable": false,
+      "hint": "A forecast, not an actual: it posts nothing and consumes no budget."
+    },
+    {
+      "key": "method",
+      "label": "Method",
+      "type": "text",
+      "align": "start",
+      "drillable": false
+    },
+    {
+      "key": "variance",
+      "label": "Variance",
+      "type": "money",
+      "align": "end",
+      "drillable": false
+    },
+    {
+      "key": "varianceDirection",
+      "label": "Direction",
+      "type": "text",
+      "align": "start",
+      "drillable": false,
+      "hint": "Written out, so the sign is never the only signal."
+    },
+    {
+      "key": "variancePct",
+      "label": "Variance %",
+      "type": "percent",
+      "align": "end",
+      "drillable": false
+    },
+    {
+      "key": "commentary",
+      "label": "Commentary",
+      "type": "text",
+      "align": "start",
+      "drillable": false
+    }
+  ],
+  "rows": [
+    {
+      "key": "70000000-0000-4000-8000-000000000005",
+      "label": "Bengaluru Events",
+      "budgetId": "70000000-0000-4000-8000-000000000005",
+      "eventId": null,
+      "orgUnitId": "30000000-0000-4000-8000-000000000006",
+      "status": "active",
+      "tags": ["System run-rate", "Commentary due"],
+      "cells": {
+        "owner": {
+          "text": "Rahul Menon"
+        },
+        "authorized": {
+          "money": {
+            "amountMinor": 1200000,
+            "currency": "USD"
+          },
+          "bucket": "authorized"
+        },
+        "actual": {
+          "money": {
+            "amountMinor": 168589,
+            "currency": "USD"
+          },
+          "bucket": "actual"
+        },
+        "committed": {
+          "money": {
+            "amountMinor": 723240,
+            "currency": "USD"
+          },
+          "bucket": "encumbered"
+        },
+        "forecast": {
+          "money": {
+            "amountMinor": 891829,
+            "currency": "USD"
+          }
+        },
+        "method": {
+          "text": "Run-rate"
+        },
+        "variance": {
+          "money": {
+            "amountMinor": 308171,
+            "currency": "USD"
+          },
+          "tone": "success"
+        },
+        "varianceDirection": {
+          "text": "under"
+        },
+        "variancePct": {
+          "bps": 2568
+        },
+        "commentary": {
+          "text": null
+        }
+      }
+    }
+  ],
+  "totals": {
+    "key": "totals",
+    "label": "Total",
+    "budgetId": null,
+    "eventId": null,
+    "orgUnitId": null,
+    "status": null,
+    "tags": [],
+    "cells": {
+      "owner": {
+        "text": null
+      },
+      "authorized": {
+        "money": {
+          "amountMinor": 1200000,
+          "currency": "USD"
+        }
+      },
+      "actual": {
+        "money": {
+          "amountMinor": 168589,
+          "currency": "USD"
+        }
+      },
+      "committed": {
+        "money": {
+          "amountMinor": 723240,
+          "currency": "USD"
+        }
+      },
+      "forecast": {
+        "money": {
+          "amountMinor": 891829,
+          "currency": "USD"
+        }
+      },
+      "method": {
+        "text": "Run-rate"
+      },
+      "variance": {
+        "money": {
+          "amountMinor": 308171,
+          "currency": "USD"
+        }
+      },
+      "varianceDirection": {
+        "text": "under"
+      },
+      "variancePct": {
+        "bps": 2568
+      },
+      "commentary": {
+        "text": null
+      }
+    }
+  },
+  "series": [
+    {
+      "key": "authorized",
+      "label": "Authorized",
+      "unit": "money",
+      "points": [
+        {
+          "key": "70000000-0000-4000-8000-000000000005",
+          "label": "Bengaluru Events",
+          "value": 1200000
+        }
+      ]
+    },
+    {
+      "key": "forecast",
+      "label": "Forecast at year end",
+      "unit": "money",
+      "points": [
+        {
+          "key": "70000000-0000-4000-8000-000000000005",
+          "label": "Bengaluru Events",
+          "value": 891829
+        }
+      ]
+    }
+  ],
+  "rowCount": 1,
+  "truncated": false,
+  "notes": [
+    "No accepted forecast for 1 budget in September reforecast; showing system run-rate forecasts for it.",
+    "Forecasts from September reforecast, as of 2026-09-30.",
+    "Forecast figures are not actuals: they post nothing and consume no budget."
+  ],
+  "reconciliation": {
+    "source": "ledger_balances",
+    "budgetsCounted": 1,
+    "authorized": {
+      "amountMinor": 1200000,
+      "currency": "USD"
+    },
+    "held": {
+      "amountMinor": 255652,
+      "currency": "USD"
+    },
+    "preEncumbered": {
+      "amountMinor": 21600,
+      "currency": "USD"
+    },
+    "encumbered": {
+      "amountMinor": 445988,
+      "currency": "USD"
+    },
+    "actual": {
+      "amountMinor": 168589,
+      "currency": "USD"
+    },
+    "accrued": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "available": {
+      "amountMinor": 308171,
+      "currency": "USD"
+    },
+    "ties": true,
+    "differences": []
+  }
+}

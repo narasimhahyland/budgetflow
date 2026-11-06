@@ -172,7 +172,8 @@ anomaly scan (both are endpoints a person or a job can call, `POST /api/ai/outlo
 `POST /api/ai/anomaly-flags/scan`); the `receipt_reused` and `unusual_vendor` flag kinds (in the
 contract for the UI, not raised by the scan yet, which needs document hashes and vendor categories);
 reported answers with their 90-day text retention (113a sub-tab); recording the suggestion id inside
-the actuals match audit entry, which needs a Phase 6 change to `QueueService.match`.
+the actuals match audit entry, which needs a Phase 6 change to `QueueService.match` (until then the
+link lives on the query-log row).
 
 ## What Phase 14 delivers (backend half)
 
