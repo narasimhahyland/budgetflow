@@ -63,7 +63,7 @@ an event.
 | 16a role scope                                       | Finance, CEO and auditor 200; regional manager and employee refused                                   | as expected | pass   |
 | RLS on the new tables                                | `forecast_cycles`, `forecast_snapshots`, `board_pack_generations` force RLS; cross-tenant write 42501 | as expected | pass   |
 
-26 API scenarios, all passing: `functional/scenario-results.txt`.
+27 API scenarios, all passing: `functional/scenario-results.txt`.
 
 ## The scenarios are not vacuous
 
@@ -120,9 +120,12 @@ read the same list twice and assert the orders are identical.
   carrying commentary for a large under-spend and one for an over-spend.
 - An open **October reforecast** (as of 2026-10-31, due 2026-11-12) with one submitted, one draft and
   one commentary-required line, so the monitor shows every state at once.
-- `period_close_snapshots` for the latest closed period, one row per legal entity, computed from the
-  ledger over the fiscal year's live budgets — so a freshly seeded board pack has an immutable source
-  and ties, and later drift is reported rather than absorbed.
+  No close snapshots are seeded. An earlier revision did seed them, which changed the snapshot counts
+  the period close screens show and so moved three visual baselines for no good reason. The
+  snapshot-backed pack is proved instead by a scenario that closes a period on a calendar it created
+  itself and builds the pack from the snapshot the **product** took — stronger evidence than a
+  fixture, and it leaves the seeded UI untouched. The default Hyland pack therefore reads the latest
+  closed period with no snapshot, and says so on every entity row.
 
 Forecast amounts are a share of each budget's net authorized amount read from the ledger at seed
 time, so the figures sit beside real money without ever becoming any.
@@ -133,7 +136,7 @@ time, so the figures sit beside real money without ever becoming any.
 api/forecast-cycles.json          GET /api/close/forecast-cycles on the seeded stack
 api/087-forecast-variance-run.json  087 run scoped to the India subtree, September cycle
 api/16a-board-pack-preview.json   16a preview: summary, legal entity and variance/FX pages
-functional/scenario-results.txt   26 API scenarios, all passing
+functional/scenario-results.txt   27 API scenarios, all passing
 functional/vacuity-proof.txt      the same scenarios failing with the behaviour reverted
 db/queries.sql                    the queries behind the forecast-and-ledger separation proof
 db/forecast-not-in-the-ledger.txt their output
@@ -172,3 +175,17 @@ the check it acknowledges.
 
 Invariants **68-71** in `docs/testing/invariant-scenarios.md` map to these scenarios (68 and 69 the
 forecast cycle and report, 70 and 71 the board pack and its generation).
+
+## UI consequences of a backend-only change
+
+The report catalog (079) is rendered from the API, so `forecast-variance` gets a card the moment its
+endpoint exists — before its own screen. Two things follow, and both are in this branch:
+
+- `apps/web-e2e/src/reports/reports.spec.ts` asserted the catalog had exactly nine reports. It now
+  asserts ten and names 087 as the one still awaiting its screen, so the count stays a real check.
+- Four visual baselines changed, all of them the extra catalog card:
+  `079-report-catalog--default--desktop/tablet` and `079-report-catalog--scoped-owner--desktop/tablet`
+  (087 is owner-scoped, so owners see it too; mobile is unchanged). Regenerated with
+  `npm run e2e:update-snapshots -- --grep "079-report-catalog"` in the pinned Playwright image and
+  nothing else was touched. The `080e-period-close-break-glass` cases, which an earlier revision of
+  this branch had moved, pass against their existing baselines again.

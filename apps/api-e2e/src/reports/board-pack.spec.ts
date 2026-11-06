@@ -9,16 +9,23 @@ import {
   BoardPackDownload,
   BoardPackGeneration,
   BoardPackGenerationList,
+  ClosePeriodDetail,
   ClosePeriodList,
 } from '@bf/contracts';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
+import { closeDetail, ledgerCheck, sandboxCalendar, signOffTieOut } from '../close/support';
 import { expectContract } from '../support/contract';
 
 const pack = async (
   request: APIRequestContext,
   query: Record<string, string> = {},
-  user: 'finance-admin' | 'finance-controller' | 'ceo' | 'auditor' = 'finance-admin',
+  user:
+    | 'finance-admin'
+    | 'finance-controller'
+    | 'ceo'
+    | 'auditor'
+    | 'sandbox-admin' = 'finance-admin',
 ) => {
   const qs = new URLSearchParams(query).toString();
   return expectContract(
@@ -31,16 +38,14 @@ const pack = async (
 };
 
 test.describe('board and FP&A pack', () => {
-  test('a closed-period pack reads the close snapshot and reconciles to the ledger', async ({
+  test('a closed-period pack reconciles to the ledger and carries all eleven pages', async ({
     request,
   }) => {
     const built = await pack(request);
 
     expect(built.source.kind).toBe('close_snapshot');
     expect(built.source.draft).toBe(false);
-    expect(built.source.snapshotVersion).toBeGreaterThanOrEqual(1);
-    expect(built.source.takenAt).not.toBeNull();
-    expect(built.source.statement).toContain('close snapshot');
+    expect(built.source.statement).toContain(built.source.periodLabel);
     expect(built.title).toContain(built.source.periodLabel);
     expect(built.currency).toBe('USD');
 
@@ -74,10 +79,12 @@ test.describe('board and FP&A pack', () => {
       'cofunding',
     ]);
 
-    // The legal entity page is the snapshot: each row names the version it came from.
+    // Every legal entity row says where its figures came from, whether that is a snapshot version
+    // or the as-of ledger of a period that closed before snapshots were taken.
     const entities = built.pages.find((p) => p.page === 'legal_entity')!;
     expect(entities.rows.length).toBeGreaterThan(0);
-    for (const row of entities.rows) expect(row.cells['snapshot'].text).toMatch(/^v\d+$/);
+    for (const row of entities.rows)
+      expect(row.cells['snapshot'].text).toMatch(/^(v\d+|.*no snapshot.*)$/);
 
     // The summary's Available carries its definition, so nobody has to guess what it counts.
     const summary = built.pages.find((p) => p.page === 'summary')!;
@@ -87,6 +94,49 @@ test.describe('board and FP&A pack', () => {
     expect(summary.rows).toHaveLength(1);
     expect(summary.rows[0].cells['available'].money?.amountMinor).toBe(r.available.amountMinor);
     expect(summary.rows[0].cells['actual'].money?.amountMinor).toBe(r.actual.amountMinor);
+  });
+
+  test('a pack of a period the product closed reads that close snapshot and ties to it', async ({
+    request,
+  }) => {
+    // The snapshot the close itself took, on a calendar this scenario owns, so the pack is proved
+    // against the product's own snapshot rather than one a fixture wrote.
+    const { calendar, entity } = await sandboxCalendar(request, { years: [2026] });
+    const january = calendar.fiscalYears[0].periods[0];
+    await signOffTieOut(request, {
+      month: january.startDate.slice(0, 7),
+      legalEntityId: entity!.id,
+    });
+    const ledger = await ledgerCheck(request, 'sandbox-admin');
+    expect(ledger.status, JSON.stringify(ledger.summary)).toBe('clean');
+    const detail = await closeDetail(request, january.id);
+    expect(detail.blockingReasons).toEqual([]);
+    const closed = await expectContract(
+      await request.post(`/api/close/periods/${january.id}/close`, {
+        headers: await mutate('sandbox-admin'),
+        data: { confirmation: detail.closeConfirmation },
+      }),
+      201,
+      ClosePeriodDetail,
+    );
+    expect(closed.period.status).toBe('closed');
+    expect(closed.snapshots.length).toBeGreaterThan(0);
+    const version = closed.snapshots[0].version;
+
+    const built = await pack(request, { fiscalPeriodId: january.id }, 'sandbox-admin');
+    expect(built.source.kind).toBe('close_snapshot');
+    expect(built.source.snapshotVersion).toBe(version);
+    expect(built.source.takenAt).not.toBeNull();
+    expect(built.source.statement).toContain('close snapshot');
+    expect(built.source.draft).toBe(false);
+
+    // Every entity row names the snapshot version it was rendered from, and the stored snapshot
+    // totals agree with the as-of ledger, so `ties` is true with no differences to report.
+    const entities = built.pages.find((p) => p.page === 'legal_entity')!;
+    expect(entities.rows.length).toBeGreaterThan(0);
+    for (const row of entities.rows) expect(row.cells['snapshot'].text).toBe(`v${version}`);
+    expect(built.reconciliation.differences).toEqual([]);
+    expect(built.reconciliation.ties).toBe(true);
   });
 
   test('the FX bridge explains the gap and is never part of spend or variance', async ({
