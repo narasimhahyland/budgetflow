@@ -1928,7 +1928,9 @@
               "policy_explain",
               "matching",
               "extraction",
-              "anomaly_flags"
+              "anomaly_flags",
+              "leadership_summary",
+              "variance_commentary"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           },
@@ -2029,7 +2031,9 @@
               "policy_explain",
               "matching",
               "extraction",
-              "anomaly_flags"
+              "anomaly_flags",
+              "leadership_summary",
+              "variance_commentary"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           }
@@ -2049,7 +2053,9 @@
               "policy_explain",
               "matching",
               "extraction",
-              "anomaly_flags"
+              "anomaly_flags",
+              "leadership_summary",
+              "variance_commentary"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           },
@@ -2533,7 +2539,9 @@
               "policy_explain",
               "matching",
               "extraction",
-              "anomaly_flags"
+              "anomaly_flags",
+              "leadership_summary",
+              "variance_commentary"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           },
@@ -2892,7 +2900,9 @@
               "policy",
               "headcount_snapshot",
               "prior_year_budget",
-              "participation"
+              "participation",
+              "period_snapshot",
+              "survey"
             ]
           },
           "id": {
@@ -2931,7 +2941,9 @@
               "policy_explain",
               "matching",
               "extraction",
-              "anomaly_flags"
+              "anomaly_flags",
+              "leadership_summary",
+              "variance_commentary"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           },
@@ -89607,7 +89619,9 @@
                 "policy_explain",
                 "matching",
                 "extraction",
-                "anomaly_flags"
+                "anomaly_flags",
+                "leadership_summary",
+                "variance_commentary"
               ],
               "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
             }
@@ -89745,7 +89759,9 @@
                 "policy_explain",
                 "matching",
                 "extraction",
-                "anomaly_flags"
+                "anomaly_flags",
+                "leadership_summary",
+                "variance_commentary"
               ],
               "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
             }
@@ -89873,7 +89889,9 @@
                 "policy_explain",
                 "matching",
                 "extraction",
-                "anomaly_flags"
+                "anomaly_flags",
+                "leadership_summary",
+                "variance_commentary"
               ],
               "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
             }
