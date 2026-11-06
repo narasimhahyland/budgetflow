@@ -8,7 +8,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { createdAt, day, pk, tenantRef, validFrom, validTo } from './_columns';
+import { createdAt, day, pk, tenantRef, ts, validFrom, validTo } from './_columns';
 import { employmentType, orgUnitKind, reportingLineKind } from './enums';
 import { legalEntities } from './finance';
 import { tenants } from './tenancy';
@@ -125,6 +125,11 @@ export const people = pgTable(
     employmentType: employmentType('employment_type').notNull().default('employee'),
     startDate: day('start_date'),
     endDate: day('end_date'),
+    /**
+     * When the retention run anonymised this leaver's personal details (P14, screen 111). Ledger lines
+     * and audit entries keep their pseudonymous reference to the person.
+     */
+    anonymisedAt: ts('anonymised_at'),
     createdAt: createdAt(),
   },
   (t) => [

@@ -1,6 +1,7 @@
 import type { INestApplicationContext } from '@nestjs/common';
 import { seedAi } from './ai';
 import { seedActuals } from './actuals';
+import { seedAdmin } from './admin';
 import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
 import { seedClose } from './close';
@@ -54,5 +55,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'AI feature switches, settings, extraction fixtures and evaluation runs',
     phase: 'P13',
     run: seedAi,
+  },
+  {
+    name: 'retention periods, capability switches, legal holds, a maintenance notice and owner invites',
+    phase: 'P14',
+    run: seedAdmin,
   },
 ];

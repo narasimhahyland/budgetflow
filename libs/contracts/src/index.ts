@@ -21,6 +21,7 @@ export * from './lib/domains/rules';
 export * from './lib/domains/reports';
 export * from './lib/domains/integrations';
 export * from './lib/domains/close';
+export * from './lib/domains/admin';
 export * from './lib/domains/ai';
 export * from './lib/endpoints';
 export * from './lib/openapi';

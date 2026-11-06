@@ -18,6 +18,7 @@ import { orgEndpoints } from './domains/org';
 import { planningEndpoints } from './domains/planning';
 import { reportEndpoints } from './domains/reports';
 import { requestEndpoints } from './domains/requests';
+import { adminEndpoints } from './domains/admin';
 import { channelEndpoints } from './domains/channels';
 import { closeEndpoints } from './domains/close';
 import { rulesEndpoints } from './domains/rules';
@@ -50,6 +51,7 @@ export const endpoints = {
   ...reportEndpoints,
   ...integrationEndpoints,
   ...closeEndpoints,
+  ...adminEndpoints,
   ...aiEndpoints,
 } as const;
 

@@ -78,6 +78,10 @@ export const ACTIONS = [
    * the switch; the feature stays off until a Finance Admin confirms it here.
    */
   'ai.confirm_finance',
+  // Administration and experience (P14)
+  'flags.confirm_finance',
+  'retention.confirm',
+  'legal_hold.manage',
 ] as const;
 export type Action = (typeof ACTIONS)[number];
 
@@ -199,6 +203,11 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'doa.read': 'tenant',
     'rules.read': 'tenant',
     'exception.resolve': 'tenant',
+    // Confirms money-affecting feature flags and any retention change that shortens a financial
+    // category; places or confirms legal holds with the Auditor.
+    'flags.confirm_finance': 'tenant',
+    'retention.confirm': 'tenant',
+    'legal_hold.manage': 'tenant',
   },
   'budget-owner': OWNER,
   'department-head': OWNER,
@@ -232,6 +241,9 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'org.read': 'tenant',
     'doa.read': 'tenant',
     'rules.read': 'tenant',
+    // Runs the integrity checks on demand (screen 113) and places legal holds with the Finance Controller.
+    'integrity.run': 'tenant',
+    'legal_hold.manage': 'tenant',
   },
   'integration-admin': {
     'tenant.read': 'tenant',

@@ -1,3 +1,4 @@
+import { OWNER_INVITED_TOPIC, RETENTION_SWEEP_TOPIC, RetentionService } from '@bf/api/admin';
 import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
 import { CHANNEL_DELIVER_TOPIC, ChannelsService, type ChannelDeliverJob } from '@bf/api/channels';
@@ -56,6 +57,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly reportDelivery: ReportDeliveryService,
     private readonly boardPacks: BoardPackService,
     private readonly webhooks: WebhooksService,
+    private readonly retention: RetentionService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -175,6 +177,53 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       {},
       { tz: 'UTC' },
     );
+    // Nightly data retention (111): fixed scope, legal holds always win, append-only run report.
+    await boss.createQueue(RETENTION_SWEEP_TOPIC, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(RETENTION_SWEEP_TOPIC, async () => {
+      const n = await this.retention.runNightly();
+      this.log.log(`nightly retention run ran for ${n} tenant(s)`);
+    });
+    await boss.schedule(
+      RETENTION_SWEEP_TOPIC,
+      process.env.RETENTION_SWEEP_CRON ?? '0 1 * * *',
+      {},
+      { tz: 'UTC' },
+    );
+    // Bulk owner invitations (103a): the invitation itself grants nothing.
+    await boss.createQueue(OWNER_INVITED_TOPIC, {
+      retryLimit: 5,
+      retryDelay: 5,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work<{
+      tenantId: string;
+      inviteId: string;
+      email: string;
+      displayName: string;
+      proposedRole: string;
+      expiresAt: string;
+    }>(OWNER_INVITED_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) {
+        const { tenantId, inviteId, email, displayName, proposedRole, expiresAt } = job.data;
+        await this.notifications.deliver({
+          tenantId,
+          to: email,
+          toName: displayName,
+          subject: 'You have been invited to BudgetFlow',
+          text: `Hello ${displayName}, you have been invited to BudgetFlow as ${proposedRole}. Sign in with your Hyland account before ${expiresAt.slice(0, 10)}.`,
+          html: `<p>Hello ${displayName},</p><p>You have been invited to BudgetFlow as ${proposedRole}. Sign in with your Hyland account before ${expiresAt.slice(0, 10)}.</p>`,
+          kind: 'owner_invite',
+          subjectType: 'owner_invite',
+          subjectId: inviteId,
+        });
+      }
+    });
     this.boss = boss;
     this.timer = setInterval(
       () => void this.drainOutbox(),

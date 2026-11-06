@@ -1,0 +1,34 @@
+
+▶ secrets         sh scripts/secret-scan.sh --all --quiet
+  ✓ secrets (1s)
+
+▶ lint            nx_run run-many -t lint
+  ✓ lint (3s)
+
+▶ styles          npx stylelint {apps,libs}/**/*.scss --allow-empty-input
+  ✓ styles (1s)
+
+▶ satori          npx sdsc check all
+  ✓ satori (32s)
+
+▶ typecheck       nx_run run-many -t typecheck
+  ✓ typecheck (5s)
+
+▶ build           nx_run run-many -t build
+  ✓ build (18s)
+
+▶ openapi         nx_run run-many -t openapi-check
+  ✓ openapi (3s)
+
+▶ db              nx_run run-many -t db-check
+  ✓ db (2s)
+
+Gate summary (lint typecheck build) — logs in tmp/gate/20261106-180333
+  PASS secrets             1s
+  PASS lint                3s
+  PASS styles              1s
+  PASS satori             32s
+  PASS typecheck           5s
+  PASS build              18s
+  PASS openapi             3s
+  PASS db                  2s
