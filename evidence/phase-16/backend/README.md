@@ -53,6 +53,24 @@ Keycloak 8340, mock providers 4260) with the deterministic seed, the fake AI pro
 marketplace partner. No external network call leaves the stack: `OutboundHttp` refuses any host
 outside `INTEGRATIONS_ALLOWED_HOSTS`, and the partner catalogue is served by `mock-providers`.
 
+## CI
+
+All five checks green on [PR #67](https://github.com/narasimhahyland/budgetflow/pull/67): preflight,
+harness, static gates, functional (API scenarios and journeys on Compose) and visual regression.
+
+Two things needed attention on the way there, both recorded here so the next reader does not repeat
+the diagnosis:
+
+- **Six 113a baselines moved and had to be updated.** Adding the `mcp` AI feature puts one more row,
+  "Connector for AI assistants", on the 113a AI settings screen, which is exactly what 092c needs.
+  The images came from the pinned Playwright image (the CI visual job's own output for this branch)
+  and the PR carries the required `Visual baselines updated:` reason.
+- **`011a-ai-assistant-panel action-redirect` on tablet failed once and passed on re-run** with no
+  code change between the two runs, and passed in the earlier CI run on the same code. The diff is a
+  vertical offset around the asynchronously loaded conversations card, so the screen has a timing
+  sensitivity at that viewport. Nothing in this phase touches 011a; worth a look by whoever owns the
+  AI screens.
+
 ## Risks and follow-ups
 
 - **Automation trigger delivery is not built.** The Phase 12 fan-out builds one payload per
