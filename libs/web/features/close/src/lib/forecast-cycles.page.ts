@@ -47,7 +47,7 @@ import { LoadState } from './load-state';
         </a>
         @if (canManage()) {
           <button mat-flat-button type="button" (click)="open()" data-testid="new-cycle">
-            <mat-icon svgIcon="add" />New cycle
+            <mat-icon svgIcon="plus_small" />New cycle
           </button>
         }
       </div>

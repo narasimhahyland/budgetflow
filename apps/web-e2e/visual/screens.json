@@ -1847,6 +1847,33 @@
           "fullPage": false
         },
         {
+          "state": "commentary-required",
+          "role": "department-head",
+          "path": "/finance/forecast-cycles/80000000-0000-4000-8000-000000000041",
+          "waitFor": "[data-testid=forecast-71000000-0000-4000-8000-000000000003]",
+          "actions": [
+            {
+              "click": "[data-testid=forecast-71000000-0000-4000-8000-000000000003]"
+            },
+            {
+              "click": "[data-testid=method-owner_input]"
+            },
+            {
+              "fill": ["[data-testid=owner-amount]", "0.00"]
+            },
+            {
+              "click": "[data-testid=submit-forecast]"
+            },
+            {
+              "waitFor": "[data-testid=commentary-required]"
+            },
+            {
+              "hover": "[data-testid=commentary-required]"
+            }
+          ],
+          "fullPage": false
+        },
+        {
           "state": "forbidden",
           "role": "employee",
           "waitFor": "role=heading[name=\"You do not have access to this page\"]"

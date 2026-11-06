@@ -1,0 +1,13 @@
+{
+  "type": "urn:budgetflow:problem:forecast-commentary-required",
+  "title": "Forecast commentary required",
+  "status": 422,
+  "code": "FORECAST_COMMENTARY_REQUIRED",
+  "detail": "Explain the variance of 800000 minor units (100.0%) in at least 20 characters before submitting.",
+  "instance": "/api/close/forecast-cycles/80000000-0000-4000-8000-000000000041/submissions",
+  "params": {
+    "varianceMinor": 800000,
+    "varianceBps": 10000,
+    "minLength": 20
+  }
+}
