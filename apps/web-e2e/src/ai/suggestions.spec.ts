@@ -1,11 +1,49 @@
 // Phase 13 journeys for the surfaces where a person acts on an AI suggestion (080f, 022d, 017c, 121a).
 // Each one proves the same rule from a different angle: the suggestion proposes, the person applies it
 // through the normal authorized command, and only then is the decision recorded against the suggestion.
-import { expect, test } from '@playwright/test';
+import { expect, test, type APIRequestContext } from '@playwright/test';
 import { SEED } from '@bf/seed';
+import { randomUUID } from 'node:crypto';
 import { expectShell } from '../support/auth';
 import { authFile } from '../support/roles';
 import { apiAs, setAiFeature } from './support';
+
+const uniq = () => randomUUID().slice(0, 8).toUpperCase();
+
+/**
+ * A spend line of this journey's own. The seeded unmatched lines carry event codes that the event
+ * reconciliation journeys need to stay unmatched, so matching one of those here would quietly break
+ * them: the subject has to be a line this test created.
+ */
+async function importSpendLine(
+  api: APIRequestContext,
+  ref: string,
+): Promise<{ actualId: string; merchant: string }> {
+  // A merchant of its own, so the queue row this journey works on cannot be confused with another.
+  const merchant = `Journey Print ${ref}`;
+  const csv = [
+    'source_ref,transaction_date,amount,currency,legal_entity,cost_center,gl_account,merchant,memo',
+    `${ref},2026-11-04,320.00,USD,HYL-US,CC-US-NYC-300,6100,${merchant},Offsite name badges`,
+  ].join('\n');
+  const uploaded = await api.post('/api/actuals/imports', {
+    data: { source: 'erp', fileName: `ai-journey-${ref}.csv`, content: csv },
+    headers: { 'idempotency-key': randomUUID() },
+  });
+  expect(uploaded.status(), 'import the journey\u2019s own spend line').toBe(201);
+  const batch = (await uploaded.json()) as { id: string };
+  const posted = await api.post(`/api/actuals/imports/${batch.id}/post`, {
+    headers: { 'idempotency-key': randomUUID() },
+  });
+  expect(posted.status(), 'post the import').toBe(200);
+
+  const found = (await (await api.get(`/api/actuals?status=all&q=${ref}`)).json()) as {
+    items: { id: string; sourceRef: string; status: string }[];
+  };
+  const line = found.items.find((i) => i.sourceRef === ref);
+  expect(line, 'the imported line is in the queue').toBeDefined();
+  expect(line!.status, 'it starts unmatched').toBe('unmatched');
+  return { actualId: line!.id, merchant };
+}
 
 // Accepting a suggestion is a one-shot human decision: the API refuses a second decision on the same
 // suggestion. A retry would therefore run against state the first attempt already changed, so these
@@ -13,13 +51,18 @@ import { apiAs, setAiFeature } from './support';
 test.describe('AI matching suggestions (080f)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('finance-controller') });
-  test.beforeAll(() => setAiFeature('matching', true));
+  test.beforeAll(async () => {
+    // These journeys run on desktop only, and so does their setup.
+    if (test.info().project.name === 'desktop') await setAiFeature('matching', true);
+  });
 
   test('ranks unmatched lines without matching anything, then matches through the normal command and records the decision', async ({
     page,
   }, info) => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
     const api = await apiAs('finance-controller');
+    const ref = `AIJ-${uniq()}`;
+    const line = await importSpendLine(api, ref);
 
     await page.goto('/finance/actuals/suggestions');
     await expectShell(page);
@@ -27,7 +70,8 @@ test.describe('AI matching suggestions (080f)', () => {
 
     await page.getByTestId('run-matching').click();
     const queue = page.getByRole('table', { name: 'AI matching suggestions' });
-    await expect(queue.getByRole('row')).toHaveCount(3); // header plus the two seeded lines
+    // Header, the two seeded unmatched lines, and the one this journey imported.
+    await expect(queue.getByRole('row')).toHaveCount(4);
     // Ranking alone matches nothing: every line is still open and waiting for a person.
     await expect(page.getByTestId('kpi-accepted')).toContainText('0');
 
@@ -38,6 +82,7 @@ test.describe('AI matching suggestions (080f)', () => {
 
     // First the seeded Hack Week travel line, chosen by its memo and never by position. Its top
     // suggestion is wrong, and the normal match command refuses it: a suggestion is not permission.
+    // Nothing changes, so the line is left exactly as the seed had it.
     const wrongRow = page.getByRole('row', { name: /Hack Week team travel/ });
     await expect(wrongRow).toContainText('INR');
     await wrongRow.getByRole('button', { name: 'Hack Week team travel' }).click();
@@ -61,10 +106,11 @@ test.describe('AI matching suggestions (080f)', () => {
     expect(stillOpen.items, 'a refused command records no acceptance').toHaveLength(0);
     await detail.getByRole('button', { name: 'Close' }).click();
 
-    // Then the seeded Northside Print line, whose suggested budget the match command accepts.
-    const row = page.getByRole('row', { name: /Northside Print/ });
-    await expect(row).toContainText('New York Events');
-    await row.getByRole('button', { name: 'Northside Print' }).click();
+    // Then this journey's own line, which the match command accepts.
+    await page.getByTestId('run-matching').click();
+    const row = page.getByRole('row', { name: new RegExp(line.merchant) });
+    await expect(row).toContainText('USD 320.00');
+    await row.getByRole('button', { name: line.merchant }).click();
     await expect(page.getByTestId('match-detail')).toBeVisible();
 
     await page.getByTestId('match-detail').getByTestId('accept-suggestion').click();
@@ -74,16 +120,16 @@ test.describe('AI matching suggestions (080f)', () => {
     // the person who made it and the audit entry the command wrote.
     const accepted = (await (
       await api.get('/api/ai/matching-suggestions?status=accepted')
-    ).json()) as {
-      items: { status: string; actualId: string; memo: string | null }[];
-    };
+    ).json()) as { items: { status: string; actualId: string; memo: string | null }[] };
     expect(accepted.items).toHaveLength(1);
-    expect(accepted.items[0]).toMatchObject({ status: 'accepted', merchant: 'Northside Print' });
-    const actual = (await (
-      await api.get(`/api/actuals?status=all&q=Offsite name badges`)
-    ).json()) as { items: { id: string; status: string }[] };
-    const matched = actual.items.find((a) => a.id === accepted.items[0].actualId);
-    expect(matched?.status, 'the line was matched by the normal command').toBe('matched');
+    expect(accepted.items[0]).toMatchObject({ status: 'accepted', actualId: line.actualId });
+    const after = (await (await api.get(`/api/actuals?status=all&q=${ref}`)).json()) as {
+      items: { id: string; status: string }[];
+    };
+    expect(
+      after.items.find((a) => a.id === line.actualId)?.status,
+      'the line was matched by the normal command',
+    ).toBe('matched');
 
     // The query log carries the human decision with the record it was applied to.
     const log = (await (
@@ -130,7 +176,10 @@ test.describe('AI matching suggestions (080f)', () => {
 test.describe('Suggested allocations (022d)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('regional-manager') });
-  test.beforeAll(() => setAiFeature('allocation_suggestions', true));
+  test.beforeAll(async () => {
+    // These journeys run on desktop only, and so does their setup.
+    if (test.info().project.name === 'desktop') await setAiFeature('allocation_suggestions', true);
+  });
 
   test('suggests a split the owner can change, then posts it through the normal allocation command', async ({
     page,
@@ -184,7 +233,10 @@ test.describe('Suggested allocations (022d)', () => {
 test.describe('Anomaly flags (017c)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('finance-controller') });
-  test.beforeAll(() => setAiFeature('anomaly_flags', true));
+  test.beforeAll(async () => {
+    // These journeys run on desktop only, and so does their setup.
+    if (test.info().project.name === 'desktop') await setAiFeature('anomaly_flags', true);
+  });
 
   test('raises an advisory flag with evidence from the records and clears it with a reason', async ({
     page,
@@ -220,7 +272,10 @@ test.describe('Anomaly flags (017c)', () => {
 test.describe('Receipt extraction (121a)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('finance-admin') });
-  test.beforeAll(() => setAiFeature('extraction', true));
+  test.beforeAll(async () => {
+    // These journeys run on desktop only, and so does their setup.
+    if (test.info().project.name === 'desktop') await setAiFeature('extraction', true);
+  });
 
   test('prefills the details from the verified receipt and records only what the person confirms', async ({
     page,

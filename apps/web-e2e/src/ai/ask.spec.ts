@@ -6,7 +6,6 @@ import { SEED } from '@bf/seed';
 import { apiToken, expectShell } from '../support/auth';
 import { API_URL } from '../support/env';
 import { authFile } from '../support/roles';
-import { setAiFeature } from './support';
 
 /** The same figures the answer shows, read straight from the budget read model. */
 async function budgetFigures(role: 'location-manager', budgetId: string) {
@@ -131,27 +130,5 @@ test.describe('Ask BudgetFlow (011a)', () => {
     await deleteEntry.click();
     await expect(page.getByText('Conversation deleted.')).toBeVisible();
     await expect(deleteEntry).toHaveCount(0);
-  });
-});
-
-test.describe('Ask BudgetFlow in Slack and Teams (061f)', () => {
-  test.use({ storageState: authFile('location-manager') });
-  // The chat feature ships off; say so outright rather than trusting the order of the suites.
-  test.beforeAll(() => setAiFeature('ask_chat', false));
-
-  test('shows the chat feature\u2019s own kill switch as its own state, not as empty data', async ({
-    page,
-  }) => {
-    await page.goto('/ask/chat');
-    await expectShell(page);
-    await page.getByTestId('chat-question').fill('How much is left in Bengaluru Events?');
-    await page.getByTestId('chat-send').click();
-
-    // ask_chat ships off because it needs the chat app connected first (061e).
-    const disabled = page.getByTestId('ai-disabled');
-    await expect(disabled).toBeVisible();
-    await expect(disabled).toContainText('Ask in Slack and Teams is turned off for this company');
-    await expect(disabled).toContainText('Questions in the app and /budgetflow balance still work');
-    await expect(page.getByTestId('chat-message')).toHaveCount(0);
   });
 });

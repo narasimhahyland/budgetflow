@@ -50,8 +50,19 @@ figures, under the column heading "Year-end outlook (AI)" and the words "not spe
 | 121a, finance admin reads a verified receipt and confirms           | fields prefilled, confirmation required, only confirmed values recorded        | confirm blocked until checked; confirmed values listed back         | PASS   |
 | 121a, receipt with a field the model could not read                 | left empty and marked, never guessed                                           | "Please check: we could not read this clearly"                      | PASS   |
 
-Commands and full output: `functional/journeys.txt` (32 journeys, 0 failures, at the gate's own
-parallelism). Scrubbed API responses behind the states above: `api/ai-states.json`.
+Commands and full output: `functional/journeys.txt` (32 journeys, 0 failures). The whole journey
+suite was then run the way CI runs it (`--project=desktop --project=tablet --project=mobile`): 377
+passed, 128 skipped, 0 failures. Scrubbed API responses behind the states above:
+`api/ai-states.json`.
+
+Two cross-journey hazards CI found that a scoped local run could not, both now fixed:
+
+- The matching journey accepted the seeded `ERP-2611-0009` line, which carries the `NYC-OFFSITE-26`
+  event code the event reconciliation journeys need unmatched. It now imports a spend line of its
+  own with a unique merchant and matches that.
+- AI feature switches are tenant-wide, so the 113a switch journey and the 061f disabled-state journey
+  decided each other's starting state. Every switch-sensitive test now runs in one serial group that
+  restores the seeded switches, and each dependent journey asserts the switch it needs beforehand.
 
 ## Gates
 
