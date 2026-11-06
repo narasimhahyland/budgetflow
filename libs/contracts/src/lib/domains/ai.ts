@@ -223,6 +223,7 @@ export const AiConversationList = named(
   'AiConversationList',
   z.object({ items: z.array(AiConversation) }).strict(),
 );
+export type AiConversationList = z.infer<typeof AiConversationList>;
 
 export const AiConversationTurn = named(
   'AiConversationTurn',
@@ -236,11 +237,13 @@ export const AiConversationTurn = named(
     })
     .strict(),
 );
+export type AiConversationTurn = z.infer<typeof AiConversationTurn>;
 
 export const AiConversationDetail = named(
   'AiConversationDetail',
   z.object({ conversation: AiConversation, turns: z.array(AiConversationTurn) }).strict(),
 );
+export type AiConversationDetail = z.infer<typeof AiConversationDetail>;
 
 // 069a policy assistant ---------------------------------------------------------------------------
 
@@ -280,6 +283,7 @@ export const PolicyOption = named(
     .strict()
     .describe('Only options that comply, or the exception path. Never a way around a control.'),
 );
+export type PolicyOption = z.infer<typeof PolicyOption>;
 
 export const PolicyExplanation = named(
   'PolicyExplanation',
@@ -354,6 +358,7 @@ export const AllocationSuggestionLine = named(
     })
     .strict(),
 );
+export type AllocationSuggestionLine = z.infer<typeof AllocationSuggestionLine>;
 
 export const AllocationSuggestion = named(
   'AllocationSuggestion',
@@ -397,6 +402,7 @@ export const OutlookDriver = named(
   'OutlookDriver',
   z.object({ label: z.string(), detail: z.string() }).strict(),
 );
+export type OutlookDriver = z.infer<typeof OutlookDriver>;
 
 export const BudgetOutlook = named(
   'BudgetOutlook',
@@ -460,6 +466,7 @@ export const OutlookList = named(
     })
     .strict(),
 );
+export type OutlookList = z.infer<typeof OutlookList>;
 
 export const OutlookRunRequest = named(
   'OutlookRunRequest',
@@ -470,6 +477,7 @@ export const OutlookRunRequest = named(
     })
     .strict(),
 );
+export type OutlookRunRequest = z.infer<typeof OutlookRunRequest>;
 
 // 080f transaction matching -----------------------------------------------------------------------
 
@@ -487,6 +495,7 @@ export const AiMatchSuggestionTarget = named(
     })
     .strict(),
 );
+export type AiMatchSuggestionTarget = z.infer<typeof AiMatchSuggestionTarget>;
 
 export const AiMatchSuggestion = named(
   'AiMatchSuggestion',
@@ -543,11 +552,13 @@ export const AiMatchSuggestionList = named(
     })
     .strict(),
 );
+export type AiMatchSuggestionList = z.infer<typeof AiMatchSuggestionList>;
 
 export const AiMatchSuggestionRunRequest = named(
   'AiMatchSuggestionRunRequest',
   z.object({ actualIds: z.array(Id).max(200).optional() }).strict(),
 );
+export type AiMatchSuggestionRunRequest = z.infer<typeof AiMatchSuggestionRunRequest>;
 
 // 017c anomaly flags ------------------------------------------------------------------------------
 
@@ -608,11 +619,13 @@ export const AnomalyFlagList = named(
     })
     .strict(),
 );
+export type AnomalyFlagList = z.infer<typeof AnomalyFlagList>;
 
 export const AnomalyScanRequest = named(
   'AnomalyScanRequest',
   z.object({ kinds: z.array(AnomalyKind).optional() }).strict(),
 );
+export type AnomalyScanRequest = z.infer<typeof AnomalyScanRequest>;
 
 // 121a receipt and quote extraction ---------------------------------------------------------------
 
@@ -626,6 +639,7 @@ export const ExtractionRequest = named(
     })
     .strict(),
 );
+export type ExtractionRequest = z.infer<typeof ExtractionRequest>;
 
 export const ExtractedField = named(
   'ExtractedField',
@@ -643,6 +657,7 @@ export const ExtractedField = named(
     })
     .strict(),
 );
+export type ExtractedField = z.infer<typeof ExtractedField>;
 
 export const ExtractionResult = named(
   'ExtractionResult',
@@ -714,6 +729,7 @@ export const AiSuggestionDecision = named(
     })
     .strict(),
 );
+export type AiSuggestionDecision = z.infer<typeof AiSuggestionDecision>;
 
 export const AiFeedbackRequest = named(
   'AiFeedbackRequest',
@@ -724,6 +740,7 @@ export const AiFeedbackRequest = named(
     })
     .strict(),
 );
+export type AiFeedbackRequest = z.infer<typeof AiFeedbackRequest>;
 
 // 113a settings, query log and accuracy -----------------------------------------------------------
 
@@ -779,6 +796,7 @@ export const AiProviderStatus = named(
     })
     .strict(),
 );
+export type AiProviderStatus = z.infer<typeof AiProviderStatus>;
 
 export const AiSettingsView = named(
   'AiSettingsView',
@@ -792,11 +810,13 @@ export const AiSettingsView = named(
     })
     .strict(),
 );
+export type AiSettingsView = z.infer<typeof AiSettingsView>;
 
 export const AiFeatureSwitchRequest = named(
   'AiFeatureSwitchRequest',
   z.object({ enabled: z.boolean() }).strict(),
 );
+export type AiFeatureSwitchRequest = z.infer<typeof AiFeatureSwitchRequest>;
 
 export const AiQueryLogEntry = named(
   'AiQueryLogEntry',
@@ -847,6 +867,7 @@ export const AiQueryLogList = named(
     })
     .strict(),
 );
+export type AiQueryLogList = z.infer<typeof AiQueryLogList>;
 
 export const AI_EVAL_METRICS = [
   'cites_only_permitted_records',
@@ -889,6 +910,7 @@ export const AiEvaluationRunRequest = named(
   'AiEvaluationRunRequest',
   z.object({ feature: AiFeature.optional() }).strict(),
 );
+export type AiEvaluationRunRequest = z.infer<typeof AiEvaluationRunRequest>;
 
 export const AiAccuracyView = named(
   'AiAccuracyView',
@@ -899,6 +921,7 @@ export const AiAccuracyView = named(
     })
     .strict(),
 );
+export type AiAccuracyView = z.infer<typeof AiAccuracyView>;
 
 // Endpoints ---------------------------------------------------------------------------------------
 
