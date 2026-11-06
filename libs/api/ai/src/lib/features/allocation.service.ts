@@ -7,7 +7,6 @@ import type {
   AllocationSuggestionLine,
   AllocationSuggestionRequest,
   AllocationWeights,
-  BudgetDetail,
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, gte, isNull, or, sql } from 'drizzle-orm';
