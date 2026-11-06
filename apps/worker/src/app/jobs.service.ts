@@ -226,6 +226,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
                 m.tenantId,
                 m.topic,
                 m.payload as Record<string, unknown>,
+                m.createdAt,
               );
               await this.boss!.send(
                 m.topic,
