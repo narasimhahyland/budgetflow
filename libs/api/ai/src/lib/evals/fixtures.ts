@@ -1,6 +1,6 @@
 import type { AiFeature } from '@bf/contracts';
-import { ANOMALY_THRESHOLDS } from '../features/anomaly.service';
-import { splitAmount } from '../features/allocation.service';
+import { splitAmount } from '../allocation-math';
+import { ANOMALY_THRESHOLDS } from '../anomaly-thresholds';
 import { allowedNumbers, figuresTraceable } from '../figure-guard';
 import { minimize } from '../minimization';
 import type { AiProvider, Fact } from '../provider/ai-provider';

@@ -12,6 +12,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { AiGateway } from '../ai-gateway.service';
+import { ANOMALY_THRESHOLDS } from '../anomaly-thresholds';
 import { AiEvaluationsService } from '../evals/evaluations.service';
 import type { Fact } from '../provider/ai-provider';
 import { AiRetrieval } from '../retrieval.service';
@@ -21,21 +22,6 @@ import { AiSuggestionsService } from '../suggestions.service';
 const AnomalyOutput = z
   .object({ finding: z.string().min(1).max(600), confidence: z.enum(['high', 'medium', 'low']) })
   .strict();
-
-/**
- * Deterministic thresholds behind the flags. They are features of the records, not model opinion:
- * the model only turns them into a sentence, and the flag is advisory either way.
- */
-export const ANOMALY_THRESHOLDS = {
-  /** Two requests by the same person on the same budget within this many days look related. */
-  splitWindowDays: 7,
-  /** Their combined amount is worth a look above this, in minor units of the budget currency. */
-  splitCombinedMinor: 250_000,
-  /** Cost per head this many times the peer median is unusual. */
-  costPerHeadFactor: 2,
-  /** A peer group smaller than this is not a basis for comparison. */
-  minimumPeerGroup: 5,
-} as const;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

@@ -2,6 +2,8 @@ export * from './lib/provider/ai-provider';
 export * from './lib/provider/fake-provider';
 export * from './lib/minimization';
 export * from './lib/figure-guard';
+export * from './lib/allocation-math';
+export * from './lib/anomaly-thresholds';
 export * from './lib/feature-catalog';
 export * from './lib/ai-gateway.service';
 export * from './lib/query-log.service';

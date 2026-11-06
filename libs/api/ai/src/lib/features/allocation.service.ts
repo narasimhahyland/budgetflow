@@ -15,10 +15,8 @@ import { AiGateway } from '../ai-gateway.service';
 import type { Fact } from '../provider/ai-provider';
 import { AiRetrieval } from '../retrieval.service';
 import { AiSettingsService } from '../settings.service';
+import { ROUNDING_MINOR, splitAmount } from '../allocation-math';
 import { AiSuggestionsService } from '../suggestions.service';
-
-/** Suggestions read like plans rather than calculator output: rounded to USD 50.00 (022d). */
-const ROUNDING_MINOR = 5_000;
 
 const WeightsOutput = z
   .object({
@@ -272,8 +270,8 @@ export class AiAllocationService {
     if (!wanted.length) return new Map();
     const res = await tx.execute<{ code: string; authorized: string; consumed: string }>(sql`
       select b.code,
-             coalesce(sum(l.amount_minor) filter (where l.account = 'authorized'), 0)::text as authorized,
-             coalesce(sum(l.amount_minor) filter (where l.account in ('encumbered', 'actual')), 0)::text as consumed
+             coalesce(sum(l.budget_amount_minor) filter (where l.account = 'authorized'), 0)::text as authorized,
+             coalesce(sum(l.budget_amount_minor) filter (where l.account in ('encumbered', 'actual')), 0)::text as consumed
       from budgets b
       join fiscal_years fy on fy.id = b.fiscal_year_id
       left join ledger_lines l on l.budget_id = b.id
@@ -294,43 +292,4 @@ export class AiAllocationService {
         });
     return out;
   }
-}
-
-/**
- * Deterministic split: a weighted score per child, normalized to the amount, rounded down to the
- * rounding step, with the remainder on the largest line so the lines always total the amount exactly.
- */
-export function splitAmount(
-  amountMinor: number,
-  facts: readonly Fact[],
-  weights: AllocationWeights,
-): { budgetId: string; amountMinor: number }[] {
-  const scores = facts.map((f) => {
-    const headcount = Number(f.fields['eligibleHeadcount'] ?? 0);
-    const priorUseBps = Number(f.fields['priorUseBps'] ?? 0);
-    const participationBps = Number(f.fields['participationBps'] ?? 0);
-    const score =
-      weights.headcountPct * headcount +
-      (weights.priorUsePct * priorUseBps) / 100 +
-      (weights.participationPct * participationBps) / 100;
-    return { budgetId: f.id, score: score > 0 ? score : 0 };
-  });
-  const total = scores.reduce((s, x) => s + x.score, 0);
-  const even = total <= 0;
-  const steps = Math.floor(amountMinor / ROUNDING_MINOR);
-  const shares = scores.map((s) => ({
-    budgetId: s.budgetId,
-    steps: even ? Math.floor(steps / scores.length) : Math.floor((steps * s.score) / total),
-    score: s.score,
-  }));
-  let used = shares.reduce((sum, s) => sum + s.steps, 0);
-  const lines = shares
-    .map((s) => ({ budgetId: s.budgetId, amountMinor: s.steps * ROUNDING_MINOR, score: s.score }))
-    .sort((a, b) => b.amountMinor - a.amountMinor || a.budgetId.localeCompare(b.budgetId));
-  const remainder = amountMinor - used * ROUNDING_MINOR;
-  if (lines.length && remainder > 0) lines[0].amountMinor += remainder;
-  used = 0;
-  return lines
-    .map(({ budgetId, amountMinor: m }) => ({ budgetId, amountMinor: m }))
-    .sort((a, b) => a.budgetId.localeCompare(b.budgetId));
 }
