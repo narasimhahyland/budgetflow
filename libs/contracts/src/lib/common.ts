@@ -303,6 +303,15 @@ export const PROBLEM_CODES = [
   'YEAR_END_DRY_RUN_REQUIRED',
   'ROLLOVER_POLICY_MISSING',
   'CARRY_TARGET_MISSING',
+  // AI layer (P13). AI suggests; people decide: none of these ever authorize a financial action.
+  'AI_FEATURE_DISABLED',
+  'AI_PROVIDER_NOT_CONFIGURED',
+  'AI_UNAVAILABLE',
+  'AI_OUTPUT_DISCARDED',
+  'AI_SUGGESTION_NOT_OPEN',
+  'AI_SUGGESTION_NOT_APPLIED',
+  'AI_FINANCE_CONFIRMATION_REQUIRED',
+  'AI_FLAG_KIND_PAUSED',
 ] as const;
 export const ProblemCode = z.enum(PROBLEM_CODES);
 export type ProblemCode = z.infer<typeof ProblemCode>;

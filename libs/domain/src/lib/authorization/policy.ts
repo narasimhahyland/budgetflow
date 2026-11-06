@@ -64,6 +64,11 @@ export const ACTIONS = [
   'integration.manage',
   'integration.read',
   'notification.manage',
+  /**
+   * Confirm that a finance-affecting AI feature may be turned on (113a). An Organization Admin sets
+   * the switch; the feature stays off until a Finance Admin confirms it here.
+   */
+  'ai.confirm_finance',
 ] as const;
 export type Action = (typeof ACTIONS)[number];
 
@@ -154,6 +159,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'rules.read': 'tenant',
     'rules.manage': 'tenant',
     'exception.resolve': 'tenant',
+    'ai.confirm_finance': 'tenant',
   },
   'finance-controller': {
     'tenant.read': 'tenant',
