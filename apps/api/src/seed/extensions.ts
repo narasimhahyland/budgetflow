@@ -40,7 +40,7 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
   },
   { name: 'saved report views, scheduled deliveries and exports', phase: 'P10', run: seedReports },
   {
-    name: 'rollover policies, close reason codes and a draft year-end run',
+    name: 'rollover policies, close reason codes, a draft year-end run, close snapshots and two forecast cycles',
     phase: 'P11',
     run: seedClose,
   },

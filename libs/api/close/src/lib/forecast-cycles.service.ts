@@ -1,5 +1,12 @@
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, CommandRunner, DB, PolicyService, unwrap, type RequestActor } from '@bf/api/core';
+import {
+  ApiProblem,
+  CommandRunner,
+  DB,
+  PolicyService,
+  unwrap,
+  type RequestActor,
+} from '@bf/api/core';
 import {
   budgets,
   forecastCycles,
@@ -107,7 +114,12 @@ export class ForecastCyclesService {
           ),
         )
         // Newest first, then by name and id so two cycles opened in the same second never swap.
-        .orderBy(desc(forecastCycles.asOfDate), desc(forecastCycles.createdAt), forecastCycles.name, forecastCycles.id);
+        .orderBy(
+          desc(forecastCycles.asOfDate),
+          desc(forecastCycles.createdAt),
+          forecastCycles.name,
+          forecastCycles.id,
+        );
       const items: ForecastCycle[] = [];
       for (const row of rows) items.push(await this.cycleDto(tx, row));
       return { items };
@@ -261,7 +273,8 @@ export class ForecastCyclesService {
           pendingMinor: line.facts.preEncumberedMinor,
           plannedEventsMinor: line.facts.plannedEventsMinor,
           systemGenerated: false,
-          submittedAt: outcome.nextStatus === 'submitted' ? now : (line.snapshot?.submittedAt ?? null),
+          submittedAt:
+            outcome.nextStatus === 'submitted' ? now : (line.snapshot?.submittedAt ?? null),
           updatedAt: now,
         };
         const [row] = line.snapshot
@@ -278,7 +291,8 @@ export class ForecastCyclesService {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
           actorSubject: actor.subject,
-          action: outcome.nextStatus === 'submitted' ? 'forecast.submitted' : 'forecast.draft_saved',
+          action:
+            outcome.nextStatus === 'submitted' ? 'forecast.submitted' : 'forecast.draft_saved',
           resourceType: 'forecast_snapshot',
           resourceId: row.id,
           legalEntityId: line.budget?.legalEntityId ?? null,
@@ -321,7 +335,9 @@ export class ForecastCyclesService {
         const [snapshot] = await tx
           .select()
           .from(forecastSnapshots)
-          .where(and(eq(forecastSnapshots.id, submissionId), eq(forecastSnapshots.cycleId, cycle.id)))
+          .where(
+            and(eq(forecastSnapshots.id, submissionId), eq(forecastSnapshots.cycleId, cycle.id)),
+          )
           .for('update');
         if (!snapshot) throw ApiProblem.notFound('forecast submission');
         if (req.decision === 'request_commentary' && !req.note?.trim())
@@ -338,7 +354,8 @@ export class ForecastCyclesService {
           .update(forecastSnapshots)
           .set({
             status: next,
-            commentaryNote: req.decision === 'request_commentary' ? (req.note ?? null) : snapshot.commentaryNote,
+            commentaryNote:
+              req.decision === 'request_commentary' ? (req.note ?? null) : snapshot.commentaryNote,
             acceptedAt: next === 'accepted' ? now : null,
             acceptedBy: next === 'accepted' ? actor.personId : null,
             updatedAt: now,
@@ -362,7 +379,9 @@ export class ForecastCyclesService {
         const lines = await this.lines(tx, cycle);
         const line =
           lines.find((l) => l.snapshot?.id === row.id) ??
-          lines.find((l) => (row.budgetId ? l.budget?.id === row.budgetId : l.eventId === row.eventId));
+          lines.find((l) =>
+            row.budgetId ? l.budget?.id === row.budgetId : l.eventId === row.eventId,
+          );
         if (!line) throw ApiProblem.notFound('forecast submission');
         return this.submissionDto(tx, cycle, { ...line, snapshot: row });
       },
@@ -403,7 +422,12 @@ export class ForecastCyclesService {
             if (line.snapshot.status === 'accepted') continue;
             await tx
               .update(forecastSnapshots)
-              .set({ status: 'accepted', acceptedAt: now, acceptedBy: actor.personId, updatedAt: now })
+              .set({
+                status: 'accepted',
+                acceptedAt: now,
+                acceptedBy: actor.personId,
+                updatedAt: now,
+              })
               .where(eq(forecastSnapshots.id, line.snapshot.id));
             accepted += 1;
             continue;
@@ -438,22 +462,28 @@ export class ForecastCyclesService {
           });
           systemWritten += 1;
         }
-        // Earlier cycles of the same fiscal year are history now, so 087's "latest accepted" is one set.
-        const superseded = await tx
-          .update(forecastSnapshots)
-          .set({ status: 'superseded', updatedAt: now })
-          .where(
-            and(
-              eq(forecastSnapshots.status, 'accepted'),
-              sql`${forecastSnapshots.cycleId} is not null`,
-              sql`${forecastSnapshots.cycleId} <> ${cycle.id}::uuid`,
-              sql`${forecastSnapshots.cycleId} in (
-                select id from forecast_cycles
-                where fiscal_year_id = ${cycle.fiscalYearId}::uuid and as_of_date <= ${cycle.asOfDate}
-              )`,
-            ),
-          )
-          .returning({ id: forecastSnapshots.id });
+        // Earlier cycles of the same fiscal year are history now, so 087's "latest accepted" is one
+        // set. Only the budgets this cycle covers are superseded: a cycle scoped to one subtree
+        // never touches a forecast somebody made outside it.
+        const coveredIds = lines.filter((l) => l.budget && !l.eventId).map((l) => l.budget!.id);
+        const superseded = coveredIds.length
+          ? await tx
+              .update(forecastSnapshots)
+              .set({ status: 'superseded', updatedAt: now })
+              .where(
+                and(
+                  eq(forecastSnapshots.status, 'accepted'),
+                  inArray(forecastSnapshots.budgetId, coveredIds),
+                  sql`${forecastSnapshots.cycleId} is not null`,
+                  sql`${forecastSnapshots.cycleId} <> ${cycle.id}::uuid`,
+                  sql`${forecastSnapshots.cycleId} in (
+                    select id from forecast_cycles
+                    where fiscal_year_id = ${cycle.fiscalYearId}::uuid and as_of_date <= ${cycle.asOfDate}
+                  )`,
+                ),
+              )
+              .returning({ id: forecastSnapshots.id })
+          : [];
         const [closed] = await tx
           .update(forecastCycles)
           .set({ status: 'closed', closedAt: now, closedBy: actor.personId })
@@ -485,7 +515,8 @@ export class ForecastCyclesService {
     if (this.policy.can(actor, 'report.read', { kind: 'tenant', tenantId: actor.tenantId }).allowed)
       return;
     if (
-      this.policy.can(actor, 'forecast.submit', { kind: 'tenant', tenantId: actor.tenantId }).allowed
+      this.policy.can(actor, 'forecast.submit', { kind: 'tenant', tenantId: actor.tenantId })
+        .allowed
     )
       return;
     throw ApiProblem.forbidden('Forecast cycles are for finance roles and budget owners.');
@@ -575,7 +606,9 @@ export class ForecastCyclesService {
         and(
           eq(budgets.fiscalYearId, cycle.fiscalYearId),
           inArray(budgets.status, [...CYCLE_BUDGET_STATUSES]),
-          scopeRoot ? sql`left(${budgets.path}, ${scopeRoot.path.length}) = ${scopeRoot.path}` : sql`true`,
+          scopeRoot
+            ? sql`left(${budgets.path}, ${scopeRoot.path.length}) = ${scopeRoot.path}`
+            : sql`true`,
         ),
       );
     const balances = await this.ledgerReads.balances(
@@ -583,7 +616,10 @@ export class ForecastCyclesService {
       rows.map((r) => r.id),
     );
     const elapsedBps = await this.elapsedBps(tx, cycle);
-    const planned = await this.plannedEventMoney(tx, rows.map((r) => r.id));
+    const planned = await this.plannedEventMoney(
+      tx,
+      rows.map((r) => r.id),
+    );
     const snapshots = await tx
       .select()
       .from(forecastSnapshots)
@@ -617,7 +653,10 @@ export class ForecastCyclesService {
     });
 
     if (cycle.includeOpenEvents && rows.length) {
-      const events = await this.openEvents(tx, rows.map((r) => r.id));
+      const events = await this.openEvents(
+        tx,
+        rows.map((r) => r.id),
+      );
       const budgetById = new Map(rows.map((r) => [r.id, r]));
       for (const e of events) {
         lines.push({
@@ -827,7 +866,10 @@ export class ForecastCyclesService {
     cycle: CycleRow,
     line: CycleLine,
   ): Promise<ForecastSubmission> {
-    const names = await this.reads.names(tx, [line.ownerPersonId, line.snapshot?.acceptedBy ?? null]);
+    const names = await this.reads.names(tx, [
+      line.ownerPersonId,
+      line.snapshot?.acceptedBy ?? null,
+    ]);
     const money = (amountMinor: number): Money => ({ amountMinor, currency: cycle.currency });
     const threshold = thresholdOf(cycle);
     const options = forecastOptions(line.facts);
@@ -839,7 +881,8 @@ export class ForecastCyclesService {
     // so an owner always opens a filled-in starting point.
     const amountMinor =
       line.snapshot?.amountMinor ??
-      (options.find((o) => o.method === method)?.amountMinor ?? runRateAmount(line.facts));
+      options.find((o) => o.method === method)?.amountMinor ??
+      runRateAmount(line.facts);
     // The ledger columns are read live from the ledger, never from the snapshot, so the monitor
     // reconciles to the ledger on every read and the variance is the one finance has to act on now.
     // The snapshot keeps its own copy of what the owner saw; the audit entry is the record of that.
@@ -897,7 +940,8 @@ function scopeLabelOf(lines: readonly CycleLine[]): string {
       (l) =>
         l.budget &&
         !lines.some(
-          (o) => o.budget && o.budget.id !== l.budget!.id && l.budget!.path.startsWith(o.budget.path),
+          (o) =>
+            o.budget && o.budget.id !== l.budget!.id && l.budget!.path.startsWith(o.budget.path),
         ),
     )
     .map((l) => l.budget!.name)

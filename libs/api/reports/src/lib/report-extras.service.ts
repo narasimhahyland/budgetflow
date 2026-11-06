@@ -291,9 +291,11 @@ export class ReportExtrasReads {
   }
 
   /**
-   * One accepted (or, inside an open cycle, submitted) snapshot per budget. The pick is fully
-   * ordered — accepted before submitted, then newest as-of date, then newest row and finally id —
-   * so two snapshots that tie never swap places between runs.
+   * One snapshot per budget. A named cycle reports what that cycle holds whatever its status, so a
+   * comparison with an earlier cycle still shows its figures after a later cycle superseded them;
+   * without a named cycle only live forecasts count. The pick is fully ordered — accepted before
+   * submitted, then newest as-of date, then newest row and finally id — so two snapshots that tie
+   * never swap places between runs.
    */
   private async snapshots(
     tx: Tx,
@@ -316,8 +318,11 @@ export class ReportExtrasReads {
       from forecast_snapshots s
       where s.budget_id in (${uuidList(budgetIds)})
         and s.event_id is null
-        and s.status in ('accepted', 'submitted')
-        ${cycleId ? sql`and s.cycle_id = ${cycleId}::uuid` : sql``}
+        ${
+          cycleId
+            ? sql`and s.cycle_id = ${cycleId}::uuid and s.status <> 'draft'`
+            : sql`and s.status in ('accepted', 'submitted')`
+        }
       order by s.budget_id,
                (s.status = 'accepted') desc,
                s.as_of_date desc,
