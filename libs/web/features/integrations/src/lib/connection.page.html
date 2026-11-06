@@ -1,0 +1,716 @@
+@if (detail.isLoading() && !valueOf(detail)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="this connector" /></section>
+} @else if (detail.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="detail.error()" what="this connector" (retry)="detail.reload()" />
+  </section>
+} @else if (valueOf(detail); as d) {
+  <header class="bf-page__header">
+    <div class="bf-page__heading">
+      <p class="bf-muted">
+        <a routerLink="/admin/integrations">Integrations</a> ·
+        {{ categoryLabel(d.summary.category) }}
+      </p>
+      <h1 class="bf-page__title">{{ d.summary.displayName }}</h1>
+      <div class="bf-chip-row">
+        <sat-status-tag [status]="statusTone(d.summary.status)" data-testid="connector-status">{{
+          statusLabel(d.summary.status)
+        }}</sat-status-tag>
+        <sat-status-tag status="neutral">{{ modeLabel(d.summary.mode) }} mode</sat-status-tag>
+      </div>
+    </div>
+    <div class="bf-page__actions">
+      @if (canManage()) {
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="busy() || !syncableObjects().length"
+          (click)="tab.set('sync')"
+          data-testid="go-sync"
+        >
+          Sync now
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="busy()"
+          (click)="togglePause(d.summary.status !== 'paused')"
+          data-testid="toggle-pause"
+        >
+          {{ d.summary.status === 'paused' ? 'Resume' : 'Pause' }}
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="busy()"
+          (click)="disconnecting.set(true)"
+          data-testid="start-disconnect"
+        >
+          Disconnect
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (notice()) {
+    <sat-banner variant="success" data-testid="connector-notice"
+      ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+    >
+  }
+  @if (failure()) {
+    <sat-banner variant="important" data-testid="connector-error"
+      ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+    >
+  }
+
+  @if (d.summary.status === 'needs_attention') {
+    <sat-banner variant="important" data-testid="connector-degraded">
+      <sat-banner-message>
+        <strong>{{ d.summary.displayName }} is not working.</strong>
+        {{ d.summary.attention ?? 'The last attempt to reach the provider failed.' }}
+        Scheduled syncs keep failing until it is fixed, so BudgetFlow is working from data that
+        stops at the last successful run.
+      </sat-banner-message>
+    </sat-banner>
+  } @else if (d.summary.status === 'paused') {
+    <sat-banner variant="info" data-testid="connector-paused">
+      <sat-banner-message>
+        <strong>Paused{{ d.summary.pausedByName ? ' by ' + d.summary.pausedByName : '' }}.</strong>
+        No schedule runs and nothing is pushed while it is paused. Data already imported stays.
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  @if (disconnecting()) {
+    <section class="bf-card" aria-labelledby="disconnect-title" data-testid="disconnect-panel">
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" id="disconnect-title">
+            Disconnect {{ d.summary.displayName }}?
+          </h2>
+          <p class="bf-card__hint">Read what happens before you confirm.</p>
+        </div>
+      </div>
+      <ul class="bf-card__body">
+        <li>Every schedule on this connector stops. Nothing new arrives or is sent.</li>
+        <li>Event codes and card limits waiting to be pushed are not sent.</li>
+        <li>
+          The stored credential is dropped. Reconnecting needs a new one; BudgetFlow cannot recover
+          this one.
+        </li>
+        <li>
+          Everything already imported stays: actuals, batches, sync history and the audit trail are
+          untouched.
+        </li>
+      </ul>
+      <div class="bf-form">
+        <mat-form-field appearance="outline" class="bf-form__wide">
+          <mat-label>Type {{ d.summary.displayName }} to confirm</mat-label>
+          <input
+            matInput
+            [ngModel]="confirmText()"
+            (ngModelChange)="confirmText.set($event)"
+            data-testid="disconnect-confirm"
+          />
+        </mat-form-field>
+      </div>
+      <div class="bf-form__actions">
+        <button mat-button type="button" (click)="disconnecting.set(false); confirmText.set('')">
+          Cancel
+        </button>
+        <button
+          mat-flat-button
+          satImportantButton
+          type="button"
+          [disabled]="busy() || !confirmed(d.summary.displayName)"
+          (click)="disconnect()"
+          data-testid="disconnect-submit"
+        >
+          Disconnect
+        </button>
+      </div>
+    </section>
+  }
+
+  <nav class="bf-tabs" aria-label="Connector sections">
+    @for (t of tabs(); track t.id) {
+      <button
+        class="bf-tabs__tab"
+        type="button"
+        [class.bf-tabs__tab--active]="tab() === t.id"
+        [attr.aria-current]="tab() === t.id ? 'page' : null"
+        (click)="tab.set(t.id)"
+        [attr.data-testid]="'tab-' + t.id"
+      >
+        {{ t.label }}
+      </button>
+    }
+  </nav>
+
+  @switch (tab()) {
+    @case ('overview') {
+      <section class="bf-kpis" aria-label="Last 24 hours">
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Records in</p>
+          <p class="bf-kpi__value" data-testid="records-in">{{ d.recordsIn24h | number }}</p>
+          <p class="bf-kpi__delta">Into the review queues, never straight to the ledger</p>
+        </div>
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Records out</p>
+          <p class="bf-kpi__value">{{ d.recordsOut24h | number }}</p>
+        </div>
+        <div class="bf-kpi" [class.bf-kpi--warning]="d.summary.errorsLast24h > 0">
+          <p class="bf-kpi__label">Errors in 24 h</p>
+          <p class="bf-kpi__value" data-testid="errors-24h">
+            {{ d.summary.errorsLast24h | number }}
+          </p>
+          @if (d.summary.errorsLast24h > 0) {
+            <p class="bf-kpi__delta">
+              <a routerLink="/admin/integrations/errors">See what failed</a>
+            </p>
+          }
+        </div>
+      </section>
+
+      <section class="bf-card" aria-labelledby="overview-title">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" id="overview-title">What this connector exchanges</h2>
+        </div>
+        <dl class="bf-facts">
+          <div>
+            <dt>Last sync</dt>
+            <dd>
+              @if (d.summary.lastSyncAt) {
+                <span data-testid="relative-time">{{
+                  d.summary.lastSyncAt | bfDateTime: timezone()
+                }}</span>
+              } @else {
+                Never
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Next scheduled run</dt>
+            <dd>
+              @if (nextRun(); as next) {
+                <span data-testid="relative-time">{{ next | bfDateTime: timezone() }}</span>
+              } @else {
+                Nothing scheduled
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Mode</dt>
+            <dd>{{ modeLabel(d.summary.mode) }}</dd>
+          </div>
+          <div>
+            <dt>Inbound callback path</dt>
+            <dd>{{ d.inboundWebhookPath ?? 'This provider does not call back' }}</dd>
+          </div>
+        </dl>
+        <div class="bf-card__body">
+          <h3 class="bf-card__title">Objects</h3>
+          <ul class="bf-chip-list">
+            @for (o of objects(); track o.key) {
+              <li class="bf-chip">
+                {{ objectLabel(o.object) }} · {{ directionLabel(o.direction) }}
+              </li>
+            } @empty {
+              <li class="bf-muted">This connector exchanges nothing yet.</li>
+            }
+          </ul>
+        </div>
+        <p class="bf-card__body bf-note">
+          Imported records go into the review queues people already use — the actuals review for
+          money, the org import for people. Nothing a connector sends posts to the ledger on its
+          own.
+        </p>
+      </section>
+    }
+
+    @case ('connection') {
+      <section class="bf-card" aria-labelledby="connection-title">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" id="connection-title">Connection</h2>
+        </div>
+        <dl class="bf-facts">
+          <div>
+            <dt>Base URL</dt>
+            <dd>{{ d.baseUrl ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Account or tenant id</dt>
+            <dd>{{ d.accountRef ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Credential</dt>
+            <dd data-testid="credential-state">
+              @if (d.credential.secretRef) {
+                Stored, encrypted. Last set
+                <span data-testid="relative-time">{{
+                  d.credential.setAt | bfDateTime: timezone()
+                }}</span
+                >{{ d.credential.setByName ? ' by ' + d.credential.setByName : '' }}.
+              } @else {
+                No credential stored.
+              }
+            </dd>
+          </div>
+        </dl>
+        <p class="bf-card__body bf-note" data-testid="credential-note">
+          BudgetFlow never shows a stored credential, not even to the person who entered it. It is
+          encrypted at rest and referenced by id. If it was lost, replace it.
+        </p>
+        @if (canManage()) {
+          <div class="bf-form">
+            <mat-form-field appearance="outline" class="bf-form__wide">
+              <mat-label>Replace the credential</mat-label>
+              <input
+                matInput
+                type="password"
+                autocomplete="off"
+                [ngModel]="newCredential()"
+                (ngModelChange)="newCredential.set($event)"
+                data-testid="replace-credential"
+              />
+              <mat-hint
+                >At least 8 characters. The old one stops working the moment this is
+                saved.</mat-hint
+              >
+            </mat-form-field>
+          </div>
+          <div class="bf-form__actions">
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="busy() || newCredential().length < 8"
+              (click)="replaceCredential()"
+              data-testid="replace-credential-submit"
+            >
+              Replace credential
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="busy()"
+              (click)="testConnection()"
+              data-testid="test-connection"
+            >
+              Test connection
+            </button>
+          </div>
+        }
+        @if (testResult(); as t) {
+          <sat-banner
+            class="bf-banner"
+            [variant]="t.ok ? 'success' : 'important'"
+            data-testid="test-result"
+          >
+            <sat-banner-message>
+              {{ t.ok ? 'The provider answered' : 'The provider refused the call' }}: {{ t.message
+              }}{{ t.statusCode ? ' (HTTP ' + t.statusCode + ')' : '' }} in
+              {{ t.durationMs | number }} ms.
+            </sat-banner-message>
+          </sat-banner>
+        }
+      </section>
+
+      <section class="bf-card" aria-labelledby="settings-title">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" id="settings-title">Settings</h2>
+        </div>
+        @if (toggles().length) {
+          <div class="bf-card__body bf-actions-col">
+            @for (s of toggles(); track s.key) {
+              <div>
+                <mat-slide-toggle
+                  [disabled]="!canManage() || busy()"
+                  [ngModel]="s.value"
+                  (ngModelChange)="onToggle(s.key, $event)"
+                  [attr.data-testid]="'setting-' + s.key"
+                  >{{ s.label }}</mat-slide-toggle
+                >
+                <p class="bf-muted">{{ s.hint }}</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="bf-card__body bf-muted">This connector has no settings to change.</p>
+        }
+        @if (pendingToggle(); as p) {
+          <sat-banner class="bf-banner" variant="warning" data-testid="setting-confirm">
+            <sat-banner-message>{{ p.consequence }}</sat-banner-message>
+          </sat-banner>
+          <div class="bf-form__actions">
+            <button mat-button type="button" (click)="pendingToggle.set(null)">Cancel</button>
+            <button
+              mat-flat-button
+              satImportantButton
+              type="button"
+              [disabled]="busy()"
+              (click)="applyToggle()"
+              data-testid="setting-confirm-submit"
+            >
+              {{ p.confirmLabel }}
+            </button>
+          </div>
+        }
+      </section>
+    }
+
+    @case ('mappings') {
+      <section class="bf-card" aria-labelledby="mappings-title">
+        <div class="bf-card__header">
+          <div>
+            <h2 class="bf-card__title" id="mappings-title">Mappings</h2>
+            <p class="bf-card__hint">
+              What the provider calls a value, and what BudgetFlow calls it.
+            </p>
+          </div>
+        </div>
+        @if (unmapped().length) {
+          <sat-banner class="bf-banner" variant="warning" data-testid="mapping-gaps">
+            <sat-banner-message>
+              <strong
+                >{{ unmapped().length }}
+                {{ unmapped().length === 1 ? 'value has' : 'values have' }} no mapping.</strong
+              >
+              Records carrying
+              {{ unmapped().length === 1 ? 'it' : 'them' }} are held back instead of being guessed
+              at. They appear in Errors and retries as mapping errors.
+            </sat-banner-message>
+          </sat-banner>
+        }
+        @if (mappings().length) {
+          <div class="bf-table-scroll">
+            <table mat-table [dataSource]="mappings()" aria-label="Mappings">
+              <ng-container matColumnDef="kind">
+                <th mat-header-cell *matHeaderCellDef>Kind</th>
+                <td mat-cell *matCellDef="let m">{{ kindLabel(m.kind) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="external">
+                <th mat-header-cell *matHeaderCellDef>At the provider</th>
+                <td mat-cell *matCellDef="let m">{{ m.externalValue }}</td>
+              </ng-container>
+              <ng-container matColumnDef="internal">
+                <th mat-header-cell *matHeaderCellDef>In BudgetFlow</th>
+                <td mat-cell *matCellDef="let m">
+                  @if (canManage()) {
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                      <mat-label>Maps to</mat-label>
+                      <input
+                        matInput
+                        [ngModel]="draftFor(m)"
+                        (ngModelChange)="setDraft(m, $event)"
+                        [attr.data-testid]="'mapping-' + m.externalValue"
+                      />
+                    </mat-form-field>
+                  } @else {
+                    {{ m.internalValue ?? 'Not mapped' }}
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let m">
+                  @if (!m.internalValue && !m.internalId) {
+                    <sat-status-tag status="warning">Not mapped</sat-status-tag>
+                  } @else if (m.approved) {
+                    <sat-status-tag status="success">Approved</sat-status-tag>
+                  } @else {
+                    <sat-status-tag status="info">Waiting for Finance Admin</sat-status-tag>
+                  }
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="mappingColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: mappingColumns"></tr>
+            </table>
+          </div>
+          @if (canManage()) {
+            <div class="bf-form__actions">
+              <button
+                mat-flat-button
+                type="button"
+                [disabled]="busy() || !mappingChanged()"
+                (click)="saveMappings()"
+                data-testid="save-mappings"
+              >
+                Save mappings
+              </button>
+            </div>
+          }
+        } @else {
+          <sat-empty-state>
+            <h2 satEmptyStateHeadline>No mappings yet</h2>
+            <p satEmptyStateDescription>
+              Mappings appear as the connector reads values it does not recognise.
+            </p>
+          </sat-empty-state>
+        }
+      </section>
+    }
+
+    @case ('sync') {
+      <section class="bf-card" aria-labelledby="sync-title">
+        <div class="bf-card__header">
+          <div>
+            <h2 class="bf-card__title" id="sync-title">Schedules</h2>
+            <p class="bf-card__hint">
+              Runs are idempotent per connector, object and window, so running one again never
+              applies the same record twice.
+            </p>
+          </div>
+        </div>
+        @if (schedules().length) {
+          <div class="bf-table-scroll">
+            <table mat-table [dataSource]="schedules()" aria-label="Schedules">
+              <ng-container matColumnDef="object">
+                <th mat-header-cell *matHeaderCellDef>Object</th>
+                <td mat-cell *matCellDef="let s">
+                  <span class="bf-cell__primary">{{ objectLabel(s.object) }}</span>
+                  <span class="bf-cell__secondary"
+                    >{{ directionLabel(s.direction) }} · {{ s.mode }} · duplicate key
+                    {{ s.dedupeKey }}</span
+                  >
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="every">
+                <th mat-header-cell *matHeaderCellDef>Runs</th>
+                <td mat-cell *matCellDef="let s">{{ everyLabel(s.everyMinutes) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="next">
+                <th mat-header-cell *matHeaderCellDef>Next run</th>
+                <td mat-cell *matCellDef="let s">
+                  @if (s.paused) {
+                    <sat-status-tag status="neutral">Paused</sat-status-tag>
+                  } @else if (s.nextRunAt) {
+                    <span data-testid="relative-time">{{
+                      s.nextRunAt | bfDateTime: timezone()
+                    }}</span>
+                  } @else {
+                    —
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let s">
+                  @if (canManage()) {
+                    <button
+                      mat-button
+                      type="button"
+                      [disabled]="busy()"
+                      (click)="toggleSchedule(s)"
+                      [attr.data-testid]="'schedule-toggle-' + s.object"
+                    >
+                      {{ s.paused ? 'Resume' : 'Pause' }}
+                    </button>
+                  }
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="scheduleColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: scheduleColumns"></tr>
+            </table>
+          </div>
+        } @else {
+          <p class="bf-card__body bf-muted">
+            Nothing is scheduled on this connector. Runs happen only when someone asks for one.
+          </p>
+        }
+      </section>
+
+      @if (canManage() && syncableObjects().length) {
+        <section class="bf-card" aria-labelledby="run-title">
+          <div class="bf-card__header">
+            <div>
+              <h2 class="bf-card__title" id="run-title">Run a sync now</h2>
+              <p class="bf-card__hint">
+                Safe to repeat. Records already applied are skipped as duplicates, not imported
+                twice.
+              </p>
+            </div>
+          </div>
+          <div class="bf-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Object</mat-label>
+              <mat-select
+                [ngModel]="runObject()"
+                (ngModelChange)="runObject.set($event)"
+                data-testid="run-object"
+              >
+                @for (o of syncableObjects(); track o.key) {
+                  <mat-option [value]="o.key"
+                    >{{ objectLabel(o.object) }} · {{ directionLabel(o.direction) }}</mat-option
+                  >
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="bf-form__actions">
+            <button
+              mat-flat-button
+              type="button"
+              [disabled]="busy() || !runObject()"
+              (click)="runSync()"
+              data-testid="run-sync"
+            >
+              Run now
+            </button>
+          </div>
+          @if (lastRun(); as r) {
+            <sat-banner
+              class="bf-banner"
+              [variant]="runTone(r.status)"
+              data-testid="run-sync-result"
+            >
+              <sat-banner-message>
+                {{ objectLabel(r.object) }}: {{ syncStatusLabel(r.status) }}.
+                {{ r.recordsRead }} read, {{ r.recordsApplied }} applied,
+                {{ r.recordsSkippedDuplicate }} skipped as already seen,
+                {{ r.recordsFailed }} failed.{{ r.errorSummary ? ' ' + r.errorSummary : '' }}
+              </sat-banner-message>
+            </sat-banner>
+          }
+        </section>
+      }
+    }
+
+    @case ('push') {
+      <section class="bf-card" aria-labelledby="push-title">
+        <div class="bf-card__header">
+          <div>
+            <h2 class="bf-card__title" id="push-title">Pushed to {{ d.summary.displayName }}</h2>
+            <p class="bf-card__hint">
+              Event codes and card limits BudgetFlow sent out. A limit never exceeds the approved
+              commitment at the locked plan rate.
+            </p>
+          </div>
+          <a routerLink="/admin/integrations/pushes">All pushes</a>
+        </div>
+        @if (pushes.isLoading() && !valueOf(pushes)) {
+          <bf-load-state [loading]="true" what="the pushes" [lines]="3" />
+        } @else if (pushes.error()) {
+          <bf-load-state [error]="pushes.error()" what="the pushes" (retry)="pushes.reload()" />
+        } @else if (pushItems().length) {
+          <div class="bf-table-scroll">
+            <table mat-table [dataSource]="pushItems()" aria-label="Pushed items">
+              <ng-container matColumnDef="reference">
+                <th mat-header-cell *matHeaderCellDef>Reference</th>
+                <td mat-cell *matCellDef="let p">
+                  <span class="bf-cell__primary">{{ p.reference }}</span>
+                  <span class="bf-cell__secondary">{{
+                    p.kind === 'event_code' ? 'Event code' : 'Card limit'
+                  }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Amount</th>
+                <td mat-cell *matCellDef="let p" class="bf-num">
+                  @if (p.amount) {
+                    <bf-money [amountMinor]="p.amount.amountMinor" [currency]="p.amount.currency" />
+                  } @else {
+                    —
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let p">
+                  <sat-status-tag [status]="pushTone(p.status)">{{
+                    pushStatusLabel(p.status)
+                  }}</sat-status-tag>
+                  @if (p.lastError) {
+                    <span class="bf-cell__secondary bf-difference">{{ p.lastError }}</span>
+                  }
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="pushColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: pushColumns"></tr>
+            </table>
+          </div>
+        } @else {
+          <sat-empty-state>
+            <h2 satEmptyStateHeadline>Nothing pushed to this connector</h2>
+            <p satEmptyStateDescription>
+              Event codes and card limits appear here once they are sent.
+            </p>
+          </sat-empty-state>
+        }
+      </section>
+    }
+
+    @case ('plan') {
+      <bf-plan-import [connection]="d" [canManage]="canManage()" />
+    }
+
+    @case ('logs') {
+      <section class="bf-card" aria-labelledby="logs-title">
+        <div class="bf-card__header">
+          <div>
+            <h2 class="bf-card__title" id="logs-title">Sync runs</h2>
+            <p class="bf-card__hint">Every run on this connector, newest first.</p>
+          </div>
+          <a routerLink="/admin/integrations/sync">All connectors</a>
+        </div>
+        @if (runs.isLoading() && !valueOf(runs)) {
+          <bf-load-state [loading]="true" what="the runs" [lines]="4" />
+        } @else if (runs.error()) {
+          <bf-load-state [error]="runs.error()" what="the runs" (retry)="runs.reload()" />
+        } @else if (runItems().length) {
+          <div class="bf-table-scroll">
+            <table mat-table [dataSource]="runItems()" aria-label="Sync runs">
+              <ng-container matColumnDef="started">
+                <th mat-header-cell *matHeaderCellDef>Started</th>
+                <td mat-cell *matCellDef="let r">
+                  <span class="bf-cell__primary" data-testid="relative-time">{{
+                    r.startedAt | bfDateTime: timezone()
+                  }}</span>
+                  <span class="bf-cell__secondary"
+                    >{{ objectLabel(r.object) }} · {{ directionLabel(r.direction) }}</span
+                  >
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="records">
+                <th mat-header-cell *matHeaderCellDef>Records</th>
+                <td mat-cell *matCellDef="let r">
+                  {{ r.recordsRead }} read, {{ r.recordsApplied }} applied
+                  @if (r.recordsSkippedDuplicate) {
+                    , {{ r.recordsSkippedDuplicate }} already seen
+                  }
+                  @if (r.recordsFailed) {
+                    <span class="bf-difference">, {{ r.recordsFailed }} failed</span>
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let r">
+                  <sat-status-tag [status]="runTag(r.status)">{{
+                    syncStatusLabel(r.status)
+                  }}</sat-status-tag>
+                  @if (r.errorSummary) {
+                    <span class="bf-cell__secondary bf-difference">{{ r.errorSummary }}</span>
+                  }
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="runColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: runColumns"></tr>
+            </table>
+          </div>
+        } @else {
+          <sat-empty-state>
+            <h2 satEmptyStateHeadline>No runs yet</h2>
+            <p satEmptyStateDescription>Runs appear here once a schedule fires or you run one.</p>
+          </sat-empty-state>
+        }
+      </section>
+    }
+  }
+
+  @if (!canManage()) {
+    <p class="bf-note" data-testid="connector-read-only">
+      You are reading this connector. Running a sync, pausing, replacing the credential and
+      disconnecting need the Integration Admin role.
+    </p>
+  }
+}

@@ -1,0 +1,271 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Integrations</h1>
+    <p class="bf-page__subtitle">
+      Every external system BudgetFlow exchanges data with, and what needs attention
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    @if (canManage() && !connecting()) {
+      <button
+        mat-flat-button
+        satImportantButton
+        type="button"
+        (click)="startConnect()"
+        data-testid="connect-system"
+      >
+        Connect a system
+      </button>
+    }
+  </div>
+</header>
+
+<bf-integrations-nav [failing]="failing()" />
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="hub-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="hub-error"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+@if (hub.isLoading() && !valueOf(hub)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the connectors" /></section>
+} @else if (hub.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="hub.error()" what="the connectors" (retry)="hub.reload()" />
+  </section>
+} @else if (valueOf(hub); as h) {
+  <section class="bf-kpis" aria-label="Connector health">
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Connected</p>
+      <p class="bf-kpi__value" data-testid="health-connected">{{ h.health.connected }}</p>
+    </div>
+    <div class="bf-kpi" [class.bf-kpi--warning]="h.health.needsAttention > 0">
+      <p class="bf-kpi__label">Needs attention</p>
+      <p class="bf-kpi__value" data-testid="health-attention">{{ h.health.needsAttention }}</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Not connected</p>
+      <p class="bf-kpi__value">{{ h.health.notConnected }}</p>
+    </div>
+    <div class="bf-kpi" [class.bf-kpi--warning]="h.health.retrying > 0">
+      <p class="bf-kpi__label">Waiting for retry</p>
+      <p class="bf-kpi__value" data-testid="health-retrying">{{ h.health.retrying }}</p>
+      <p class="bf-kpi__delta">Messages that failed and will be tried again</p>
+    </div>
+    <div class="bf-kpi" [class.bf-kpi--warning]="h.health.deadLetter > 0">
+      <p class="bf-kpi__label">Dead letter</p>
+      <p class="bf-kpi__value" data-testid="health-dead-letter">{{ h.health.deadLetter }}</p>
+      <p class="bf-kpi__delta">Retries exhausted; someone has to decide</p>
+    </div>
+  </section>
+
+  @if (attention().length) {
+    <sat-banner variant="important" data-testid="hub-attention">
+      <sat-banner-message>
+        <strong
+          >{{ attention().length }}
+          {{ attention().length === 1 ? 'connector is' : 'connectors are' }} not working.</strong
+        >
+        @for (c of attention(); track c.id) {
+          {{ c.displayName }}: {{ c.attention ?? 'The last sync failed.' }}
+        }
+        Data from
+        {{ attention().length === 1 ? 'it' : 'them' }} is not reaching BudgetFlow until this is
+        fixed.
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  @if (connecting()) {
+    <section class="bf-card" aria-labelledby="connect-title">
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" id="connect-title">Connect a system</h2>
+          <p class="bf-card__hint">
+            The credential is sent once, encrypted at rest and referenced by id. BudgetFlow can
+            never show it back to you. Test the connection after it is saved.
+          </p>
+        </div>
+      </div>
+      <div class="bf-form">
+        <mat-form-field appearance="outline">
+          <mat-label>System</mat-label>
+          <mat-select
+            [ngModel]="provider()"
+            (ngModelChange)="provider.set($event)"
+            data-testid="connect-provider"
+          >
+            @for (a of available(); track a.provider) {
+              <mat-option [value]="a.provider"
+                >{{ a.displayName }} · {{ categoryLabel(a.category) }}</mat-option
+              >
+            }
+          </mat-select>
+          @if (chosen(); as a) {
+            <mat-hint>Exchanges {{ a.exchanges.join(', ') }}</mat-hint>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Mode</mat-label>
+          <mat-select
+            [ngModel]="mode()"
+            (ngModelChange)="mode.set($event)"
+            data-testid="connect-mode"
+          >
+            <mat-option value="mock">Mock — the local mock provider</mat-option>
+            <mat-option value="sandbox">Sandbox — the provider's test account</mat-option>
+            <mat-option value="live">Live — the real account</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Display name (optional)</mat-label>
+          <input matInput [ngModel]="displayName()" (ngModelChange)="displayName.set($event)" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Base URL (optional)</mat-label>
+          <input
+            matInput
+            type="url"
+            placeholder="https://provider.example.test"
+            [ngModel]="baseUrl()"
+            (ngModelChange)="baseUrl.set($event)"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Account or tenant id at the provider (optional)</mat-label>
+          <input matInput [ngModel]="accountRef()" (ngModelChange)="accountRef.set($event)" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="bf-form__wide">
+          <mat-label>Credential</mat-label>
+          <input
+            matInput
+            type="password"
+            autocomplete="off"
+            [ngModel]="credential()"
+            (ngModelChange)="credential.set($event)"
+            data-testid="connect-credential"
+          />
+          <mat-hint
+            >Write-only. At least 8 characters. It is never returned by the API, never logged and
+            never shown on this screen again.</mat-hint
+          >
+        </mat-form-field>
+      </div>
+      <div class="bf-form__actions">
+        <button mat-button type="button" (click)="connecting.set(false)">Cancel</button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="busy() || !provider() || credential().length < 8"
+          (click)="connect()"
+          data-testid="connect-submit"
+        >
+          Connect
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (h.connections.length) {
+    @for (group of groups(); track group.category) {
+      <section class="bf-card" [attr.aria-labelledby]="'cat-' + group.category">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" [id]="'cat-' + group.category">
+            {{ categoryLabel(group.category) }}
+          </h2>
+          <span class="bf-muted"
+            >{{ group.items.length }}
+            {{ group.items.length === 1 ? 'connection' : 'connections' }}</span
+          >
+        </div>
+        <div class="bf-tiles">
+          @for (c of group.items; track c.id) {
+            <a
+              class="bf-tile"
+              [class.bf-tile--attention]="c.status === 'needs_attention'"
+              [class.bf-tile--paused]="c.status === 'paused'"
+              [routerLink]="['/admin/integrations/connections', c.id]"
+              [attr.data-testid]="'connector-tile-' + c.provider"
+              [attr.aria-label]="
+                c.displayName + ', ' + statusLabel(c.status) + ', ' + modeLabel(c.mode) + ' mode'
+              "
+            >
+              <h3 class="bf-tile__name">{{ c.displayName }}</h3>
+              <div class="bf-tile__tags">
+                <sat-status-tag [status]="statusTone(c.status)">{{
+                  statusLabel(c.status)
+                }}</sat-status-tag>
+                <sat-status-tag status="neutral">{{ modeLabel(c.mode) }}</sat-status-tag>
+              </div>
+              <p class="bf-tile__facts">
+                <span
+                  >Last sync
+                  @if (c.lastSyncAt) {
+                    <span data-testid="relative-time">{{
+                      c.lastSyncAt | bfDateTime: timezone()
+                    }}</span>
+                  } @else {
+                    never
+                  }
+                </span>
+                <span>{{ c.recordsLast24h | number }} records in 24 h</span>
+                <span [class.bf-difference]="c.errorsLast24h > 0"
+                  >{{ c.errorsLast24h | number }} errors</span
+                >
+              </p>
+              @if (c.attention) {
+                <p class="bf-tile__attention">{{ c.attention }}</p>
+              }
+              @if (c.pausedByName) {
+                <p class="bf-tile__attention">
+                  Paused by {{ c.pausedByName }}. No schedules run while it is paused.
+                </p>
+              }
+            </a>
+          }
+        </div>
+      </section>
+    }
+  } @else {
+    <section class="bf-card">
+      <sat-empty-state data-testid="hub-empty">
+        <h2 satEmptyStateHeadline>No integrations yet</h2>
+        <p satEmptyStateDescription>
+          Connect an ERP or the HR file import first: they bring in the actuals and the headcount
+          the rest of BudgetFlow works from.
+        </p>
+        @if (canManage()) {
+          <button mat-flat-button type="button" (click)="startConnect()">Connect a system</button>
+        }
+      </sat-empty-state>
+    </section>
+  }
+
+  @if (available().length) {
+    <section class="bf-card" aria-labelledby="available-title">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="available-title">Systems you can still add</h2>
+      </div>
+      <ul class="bf-card__body bf-chip-list">
+        @for (a of available(); track a.provider) {
+          <li class="bf-chip" [attr.data-testid]="'available-' + a.provider">
+            {{ a.displayName }} · {{ a.exchanges.join(', ') }}
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (!canManage()) {
+    <p class="bf-note" data-testid="hub-read-only">
+      You can see every connector and its health. Connecting, pausing, disconnecting and replacing
+      credentials need the Integration Admin role.
+    </p>
+  }
+}

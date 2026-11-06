@@ -1,0 +1,243 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Sync status</h1>
+    <p class="bf-page__subtitle">
+      What ran, how long it took, how many records moved and what failed
+    </p>
+  </div>
+</header>
+
+<bf-integrations-nav [failing]="failing()" />
+
+<section class="bf-card bf-filters" aria-label="Filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Direction</mat-label>
+    <mat-select
+      [ngModel]="direction()"
+      (ngModelChange)="direction.set($event); selected.set(null)"
+      data-testid="filter-direction"
+    >
+      <mat-option value="all">Both directions</mat-option>
+      <mat-option value="inbound">Inbound</mat-option>
+      <mat-option value="outbound">Outbound</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Status</mat-label>
+    <mat-select
+      [ngModel]="status()"
+      (ngModelChange)="status.set($event); selected.set(null)"
+      data-testid="filter-status"
+    >
+      <mat-option value="all">Any status</mat-option>
+      <mat-option value="succeeded">Succeeded</mat-option>
+      <mat-option value="partly_succeeded">Partly succeeded</mat-option>
+      <mat-option value="failed">Failed</mat-option>
+      <mat-option value="running">Running</mat-option>
+    </mat-select>
+  </mat-form-field>
+</section>
+
+@if (summary(); as s) {
+  <section class="bf-kpis" aria-label="Runs in the last 24 hours">
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Runs in 24 h</p>
+      <p class="bf-kpi__value" data-testid="summary-runs">{{ s.runs24h | number }}</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Succeeded</p>
+      <p class="bf-kpi__value">{{ s.succeeded | number }}</p>
+    </div>
+    <div class="bf-kpi" [class.bf-kpi--warning]="s.partlySucceeded > 0">
+      <p class="bf-kpi__label">Partly succeeded</p>
+      <p class="bf-kpi__value" data-testid="summary-partly">{{ s.partlySucceeded | number }}</p>
+      <p class="bf-kpi__delta">Some records were held or rejected</p>
+    </div>
+    <div class="bf-kpi" [class.bf-kpi--warning]="s.failed > 0">
+      <p class="bf-kpi__label">Failed</p>
+      <p class="bf-kpi__value" data-testid="summary-failed">{{ s.failed | number }}</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Records in</p>
+      <p class="bf-kpi__value">{{ s.recordsIn | number }}</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Records out</p>
+      <p class="bf-kpi__value">{{ s.recordsOut | number }}</p>
+    </div>
+  </section>
+}
+
+@if (runs.isLoading() && !valueOf(runs)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the sync runs" /></section>
+} @else if (runs.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="runs.error()" what="the sync runs" (retry)="reload()" />
+  </section>
+} @else if (items().length) {
+  <div class="bf-two-col">
+    <section class="bf-card" aria-labelledby="runs-title">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="runs-title">Runs</h2>
+        <span class="bf-muted">{{ items().length }} shown</span>
+      </div>
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="items()" aria-label="Sync runs">
+          <ng-container matColumnDef="started">
+            <th mat-header-cell *matHeaderCellDef>Started</th>
+            <td mat-cell *matCellDef="let r">
+              <span class="bf-cell__primary bf-nowrap" data-testid="relative-time">{{
+                r.startedAt | bfDateTime: timezone()
+              }}</span>
+              <span class="bf-cell__secondary">{{ duration(r) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="connector">
+            <th mat-header-cell *matHeaderCellDef>Connector</th>
+            <td mat-cell *matCellDef="let r">
+              <span class="bf-cell__primary">{{ connectorName(r) }}</span>
+              <span class="bf-cell__secondary">{{ modeLabel(r.mode) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="object">
+            <th mat-header-cell *matHeaderCellDef>Object</th>
+            <td mat-cell *matCellDef="let r">
+              <span class="bf-cell__primary">{{ objectLabel(r.object) }}</span>
+              <span class="bf-cell__secondary">{{ directionLabel(r.direction) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="records">
+            <th mat-header-cell *matHeaderCellDef>Records</th>
+            <td mat-cell *matCellDef="let r">
+              {{ r.recordsRead }} read, {{ r.recordsApplied }} applied
+              @if (r.recordsSkippedDuplicate) {
+                <span class="bf-cell__secondary"
+                  >{{ r.recordsSkippedDuplicate }} held as already seen</span
+                >
+              }
+              @if (r.recordsFailed) {
+                <span class="bf-cell__secondary bf-difference">{{ r.recordsFailed }} failed</span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let r">
+              <sat-status-tag [status]="statusTone(r.status)">{{
+                statusLabel(r.status)
+              }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: columns"
+            class="bf-row--clickable"
+            [class.bf-row--selected]="row.id === selected()"
+            tabindex="0"
+            (click)="select(row)"
+            (keydown.enter)="select(row)"
+            [attr.data-testid]="'run-row-' + row.provider + '-' + row.object"
+          ></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="bf-card" aria-labelledby="detail-title" data-testid="run-detail">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="detail-title">Run detail</h2>
+      </div>
+      @if (run(); as r) {
+        @if (r.status === 'failed') {
+          <sat-banner class="bf-banner" variant="important" data-testid="run-failed">
+            <sat-banner-message>
+              <strong>This run failed.</strong>
+              {{ r.errorSummary ?? 'The provider did not answer.' }} Nothing from it reached
+              BudgetFlow. <a routerLink="/admin/integrations/errors">See the failed messages</a>.
+            </sat-banner-message>
+          </sat-banner>
+        } @else if (r.status === 'partly_succeeded') {
+          <sat-banner class="bf-banner" variant="warning" data-testid="run-partly">
+            <sat-banner-message>
+              <strong>Part of this run did not land.</strong>
+              {{ r.recordsSkippedDuplicate }} held as possible duplicates and
+              {{ r.recordsFailed }} rejected.{{ r.errorSummary ? ' ' + r.errorSummary : '' }}
+            </sat-banner-message>
+          </sat-banner>
+        }
+        <dl class="bf-facts">
+          <div>
+            <dt>Connector</dt>
+            <dd>
+              <a [routerLink]="connectionLink(r)">{{ connectorName(r) }}</a>
+            </dd>
+          </div>
+          <div>
+            <dt>Object</dt>
+            <dd>{{ objectLabel(r.object) }} · {{ directionLabel(r.direction) }}</dd>
+          </div>
+          <div>
+            <dt>Started</dt>
+            <dd data-testid="relative-time">{{ r.startedAt | bfDateTime: timezone() }}</dd>
+          </div>
+          <div>
+            <dt>Finished</dt>
+            <dd>
+              @if (r.finishedAt) {
+                <span data-testid="relative-time">{{ r.finishedAt | bfDateTime: timezone() }}</span>
+              } @else {
+                Still running
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Read</dt>
+            <dd>{{ r.recordsRead | number }}</dd>
+          </div>
+          <div>
+            <dt>Applied</dt>
+            <dd>{{ r.recordsApplied | number }}</dd>
+          </div>
+          <div>
+            <dt>Held as already seen</dt>
+            <dd>{{ r.recordsSkippedDuplicate | number }}</dd>
+          </div>
+          <div>
+            <dt>Failed</dt>
+            <dd [class.bf-difference]="r.recordsFailed > 0">{{ r.recordsFailed | number }}</dd>
+          </div>
+          <div>
+            <dt>Started by</dt>
+            <dd>{{ r.triggeredByName ?? 'The schedule' }}</dd>
+          </div>
+          <div>
+            <dt>Incremental watermark</dt>
+            <dd>{{ r.cursor ?? 'Full run' }}</dd>
+          </div>
+        </dl>
+        @if (r.importBatchId) {
+          <p class="bf-card__body">
+            This run created a batch in the actuals review.
+            <a routerLink="/finance/actuals/queue">Open the review queue</a>.
+          </p>
+        }
+        <p class="bf-card__body bf-note">
+          Repeating this run is safe: it carries the same idempotency key, so a record already
+          applied is skipped rather than imported again.
+        </p>
+      } @else {
+        <p class="bf-card__body bf-muted">Choose a run to see its counts and what it created.</p>
+      }
+    </section>
+  </div>
+} @else {
+  <section class="bf-card">
+    <sat-empty-state data-testid="sync-empty">
+      <h2 satEmptyStateHeadline>No sync runs match</h2>
+      <p satEmptyStateDescription>
+        Change the filters, or connect a system in Integrations so data starts flowing.
+      </p>
+      <a mat-stroked-button routerLink="/admin/integrations">Go to connectors</a>
+    </sat-empty-state>
+  </section>
+}

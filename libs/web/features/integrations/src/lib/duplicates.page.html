@@ -1,0 +1,305 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Cross-source duplicates</h1>
+    <p class="bf-page__subtitle">
+      Spend that arrived from more than one system, held before matching so it is counted once
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    <a mat-stroked-button routerLink="/finance/actuals/queue">Unmatched queue</a>
+  </div>
+</header>
+
+<nav class="bf-tabs" aria-label="Duplicate groups">
+  <button
+    class="bf-tabs__tab"
+    type="button"
+    [class.bf-tabs__tab--active]="view() === 'open'"
+    [attr.aria-current]="view() === 'open' ? 'page' : null"
+    (click)="view.set('open'); selected.set(null)"
+    data-testid="tab-open"
+  >
+    Waiting for a decision ({{ openCount() }})
+  </button>
+  <button
+    class="bf-tabs__tab"
+    type="button"
+    [class.bf-tabs__tab--active]="view() === 'resolved'"
+    [attr.aria-current]="view() === 'resolved' ? 'page' : null"
+    (click)="view.set('resolved'); selected.set(null)"
+    data-testid="tab-resolved"
+  >
+    Decided
+  </button>
+</nav>
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="duplicates-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="duplicates-failure"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+@if (view() === 'open' && openCount() > 0) {
+  <sat-banner variant="warning" data-testid="duplicates-held">
+    <sat-banner-message>
+      <strong
+        >{{ openCount() }} possible
+        {{ openCount() === 1 ? 'duplicate is' : 'duplicates are' }} held.</strong
+      >
+      Held lines do not consume budget and are not matched until someone decides. Until then the
+      budgets they belong to look less consumed than they may turn out to be.
+    </sat-banner-message>
+  </sat-banner>
+}
+
+@if (groups.isLoading() && !valueOf(groups)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the duplicates" /></section>
+} @else if (groups.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="groups.error()" what="the duplicates" (retry)="groups.reload()" />
+  </section>
+} @else if (items().length) {
+  @for (g of items(); track g.flagId) {
+    <section
+      class="bf-card"
+      [attr.aria-labelledby]="'dup-' + g.flagId"
+      [attr.data-testid]="'duplicate-group-' + g.flagId"
+    >
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" [id]="'dup-' + g.flagId">{{ g.pattern }}</h2>
+          <p class="bf-card__hint">
+            Spotted
+            <span data-testid="relative-time">{{ g.detectedAt | bfDateTime: timezone() }}</span>
+          </p>
+        </div>
+        <div class="bf-chip-row">
+          <sat-status-tag [status]="g.confidence === 'high' ? 'important' : 'warning'"
+            >{{ g.confidence === 'high' ? 'High' : 'Medium' }} confidence</sat-status-tag
+          >
+          @if (g.status === 'resolved') {
+            <sat-status-tag status="success">{{
+              g.resolution === 'kept_one' ? 'One line kept' : 'Not duplicates'
+            }}</sat-status-tag>
+          }
+        </div>
+      </div>
+
+      <ul class="bf-card__body">
+        @for (fact of g.facts; track fact) {
+          <li>{{ fact }}</li>
+        }
+      </ul>
+
+      <div class="bf-compare">
+        @for (l of lines(g); track l.actualId) {
+          <div
+            class="bf-compare__line"
+            [class.bf-compare__line--kept]="g.keptActualId === l.actualId"
+            [attr.data-testid]="'duplicate-line-' + l.actualId"
+          >
+            <div class="bf-chip-row">
+              <strong>{{ l.source }}</strong>
+              <span class="bf-muted">{{ l.sourceRef }}</span>
+              @if (g.keptActualId === l.actualId) {
+                <sat-status-tag status="success">Kept as the record</sat-status-tag>
+              } @else if (g.status === 'resolved' && g.resolution === 'kept_one') {
+                <sat-status-tag status="neutral">Excluded</sat-status-tag>
+              }
+            </div>
+            <dl class="bf-facts bf-facts--tight">
+              <div>
+                <dt>Amount</dt>
+                <dd>
+                  <bf-money
+                    [amountMinor]="l.transactionAmount.amountMinor"
+                    [currency]="l.transactionAmount.currency"
+                  />
+                  @if (l.transactionAmount.currency !== l.reportingAmount.currency) {
+                    <span class="bf-muted"
+                      >=
+                      <bf-money
+                        [amountMinor]="l.reportingAmount.amountMinor"
+                        [currency]="l.reportingAmount.currency"
+                      />
+                      at the locked plan rate</span
+                    >
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>Accounting date</dt>
+                <dd>{{ l.accountingDate }}</dd>
+              </div>
+              <div>
+                <dt>Merchant</dt>
+                <dd>{{ l.merchant ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>Person</dt>
+                <dd>{{ l.personName ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>Event code</dt>
+                <dd>{{ l.eventCode ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>In BudgetFlow</dt>
+                <dd>{{ l.matchStatus }}</dd>
+              </div>
+            </dl>
+          </div>
+        }
+      </div>
+
+      @if (g.status === 'resolved') {
+        <p class="bf-card__body bf-muted" [attr.data-testid]="'resolved-by-' + g.flagId">
+          Decided by {{ g.resolvedByName ?? 'finance' }}. The excluded line is kept and linked, so
+          the history of what arrived is intact.
+        </p>
+      } @else if (canResolve()) {
+        @if (selected() === g.flagId) {
+          @if (alreadyMatched(g)) {
+            <sat-banner class="bf-banner" variant="warning" data-testid="already-matched">
+              <sat-banner-message>
+                <strong>One of these lines is already matched.</strong>
+                Excluding it does not erase the posting — BudgetFlow writes a reversal in an open
+                accounting period, and both entries stay visible.
+              </sat-banner-message>
+            </sat-banner>
+          }
+          <fieldset class="bf-card__body">
+            <legend class="bf-card__title">What is true here?</legend>
+            <div class="bf-actions-col">
+              <label class="bf-chip-row">
+                <input
+                  type="radio"
+                  name="resolution"
+                  value="kept_one"
+                  [checked]="resolution() === 'kept_one'"
+                  (change)="resolution.set('kept_one')"
+                  data-testid="resolution-kept-one"
+                />
+                One payment, reported twice. Keep one line as the record and exclude the other.
+              </label>
+              <label class="bf-chip-row">
+                <input
+                  type="radio"
+                  name="resolution"
+                  value="kept_both"
+                  [checked]="resolution() === 'kept_both'"
+                  (change)="resolution.set('kept_both')"
+                  data-testid="resolution-kept-both"
+                />
+                Two different payments. Both should consume budget.
+              </label>
+            </div>
+          </fieldset>
+          @if (resolution() === 'kept_one') {
+            <fieldset class="bf-card__body">
+              <legend class="bf-card__title">Which line is the record?</legend>
+              <div class="bf-actions-col">
+                @for (l of lines(g); track l.actualId) {
+                  <label class="bf-chip-row">
+                    <input
+                      type="radio"
+                      name="keep"
+                      [value]="l.actualId"
+                      [checked]="keepActualId() === l.actualId"
+                      (change)="keepActualId.set(l.actualId)"
+                      [attr.data-testid]="'keep-' + l.actualId"
+                    />
+                    {{ l.source }} {{ l.sourceRef }} ·
+                    <bf-money
+                      [amountMinor]="l.transactionAmount.amountMinor"
+                      [currency]="l.transactionAmount.currency"
+                    />
+                  </label>
+                }
+              </div>
+              <p class="bf-muted">
+                The line closest to the general ledger is suggested first. The other is excluded
+                from consumption and linked to the one you keep.
+              </p>
+            </fieldset>
+          }
+          <div class="bf-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Reason code</mat-label>
+              <input
+                matInput
+                [ngModel]="reasonCode()"
+                (ngModelChange)="reasonCode.set($event)"
+                placeholder="CARD_ITEMIZATION"
+                data-testid="duplicate-reason-code"
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="bf-form__wide">
+              <mat-label>Why</mat-label>
+              <textarea
+                matInput
+                rows="2"
+                [ngModel]="reason()"
+                (ngModelChange)="reason.set($event)"
+                data-testid="duplicate-reason"
+              ></textarea>
+            </mat-form-field>
+          </div>
+          <div class="bf-form__actions">
+            <button mat-button type="button" (click)="selected.set(null)">Cancel</button>
+            <button
+              mat-flat-button
+              satImportantButton
+              type="button"
+              [disabled]="
+                busy() ||
+                reasonCode().trim().length < 2 ||
+                reason().trim().length < 5 ||
+                (resolution() === 'kept_one' && !keepActualId())
+              "
+              (click)="resolve()"
+              data-testid="duplicate-resolve"
+            >
+              {{ resolution() === 'kept_one' ? 'Keep one line' : 'Keep both lines' }}
+            </button>
+          </div>
+        } @else {
+          <div class="bf-form__actions">
+            <button
+              mat-flat-button
+              type="button"
+              (click)="select(g)"
+              [attr.data-testid]="'decide-' + g.flagId"
+            >
+              Decide
+            </button>
+          </div>
+        }
+      } @else {
+        <p class="bf-card__body bf-note" [attr.data-testid]="'read-only-' + g.flagId">
+          These lines are held as a possible duplicate. Finance decides which one is the record.
+        </p>
+      }
+    </section>
+  }
+} @else {
+  <section class="bf-card">
+    <sat-empty-state data-testid="duplicates-empty">
+      <h2 satEmptyStateHeadline>
+        {{ view() === 'open' ? 'No possible duplicates' : 'Nothing decided yet' }}
+      </h2>
+      <p satEmptyStateDescription>
+        @if (view() === 'open') {
+          Nothing is being held. Every actual that arrived has a single source.
+        } @else {
+          Groups appear here once finance has decided which line is the record.
+        }
+      </p>
+    </sat-empty-state>
+  </section>
+}
