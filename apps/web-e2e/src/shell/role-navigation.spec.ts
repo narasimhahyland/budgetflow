@@ -28,6 +28,9 @@ const NEEDS: Record<string, string> = {
   'Intercompany recharges': 'actuals.manage',
   'GL tie-out': 'actuals.manage',
   'Fiscal periods': 'period.manage',
+  'Period close': 'period.manage',
+  'Rollover policies': 'period.manage',
+  'Year-end': 'period.manage',
   'Exchange rates': 'fx.manage',
   'Legal entities': 'master_data.manage',
   'GL accounts': 'master_data.manage',
@@ -49,6 +52,7 @@ const READ = ['Budget hierarchy', 'Budget list', 'Budget requests'];
 // From Phase 5 everyone in the tenant browses events; requesting (and the employee's own budgets)
 // follows request.create, which covers the home location's budgets as well as owned ones.
 const REQUESTS = ['Request funds', 'My requests', 'My budgets'];
+const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
 const OWNER = [
   'Home',
   'Budget hierarchy',
@@ -98,6 +102,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Intercompany recharges',
     'GL tie-out',
     'Fiscal periods',
+    ...CLOSE,
     'Exchange rates',
     'Legal entities',
     'GL accounts',
@@ -120,6 +125,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Intercompany recharges',
     'GL tie-out',
     'Fiscal periods',
+    ...CLOSE,
     'Delegation of authority',
     'Reports',
     'Utilization',

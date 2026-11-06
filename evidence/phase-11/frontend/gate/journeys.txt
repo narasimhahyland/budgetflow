@@ -1,0 +1,70 @@
+  ✓  38 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for employee › employee sees exactly the areas their permissions allow (480ms)
+  ✓  37 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (504ms)
+  ✓  39 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (491ms)
+  ✓  40 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (479ms)
+(node:72558) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  41 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (490ms)
+(node:72567) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  42 [tablet] › apps/web-e2e/src/close/close.spec.ts:22:7 › period close checklist › November lists every period of the fiscal year and opens its checklist (614ms)
+  ✓  43 [tablet] › apps/web-e2e/src/close/close.spec.ts:34:7 › period close checklist › a close that cannot happen says so and leaves the button disabled (503ms)
+  -  45 [tablet] › apps/web-e2e/src/close/close.spec.ts:56:7 › accepting a soft check › the controller accepts a soft check with a reason and it stops holding the close
+  ✓  44 [tablet] › apps/web-e2e/src/close/close.spec.ts:44:7 › period close checklist › a hard check cannot be accepted; only soft checks offer a reason (464ms)
+  -  46 [tablet] › apps/web-e2e/src/close/close.spec.ts:88:7 › break-glass reopen › reopening a closed period needs two different people
+  ✓  47 [tablet] › apps/web-e2e/src/close/close.spec.ts:146:7 › period close scope › someone without ledger access is told so instead of seeing a blank page (406ms)
+  -  49 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:30:7 › year-end run › a dry run fills the per-budget outcome and execute stays refused with the reason
+  ✓  48 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:14:7 › year-end run › the FY2026 run opens from the list and offers no execution until it is ready (559ms)
+  -  51 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:71:7 › rollover policies › a policy is assigned to a budget with a reason
+  ✓  50 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:59:7 › rollover policies › every rollover mode is shown with what it does at year end (458ms)
+  ✓  52 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:91:7 › year-end scope › an analyst reads the run but is offered no dry run or execution (438ms)
+  -  54 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
+  ✓  53 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (712ms)
+  ✓  55 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (497ms)
+  ✓  56 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (504ms)
+  ✓  57 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (516ms)
+  ✓  58 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (511ms)
+  ✓  59 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (505ms)
+  ✓  60 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (482ms)
+  ✓  61 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (462ms)
+  ✓  62 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (481ms)
+  ✓  63 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (550ms)
+  ✓  64 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (495ms)
+  ✓  65 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for employee › employee sees exactly the areas their permissions allow (483ms)
+  ✓  66 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (494ms)
+  ✓  67 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (487ms)
+(node:72686) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  68 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (441ms)
+(node:72690) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  69 [mobile] › apps/web-e2e/src/close/close.spec.ts:22:7 › period close checklist › November lists every period of the fiscal year and opens its checklist (688ms)
+  ✓  70 [mobile] › apps/web-e2e/src/close/close.spec.ts:34:7 › period close checklist › a close that cannot happen says so and leaves the button disabled (508ms)
+  -  72 [mobile] › apps/web-e2e/src/close/close.spec.ts:56:7 › accepting a soft check › the controller accepts a soft check with a reason and it stops holding the close
+  -  73 [mobile] › apps/web-e2e/src/close/close.spec.ts:88:7 › break-glass reopen › reopening a closed period needs two different people
+  ✓  71 [mobile] › apps/web-e2e/src/close/close.spec.ts:44:7 › period close checklist › a hard check cannot be accepted; only soft checks offer a reason (489ms)
+  ✓  74 [mobile] › apps/web-e2e/src/close/close.spec.ts:146:7 › period close scope › someone without ledger access is told so instead of seeing a blank page (452ms)
+  -  76 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:30:7 › year-end run › a dry run fills the per-budget outcome and execute stays refused with the reason
+  ✓  75 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:14:7 › year-end run › the FY2026 run opens from the list and offers no execution until it is ready (623ms)
+  -  78 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:71:7 › rollover policies › a policy is assigned to a budget with a reason
+  ✓  77 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:59:7 › rollover policies › every rollover mode is shown with what it does at year end (495ms)
+  ✓  79 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:91:7 › year-end scope › an analyst reads the run but is offered no dry run or execution (594ms)
+  -  81 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
+  ✓  80 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions (882ms)
+  ✓  82 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow (523ms)
+  ✓  83 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow (524ms)
+  ✓  84 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for ceo › ceo sees exactly the areas their permissions allow (549ms)
+  ✓  85 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow (522ms)
+  ✓  86 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow (543ms)
+  ✓  87 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow (523ms)
+  ✓  88 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for department-head › department-head sees exactly the areas their permissions allow (636ms)
+  ✓  89 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow (522ms)
+  ✓  90 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow (517ms)
+  ✓  91 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow (500ms)
+  ✓  92 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for employee › employee sees exactly the areas their permissions allow (516ms)
+  ✓  93 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for auditor › auditor sees exactly the areas their permissions allow (702ms)
+  ✓  94 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow (1.1s)
+  ✓  95 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:162:9 › navigation for analyst › analyst sees exactly the areas their permissions allow (846ms)
+
+  10 skipped
+  85 passed (39.7s)

@@ -1678,6 +1678,109 @@
       ]
     },
     {
+      "id": "080e-period-close",
+      "role": "finance-admin",
+      "path": "/finance/close",
+      "waitFor": "role=heading[name=\"Period close\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "forbidden",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
+      "id": "080e-period-close-checklist",
+      "role": "finance-admin",
+      "path": "/finance/close/23000000-0000-4000-8000-012026110000",
+      "waitFor": "role=heading[name=\"Nov 2026\"]",
+      "states": [
+        {
+          "state": "blocked"
+        },
+        {
+          "state": "acknowledge-dialog",
+          "actions": [
+            {
+              "click": "[data-testid=\"acknowledge-accruals_reviewed\"]"
+            },
+            {
+              "waitFor": "[data-testid=\"ack-reason\"]"
+            }
+          ]
+        },
+        {
+          "state": "snapshots",
+          "path": "/finance/close/23000000-0000-4000-8000-012026110000?tab=snapshots",
+          "waitFor": "text=No snapshots yet"
+        },
+        {
+          "state": "late-items",
+          "path": "/finance/close/23000000-0000-4000-8000-012026110000?tab=late-items",
+          "waitFor": "text=No late items"
+        }
+      ]
+    },
+    {
+      "id": "080e-period-close-break-glass",
+      "role": "finance-controller",
+      "path": "/finance/close/23000000-0000-4000-8000-012026090000",
+      "waitFor": "role=heading[name=\"Sep 2026\"]",
+      "states": [
+        {
+          "state": "closed"
+        },
+        {
+          "state": "request-dialog",
+          "actions": [
+            {
+              "click": "[data-testid=\"request-break-glass\"]"
+            },
+            {
+              "waitFor": "[data-testid=\"break-glass-reason\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "087c-rollover-policies",
+      "role": "finance-admin",
+      "path": "/finance/rollover-policies",
+      "waitFor": "role=heading[name=\"Rollover policies\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "087b-year-end",
+      "role": "finance-admin",
+      "path": "/finance/year-end",
+      "waitFor": "role=heading[name=\"Year-end\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "087b-year-end-run",
+      "role": "finance-admin",
+      "path": "/finance/year-end/80000000-0000-4000-8000-000000000010",
+      "waitFor": "role=heading[name=\"Year end FY2026 → FY2027\"]",
+      "states": [
+        {
+          "state": "draft"
+        }
+      ]
+    },
+    {
       "id": "092-integrations-hub",
       "role": "integration-admin",
       "path": "/admin/integrations",
