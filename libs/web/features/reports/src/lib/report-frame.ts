@@ -176,6 +176,7 @@ export class Reconciliation {
               <th
                 [class.bf-num]="c.align === 'end'"
                 [class.bf-cell--forecast]="isForecast(c)"
+                [class.bf-cell--prose]="isProse(c)"
                 [attr.title]="c.hint"
               >
                 {{ c.label }}
@@ -193,6 +194,7 @@ export class Reconciliation {
                 <td
                   [class.bf-num]="c.align === 'end'"
                   [class.bf-cell--forecast]="isForecast(c)"
+                  [class.bf-cell--prose]="isProse(c)"
                   [attr.data-testid]="isForecast(c) ? 'forecast-cell' : null"
                 >
                   @let cell = cellFor(row, c);
@@ -332,6 +334,10 @@ export class Reconciliation {
     .bf-row-tag {
       margin-inline-start: 8px;
     }
+    /* A column holding a sentence needs room for it; the table scrolls sideways instead. */
+    .bf-cell--prose {
+      min-width: 220px;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -343,11 +349,17 @@ export class ReportTable {
   readonly timezone = input('UTC');
   /** Column keys holding a projection rather than money the ledger moved. */
   readonly forecastColumns = input<readonly string[]>([]);
+  /** Column keys whose cells hold a sentence, not a label, and so need room to read. */
+  readonly proseColumns = input<readonly string[]>([]);
   readonly drill = output<DrillRequest>();
   protected readonly percentOf = percentOf;
 
   protected isForecast(c: ReportColumn): boolean {
     return this.forecastColumns().includes(c.key);
+  }
+
+  protected isProse(c: ReportColumn): boolean {
+    return this.proseColumns().includes(c.key);
   }
 
   /** Row tags are written by the API; "Commentary due" is the only one that asks for action. */

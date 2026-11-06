@@ -69,6 +69,8 @@ const METHOD_LABELS: Record<ForecastMethod, string> = {
 
 /** 087 only: the columns holding a projection, so the frame can mark them as not-yet-spent money. */
 const FORECAST_COLUMNS = ['forecast', 'previousForecast', 'change'];
+/** 087 only: the owner's explanation is a sentence and needs room, not a label-width column. */
+const PROSE_COLUMNS = ['commentary'];
 
 /**
  * Screens 080-087 and 015a/015b: the Phase 10 and 11 reports in one frame. The server returns the
@@ -372,6 +374,7 @@ const FORECAST_COLUMNS = ['forecast', 'previousForecast', 'change'];
             [caption]="r.name"
             [timezone]="session.timezone()"
             [forecastColumns]="forecastColumns()"
+            [proseColumns]="proseColumns()"
             (drill)="drill.set($event)"
           />
         } @else {
@@ -494,6 +497,7 @@ export class ReportPage {
   protected readonly forecastColumns = computed(() =>
     this.isForecastReport() ? FORECAST_COLUMNS : [],
   );
+  protected readonly proseColumns = computed(() => (this.isForecastReport() ? PROSE_COLUMNS : []));
 
   protected readonly catalog = resource({ loader: () => data(this.api.getReportCatalog({})) });
   protected readonly definition = computed(() =>
