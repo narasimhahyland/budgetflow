@@ -1,5 +1,15 @@
 import { z } from 'zod';
-import { BudgetStatus, BudgetType, CurrencyCode, Id, IsoDate, IsoDateTime, Money } from '../common';
+import {
+  BudgetStatus,
+  BudgetType,
+  CurrencyCode,
+  ForecastMethod,
+  Id,
+  IsoDate,
+  IsoDateTime,
+  Money,
+  RateType,
+} from '../common';
 import { LedgerLine } from './ledger';
 import type { Endpoint } from '../endpoint';
 import { named } from '../registry';
@@ -19,6 +29,8 @@ export const REPORT_IDS = [
   'unused-expired',
   'spend-per-head',
   'participation-reach',
+  // Phase 11: forecast snapshots joined to the ledger (087).
+  'forecast-variance',
 ] as const;
 export const ReportId = z.enum(REPORT_IDS).describe('Report in the Phase 10 catalog.');
 export type ReportId = z.infer<typeof ReportId>;
@@ -65,6 +77,18 @@ export const ReportFilters = named(
       groupBy: ReportGroupBy.optional(),
       periodFrom: IsoDate.optional().describe('Accounting date from (inclusive).'),
       periodTo: IsoDate.optional().describe('Accounting date to (inclusive).'),
+      /** 087 only. Omitted means the latest accepted forecast per budget. */
+      forecastCycleId: Id.optional().describe(
+        'Report the forecasts of this cycle, for example "October reforecast".',
+      ),
+      compareCycleId: Id.optional().describe(
+        'Add "Previous forecast" and "Change" columns from an earlier cycle.',
+      ),
+      forecastMethod: ForecastMethod.optional(),
+      commentaryRequiredOnly: z
+        .enum(['true', 'false'])
+        .optional()
+        .describe('Only the rows whose variance is above the cycle threshold.'),
     })
     .strict()
     .describe('Report filters; stored verbatim on saved views and schedules, never report data.'),
@@ -212,6 +236,11 @@ export const ReportResult = named(
       series: z.array(ReportSeries),
       rowCount: z.int(),
       truncated: z.boolean(),
+      notes: z
+        .array(z.string())
+        .describe(
+          'Plain-English statements the frame shows as banners, for example "No accepted forecast yet; showing run-rate forecasts".',
+        ),
       reconciliation: ReportReconciliation,
     })
     .strict()
@@ -626,9 +655,217 @@ export const CreateExportRequest = named(
 );
 export type CreateExportRequest = z.infer<typeof CreateExportRequest>;
 
+// 016a Board and FP&A pack -----------------------------------------------------------------------
+
+export const BOARD_PACK_PAGES = [
+  'summary',
+  'legal_entity',
+  'region',
+  'function',
+  'category',
+  'period',
+  'variance_fx',
+  'top_commitments',
+  'controls_applied',
+  'exceptions',
+  'cofunding',
+] as const;
+export const BoardPackPageId = z
+  .enum(BOARD_PACK_PAGES)
+  .describe('Fixed building blocks of the pack; they can be toggled and reordered, not rewritten.');
+export type BoardPackPageId = z.infer<typeof BoardPackPageId>;
+
+export const BoardPackSource = named(
+  'BoardPackSource',
+  z
+    .object({
+      kind: z.enum(['close_snapshot', 'open_period_draft']),
+      fiscalPeriodId: Id,
+      periodLabel: z.string(),
+      snapshotVersion: z
+        .int()
+        .nullable()
+        .describe('Version of the close snapshot; null for an open-period draft.'),
+      takenAt: IsoDateTime.nullable(),
+      draft: z
+        .boolean()
+        .describe('True for an open period: every page and the PDF carry a "Draft" watermark.'),
+      statement: z
+        .string()
+        .describe('The sentence the cover page prints about where the figures came from.'),
+    })
+    .strict()
+    .describe('Where the pack read its numbers. A closed period reads an immutable snapshot.'),
+);
+export type BoardPackSource = z.infer<typeof BoardPackSource>;
+
+export const BoardPackPage = named(
+  'BoardPackPage',
+  z
+    .object({
+      page: BoardPackPageId,
+      title: z.string(),
+      statement: z
+        .string()
+        .nullable()
+        .describe('Shown instead of rows when the page has no data, for example "No controls applied in October 2026".'),
+      columns: z.array(ReportColumn),
+      rows: z.array(ReportRow).describe('Ordered by label then key, so a regenerated pack matches.'),
+      totals: ReportRow.nullable(),
+      series: z.array(ReportSeries),
+    })
+    .strict(),
+);
+export type BoardPackPage = z.infer<typeof BoardPackPage>;
+
+export const FxBridgeRow = named(
+  'FxBridgeRow',
+  z
+    .object({
+      transactionCurrency: CurrencyCode,
+      transaction: Money.describe('Spend as posted, in its transaction currency.'),
+      atPlanRate: Money.describe('The same spend at the locked plan rate: the rate budget control uses.'),
+      atReportingRate: Money.describe('The same spend at the reporting rate type.'),
+      fxEffect: Money.describe('At reporting rate − at plan rate.'),
+      planRate: z.string().nullable().describe('The plan cross rate applied, 12 decimals.'),
+      note: z.string().describe('"Not part of spend or variance; FX never consumes budget."'),
+    })
+    .strict(),
+);
+export type FxBridgeRow = z.infer<typeof FxBridgeRow>;
+
+export const FxBridge = named(
+  'FxBridge',
+  z
+    .object({
+      reportingRateType: RateType.describe('The company\u2019s reporting rate type; monthly average by default.'),
+      rows: z.array(FxBridgeRow).describe('One row per transaction currency, ordered by code.'),
+      totalEffect: Money,
+      note: z.string(),
+    })
+    .strict()
+    .describe(
+      'Why a constant-currency total differs from the reported one. The effect is bridged on its own and never enters spend, variance or any budget bucket.',
+    ),
+);
+export type FxBridge = z.infer<typeof FxBridge>;
+
+export const BoardPack = named(
+  'BoardPack',
+  z
+    .object({
+      generatedAt: IsoDateTime,
+      currency: CurrencyCode,
+      title: z.string().describe('Cover title, for example "Hyland \u2014 budget pack \u2014 October 2026".'),
+      source: BoardPackSource,
+      constantCurrency: z.boolean(),
+      scope: ReportScope,
+      pages: z.array(BoardPackPage),
+      fxBridge: FxBridge,
+      reconciliation: ReportReconciliation,
+      notes: z.array(z.string()),
+    })
+    .strict()
+    .describe('The pack as the builder previews it and the generation job renders it.'),
+);
+export type BoardPack = z.infer<typeof BoardPack>;
+
+export const BoardPackQuery = z
+  .object({
+    fiscalPeriodId: Id.optional().describe('Defaults to the latest closed period.'),
+    draft: z
+      .enum(['true', 'false'])
+      .optional()
+      .describe('Read the current open period instead; every page is watermarked "Draft".'),
+    pages: z
+      .string()
+      .optional()
+      .describe('Comma-separated page ids in the order wanted; omitted means every page.'),
+    constantCurrency: z.enum(['true', 'false']).optional(),
+    rootBudgetId: Id.optional(),
+    forecastCycleId: Id.optional(),
+  })
+  .strict();
+
+export const BOARD_PACK_STATUSES = ['queued', 'running', 'ready', 'failed', 'expired'] as const;
+export const BoardPackStatus = z.enum(BOARD_PACK_STATUSES);
+export type BoardPackStatus = z.infer<typeof BoardPackStatus>;
+
+export const BoardPackFile = named(
+  'BoardPackFile',
+  z
+    .object({
+      format: z.enum(['pdf', 'xlsx']),
+      fileName: z.string(),
+      sizeBytes: z.int().min(0),
+      sha256: z.string(),
+    })
+    .strict()
+    .describe('A rendered file in the DocumentStore under a tenant-scoped key.'),
+);
+export type BoardPackFile = z.infer<typeof BoardPackFile>;
+
+export const BoardPackGeneration = named(
+  'BoardPackGeneration',
+  z
+    .object({
+      id: Id,
+      status: BoardPackStatus,
+      source: BoardPackSource,
+      pages: z.array(BoardPackPageId),
+      formats: z.array(z.enum(['pdf', 'xlsx'])),
+      constantCurrency: z.boolean(),
+      currency: CurrencyCode,
+      pageCount: z.int().min(0),
+      rowCount: z.int().min(0),
+      files: z.array(BoardPackFile),
+      failedPage: BoardPackPageId.nullable(),
+      error: z.string().nullable(),
+      requestedByName: z.string().nullable(),
+      requestedAt: IsoDateTime,
+      completedAt: IsoDateTime.nullable(),
+      expiresAt: IsoDateTime.describe('Download links stop working after this; the pack is regenerated.'),
+    })
+    .strict()
+    .describe('A pack generation. Rendering runs in the worker; the files land in the DocumentStore.'),
+);
+export type BoardPackGeneration = z.infer<typeof BoardPackGeneration>;
+
+export const BoardPackGenerationList = named(
+  'BoardPackGenerationList',
+  z.object({ items: z.array(BoardPackGeneration) }).strict(),
+);
+
+export const CreateBoardPackRequest = named(
+  'CreateBoardPackRequest',
+  z
+    .object({
+      fiscalPeriodId: Id.optional(),
+      draft: z.boolean().optional(),
+      pages: z.array(BoardPackPageId).min(1).max(BOARD_PACK_PAGES.length).optional(),
+      formats: z.array(z.enum(['pdf', 'xlsx'])).min(1).max(2).optional(),
+      constantCurrency: z.boolean().optional(),
+      rootBudgetId: Id.optional(),
+      forecastCycleId: Id.optional(),
+    })
+    .strict()
+    .describe('Queues a generation. Defaults: the latest closed period, every page, PDF and XLSX.'),
+);
+export type CreateBoardPackRequest = z.infer<typeof CreateBoardPackRequest>;
+
+export const BoardPackDownload = named(
+  'BoardPackDownload',
+  z
+    .object({ url: z.string(), fileName: z.string(), expiresAt: IsoDateTime })
+    .strict()
+    .describe('A short-lived signed URL for one rendered file.'),
+);
+export type BoardPackDownload = z.infer<typeof BoardPackDownload>;
+
 const ReportParams = z.object({ reportId: ReportId }).strict();
 const ScheduleParams = z.object({ scheduleId: Id }).strict();
 const ViewParams = z.object({ viewId: Id }).strict();
+const GenerationParams = z.object({ generationId: Id }).strict();
 
 export const reportEndpoints = {
   getReportCatalog: {
@@ -802,5 +1039,61 @@ export const reportEndpoints = {
     auth: true,
     response: { status: 200, schema: ReportExportList },
     errors: [401, 403],
+  },
+  getBoardPack: {
+    operationId: 'getBoardPack',
+    method: 'get',
+    path: '/api/reports/board-pack',
+    summary: 'Preview the board and FP&A pack from a close snapshot or the open period',
+    tags: ['reports'],
+    auth: true,
+    query: BoardPackQuery,
+    response: { status: 200, schema: BoardPack },
+    errors: [400, 401, 403, 404, 409, 422],
+  },
+  createBoardPackGeneration: {
+    operationId: 'createBoardPackGeneration',
+    method: 'post',
+    path: '/api/reports/board-pack/generations',
+    summary: 'Generate the pack in the background into the DocumentStore',
+    tags: ['reports'],
+    auth: true,
+    idempotent: true,
+    body: CreateBoardPackRequest,
+    response: { status: 202, schema: BoardPackGeneration },
+    errors: [400, 401, 403, 404, 409, 422],
+  },
+  listBoardPackGenerations: {
+    operationId: 'listBoardPackGenerations',
+    method: 'get',
+    path: '/api/reports/board-pack/generations',
+    summary: 'Pack generations with their status, newest first',
+    tags: ['reports'],
+    auth: true,
+    response: { status: 200, schema: BoardPackGenerationList },
+    errors: [401, 403],
+  },
+  getBoardPackGeneration: {
+    operationId: 'getBoardPackGeneration',
+    method: 'get',
+    path: '/api/reports/board-pack/generations/{generationId}',
+    summary: 'One pack generation, with the files it rendered',
+    tags: ['reports'],
+    auth: true,
+    params: GenerationParams,
+    response: { status: 200, schema: BoardPackGeneration },
+    errors: [400, 401, 403, 404],
+  },
+  downloadBoardPack: {
+    operationId: 'downloadBoardPack',
+    method: 'get',
+    path: '/api/reports/board-pack/generations/{generationId}/download',
+    summary: 'A short-lived signed URL for a rendered pack file',
+    tags: ['reports'],
+    auth: true,
+    params: GenerationParams,
+    query: z.object({ format: z.enum(['pdf', 'xlsx']) }).strict(),
+    response: { status: 200, schema: BoardPackDownload },
+    errors: [400, 401, 403, 404, 409],
   },
 } as const satisfies Record<string, Endpoint>;

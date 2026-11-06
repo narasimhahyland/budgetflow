@@ -23,6 +23,15 @@ const DEFAULT_LIMIT = 200;
 
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 
+const emptyExtras = (): ReportExtras => ({
+  events: [],
+  headcount: new Map(),
+  participation: new Map(),
+  forecasts: { cycle: null, compare: null, byBudget: new Map(), compareByBudget: new Map() },
+  fxLines: [],
+  planRates: [],
+});
+
 /** The report catalog, report runs in the shared frame, and drill-down to the ledger lines. */
 @Injectable()
 export class ReportsService {
@@ -132,6 +141,7 @@ export class ReportsService {
       series: built.series,
       rowCount: built.rows.length,
       truncated: built.rows.length > rows.length,
+      notes: built.notes ?? [],
       reconciliation: reconcile(built, totals, dataset.budgets.length, money),
     };
   }
@@ -154,8 +164,15 @@ export class ReportsService {
         return this.extras.headcount(tx);
       case 'participation-reach':
         return this.extras.participation(tx, query);
+      case 'forecast-variance':
+        return this.extras.forecasts(tx, {
+          budgetIds: query.budgetIds,
+          cycleId: filters.forecastCycleId,
+          compareCycleId: filters.compareCycleId,
+          fiscalYearId: dataset.fiscalYear?.id,
+        });
       default:
-        return Promise.resolve({ events: [], headcount: new Map(), participation: new Map() });
+        return Promise.resolve(emptyExtras());
     }
   }
 

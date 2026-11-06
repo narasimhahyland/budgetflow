@@ -183,6 +183,12 @@ services:
       INTEGRATIONS_MOCK_BASE_URL: http://mock-providers:4010
       INTEGRATIONS_ALLOWED_HOSTS: mock-providers,localhost,127.0.0.1
       INTEGRATIONS_SECRET_KEY: ${BF_INTEGRATIONS_SECRET_KEY:-}
+      # The worker renders the board and FP&A pack (16a) into the DocumentStore, so it needs the
+      # same store as the API: the internal endpoint to write, the public one to sign download links.
+      DOCUMENT_STORE_ENDPOINT: http://minio:9000
+      DOCUMENT_STORE_PUBLIC_URL: http://localhost:${BF_MINIO_PORT:-9000}
+      DOCUMENT_STORE_ACCESS_KEY: ${BF_MINIO_ROOT_USER:?}
+      DOCUMENT_STORE_SECRET_KEY: ${BF_MINIO_ROOT_PASSWORD:?}
     depends_on:
       api:
         condition: service_healthy

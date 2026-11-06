@@ -7,5 +7,7 @@ export * from './lib/health.service';
 export * from './lib/saved-views.service';
 export * from './lib/schedules.service';
 export * from './lib/report-delivery.service';
+export * from './lib/board-pack-pages';
+export * from './lib/board-pack.service';
 export * from './lib/reports.controller';
 export * from './lib/reports.module';

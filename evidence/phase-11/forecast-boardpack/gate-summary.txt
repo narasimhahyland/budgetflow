@@ -1,0 +1,11 @@
+  ✓ db (5s)
+
+Gate summary (lint typecheck build) — logs in tmp/gate/20261106-153931
+  PASS secrets             3s
+  PASS lint                8s
+  PASS styles              3s
+  PASS satori             31s
+  PASS typecheck          45s
+  PASS build              20s
+  PASS openapi             2s
+  PASS db                  5s

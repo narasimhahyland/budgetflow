@@ -5,6 +5,7 @@ import { SpendModule } from '@bf/api/spend';
 import { Module } from '@nestjs/common';
 import { CloseController } from './close.controller';
 import { CloseReads } from './close-reads';
+import { ForecastCyclesService } from './forecast-cycles.service';
 import { PeriodCloseService } from './period-close.service';
 import { PeriodCloseChecks, STANDARD_PERIOD_CHECKS } from './period-close-checks';
 import { RolloverPoliciesService } from './rollover-policies.service';
@@ -20,7 +21,13 @@ const periodCloseChecks = {
   },
 };
 
-const SERVICES = [CloseReads, PeriodCloseService, RolloverPoliciesService, YearEndService];
+const SERVICES = [
+  CloseReads,
+  PeriodCloseService,
+  RolloverPoliciesService,
+  YearEndService,
+  ForecastCyclesService,
+];
 
 /** Period close, year end and roll-forward services (also used by the seed). */
 @Module({
