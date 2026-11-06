@@ -1,0 +1,341 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Errors and retries</h1>
+    <p class="bf-page__subtitle">
+      Everything that failed on its way in or out, why it failed, and what happens next
+    </p>
+  </div>
+</header>
+
+<bf-integrations-nav [failing]="failing()" />
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="errors-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="errors-failure"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+<nav class="bf-tabs" aria-label="Queues">
+  <button
+    class="bf-tabs__tab"
+    type="button"
+    [class.bf-tabs__tab--active]="tab() === 'retrying'"
+    [attr.aria-current]="tab() === 'retrying' ? 'page' : null"
+    (click)="switchTab('retrying')"
+    data-testid="tab-retrying"
+  >
+    Waiting for retry ({{ retrying() }})
+  </button>
+  <button
+    class="bf-tabs__tab"
+    type="button"
+    [class.bf-tabs__tab--active]="tab() === 'dead_letter'"
+    [attr.aria-current]="tab() === 'dead_letter' ? 'page' : null"
+    (click)="switchTab('dead_letter')"
+    data-testid="tab-dead-letter"
+  >
+    Dead letter ({{ deadLetter() }})
+  </button>
+  <button
+    class="bf-tabs__tab"
+    type="button"
+    [class.bf-tabs__tab--active]="tab() === 'discarded'"
+    [attr.aria-current]="tab() === 'discarded' ? 'page' : null"
+    (click)="switchTab('discarded')"
+    data-testid="tab-discarded"
+  >
+    Discarded
+  </button>
+</nav>
+
+<section class="bf-card bf-filters" aria-label="Filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Why it failed</mat-label>
+    <mat-select
+      [ngModel]="errorClass()"
+      (ngModelChange)="errorClass.set($event)"
+      data-testid="filter-error-class"
+    >
+      <mat-option value="all">Any reason</mat-option>
+      <mat-option value="authentication">Authentication</mat-option>
+      <mat-option value="validation">Validation</mat-option>
+      <mat-option value="mapping">Mapping</mat-option>
+      <mat-option value="rate_limit">Rate limit</mat-option>
+      <mat-option value="provider_unavailable">Provider unavailable</mat-option>
+      <mat-option value="signature">Signature</mat-option>
+    </mat-select>
+  </mat-form-field>
+</section>
+
+@if (tab() === 'dead_letter' && deadLetter() > 0) {
+  <sat-banner variant="warning" data-testid="dead-letter-note">
+    <sat-banner-message>
+      <strong>These used up every retry.</strong> Nothing happens to them until someone fixes the
+      cause and retries, or discards them with a reason. Signature failures are never retried
+      automatically: a mismatched signature may mean the call was forged.
+    </sat-banner-message>
+  </sat-banner>
+}
+
+@if (messages.isLoading() && !valueOf(messages)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the failed messages" /></section>
+} @else if (messages.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="messages.error()" what="the failed messages" (retry)="reloadAll()" />
+  </section>
+} @else if (items().length) {
+  @if (canManage() && chosenCount() > 0) {
+    <section class="bf-card" aria-label="Selected messages" data-testid="selection-bar">
+      <div class="bf-footer">
+        <p class="bf-footer__note">
+          {{ chosenCount() }} selected.
+          @if (tab() === 'discarded') {
+            Discarded messages are kept for audit and cannot be retried.
+          } @else {
+            Retrying reuses the original key, so a message that succeeds is never applied twice.
+          }
+        </p>
+        <div class="bf-chip-row">
+          @if (tab() !== 'discarded') {
+            <button
+              mat-flat-button
+              type="button"
+              [disabled]="busy()"
+              (click)="retry()"
+              data-testid="retry-selected"
+            >
+              Retry {{ chosenCount() }}
+            </button>
+          }
+          @if (tab() === 'dead_letter') {
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="busy()"
+              (click)="discarding.set(true)"
+              data-testid="discard-selected"
+            >
+              Discard {{ chosenCount() }}
+            </button>
+          }
+        </div>
+      </div>
+      @if (discarding()) {
+        <sat-banner class="bf-banner" variant="warning" data-testid="discard-warning">
+          <sat-banner-message>
+            <strong>Discarding gives up on these {{ chosenCount() }} records.</strong>
+            They will never be retried, so whatever they carried — an actual, a worker change, a
+            push — never reaches BudgetFlow. They stay in the audit log with your reason.
+          </sat-banner-message>
+        </sat-banner>
+        <div class="bf-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Reason code</mat-label>
+            <input
+              matInput
+              [ngModel]="reasonCode()"
+              (ngModelChange)="reasonCode.set($event)"
+              placeholder="DUPLICATE_IN_SOURCE"
+              data-testid="discard-reason-code"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="bf-form__wide">
+            <mat-label>Why these are being given up on</mat-label>
+            <textarea
+              matInput
+              rows="2"
+              [ngModel]="reason()"
+              (ngModelChange)="reason.set($event)"
+              data-testid="discard-reason"
+            ></textarea>
+          </mat-form-field>
+        </div>
+        <div class="bf-form__actions">
+          <button mat-button type="button" (click)="discarding.set(false)">Cancel</button>
+          <button
+            mat-flat-button
+            type="button"
+            [disabled]="busy() || reasonCode().trim().length < 2 || reason().trim().length < 5"
+            (click)="discard()"
+            data-testid="discard-submit"
+          >
+            Discard {{ chosenCount() }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+
+  <div class="bf-two-col">
+    <section class="bf-card" aria-labelledby="messages-title">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="messages-title">Messages</h2>
+        <span class="bf-muted">{{ items().length }} shown, oldest failure first</span>
+      </div>
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="items()" aria-label="Failed messages">
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Select</span></th>
+            <td mat-cell *matCellDef="let m">
+              @if (canManage()) {
+                <mat-checkbox
+                  [checked]="isChosen(m.id)"
+                  (change)="toggle(m.id, $event.checked)"
+                  [attr.data-testid]="'select-' + m.id"
+                  [attr.aria-label]="'Select ' + m.item"
+                />
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="item">
+            <th mat-header-cell *matHeaderCellDef>Item</th>
+            <td mat-cell *matCellDef="let m">
+              <span class="bf-cell__primary">{{ m.item }}</span>
+              <span class="bf-cell__secondary"
+                >{{ connectorName(m) }} · {{ directionLabel(m.direction) }} · first failed
+                <span data-testid="relative-time">{{
+                  m.firstFailedAt | bfDateTime: timezone()
+                }}</span></span
+              >
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="error">
+            <th mat-header-cell *matHeaderCellDef>Why</th>
+            <td mat-cell *matCellDef="let m">
+              <sat-status-tag [status]="errorClassTone(m.errorClass)">{{
+                errorClassLabel(m.errorClass)
+              }}</sat-status-tag>
+              <span class="bf-cell__secondary">{{ m.lastError }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="attempts">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Attempts</th>
+            <td mat-cell *matCellDef="let m" class="bf-num">
+              {{ m.attempts }} of {{ m.maxAttempts }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="next">
+            <th mat-header-cell *matHeaderCellDef>Next</th>
+            <td mat-cell *matCellDef="let m">
+              @if (m.status === 'discarded') {
+                <sat-status-tag status="neutral">Discarded</sat-status-tag>
+                <span class="bf-cell__secondary">{{ m.discardReason }}</span>
+              } @else if (m.nextRetryAt) {
+                <span data-testid="relative-time">{{
+                  m.nextRetryAt | bfDateTime: timezone()
+                }}</span>
+              } @else if (m.errorClass === 'signature') {
+                <span class="bf-cell__secondary">Never retried automatically</span>
+              } @else {
+                <span class="bf-cell__secondary">Waiting for a decision</span>
+              }
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: columns"
+            class="bf-row--clickable"
+            [class.bf-row--selected]="row.id === opened()"
+            tabindex="0"
+            (click)="open(row)"
+            (keydown.enter)="open(row)"
+            [attr.data-testid]="'message-row-' + row.provider"
+          ></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="bf-card" aria-labelledby="payload-title" data-testid="payload-panel">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="payload-title">What was sent</h2>
+      </div>
+      @if (message(); as m) {
+        <dl class="bf-facts">
+          <div>
+            <dt>Item</dt>
+            <dd>{{ m.item }}</dd>
+          </div>
+          <div>
+            <dt>Connector</dt>
+            <dd>{{ connectorName(m) }}</dd>
+          </div>
+          <div>
+            <dt>Last error</dt>
+            <dd>{{ m.lastError }}</dd>
+          </div>
+          <div>
+            <dt>Attempts</dt>
+            <dd>{{ m.attempts }} of {{ m.maxAttempts }}</dd>
+          </div>
+          <div>
+            <dt>Moved to dead letter</dt>
+            <dd>
+              @if (m.movedToDeadLetterAt) {
+                <span data-testid="relative-time">{{
+                  m.movedToDeadLetterAt | bfDateTime: timezone()
+                }}</span>
+              } @else {
+                Not yet
+              }
+            </dd>
+          </div>
+        </dl>
+        @if (m.errorClass === 'mapping') {
+          <p class="bf-card__body">
+            A value in this record has no BudgetFlow equivalent. Add the mapping on the connector,
+            then retry.
+            <a [routerLink]="['/admin/integrations/connections', m.connectionId]"
+              >Open its mappings</a
+            >.
+          </p>
+        } @else if (m.errorClass === 'authentication') {
+          <p class="bf-card__body">
+            The provider refused BudgetFlow's credential. Replace it on the connector, then retry.
+            <a [routerLink]="['/admin/integrations/connections', m.connectionId]"
+              >Open the connection</a
+            >.
+          </p>
+        }
+        <div class="bf-card__body">
+          <h3 class="bf-card__title">Payload</h3>
+          <p class="bf-muted" data-testid="payload-redaction">
+            Tokens, signatures and card numbers are masked before this is stored. What you see here
+            is all BudgetFlow kept.
+          </p>
+          <pre class="bf-payload"><code>{{ m.payloadRedacted | json }}</code></pre>
+        </div>
+      } @else {
+        <p class="bf-card__body bf-muted">Choose a message to see its redacted payload.</p>
+      }
+    </section>
+  </div>
+} @else {
+  <section class="bf-card">
+    <sat-empty-state data-testid="errors-empty">
+      <h2 satEmptyStateHeadline>
+        {{ tab() === 'retrying' ? 'Nothing is failing' : 'Nothing here' }}
+      </h2>
+      <p satEmptyStateDescription>
+        @if (tab() === 'retrying') {
+          No message is waiting for a retry right now.
+        } @else if (tab() === 'dead_letter') {
+          No message has used up its retries.
+        } @else {
+          Nothing has been discarded.
+        }
+      </p>
+    </sat-empty-state>
+  </section>
+}
+
+@if (!canManage()) {
+  <p class="bf-note" data-testid="errors-read-only">
+    You can read what failed and why. Retrying and discarding need the Integration Admin role.
+  </p>
+}
