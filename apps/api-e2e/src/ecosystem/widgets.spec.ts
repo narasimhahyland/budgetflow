@@ -65,7 +65,7 @@ test.describe('configuring widgets', () => {
             eventCount: 3,
           },
         }),
-        422,
+        400,
         'VALIDATION_FAILED',
       );
     }

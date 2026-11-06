@@ -96,7 +96,11 @@ test.describe('what an automation may do', () => {
   test('a draft it creates stays a draft, is labelled, and writes one audit entry', async ({
     request,
   }) => {
-    const { token } = await connectAutomation(request, 'finance-admin', ['request.draft.create']);
+    // The Bengaluru location manager owns that budget, so a draft on it is work they could do
+    // unaided; an automation never reaches further than its person does.
+    const { token } = await connectAutomation(request, 'location-manager', [
+      'request.draft.create',
+    ]);
     const created = await expectContract(
       await request.post('/api/automation/v1/requests/drafts', {
         headers: withToken(token, { 'idempotency-key': randomUUID() }),
@@ -118,7 +122,7 @@ test.describe('what an automation may do', () => {
     // The request itself, read back through the ordinary API, is a draft and nothing more.
     const detail = await expectContract(
       await request.get(`/api/requests/${created.requestId}`, {
-        headers: await as('finance-admin'),
+        headers: await as('location-manager'),
       }),
       200,
       RequestDetail,
@@ -139,7 +143,9 @@ test.describe('what an automation may do', () => {
   });
 
   test('the same idempotency key creates one draft, not two', async ({ request }) => {
-    const { token } = await connectAutomation(request, 'finance-admin', ['request.draft.create']);
+    const { token } = await connectAutomation(request, 'location-manager', [
+      'request.draft.create',
+    ]);
     const key = randomUUID();
     const data = {
       budgetId: SEED.budgets.bengaluru,

@@ -137,6 +137,7 @@ export class EcosystemController {
   }
 
   @Post('api/ecosystem/bi/connections/:connectionId/revoke')
+  @HttpCode(200)
   revokeBiConnection(
     @CurrentActor() actor: RequestActor,
     @Param('connectionId') connectionId: string,
@@ -195,6 +196,7 @@ export class EcosystemController {
   }
 
   @Post('api/ecosystem/assistants/connections/:connectionId/revoke')
+  @HttpCode(200)
   revokeAssistantConnection(
     @CurrentActor() actor: RequestActor,
     @Param('connectionId') connectionId: string,
@@ -254,6 +256,7 @@ export class EcosystemController {
   }
 
   @Post('api/ecosystem/automations/connections/:connectionId/revoke')
+  @HttpCode(200)
   revokeAutomation(
     @CurrentActor() actor: RequestActor,
     @Param('connectionId') connectionId: string,
@@ -291,6 +294,7 @@ export class EcosystemController {
   }
 
   @Post('api/ecosystem/marketplace/partners/:partnerId/sync')
+  @HttpCode(200)
   async syncPartner(
     @CurrentActor() actor: RequestActor,
     @Param('partnerId') partnerId: string,

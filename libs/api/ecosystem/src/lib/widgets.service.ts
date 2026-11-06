@@ -238,30 +238,46 @@ export class WidgetsService {
    * which the browser sets and a page cannot forge for a cross-site request; an absent one means the
    * call did not come from a framed page and is treated as not allowed.
    */
-  content(actor: RequestActor, widgetId: string, origin: string | null): Promise<WidgetContent> {
-    return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
-      const row = await this.rowOrFail(tx, widgetId);
-      if (row.status !== 'active')
-        throw new ApiProblem(409, 'WIDGET_PAUSED', 'This widget is paused.');
-      const host = origin ? origin.trim().replace(/\/$/, '').toLowerCase() : null;
-      if (!host || !row.allowedOrigins.includes(host)) {
-        await tx.insert(ecosystemCalls).values({
+  async content(
+    actor: RequestActor,
+    widgetId: string,
+    origin: string | null,
+  ): Promise<WidgetContent> {
+    const host = origin ? origin.trim().replace(/\/$/, '').toLowerCase() : null;
+    const refusal = await withTenant(
+      this.db,
+      { tenantId: actor.tenantId, subject: actor.subject },
+      async (tx) => {
+        const row = await this.rowOrFail(tx, widgetId);
+        if (row.status !== 'active')
+          throw new ApiProblem(409, 'WIDGET_PAUSED', 'This widget is paused.');
+        return host && row.allowedOrigins.includes(host) ? null : row.id;
+      },
+    );
+    // The refusal is recorded in its own transaction, so it survives the error that follows it:
+    // an admin can only see which sites tried to show the widget if the record is not rolled back.
+    if (refusal) {
+      await withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, (tx) =>
+        tx.insert(ecosystemCalls).values({
           tenantId: actor.tenantId,
-          widgetId: row.id,
+          widgetId: refusal,
           surface: 'widget',
-          operation: `content:${row.kind}`,
+          operation: 'content',
           outcome: 'origin_refused',
           recordsReturned: 0,
           refusedOrigin: (host ?? 'none').slice(0, 200),
           actorPersonId: actor.personId,
-        });
-        throw new ApiProblem(
-          403,
-          'WIDGET_ORIGIN_NOT_ALLOWED',
-          'This site is not allowed to show the widget. Ask your administrator to add it.',
-        );
-      }
+        }),
+      );
+      throw new ApiProblem(
+        403,
+        'WIDGET_ORIGIN_NOT_ALLOWED',
+        'This site is not allowed to show the widget. Ask your administrator to add it.',
+      );
+    }
 
+    return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
+      const row = await this.rowOrFail(tx, widgetId);
       const content =
         row.kind === 'team_budget'
           ? await this.teamBudget(tx, actor, row.showAmounts)

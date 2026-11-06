@@ -142,6 +142,23 @@ test.describe('tool calls', () => {
     expect(employeeSees.recordCount).toBe(0);
   });
 
+  test('an owner sees their own subtree and not a budget belonging to someone else', async ({
+    request,
+  }) => {
+    // The Bengaluru location manager owns one subtree. The central contingency reserve is a
+    // separate root owned by finance, so it must not appear however the tool is called.
+    const { token } = await connectAssistant(request, 'location-manager', ['list_my_budgets']);
+    const mine = await expectContract(
+      await callTool(request, token, 'list_my_budgets'),
+      200,
+      McpToolCallResult,
+    );
+    const ids = mine.records.map((r) => r['id']);
+    expect(ids).toContain(SEED.budgets.bengaluru);
+    expect(ids).not.toContain(SEED.budgets.contingency);
+    expect(ids).not.toContain(SEED.budgets.europe);
+  });
+
   test('records carry only the allowed field names, never an email address', async ({
     request,
   }) => {
@@ -204,7 +221,7 @@ test.describe('tool calls', () => {
           headers: withToken(token),
           data: { tool: invented, arguments: {} },
         }),
-        422,
+        400,
         'VALIDATION_FAILED',
       );
     }

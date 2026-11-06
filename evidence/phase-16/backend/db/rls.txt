@@ -1,0 +1,22 @@
+         table         | rls_enabled | rls_forced | tenant_isolation_policies 
+-----------------------+-------------+------------+---------------------------
+ ecosystem_calls       | t           | t          |                         1
+ ecosystem_connections | t           | t          |                         1
+ ecosystem_surfaces    | t           | t          |                         1
+ embedded_widgets      | t           | t          |                         1
+ marketplace_bookings  | t           | t          |                         1
+ marketplace_offers    | t           | t          |                         1
+ marketplace_partners  | t           | t          |                         1
+(7 rows)
+
+           trigger           |      table      
+-----------------------------+-----------------
+ ecosystem_calls_append_only | ecosystem_calls
+ ecosystem_calls_no_truncate | ecosystem_calls
+(2 rows)
+
+              check              | rows 
+---------------------------------+------
+ ecosystem_calls update rejected |  269
+(1 row)
+
