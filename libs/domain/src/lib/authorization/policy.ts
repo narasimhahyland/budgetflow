@@ -56,6 +56,8 @@ export const ACTIONS = [
   'actuals.manage',
   'actuals.read',
   'gl.sign_off',
+  'forecast.submit',
+  'forecast.manage',
   'report.read',
   'report.schedule',
   'audit.read',
@@ -93,6 +95,8 @@ const OWNER: Grants = {
   'contribution.decide': 'owned',
   'event.manage': 'owned',
   'event.read': 'owned',
+  // Owners forecast the budgets they own; accepting and closing a cycle is `forecast.manage`.
+  'forecast.submit': 'owned',
   'report.read': 'owned',
   'report.schedule': 'owned',
 };
@@ -147,6 +151,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'actuals.manage': 'tenant',
     'actuals.read': 'tenant',
     'gl.sign_off': 'tenant',
+    'forecast.submit': 'tenant',
+    'forecast.manage': 'tenant',
     'report.read': 'tenant',
     'report.schedule': 'tenant',
     'event.read': 'tenant',
@@ -200,6 +206,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'contribution.request': 'owned',
     'event.manage': 'self',
     'event.read': 'self',
+    // Forecast at completion for the open events the organizer runs.
+    'forecast.submit': 'owned',
   },
   employee: { 'tenant.read': 'tenant', 'org.read': 'self', 'request.create': 'self' },
   auditor: {

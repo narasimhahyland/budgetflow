@@ -1,0 +1,40 @@
+    ledger_account     
+-----------------------
+ authorized
+ allocated_out
+ held
+ pre_encumbered
+ encumbered
+ actual
+ accrued
+ plan_funding
+ savings
+ obligations
+ earmark_reserve
+ fx_variance
+ intercompany_due_from
+ intercompany_due_to
+(14 rows)
+
+ ledger_columns_referencing_forecast 
+-------------------------------------
+                                   0
+(1 row)
+
+ forecast_journals 
+-------------------
+                 0
+(1 row)
+
+         table          | rls_enabled | rls_forced | tenant_isolation 
+------------------------+-------------+------------+------------------
+ board_pack_generations | t           | t          | t
+ forecast_cycles        | t           | t          | t
+ forecast_snapshots     | t           | t          | t
+(3 rows)
+
+              conname               |                         definition                          
+------------------------------------+-------------------------------------------------------------
+ forecast_snapshots_budget_or_event | CHECK (((budget_id IS NOT NULL) OR (event_id IS NOT NULL)))
+(1 row)
+

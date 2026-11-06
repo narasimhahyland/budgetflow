@@ -1,0 +1,1238 @@
+{
+  "generatedAt": "2026-11-06T08:45:49.436Z",
+  "currency": "USD",
+  "title": "Hyland \u2014 budget pack \u2014 Sep 2026",
+  "source": {
+    "kind": "close_snapshot",
+    "fiscalPeriodId": "23000000-0000-4000-8000-012026090000",
+    "periodLabel": "Sep 2026",
+    "snapshotVersion": 1,
+    "takenAt": "2026-11-06T08:42:41.695Z",
+    "draft": false,
+    "statement": "Figures from the Sep 2026 close snapshot taken 2026-11-06T08:42:41.695Z. Items posted late are in the next open period."
+  },
+  "constantCurrency": true,
+  "scope": {
+    "tenantWide": true,
+    "label": "Hyland",
+    "budgetIds": 112,
+    "note": null
+  },
+  "pages": [
+    {
+      "page": "summary",
+      "title": "Summary",
+      "statement": null,
+      "columns": [
+        {
+          "key": "label",
+          "label": "Scope",
+          "type": "text",
+          "align": "start",
+          "drillable": false
+        },
+        {
+          "key": "authorized",
+          "label": "Authorized",
+          "type": "money",
+          "align": "end",
+          "drillable": true
+        },
+        {
+          "key": "pending",
+          "label": "Pending",
+          "type": "money",
+          "align": "end",
+          "drillable": true
+        },
+        {
+          "key": "committed",
+          "label": "Committed",
+          "type": "money",
+          "align": "end",
+          "drillable": true
+        },
+        {
+          "key": "actual",
+          "label": "Actual",
+          "type": "money",
+          "align": "end",
+          "drillable": true
+        },
+        {
+          "key": "available",
+          "label": "Available",
+          "type": "money",
+          "align": "end",
+          "drillable": false,
+          "hint": "Company-wide: Authorized \u2212 Held \u2212 Pre-encumbered \u2212 Encumbered \u2212 Actual, with child allocations counted once."
+        },
+        {
+          "key": "utilization",
+          "label": "Utilization",
+          "type": "percent",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "forecast",
+          "label": "Forecast at year end",
+          "type": "money",
+          "align": "end",
+          "drillable": false,
+          "hint": "A forecast, not an actual: it posts nothing and consumes no budget."
+        }
+      ],
+      "rows": [
+        {
+          "key": "company",
+          "label": "Hyland",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": null,
+          "status": null,
+          "tags": [],
+          "cells": {
+            "authorized": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "authorized"
+            },
+            "pending": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "pre_encumbered"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "available": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "utilization": {
+              "bps": 0
+            },
+            "forecast": {
+              "money": {
+                "amountMinor": 740000,
+                "currency": "USD"
+              }
+            }
+          }
+        }
+      ],
+      "totals": {
+        "key": "totals",
+        "label": "Total",
+        "budgetId": null,
+        "eventId": null,
+        "orgUnitId": null,
+        "status": null,
+        "tags": [],
+        "cells": {
+          "authorized": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            },
+            "bucket": "authorized"
+          },
+          "pending": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            },
+            "bucket": "pre_encumbered"
+          },
+          "committed": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            },
+            "bucket": "encumbered"
+          },
+          "actual": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            },
+            "bucket": "actual"
+          },
+          "available": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "utilization": {
+            "bps": 0
+          },
+          "forecast": {
+            "money": {
+              "amountMinor": 740000,
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "series": []
+    },
+    {
+      "page": "legal_entity",
+      "title": "By legal entity",
+      "statement": null,
+      "columns": [
+        {
+          "key": "label",
+          "label": "Legal entity",
+          "type": "text",
+          "align": "start",
+          "drillable": false
+        },
+        {
+          "key": "budgets",
+          "label": "Budgets",
+          "type": "number",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "authorized",
+          "label": "Authorized",
+          "type": "money",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "allocatedOut",
+          "label": "Allocated out",
+          "type": "money",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "held",
+          "label": "Held",
+          "type": "money",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "pending",
+          "label": "Pending",
+          "type": "money",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "committed",
+          "label": "Committed",
+          "type": "money",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "actual",
+          "label": "Actual",
+          "type": "money",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "accrued",
+          "label": "Accrued",
+          "type": "money",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "snapshot",
+          "label": "Snapshot",
+          "type": "text",
+          "align": "start",
+          "drillable": false,
+          "hint": "Version of the close snapshot these figures came from."
+        }
+      ],
+      "rows": [
+        {
+          "key": "entity:20000000-0000-4000-8000-000000000003",
+          "label": "HYL-DE",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": null,
+          "status": null,
+          "tags": [],
+          "cells": {
+            "budgets": {
+              "number": 0
+            },
+            "authorized": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "allocatedOut": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "held": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "pending": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "accrued": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "snapshot": {
+              "text": "v1"
+            }
+          }
+        },
+        {
+          "key": "entity:20000000-0000-4000-8000-000000000002",
+          "label": "HYL-IN",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": null,
+          "status": null,
+          "tags": [],
+          "cells": {
+            "budgets": {
+              "number": 0
+            },
+            "authorized": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "allocatedOut": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "held": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "pending": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "accrued": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "snapshot": {
+              "text": "v1"
+            }
+          }
+        },
+        {
+          "key": "entity:20000000-0000-4000-8000-000000000006",
+          "label": "HYL-UK",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": null,
+          "status": null,
+          "tags": [],
+          "cells": {
+            "budgets": {
+              "number": 0
+            },
+            "authorized": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "allocatedOut": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "held": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "pending": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "accrued": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "snapshot": {
+              "text": "v1"
+            }
+          }
+        },
+        {
+          "key": "entity:20000000-0000-4000-8000-000000000001",
+          "label": "HYL-US",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": null,
+          "status": null,
+          "tags": [],
+          "cells": {
+            "budgets": {
+              "number": 0
+            },
+            "authorized": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "allocatedOut": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "held": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "pending": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "accrued": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "snapshot": {
+              "text": "v1"
+            }
+          }
+        },
+        {
+          "key": "entity:20000000-0000-4000-8000-000000000004",
+          "label": "Not set",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": null,
+          "status": null,
+          "tags": [],
+          "cells": {
+            "budgets": {
+              "number": 0
+            },
+            "authorized": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "allocatedOut": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "held": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "pending": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "accrued": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "snapshot": {
+              "text": "v1"
+            }
+          }
+        },
+        {
+          "key": "entity:20000000-0000-4000-8000-000000000005",
+          "label": "Not set",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": null,
+          "status": null,
+          "tags": [],
+          "cells": {
+            "budgets": {
+              "number": 0
+            },
+            "authorized": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "allocatedOut": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "held": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "pending": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "accrued": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "snapshot": {
+              "text": "v1"
+            }
+          }
+        }
+      ],
+      "totals": {
+        "key": "totals",
+        "label": "Total",
+        "budgetId": null,
+        "eventId": null,
+        "orgUnitId": null,
+        "status": null,
+        "tags": [],
+        "cells": {
+          "budgets": {
+            "number": 0
+          },
+          "authorized": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "allocatedOut": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "held": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "pending": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "committed": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "actual": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "accrued": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "snapshot": {
+            "text": null
+          }
+        }
+      },
+      "series": []
+    },
+    {
+      "page": "variance_fx",
+      "title": "Variance and FX bridge",
+      "statement": null,
+      "columns": [
+        {
+          "key": "label",
+          "label": "Region",
+          "type": "text",
+          "align": "start",
+          "drillable": false
+        },
+        {
+          "key": "planToDate",
+          "label": "Plan phased to date",
+          "type": "money",
+          "align": "end",
+          "drillable": false,
+          "hint": "Authorized, phased by how far through the fiscal year the period end is."
+        },
+        {
+          "key": "actual",
+          "label": "Actual",
+          "type": "money",
+          "align": "end",
+          "drillable": true
+        },
+        {
+          "key": "committed",
+          "label": "Committed",
+          "type": "money",
+          "align": "end",
+          "drillable": true
+        },
+        {
+          "key": "variance",
+          "label": "Variance against plan to date",
+          "type": "money",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "variancePct",
+          "label": "Variance %",
+          "type": "percent",
+          "align": "end",
+          "drillable": false
+        },
+        {
+          "key": "fxNote",
+          "label": "FX",
+          "type": "text",
+          "align": "start",
+          "drillable": false,
+          "hint": "The FX effect is bridged on its own page and is not part of this variance."
+        }
+      ],
+      "rows": [
+        {
+          "key": "region:30000000-0000-4000-8000-000000000006",
+          "label": "Bengaluru",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": "30000000-0000-4000-8000-000000000006",
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        },
+        {
+          "key": "region:30000000-0000-4000-8000-000000000009",
+          "label": "Berlin",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": "30000000-0000-4000-8000-000000000009",
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        },
+        {
+          "key": "region:30000000-0000-4000-8000-000000000005",
+          "label": "Europe",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": "30000000-0000-4000-8000-000000000005",
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        },
+        {
+          "key": "region:30000000-0000-4000-8000-000000000007",
+          "label": "Hyderabad",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": "30000000-0000-4000-8000-000000000007",
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        },
+        {
+          "key": "region:30000000-0000-4000-8000-000000000001",
+          "label": "Hyland",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": "30000000-0000-4000-8000-000000000001",
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        },
+        {
+          "key": "region:30000000-0000-4000-8000-000000000003",
+          "label": "India",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": "30000000-0000-4000-8000-000000000003",
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        },
+        {
+          "key": "region:30000000-0000-4000-8000-000000000008",
+          "label": "New York",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": "30000000-0000-4000-8000-000000000008",
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        },
+        {
+          "key": "region:none",
+          "label": "Not set",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": null,
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        },
+        {
+          "key": "region:30000000-0000-4000-8000-000000000004",
+          "label": "United States",
+          "budgetId": null,
+          "eventId": null,
+          "orgUnitId": "30000000-0000-4000-8000-000000000004",
+          "status": null,
+          "tags": [],
+          "cells": {
+            "planToDate": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              }
+            },
+            "actual": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "actual"
+            },
+            "committed": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "bucket": "encumbered"
+            },
+            "variance": {
+              "money": {
+                "amountMinor": 0,
+                "currency": "USD"
+              },
+              "tone": "success"
+            },
+            "variancePct": {
+              "bps": 0
+            },
+            "fxNote": {
+              "text": "Bridged separately"
+            }
+          }
+        }
+      ],
+      "totals": {
+        "key": "totals",
+        "label": "Total",
+        "budgetId": null,
+        "eventId": null,
+        "orgUnitId": null,
+        "status": null,
+        "tags": [],
+        "cells": {
+          "planToDate": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "actual": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "committed": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "variance": {
+            "money": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          "variancePct": {
+            "bps": 0
+          },
+          "fxNote": {
+            "text": "Bridged separately"
+          }
+        }
+      },
+      "series": []
+    }
+  ],
+  "fxBridge": {
+    "reportingRateType": "monthly_average",
+    "rows": [],
+    "totalEffect": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "note": "Not part of spend or variance; FX never consumes budget."
+  },
+  "reconciliation": {
+    "source": "ledger_balances",
+    "budgetsCounted": 112,
+    "authorized": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "held": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "preEncumbered": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "encumbered": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "actual": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "accrued": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "available": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "ties": true,
+    "differences": []
+  },
+  "notes": [
+    "Figures from the Sep 2026 close snapshot taken 2026-11-06T08:42:41.695Z. Items posted late are in the next open period.",
+    "Not part of spend or variance; FX never consumes budget."
+  ]
+}

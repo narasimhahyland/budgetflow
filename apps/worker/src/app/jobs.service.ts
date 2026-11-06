@@ -8,9 +8,12 @@ import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
 import { LEDGER_CHECK_TOPIC, RebuildService } from '@bf/api/integrity';
 import { EMAIL_TOPIC, NotificationsService, type EmailPayload } from '@bf/api/notifications';
 import {
+  BOARD_PACK_TOPIC,
+  BoardPackService,
   REPORT_DELIVER_TOPIC,
   REPORT_SWEEP_TOPIC,
   ReportDeliveryService,
+  type BoardPackJob,
   type ReportDeliverJob,
 } from '@bf/api/reports';
 import { BUDGET_THRESHOLD_TOPIC, BudgetAlertsConsumer, type ThresholdCrossed } from '@bf/api/spend';
@@ -52,6 +55,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly channels: ChannelsService,
     private readonly slaSweep: SlaSweepService,
     private readonly reportDelivery: ReportDeliveryService,
+    private readonly boardPacks: BoardPackService,
     private readonly webhooks: WebhooksService,
     private readonly retention: RetentionService,
   ) {}
@@ -88,6 +92,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       BUDGET_THRESHOLD_TOPIC,
       CHANNEL_DELIVER_TOPIC,
       REPORT_DELIVER_TOPIC,
+      BOARD_PACK_TOPIC,
     ]) {
       await boss.createQueue(topic, {
         retryLimit: 5,
@@ -122,6 +127,11 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     // who may see the same data, post headline figures to the allowed channels.
     await boss.work<ReportDeliverJob>(REPORT_DELIVER_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.reportDelivery.deliver(job.data);
+    });
+    // Board and FP&A pack generation (16a): renders the pages into the DocumentStore. Keyed by the
+    // generation id, and a generation already `ready` is left alone, so a replay is a no-op.
+    await boss.work<BoardPackJob>(BOARD_PACK_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.boardPacks.render(job.data);
     });
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();

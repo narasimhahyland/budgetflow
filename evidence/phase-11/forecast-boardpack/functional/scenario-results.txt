@@ -1,0 +1,33 @@
+  ✓   1 apps/api-e2e/src/close/board-pack-snapshot.spec.ts:13:7 › board pack from a close snapshot (16a) › a pack of a period the product closed reads that close snapshot and ties to it (4.1s)
+  ✓   2 apps/api-e2e/src/close/forecast-cycle.spec.ts:108:7 › forecast cycle › a variance above the cycle threshold is refused without commentary and accepted with it (287ms)
+  ✓   3 apps/api-e2e/src/close/forecast-cycle.spec.ts:153:7 › forecast cycle › a variance exactly on the threshold needs commentary, one minor unit inside it does not (99ms)
+  ✓   4 apps/api-e2e/src/close/forecast-cycle.spec.ts:187:7 › forecast cycle › a forecast posts nothing: the ledger and the budget balances are unchanged (146ms)
+  ✓   5 apps/api-e2e/src/close/forecast-cycle.spec.ts:228:7 › forecast cycle › the system methods are computed from the ledger and offered with their explanation (116ms)
+  ✓   6 apps/api-e2e/src/close/forecast-cycle.spec.ts:265:7 › forecast cycle › an owner may forecast their own budget and not another owner’s (200ms)
+  ✓   7 apps/api-e2e/src/close/forecast-cycle.spec.ts:319:7 › forecast cycle › only finance decides, and an accepted forecast is the owner’s last word (117ms)
+  ✓   8 apps/api-e2e/src/close/forecast-cycle.spec.ts:392:7 › forecast cycle › closing a cycle accepts what was submitted, fills the gaps with System run-rate and locks the snapshot (204ms)
+  ✓   9 apps/api-e2e/src/close/forecast-cycle.spec.ts:473:7 › forecast cycle › a replayed submission is stored once and answered from the first result (111ms)
+  ✓  10 apps/api-e2e/src/close/forecast-cycle.spec.ts:503:7 › forecast cycle › cycle lines come back in a total order, the same way every time (287ms)
+  ✓  11 apps/api-e2e/src/close/forecast-cycle.spec.ts:527:7 › forecast cycle › an auditor reads a cycle and cannot change it (180ms)
+  ✓  12 apps/api-e2e/src/db/rls-policies.spec.ts:79:7 › row-level security as the application role › the forecast cycle and board pack tables isolate tenants (80ms)
+  ✓  13 apps/api-e2e/src/reports/board-pack.spec.ts:40:7 › board and FP&A pack › a closed-period pack reconciles to the ledger and carries all eleven pages (28ms)
+  ✓  14 apps/api-e2e/src/reports/board-pack.spec.ts:98:7 › board and FP&A pack › the FX bridge explains the gap and is never part of spend or variance (26ms)
+  ✓  15 apps/api-e2e/src/reports/board-pack.spec.ts:151:7 › board and FP&A pack › an open-period pack is a draft and says so on every page (25ms)
+  ✓  16 apps/api-e2e/src/reports/board-pack.spec.ts:164:7 › board and FP&A pack › a page with no data keeps its place and carries a statement (114ms)
+  ✓  17 apps/api-e2e/src/reports/board-pack.spec.ts:192:7 › board and FP&A pack › only the pages asked for are rendered, in the order asked for (19ms)
+  ✓  18 apps/api-e2e/src/reports/board-pack.spec.ts:197:7 › board and FP&A pack › generation runs in the worker and lands in the DocumentStore behind a short-lived link (1.6s)
+  ✓  19 apps/api-e2e/src/reports/board-pack.spec.ts:280:7 › board and FP&A pack › a replayed generation request queues one pack (21ms)
+  ✓  20 apps/api-e2e/src/reports/board-pack.spec.ts:300:7 › board and FP&A pack › the pack is for finance, the CEO and auditors; owner roles are refused (144ms)
+  ✓  21 apps/api-e2e/src/reports/forecast-variance.spec.ts:123:7 › forecast and variance report › the report is in the catalog, scoped to owners as well as finance (17ms)
+  ✓  22 apps/api-e2e/src/reports/forecast-variance.spec.ts:136:7 › forecast and variance report › accepted forecasts are reported against the ledger, and only the ledger columns reconcile (215ms)
+  ✓  23 apps/api-e2e/src/reports/forecast-variance.spec.ts:209:7 › forecast and variance report › a budget with no accepted forecast falls back to the system run-rate and the report says so (160ms)
+  ✓  24 apps/api-e2e/src/reports/forecast-variance.spec.ts:260:7 › forecast and variance report › comparing with an earlier cycle adds the previous forecast and the change (147ms)
+  ✓  25 apps/api-e2e/src/reports/forecast-variance.spec.ts:294:7 › forecast and variance report › "commentary required only" narrows the rows and says the figures are a part of the ledger (190ms)
+  ✓  26 apps/api-e2e/src/reports/forecast-variance.spec.ts:346:7 › forecast and variance report › tied rows come back in the same order every time (123ms)
+  ✓  27 apps/api-e2e/src/reports/forecast-variance.spec.ts:365:7 › forecast and variance report › an owner sees only their own subtree; an auditor reads the whole tenant (111ms)
+  27 passed (9.8s)
+
+Full suite as CI runs it, on a fresh seed: 440 passed (apps/api-e2e).
+The close-snapshot scenario lives in src/close so it closes its period before the
+integrity scenarios leave open flags behind; run out of that order it is blocked,
+which is the product refusing a close, not a weak assertion.

@@ -11,6 +11,7 @@ export * from './lib/fiscal/period';
 export * from './lib/fiscal/period-sequence';
 export * from './lib/fiscal/close';
 export * from './lib/fiscal/year-end';
+export * from './lib/fiscal/forecast';
 export * from './lib/ledger/accounts';
 export * from './lib/ledger/journal';
 export * from './lib/ledger/balances';

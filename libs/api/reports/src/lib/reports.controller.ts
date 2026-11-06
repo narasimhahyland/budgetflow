@@ -6,7 +6,10 @@ import {
   type RequestActor,
 } from '@bf/api/core';
 import {
+  BoardPackPageId,
+  BoardPackQuery,
   BudgetHealthQuery,
+  CreateBoardPackRequest,
   CreateExportRequest,
   CreateSavedViewRequest,
   CreateScheduleRequest,
@@ -14,6 +17,9 @@ import {
   ReportId,
   ReportRunQuery,
   UpdateScheduleRequest,
+  type BoardPack,
+  type BoardPackDownload,
+  type BoardPackGeneration,
   type BudgetHealthOverview,
   type ReportCatalog,
   type ReportDrilldown,
@@ -36,6 +42,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { z } from 'zod';
+import { BoardPackService } from './board-pack.service';
 import { HealthService } from './health.service';
 import { ReportsService } from './reports.service';
 import { SavedViewsService } from './saved-views.service';
@@ -54,6 +61,7 @@ export class ReportsController {
     private readonly health: HealthService,
     private readonly views: SavedViewsService,
     private readonly schedules: SchedulesService,
+    private readonly packs: BoardPackService,
   ) {}
 
   @Get('reports')
@@ -187,6 +195,67 @@ export class ReportsController {
   @Get('reports/exports')
   listExports(@CurrentActor() actor: RequestActor): Promise<{ items: ReportExport[] }> {
     return this.schedules.listExports(actor);
+  }
+
+  // 016a Board and FP&A pack. Declared before the `:reportId` routes so "board-pack" is never
+  // read as a report id.
+  @Get('reports/board-pack')
+  boardPack(@CurrentActor() actor: RequestActor, @Query() raw: unknown): Promise<BoardPack> {
+    const q = parseWith(BoardPackQuery, raw);
+    return this.packs.preview(actor, {
+      fiscalPeriodId: q.fiscalPeriodId,
+      draft: q.draft === 'true',
+      pages: q.pages
+        ? q.pages
+            .split(',')
+            .map((p) => p.trim())
+            .filter(Boolean)
+            .map((p) => parseWith(BoardPackPageId, p))
+        : undefined,
+      constantCurrency: q.constantCurrency !== 'false',
+      rootBudgetId: q.rootBudgetId,
+      forecastCycleId: q.forecastCycleId,
+    });
+  }
+
+  @Get('reports/board-pack/generations')
+  listBoardPacks(@CurrentActor() actor: RequestActor): Promise<{ items: BoardPackGeneration[] }> {
+    return this.packs.list(actor);
+  }
+
+  @Get('reports/board-pack/generations/:generationId')
+  boardPackGeneration(
+    @CurrentActor() actor: RequestActor,
+    @Param('generationId') raw: string,
+  ): Promise<BoardPackGeneration> {
+    return this.packs.generation(actor, parseWith(Uuid, raw));
+  }
+
+  @Get('reports/board-pack/generations/:generationId/download')
+  boardPackDownload(
+    @CurrentActor() actor: RequestActor,
+    @Param('generationId') raw: string,
+    @Query() query: unknown,
+  ): Promise<BoardPackDownload> {
+    const { format } = parseWith(z.object({ format: z.enum(['pdf', 'xlsx']) }).strict(), query);
+    return this.packs.download(actor, parseWith(Uuid, raw), format);
+  }
+
+  @Post('reports/board-pack/generations')
+  @HttpCode(202)
+  async createBoardPack(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() idempotencyKey: string,
+    @RequestId() requestId: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ): Promise<BoardPackGeneration> {
+    const r = await this.packs.create(actor, parseWith(CreateBoardPackRequest, body ?? {}), {
+      idempotencyKey,
+      requestId,
+    });
+    if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
+    return r.body;
   }
 
   @Get('dashboards/health')

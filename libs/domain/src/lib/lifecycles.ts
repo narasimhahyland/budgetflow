@@ -217,6 +217,22 @@ export const forecastMachine = defineMachine<
   ],
 });
 
+/**
+ * A forecast cycle is open while owners submit and finance accepts, and closed once the snapshot is
+ * locked. Closing fills the budgets nobody submitted with system run-rate snapshots and supersedes
+ * the previous cycle's, so reports and the board pack always read one complete, immutable set.
+ */
+export const FORECAST_CYCLE_STATUSES = ['open', 'closed'] as const;
+export type ForecastCycleStatus = (typeof FORECAST_CYCLE_STATUSES)[number];
+export const forecastCycleMachine = defineMachine<ForecastCycleStatus, 'close'>({
+  name: 'forecast cycle',
+  transitions: [{ from: 'open', event: 'close', to: 'closed' }],
+});
+
+/** Board and FP&A pack generation (16a): a background job renders the pages into the DocumentStore. */
+export const BOARD_PACK_STATUSES = ['queued', 'running', 'ready', 'failed', 'expired'] as const;
+export type BoardPackStatus = (typeof BOARD_PACK_STATUSES)[number];
+
 /** Intercompany recharge schedule lifecycle; a tax approver signs off when the policy requires one. */
 export const RECHARGE_STATUSES = [
   'proposed',

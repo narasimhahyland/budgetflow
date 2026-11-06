@@ -1,5 +1,14 @@
 import { z } from 'zod';
-import { CurrencyCode, Id, IsoDate, IsoDateTime, Money } from '../common';
+import {
+  CurrencyCode,
+  ForecastMethod,
+  ForecastStatus,
+  Id,
+  IsoDate,
+  IsoDateTime,
+  Money,
+} from '../common';
+import { ReportReconciliation, ReportScope } from './reports';
 import type { Endpoint } from '../endpoint';
 import { named } from '../registry';
 
@@ -13,6 +22,8 @@ const ReopenParams = z.object({ requestId: Id }).strict();
 const RunParams = z.object({ runId: Id }).strict();
 const RunLineParams = z.object({ runId: Id, lineId: Id }).strict();
 const BudgetParams = z.object({ budgetId: Id }).strict();
+const CycleParams = z.object({ cycleId: Id }).strict();
+const SubmissionParams = z.object({ cycleId: Id, submissionId: Id }).strict();
 
 // Period close checklist -------------------------------------------------------------------------
 
@@ -485,6 +496,249 @@ export const ExecuteYearEndRequest = named(
 );
 export type ExecuteYearEndRequest = z.infer<typeof ExecuteYearEndRequest>;
 
+// Forecast cycles (87a) -------------------------------------------------------------------------
+
+export const ForecastCycleStatus = z
+  .enum(['open', 'closed'])
+  .describe('A closed cycle is an immutable snapshot that reports and the board pack read.');
+
+export const ForecastCycleProgress = named(
+  'ForecastCycleProgress',
+  z
+    .object({
+      budgets: z
+        .int()
+        .min(0)
+        .describe('Lines in the cycle: budgets in scope plus included events.'),
+      notStarted: z.int().min(0),
+      draft: z.int().min(0),
+      submitted: z.int().min(0),
+      commentaryRequired: z.int().min(0),
+      accepted: z.int().min(0),
+      overdue: z.int().min(0).describe('Lines not submitted after the due date.'),
+    })
+    .strict(),
+);
+export type ForecastCycleProgress = z.infer<typeof ForecastCycleProgress>;
+
+export const ForecastCycle = named(
+  'ForecastCycle',
+  z
+    .object({
+      id: Id,
+      name: z.string(),
+      asOfDate: IsoDate.describe(
+        'The last closed or soft-closed period end the cycle forecasts from.',
+      ),
+      dueDate: IsoDate,
+      fiscalYearId: Id,
+      fiscalYearLabel: z.string(),
+      scopeRootBudgetId: Id.nullable().describe('Null means every active budget in the tenant.'),
+      scopeLabel: z.string(),
+      status: ForecastCycleStatus,
+      currency: CurrencyCode,
+      varianceThresholdBps: z
+        .int()
+        .min(0)
+        .describe('Commentary is required at or above this share of authorized (1,000 = 10%).'),
+      varianceThreshold: Money.describe('…and at or above this amount. Both tests must pass.'),
+      defaultMethodOperating: ForecastMethod,
+      defaultMethodEvent: ForecastMethod,
+      includeOpenEvents: z.boolean(),
+      reminderDaysBefore: z.array(z.int().min(0).max(30)),
+      progress: ForecastCycleProgress,
+      createdByName: z.string().nullable(),
+      createdAt: IsoDateTime,
+      closedAt: IsoDateTime.nullable(),
+      closedByName: z.string().nullable(),
+      closeConfirmation: z
+        .string()
+        .describe(
+          'The phrase closing the cycle must repeat, for example "CLOSE OCTOBER REFORECAST".',
+        ),
+    })
+    .strict()
+    .describe(
+      'One reforecast round: finance opens it, owners submit, finance accepts, then it closes.',
+    ),
+);
+export type ForecastCycle = z.infer<typeof ForecastCycle>;
+
+export const ForecastCycleList = named(
+  'ForecastCycleList',
+  z.object({ items: z.array(ForecastCycle) }).strict(),
+);
+
+export const ForecastMethodOption = named(
+  'ForecastMethodOption',
+  z
+    .object({
+      method: ForecastMethod,
+      amount: Money,
+      explanation: z.string().describe('One sentence an owner can check the number against.'),
+    })
+    .strict()
+    .describe('A system-computed starting point; the API computes it, the owner chooses.'),
+);
+export type ForecastMethodOption = z.infer<typeof ForecastMethodOption>;
+
+export const ForecastSubmission = named(
+  'ForecastSubmission',
+  z
+    .object({
+      id: Id,
+      cycleId: Id,
+      budgetId: Id.nullable(),
+      budgetName: z.string().nullable(),
+      eventId: Id.nullable(),
+      eventName: z.string().nullable(),
+      eventCode: z.string().nullable(),
+      ownerPersonId: Id.nullable(),
+      ownerName: z.string().nullable(),
+      /** Ledger facts the forecast is measured against; they never change by forecasting. */
+      authorized: Money,
+      actualToDate: Money,
+      committed: Money.describe('Held + pre-encumbered + encumbered over the budget.'),
+      pending: Money.describe('Pre-encumbered: requests waiting for a decision.'),
+      plannedEvents: Money.describe('Approved events whose costs are not committed yet.'),
+      forecast: Money.describe('Year-end forecast. Never posted and never consumes budget.'),
+      method: ForecastMethod,
+      methodOptions: z.array(ForecastMethodOption),
+      variance: Money.describe('Authorized − forecast: positive is under the budget.'),
+      varianceBps: z.int(),
+      varianceDirection: z.enum(['under', 'over', 'on']),
+      commentaryRequired: z.boolean(),
+      commentary: z.string().nullable(),
+      commentaryNote: z
+        .string()
+        .nullable()
+        .describe("Finance's note when they asked the owner for more explanation."),
+      status: ForecastStatus,
+      systemGenerated: z
+        .boolean()
+        .describe('True for the run-rate forecast the cycle close wrote because nobody submitted.'),
+      submittedAt: IsoDateTime.nullable(),
+      acceptedAt: IsoDateTime.nullable(),
+      acceptedByName: z.string().nullable(),
+      updatedAt: IsoDateTime,
+    })
+    .strict()
+    .describe(
+      'One budget or event in a forecast cycle, with the ledger facts behind its variance.',
+    ),
+);
+export type ForecastSubmission = z.infer<typeof ForecastSubmission>;
+
+export const ForecastCycleTotals = named(
+  'ForecastCycleTotals',
+  z
+    .object({
+      authorized: Money,
+      actualToDate: Money,
+      committed: Money,
+      forecast: Money,
+      variance: Money,
+      varianceBps: z.int(),
+    })
+    .strict(),
+);
+export type ForecastCycleTotals = z.infer<typeof ForecastCycleTotals>;
+
+export const ForecastCycleDetail = named(
+  'ForecastCycleDetail',
+  z
+    .object({
+      cycle: ForecastCycle,
+      scope: ReportScope.describe(
+        'What the viewer may see: finance the whole cycle, owners their own.',
+      ),
+      submissions: z
+        .array(ForecastSubmission)
+        .describe('Ordered by budget or event name then id, so tied rows never reorder.'),
+      totals: ForecastCycleTotals,
+      reconciliation: ReportReconciliation.describe(
+        'The ledger behind the authorized, committed and actual columns. Forecast is not in it: a forecast posts nothing.',
+      ),
+      allowedActions: z.array(z.enum(['submit', 'accept', 'request_commentary', 'close'])),
+    })
+    .strict(),
+);
+export type ForecastCycleDetail = z.infer<typeof ForecastCycleDetail>;
+
+export const CreateForecastCycleRequest = named(
+  'CreateForecastCycleRequest',
+  z
+    .object({
+      name: z.string().trim().min(1).max(120),
+      asOfDate: IsoDate,
+      dueDate: IsoDate,
+      fiscalYearId: Id.optional().describe(
+        'Defaults to the fiscal year containing the as-of date.',
+      ),
+      rootBudgetId: Id.optional().describe('Scope: this budget and everything below it.'),
+      varianceThresholdBps: z.int().min(0).max(10_000).optional(),
+      varianceThresholdMinor: z.int().min(0).optional(),
+      defaultMethodOperating: ForecastMethod.optional(),
+      defaultMethodEvent: ForecastMethod.optional(),
+      includeOpenEvents: z.boolean().optional(),
+      reminderDaysBefore: z.array(z.int().min(0).max(30)).max(5).optional(),
+    })
+    .strict()
+    .describe(
+      'Opens a cycle. Defaults: at least 10% and at least 1,000.00, run-rate for operating budgets.',
+    ),
+);
+export type CreateForecastCycleRequest = z.infer<typeof CreateForecastCycleRequest>;
+
+export const SubmitForecastRequest = named(
+  'SubmitForecastRequest',
+  z
+    .object({
+      budgetId: Id.optional(),
+      eventId: Id.optional(),
+      method: ForecastMethod,
+      amountMinor: z
+        .int()
+        .min(0)
+        .optional()
+        .describe('Required for `owner_input`; ignored for the system methods.'),
+      commentary: z.string().trim().max(1_000).optional(),
+      submit: z
+        .boolean()
+        .optional()
+        .describe('False saves a draft; true (default) submits it for finance to accept.'),
+    })
+    .strict()
+    .describe(
+      'Exactly one of budgetId or eventId. A variance above the cycle threshold is refused without commentary (FORECAST_COMMENTARY_REQUIRED).',
+    ),
+);
+export type SubmitForecastRequest = z.infer<typeof SubmitForecastRequest>;
+
+export const ForecastDecisionRequest = named(
+  'ForecastDecisionRequest',
+  z
+    .object({
+      decision: z.enum(['accept', 'request_commentary']),
+      note: Reason.optional().describe('Required when asking the owner for more explanation.'),
+    })
+    .strict(),
+);
+export type ForecastDecisionRequest = z.infer<typeof ForecastDecisionRequest>;
+
+export const CloseForecastCycleRequest = named(
+  'CloseForecastCycleRequest',
+  z
+    .object({
+      confirmation: z.string().trim().min(1).describe('Must equal `closeConfirmation`.'),
+    })
+    .strict()
+    .describe(
+      'Accepts the remaining submissions as they are, writes system run-rate forecasts for the budgets nobody submitted, and supersedes the previous cycle.',
+    ),
+);
+export type CloseForecastCycleRequest = z.infer<typeof CloseForecastCycleRequest>;
+
 export const closeEndpoints = {
   listClosePeriods: {
     operationId: 'listClosePeriods',
@@ -701,6 +955,81 @@ export const closeEndpoints = {
     params: RunParams,
     body: ExecuteYearEndRequest,
     response: { status: 201, schema: YearEndRun },
+    errors: [400, 401, 403, 404, 409, 422],
+  },
+  listForecastCycles: {
+    operationId: 'listForecastCycles',
+    method: 'get',
+    path: '/api/close/forecast-cycles',
+    summary: 'Forecast cycles with their progress, newest first',
+    tags: ['close'],
+    auth: true,
+    query: z
+      .object({ fiscalYearId: Id.optional(), status: ForecastCycleStatus.optional() })
+      .strict(),
+    response: { status: 200, schema: ForecastCycleList },
+    errors: [400, 401, 403],
+  },
+  createForecastCycle: {
+    operationId: 'createForecastCycle',
+    method: 'post',
+    path: '/api/close/forecast-cycles',
+    summary: 'Open a reforecast cycle with a due date and a variance threshold',
+    tags: ['close'],
+    auth: true,
+    idempotent: true,
+    body: CreateForecastCycleRequest,
+    response: { status: 201, schema: ForecastCycleDetail },
+    errors: [400, 401, 403, 404, 409, 422],
+  },
+  getForecastCycle: {
+    operationId: 'getForecastCycle',
+    method: 'get',
+    path: '/api/close/forecast-cycles/{cycleId}',
+    summary: 'A cycle with every line the viewer may see and its ledger reconciliation',
+    tags: ['close'],
+    auth: true,
+    params: CycleParams,
+    response: { status: 200, schema: ForecastCycleDetail },
+    errors: [400, 401, 403, 404],
+  },
+  submitForecast: {
+    operationId: 'submitForecast',
+    method: 'post',
+    path: '/api/close/forecast-cycles/{cycleId}/submissions',
+    summary: 'Save or submit the forecast for one budget or event',
+    tags: ['close'],
+    auth: true,
+    idempotent: true,
+    params: CycleParams,
+    body: SubmitForecastRequest,
+    response: { status: 201, schema: ForecastSubmission },
+    errors: [400, 401, 403, 404, 409, 422],
+  },
+  decideForecast: {
+    operationId: 'decideForecast',
+    method: 'post',
+    path: '/api/close/forecast-cycles/{cycleId}/submissions/{submissionId}/decision',
+    summary: 'Accept a submitted forecast, or ask the owner for commentary',
+    tags: ['close'],
+    auth: true,
+    idempotent: true,
+    params: SubmissionParams,
+    body: ForecastDecisionRequest,
+    response: { status: 201, schema: ForecastSubmission },
+    errors: [400, 401, 403, 404, 409, 422],
+  },
+  closeForecastCycle: {
+    operationId: 'closeForecastCycle',
+    method: 'post',
+    path: '/api/close/forecast-cycles/{cycleId}/close',
+    summary: 'Close the cycle and lock its snapshot',
+    tags: ['close'],
+    auth: true,
+    idempotent: true,
+    params: CycleParams,
+    body: CloseForecastCycleRequest,
+    response: { status: 201, schema: ForecastCycleDetail },
     errors: [400, 401, 403, 404, 409, 422],
   },
 } as const satisfies Record<string, Endpoint>;
