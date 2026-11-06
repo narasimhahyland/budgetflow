@@ -6,6 +6,7 @@ import { expect, test, type APIRequestContext } from '@playwright/test';
 import {
   BudgetDetail,
   CommitmentHygieneList,
+  FiscalCalendarDetail,
   IntegrityCheckRun,
   Journal,
   YearEndRun,
@@ -354,6 +355,77 @@ test.describe('fiscal year-end run', () => {
     expect(line.status).toBe('blocked');
     expect(line.blockedReason).toContain('rollover policy');
     expect(dry.readiness.find((r) => r.code === 'rollover_policies_assigned')?.passed).toBe(false);
+  });
+
+  test('a target year whose plan rates are not locked blocks the run until they are locked', async ({
+    request,
+  }) => {
+    // Every seeded fiscal year already has its plan rates locked, so the scenario makes its own
+    // target year to arrive at the unlocked state.
+    const suffix = uniq();
+    const calendar = await expectContract(
+      await request.post('/api/finance/fiscal-calendars', {
+        headers: await mutate('finance-admin'),
+        data: {
+          name: `Year-end unlocked target ${suffix}`,
+          definition: { type: 'calendar_year', labelBy: 'end' },
+          years: [2029],
+        },
+      }),
+      201,
+      FiscalCalendarDetail,
+    );
+    const targetYear = calendar.fiscalYears[0];
+    expect(targetYear.planRatesLockedAt).toBeNull();
+
+    const source = await rootInYear(request, {
+      fiscalYearId: FY2026,
+      amountMinor: 150_000,
+      code: `YEU-${suffix}`,
+      name: `Year-end unlocked source ${suffix}`,
+    });
+    // Everything lapses, so no line needs a counterpart in the target year and the plan rate lock is
+    // the only blocking check left to fail.
+    await setRolloverPolicy(request, source.budget.id, await policyIdByCode(request, 'LAPSE'));
+
+    const created = await expectContract(
+      await request.post('/api/close/year-end-runs', {
+        headers: await mutate('finance-admin'),
+        data: { rootBudgetId: source.budget.id, targetFiscalYearId: targetYear.id },
+      }),
+      201,
+      YearEndRun,
+    );
+    const dry = await expectContract(
+      await request.post(`/api/close/year-end-runs/${created.id}/dry-run`, {
+        headers: await mutate('finance-admin'),
+      }),
+      201,
+      YearEndRun,
+    );
+    expect(dry.readiness.find((r) => r.code === 'target_plan_rates_locked')).toMatchObject({
+      passed: false,
+      blocksExecution: true,
+    });
+    expect(dry.readiness.find((r) => r.code === 'target_budgets_exist')?.passed).toBe(true);
+
+    const blocked = await request.post(`/api/close/year-end-runs/${created.id}/execution`, {
+      headers: await mutate('finance-admin'),
+      data: { confirmation: created.executeConfirmation },
+    });
+    expect(blocked.status()).toBe(409);
+    const problem = (await blocked.json()) as { code: string; detail: string };
+    expect(problem.code).toBe('YEAR_END_NOT_READY');
+    expect(problem.detail).toContain('plan rates');
+
+    const lock = await request.post(`/api/finance/fiscal-years/${targetYear.id}/plan-rate-lock`, {
+      headers: await mutate('finance-admin'),
+      data: { reason: 'Year-end scenario: lock the target year before money moves into it.' },
+    });
+    expect(lock.status(), await lock.text()).toBe(201);
+
+    const after = await yearEndRun(request, created.id);
+    expect(after.readiness.find((r) => r.code === 'target_plan_rates_locked')?.passed).toBe(true);
   });
 
   test('an open commitment carries into the new year with its funding and keeps its amount', async ({
