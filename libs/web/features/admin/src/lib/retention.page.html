@@ -80,7 +80,9 @@
             <sat-status-tag
               [attr.data-testid]="'automation-' + p.category"
               [status]="p.automation === 'automatic' ? 'info' : 'neutral'"
-              >{{ p.automation === 'automatic' ? 'Applied nightly' : 'Stated policy only' }}</sat-status-tag
+              >{{
+                p.automation === 'automatic' ? 'Applied nightly' : 'Stated policy only'
+              }}</sat-status-tag
             >
             <span class="bf-cell__secondary">{{ automationLabel(p) }}</span>
           </td>
@@ -131,7 +133,7 @@
                 [testId]="'pending-' + p.category"
                 (confirm)="openDecision(p, 'confirm')"
                 (decline)="openDecision(p, 'decline')"
-                (cancel)="openDecision(p, 'cancel')"
+                (withdraw)="openDecision(p, 'cancel')"
               />
             }
             @if (deciding(); as open) {

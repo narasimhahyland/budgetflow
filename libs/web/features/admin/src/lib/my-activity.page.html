@@ -92,12 +92,7 @@
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>To</mat-label>
-        <input
-          matInput
-          type="date"
-          [ngModel]="to()"
-          (ngModelChange)="to.set($event)"
-        />
+        <input matInput type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
       </mat-form-field>
       @if (filtered()) {
         <button mat-button type="button" (click)="clear()">Clear filters</button>

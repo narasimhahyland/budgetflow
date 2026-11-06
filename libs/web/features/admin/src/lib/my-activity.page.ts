@@ -21,7 +21,7 @@ import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
-const TYPE_LABEL: Record<MyActivityType, string> = {
+const TYPE_LABEL: Record<string, string> = {
   request: 'Requests',
   approval: 'Approvals',
   event: 'Events',
@@ -31,7 +31,7 @@ const TYPE_LABEL: Record<MyActivityType, string> = {
   comment: 'Comments',
   budget: 'Budgets',
   other: 'Other',
-};
+} satisfies Record<MyActivityType, string>;
 
 const TYPES = Object.keys(TYPE_LABEL) as MyActivityType[];
 

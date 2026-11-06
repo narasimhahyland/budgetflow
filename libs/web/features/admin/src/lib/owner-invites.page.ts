@@ -31,19 +31,19 @@ interface Draft {
   orgUnitId: string;
 }
 
-const STATUS_TONE: Record<OwnerInvite['status'], 'success' | 'info' | 'neutral'> = {
+const STATUS_TONE: Record<string, 'success' | 'info' | 'neutral'> = {
   accepted: 'success',
   invited: 'info',
   expired: 'neutral',
   revoked: 'neutral',
-};
+} satisfies Record<OwnerInvite['status'], 'success' | 'info' | 'neutral'>;
 
-const STATUS_LABEL: Record<OwnerInvite['status'], string> = {
+const STATUS_LABEL: Record<string, string> = {
   accepted: 'Signed in',
   invited: 'Invited',
   expired: 'Expired',
   revoked: 'Withdrawn',
-};
+} satisfies Record<OwnerInvite['status'], string>;
 
 /**
  * Screen 103a: invite several budget owners at once and track who has accepted.

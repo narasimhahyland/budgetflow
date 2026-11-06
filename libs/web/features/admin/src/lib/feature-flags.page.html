@@ -54,11 +54,7 @@
     </mat-form-field>
     <mat-form-field appearance="outline">
       <mat-label>Area</mat-label>
-      <mat-select
-        data-testid="flag-area"
-        [ngModel]="area()"
-        (ngModelChange)="area.set($event)"
-      >
+      <mat-select data-testid="flag-area" [ngModel]="area()" (ngModelChange)="area.set($event)">
         <mat-option value="all">Every area</mat-option>
         @for (a of areas; track a) {
           <mat-option [value]="a">{{ areaLabel[a] }}</mat-option>
@@ -110,9 +106,11 @@
             <ng-container matColumnDef="state">
               <th mat-header-cell *matHeaderCellDef>In force</th>
               <td mat-cell *matCellDef="let f">
-                <sat-status-tag [attr.data-testid]="'flag-state-' + f.key" [status]="stateTone(f)">{{
-                  stateLabel(f)
-                }}</sat-status-tag>
+                <sat-status-tag
+                  [attr.data-testid]="'flag-state-' + f.key"
+                  [status]="stateTone(f)"
+                  >{{ stateLabel(f) }}</sat-status-tag
+                >
               </td>
             </ng-container>
             <ng-container matColumnDef="rollout">
@@ -123,7 +121,9 @@
               <th mat-header-cell *matHeaderCellDef>Last change</th>
               <td mat-cell *matCellDef="let f">
                 @if (f.changedAt) {
-                  <span class="bf-cell__primary">{{ f.changedByName ?? 'Someone who has left' }}</span>
+                  <span class="bf-cell__primary">{{
+                    f.changedByName ?? 'Someone who has left'
+                  }}</span>
                   <span class="bf-cell__secondary" data-testid="relative-time">{{
                     f.changedAt | bfDateTime: timezone()
                   }}</span>
@@ -181,7 +181,7 @@
                     [testId]="'pending-' + f.key"
                     (confirm)="openDecision(f, 'confirm')"
                     (decline)="openDecision(f, 'decline')"
-                    (cancel)="openDecision(f, 'cancel')"
+                    (withdraw)="openDecision(f, 'cancel')"
                   />
                 }
                 @if (deciding(); as open) {
@@ -202,7 +202,9 @@
                         >
                           {{ decisionLabel[open.decision] }}
                         </button>
-                        <button mat-button type="button" (click)="deciding.set(null)">Cancel</button>
+                        <button mat-button type="button" (click)="deciding.set(null)">
+                          Cancel
+                        </button>
                       </div>
                     </form>
                   }
@@ -333,7 +335,11 @@
         {{ availableCount() }} of {{ capabilities().length }} capabilities are available to you.
       </p>
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="capabilities()" aria-label="Capabilities as they apply to you">
+        <table
+          mat-table
+          [dataSource]="capabilities()"
+          aria-label="Capabilities as they apply to you"
+        >
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Capability</th>
             <td mat-cell *matCellDef="let c">
@@ -414,21 +420,32 @@
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let c">
-                <sat-status-tag [status]="c.status === 'applied' ? 'success' : c.status === 'pending' ? 'warning' : 'neutral'">{{
-                  c.status === 'applied'
-                    ? 'In force'
-                    : c.status === 'pending'
-                      ? 'Waiting for a second person'
-                      : c.status === 'declined'
-                        ? 'Declined'
-                        : 'Withdrawn'
-                }}</sat-status-tag>
+                <sat-status-tag
+                  [status]="
+                    c.status === 'applied'
+                      ? 'success'
+                      : c.status === 'pending'
+                        ? 'warning'
+                        : 'neutral'
+                  "
+                  >{{
+                    c.status === 'applied'
+                      ? 'In force'
+                      : c.status === 'pending'
+                        ? 'Waiting for a second person'
+                        : c.status === 'declined'
+                          ? 'Declined'
+                          : 'Withdrawn'
+                  }}</sat-status-tag
+                >
               </td>
             </ng-container>
             <ng-container matColumnDef="who">
               <th mat-header-cell *matHeaderCellDef>Who</th>
               <td mat-cell *matCellDef="let c">
-                <span class="bf-cell__primary">{{ c.requestedByName ?? 'Someone who has left' }}</span>
+                <span class="bf-cell__primary">{{
+                  c.requestedByName ?? 'Someone who has left'
+                }}</span>
                 <span class="bf-cell__secondary" data-testid="relative-time">{{
                   c.requestedAt | bfDateTime: timezone()
                 }}</span>

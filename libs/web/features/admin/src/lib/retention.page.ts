@@ -22,19 +22,19 @@ import { PendingChange, ReasonField } from './admin-ui';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
-const ACTION_LABEL: Record<RetentionPolicy['action'], string> = {
+const ACTION_LABEL: Record<string, string> = {
   delete: 'Deleted',
   anonymise: 'Personal details anonymised',
   archive: 'Archived read-only',
   never: 'Never removed',
-};
+} satisfies Record<RetentionPolicy['action'], string>;
 
-const SCOPE_LABEL: Record<LegalHoldScopeKind, string> = {
+const SCOPE_LABEL: Record<string, string> = {
   person: 'A person',
   event: 'An event',
   budget: 'A budget',
   date_range: 'A range of dates',
-};
+} satisfies Record<LegalHoldScopeKind, string>;
 
 type PolicyRow = RetentionPolicy & { detail: boolean };
 
@@ -87,7 +87,14 @@ export class RetentionPage {
   protected readonly scopeLabel = SCOPE_LABEL;
   protected readonly scopeKinds = Object.keys(SCOPE_LABEL) as LegalHoldScopeKind[];
   protected readonly holdDecisionLabel = HOLD_DECISION_LABEL;
-  protected readonly policyColumns = ['category', 'period', 'then', 'applied', 'signoff', 'actions'];
+  protected readonly policyColumns = [
+    'category',
+    'period',
+    'then',
+    'applied',
+    'signoff',
+    'actions',
+  ];
   protected readonly holdColumns = ['scope', 'reason', 'who', 'status', 'actions'];
   protected readonly runColumns = ['started', 'mode', 'summary', 'status', 'actions'];
   protected readonly hasDetail = (_index: number, row: { detail: boolean }): boolean => row.detail;
@@ -159,7 +166,8 @@ export class RetentionPage {
     () => (valueOf(this.holds)?.items ?? []).filter((h) => h.status === 'active').length,
   );
   protected readonly waitingHolds = computed(
-    () => (valueOf(this.holds)?.items ?? []).filter((h) => h.status === 'pending_confirmation').length,
+    () =>
+      (valueOf(this.holds)?.items ?? []).filter((h) => h.status === 'pending_confirmation').length,
   );
 
   protected readonly lastRun = computed(() => (valueOf(this.runs)?.items ?? [])[0] ?? null);

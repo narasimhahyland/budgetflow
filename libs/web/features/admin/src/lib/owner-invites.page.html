@@ -208,7 +208,9 @@
           <ng-container matColumnDef="role">
             <th mat-header-cell *matHeaderCellDef>Role proposed</th>
             <td mat-cell *matCellDef="let i">
-              <span class="bf-cell__primary">{{ roleLabel[i.proposedRole] ?? i.proposedRole }}</span>
+              <span class="bf-cell__primary">{{
+                roleLabel[i.proposedRole] ?? i.proposedRole
+              }}</span>
               <span class="bf-cell__secondary">
                 Granted only through user administration, never by the invitation.
               </span>

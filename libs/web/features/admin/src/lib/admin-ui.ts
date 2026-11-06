@@ -44,7 +44,7 @@ import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
           <p class="bf-pending__meta">
             You asked for this change, so somebody else has to confirm it.
           </p>
-          <button mat-stroked-button type="button" [disabled]="busy()" (click)="cancel.emit()">
+          <button mat-stroked-button type="button" [disabled]="busy()" (click)="withdraw.emit()">
             Withdraw request
           </button>
         </div>
@@ -101,7 +101,7 @@ export class PendingChange {
   readonly confirmerNote = input('A Finance Controller has to confirm it before it takes effect.');
   readonly confirm = output<void>();
   readonly decline = output<void>();
-  readonly cancel = output<void>();
+  readonly withdraw = output<void>();
   protected readonly timezone = this.session.timezone;
   protected readonly mine = computed(
     () => this.change().requestedByName === this.session.me()?.displayName,

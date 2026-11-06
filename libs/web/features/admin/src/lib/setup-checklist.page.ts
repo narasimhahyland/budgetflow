@@ -41,8 +41,8 @@ import { LoadState } from './load-state';
       } @else {
         <sat-banner variant="info" class="bf-banner">
           <sat-banner-message data-testid="setup-progress">
-            {{ c.completed }} of {{ c.total }} steps are done.
-            {{ c.total - c.completed }} still to go.
+            {{ c.completed }} of {{ c.total }} steps are done. {{ c.total - c.completed }} still to
+            go.
           </sat-banner-message>
         </sat-banner>
       }

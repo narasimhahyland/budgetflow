@@ -161,7 +161,7 @@
                   confirmerNote="Somebody who already holds the authority this role gives has to confirm it."
                   (confirm)="openDecision(u, change.id, 'confirm')"
                   (decline)="openDecision(u, change.id, 'decline')"
-                  (cancel)="openDecision(u, change.id, 'cancel')"
+                  (withdraw)="openDecision(u, change.id, 'cancel')"
                 />
               }
               @if (deciding(); as open) {

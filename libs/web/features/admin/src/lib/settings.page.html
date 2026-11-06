@@ -40,7 +40,12 @@
     <div class="bf-card__header">
       <h2 class="bf-card__title" id="branding-title">Program branding</h2>
       @if (mayChange('branding') && editing() !== 'branding') {
-        <button mat-stroked-button type="button" data-testid="edit-branding" (click)="open('branding')">
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="edit-branding"
+          (click)="open('branding')"
+        >
           Change branding
         </button>
       }
@@ -230,9 +235,7 @@
             />
           </mat-form-field>
         </div>
-        <mat-checkbox
-          [checked]="q.enabled"
-          (change)="setQuietHours('enabled', $event.checked)"
+        <mat-checkbox [checked]="q.enabled" (change)="setQuietHours('enabled', $event.checked)"
           >Hold messages during quiet hours</mat-checkbox
         >
         <mat-checkbox
@@ -434,9 +437,7 @@
             />
           </mat-form-field>
         </div>
-        <mat-checkbox
-          [checked]="serviceUsersOnly()"
-          (change)="serviceUsersOnly.set($event.checked)"
+        <mat-checkbox [checked]="serviceUsersOnly()" (change)="serviceUsersOnly.set($event.checked)"
           >Local accounts are for service and test users only</mat-checkbox
         >
         <mat-checkbox [checked]="biometricUnlock()" (change)="biometricUnlock.set($event.checked)"

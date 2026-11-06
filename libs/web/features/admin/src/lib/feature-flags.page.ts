@@ -155,8 +155,7 @@ export class FeatureFlagsPage {
       const group = byArea.get(flag.area) ?? [];
       group.push({
         ...flag,
-        detail:
-          flag.pendingChange !== null || editing === flag.key || deciding?.key === flag.key,
+        detail: flag.pendingChange !== null || editing === flag.key || deciding?.key === flag.key,
       });
       byArea.set(flag.area, group);
     }
@@ -219,8 +218,10 @@ export class FeatureFlagsPage {
           body: {
             enabled: this.enabling(),
             rolloutMode: this.enabling() ? this.rolloutMode() : 'everyone',
-            pilotOrgUnitIds: this.enabling() && this.rolloutMode() === 'pilot' ? this.pilotUnits() : [],
-            pilotRoleIds: this.enabling() && this.rolloutMode() === 'pilot' ? this.pilotRoles() : [],
+            pilotOrgUnitIds:
+              this.enabling() && this.rolloutMode() === 'pilot' ? this.pilotUnits() : [],
+            pilotRoleIds:
+              this.enabling() && this.rolloutMode() === 'pilot' ? this.pilotRoles() : [],
             reason: this.reason(),
           },
         }),

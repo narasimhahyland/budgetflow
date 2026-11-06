@@ -114,7 +114,9 @@ export class UsersPage {
     }));
   });
 
-  protected readonly privilegedCount = computed(() => this.rows().filter((u) => u.privileged).length);
+  protected readonly privilegedCount = computed(
+    () => this.rows().filter((u) => u.privileged).length,
+  );
 
   protected roleNames(user: AdminUser): string {
     return user.roles.map((r) => ROLE_LABELS[r] ?? r).join(', ') || 'No role';

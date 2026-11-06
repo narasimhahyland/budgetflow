@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  resource,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -24,13 +18,13 @@ import { ReasonField } from './admin-ui';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { LoadState } from './load-state';
 
-const CHANNEL_LABEL: Record<NotificationChannel, string> = {
+const CHANNEL_LABEL: Record<string, string> = {
   in_app: 'In-app',
   email: 'Email',
   push: 'Mobile push',
   slack: 'Slack',
   teams: 'Microsoft Teams',
-};
+} satisfies Record<NotificationChannel, string>;
 
 const AUDIENCE_LABEL: Record<string, string> = {
   approvers: 'Approvers',
