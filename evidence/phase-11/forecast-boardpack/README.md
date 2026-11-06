@@ -174,8 +174,8 @@ acknowledged the November check it asserts is blocking. It passes again after `s
 CI reseeds before `functional-api`, so it is green there; worth a follow-up to make that scenario own
 the check it acknowledges.
 
-Invariants **68-71** in `docs/testing/invariant-scenarios.md` map to these scenarios (68 and 69 the
-forecast cycle and report, 70 and 71 the board pack and its generation).
+Invariants **69-72** in `docs/testing/invariant-scenarios.md` map to these scenarios (69 and 70 the
+forecast cycle and report, 71 and 72 the board pack and its generation).
 
 ## UI consequences of a backend-only change
 

@@ -1,0 +1,295 @@
+{
+  "/api/integrations": {
+    "path": "/api/integrations",
+    "status": 200,
+    "body": {
+      "health": {
+        "connected": 6,
+        "needsAttention": 1,
+        "notConnected": 8,
+        "retrying": 0,
+        "deadLetter": 0
+      },
+      "connections": [
+        {
+          "id": "90000000-0000-4000-8000-000000000005",
+          "provider": "outlook",
+          "category": "calendar",
+          "displayName": "Microsoft Outlook",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000002",
+          "provider": "ramp",
+          "category": "cards",
+          "displayName": "Ramp",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000001",
+          "provider": "erpnext",
+          "category": "erp",
+          "displayName": "ERPNext",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000003",
+          "provider": "concur",
+          "category": "expense",
+          "displayName": "Concur",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000004",
+          "provider": "hr_file",
+          "category": "hr",
+          "displayName": "HR file import",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000006",
+          "provider": "scim",
+          "category": "identity",
+          "displayName": "SCIM provisioning",
+          "status": "connected",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": null,
+          "pausedByName": null
+        },
+        {
+          "id": "90000000-0000-4000-8000-000000000007",
+          "provider": "adaptive_planning",
+          "category": "planning",
+          "displayName": "Adaptive Planning",
+          "status": "needs_attention",
+          "mode": "mock",
+          "lastSyncAt": null,
+          "recordsLast24h": 0,
+          "errorsLast24h": 0,
+          "attention": "401 Unauthorized: check the client secret",
+          "pausedByName": null
+        }
+      ],
+      "available": [
+        {
+          "provider": "odoo",
+          "category": "erp",
+          "displayName": "Odoo",
+          "exchanges": ["Inbound: journal items", "Outbound: event codes as analytic tags"]
+        },
+        {
+          "provider": "workday_financials",
+          "category": "erp",
+          "displayName": "Workday Financials",
+          "exchanges": [
+            "Inbound: journal lines",
+            "Outbound: event codes as worktags",
+            "Optional budget check before approving commitments"
+          ]
+        },
+        {
+          "provider": "netsuite",
+          "category": "erp",
+          "displayName": "NetSuite",
+          "exchanges": ["Inbound: transactions", "Outbound: event codes as a custom segment"]
+        },
+        {
+          "provider": "brex",
+          "category": "cards",
+          "displayName": "Brex",
+          "exchanges": [
+            "Inbound: card transactions",
+            "Outbound: spend limits (lowered to the amount spent instead of suspended)"
+          ]
+        },
+        {
+          "provider": "navan",
+          "category": "expense",
+          "displayName": "Navan",
+          "exchanges": ["Inbound: expense lines and travel bookings", "Outbound: event codes"]
+        },
+        {
+          "provider": "coupa",
+          "category": "expense",
+          "displayName": "Coupa",
+          "exchanges": [
+            "Inbound: purchase orders and supplier invoices",
+            "Outbound: event codes and approved commitment references"
+          ]
+        },
+        {
+          "provider": "workday_hcm",
+          "category": "hr",
+          "displayName": "Workday HCM",
+          "exchanges": ["Inbound only: workers, org units, locations, cost centers"]
+        },
+        {
+          "provider": "google_calendar",
+          "category": "calendar",
+          "displayName": "Google Calendar",
+          "exchanges": [
+            "Outbound: invitations from one shared BudgetFlow calendar",
+            "Inbound: attendee responses"
+          ]
+        }
+      ],
+      "canManage": true
+    }
+  },
+  "/api/integrations/connections/90000000-0000-4000-8000-000000000001": {
+    "path": "/api/integrations/connections/90000000-0000-4000-8000-000000000001",
+    "status": 200,
+    "body": {
+      "summary": {
+        "id": "90000000-0000-4000-8000-000000000001",
+        "provider": "erpnext",
+        "category": "erp",
+        "displayName": "ERPNext",
+        "status": "connected",
+        "mode": "mock",
+        "lastSyncAt": null,
+        "recordsLast24h": 0,
+        "errorsLast24h": 0,
+        "attention": null,
+        "pausedByName": null
+      },
+      "baseUrl": "http://mock-providers:4010",
+      "accountRef": "hyland-books",
+      "credential": {
+        "secretRef": "90000000-0000-4000-8000-000000000011",
+        "setAt": "2026-11-02T09:00:00.000Z",
+        "setByName": "Omar Haddad"
+      },
+      "settings": {
+        "webhooksEnabled": true
+      },
+      "schedules": [
+        {
+          "mode": "incremental",
+          "object": "gl_lines",
+          "paused": false,
+          "dedupeKey": "source_ref",
+          "direction": "inbound",
+          "nextRunAt": null,
+          "everyMinutes": 1440
+        }
+      ],
+      "mappings": [],
+      "objects": [
+        {
+          "object": "gl_lines",
+          "direction": "inbound"
+        },
+        {
+          "object": "suppliers",
+          "direction": "inbound"
+        },
+        {
+          "object": "event_codes",
+          "direction": "outbound"
+        }
+      ],
+      "inboundWebhookPath": "/api/integrations/webhooks/10000000-0000-4000-8000-000000000001/90000000-0000-4000-8000-000000000001",
+      "recordsIn24h": 0,
+      "recordsOut24h": 0
+    }
+  },
+  "/api/integrations/api-keys": {
+    "path": "/api/integrations/api-keys",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "90000000-0000-4000-8000-000000000020",
+          "name": "Intranet budget widget",
+          "prefix": "bf_live_ebe8",
+          "scopes": ["budgets.read", "events.read"],
+          "ownerPersonId": "40000000-0000-4000-8000-000000000013",
+          "ownerName": "Omar Haddad",
+          "createdAt": "2026-11-06T03:08:22.415Z",
+          "lastUsedAt": null,
+          "expiresAt": "2027-02-04T03:08:22.579Z",
+          "revokedAt": null,
+          "status": "active",
+          "allowedCidrs": [],
+          "rateLimitPerMinute": 120,
+          "rotatedFromId": null
+        }
+      ]
+    }
+  },
+  "/api/integrations/identity": {
+    "path": "/api/integrations/identity",
+    "status": 200,
+    "body": {
+      "ssoStatus": "connected",
+      "ssoDescription": "People sign in through the company identity provider (OpenID Connect); multi-factor authentication is optional per person.",
+      "scimEndpoint": "/scim/v2/Users",
+      "tokens": [],
+      "holdOwnerDeactivations": false,
+      "log": []
+    }
+  },
+  "/api/integrations/webhook-endpoints": {
+    "path": "/api/integrations/webhook-endpoints",
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "90000000-0000-4000-8000-000000000021",
+          "url": "http://mock-providers:4010/receiver/hook",
+          "description": "Finance hub: control changes and threshold alerts",
+          "events": [
+            "budget.frozen",
+            "budget.reduced",
+            "budget.set_to_zero",
+            "budget.threshold_crossed"
+          ],
+          "status": "active",
+          "lastDeliveryAt": null,
+          "lastStatusCode": null,
+          "lastDurationMs": null,
+          "successRateBps": 0,
+          "disabledAt": null,
+          "disabledReason": null,
+          "secretSetAt": "2026-11-06T03:08:22.415Z",
+          "secretRotatedAt": null
+        }
+      ],
+      "verification": "Every delivery carries a BudgetFlow-Signature header: t=<unix seconds>,v1=<HMAC-SHA256 of \"<t>.<body>\">. Reject deliveries older than 5 minutes."
+    }
+  }
+}

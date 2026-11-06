@@ -424,6 +424,11 @@ export class WebhooksService {
   /**
    * Signs and sends one delivery, then records the attempt. Failures retry with backoff; an endpoint
    * that has been failing for 24 hours is disabled so a broken receiver cannot be retried forever.
+   *
+   * `deliveryId` is the queued row this attempt belongs to. The result is written onto that row, so
+   * a delivery the fan-out queued is one row moving `pending` → `succeeded` / `failed` / `exhausted`
+   * rather than a queued row that nothing ever resolves plus a second row with the outcome. Without
+   * it (a test ping or an operator redelivery, which have no queued row) the attempt is inserted.
    */
   async deliver(
     tenantId: string,
@@ -432,6 +437,7 @@ export class WebhooksService {
     payload: Record<string, unknown>,
     eventId: string = randomUUID(),
     attempt = 1,
+    deliveryId: string | null = null,
   ): Promise<SendTestPingResult> {
     const endpoint = await withTenant(
       this.db,
@@ -486,30 +492,32 @@ export class WebhooksService {
     return withTenant(this.db, { tenantId, subject: 'system:webhooks' }, async (tx) => {
       const failing = !res.ok;
       const exhausted = failing && attempt >= MAX_RETRY_ATTEMPTS;
-      const [row] = await tx
-        .insert(webhookDeliveries)
-        .values({
-          tenantId,
-          endpointId,
-          eventId,
-          eventType,
-          attempt,
-          status: res.ok ? 'succeeded' : exhausted ? 'exhausted' : 'failed',
-          statusCode: res.statusCode || null,
-          durationMs: res.durationMs,
-          nextRetryAt:
-            failing && !exhausted
-              ? new Date(
-                  Date.now() +
-                    RETRY_BACKOFF_MINUTES[Math.min(attempt - 1, RETRY_BACKOFF_MINUTES.length - 1)] *
-                      60_000,
-                )
-              : null,
-          error: res.ok ? null : providerMessage(res.statusCode || null, res.body),
-          payload,
-        })
-        .onConflictDoNothing()
-        .returning();
+      const outcome = {
+        attempt,
+        status: res.ok ? 'succeeded' : exhausted ? 'exhausted' : 'failed',
+        statusCode: res.statusCode || null,
+        durationMs: res.durationMs,
+        nextRetryAt:
+          failing && !exhausted
+            ? new Date(
+                Date.now() +
+                  RETRY_BACKOFF_MINUTES[Math.min(attempt - 1, RETRY_BACKOFF_MINUTES.length - 1)] *
+                    60_000,
+              )
+            : null,
+        error: res.ok ? null : providerMessage(res.statusCode || null, res.body),
+      };
+      const [row] = deliveryId
+        ? await tx
+            .update(webhookDeliveries)
+            .set(outcome)
+            .where(eq(webhookDeliveries.id, deliveryId))
+            .returning()
+        : await tx
+            .insert(webhookDeliveries)
+            .values({ tenantId, endpointId, eventId, eventType, payload, ...outcome })
+            .onConflictDoNothing()
+            .returning();
       const since = endpoint.row.failingSince ?? new Date();
       const disable =
         failing && Date.now() - since.getTime() >= WEBHOOK_FAILURE_WINDOW_HOURS * HOUR_MS;
@@ -538,7 +546,9 @@ export class WebhooksService {
 
   /**
    * Reuses the Phase 8 outbox: as the worker drains a message it offers it here, and every endpoint
-   * subscribed to the matching event gets a pending delivery. No separate event pipeline.
+   * subscribed to the matching event gets a pending delivery. No separate event pipeline. That
+   * pending row is the delivery, not a note that one is coming: `deliverDue` hands its id to
+   * `deliver`, which writes the outcome back onto it.
    *
    * An endpoint only receives events that happened while it existed. `messageCreatedAt` is the
    * outbox row's `created_at` and the endpoint's is its `created_at`; both are assigned by the same
@@ -609,6 +619,8 @@ export class WebhooksService {
           .limit(25),
       );
       for (const d of due) {
+        // Clearing nextRetryAt claims the row, so the next tick cannot pick it up while it is in
+        // flight; deliver() then writes this attempt's outcome back onto the same row.
         try {
           await withTenant(this.db, { tenantId: t.id, subject: 'system:webhooks' }, (tx) =>
             tx
@@ -623,14 +635,48 @@ export class WebhooksService {
             (d.payload ?? {}) as Record<string, unknown>,
             d.eventId,
             d.attempt + 1,
+            d.id,
           );
           sent++;
         } catch (e) {
-          this.log.warn(`webhook delivery ${d.id} failed: ${(e as Error).message}`);
+          // The send never happened (a removed endpoint, a missing secret). Record it against the
+          // claimed row: leaving it pending would show the log a queued delivery nothing will send.
+          const message = (e as Error).message;
+          this.log.warn(`webhook delivery ${d.id} failed: ${message}`);
+          await this.recordUnsent(t.id, d.id, d.attempt + 1, message);
         }
       }
     }
     return sent;
+  }
+
+  /** Marks a claimed delivery that could not be attempted at all, so it never stays `pending`. */
+  private async recordUnsent(
+    tenantId: string,
+    deliveryId: string,
+    attempt: number,
+    message: string,
+  ): Promise<void> {
+    const exhausted = attempt >= MAX_RETRY_ATTEMPTS;
+    await withTenant(this.db, { tenantId, subject: 'system:webhooks' }, (tx) =>
+      tx
+        .update(webhookDeliveries)
+        .set({
+          attempt,
+          status: exhausted ? 'exhausted' : 'failed',
+          error: message,
+          nextRetryAt: exhausted
+            ? null
+            : new Date(
+                Date.now() +
+                  RETRY_BACKOFF_MINUTES[Math.min(attempt - 1, RETRY_BACKOFF_MINUTES.length - 1)] *
+                    60_000,
+              ),
+        })
+        .where(eq(webhookDeliveries.id, deliveryId)),
+    ).catch((e) =>
+      this.log.error(`could not record delivery ${deliveryId}: ${(e as Error).message}`),
+    );
   }
 
   // Inbound provider callbacks ------------------------------------------------------------------

@@ -4,6 +4,7 @@ import { accountingRoutes } from '@bf/web/features/accounting';
 import { authRoutes } from '@bf/web/features/auth';
 import { closeRoutes } from '@bf/web/features/close';
 import { financeAdminRoutes } from '@bf/web/features/finance-admin';
+import { duplicateRoutes, integrationsRoutes } from '@bf/web/features/integrations';
 import { orgRoutes } from '@bf/web/features/org';
 import { Shell, shellChildRoutes } from '@bf/web/shell';
 
@@ -96,6 +97,8 @@ export const appRoutes: Route[] = [
       },
       ...accountingRoutes,
       ...closeRoutes,
+      ...integrationsRoutes,
+      ...duplicateRoutes,
       ...shellChildRoutes,
     ],
   },

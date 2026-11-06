@@ -1,0 +1,259 @@
+// Integrations additions (092-101) ---------------------------------------------------------------
+
+.bf-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .bf-two-col {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.bf-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bf-muted {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+// A static label (an API key scope, a subscribed event, a connector that can still be added).
+// Satori's inline chip is only for buttons and links, so a non-interactive label gets this.
+.bf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-surface-container);
+  font: var(--mat-sys-label-medium);
+}
+
+.bf-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bf-nowrap {
+  white-space: nowrap;
+}
+
+// A key prefix is generated when the key is issued, so the characters differ per environment. The
+// box is sized once so the column, and everything to the right of it, does not move with them.
+.bf-key-prefix {
+  display: inline-block;
+  width: 96px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.bf-row--clickable {
+  cursor: pointer;
+}
+
+.bf-row--selected td {
+  background: var(--mat-sys-secondary-container);
+}
+
+.bf-note {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-table-scroll {
+  position: relative;
+}
+
+// Long provider paths and ids must wrap inside their cell rather than stretch the table.
+.bf-facts dd {
+  overflow-wrap: anywhere;
+}
+
+// A form field inside a table cell needs room above it for its floating label.
+.bf-cell-field {
+  display: block;
+  padding: 10px 0;
+}
+
+// Connector tiles (092) --------------------------------------------------------------------------
+
+.bf-card__subheading {
+  margin: 8px 0 0;
+  padding: 0 20px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+}
+
+.bf-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 8px 20px 20px;
+}
+
+.bf-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-large);
+  background: var(--mat-sys-surface-container-lowest);
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+}
+
+.bf-tile:hover,
+.bf-tile:focus-visible {
+  border-color: var(--mat-sys-primary);
+}
+
+.bf-tile--attention {
+  border-color: var(--sat-sys-important-icon);
+  background: var(--sat-sys-important-container);
+}
+
+.bf-tile--paused {
+  border-color: var(--mat-sys-outline);
+  background: var(--mat-sys-surface-container);
+}
+
+.bf-tile__name {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.bf-tile__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bf-tile__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-tile__attention {
+  margin: 0;
+  color: var(--sat-sys-on-important-container);
+  font: var(--mat-sys-body-small);
+}
+
+// The connector frame tab strip (092, shared by 093-098 and 094a) --------------------------------
+
+.bf-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.bf-tabs__tab {
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+  cursor: pointer;
+}
+
+.bf-tabs__tab--active {
+  border-bottom-color: var(--mat-sys-primary);
+  color: var(--mat-sys-primary);
+}
+
+// One-time secrets (098, 101) --------------------------------------------------------------------
+
+.bf-secret {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+// The value is a <code> element, which browsers already render in a monospace face: the project
+// bans font-family declarations because Satori loads the app fonts.
+.bf-secret__value {
+  flex: 1 1 280px;
+  padding: 10px 12px;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--sat-sys-warning-icon);
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container-lowest);
+}
+
+// The SCIM endpoint is public information, not a secret: it gets no warning outline.
+.bf-secret__value--plain {
+  border-color: var(--mat-sys-outline-variant);
+}
+
+// Duplicate comparison (099a) --------------------------------------------------------------------
+
+.bf-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  padding: 8px 20px 16px;
+}
+
+.bf-compare__line {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-lowest);
+}
+
+.bf-compare__line--kept {
+  border-color: var(--sat-sys-success-icon);
+  background: var(--sat-sys-success-container);
+}
+
+// The reporting-currency equivalent sits under the transaction amount, never folded into it.
+.bf-reporting {
+  display: block;
+}
+
+.bf-facts--tight {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  padding: 0;
+}
+
+// Redacted payloads (100, 101) -------------------------------------------------------------------
+
+.bf-payload {
+  max-height: 320px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container);
+  font: var(--mat-sys-body-small);
+}

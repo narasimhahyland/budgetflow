@@ -1,0 +1,455 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Webhooks</h1>
+    <p class="bf-page__subtitle">
+      Where BudgetFlow sends events as they happen, and whether each one arrived
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    @if (canManage() && !creating()) {
+      <button
+        mat-flat-button
+        satImportantButton
+        type="button"
+        (click)="startCreate()"
+        data-testid="create-endpoint"
+      >
+        Add an endpoint
+      </button>
+    }
+  </div>
+</header>
+
+<bf-integrations-nav />
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="webhooks-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="webhooks-failure"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+@if (created(); as c) {
+  <section class="bf-card" aria-labelledby="secret-title" data-testid="endpoint-created">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="secret-title">Signing secret for {{ c.url }}</h2>
+    </div>
+    <bf-one-time-secret
+      [secret]="c.secret"
+      what="signing secret"
+      testId="webhook-secret"
+      (done)="dismissSecret()"
+    />
+  </section>
+}
+
+@if (creating()) {
+  <section class="bf-card" aria-labelledby="add-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="add-title">Add an endpoint</h2>
+        <p class="bf-card__hint">
+          BudgetFlow posts each event to this address and signs it. The signing secret appears once,
+          after the endpoint is created.
+        </p>
+      </div>
+    </div>
+    <div class="bf-form">
+      <mat-form-field appearance="outline" class="bf-form__wide">
+        <mat-label>URL</mat-label>
+        <input
+          matInput
+          type="url"
+          [ngModel]="url()"
+          (ngModelChange)="url.set($event)"
+          placeholder="https://finance.example.test/budgetflow/hook"
+          data-testid="endpoint-url"
+        />
+        @if (urlInvalid()) {
+          <mat-error>Use an https address.</mat-error>
+        } @else {
+          <mat-hint>https only: events carry budget figures and identifiers.</mat-hint>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="bf-form__wide">
+        <mat-label>What receives these (optional)</mat-label>
+        <input
+          matInput
+          [ngModel]="description()"
+          (ngModelChange)="description.set($event)"
+          data-testid="endpoint-description"
+        />
+      </mat-form-field>
+    </div>
+    <fieldset class="bf-card__body">
+      <legend class="bf-card__title">Events to send</legend>
+      <div class="bf-actions-col">
+        @for (e of allEvents; track e) {
+          <mat-checkbox
+            [checked]="hasEvent(e)"
+            (change)="toggleEvent(e, $event.checked)"
+            [attr.data-testid]="'event-' + e"
+            >{{ eventLabel(e) }} <span class="bf-muted">({{ e }})</span></mat-checkbox
+          >
+        }
+      </div>
+      @if (!events().size) {
+        <p class="bf-muted" data-testid="event-required">Choose at least one event.</p>
+      }
+    </fieldset>
+    <div class="bf-form__actions">
+      <button mat-button type="button" (click)="creating.set(false)">Cancel</button>
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="busy() || urlInvalid() || !url().trim() || !events().size"
+        (click)="create()"
+        data-testid="create-endpoint-submit"
+      >
+        Add endpoint
+      </button>
+    </div>
+  </section>
+}
+
+@if (removing(); as e) {
+  <section class="bf-card" aria-labelledby="remove-title" data-testid="remove-panel">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="remove-title">Remove {{ e.url }}?</h2>
+    </div>
+    <sat-banner class="bf-banner" variant="important">
+      <sat-banner-message>
+        <strong>This endpoint stops receiving events immediately.</strong>
+        Anything downstream that reacts to budget freezes, approvals or period closes goes quiet,
+        and nothing is queued for it. Its delivery log stays for audit.
+      </sat-banner-message>
+    </sat-banner>
+    <div class="bf-form__actions">
+      <button mat-button type="button" (click)="removing.set(null)">Cancel</button>
+      <button
+        mat-flat-button
+        satImportantButton
+        type="button"
+        [disabled]="busy()"
+        (click)="remove()"
+        data-testid="remove-submit"
+      >
+        Remove endpoint
+      </button>
+    </div>
+  </section>
+}
+
+@if (endpoints.isLoading() && !valueOf(endpoints)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the endpoints" /></section>
+} @else if (endpoints.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="endpoints.error()" what="the endpoints" (retry)="reload()" />
+  </section>
+} @else if (items().length) {
+  <section class="bf-card" aria-labelledby="endpoints-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="endpoints-title">Endpoints</h2>
+    </div>
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="items()" aria-label="Webhook endpoints">
+        <ng-container matColumnDef="url">
+          <th mat-header-cell *matHeaderCellDef>URL</th>
+          <td mat-cell *matCellDef="let e">
+            <span class="bf-cell__primary">{{ e.url }}</span>
+            <span class="bf-cell__secondary">{{ e.description ?? 'No description' }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="events">
+          <th mat-header-cell *matHeaderCellDef>Events</th>
+          <td mat-cell *matCellDef="let e">
+            <ul class="bf-chip-list">
+              @for (t of e.events; track t) {
+                <li class="bf-chip">{{ eventLabel(t) }}</li>
+              }
+            </ul>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="last">
+          <th mat-header-cell *matHeaderCellDef>Last delivery</th>
+          <td mat-cell *matCellDef="let e">
+            @if (e.lastDeliveryAt) {
+              <span class="bf-cell__primary" data-testid="relative-time">{{
+                e.lastDeliveryAt | bfDateTime: timezone()
+              }}</span>
+              <span class="bf-cell__secondary" data-testid="delivery-latency"
+                >HTTP {{ e.lastStatusCode ?? '—' }} in {{ e.lastDurationMs ?? 0 }} ms</span
+              >
+            } @else {
+              <span class="bf-muted">Nothing sent yet</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="rate">
+          <th mat-header-cell *matHeaderCellDef class="bf-num">Delivered (7 days)</th>
+          <td mat-cell *matCellDef="let e" class="bf-num">
+            <span data-testid="delivery-rate"
+              >{{ successPercent(e.successRateBps) | number: '1.1-1' }}%</span
+            >
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let e">
+            <sat-status-tag [status]="statusTone(e.status)">{{
+              statusLabel(e.status)
+            }}</sat-status-tag>
+            @if (e.disabledReason) {
+              <span class="bf-cell__secondary bf-difference">{{ e.disabledReason }}</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let e">
+            <div class="bf-row-actions">
+              <button
+                mat-button
+                type="button"
+                (click)="select(e)"
+                [attr.data-testid]="'deliveries-' + e.id"
+              >
+                Deliveries
+              </button>
+              @if (canManage()) {
+                <button
+                  mat-button
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="testPing(e)"
+                  [attr.data-testid]="'test-ping-' + e.id"
+                >
+                  Send test ping
+                </button>
+                <button
+                  mat-button
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="rotateSecret(e)"
+                  [attr.data-testid]="'rotate-secret-' + e.id"
+                >
+                  Rotate secret
+                </button>
+                @if (e.status === 'disabled') {
+                  <button
+                    mat-button
+                    type="button"
+                    [disabled]="busy()"
+                    (click)="reEnable(e)"
+                    [attr.data-testid]="'re-enable-' + e.id"
+                  >
+                    Re-enable
+                  </button>
+                }
+                <button
+                  mat-button
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="removing.set(e)"
+                  [attr.data-testid]="'remove-' + e.id"
+                >
+                  Remove
+                </button>
+              }
+            </div>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="endpointColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: endpointColumns"
+          [class.bf-row--selected]="row.id === openEndpoint()"
+          [attr.data-testid]="'endpoint-row-' + row.id"
+        ></tr>
+      </table>
+    </div>
+    @if (endpoint(); as e) {
+      @if (e.status === 'disabled') {
+        <sat-banner class="bf-banner" variant="important" data-testid="endpoint-disabled">
+          <sat-banner-message>
+            <strong>{{ e.url }} was switched off after a day of failures.</strong>
+            {{ e.disabledReason ?? 'It kept refusing deliveries.' }} Nothing has been sent to it
+            since. Fix the receiver, send a test ping, then re-enable it.
+          </sat-banner-message>
+        </sat-banner>
+      } @else if (e.status === 'failing') {
+        <sat-banner class="bf-banner" variant="warning" data-testid="endpoint-failing">
+          <sat-banner-message>
+            <strong>{{ e.url }} is rejecting some deliveries.</strong>
+            BudgetFlow keeps retrying with a growing gap for 24 hours. After that the endpoint is
+            switched off and its owner is told.
+          </sat-banner-message>
+        </sat-banner>
+      }
+      <p class="bf-card__body bf-muted">
+        Signing secret last set
+        <span data-testid="relative-time">{{ e.secretSetAt | bfDateTime: timezone() }}</span
+        >{{ e.secretRotatedAt ? ', rotated since' : '' }}. The secret itself is stored hashed and is
+        never shown again after it is issued.
+      </p>
+    }
+  </section>
+
+  @if (ping(); as p) {
+    <sat-banner [variant]="p.ok ? 'success' : 'important'" data-testid="ping-result">
+      <sat-banner-message>
+        {{ p.ok ? 'The receiver accepted the test ping' : 'The receiver refused the test ping' }}:
+        {{ p.message }}{{ p.statusCode ? ' (HTTP ' + p.statusCode + ')' : '' }} in
+        {{ p.durationMs | number }} ms.
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  <section class="bf-card" aria-labelledby="deliveries-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="deliveries-title">
+          Deliveries{{ endpoint() ? ' to ' + endpoint()!.url : ' (all endpoints)' }}
+        </h2>
+        <p class="bf-card__hint">
+          Every attempt, with the status code the receiver answered and when the next try happens.
+        </p>
+      </div>
+      @if (openEndpoint()) {
+        <button mat-button type="button" (click)="openEndpoint.set(null)">Show all</button>
+      }
+    </div>
+    @if (deliveries.isLoading() && !valueOf(deliveries)) {
+      <bf-load-state [loading]="true" what="the deliveries" [lines]="4" />
+    } @else if (deliveries.error()) {
+      <bf-load-state
+        [error]="deliveries.error()"
+        what="the deliveries"
+        (retry)="deliveries.reload()"
+      />
+    } @else if (deliveryItems().length) {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="deliveryItems()" aria-label="Webhook deliveries">
+          <ng-container matColumnDef="event">
+            <th mat-header-cell *matHeaderCellDef>Event</th>
+            <td mat-cell *matCellDef="let d">
+              <span class="bf-cell__primary">{{ eventLabel(d.eventType) }}</span>
+              <span class="bf-cell__secondary" data-testid="relative-time">{{
+                d.createdAt | bfDateTime: timezone()
+              }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="attempt">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Attempt</th>
+            <td mat-cell *matCellDef="let d" class="bf-num">{{ d.attempt }}</td>
+          </ng-container>
+          <ng-container matColumnDef="result">
+            <th mat-header-cell *matHeaderCellDef>Result</th>
+            <td mat-cell *matCellDef="let d">
+              <sat-status-tag [status]="deliveryTone(d.status)">{{
+                deliveryLabel(d.status)
+              }}</sat-status-tag>
+              <span class="bf-cell__secondary" data-testid="delivery-latency"
+                >HTTP {{ d.statusCode ?? '—' }}
+                {{ d.durationMs !== null ? 'in ' + d.durationMs + ' ms' : '' }}</span
+              >
+              @if (d.error) {
+                <span class="bf-cell__secondary bf-difference">{{ d.error }}</span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="next">
+            <th mat-header-cell *matHeaderCellDef>Next</th>
+            <td mat-cell *matCellDef="let d">
+              <div class="bf-row-actions">
+                @if (d.nextRetryAt) {
+                  <span data-testid="relative-time">{{
+                    d.nextRetryAt | bfDateTime: timezone()
+                  }}</span>
+                } @else {
+                  <span class="bf-muted">No retry queued</span>
+                }
+                <button
+                  mat-button
+                  type="button"
+                  (click)="openPayload(d)"
+                  [attr.data-testid]="'payload-' + d.id"
+                >
+                  Payload
+                </button>
+                @if (canManage()) {
+                  <button
+                    mat-button
+                    type="button"
+                    [disabled]="busy()"
+                    (click)="redeliver(d)"
+                    [attr.data-testid]="'redeliver-' + d.id"
+                  >
+                    Send again
+                  </button>
+                }
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="deliveryColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: deliveryColumns"
+            [class.bf-row--selected]="row.id === openDelivery()"
+            [attr.data-testid]="'delivery-row-' + row.id"
+          ></tr>
+        </table>
+      </div>
+      @if (delivery(); as d) {
+        <div class="bf-card__body" data-testid="delivery-payload">
+          <h3 class="bf-card__title">What was sent</h3>
+          <p class="bf-muted">
+            Payloads carry identifiers and the fields of the event. They never carry a credential, a
+            signing secret or a card number.
+          </p>
+          <pre class="bf-payload"><code>{{ d.payload | json }}</code></pre>
+        </div>
+      }
+    } @else {
+      <sat-empty-state data-testid="deliveries-empty">
+        <h2 satEmptyStateHeadline>No deliveries yet</h2>
+        <p satEmptyStateDescription>
+          Deliveries appear the first time one of the subscribed events happens.
+        </p>
+      </sat-empty-state>
+    }
+  </section>
+
+  @if (verification()) {
+    <section class="bf-card" aria-labelledby="verify-title">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="verify-title">How a receiver checks a delivery is ours</h2>
+      </div>
+      <p class="bf-card__body" data-testid="webhook-verification">{{ verification() }}</p>
+    </section>
+  }
+} @else {
+  <section class="bf-card">
+    <sat-empty-state data-testid="endpoints-empty">
+      <h2 satEmptyStateHeadline>No webhook endpoints yet</h2>
+      <p satEmptyStateDescription>
+        Subscribe an https endpoint to hear about freezes, approvals and period closes as they
+        happen, instead of polling.
+      </p>
+      @if (canManage()) {
+        <button mat-flat-button type="button" (click)="startCreate()">Add an endpoint</button>
+      }
+    </sat-empty-state>
+  </section>
+}
+
+@if (!canManage()) {
+  <p class="bf-note" data-testid="webhooks-read-only">
+    You can read the endpoints and every delivery. Adding, testing, rotating secrets and removing
+    need the Integration Admin role.
+  </p>
+}

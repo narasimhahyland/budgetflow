@@ -15,12 +15,20 @@ import { freeze, tree } from '../budgets/p4';
 import {
   armFailure,
   deliveriesSignedWith,
+  deliveryLog,
+  isTerminal,
   MOCK_INTERNAL_BASE,
   resetMock,
   waitForDelivery,
 } from '../support/p12';
 
 const RECEIVER = `${MOCK_INTERNAL_BASE}/receiver/hook`;
+/**
+ * An allowed host with nothing listening on this path: the mock answers 401 every time. A scenario
+ * that needs a delivery to fail uses it rather than arming the shared receiver, whose armed failures
+ * a retry from an earlier delivery can spend first.
+ */
+const REFUSING_RECEIVER = `${MOCK_INTERNAL_BASE}/receiver/not-listening`;
 
 async function createEndpoint(
   request: import('@playwright/test').APIRequestContext,
@@ -267,11 +275,64 @@ test.describe('domain events reach subscribed endpoints', () => {
       200,
       WebhookDeliveryList,
     );
-    // Each event leaves the queued row and the attempt that sent it, so count the subjects, not rows.
-    expect(log.items.length, 'the endpoint has a delivery log to judge').toBeGreaterThan(0);
     expect(
-      [...new Set(log.items.map((d) => d.payload['budgetId']))],
+      log.items.map((d) => d.payload['budgetId']),
       'the delivery log holds only the event raised after the endpoint existed',
     ).toEqual([b.id]);
+  });
+});
+
+/**
+ * One fanned-out event is one delivery. The fan-out queues the row and the send writes its outcome
+ * back onto it, so an operator reading the log sees what happened to each event and never a queued
+ * row beside a sent one that will never complete.
+ */
+test.describe('the delivery log holds one row per event', () => {
+  test('a delivered event leaves exactly one row, in a terminal state', async ({ request }) => {
+    const { b } = await tree(request, 2_000_000, 500_000);
+    const created = await createEndpoint(request);
+    await freeze(request, b.id);
+
+    expect(await waitForDelivery(created.signingSecret), 'the receiver got the event').toBeTruthy();
+
+    const items = await deliveryLog(
+      request,
+      created.endpoint.id,
+      await as('integration-admin'),
+      (rows) => rows.length > 0 && rows.every(isTerminal),
+    );
+    expect(
+      items.map((d) => d.status),
+      'the delivered event is one row that reached a terminal state',
+    ).toEqual(['succeeded']);
+    expect(items[0].payload['budgetId']).toBe(b.id);
+    expect(items[0].statusCode).toBe(200);
+    expect(items[0].attempt, 'the row records the attempt that sent it').toBeGreaterThan(0);
+    expect(items[0].error).toBeNull();
+    expect(items[0].nextRetryAt, 'nothing is waiting to be sent again').toBeNull();
+  });
+
+  test('a delivery the receiver rejects leaves one row, failed, with the reason', async ({
+    request,
+  }) => {
+    const { b } = await tree(request, 2_000_000, 500_000);
+    const created = await createEndpoint(request, REFUSING_RECEIVER);
+    await freeze(request, b.id);
+
+    // A recorded status code is the attempt having happened. The retry is a minute away, so the log
+    // is read between the two and shows the failure exactly as the operator would see it.
+    const items = await deliveryLog(
+      request,
+      created.endpoint.id,
+      await as('integration-admin'),
+      (rows) => rows.length > 0 && rows.every((d) => d.statusCode !== null),
+    );
+    expect(
+      items.map((d) => d.status),
+      'the refused event is one row recorded as failed',
+    ).toEqual(['failed']);
+    expect(items[0].statusCode).toBe(401);
+    expect(items[0].error, 'the failure carries a reason the operator can act on').toContain('401');
+    expect(items[0].nextRetryAt, 'it is queued to be tried again').not.toBeNull();
   });
 });
