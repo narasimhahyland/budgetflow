@@ -1,3 +1,4 @@
+import { AdminApiModule } from '@bf/api/admin';
 import { ApprovalsApiModule } from '@bf/api/approvals';
 import { ActualsApiModule } from '@bf/api/actuals';
 import { AuditApiModule } from '@bf/api/audit';
@@ -43,6 +44,7 @@ import { HealthController, OpenApiController } from './health.controller';
     CloseApiModule,
     RulesApiModule,
     ReportsApiModule,
+    AdminApiModule,
   ],
   controllers: [HealthController, OpenApiController],
 })
