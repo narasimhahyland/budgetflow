@@ -16,6 +16,7 @@ import { SEED } from '@bf/seed';
 import { apiToken, expectShell } from '../support/auth';
 import { API_URL } from '../support/env';
 import { authFile, type RoleId } from '../support/roles';
+import { desktopOnly } from '../spend/api';
 
 interface Health {
   connected: number;
@@ -54,10 +55,10 @@ interface SyncRun {
   recordsSkippedDuplicate: number;
 }
 
-// These journeys share one seeded tenant: they resolve the one duplicate group, replace a stored
-// credential and issue keys. Running them in order in a single worker keeps them off each other's
-// data and keeps the token cache below to one grant per role, which Keycloak's brute-force counter
-// needs. (`default`, not `serial`: a failure must not hide the tests after it.)
+// These journeys share one seeded tenant, so within a project they run in order in a single worker:
+// that keeps the mutating ones off each other's data and the token cache below to one grant per role.
+// (`default`, not `serial`: a failure must not hide the tests after it.) The journeys that change
+// shared state are marked desktop-only one by one; the read-only ones run at every viewport.
 test.describe.configure({ mode: 'default' });
 
 // One token per role for the whole file: Keycloak refuses a burst of direct grants for one user.
@@ -151,7 +152,8 @@ test.describe('connector hub (092)', () => {
 
   test('a connector the provider refuses says what stopped and offers the fix', async ({
     page,
-  }) => {
+  }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     // The journey breaks the planning connector itself instead of trusting the seeded one to still
     // be broken: other suites on this stack repair it. The credential below is the placeholder the
     // mock planning provider rejects.
@@ -206,7 +208,8 @@ test.describe('credentials (092 Connection tab)', () => {
 
   test('replacing a credential keeps it off the screen and tells the admin to test it', async ({
     page,
-  }) => {
+  }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     const hub = await getJson<Hub>('integration-admin', '/api/integrations');
     const outlook = hub.connections.find((c) => c.provider === 'outlook')!;
 
@@ -232,7 +235,8 @@ test.describe('running a sync (092 Sync tab, 099)', () => {
 
   test('a run reports what it moved, and running it again applies nothing twice', async ({
     page,
-  }) => {
+  }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     const hub = await getJson<Hub>('integration-admin', '/api/integrations');
     const erp = hub.connections.find((c) => c.provider === 'erpnext')!;
 
@@ -287,7 +291,8 @@ test.describe('API keys (101)', () => {
 
   test('a key is shown once, then only by its prefix, and cannot approve anything', async ({
     page,
-  }) => {
+  }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     await page.goto('/admin/integrations/api-keys');
     await expectShell(page);
     await expect(page.getByTestId('scope-limits')).toContainText(
@@ -323,7 +328,8 @@ test.describe('API keys (101)', () => {
     expect(await page.locator('body').innerText()).not.toContain(secret);
   });
 
-  test('revoking states the consequence and needs the key name typed', async ({ page }) => {
+  test('revoking states the consequence and needs the key name typed', async ({ page }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     await page.goto('/admin/integrations/api-keys');
     await page.getByTestId('create-key').click();
     await page.getByTestId('key-name').fill('Journey key to revoke');
@@ -359,7 +365,8 @@ test.describe('API keys (101)', () => {
 test.describe('webhooks (101)', () => {
   test.use({ storageState: authFile('integration-admin') });
 
-  test('a test ping is reported honestly and lands in the delivery log', async ({ page }) => {
+  test('a test ping is reported honestly and lands in the delivery log', async ({ page }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     await page.goto('/admin/integrations/webhooks');
     await expectShell(page);
 
@@ -399,7 +406,8 @@ test.describe('webhooks (101)', () => {
 test.describe('identity and SCIM (098)', () => {
   test.use({ storageState: authFile('integration-admin') });
 
-  test('a SCIM token is shown once and the list keeps only its prefix', async ({ page }) => {
+  test('a SCIM token is shown once and the list keeps only its prefix', async ({ page }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     await page.goto('/admin/integrations/identity');
     await expectShell(page);
     await expect(page.getByTestId('sso-status')).toBeVisible();
@@ -424,7 +432,8 @@ test.describe('cross-source duplicates (99a)', () => {
 
   test('finance keeps one line as the record and the other is excluded, not deleted', async ({
     page,
-  }) => {
+  }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     // The journey brings its own spend rather than deciding the seeded duplicate: resolving a group
     // excludes a line, and the seeded one sits on an account the GL tie-out journey reads.
     const ref = randomUUID().slice(0, 8).toUpperCase();
