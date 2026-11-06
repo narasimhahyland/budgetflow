@@ -355,8 +355,9 @@
 
   .bf-list__item {
     display: block;
-    // width: 100% is the item filling its card, and the side padding is inside that width.
-    // Without border-box the padding is added on top and the item overruns the card.
+    // The side padding is inside the 100% width, not added to it. `reset.scss` already says this
+    // for everything; it is repeated here because this sheet is a library and does not control
+    // whether its host loads that reset, and because this is the rule that has regressed twice.
     box-sizing: border-box;
     width: 100%;
     padding: 12px 20px;
