@@ -52,6 +52,12 @@ interface SyncRun {
   recordsSkippedDuplicate: number;
 }
 
+// These journeys share one seeded tenant: they resolve the one duplicate group, replace a stored
+// credential and issue keys. Running them in order in a single worker keeps them off each other's
+// data and keeps the token cache below to one grant per role, which Keycloak's brute-force counter
+// needs. (`default`, not `serial`: a failure must not hide the tests after it.)
+test.describe.configure({ mode: 'default' });
+
 // One token per role for the whole file: Keycloak refuses a burst of direct grants for one user.
 const tokens = new Map<RoleId, Promise<string>>();
 const tokenFor = (role: RoleId): Promise<string> => {

@@ -1797,6 +1797,7 @@
       "role": "integration-admin",
       "path": "/admin/integrations/identity",
       "waitFor": "role=heading[name=\"Identity and SCIM\"]",
+      "mask": ["[data-testid=key-prefix]"],
       "states": [
         {
           "state": "default"
@@ -1860,6 +1861,7 @@
       "role": "integration-admin",
       "path": "/admin/integrations/api-keys",
       "waitFor": "role=heading[name=\"API keys\"]",
+      "mask": ["[data-testid=key-prefix]"],
       "states": [
         {
           "state": "default"
@@ -1879,9 +1881,18 @@
       "role": "integration-admin",
       "path": "/admin/integrations/webhooks",
       "waitFor": "role=heading[name=\"Webhooks\"]",
+      "mask": ["[data-testid=delivery-latency]", "[data-testid=delivery-rate]"],
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "add-endpoint",
+          "actions": [
+            { "click": "[data-testid=create-endpoint]" },
+            { "waitFor": "[data-testid=event-required]" },
+            { "scrollTop": true }
+          ]
         }
       ]
     }

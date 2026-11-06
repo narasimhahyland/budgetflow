@@ -5,7 +5,11 @@ import { defineConfig, devices } from '@playwright/test';
 import { env } from './src/support/env';
 
 // Journeys that sign in fresh sessions, change a password or trip lockout counters run once, on desktop.
-const SESSION_JOURNEYS = [/src\/auth\//, /src\/shell\/analytics\.spec\.ts/];
+// The integration journeys join them: they resolve the one seeded duplicate group, replace a stored
+// credential and revoke keys, so the same test at three viewports would race itself over one row, and
+// the direct grants behind their API cross-checks trip Keycloak's brute-force counter. Those screens
+// are checked at all three viewports by the visual baselines instead.
+const SESSION_JOURNEYS = [/src\/auth\//, /src\/shell\/analytics\.spec\.ts/, /src\/integrations\//];
 
 // Port from the shell, then .env (worktrees run their own stack), then infra/.env.example.
 const baseURL = process.env.BASE_URL ?? `http://localhost:${env('BF_WEB_PORT')}`;

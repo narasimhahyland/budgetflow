@@ -144,7 +144,9 @@
           <ng-container matColumnDef="prefix">
             <th mat-header-cell *matHeaderCellDef>Token</th>
             <td mat-cell *matCellDef="let t">
-              <span class="bf-cell__primary bf-nowrap">{{ t.prefix }}…</span>
+              <span class="bf-cell__primary bf-nowrap" data-testid="key-prefix"
+                >{{ t.prefix }}…</span
+              >
               <span class="bf-cell__secondary">Stored hashed; the value is never shown again</span>
             </td>
           </ng-container>

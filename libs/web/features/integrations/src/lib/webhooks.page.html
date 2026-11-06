@@ -181,7 +181,7 @@
               <span class="bf-cell__primary" data-testid="relative-time">{{
                 e.lastDeliveryAt | bfDateTime: timezone()
               }}</span>
-              <span class="bf-cell__secondary"
+              <span class="bf-cell__secondary" data-testid="delivery-latency"
                 >HTTP {{ e.lastStatusCode ?? '—' }} in {{ e.lastDurationMs ?? 0 }} ms</span
               >
             } @else {
@@ -192,7 +192,9 @@
         <ng-container matColumnDef="rate">
           <th mat-header-cell *matHeaderCellDef class="bf-num">Delivered (7 days)</th>
           <td mat-cell *matCellDef="let e" class="bf-num">
-            {{ successPercent(e.successRateBps) | number: '1.1-1' }}%
+            <span data-testid="delivery-rate"
+              >{{ successPercent(e.successRateBps) | number: '1.1-1' }}%</span
+            >
           </td>
         </ng-container>
         <ng-container matColumnDef="status">
@@ -351,7 +353,7 @@
               <sat-status-tag [status]="deliveryTone(d.status)">{{
                 deliveryLabel(d.status)
               }}</sat-status-tag>
-              <span class="bf-cell__secondary"
+              <span class="bf-cell__secondary" data-testid="delivery-latency"
                 >HTTP {{ d.statusCode ?? '—' }}
                 {{ d.durationMs !== null ? 'in ' + d.durationMs + ' ms' : '' }}</span
               >
