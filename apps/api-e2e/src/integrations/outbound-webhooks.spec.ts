@@ -23,6 +23,12 @@ import {
 } from '../support/p12';
 
 const RECEIVER = `${MOCK_INTERNAL_BASE}/receiver/hook`;
+/**
+ * An allowed host with nothing listening on this path: the mock answers 401 every time. A scenario
+ * that needs a delivery to fail uses it rather than arming the shared receiver, whose armed failures
+ * a retry from an earlier delivery can spend first.
+ */
+const REFUSING_RECEIVER = `${MOCK_INTERNAL_BASE}/receiver/not-listening`;
 
 async function createEndpoint(
   request: import('@playwright/test').APIRequestContext,
@@ -310,29 +316,23 @@ test.describe('the delivery log holds one row per event', () => {
     request,
   }) => {
     const { b } = await tree(request, 2_000_000, 500_000);
-    const created = await createEndpoint(request);
-    // Only the first attempt fails; the retry is a minute away, so this scenario reads the log
-    // between them and sees the failure exactly as the operator would.
-    await armFailure('/receiver/hook', 503, 1);
+    const created = await createEndpoint(request, REFUSING_RECEIVER);
     await freeze(request, b.id);
 
-    expect(
-      await waitForDelivery(created.signingSecret),
-      'the receiver was called and refused',
-    ).toBeTruthy();
-
+    // A recorded status code is the attempt having happened. The retry is a minute away, so the log
+    // is read between the two and shows the failure exactly as the operator would see it.
     const items = await deliveryLog(
       request,
       created.endpoint.id,
       await as('integration-admin'),
-      (rows) => rows.length > 0 && rows.every((d) => d.status === 'failed'),
+      (rows) => rows.length > 0 && rows.every((d) => d.statusCode !== null),
     );
     expect(
       items.map((d) => d.status),
       'the refused event is one row recorded as failed',
     ).toEqual(['failed']);
-    expect(items[0].statusCode).toBe(503);
-    expect(items[0].error, 'the failure carries a reason the operator can act on').toContain('503');
+    expect(items[0].statusCode).toBe(401);
+    expect(items[0].error, 'the failure carries a reason the operator can act on').toContain('401');
     expect(items[0].nextRetryAt, 'it is queued to be tried again').not.toBeNull();
   });
 });
