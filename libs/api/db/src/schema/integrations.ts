@@ -293,7 +293,11 @@ export const webhookEndpoints = pgTable(
   (t) => [index('webhook_endpoints_tenant').on(t.tenantId, t.status)],
 );
 
-/** One row per delivery attempt, with the payload that was signed (identifiers only, no secrets). */
+/**
+ * One row per delivery, carrying the payload that was signed (identifiers only, no secrets). A row
+ * the outbox fan-out queues moves `pending` → `succeeded` / `failed` / `exhausted` in place and
+ * `attempt` counts the tries it took; a test ping or an operator redelivery adds its own row.
+ */
 export const webhookDeliveries = pgTable(
   'webhook_deliveries',
   {
