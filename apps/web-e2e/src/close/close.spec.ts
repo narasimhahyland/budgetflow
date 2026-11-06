@@ -16,6 +16,13 @@ const NOVEMBER = periodId(CALENDAR_INDEX.acmeGroup, 2026, 11);
  */
 const SEPTEMBER = periodId(CALENDAR_INDEX.acmeIndia, 2027, 6);
 
+/**
+ * Accepting a soft check and reopening a period both change what the checks above them report, so
+ * within a project these run in declaration order in one worker. (`default`, not `serial`: a failure
+ * must not hide the tests after it.)
+ */
+test.describe.configure({ mode: 'default' });
+
 test.describe('period close checklist', () => {
   test.use({ storageState: authFile('finance-admin') });
 
@@ -59,13 +66,11 @@ test.describe('accepting a soft check', () => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
     await page.goto(`/finance/close/${NOVEMBER}`);
     await expectShell(page);
-    const accept = page.getByTestId('acknowledge-commitments_accrued').first();
-    const soft = (await accept.count())
-      ? 'commitments_accrued'
-      : (await page.getByTestId('acknowledge-accruals_reviewed').first().count())
-        ? 'accruals_reviewed'
-        : 'unmatched_actuals_cleared';
-    await page.getByTestId(`acknowledge-${soft}`).first().click();
+    // Named outright rather than "whichever check still offers a button": a subject picked by what
+    // happens to be acknowledgeable turns into a different check without the journey noticing.
+    const accept = page.getByTestId('acknowledge-accruals_reviewed').first();
+    await expect(accept).toBeVisible();
+    await accept.click();
 
     await page.getByTestId('ack-reason-code').click();
     await page.getByRole('option').first().click();
@@ -95,21 +100,20 @@ test.describe('break-glass reopen', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Sep 2026' })).toBeVisible();
     await expect(page.getByTestId('close-period')).toHaveCount(0);
 
-    // The controller asks. Nothing moves yet. (A retry finds its own earlier request still open.)
-    if ((await page.getByTestId('break-glass-pending').count()) === 0) {
-      await expect(
-        page.getByRole('heading', { name: 'Break glass: reopen Sep 2026' }),
-      ).toBeVisible();
-      await page.getByTestId('request-break-glass').click();
-      await page.getByTestId('break-glass-reason-code').click();
-      await page.getByRole('option').first().click();
-      await page.getByTestId('break-glass-reason').fill(reason);
-      await page.getByTestId('confirm-break-glass').click();
-      await expect(page.getByTestId('close-notice')).toContainText(
-        'does not move until a different person approves it',
-      );
-      await expect(page.getByTestId('break-glass-pending')).toContainText(reason);
-    }
+    // The controller asks. The seed leaves September closed with nothing pending, so the request and
+    // what it says are asserted outright: wrapping them in "if nothing is pending yet" would let the
+    // journey pass without ever asking, and without reading the notice that says nothing has moved.
+    await expect(page.getByTestId('break-glass-pending')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Break glass: reopen Sep 2026' })).toBeVisible();
+    await page.getByTestId('request-break-glass').click();
+    await page.getByTestId('break-glass-reason-code').click();
+    await page.getByRole('option').first().click();
+    await page.getByTestId('break-glass-reason').fill(reason);
+    await page.getByTestId('confirm-break-glass').click();
+    await expect(page.getByTestId('close-notice')).toContainText(
+      'does not move until a different person approves it',
+    );
+    await expect(page.getByTestId('break-glass-pending')).toContainText(reason);
     await expect(page.getByTestId('break-glass-pending')).toContainText('needs a second person');
     await expect(page.getByRole('heading', { level: 1, name: 'Sep 2026' })).toBeVisible();
     await expect(page.getByText('Closed', { exact: true }).first()).toBeVisible();
