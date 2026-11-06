@@ -136,9 +136,15 @@ test.describe('forecast and variance report', () => {
   test('accepted forecasts are reported against the ledger, and only the ledger columns reconcile', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 1_000_000, owner: 'finance-admin' });
-    const child = await createChild(request, root.id, { currency: 'USD' });
-    await allocateOk(request, root.id, child.id, { amountMinor: 400_000, currency: 'USD' });
+    const root = await createRoot(request, { amountMinor: 1_000_000, as: 'finance-admin' });
+    const child = await createChild(request, root.id, { currency: 'USD', as: 'finance-admin' });
+    await allocateOk(
+      request,
+      root.id,
+      child.id,
+      { amountMinor: 400_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
     await openingBalances(request, child.id, [
       ['encumbered', 120_000],
       ['pre_encumbered', 30_000],
@@ -203,11 +209,23 @@ test.describe('forecast and variance report', () => {
   test('a budget with no accepted forecast falls back to the system run-rate and the report says so', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 900_000, owner: 'finance-admin' });
-    const forecast = await createChild(request, root.id, { currency: 'USD' });
-    const silent = await createChild(request, root.id, { currency: 'USD' });
-    await allocateOk(request, root.id, forecast.id, { amountMinor: 300_000, currency: 'USD' });
-    await allocateOk(request, root.id, silent.id, { amountMinor: 200_000, currency: 'USD' });
+    const root = await createRoot(request, { amountMinor: 900_000, as: 'finance-admin' });
+    const forecast = await createChild(request, root.id, { currency: 'USD', as: 'finance-admin' });
+    const silent = await createChild(request, root.id, { currency: 'USD', as: 'finance-admin' });
+    await allocateOk(
+      request,
+      root.id,
+      forecast.id,
+      { amountMinor: 300_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
+    await allocateOk(
+      request,
+      root.id,
+      silent.id,
+      { amountMinor: 200_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
     await openingBalances(request, silent.id, [['actual', 80_000]]);
     const cycle = await acceptedCycle(
       request,
@@ -242,7 +260,7 @@ test.describe('forecast and variance report', () => {
   test('comparing with an earlier cycle adds the previous forecast and the change', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 800_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 800_000, as: 'finance-admin' });
     const earlier = await acceptedCycle(
       request,
       root.id,
@@ -276,11 +294,23 @@ test.describe('forecast and variance report', () => {
   test('"commentary required only" narrows the rows and says the figures are a part of the ledger', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 1_000_000, owner: 'finance-admin' });
-    const big = await createChild(request, root.id, { currency: 'USD' });
-    const small = await createChild(request, root.id, { currency: 'USD' });
-    await allocateOk(request, root.id, big.id, { amountMinor: 400_000, currency: 'USD' });
-    await allocateOk(request, root.id, small.id, { amountMinor: 400_000, currency: 'USD' });
+    const root = await createRoot(request, { amountMinor: 1_000_000, as: 'finance-admin' });
+    const big = await createChild(request, root.id, { currency: 'USD', as: 'finance-admin' });
+    const small = await createChild(request, root.id, { currency: 'USD', as: 'finance-admin' });
+    await allocateOk(
+      request,
+      root.id,
+      big.id,
+      { amountMinor: 400_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
+    await allocateOk(
+      request,
+      root.id,
+      small.id,
+      { amountMinor: 400_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
     const cycle = await acceptedCycle(
       request,
       root.id,
@@ -314,27 +344,40 @@ test.describe('forecast and variance report', () => {
   });
 
   test('tied rows come back in the same order every time', async ({ request }) => {
-    const root = await createRoot(request, { amountMinor: 600_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 600_000, as: 'finance-admin' });
     // Four children with nothing authorized: every row ties at zero, so only the tie-break orders them.
-    for (let i = 0; i < 4; i += 1) await createChild(request, root.id, { currency: 'USD' });
+    for (let i = 0; i < 4; i += 1)
+      await createChild(request, root.id, { currency: 'USD', as: 'finance-admin' });
 
     const first = await runReport(request, { rootBudgetId: root.id });
     const second = await runReport(request, { rootBudgetId: root.id });
     const keys = (r: typeof ReportResult._output) => r.rows.map((x) => `${x.label}|${x.key}`);
-    expect(keys(first)).toEqual(keys(second));
-    expect(keys(first)).toEqual([...keys(first)].sort((a, b) => a.localeCompare(b)));
     expect(first.rows.length).toBe(5);
+    expect(keys(first)).toEqual(keys(second));
+    // Largest authorized first, so the root leads; the four children all tie at nothing authorized
+    // and are ordered by the tie-break alone, which is label then the unique row key.
+    expect(first.rows[0].budgetId).toBe(root.id);
+    const tied = keys(first).slice(1);
+    expect(tied).toHaveLength(4);
+    expect(tied).toEqual([...tied].sort((a, b) => a.localeCompare(b)));
   });
 
   test('an owner sees only their own subtree; an auditor reads the whole tenant', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 700_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 700_000, as: 'finance-admin' });
     const owned = await createChild(request, root.id, {
       currency: 'USD',
       owner: 'regional-manager',
+      as: 'finance-admin',
     });
-    await allocateOk(request, root.id, owned.id, { amountMinor: 200_000, currency: 'USD' });
+    await allocateOk(
+      request,
+      root.id,
+      owned.id,
+      { amountMinor: 200_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
 
     const ownerView = await runReport(request, { rootBudgetId: owned.id }, 'regional-manager');
     expect(ownerView.rows.map((r) => r.budgetId)).toEqual([owned.id]);

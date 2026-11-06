@@ -57,6 +57,7 @@ test.describe('board and FP&A pack', () => {
         r.actual.amountMinor,
     );
     expect(r.budgetsCounted).toBeGreaterThan(0);
+    expect(r.authorized.currency).toBe('USD');
 
     // Every page of the inventory is there, in the order the pack defines.
     expect(built.pages.map((p) => p.page)).toEqual([
@@ -91,7 +92,9 @@ test.describe('board and FP&A pack', () => {
   test('the FX bridge explains the gap and is never part of spend or variance', async ({
     request,
   }) => {
-    const built = await pack(request);
+    // The bridge is read on the pack for the period the seeded multi-currency spend sits in, which
+    // is the current open one; a closed period that nothing was posted into has nothing to bridge.
+    const built = await pack(request, { draft: 'true' });
     const fx = built.fxBridge;
 
     expect(fx.reportingRateType).toBe('monthly_average');

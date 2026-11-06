@@ -1,0 +1,22 @@
+
+    Error: {"id":"201aed46-6fb3-4eed-bfe7-8a2a90d2cf46","cycleId":"cd40b6a5-f1f8-47d6-a1e9-69cf1d6b6d84","budgetId":"8915fbed-1325-4b67-9481-7f47de582088","budgetName":"Scenario root SC-993ACC","eventId":null,"eventName":null,"eventCode":null,"ownerPersonId":"40000000-0000-4000-8000-000000000004","ownerName":"Priya Raman","authorized":{"amountMinor":1000000,"currency":"USD"},"actualToDate":{"amountMinor":0,"currency":"USD"},"committed":{"amountMinor":0,"currency":"USD"},"pending":{"amountMinor":0,"currency":"USD"},"plannedEvents":{"amountMinor":0,"currency":"USD"},"forecast":{"amountMinor":900000,"currency":"USD"},"method":"owner_input","methodOptions":[{"method":"run_rate","amount":{"amountMinor":0,"currency":"USD"},"explanation":"Spend so far projected over the whole year, never below what is already committed and spent."},{"method":"committed_pipeline","amount":{"amountMinor":0,"currency":"USD"},"explanation":"Actual plus the run-rate for routine spend, plus held, pending and approved commitments and approved events not yet committed."}],"variance":{"amountMinor":100000,"currency":"USD"},"varianceBps":1000,"varianceDirection":"under","commentaryRequired":false,"commentary":null,"commentaryNote":null,"status":"submitted","systemGenerated":false,"submittedAt":"2026-11-06T08:44:16.700Z","acceptedAt":null,"acceptedByName":null,"updatedAt":"2026-11-06T08:44:16.700Z"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 422
+    Received: 201
+
+      168 |       },
+      169 |     );
+    > 170 |     expect(onThreshold.status(), await onThreshold.text()).toBe(422);
+          |                                                            ^
+      171 |     expect((await onThreshold.json()).code).toBe('FORECAST_COMMENTARY_REQUIRED');
+      172 |
+      173 |     // One minor unit inside it needs no commentary.
+        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control-worktrees/p11-forecast/apps/api-e2e/src/close/forecast-cycle.spec.ts:170:60
+
+    Error Context: dist/.playwright/apps/api-e2e/test-results/close-forecast-cycle-forec-02e70-nor-unit-inside-it-does-not/error-context.md
+
+  2 failed
+    apps/api-e2e/src/close/forecast-cycle.spec.ts:108:7 › forecast cycle › a variance above the cycle threshold is refused without commentary and accepted with it 
+    apps/api-e2e/src/close/forecast-cycle.spec.ts:153:7 › forecast cycle › a variance exactly on the threshold needs commentary, one minor unit inside it does not 

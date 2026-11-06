@@ -150,15 +150,16 @@ export class ForecastCyclesService {
             'VALIDATION_FAILED',
             'The due date cannot be before the as-of date.',
           );
-        const fy = req.fiscalYearId
-          ? await this.reads.fiscalYear(tx, req.fiscalYearId)
-          : await this.fiscalYearOn(tx, req.asOfDate);
         let scopeRoot: BudgetRow | null = null;
         if (req.rootBudgetId) {
           const [row] = await tx.select().from(budgets).where(eq(budgets.id, req.rootBudgetId));
           if (!row) throw ApiProblem.notFound('budget');
           scopeRoot = row;
         }
+        const fy = await this.resolveFiscalYear(tx, req.asOfDate, {
+          fiscalYearId: req.fiscalYearId,
+          scopeRoot,
+        });
         const duplicate = await tx
           .select({ id: forecastCycles.id })
           .from(forecastCycles)
@@ -576,16 +577,44 @@ export class ForecastCyclesService {
     return row;
   }
 
-  private async fiscalYearOn(tx: Tx, date: string) {
-    const rows = await tx.execute<{ id: string }>(
-      sql`select id from fiscal_years where start_date <= ${date} and end_date >= ${date} order by start_date limit 1`,
-    );
+  /**
+   * The fiscal year the cycle forecasts. A tenant runs several fiscal calendars, so several fiscal
+   * years can cover the same as-of date: the scope root's own year wins, then the year the caller
+   * named, and otherwise the year the most budgets are on, tie-broken by label and id so the choice
+   * is the same every time.
+   */
+  private async resolveFiscalYear(
+    tx: Tx,
+    asOfDate: string,
+    opts: { fiscalYearId?: string; scopeRoot: BudgetRow | null },
+  ) {
+    if (opts.scopeRoot) {
+      const fy = await this.reads.fiscalYear(tx, opts.scopeRoot.fiscalYearId);
+      if (fy.startDate > asOfDate || fy.endDate < asOfDate)
+        throw new ApiProblem(
+          422,
+          'VALIDATION_FAILED',
+          `${asOfDate} is outside ${fy.label} (${fy.startDate} to ${fy.endDate}), the fiscal year of the budget you scoped the cycle to.`,
+          { field: 'asOfDate' },
+        );
+      return fy;
+    }
+    if (opts.fiscalYearId) return this.reads.fiscalYear(tx, opts.fiscalYearId);
+    const rows = await tx.execute<{ id: string }>(sql`
+      select y.id
+      from fiscal_years y
+      left join budgets b on b.fiscal_year_id = y.id and b.status <> 'cancelled'
+      where y.start_date <= ${asOfDate} and y.end_date >= ${asOfDate}
+      group by y.id, y.label
+      order by count(b.id) desc, y.label, y.id
+      limit 1`);
     const id = rows.rows[0]?.id;
     if (!id)
       throw new ApiProblem(
         422,
         'VALIDATION_FAILED',
-        `No fiscal year contains ${date}; pick an as-of date inside a fiscal year.`,
+        `No fiscal year contains ${asOfDate}; pick an as-of date inside a fiscal year.`,
+        { field: 'asOfDate' },
       );
     return this.reads.fiscalYear(tx, id);
   }

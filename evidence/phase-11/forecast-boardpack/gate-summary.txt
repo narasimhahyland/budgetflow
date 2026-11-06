@@ -1,0 +1,30 @@
+▶ lint            nx_run affected -t lint --base=fffea36921bc28c859284f407e9ad8255fd38caa
+  ✓ lint (7s)
+
+▶ styles          npx stylelint {apps,libs}/**/*.scss --allow-empty-input
+  ✓ styles (3s)
+
+▶ satori          npx sdsc check all
+  ✓ satori (30s)
+
+▶ typecheck       nx_run affected -t typecheck --base=fffea36921bc28c859284f407e9ad8255fd38caa
+  ✓ typecheck (42s)
+
+▶ build           nx_run affected -t build --base=fffea36921bc28c859284f407e9ad8255fd38caa
+  ✓ build (2s)
+
+▶ openapi         nx_run affected -t openapi-check --base=fffea36921bc28c859284f407e9ad8255fd38caa
+  ✓ openapi (2s)
+
+▶ db              nx_run affected -t db-check --base=fffea36921bc28c859284f407e9ad8255fd38caa
+  ✓ db (4s)
+
+Gate summary (lint typecheck build) — logs in tmp/gate/20261106-141831
+  PASS secrets             5s
+  PASS lint                7s
+  PASS styles              3s
+  PASS satori             30s
+  PASS typecheck          42s
+  PASS build               2s
+  PASS openapi             2s
+  PASS db                  4s

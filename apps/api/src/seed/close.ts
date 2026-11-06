@@ -93,29 +93,42 @@ async function seedPeriodCloseSnapshots(tx: Tx, takenBy: string | null): Promise
   if (Number(existing.rows[0]?.n ?? 0) > 0) return;
   // One row per legal entity, cumulative to the period end, in the reporting currency. Summed over
   // the fiscal year's live budgets, which is the population the board pack reads, so a freshly
-  // seeded pack ties and any later drift between the two is reported rather than absorbed.
+  // seeded pack ties and any later drift between the two is reported rather than absorbed. Every
+  // entity gets a row even with nothing posted yet, so the pack always has a snapshot to name.
   await tx.execute(sql`
     insert into period_close_snapshots
       (tenant_id, fiscal_period_id, legal_entity_id, balances, taken_by, version, currency, budget_count)
-    select ${T}::uuid, ${period.id}::uuid, l.legal_entity_id,
+    select ${T}::uuid, ${period.id}::uuid, le.id,
            jsonb_build_object(
-             'authorizedMinor', abs(coalesce(sum(case when l.account = 'authorized' then l.reporting_amount_minor end), 0)),
-             'allocatedOutMinor', abs(coalesce(sum(case when l.account = 'allocated_out' then l.reporting_amount_minor end), 0)),
-             'heldMinor', abs(coalesce(sum(case when l.account = 'held' then l.reporting_amount_minor end), 0)),
-             'preEncumberedMinor', abs(coalesce(sum(case when l.account = 'pre_encumbered' then l.reporting_amount_minor end), 0)),
-             'encumberedMinor', abs(coalesce(sum(case when l.account = 'encumbered' then l.reporting_amount_minor end), 0)),
-             'actualMinor', abs(coalesce(sum(case when l.account = 'actual' then l.reporting_amount_minor end), 0)),
-             'accruedMinor', abs(coalesce(sum(case when l.account = 'accrued' then l.reporting_amount_minor end), 0))
+             'authorizedMinor', coalesce(b.authorized, 0),
+             'allocatedOutMinor', coalesce(b.allocated_out, 0),
+             'heldMinor', coalesce(b.held, 0),
+             'preEncumberedMinor', coalesce(b.pre_encumbered, 0),
+             'encumberedMinor', coalesce(b.encumbered, 0),
+             'actualMinor', coalesce(b.actual, 0),
+             'accruedMinor', coalesce(b.accrued, 0)
            ),
-           ${takenBy}::uuid, 1, 'USD', count(distinct l.budget_id)
-    from ledger_lines l
-    join fiscal_periods fp on fp.id = l.fiscal_period_id
-    join budgets b on b.id = l.budget_id
-    where fp.end_date <= ${period.end_date}::date
-      and b.fiscal_year_id = ${FISCAL_YEARS.acmeFy2026}::uuid
-      and b.status <> 'cancelled'
-      and l.account in ('authorized', 'allocated_out', 'held', 'pre_encumbered', 'encumbered', 'actual', 'accrued')
-    group by l.legal_entity_id`);
+           ${takenBy}::uuid, 1, 'USD', coalesce(b.budget_count, 0)
+    from legal_entities le
+    left join (
+      select l.legal_entity_id,
+             abs(coalesce(sum(case when l.account = 'authorized' then l.reporting_amount_minor end), 0)) as authorized,
+             abs(coalesce(sum(case when l.account = 'allocated_out' then l.reporting_amount_minor end), 0)) as allocated_out,
+             abs(coalesce(sum(case when l.account = 'held' then l.reporting_amount_minor end), 0)) as held,
+             abs(coalesce(sum(case when l.account = 'pre_encumbered' then l.reporting_amount_minor end), 0)) as pre_encumbered,
+             abs(coalesce(sum(case when l.account = 'encumbered' then l.reporting_amount_minor end), 0)) as encumbered,
+             abs(coalesce(sum(case when l.account = 'actual' then l.reporting_amount_minor end), 0)) as actual,
+             abs(coalesce(sum(case when l.account = 'accrued' then l.reporting_amount_minor end), 0)) as accrued,
+             count(distinct l.budget_id) as budget_count
+      from ledger_lines l
+      join fiscal_periods fp on fp.id = l.fiscal_period_id
+      join budgets bu on bu.id = l.budget_id
+      where fp.end_date <= ${period.end_date}::date
+        and bu.fiscal_year_id = ${FISCAL_YEARS.acmeFy2026}::uuid
+        and bu.status <> 'cancelled'
+        and l.account in ('authorized', 'allocated_out', 'held', 'pre_encumbered', 'encumbered', 'actual', 'accrued')
+      group by l.legal_entity_id
+    ) b on b.legal_entity_id = le.id`);
 }
 
 /**

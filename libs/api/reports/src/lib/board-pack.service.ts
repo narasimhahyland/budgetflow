@@ -295,13 +295,7 @@ export class BoardPackService {
     const { body, contentType, fileName } = renderPack(pack, format, row.fiscalPeriodId);
     // Tenant-scoped key: a pack of one tenant can never be addressed from another.
     const storageKey = `tenants/${row.tenantId}/board-packs/${row.id}.${format}`;
-    await this.store.prepare();
-    const res = await fetch(this.store.uploadUrl(storageKey, contentType, 600), {
-      method: 'PUT',
-      headers: { 'content-type': contentType },
-      body: new Uint8Array(body),
-    });
-    if (!res.ok) throw new Error(`document store refused the ${format} pack: HTTP ${res.status}`);
+    await this.store.put(storageKey, contentType, body);
     return {
       format,
       fileName,
@@ -377,30 +371,35 @@ export class BoardPackService {
 
   // Building --------------------------------------------------------------------------------------
 
-  /** The period the pack reads, and whether it is the immutable snapshot or a live draft. */
+  /**
+   * The period the pack reads, and whether it is the immutable snapshot or a live draft. A tenant
+   * runs several fiscal calendars, so a date can fall in several periods: the pack prefers a period
+   * on a calendar that actually carries budgets, and tie-breaks on the period id, so the same month
+   * always produces the same pack.
+   */
   private async source(
     tx: Tx,
     opts: { fiscalPeriodId?: string; draft?: boolean },
   ): Promise<BoardPackSource> {
+    const columns = sql`p.id, p.label, p.start_date::text as start_date, p.end_date::text as end_date,
+                        p.status::text as status, p.fiscal_year_id`;
+    const hasBudgets = sql`exists (
+      select 1 from budgets b
+      where b.fiscal_year_id = p.fiscal_year_id and b.status <> 'cancelled')`;
     const res = opts.fiscalPeriodId
-      ? await tx.execute<PeriodPick>(sql`
-          select p.id, p.label, p.start_date::text as start_date, p.end_date::text as end_date,
-                 p.status::text as status, p.fiscal_year_id
-          from fiscal_periods p where p.id = ${opts.fiscalPeriodId}::uuid`)
+      ? await tx.execute<PeriodPick>(
+          sql`select ${columns} from fiscal_periods p where p.id = ${opts.fiscalPeriodId}::uuid`,
+        )
       : opts.draft
         ? await tx.execute<PeriodPick>(sql`
-            select p.id, p.label, p.start_date::text as start_date, p.end_date::text as end_date,
-                   p.status::text as status, p.fiscal_year_id
-            from fiscal_periods p
+            select ${columns} from fiscal_periods p
             where p.status = 'open'
-            order by p.start_date, p.id
+            order by ${hasBudgets} desc, p.start_date, p.id
             limit 1`)
         : await tx.execute<PeriodPick>(sql`
-            select p.id, p.label, p.start_date::text as start_date, p.end_date::text as end_date,
-                   p.status::text as status, p.fiscal_year_id
-            from fiscal_periods p
+            select ${columns} from fiscal_periods p
             where p.status in ('closed', 'locked')
-            order by p.end_date desc, p.id
+            order by ${hasBudgets} desc, p.end_date desc, p.id
             limit 1`);
     const period = res.rows[0];
     if (!period)
@@ -688,13 +687,13 @@ export class BoardPackService {
       n: string;
     }>(sql`
       select gb.name as giving_budget_name, e.name as receiving, c.status::text as status,
-             sum(coalesce(c.approved_amount_minor, c.requested_amount_minor))::text as approved_minor,
+             sum(coalesce(c.approved_minor, c.requested_minor))::text as approved_minor,
              min(c.currency) as currency, min(c.mode::text) as mode, count(*)::text as n
       from contribution_requests c
-      join budgets gb on gb.id = c.giving_budget_id
+      join budgets gb on gb.id = c.giver_budget_id
       left join events e on e.id = c.event_id
       where c.status in ('approved_full', 'approved_partial', 'earmarked', 'transferred', 'settled')
-        and (c.giving_budget_id in (${uuidList(budgetIds)}) or c.receiving_budget_id in (${uuidList(budgetIds)}))
+        and (c.giver_budget_id in (${uuidList(budgetIds)}) or c.receiver_budget_id in (${uuidList(budgetIds)}))
       group by gb.name, e.name, c.status
       order by gb.name, e.name nulls last, c.status`);
     return res.rows.map((r) => ({

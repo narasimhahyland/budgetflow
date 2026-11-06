@@ -108,7 +108,7 @@ test.describe('forecast cycle', () => {
   test('a variance above the cycle threshold is refused without commentary and accepted with it', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 1_000_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 1_000_000, as: 'finance-admin' });
     await openingBalances(request, root.id, [['actual', 200_000]]);
     const cycle = await openCycle(request, root.id);
 
@@ -153,7 +153,7 @@ test.describe('forecast cycle', () => {
   test('a variance exactly on the threshold needs commentary, one minor unit inside it does not', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 1_000_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 1_000_000, as: 'finance-admin' });
     const cycle = await openCycle(request, root.id, {
       thresholdBps: 1_000,
       thresholdMinor: 100_000,
@@ -187,7 +187,7 @@ test.describe('forecast cycle', () => {
   test('a forecast posts nothing: the ledger and the budget balances are unchanged', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 800_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 800_000, as: 'finance-admin' });
     await openingBalances(request, root.id, [
       ['encumbered', 100_000],
       ['actual', 150_000],
@@ -228,7 +228,7 @@ test.describe('forecast cycle', () => {
   test('the system methods are computed from the ledger and offered with their explanation', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 1_000_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 1_000_000, as: 'finance-admin' });
     await openingBalances(request, root.id, [
       ['encumbered', 120_000],
       ['pre_encumbered', 30_000],
@@ -265,28 +265,45 @@ test.describe('forecast cycle', () => {
   test('an owner may forecast their own budget and not another owner\u2019s', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 900_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 900_000, as: 'finance-admin' });
     const mine = await createChild(request, root.id, {
       currency: 'USD',
       owner: 'regional-manager',
+      as: 'finance-admin',
     });
     const theirs = await createChild(request, root.id, {
       currency: 'USD',
       owner: 'department-head',
+      as: 'finance-admin',
     });
-    await allocateOk(request, root.id, mine.id, { amountMinor: 300_000, currency: 'USD' });
-    await allocateOk(request, root.id, theirs.id, { amountMinor: 300_000, currency: 'USD' });
+    await allocateOk(
+      request,
+      root.id,
+      mine.id,
+      { amountMinor: 300_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
+    await allocateOk(
+      request,
+      root.id,
+      theirs.id,
+      { amountMinor: 300_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
     const cycle = await openCycle(request, root.id);
 
+    // Nothing has been spent, so the run-rate forecasts zero: the whole budget under, which needs
+    // an explanation before it can be submitted.
+    const commentary = 'Nothing is committed yet; the regional programme starts in January.';
     const ok = await request.post(`/api/close/forecast-cycles/${cycle.cycle.id}/submissions`, {
       headers: await mutate('regional-manager'),
-      data: submitData(mine.id, 'run_rate'),
+      data: submitData(mine.id, 'run_rate', { commentary }),
     });
     expect(ok.status(), await ok.text()).toBe(201);
 
     const refused = await request.post(`/api/close/forecast-cycles/${cycle.cycle.id}/submissions`, {
       headers: await mutate('regional-manager'),
-      data: submitData(theirs.id, 'run_rate'),
+      data: submitData(theirs.id, 'run_rate', { commentary }),
     });
     expect([403, 404]).toContain(refused.status());
 
@@ -375,14 +392,32 @@ test.describe('forecast cycle', () => {
   test('closing a cycle accepts what was submitted, fills the gaps with System run-rate and locks the snapshot', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 1_200_000, owner: 'finance-admin' });
-    const submittedChild = await createChild(request, root.id, { currency: 'USD' });
-    const silentChild = await createChild(request, root.id, { currency: 'USD' });
-    await allocateOk(request, root.id, submittedChild.id, {
-      amountMinor: 400_000,
+    const root = await createRoot(request, { amountMinor: 1_200_000, as: 'finance-admin' });
+    const submittedChild = await createChild(request, root.id, {
       currency: 'USD',
+      as: 'finance-admin',
     });
-    await allocateOk(request, root.id, silentChild.id, { amountMinor: 300_000, currency: 'USD' });
+    const silentChild = await createChild(request, root.id, {
+      currency: 'USD',
+      as: 'finance-admin',
+    });
+    await allocateOk(
+      request,
+      root.id,
+      submittedChild.id,
+      {
+        amountMinor: 400_000,
+        currency: 'USD',
+      },
+      { as: 'finance-admin' },
+    );
+    await allocateOk(
+      request,
+      root.id,
+      silentChild.id,
+      { amountMinor: 300_000, currency: 'USD' },
+      { as: 'finance-admin' },
+    );
     await openingBalances(request, silentChild.id, [['actual', 60_000]]);
     const cycle = await openCycle(request, root.id);
     await expectContract(
@@ -438,7 +473,7 @@ test.describe('forecast cycle', () => {
   test('a replayed submission is stored once and answered from the first result', async ({
     request,
   }) => {
-    const root = await createRoot(request, { amountMinor: 500_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 500_000, as: 'finance-admin' });
     const cycle = await openCycle(request, root.id);
     const key = randomUUID();
     const data = submitData(root.id, 'owner_input', { amountMinor: 495_000 });
@@ -466,10 +501,16 @@ test.describe('forecast cycle', () => {
   });
 
   test('cycle lines come back in a total order, the same way every time', async ({ request }) => {
-    const root = await createRoot(request, { amountMinor: 600_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 600_000, as: 'finance-admin' });
     for (let i = 0; i < 4; i += 1) {
-      const child = await createChild(request, root.id, { currency: 'USD' });
-      await allocateOk(request, root.id, child.id, { amountMinor: 50_000, currency: 'USD' });
+      const child = await createChild(request, root.id, { currency: 'USD', as: 'finance-admin' });
+      await allocateOk(
+        request,
+        root.id,
+        child.id,
+        { amountMinor: 50_000, currency: 'USD' },
+        { as: 'finance-admin' },
+      );
     }
     const cycle = await openCycle(request, root.id);
     const first = await cycleDetail(request, cycle.cycle.id);
@@ -484,7 +525,7 @@ test.describe('forecast cycle', () => {
   });
 
   test('an auditor reads a cycle and cannot change it', async ({ request }) => {
-    const root = await createRoot(request, { amountMinor: 400_000, owner: 'finance-admin' });
+    const root = await createRoot(request, { amountMinor: 400_000, as: 'finance-admin' });
     const cycle = await openCycle(request, root.id);
 
     const read = await cycleDetail(request, cycle.cycle.id, 'auditor');
