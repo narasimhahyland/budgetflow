@@ -168,6 +168,14 @@ for (const [role, expected] of Object.entries(EXPECTED) as [RoleId, string[]][])
       await page.goto('/');
       const nav = page.getByRole('navigation', { name: 'Platform Navigation' });
       await expect(nav.getByRole('menuitem')).toHaveText(expected);
+      // Satori draws the icon with <mat-icon [svgIcon]>, which renders nothing at all when the name
+      // is not in the icon set, so a wrong name is invisible unless something asserts the glyph.
+      const iconless = await nav
+        .getByRole('menuitem')
+        .evaluateAll((items) =>
+          items.filter((i) => !i.querySelector('svg')).map((i) => (i.textContent ?? '').trim()),
+        );
+      expect(iconless, 'every navigation item renders its icon').toEqual([]);
       await expect(page.getByTestId('header-company')).toHaveText('Hyland');
       await expect(
         page.getByRole('button', { name: /switch|tenant|organi[sz]ation/i }),
