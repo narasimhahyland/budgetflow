@@ -72,8 +72,11 @@
   overflow-x: auto;
 }
 
+// The administration tables carry five or six columns of text. Below the minimum they scroll
+// sideways instead of squeezing a capability name down to one word per line.
 .bf-table-scroll table {
   width: 100%;
+  min-width: 680px;
 }
 
 .bf-num {

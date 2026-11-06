@@ -75,11 +75,11 @@
       </div>
       <div>
         <dt>Messages waiting to publish</dt>
-        <dd>{{ outboxNote(h) }}</dd>
+        <dd data-testid="health-varies">{{ outboxNote(h) }}</dd>
       </div>
       <div>
         <dt>Services needing attention</dt>
-        <dd>{{ attention().length }}</dd>
+        <dd data-testid="health-varies">{{ attention().length }}</dd>
       </div>
       <div>
         <dt>Nightly jobs that failed</dt>
@@ -103,7 +103,7 @@
               >{{ statusLabel[service.status] }}</sat-status-tag
             >
           </div>
-          <p class="bf-tile__detail">{{ service.detail }}</p>
+          <p class="bf-tile__detail" data-testid="health-varies">{{ service.detail }}</p>
         </li>
       }
     </ul>
@@ -176,7 +176,7 @@
               <span class="bf-cell__primary" data-testid="relative-time">{{
                 j.lastRunAt | bfDateTime: timezone()
               }}</span>
-              <span class="bf-cell__secondary">
+              <span class="bf-cell__secondary" data-testid="health-varies">
                 {{ j.durationMs === null ? '' : j.durationMs + ' ms' }}
               </span>
             } @else {
@@ -190,7 +190,7 @@
             <sat-status-tag [attr.data-testid]="'job-' + j.job" [status]="jobTone[j.status]">{{
               jobLabel[j.status]
             }}</sat-status-tag>
-            <span class="bf-cell__secondary">{{ j.result }}</span>
+            <span class="bf-cell__secondary" data-testid="health-varies">{{ j.result }}</span>
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="jobColumns"></tr>
