@@ -318,7 +318,7 @@ import { LoadState } from './load-state';
                     [amountMinor]="s.variance.amountMinor"
                     [currency]="s.variance.currency"
                   />
-                  <span class="bf-cell__secondary" [attr.data-testid]="'direction-' + s.id">
+                  <span class="bf-cell__secondary" [attr.data-testid]="'direction-' + lineKey(s)">
                     {{ percent(s.varianceBps) }} {{ direction(s) }}
                   </span>
                 </td>
@@ -351,7 +351,7 @@ import { LoadState } from './load-state';
                         type="button"
                         [disabled]="busy()"
                         (click)="forecast(s)"
-                        [attr.data-testid]="'forecast-' + s.id"
+                        [attr.data-testid]="'forecast-' + lineKey(s)"
                       >
                         Forecast
                       </button>
@@ -362,7 +362,7 @@ import { LoadState } from './load-state';
                         type="button"
                         [disabled]="busy()"
                         (click)="accept(s)"
-                        [attr.data-testid]="'accept-' + s.id"
+                        [attr.data-testid]="'accept-' + lineKey(s)"
                       >
                         Accept
                       </button>
@@ -373,7 +373,7 @@ import { LoadState } from './load-state';
                         type="button"
                         [disabled]="busy()"
                         (click)="askForCommentary(s)"
-                        [attr.data-testid]="'ask-' + s.id"
+                        [attr.data-testid]="'ask-' + lineKey(s)"
                       >
                         Ask for commentary
                       </button>
@@ -517,6 +517,14 @@ export class ForecastCyclePage {
 
   protected lineStatus(s: ForecastSubmission) {
     return FORECAST_STATUS[s.status];
+  }
+
+  /**
+   * A line nobody has saved yet has no snapshot, and so no id of its own; the budget or event it
+   * covers is what identifies it on the screen.
+   */
+  protected lineKey(s: ForecastSubmission): string {
+    return s.budgetId ?? s.eventId ?? s.id;
   }
 
   protected method(s: ForecastSubmission): string {

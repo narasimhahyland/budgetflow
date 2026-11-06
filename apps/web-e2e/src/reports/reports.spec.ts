@@ -79,8 +79,7 @@ test.describe('report catalog (79)', () => {
     for (const report of catalog.reports)
       await expect(page.getByTestId(`report-card-${report.reportId}`)).toContainText(report.name);
     // The nine Phase 10 reports plus forecast and variance (087, Phase 11), including the two only
-    // a tenant-wide viewer may open. The catalog is data-driven, so 087 has a card from the day its
-    // endpoint exists; its own screen lands with the Phase 11 frontend.
+    // a tenant-wide viewer may open.
     expect(catalog.reports).toHaveLength(10);
     await expect(page.getByTestId('report-card-spend-per-head')).toBeVisible();
     await expect(page.getByTestId('report-card-forecast-variance')).toContainText(

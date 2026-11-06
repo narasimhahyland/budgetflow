@@ -41,10 +41,23 @@ export function valueOf<T>(r: { hasValue(): boolean; value(): T }): T | undefine
 
 /** Parses a typed amount ("1,250.50") into integer minor units of the currency, without floating point. */
 export function toMinor(text: string, currency: string): number | undefined {
+  const n = parseMinor(text, currency);
+  return n !== undefined && n > 0 ? n : undefined;
+}
+
+/**
+ * The same parse, but zero is a real answer: an owner forecasting that a budget will spend nothing
+ * by year end is saying something, unlike an amount of zero on a carry or an adjustment.
+ */
+export function toMinorAllowingZero(text: string, currency: string): number | undefined {
+  return parseMinor(text, currency);
+}
+
+function parseMinor(text: string, currency: string): number | undefined {
   const v = text.trim().replace(/[\s,]/g, '');
   const m = /^(\d+)(?:\.(\d+))?$/.exec(v);
   if (!m) return undefined;
   const digits = getNumberOfCurrencyDigits(currency);
   const n = Number(m[1] + (m[2] ?? '').padEnd(digits, '0').slice(0, digits));
-  return Number.isSafeInteger(n) && n > 0 ? n : undefined;
+  return Number.isSafeInteger(n) ? n : undefined;
 }

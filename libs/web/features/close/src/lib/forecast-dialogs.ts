@@ -2,6 +2,7 @@ import { formatNumber } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,7 +17,7 @@ import { formatMoney, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_INTERACTIVE_CARD_IMPORTS } from '@hylandsoftware/satori-ui/interactive-card';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
-import { ApiError, data, errorMessage, injectApi, toMinor, todayIso } from './api';
+import { ApiError, data, errorMessage, injectApi, toMinorAllowingZero, todayIso } from './api';
 import { COMMENTARY_MIN, METHOD_LABELS } from './forecast-format';
 
 /** Screen 87a: finance opens a round, with the due date and the threshold that asks for commentary. */
@@ -278,6 +279,7 @@ export class NewForecastCycleDialog {
           rows="3"
           [ngModel]="commentary()"
           (ngModelChange)="commentary.set($event)"
+          [errorStateMatcher]="refusedMatcher"
           data-testid="forecast-commentary"
         ></textarea>
         @if (commentaryError(); as text) {
@@ -336,6 +338,13 @@ export class SubmitForecastDialog {
   protected readonly failure = signal<string | null>(null);
   /** Set from the API's 422, so the field says what the server actually refused. */
   protected readonly commentaryError = signal<string | null>(null);
+  /**
+   * The refusal comes from the server, not from a validator, so the field is told to show its error
+   * state explicitly. Without this `mat-error` stays hidden and a real refusal looks like nothing.
+   */
+  protected readonly refusedMatcher: ErrorStateMatcher = {
+    isErrorState: () => this.commentaryError() !== null,
+  };
 
   protected label(method: ForecastMethod): string {
     return METHOD_LABELS[method];
@@ -352,7 +361,7 @@ export class SubmitForecastDialog {
     this.commentaryError.set(null);
     const currency = this.line().authorized.currency;
     const amountMinor =
-      this.method() === 'owner_input' ? toMinor(this.amount(), currency) : undefined;
+      this.method() === 'owner_input' ? toMinorAllowingZero(this.amount(), currency) : undefined;
     if (this.method() === 'owner_input' && amountMinor === undefined) {
       this.failure.set(`Enter the year-end figure in ${currency}, for example 24,900.00.`);
       this.busy.set(false);

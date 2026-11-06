@@ -50,8 +50,8 @@ const GENERATION_STATUS: Record<
   expired: { tone: 'neutral-quiet', text: 'Expired' },
 };
 
-/** Columns of the pack that hold a projection rather than money the ledger moved. */
-const FORECAST_COLUMNS = ['forecast', 'forecastYearEnd', 'previousForecast'];
+/** The summary page's year-end column holds a projection, not money the ledger moved. */
+const FORECAST_COLUMNS = ['forecast'];
 
 const POLL_MS = 1_500;
 const POLL_LIMIT = 40;
@@ -239,7 +239,7 @@ const POLL_LIMIT = 40;
               <div class="bf-card__header">
                 <h2 class="bf-card__title" [id]="'page-' + page.page">{{ page.title }}</h2>
                 @if (p.source.draft) {
-                  <span class="bf-watermark" aria-hidden="true">Draft</span>
+                  <span class="bf-watermark" data-testid="pack-watermark">Draft</span>
                 }
               </div>
               @if (page.rows.length) {
