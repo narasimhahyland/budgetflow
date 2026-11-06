@@ -63,7 +63,8 @@ an event.
 | 16a role scope                                       | Finance, CEO and auditor 200; regional manager and employee refused                                   | as expected | pass   |
 | RLS on the new tables                                | `forecast_cycles`, `forecast_snapshots`, `board_pack_generations` force RLS; cross-tenant write 42501 | as expected | pass   |
 
-27 API scenarios, all passing: `functional/scenario-results.txt`.
+27 API scenarios, all passing, and the whole `apps/api-e2e` suite is **440 passed** on a fresh seed —
+the way CI runs it: `functional/scenario-results.txt`.
 
 ## The scenarios are not vacuous
 
