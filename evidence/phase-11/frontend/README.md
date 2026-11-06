@@ -38,11 +38,31 @@ Not built: screens 87 (forecast and variance) and 16a (board pack) — see "Gaps
 ## Checks and gates
 
 - `scripts/gate.sh static --affected`: all green — `gate/static-gate-summary.txt`.
-- Journeys (`apps/web-e2e/src/close/`), desktop, tablet and mobile: 39 passed, 8 skipped
-  (mutating journeys run once, on desktop) — `gate/journeys.txt`. Run three times after the last
-  fix with no flakes.
+- Journeys, desktop, tablet and mobile: 85 passed, 10 skipped (mutating journeys run once, on
+  desktop) — `gate/journeys.txt`. The run covers the Phase 11 journeys plus the two suites the new
+  navigation and the break-glass reopen touch (`shell/role-navigation`, `finance-admin/finance-setup`).
 - Visual baselines: 33 new PNGs in `apps/web-e2e/src/__screenshots__/visual-light/`, generated and
-  compared in the pinned Playwright image. Only the new screens were generated.
+  compared in the pinned Playwright image. Only the new screens were generated. The three
+  `087c-rollover-policies` baselines were regenerated once more after the budget picker gained a
+  search field (see "Found by CI" below).
+
+## Found by CI, fixed on the branch
+
+The first CI run failed 13 journeys. None was a flake; each was a real collision with the rest of
+the suite, which the isolated local runs could not see:
+
+- The three new navigation entries were missing from the role-navigation expectations for finance
+  admin and finance controller. Added, with their `period.manage` permission.
+- The break-glass journey reopened Sep 2026 on the Hyland group calendar, which the fiscal-calendar
+  journey asserts on ("Closing Oct 2026 blocks new postings" became "Closing Sep 2026"). The
+  journey moved to the India calendar (Apr-Mar), which no other check asserts on.
+- The year-end list link "FY2026 → FY2027" matched six rows, because the API scenarios create their
+  own FY2026 runs in the same tenant. The journey now opens the seeded run by its href.
+- The rollover budget picker listed the first 200 budgets, and the API scenarios create enough
+  budgets to push Hyderabad Events off that page. The picker now searches the server by name or
+  code, which is also what it needs for a real tenant.
+- The read-only year-end test asserted the "no dry run yet" wording, which the dry-run journey
+  beside it changes. It now asserts the refusal; the wording is asserted where the state is made.
 
 ## Findings fixed during visual QA
 

@@ -1,14 +1,8 @@
-  ✓ openapi (1s)
-
-▶ db              nx_run affected -t db-check --base=054c9bb965c545ed6ca0c238468587e7a4b5334c
-  ✓ db (1s)
-
-Gate summary (lint typecheck build) — logs in tmp/gate/20261106-084431
-  PASS secrets             3s
-  PASS lint                5s
-  PASS styles              3s
-  PASS satori             25s
-  PASS typecheck           5s
-  PASS build               1s
-  PASS openapi             1s
-  PASS db                  1s
+PASS|secrets|1s
+PASS|lint|3s
+PASS|styles|3s
+PASS|satori|28s
+PASS|typecheck|3s
+PASS|build|2s
+PASS|openapi|1s
+PASS|db|1s

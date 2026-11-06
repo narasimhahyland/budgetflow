@@ -16,11 +16,15 @@ test.describe('year-end run', () => {
   }) => {
     await page.goto('/finance/year-end');
     await expectShell(page);
-    await page.getByRole('link', { name: 'FY2026 → FY2027' }).click();
+    // API scenarios create their own FY2026 runs in the same tenant, so the seeded one is picked
+    // by its href rather than by a label several rows share.
+    await page.locator(`a[href="${RUN}"]`).click();
     await expect(page).toHaveURL(new RegExp(`${P11_IDS.yearEndRunFy2026}$`));
     await expect(page.getByRole('heading', { name: /Year end FY2026/ })).toBeVisible();
+    // The dry run below changes why the run is not ready, so only the refusal itself is asserted
+    // here; the wording of each state belongs to the journey that puts the run in it.
     await expect(page.getByTestId('execute-run')).toBeDisabled();
-    await expect(page.getByTestId('run-not-ready')).toContainText('Execute is not available yet');
+    await expect(page.getByTestId('run-not-ready')).toBeVisible();
   });
 
   test('a dry run fills the per-budget outcome and execute stays refused with the reason', async ({
@@ -29,6 +33,7 @@ test.describe('year-end run', () => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
     await page.goto(RUN);
     await expectShell(page);
+    await expect(page.getByTestId('run-not-ready')).toContainText('Execute is not available yet');
     await page.getByTestId('dry-run').click();
 
     await expect(page.getByTestId('dry-run-banner')).toContainText('nothing has been posted');
@@ -67,6 +72,7 @@ test.describe('rollover policies', () => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
     await page.goto('/finance/rollover-policies');
     await expectShell(page);
+    await page.getByTestId('assign-search').fill('Hyderabad Events');
     await page.getByTestId('assign-budget').click();
     await page.getByRole('option', { name: 'Hyderabad Events', exact: true }).click();
     await page.getByTestId('assign-policy').click();

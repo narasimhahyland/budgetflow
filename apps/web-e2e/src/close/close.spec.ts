@@ -10,10 +10,11 @@ import { authFile } from '../support/roles';
 
 const NOVEMBER = periodId(CALENDAR_INDEX.acmeGroup, 2026, 11);
 /**
- * Reopening a period changes what its neighbours allow, so every assertion about September lives
- * inside the one journey that reopens it rather than in a test that could run beside it.
+ * Reopening a period changes what its neighbours allow, so the break-glass journey works on the
+ * India calendar (Apr-Mar, so Sep 2026 is period 6 of FY2027), which no other check asserts on, and
+ * every assertion about September lives inside that one journey rather than beside it.
  */
-const SEPTEMBER = periodId(CALENDAR_INDEX.acmeGroup, 2026, 9);
+const SEPTEMBER = periodId(CALENDAR_INDEX.acmeIndia, 2027, 6);
 
 test.describe('period close checklist', () => {
   test.use({ storageState: authFile('finance-admin') });

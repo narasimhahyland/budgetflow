@@ -147,12 +147,23 @@ import { LoadState } from './load-state';
           <div>
             <h2 class="bf-card__title" id="assign-title">Assign a policy to a budget</h2>
             <p class="bf-card__hint">
-              The change is audited with your reason. Once a year-end run's commitment freeze date
-              has passed, the server refuses changes for that year.
+              Search for the budget by name or code; the list shows the first 100 matches. The
+              change is audited with your reason. Once a year-end run's commitment freeze date has
+              passed, the server refuses changes for that year.
             </p>
           </div>
         </div>
         <div class="bf-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Find a budget</mat-label>
+            <input
+              matInput
+              [ngModel]="budgetSearch()"
+              (ngModelChange)="searchBudgets($event)"
+              placeholder="Name or code"
+              data-testid="assign-search"
+            />
+          </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Budget</mat-label>
             <mat-select
@@ -224,8 +235,15 @@ export class RolloverPoliciesPage {
   protected readonly rows = computed(() =>
     ordered(valueOf(this.policies)?.items ?? [], (p) => p.code),
   );
+  protected readonly budgetSearch = signal('');
   private readonly budgets = resource({
-    loader: async () => (await data(this.api.listBudgets({ query: { limit: 200 } }))).items,
+    params: () => ({ q: this.budgetSearch().trim() }),
+    loader: async ({ params }) =>
+      (
+        await data(
+          this.api.listBudgets({ query: { limit: 100, ...(params.q ? { q: params.q } : {}) } }),
+        )
+      ).items,
   });
   protected readonly budgetOptions = computed(() =>
     ordered(
@@ -243,6 +261,12 @@ export class RolloverPoliciesPage {
   protected readonly ready = computed(
     () => this.budgetId().length > 0 && this.reason().trim().length >= 5,
   );
+
+  /** A new search invalidates the chosen budget: the id must always belong to a visible option. */
+  protected searchBudgets(term: string): void {
+    this.budgetSearch.set(term);
+    this.budgetId.set('');
+  }
 
   protected mode(p: RolloverPolicy): string {
     return ROLLOVER_MODE[p.mode];
