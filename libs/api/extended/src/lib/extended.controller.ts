@@ -23,6 +23,7 @@ import {
   RegenerateSectionRequest,
   SayThanksRequest,
   SubmitCommentaryRequest,
+  UpsertRecognitionAwardTypeRequest,
   UpsertWalletProgramRequest,
   WalletClaimDecisionRequest,
 } from '@bf/contracts';
@@ -443,6 +444,24 @@ export class ExtendedController {
   @Get('recognition')
   getRecognitionFeed(@CurrentActor() actor: RequestActor, @Query() query: unknown) {
     return this.recognition.feed(actor, parseWith(FeedQuery, query));
+  }
+
+  @Put('recognition/award-types')
+  async upsertAwardType(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.recognition.upsertAwardType(
+        actor,
+        parseWith(UpsertRecognitionAwardTypeRequest, body),
+        ctx(key, rid),
+      ),
+    );
   }
 
   @Post('recognition/allowances')

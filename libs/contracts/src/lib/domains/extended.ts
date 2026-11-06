@@ -806,6 +806,25 @@ export const RecognitionAwardType = named(
 );
 export type RecognitionAwardType = z.infer<typeof RecognitionAwardType>;
 
+export const UpsertRecognitionAwardTypeRequest = named(
+  'UpsertRecognitionAwardTypeRequest',
+  z
+    .object({
+      kind: RecognitionAwardKind,
+      name: Name,
+      locationOrgUnitId: Id.optional(),
+      /** Omitted for a thank-you note, which moves no money and needs no budget. */
+      amountMinor: z.int().positive().optional(),
+      needsApproval: z.boolean().optional(),
+      fundingBudgetId: Id.optional(),
+      active: z.boolean().optional(),
+      reason: Reason,
+    })
+    .strict()
+    .describe('Program settings: what a location offers, how much it is worth and who pays.'),
+);
+export type UpsertRecognitionAwardTypeRequest = z.infer<typeof UpsertRecognitionAwardTypeRequest>;
+
 export const RecognitionAllowance = named(
   'RecognitionAllowance',
   z
@@ -1293,6 +1312,18 @@ export const extendedEndpoints = {
     query: z.object({ scope: z.enum(['all', 'mine']).optional() }).strict(),
     response: { status: 200, schema: RecognitionFeed },
     errors: [400, 401, 403],
+  },
+  upsertRecognitionAwardType: {
+    operationId: 'upsertRecognitionAwardType',
+    method: 'put',
+    path: '/api/recognition/award-types',
+    summary: 'Create or change an award type a location offers',
+    tags: ['recognition'],
+    auth: true,
+    idempotent: true,
+    body: UpsertRecognitionAwardTypeRequest,
+    response: { status: 200, schema: RecognitionAwardType },
+    errors: [400, 401, 403, 404, 409, 422],
   },
   grantRecognitionAllowance: {
     operationId: 'grantRecognitionAllowance',

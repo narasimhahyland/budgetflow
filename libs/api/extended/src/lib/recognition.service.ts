@@ -28,6 +28,7 @@ import {
 import { PostingSupport, type LockedBudget, type PostCtx } from '@bf/api/spend';
 import type {
   GiveRecognitionRequest,
+  UpsertRecognitionAwardTypeRequest,
   GrantRecognitionAllowanceRequest,
   OrganizerRecognition,
   OrganizerThankNote,
@@ -136,6 +137,90 @@ export class RecognitionService {
         awardTypes: await this.awardTypeViews(tx, await this.typeRows(tx, actor.tenantId)),
       };
     });
+  }
+
+  upsertAwardType(
+    actor: RequestActor,
+    req: UpsertRecognitionAwardTypeRequest,
+    ctx: CommandContext,
+  ) {
+    return this.commands.run(
+      actor,
+      {
+        idempotencyKey: ctx.idempotencyKey,
+        operation: `recognition.awardType:${req.kind}:${req.name}`,
+        request: req,
+        status: 200,
+      },
+      async (tx) => {
+        this.policy.assert(
+          actor,
+          'tenant.settings.manage',
+          { kind: 'tenant', tenantId: actor.tenantId },
+          'award type',
+        );
+        const budget = req.fundingBudgetId ? await this.views.row(tx, req.fundingBudgetId) : null;
+        // An award type that pays money has to name a budget its author can spend from, so nobody
+        // can point a new award type at someone else's Recognition budget.
+        if (budget) this.policy.assert(actor, 'budget.allocate', budgetResource(budget), 'budget');
+        if (req.kind !== 'thank_you' && (!req.amountMinor || !budget))
+          throw new ApiProblem(
+            422,
+            'RECOGNITION_TYPE_INACTIVE',
+            'A monetary award type needs both an amount and a Recognition budget to pay for it.',
+            { field: 'fundingBudgetId' },
+          );
+        const existing = (await this.typeRows(tx, actor.tenantId)).find(
+          (t) =>
+            t.kind === req.kind &&
+            t.name === req.name &&
+            t.locationOrgUnitId === (req.locationOrgUnitId ?? null),
+        );
+        const values = {
+          tenantId: actor.tenantId,
+          kind: req.kind,
+          name: req.name,
+          locationOrgUnitId: req.locationOrgUnitId ?? null,
+          amountMinor: req.kind === 'thank_you' ? null : (req.amountMinor ?? null),
+          currency: budget?.currency ?? null,
+          needsApproval: req.needsApproval ?? false,
+          fundingBudgetId: budget?.id ?? null,
+          active: req.active ?? true,
+          updatedAt: new Date(),
+        };
+        const [row] = existing
+          ? await tx
+              .update(recognitionAwardTypes)
+              .set(values)
+              .where(eq(recognitionAwardTypes.id, existing.id))
+              .returning()
+          : await tx.insert(recognitionAwardTypes).values(values).returning();
+        await this.audit.append(tx, {
+          tenantId: actor.tenantId,
+          actorPersonId: actor.personId,
+          actorSubject: actor.subject,
+          action: existing ? 'recognition_award_type.updated' : 'recognition_award_type.created',
+          resourceType: 'recognition_award_type',
+          resourceId: row.id,
+          legalEntityId: budget?.legalEntityId ?? null,
+          requestId: ctx.requestId,
+          reason: req.reason,
+          changes: {
+            amountMinor: {
+              from: existing?.amountMinor === undefined ? null : Number(existing.amountMinor),
+              to: values.amountMinor,
+            },
+            fundingBudgetId: {
+              from: existing?.fundingBudgetId ?? null,
+              to: values.fundingBudgetId,
+            },
+            needsApproval: { from: existing?.needsApproval ?? null, to: values.needsApproval },
+            active: { from: existing?.active ?? null, to: values.active },
+          },
+        });
+        return (await this.awardTypeViews(tx, [row]))[0];
+      },
+    );
   }
 
   grantAllowance(actor: RequestActor, req: GrantRecognitionAllowanceRequest, ctx: CommandContext) {
