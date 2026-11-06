@@ -539,12 +539,20 @@ export class WebhooksService {
   /**
    * Reuses the Phase 8 outbox: as the worker drains a message it offers it here, and every endpoint
    * subscribed to the matching event gets a pending delivery. No separate event pipeline.
+   *
+   * An endpoint only receives events that happened while it existed. `messageCreatedAt` is the
+   * outbox row's `created_at` and the endpoint's is its `created_at`; both are assigned by the same
+   * Postgres `now()`, so the comparison orders two database timestamps rather than two clocks.
+   * Without it, draining a backlog would hand a newly registered endpoint the history before it —
+   * events its owner was never authorized to see, and the reason an endpoint's delivery count
+   * depended on whether the worker drained before or after the endpoint was created.
    */
   async fanOutFromOutbox(
     tx: Tx,
     tenantId: string,
     topic: string,
     payload: Record<string, unknown>,
+    messageCreatedAt: Date,
   ): Promise<string[]> {
     const map = OUTBOX_TO_WEBHOOK[topic];
     if (!map) return [];
@@ -556,6 +564,7 @@ export class WebhooksService {
       .where(
         and(
           isNull(webhookEndpoints.deletedAt),
+          lte(webhookEndpoints.createdAt, messageCreatedAt),
           sql`${eventType} = any(${webhookEndpoints.events})`,
         ),
       );
