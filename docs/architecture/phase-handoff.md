@@ -197,11 +197,14 @@ is on with `allowed: false` still refuses. **Administration cannot create author
 confers money or approval authority the requester does not hold stays pending until a second person who
 holds it confirms, and approval limits never travel with a role.
 
-Every retention period is a **provisional default pending finance and legal sign-off**
-(`retention_policies.signoff_status`), not an approved legal position. The values finance and legal still
-have to confirm: financial records and evidence 8 years after the fiscal year closes with a 7-year minimum,
-event records 8 years, attendee needs 30 days, survey responses 24 months, event photos 12 months,
-analytics 25 months, notifications 12 months, webhook deliveries 90 days, leaver anonymisation 90 days.
+Every retention period ships as a **provisional default pending finance and legal sign-off**
+(`retention_policies.signoff_status` is `provisional` on all twelve categories), not an approved legal
+position. Nine of them are periods finance and legal can still change and have to confirm: financial
+records and evidence 8 years after the fiscal year closes with a 7-year minimum, event records 8 years,
+survey responses 24 months, event photos 12 months, analytics 25 months, notifications 12 months, webhook
+deliveries 90 days, leaver anonymisation 90 days. The other three are locked, so sign-off confirms a stated
+policy rather than a period anyone could shorten: ledger journals and the audit log are never deleted, and
+attendee needs go 30 days after the event closes.
 
 Not in this half: the Angular screens; entitlements and plan gating (105a is deferred); the demo
 environment (102c, a separate deployment); segregation-of-duties rules and access-review campaigns (113,
