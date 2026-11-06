@@ -128,6 +128,7 @@ const ROLE_LABELS: Record<string, string> = {
 const EDIT_WINDOW_MS = 15 * 60 * 1000;
 const CLOSED_THREAD_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const ARCHIVE_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+const DELIVERY_WINDOW_MS = 24 * 60 * 60 * 1000;
 const STEP_UP_THRESHOLD_MINOR = 2_500_000; // USD 25,000.00 requires web app step-up
 
 export interface ChannelDeliverJob {
@@ -1690,10 +1691,13 @@ export class ChannelsService {
       : row.status === 'connected'
         ? 'Nadia Farouk'
         : null;
+    const since = new Date(Date.now() - DELIVERY_WINDOW_MS);
     const dels = await tx
       .select()
       .from(channelDeliveries)
-      .where(eq(channelDeliveries.channel, row.provider));
+      .where(
+        and(eq(channelDeliveries.channel, row.provider), gte(channelDeliveries.createdAt, since)),
+      );
     const sent = dels.filter((d) => d.status === 'sent' || d.status === 'updated').length;
     const retried = dels.filter((d) => d.status === 'retried' || d.attempts > 1).length;
     const failed = dels.filter((d) => d.status === 'failed').length;

@@ -14,6 +14,7 @@ import { SEED, userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
+import { asAppRole } from '../support/db';
 import { postChatWebhook, webhookOk } from '../support/p8';
 import { applyControl, budget, directorTree } from '../support/p5';
 
@@ -202,5 +203,106 @@ test.describe('chat commands, workspace setup and account linking', () => {
     expect(home.kind).toBe('app_home');
     expect(home.waitingApprovals).toBeDefined();
     expect(home.myRequests).toBeDefined();
+  });
+
+  test('the "Last 24h" delivery summary counts the last 24 hours and nothing older', async ({
+    request,
+  }) => {
+    // The console labels the figures "Last 24h", so deliveries that fell out of that window must not
+    // be counted. Two slack deliveries land 48 hours back (one sent, one failed) and one an hour ago.
+    const oldSent = randomUUID();
+    const oldFailed = randomUUID();
+    const recent = randomUUID();
+    const ids = [oldSent, oldFailed, recent];
+
+    /** What the console reports for Slack. */
+    const reported = async () =>
+      (
+        await expectContract(
+          await request.get('/api/admin/channels', { headers: await as('integration-admin') }),
+          200,
+          AdminChannelsView,
+        )
+      ).slack.delivery24h;
+
+    /** Ground truth straight from the delivery log, all time and within the labelled window. */
+    const truth = () =>
+      asAppRole(TENANT, async (c) => {
+        const [row] = (
+          await c.query<Record<string, string>>(
+            `select count(*) filter (where status in ('sent','updated'))              as all_sent,
+                    count(*) filter (where status = 'failed')                         as all_failed,
+                    count(*) filter (where status in ('sent','updated') and fresh)     as win_sent,
+                    count(*) filter (where status = 'failed' and fresh)                as win_failed
+               from (select status, created_at >= now() - interval '24 hours' as fresh
+                       from channel_deliveries where channel = 'slack') d`,
+          )
+        ).rows;
+        return {
+          allSent: Number(row.all_sent),
+          allFailed: Number(row.all_failed),
+          winSent: Number(row.win_sent),
+          winFailed: Number(row.win_failed),
+        };
+      });
+
+    try {
+      await asAppRole(
+        TENANT,
+        async (c) => {
+          for (const [id, status, age] of [
+            [oldSent, 'sent', '48 hours'],
+            [oldFailed, 'failed', '48 hours'],
+            [recent, 'sent', '1 hour'],
+          ] as const) {
+            await c.query(
+              `insert into channel_deliveries (id, tenant_id, channel, kind, status, attempts, created_at, updated_at)
+               values ($1, $2, 'slack', 'approval.assigned', $3, 1, now() - $4::interval, now() - $4::interval)`,
+              [id, TENANT, status, age],
+            );
+          }
+        },
+        { commit: true },
+      );
+
+      // The three rows really sit where this scenario claims: two outside the window, one inside.
+      const ages = await asAppRole(TENANT, async (c) =>
+        c.query<{ older: boolean }>(
+          `select created_at < now() - interval '24 hours' as older
+             from channel_deliveries where id = any($1::uuid[]) order by created_at`,
+          [ids],
+        ),
+      );
+      expect(ages.rows.map((r) => r.older)).toEqual([true, true, false]);
+
+      // The worker is still delivering cards queued by earlier scenarios, so bracket the console
+      // reading with the ground truth and retry until no row lands in between.
+      let reading: { api: Awaited<ReturnType<typeof reported>> } & Awaited<
+        ReturnType<typeof truth>
+      >;
+      for (let attempt = 0; ; attempt++) {
+        const start = await truth();
+        const api = await reported();
+        const end = await truth();
+        if (start.allSent === end.allSent && start.allFailed === end.allFailed) {
+          reading = { api, ...start };
+          break;
+        }
+        if (attempt === 9) throw new Error('the delivery log kept changing under the reading');
+        await new Promise((r) => setTimeout(r, 300));
+      }
+
+      // There is history to exclude (the two 48-hour-old rows), and the console excluded exactly it.
+      expect(reading.allSent).toBeGreaterThan(reading.winSent);
+      expect(reading.allFailed).toBeGreaterThan(reading.winFailed);
+      expect(reading.api.sent).toBe(reading.winSent);
+      expect(reading.api.failed).toBe(reading.winFailed);
+    } finally {
+      await asAppRole(
+        TENANT,
+        async (c) => c.query(`delete from channel_deliveries where id = any($1::uuid[])`, [ids]),
+        { commit: true },
+      );
+    }
   });
 });
