@@ -6,7 +6,16 @@ import type {
   ReportId,
   ReportRow,
 } from '@bf/contracts';
-import { runRateForecast } from '@bf/domain';
+import {
+  commentaryRequired,
+  forecastVariance,
+  runRateAmount,
+  runRateForecast,
+  type ForecastFacts,
+  type ForecastMethod,
+  type FxBridgeInput,
+  type FxRate,
+} from '@bf/domain';
 import { REPORT_SPECS } from './report-definitions';
 import {
   committedOf,
@@ -33,6 +42,8 @@ export interface ReconcileRule {
 
 export interface BuiltReport {
   groupBy: ReportGroupBy;
+  /** Plain-English statements the frame shows as banners. */
+  notes?: string[];
   kpis: {
     key: string;
     label: string;
@@ -53,12 +64,46 @@ export interface BuiltReport {
   reconcile: ReconcileRule[];
 }
 
-/** Extra data the event, fairness and participation reports need beyond the budget dataset. */
+/** Extra data the event, fairness, participation and forecast reports need beyond the budget dataset. */
 export interface ReportExtras {
   events: EventFigures[];
   headcount: Map<string, number>;
   participation: Map<string, ParticipationFigures>;
+  forecasts: ForecastExtras;
+  fxLines: FxLineTotals[];
+  planRates: FxRate[];
 }
+
+export interface ForecastCycleRef {
+  id: string;
+  name: string;
+  asOfDate: string;
+  dueDate: string;
+  status: 'open' | 'closed';
+  varianceThresholdBps: number;
+  varianceThresholdMinor: number;
+}
+
+export interface ForecastSnapshotFigures {
+  budgetId: string;
+  amountMinor: number;
+  method: ForecastMethod;
+  status: 'accepted' | 'submitted';
+  commentary: string | null;
+  asOfDate: string;
+  systemGenerated: boolean;
+  currency: string;
+}
+
+export interface ForecastExtras {
+  cycle: ForecastCycleRef | null;
+  compare: ForecastCycleRef | null;
+  byBudget: Map<string, ForecastSnapshotFigures>;
+  compareByBudget: Map<string, ForecastSnapshotFigures>;
+}
+
+/** Actual spend in one transaction currency, with the reporting amount the ledger stored for it. */
+export type FxLineTotals = FxBridgeInput;
 
 export interface EventFigures {
   id: string;
@@ -130,6 +175,8 @@ export function buildReport(
       return spendPerHead(ctx);
     case 'participation-reach':
       return participationReach(ctx);
+    case 'forecast-variance':
+      return forecastVarianceReport(ctx);
   }
 }
 
@@ -1000,6 +1047,255 @@ function spendPerHead({ dataset, extras, money }: Ctx): BuiltReport {
       { column: 'actual', buckets: ['actual'], mode: 'equals' },
     ],
   };
+}
+
+// 087 Forecast and variance ------------------------------------------------------------------------
+
+const METHOD_LABELS: Record<ForecastMethod, string> = {
+  run_rate: 'Run-rate',
+  committed_pipeline: 'Committed + pipeline',
+  owner_input: 'Owner input',
+};
+
+/** Ledger facts of one budget in the shape the forecast methods take. */
+export function factsOf(b: ScopedBudget, elapsedBps: number): ForecastFacts {
+  return {
+    authorizedMinor: b.balances.authorized - b.balances.allocated_out,
+    heldMinor: b.balances.held,
+    preEncumberedMinor: b.balances.pre_encumbered,
+    encumberedMinor: b.balances.encumbered,
+    actualMinor: b.balances.actual,
+    plannedEventsMinor: 0,
+    elapsedBps,
+  };
+}
+
+/**
+ * Forecast against authorized per budget, with the method, the variance and the owner's commentary
+ * where the variance is above the cycle threshold, plus the earlier cycle's figure when one is
+ * asked for.
+ *
+ * Authorized, Actual YTD and Committed come from the ledger and are the only columns the
+ * reconciliation checks: a forecast posts nothing, so there is no bucket for it to tie to. A budget
+ * without an accepted forecast falls back to the system run-rate and the report says so in a note,
+ * rather than showing an empty row.
+ */
+function forecastVarianceReport({ dataset, filters, extras, money }: Ctx): BuiltReport {
+  const elapsedBps = dataset.fiscalYear?.elapsedBps ?? 0;
+  const { cycle, compare, byBudget, compareByBudget } = extras.forecasts;
+  const threshold = {
+    bps: cycle?.varianceThresholdBps ?? 1_000,
+    minor: cycle?.varianceThresholdMinor ?? 100_000,
+  };
+  const comparing = compare !== null;
+  const total = sumBuckets(dataset.budgets);
+  let fallbacks = 0;
+
+  const built = dataset.budgets
+    .map((b) => {
+      const facts = factsOf(b, elapsedBps);
+      const snapshot = byBudget.get(b.row.id);
+      if (!snapshot) fallbacks += 1;
+      const forecastMinor = snapshot?.amountMinor ?? runRateAmount(facts);
+      const method: ForecastMethod = snapshot?.method ?? 'run_rate';
+      const variance = forecastVariance(facts.authorizedMinor, forecastMinor);
+      const needsCommentary = commentaryRequired(variance, threshold);
+      const previous = compareByBudget.get(b.row.id);
+      const tags = [...statusTags(b)];
+      if (!snapshot) tags.push('System run-rate');
+      else if (snapshot.systemGenerated) tags.push('System');
+      if (needsCommentary && !snapshot?.commentary) tags.push('Commentary due');
+      return {
+        key: b.row.id,
+        label: b.row.name,
+        budgetId: b.row.id,
+        eventId: null,
+        orgUnitId: b.orgUnitId,
+        status: b.row.status,
+        tags,
+        cells: {
+          owner: cellText(b.ownerName),
+          authorized: cellMoney(money(facts.authorizedMinor), 'authorized'),
+          actual: cellMoney(money(facts.actualMinor), 'actual'),
+          committed: cellMoney(
+            money(facts.heldMinor + facts.preEncumberedMinor + facts.encumberedMinor),
+            'encumbered',
+          ),
+          forecast: cellMoney(money(forecastMinor)),
+          method: cellText(METHOD_LABELS[method]),
+          variance: {
+            money: money(variance.varianceMinor),
+            // "Over" is the tone finance has to act on; under-spend is information, not an error.
+            tone: (variance.direction === 'over'
+              ? 'error'
+              : variance.direction === 'under'
+                ? 'success'
+                : 'neutral') as ReportCell['tone'],
+          },
+          varianceDirection: cellText(variance.direction),
+          variancePct: cellBps(variance.varianceBps),
+          commentary: cellText(snapshot?.commentary ?? null),
+          ...(comparing
+            ? {
+                previousForecast: previous
+                  ? cellMoney(money(previous.amountMinor))
+                  : cellText('\u2013'),
+                change: previous
+                  ? cellMoney(money(forecastMinor - previous.amountMinor))
+                  : cellText('\u2013'),
+              }
+            : {}),
+        },
+        needsCommentary,
+        sort: facts.authorizedMinor,
+      };
+    })
+    // Largest budget first, then the shared tie-break, so two budgets with nothing authorized
+    // never change places between two runs of the same report.
+    .sort((a, b) => b.sort - a.sort || tieBreak(a, b));
+
+  const commentaryOnly = filters.commentaryRequiredOnly === 'true';
+  const reconcileMode: ReconcileRule['mode'] = commentaryOnly ? 'at_most' : 'equals';
+  const filtered = commentaryOnly ? built.filter((r) => r.needsCommentary) : built;
+  const rows = filtered.map(({ sort: _sort, needsCommentary: _needs, ...row }) => row);
+
+  const forecastTotal = rows.reduce((s, r) => s + (r.cells['forecast'].money?.amountMinor ?? 0), 0);
+  const committedTotal = total.held + total.preEncumbered + total.encumbered;
+  const authorizedTotal = rows.reduce(
+    (s, r) => s + (r.cells['authorized'].money?.amountMinor ?? 0),
+    0,
+  );
+  const varianceTotal = authorizedTotal - forecastTotal;
+  const commentaryDue = built.filter((r) => r.needsCommentary).length;
+  const notes: string[] = [];
+  if (!cycle)
+    notes.push('No forecast cycle yet; showing system run-rate forecasts for every budget.');
+  else if (fallbacks > 0)
+    notes.push(
+      `No accepted forecast for ${fallbacks} budget${fallbacks === 1 ? '' : 's'} in ${cycle.name}; showing system run-rate forecasts for ${fallbacks === 1 ? 'it' : 'them'}.`,
+    );
+  if (cycle) notes.push(`Forecasts from ${cycle.name}, as of ${cycle.asOfDate}.`);
+  if (compare) notes.push(`Compared with ${compare.name}, as of ${compare.asOfDate}.`);
+  notes.push('Forecast figures are not actuals: they post nothing and consume no budget.');
+
+  const columns: ReportColumnSpec[] = [
+    { key: 'label', label: 'Budget', type: 'text', align: 'start', drillable: false },
+    { key: 'owner', label: 'Owner', type: 'text', align: 'start', drillable: false },
+    { key: 'authorized', label: 'Authorized', type: 'money', align: 'end', drillable: true },
+    { key: 'actual', label: 'Actual YTD', type: 'money', align: 'end', drillable: true },
+    { key: 'committed', label: 'Committed', type: 'money', align: 'end', drillable: true },
+    {
+      key: 'forecast',
+      label: 'Forecast at year end',
+      type: 'money',
+      align: 'end',
+      drillable: false,
+      hint: 'A forecast, not an actual: it posts nothing and consumes no budget.',
+    },
+    { key: 'method', label: 'Method', type: 'text', align: 'start', drillable: false },
+    { key: 'variance', label: 'Variance', type: 'money', align: 'end', drillable: false },
+    {
+      key: 'varianceDirection',
+      label: 'Direction',
+      type: 'text',
+      align: 'start',
+      drillable: false,
+      hint: 'Written out, so the sign is never the only signal.',
+    },
+    { key: 'variancePct', label: 'Variance %', type: 'percent', align: 'end', drillable: false },
+    { key: 'commentary', label: 'Commentary', type: 'text', align: 'start', drillable: false },
+  ];
+  if (comparing)
+    columns.push(
+      {
+        key: 'previousForecast',
+        label: 'Previous forecast',
+        type: 'money',
+        align: 'end',
+        drillable: false,
+      },
+      { key: 'change', label: 'Change', type: 'money', align: 'end', drillable: false },
+    );
+
+  return {
+    groupBy: 'budget',
+    notes,
+    kpis: [
+      { key: 'authorized', label: 'Authorized', money: money(total.authorized) },
+      { key: 'actual', label: 'Actual YTD', money: money(total.actual) },
+      { key: 'committed', label: 'Committed', money: money(committedTotal) },
+      {
+        key: 'forecast',
+        label: 'Forecast at year end',
+        money: money(forecastTotal),
+        hint: 'Sum of the forecasts shown. Never posted to the ledger.',
+      },
+      { key: 'variance', label: 'Variance against authorized', money: money(varianceTotal) },
+      { key: 'commentaryDue', label: 'Variances needing commentary', number: commentaryDue },
+    ],
+    columns,
+    rows,
+    totals: totalsRow('Total', {
+      owner: cellText(null),
+      authorized: cellMoney(money(total.authorized)),
+      actual: cellMoney(money(total.actual)),
+      committed: cellMoney(money(committedTotal)),
+      forecast: cellMoney(money(forecastTotal)),
+      method: cellText(methodSummary(built)),
+      variance: cellMoney(money(total.authorized - forecastTotal)),
+      varianceDirection: cellText(
+        total.authorized - forecastTotal > 0
+          ? 'under'
+          : total.authorized - forecastTotal < 0
+            ? 'over'
+            : 'on',
+      ),
+      variancePct: cellBps(bps(total.authorized - forecastTotal, total.authorized)),
+      commentary: cellText(null),
+      ...(comparing ? { previousForecast: cellText('\u2013'), change: cellText('\u2013') } : {}),
+    }),
+    series: [
+      {
+        key: 'authorized',
+        label: 'Authorized',
+        unit: 'money',
+        points: rows.map((r) => ({
+          key: r.key,
+          label: r.label,
+          value: r.cells['authorized'].money?.amountMinor ?? 0,
+        })),
+      },
+      {
+        key: 'forecast',
+        label: 'Forecast at year end',
+        unit: 'money',
+        points: rows.map((r) => ({
+          key: r.key,
+          label: r.label,
+          value: r.cells['forecast'].money?.amountMinor ?? 0,
+        })),
+      },
+    ],
+    // Only the ledger columns are checked. Forecast is deliberately absent: it has no bucket.
+    // "Commentary required only" shows a subset of the budgets in scope, so the columns are then
+    // checked as a part of the ledger rather than the whole of it.
+    reconcile: [
+      { column: 'authorized', buckets: ['authorized'], mode: reconcileMode },
+      { column: 'actual', buckets: ['actual'], mode: reconcileMode },
+      {
+        column: 'committed',
+        buckets: ['held', 'preEncumbered', 'encumbered'],
+        mode: reconcileMode,
+      },
+    ],
+  };
+}
+
+/** "Mixed" when the budgets in scope used different methods, as the roll-up row shows it. */
+function methodSummary(rows: readonly { cells: Record<string, ReportCell> }[]): string {
+  const methods = new Set(rows.map((r) => r.cells['method'].text ?? ''));
+  if (methods.size === 0) return '\u2013';
+  return methods.size === 1 ? [...methods][0] : 'Mixed';
 }
 
 // 015b Participation and reach ---------------------------------------------------------------------

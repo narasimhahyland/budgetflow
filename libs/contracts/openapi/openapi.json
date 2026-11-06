@@ -3249,6 +3249,429 @@
         ],
         "additionalProperties": false
       },
+      "BoardPack": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "title": {
+            "type": "string",
+            "description": "Cover title, for example \"Hyland — budget pack — October 2026\"."
+          },
+          "source": {
+            "$ref": "#/components/schemas/BoardPackSource"
+          },
+          "constantCurrency": {
+            "type": "boolean"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/ReportScope"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoardPackPage"
+            }
+          },
+          "fxBridge": {
+            "$ref": "#/components/schemas/FxBridge"
+          },
+          "reconciliation": {
+            "$ref": "#/components/schemas/ReportReconciliation"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "generatedAt",
+          "currency",
+          "title",
+          "source",
+          "constantCurrency",
+          "scope",
+          "pages",
+          "fxBridge",
+          "reconciliation",
+          "notes"
+        ],
+        "additionalProperties": false,
+        "description": "The pack as the builder previews it and the generation job renders it."
+      },
+      "BoardPackDownload": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "url",
+          "fileName",
+          "expiresAt"
+        ],
+        "additionalProperties": false,
+        "description": "A short-lived signed URL for one rendered file."
+      },
+      "BoardPackFile": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "pdf",
+              "xlsx"
+            ]
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sha256": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "format",
+          "fileName",
+          "sizeBytes",
+          "sha256"
+        ],
+        "additionalProperties": false,
+        "description": "A rendered file in the DocumentStore under a tenant-scoped key."
+      },
+      "BoardPackGeneration": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "ready",
+              "failed",
+              "expired"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/BoardPackSource"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "summary",
+                "legal_entity",
+                "region",
+                "function",
+                "category",
+                "period",
+                "variance_fx",
+                "top_commitments",
+                "controls_applied",
+                "exceptions",
+                "cofunding"
+              ],
+              "description": "Fixed building blocks of the pack; they can be toggled and reordered, not rewritten."
+            }
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "xlsx"
+              ]
+            }
+          },
+          "constantCurrency": {
+            "type": "boolean"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "pageCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rowCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoardPackFile"
+            }
+          },
+          "failedPage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "summary",
+                  "legal_entity",
+                  "region",
+                  "function",
+                  "category",
+                  "period",
+                  "variance_fx",
+                  "top_commitments",
+                  "controls_applied",
+                  "exceptions",
+                  "cofunding"
+                ],
+                "description": "Fixed building blocks of the pack; they can be toggled and reordered, not rewritten."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "requestedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "completedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Download links stop working after this; the pack is regenerated."
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "source",
+          "pages",
+          "formats",
+          "constantCurrency",
+          "currency",
+          "pageCount",
+          "rowCount",
+          "files",
+          "failedPage",
+          "error",
+          "requestedByName",
+          "requestedAt",
+          "completedAt",
+          "expiresAt"
+        ],
+        "additionalProperties": false,
+        "description": "A pack generation. Rendering runs in the worker; the files land in the DocumentStore."
+      },
+      "BoardPackGenerationList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoardPackGeneration"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "BoardPackPage": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "legal_entity",
+              "region",
+              "function",
+              "category",
+              "period",
+              "variance_fx",
+              "top_commitments",
+              "controls_applied",
+              "exceptions",
+              "cofunding"
+            ],
+            "description": "Fixed building blocks of the pack; they can be toggled and reordered, not rewritten."
+          },
+          "title": {
+            "type": "string"
+          },
+          "statement": {
+            "description": "Shown instead of rows when the page has no data, for example \"No controls applied in October 2026\".",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportColumn"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportRow"
+            },
+            "description": "Ordered by label then key, so a regenerated pack matches."
+          },
+          "totals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReportRow"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportSeries"
+            }
+          }
+        },
+        "required": [
+          "page",
+          "title",
+          "statement",
+          "columns",
+          "rows",
+          "totals",
+          "series"
+        ],
+        "additionalProperties": false
+      },
+      "BoardPackSource": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "close_snapshot",
+              "open_period_draft"
+            ]
+          },
+          "fiscalPeriodId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "snapshotVersion": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Version of the close snapshot; null for an open-period draft."
+          },
+          "takenAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "draft": {
+            "type": "boolean",
+            "description": "True for an open period: every page and the PDF carry a \"Draft\" watermark."
+          },
+          "statement": {
+            "type": "string",
+            "description": "The sentence the cover page prints about where the figures came from."
+          }
+        },
+        "required": [
+          "kind",
+          "fiscalPeriodId",
+          "periodLabel",
+          "snapshotVersion",
+          "takenAt",
+          "draft",
+          "statement"
+        ],
+        "additionalProperties": false,
+        "description": "Where the pack read its numbers. A closed period reads an immutable snapshot."
+      },
       "BudgetBalances": {
         "type": "object",
         "properties": {
@@ -6313,6 +6736,21 @@
         ],
         "additionalProperties": false
       },
+      "CloseForecastCycleRequest": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Must equal `closeConfirmation`."
+          }
+        },
+        "required": [
+          "confirmation"
+        ],
+        "additionalProperties": false,
+        "description": "Accepts the remaining submissions as they are, writes system run-rate forecasts for the budgets nobody submitted, and supersedes the previous cycle."
+      },
       "ClosePeriodDetail": {
         "type": "object",
         "properties": {
@@ -8945,6 +9383,71 @@
         ],
         "additionalProperties": false
       },
+      "CreateBoardPackRequest": {
+        "type": "object",
+        "properties": {
+          "fiscalPeriodId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "draft": {
+            "type": "boolean"
+          },
+          "pages": {
+            "minItems": 1,
+            "maxItems": 11,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "summary",
+                "legal_entity",
+                "region",
+                "function",
+                "category",
+                "period",
+                "variance_fx",
+                "top_commitments",
+                "controls_applied",
+                "exceptions",
+                "cofunding"
+              ],
+              "description": "Fixed building blocks of the pack; they can be toggled and reordered, not rewritten."
+            }
+          },
+          "formats": {
+            "minItems": 1,
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "xlsx"
+              ]
+            }
+          },
+          "constantCurrency": {
+            "type": "boolean"
+          },
+          "rootBudgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "forecastCycleId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Queues a generation. Defaults: the latest closed period, every page, PDF and XLSX."
+      },
       "CreateBudgetRequest": {
         "type": "object",
         "properties": {
@@ -9646,6 +10149,87 @@
           "years"
         ],
         "additionalProperties": false
+      },
+      "CreateForecastCycleRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "asOfDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "fiscalYearId": {
+            "description": "Defaults to the fiscal year containing the as-of date.",
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "rootBudgetId": {
+            "description": "Scope: this budget and everything below it.",
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "varianceThresholdBps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "varianceThresholdMinor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "defaultMethodOperating": {
+            "type": "string",
+            "enum": [
+              "run_rate",
+              "committed_pipeline",
+              "owner_input"
+            ],
+            "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+          },
+          "defaultMethodEvent": {
+            "type": "string",
+            "enum": [
+              "run_rate",
+              "committed_pipeline",
+              "owner_input"
+            ],
+            "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+          },
+          "includeOpenEvents": {
+            "type": "boolean"
+          },
+          "reminderDaysBefore": {
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 30
+            }
+          }
+        },
+        "required": [
+          "name",
+          "asOfDate",
+          "dueDate"
+        ],
+        "additionalProperties": false,
+        "description": "Opens a cycle. Defaults: at least 10% and at least 1,000.00, run-rate for operating budgets."
       },
       "CreateGlAccountRequest": {
         "type": "object",
@@ -10468,7 +11052,8 @@
               "event-spending",
               "unused-expired",
               "spend-per-head",
-              "participation-reach"
+              "participation-reach",
+              "forecast-variance"
             ],
             "description": "Report in the Phase 10 catalog."
           },
@@ -10510,7 +11095,8 @@
               "event-spending",
               "unused-expired",
               "spend-per-head",
-              "participation-reach"
+              "participation-reach",
+              "forecast-variance"
             ],
             "description": "Report in the Phase 10 catalog."
           },
@@ -17883,6 +18469,605 @@
         ],
         "additionalProperties": false
       },
+      "ForecastCycle": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "asOfDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "The last closed or soft-closed period end the cycle forecasts from."
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "fiscalYearId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "fiscalYearLabel": {
+            "type": "string"
+          },
+          "scopeRootBudgetId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null means every active budget in the tenant."
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "description": "A closed cycle is an immutable snapshot that reports and the board pack read."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "varianceThresholdBps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Commentary is required at or above this share of authorized (1,000 = 10%)."
+          },
+          "varianceThreshold": {
+            "description": "…and at or above this amount. Both tests must pass.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "defaultMethodOperating": {
+            "type": "string",
+            "enum": [
+              "run_rate",
+              "committed_pipeline",
+              "owner_input"
+            ],
+            "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+          },
+          "defaultMethodEvent": {
+            "type": "string",
+            "enum": [
+              "run_rate",
+              "committed_pipeline",
+              "owner_input"
+            ],
+            "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+          },
+          "includeOpenEvents": {
+            "type": "boolean"
+          },
+          "reminderDaysBefore": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 30
+            }
+          },
+          "progress": {
+            "$ref": "#/components/schemas/ForecastCycleProgress"
+          },
+          "createdByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "closedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "closedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "closeConfirmation": {
+            "type": "string",
+            "description": "The phrase closing the cycle must repeat, for example \"CLOSE OCTOBER REFORECAST\"."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "asOfDate",
+          "dueDate",
+          "fiscalYearId",
+          "fiscalYearLabel",
+          "scopeRootBudgetId",
+          "scopeLabel",
+          "status",
+          "currency",
+          "varianceThresholdBps",
+          "varianceThreshold",
+          "defaultMethodOperating",
+          "defaultMethodEvent",
+          "includeOpenEvents",
+          "reminderDaysBefore",
+          "progress",
+          "createdByName",
+          "createdAt",
+          "closedAt",
+          "closedByName",
+          "closeConfirmation"
+        ],
+        "additionalProperties": false,
+        "description": "One reforecast round: finance opens it, owners submit, finance accepts, then it closes."
+      },
+      "ForecastCycleDetail": {
+        "type": "object",
+        "properties": {
+          "cycle": {
+            "$ref": "#/components/schemas/ForecastCycle"
+          },
+          "scope": {
+            "description": "What the viewer may see: finance the whole cycle, owners their own.",
+            "$ref": "#/components/schemas/ReportScope"
+          },
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastSubmission"
+            },
+            "description": "Ordered by budget or event name then id, so tied rows never reorder."
+          },
+          "totals": {
+            "$ref": "#/components/schemas/ForecastCycleTotals"
+          },
+          "reconciliation": {
+            "description": "The ledger behind the authorized, committed and actual columns. Forecast is not in it: a forecast posts nothing.",
+            "$ref": "#/components/schemas/ReportReconciliation"
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "submit",
+                "accept",
+                "request_commentary",
+                "close"
+              ]
+            }
+          }
+        },
+        "required": [
+          "cycle",
+          "scope",
+          "submissions",
+          "totals",
+          "reconciliation",
+          "allowedActions"
+        ],
+        "additionalProperties": false
+      },
+      "ForecastCycleList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastCycle"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "ForecastCycleProgress": {
+        "type": "object",
+        "properties": {
+          "budgets": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Lines in the cycle: budgets in scope plus included events."
+          },
+          "notStarted": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "draft": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "submitted": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "commentaryRequired": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "accepted": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "overdue": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Lines not submitted after the due date."
+          }
+        },
+        "required": [
+          "budgets",
+          "notStarted",
+          "draft",
+          "submitted",
+          "commentaryRequired",
+          "accepted",
+          "overdue"
+        ],
+        "additionalProperties": false
+      },
+      "ForecastCycleTotals": {
+        "type": "object",
+        "properties": {
+          "authorized": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "actualToDate": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "committed": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "forecast": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "variance": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "varianceBps": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "authorized",
+          "actualToDate",
+          "committed",
+          "forecast",
+          "variance",
+          "varianceBps"
+        ],
+        "additionalProperties": false
+      },
+      "ForecastDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accept",
+              "request_commentary"
+            ]
+          },
+          "note": {
+            "description": "Required when asking the owner for more explanation.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "additionalProperties": false
+      },
+      "ForecastMethodOption": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "run_rate",
+              "committed_pipeline",
+              "owner_input"
+            ],
+            "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "explanation": {
+            "type": "string",
+            "description": "One sentence an owner can check the number against."
+          }
+        },
+        "required": [
+          "method",
+          "amount",
+          "explanation"
+        ],
+        "additionalProperties": false,
+        "description": "A system-computed starting point; the API computes it, the owner chooses."
+      },
+      "ForecastSubmission": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "cycleId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "budgetName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "eventId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "eventName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "eventCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ownerPersonId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ownerName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "authorized": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "actualToDate": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "committed": {
+            "description": "Held + pre-encumbered + encumbered over the budget.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "pending": {
+            "description": "Pre-encumbered: requests waiting for a decision.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "plannedEvents": {
+            "description": "Approved events whose costs are not committed yet.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "forecast": {
+            "description": "Year-end forecast. Never posted and never consumes budget.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "run_rate",
+              "committed_pipeline",
+              "owner_input"
+            ],
+            "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+          },
+          "methodOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastMethodOption"
+            }
+          },
+          "variance": {
+            "description": "Authorized − forecast: positive is under the budget.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "varianceBps": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "varianceDirection": {
+            "type": "string",
+            "enum": [
+              "under",
+              "over",
+              "on"
+            ]
+          },
+          "commentaryRequired": {
+            "type": "boolean"
+          },
+          "commentary": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "commentaryNote": {
+            "description": "Finance's note when they asked the owner for more explanation.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "commentary_required",
+              "accepted",
+              "superseded"
+            ]
+          },
+          "systemGenerated": {
+            "type": "boolean",
+            "description": "True for the run-rate forecast the cycle close wrote because nobody submitted."
+          },
+          "submittedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "acceptedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "acceptedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "id",
+          "cycleId",
+          "budgetId",
+          "budgetName",
+          "eventId",
+          "eventName",
+          "eventCode",
+          "ownerPersonId",
+          "ownerName",
+          "authorized",
+          "actualToDate",
+          "committed",
+          "pending",
+          "plannedEvents",
+          "forecast",
+          "method",
+          "methodOptions",
+          "variance",
+          "varianceBps",
+          "varianceDirection",
+          "commentaryRequired",
+          "commentary",
+          "commentaryNote",
+          "status",
+          "systemGenerated",
+          "submittedAt",
+          "acceptedAt",
+          "acceptedByName",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "description": "One budget or event in a forecast cycle, with the ledger facts behind its variance."
+      },
       "FreezeRequest": {
         "type": "object",
         "properties": {
@@ -18181,6 +19366,87 @@
           "requestRef",
           "contributionId",
           "contributionRef"
+        ],
+        "additionalProperties": false
+      },
+      "FxBridge": {
+        "type": "object",
+        "properties": {
+          "reportingRateType": {
+            "type": "string",
+            "enum": [
+              "plan",
+              "spot",
+              "month_end",
+              "monthly_average"
+            ],
+            "description": "The company’s reporting rate type; monthly average by default."
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FxBridgeRow"
+            },
+            "description": "One row per transaction currency, ordered by code."
+          },
+          "totalEffect": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reportingRateType",
+          "rows",
+          "totalEffect",
+          "note"
+        ],
+        "additionalProperties": false,
+        "description": "Why a constant-currency total differs from the reported one. The effect is bridged on its own and never enters spend, variance or any budget bucket."
+      },
+      "FxBridgeRow": {
+        "type": "object",
+        "properties": {
+          "transactionCurrency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "transaction": {
+            "description": "Spend as posted, in its transaction currency.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "atPlanRate": {
+            "description": "The same spend at the locked plan rate: the rate budget control uses.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "atReportingRate": {
+            "description": "The same spend at the reporting rate type.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "fxEffect": {
+            "description": "At reporting rate − at plan rate.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "planRate": {
+            "description": "The plan cross rate applied, 12 decimals.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "description": "\"Not part of spend or variance; FX never consumes budget.\""
+          }
+        },
+        "required": [
+          "transactionCurrency",
+          "transaction",
+          "atPlanRate",
+          "atReportingRate",
+          "fxEffect",
+          "planRate",
+          "note"
         ],
         "additionalProperties": false
       },
@@ -26149,7 +27415,17 @@
               "YEAR_END_ALREADY_EXECUTED",
               "YEAR_END_DRY_RUN_REQUIRED",
               "ROLLOVER_POLICY_MISSING",
-              "CARRY_TARGET_MISSING"
+              "CARRY_TARGET_MISSING",
+              "FORECAST_COMMENTARY_REQUIRED",
+              "FORECAST_AMOUNT_REQUIRED",
+              "FORECAST_CYCLE_CLOSED",
+              "FORECAST_ALREADY_ACCEPTED",
+              "FORECAST_SUPERSEDED",
+              "FORECAST_NOT_SUBMITTED",
+              "FORECAST_CYCLE_ALREADY_OPEN",
+              "FORECAST_NOT_IN_SCOPE",
+              "BOARD_PACK_NOT_READY",
+              "BOARD_PACK_NO_SNAPSHOT"
             ],
             "description": "Stable machine-readable code; the UI branches on it."
           },
@@ -28142,7 +29418,8 @@
               "event-spending",
               "unused-expired",
               "spend-per-head",
-              "participation-reach"
+              "participation-reach",
+              "forecast-variance"
             ],
             "description": "Report in the Phase 10 catalog."
           },
@@ -28226,7 +29503,8 @@
               "event-spending",
               "unused-expired",
               "spend-per-head",
-              "participation-reach"
+              "participation-reach",
+              "forecast-variance"
             ],
             "description": "Report in the Phase 10 catalog."
           },
@@ -28290,7 +29568,8 @@
               "event-spending",
               "unused-expired",
               "spend-per-head",
-              "participation-reach"
+              "participation-reach",
+              "forecast-variance"
             ],
             "description": "Report in the Phase 10 catalog."
           },
@@ -28492,6 +29771,35 @@
             "type": "string",
             "format": "date",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "forecastCycleId": {
+            "description": "Report the forecasts of this cycle, for example \"October reforecast\".",
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "compareCycleId": {
+            "description": "Add \"Previous forecast\" and \"Change\" columns from an earlier cycle.",
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "forecastMethod": {
+            "type": "string",
+            "enum": [
+              "run_rate",
+              "committed_pipeline",
+              "owner_input"
+            ],
+            "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+          },
+          "commentaryRequiredOnly": {
+            "description": "Only the rows whose variance is above the cycle threshold.",
+            "type": "string",
+            "enum": [
+              "true",
+              "false"
+            ]
           }
         },
         "additionalProperties": false,
@@ -28748,7 +30056,8 @@
               "event-spending",
               "unused-expired",
               "spend-per-head",
-              "participation-reach"
+              "participation-reach",
+              "forecast-variance"
             ],
             "description": "Report in the Phase 10 catalog."
           },
@@ -28832,6 +30141,13 @@
           "truncated": {
             "type": "boolean"
           },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Plain-English statements the frame shows as banners, for example \"No accepted forecast yet; showing run-rate forecasts\"."
+          },
           "reconciliation": {
             "$ref": "#/components/schemas/ReportReconciliation"
           }
@@ -28852,6 +30168,7 @@
           "series",
           "rowCount",
           "truncated",
+          "notes",
           "reconciliation"
         ],
         "additionalProperties": false,
@@ -28985,7 +30302,8 @@
               "event-spending",
               "unused-expired",
               "spend-per-head",
-              "participation-reach"
+              "participation-reach",
+              "forecast-variance"
             ],
             "description": "Report in the Phase 10 catalog."
           },
@@ -31834,7 +33152,8 @@
               "event-spending",
               "unused-expired",
               "spend-per-head",
-              "participation-reach"
+              "participation-reach",
+              "forecast-variance"
             ],
             "description": "Report in the Phase 10 catalog."
           },
@@ -33446,6 +34765,51 @@
           "reuseForFutureEvents"
         ],
         "additionalProperties": false
+      },
+      "SubmitForecastRequest": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "run_rate",
+              "committed_pipeline",
+              "owner_input"
+            ],
+            "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+          },
+          "amountMinor": {
+            "description": "Required for `owner_input`; ignored for the system methods.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "commentary": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "submit": {
+            "description": "False saves a draft; true (default) submits it for finance to accept.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "additionalProperties": false,
+        "description": "Exactly one of budgetId or eventId. A variance above the cycle threshold is refused without commentary (FORECAST_COMMENTARY_REQUIRED)."
       },
       "SubmitSurveyResponseBody": {
         "type": "object",
@@ -66247,7 +67611,8 @@
                 "event-spending",
                 "unused-expired",
                 "spend-per-head",
-                "participation-reach"
+                "participation-reach",
+                "forecast-variance"
               ],
               "description": "Report in the Phase 10 catalog."
             }
@@ -66399,6 +67764,55 @@
             }
           },
           {
+            "name": "forecastCycleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Report the forecasts of this cycle, for example \"October reforecast\".",
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "name": "compareCycleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Add \"Previous forecast\" and \"Change\" columns from an earlier cycle.",
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "name": "forecastMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "run_rate",
+                "committed_pipeline",
+                "owner_input"
+              ],
+              "description": "How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner’s own number."
+            }
+          },
+          {
+            "name": "commentaryRequiredOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Only the rows whose variance is above the cycle threshold.",
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
@@ -66511,7 +67925,8 @@
                 "event-spending",
                 "unused-expired",
                 "spend-per-head",
-                "participation-reach"
+                "participation-reach",
+                "forecast-variance"
               ],
               "description": "Report in the Phase 10 catalog."
             }
@@ -67684,7 +69099,8 @@
                 "event-spending",
                 "unused-expired",
                 "spend-per-head",
-                "participation-reach"
+                "participation-reach",
+                "forecast-variance"
               ],
               "description": "Report in the Phase 10 catalog."
             }
@@ -67831,6 +69247,546 @@
             }
           },
           "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/board-pack": {
+      "get": {
+        "operationId": "getBoardPack",
+        "summary": "Preview the board and FP&A pack from a close snapshot or the open period",
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "fiscalPeriodId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Defaults to the latest closed period.",
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "name": "draft",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Read the current open period instead; every page is watermarked \"Draft\".",
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "pages",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Comma-separated page ids in the order wanted; omitted means every page.",
+              "type": "string"
+            }
+          },
+          {
+            "name": "constantCurrency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "rootBudgetId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "forecastCycleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardPack"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/board-pack/generations": {
+      "post": {
+        "operationId": "createBoardPackGeneration",
+        "summary": "Generate the pack in the background into the DocumentStore",
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBoardPackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardPackGeneration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listBoardPackGenerations",
+        "summary": "Pack generations with their status, newest first",
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardPackGenerationList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/board-pack/generations/{generationId}": {
+      "get": {
+        "operationId": "getBoardPackGeneration",
+        "summary": "One pack generation, with the files it rendered",
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "generationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardPackGeneration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/board-pack/generations/{generationId}/download": {
+      "get": {
+        "operationId": "downloadBoardPack",
+        "summary": "A short-lived signed URL for a rendered pack file",
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "generationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "xlsx"
+              ]
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardPackDownload"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {
@@ -73800,6 +75756,705 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/YearEndRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/close/forecast-cycles": {
+      "get": {
+        "operationId": "listForecastCycles",
+        "summary": "Forecast cycles with their progress, newest first",
+        "tags": [
+          "close"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "fiscalYearId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed"
+              ],
+              "description": "A closed cycle is an immutable snapshot that reports and the board pack read."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastCycleList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createForecastCycle",
+        "summary": "Open a reforecast cycle with a due date and a variance threshold",
+        "tags": [
+          "close"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateForecastCycleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastCycleDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/close/forecast-cycles/{cycleId}": {
+      "get": {
+        "operationId": "getForecastCycle",
+        "summary": "A cycle with every line the viewer may see and its ledger reconciliation",
+        "tags": [
+          "close"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastCycleDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/close/forecast-cycles/{cycleId}/submissions": {
+      "post": {
+        "operationId": "submitForecast",
+        "summary": "Save or submit the forecast for one budget or event",
+        "tags": [
+          "close"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitForecastRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastSubmission"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/close/forecast-cycles/{cycleId}/submissions/{submissionId}/decision": {
+      "post": {
+        "operationId": "decideForecast",
+        "summary": "Accept a submitted forecast, or ask the owner for commentary",
+        "tags": [
+          "close"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "submissionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForecastDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastSubmission"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/close/forecast-cycles/{cycleId}/close": {
+      "post": {
+        "operationId": "closeForecastCycle",
+        "summary": "Close the cycle and lock its snapshot",
+        "tags": [
+          "close"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseForecastCycleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastCycleDetail"
                 }
               }
             }

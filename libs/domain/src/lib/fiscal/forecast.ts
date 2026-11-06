@@ -129,9 +129,7 @@ export const DEFAULT_VARIANCE_THRESHOLD: VarianceThreshold = { bps: 1_000, minor
  * inclusive at both boundaries: a variance exactly on the threshold needs commentary.
  */
 export function commentaryRequired(v: ForecastVariance, threshold: VarianceThreshold): boolean {
-  return (
-    Math.abs(v.varianceMinor) >= threshold.minor && Math.abs(v.varianceBps) >= threshold.bps
-  );
+  return Math.abs(v.varianceMinor) >= threshold.minor && Math.abs(v.varianceBps) >= threshold.bps;
 }
 
 export const COMMENTARY_MIN_LENGTH = 20;
@@ -209,7 +207,10 @@ export function checkForecastDecision(
   decision: 'accept' | 'request_commentary',
 ): Result<ForecastStatus> {
   if (cycleStatus === 'closed')
-    return err('FORECAST_CYCLE_CLOSED', 'This forecast cycle is closed; its snapshot cannot change.');
+    return err(
+      'FORECAST_CYCLE_CLOSED',
+      'This forecast cycle is closed; its snapshot cannot change.',
+    );
   if (currentStatus !== 'submitted')
     return err(
       'FORECAST_NOT_SUBMITTED',
@@ -259,7 +260,7 @@ export function fxBridge(
   reportingCurrency: CurrencyCode,
   planRates: readonly FxRate[],
 ): { rows: FxBridgeRow[]; totalEffect: Money } {
-  const byCurrency = new Map<string, { transaction: number; reporting: number }>();
+  const byCurrency = new Map<CurrencyCode, { transaction: number; reporting: number }>();
   for (const r of rows) {
     const cur = byCurrency.get(r.transactionCurrency) ?? { transaction: 0, reporting: 0 };
     cur.transaction += r.transactionAmountMinor;

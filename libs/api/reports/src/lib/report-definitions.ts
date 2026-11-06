@@ -117,6 +117,17 @@ export const REPORT_SPECS: Record<ReportId, ReportSpec> = {
     formats: ALL_FORMATS,
     ownerScoped: false,
   },
+  'forecast-variance': {
+    reportId: 'forecast-variance',
+    name: 'Forecast and variance',
+    question: 'Where will the year land against what we authorized, and why?',
+    group: 'budgets',
+    screen: '087',
+    groupBys: ['budget'],
+    defaultGroupBy: 'budget',
+    formats: ALL_FORMATS,
+    ownerScoped: true,
+  },
 };
 
 export const REPORT_LIST: ReportSpec[] = Object.values(REPORT_SPECS);

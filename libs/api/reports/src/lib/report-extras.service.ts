@@ -1,7 +1,15 @@
 import type { Tx } from '@bf/api/db';
+import type { FxRate } from '@bf/domain';
 import { Injectable } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
-import type { EventFigures, ParticipationFigures, ReportExtras } from './report-builders';
+import type {
+  EventFigures,
+  ForecastCycleRef,
+  ForecastSnapshotFigures,
+  FxLineTotals,
+  ParticipationFigures,
+  ReportExtras,
+} from './report-builders';
 
 export interface EventFiguresQuery {
   budgetIds: string[];
@@ -9,7 +17,14 @@ export interface EventFiguresQuery {
   periodTo?: string;
 }
 
-const EMPTY: ReportExtras = { events: [], headcount: new Map(), participation: new Map() };
+const EMPTY: ReportExtras = {
+  events: [],
+  headcount: new Map(),
+  participation: new Map(),
+  forecasts: { cycle: null, compare: null, byBudget: new Map(), compareByBudget: new Map() },
+  fxLines: [],
+  planRates: [],
+};
 
 const uuidList = (ids: readonly string[]) =>
   sql.join(
@@ -209,6 +224,183 @@ export class ReportExtrasReads {
     }
     if (participation.size) await this.nameLocations(tx, participation);
     return { ...EMPTY, participation };
+  }
+
+  /**
+   * Accepted forecast snapshots for the budgets in scope (087). A named cycle reports that cycle;
+   * without one the latest accepted snapshot per budget is used, and when a budget has none at all
+   * the builder falls back to the system run-rate and says so in a note.
+   */
+  async forecasts(
+    tx: Tx,
+    q: {
+      budgetIds: readonly string[];
+      cycleId?: string;
+      compareCycleId?: string;
+      fiscalYearId?: string;
+    },
+  ): Promise<ReportExtras> {
+    if (!q.budgetIds.length) return EMPTY;
+    const cycle = await this.cycle(tx, q.cycleId, q.fiscalYearId);
+    const compare = q.compareCycleId ? await this.cycle(tx, q.compareCycleId) : null;
+    const byBudget = await this.snapshots(tx, q.budgetIds, cycle?.id ?? null);
+    const compareByBudget = compare
+      ? await this.snapshots(tx, q.budgetIds, compare.id)
+      : new Map<string, ForecastSnapshotFigures>();
+    return { ...EMPTY, forecasts: { cycle, compare, byBudget, compareByBudget } };
+  }
+
+  /** A named cycle, or the most recent closed one of the fiscal year, or the most recent open one. */
+  private async cycle(
+    tx: Tx,
+    cycleId?: string,
+    fiscalYearId?: string,
+  ): Promise<ForecastCycleRef | null> {
+    const res = await tx.execute<{
+      id: string;
+      name: string;
+      as_of_date: string;
+      due_date: string;
+      status: string;
+      variance_threshold_bps: string;
+      variance_threshold_minor: string;
+    }>(
+      cycleId
+        ? sql`select id, name, as_of_date::text, due_date::text, status::text,
+                     variance_threshold_bps::text, variance_threshold_minor::text
+              from forecast_cycles where id = ${cycleId}::uuid`
+        : sql`select id, name, as_of_date::text, due_date::text, status::text,
+                     variance_threshold_bps::text, variance_threshold_minor::text
+              from forecast_cycles
+              ${fiscalYearId ? sql`where fiscal_year_id = ${fiscalYearId}::uuid` : sql``}
+              order by (status = 'closed') desc, as_of_date desc, created_at desc, name, id
+              limit 1`,
+    );
+    const r = res.rows[0];
+    return r
+      ? {
+          id: r.id,
+          name: r.name,
+          asOfDate: r.as_of_date,
+          dueDate: r.due_date,
+          status: r.status as 'open' | 'closed',
+          varianceThresholdBps: Number(r.variance_threshold_bps),
+          varianceThresholdMinor: Number(r.variance_threshold_minor),
+        }
+      : null;
+  }
+
+  /**
+   * One accepted (or, inside an open cycle, submitted) snapshot per budget. The pick is fully
+   * ordered — accepted before submitted, then newest as-of date, then newest row and finally id —
+   * so two snapshots that tie never swap places between runs.
+   */
+  private async snapshots(
+    tx: Tx,
+    budgetIds: readonly string[],
+    cycleId: string | null,
+  ): Promise<Map<string, ForecastSnapshotFigures>> {
+    const res = await tx.execute<{
+      budget_id: string;
+      amount_minor: string;
+      method: string;
+      status: string;
+      commentary: string | null;
+      as_of_date: string;
+      system_generated: boolean;
+      currency: string;
+    }>(sql`
+      select distinct on (s.budget_id)
+             s.budget_id, s.amount_minor::text, s.method::text as method, s.status::text as status,
+             s.commentary, s.as_of_date::text as as_of_date, s.system_generated, s.currency
+      from forecast_snapshots s
+      where s.budget_id in (${uuidList(budgetIds)})
+        and s.event_id is null
+        and s.status in ('accepted', 'submitted')
+        ${cycleId ? sql`and s.cycle_id = ${cycleId}::uuid` : sql``}
+      order by s.budget_id,
+               (s.status = 'accepted') desc,
+               s.as_of_date desc,
+               s.created_at desc,
+               s.id desc`);
+    return new Map(
+      res.rows.map((r) => [
+        r.budget_id,
+        {
+          budgetId: r.budget_id,
+          amountMinor: Number(r.amount_minor),
+          method: r.method as ForecastSnapshotFigures['method'],
+          status: r.status as ForecastSnapshotFigures['status'],
+          commentary: r.commentary,
+          asOfDate: r.as_of_date,
+          systemGenerated: r.system_generated,
+          currency: r.currency,
+        },
+      ]),
+    );
+  }
+
+  /**
+   * Actual spend by transaction currency for the FX bridge (16a), with the reporting amount the
+   * ledger stored. Both sides of the bridge come from the same lines, so the bridge can only ever
+   * explain the gap between two valuations of the same spend — never add or move any.
+   */
+  async fxBridgeLines(
+    tx: Tx,
+    q: { budgetIds: readonly string[]; periodTo?: string; periodFrom?: string },
+  ): Promise<FxLineTotals[]> {
+    if (!q.budgetIds.length) return [];
+    const res = await tx.execute<{
+      transaction_currency: string;
+      transaction_amount: string;
+      reporting_amount: string;
+    }>(sql`
+      select l.transaction_currency,
+             sum(l.transaction_amount_minor)::text as transaction_amount,
+             sum(l.reporting_amount_minor)::text as reporting_amount
+      from ledger_lines l
+      join fiscal_periods fp on fp.id = l.fiscal_period_id
+      where l.budget_id in (${uuidList(q.budgetIds)})
+        and l.account = 'actual'
+        ${q.periodFrom ? sql`and fp.end_date >= ${q.periodFrom}` : sql``}
+        ${q.periodTo ? sql`and fp.start_date <= ${q.periodTo}` : sql``}
+      group by l.transaction_currency
+      order by l.transaction_currency`);
+    return res.rows.map((r) => ({
+      transactionCurrency: r.transaction_currency as FxLineTotals['transactionCurrency'],
+      transactionAmountMinor: Number(r.transaction_amount),
+      reportingAmountMinor: Number(r.reporting_amount),
+    }));
+  }
+
+  /** Locked plan rates of a fiscal year, quoted against the reporting currency. */
+  async planRates(tx: Tx, fiscalYearId: string | undefined): Promise<FxRate[]> {
+    if (!fiscalYearId) return [];
+    const res = await tx.execute<{
+      id: string;
+      base_currency: string;
+      quote_currency: string;
+      rate: string;
+    }>(sql`
+      select id, base_currency, quote_currency, rate::text as rate
+      from exchange_rates
+      where rate_type = 'plan' and fiscal_year_id = ${fiscalYearId}::uuid
+      order by quote_currency, locked desc, effective_date desc, id`);
+    const seen = new Set<string>();
+    const rates: FxRate[] = [];
+    for (const r of res.rows) {
+      const key = `${r.base_currency}:${r.quote_currency}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rates.push({
+        id: r.id,
+        type: 'plan',
+        base: r.base_currency as FxRate['base'],
+        quote: r.quote_currency as FxRate['quote'],
+        value: r.rate,
+      });
+    }
+    return rates;
   }
 
   private async nameLocations(
