@@ -44,8 +44,9 @@ const SCOPE: Record<RoleId, { has: string[]; lacks: string[] }> = {
   },
   employee: { has: ['tenant.read', 'request.create'], lacks: ['budget.read', 'request.approve'] },
   auditor: {
-    has: ['budget.read', 'ledger.read', 'audit.read', 'integrity.read'],
-    lacks: ['budget.allocate', 'integrity.run', 'ledger.reverse'],
+    // P14 (screen 113): the Auditor runs the integrity checks on demand and manages legal holds.
+    has: ['budget.read', 'ledger.read', 'audit.read', 'integrity.read', 'integrity.run'],
+    lacks: ['budget.allocate', 'ledger.reverse', 'retention.confirm'],
   },
   'integration-admin': { has: ['integration.manage'], lacks: ['budget.read', 'audit.read'] },
   analyst: { has: ['budget.read', 'report.read'], lacks: ['budget.allocate', 'audit.read'] },

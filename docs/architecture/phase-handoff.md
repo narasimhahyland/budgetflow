@@ -175,6 +175,45 @@ reported answers with their 90-day text retention (113a sub-tab); recording the 
 the actuals match audit entry, which needs a Phase 6 change to `QueueService.match` (until then the
 link lives on the query-log row).
 
+## What Phase 14 delivers (backend half)
+
+The Angular screens (105, 109-114, 122, 10a, 102b, 103a, 116a, 000b) follow as a separate change; this half is the API they build on.
+
+| Area      | Where                                                                    | How the frontend and later phases use it                                                                                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contracts | `libs/contracts/src/lib/domains/admin.ts`                                | Company settings (branding, notification defaults, documents, security), feature flags with pilot rollout, retention policies and legal holds, retention runs, user and role administration, owner invites, system health, maintenance notices, the setup checklist and `/api/me/features` and `/api/me/activity`. 25 new problem codes. |
+| API       | `libs/api/admin` (`AdminModule`, `AdminApiModule`)                       | `AdminSettingsService`, `FeatureFlagsService` (also `isEnabled` / `assertEnabled` for other modules), `RetentionService` (+ `runNightly` for the worker), `UserAdminService`, `SystemHealthService`, `ExperienceService`.                                                                                                                |
+| Domain    | `libs/domain/src/lib/admin/*`                                            | `FLAG_CATALOG` and `flagAppliesTo`, `RETENTION_CATALOG` with `applyLegalHolds` and `retentionScopeKey`, `assessRoleGrant` / `canConfirmRoleGrant` with `MONEY_AUTHORITY_ACTIONS`, and the settings defaults and validators.                                                                                                              |
+| Schema    | `libs/api/db/src/schema/admin.ts`, migration `0017_p14_admin`            | `admin_change_requests`, `retention_policies`, `legal_holds`, `retention_runs` and `retention_run_items` (append-only), `maintenance_notices`, `owner_invites`; columns on `feature_flags` (rollout) and `people.anonymised_at`.                                                                                                         |
+| Policy    | `libs/domain/.../authorization/policy.ts`                                | New actions `flags.confirm_finance`, `retention.confirm` and `legal_hold.manage`; the Auditor also gains `integrity.run` (screen 113) and `legal_hold.manage`.                                                                                                                                                                           |
+| Seed      | `libs/seed/src/lib/admin.ts` (prefix `91`), `apps/api/src/seed/admin.ts` | Retention periods at their provisional defaults, the capability switches with a Bengaluru and Berlin pilot, a money-affecting change waiting for the Finance Controller, an active and a released legal hold, a maintenance notice and two owner invitations. Adds the `sandbox-auditor` user.                                           |
+| Worker    | `apps/worker/src/app/jobs.service.ts`                                    | `admin.retention.nightly` at 01:00 UTC (`RETENTION_SWEEP_TOPIC`, fixed scope) and `admin.owner_invited` for the invitation email.                                                                                                                                                                                                        |
+| Tests     | `apps/api-e2e/src/admin/`, `apps/api-e2e/src/admin/support.ts`           | 32 scenarios; invariant rows 77-81.                                                                                                                                                                                                                                                                                                      |
+
+Three rules hold the phase together. A **legal hold beats retention**: `applyLegalHolds` in `libs/domain`
+takes every held record out of the list before anything is touched, and the append-only run report names
+the hold that kept it. A **flag is not authorization**: `FeatureFlagsService.isEnabled` only says whether a
+capability is revealed, and every caller asserts the action through `PolicyService` as well, so a flag that
+is on with `allowed: false` still refuses. **Administration cannot create authority**: a role grant that
+confers money or approval authority the requester does not hold stays pending until a second person who
+holds it confirms, and approval limits never travel with a role.
+
+Every retention period ships as a **provisional default pending finance and legal sign-off**
+(`retention_policies.signoff_status` is `provisional` on all twelve categories), not an approved legal
+position. Nine of them are periods finance and legal can still change and have to confirm: financial
+records and evidence 8 years after the fiscal year closes with a 7-year minimum, event records 8 years,
+survey responses 24 months, event photos 12 months, analytics 25 months, notifications 12 months, webhook
+deliveries 90 days, leaver anonymisation 90 days. The other three are locked, so sign-off confirms a stated
+policy rather than a period anyone could shorten: ledger journals and the audit log are never deleted, and
+attendee needs go 30 days after the event closes.
+
+Not in this half: the Angular screens; entitlements and plan gating (105a is deferred); the demo
+environment (102c, a separate deployment); segregation-of-duties rules and access-review campaigns (113,
+tabs 2 and 3); break-glass request and approval (112, the grant table exists); AI retention categories
+(Phase 13 owns the AI area); Keycloak session lifetimes are stored and shown but not pushed to the realm;
+`sync_runs` are kept while their messages reference them, so the webhook delivery log is what the
+`integration_logs` category removes.
+
 ## Rules for every phase agent
 
 1. **Owned paths only.** Each phase below lists the paths it owns. Shared surfaces belong to the integrator (`git-worktree-workflow.mdc`): `package.json`, lockfile, `nx.json`, `tsconfig.base.json`, `eslint.config.mjs`, `.stylelintrc.mjs`, `libs/contracts/src/lib/{common,endpoint,endpoints,registry}.ts` and `index.ts`, `libs/api/db/**`, `libs/domain/src/index.ts` and `authorization/policy.ts`, `apps/api/src/app/app.module.ts`, `apps/worker/src/app/worker.module.ts`, `apps/api/src/seed/extensions.ts`, `apps/web/src/app/**`, `libs/web/ui/**`, `libs/web/data-access/**`, `apps/web-e2e/visual/screens.json`, `docs/testing/invariant-scenarios.md`, `infra/**`, `.cursor/**`, `.github/**`. Put requested changes to them in your report.
@@ -188,7 +227,7 @@ link lives on the query-log row).
 9. **Web.** Phase 2 creates `libs/web/ui`, `libs/web/data-access` (on `createApiClient`) and `libs/web/shell`. Each screen group is `libs/web/features/<group>` (tags `type:feature`, `scope:web`) exporting `Routes`; features never import each other; the integrator wires lazy routes in `apps/web`. Light theme only.
 10. **Done** means `/functional-check` and `scripts/gate.sh` green, evidence under `evidence/<phase-id>/`.
 
-Reserved seed id prefixes: `10`-`24` tenancy and finance, `25`-`27` GL accounts, GL mappings and vendors (P3), `30`-`36` org (`36` org unit versions, P3), `40`-`42` people and memberships, `50` Keycloak subjects, `51` subjects in the Hyland SSO stand-in realm, `60`-`68` categories, plan, reason codes, DoA, flags, templates, `70` budgets. Phase 3 rows inside earlier prefixes start at n = 100 (n = 1000 for rates and closure rows) so Phase 1 ids never collide. `71` is used by P4 (demo budgets), `72`-`76` by P5, `77`-`79` by P6, `80`-`86` by P7 to P9, `90` by P12 (integrations), `91` by P13 (AI). Next free: `92`+.
+Reserved seed id prefixes: `10`-`24` tenancy and finance, `25`-`27` GL accounts, GL mappings and vendors (P3), `30`-`36` org (`36` org unit versions, P3), `40`-`42` people and memberships, `50` Keycloak subjects, `51` subjects in the Hyland SSO stand-in realm, `60`-`68` categories, plan, reason codes, DoA, flags, templates, `70` budgets. Phase 3 rows inside earlier prefixes start at n = 100 (n = 1000 for rates and closure rows) so Phase 1 ids never collide. `71` is used by P4 (demo budgets), `72`-`76` by P5, `77`-`79` by P6, `80`-`86` by P7 to P9, `90` by P12 (integrations), `91` by P13 (AI, `documents`) and P14 (administration, `feature_flags` and the other admin tables; the two sets overlap on n = 1-3 but land in different tables). Next free: `92`+.
 
 ## Phase map
 

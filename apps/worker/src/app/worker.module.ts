@@ -1,3 +1,4 @@
+import { AdminModule } from '@bf/api/admin';
 import { ApprovalsModule } from '@bf/api/approvals';
 import { ContributionsModule } from '@bf/api/contributions';
 import { ChannelsModule } from '@bf/api/channels';
@@ -35,6 +36,7 @@ class WorkerHealthController {
     ApprovalsModule,
     ReportsModule,
     IntegrationsModule,
+    AdminModule,
   ],
   providers: [JobsService],
   controllers: [WorkerHealthController],
