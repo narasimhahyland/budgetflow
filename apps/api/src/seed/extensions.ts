@@ -5,6 +5,7 @@ import { seedAdmin } from './admin';
 import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
 import { seedClose } from './close';
+import { seedEcosystem } from './ecosystem';
 import { seedEvents } from './events';
 import { seedEventsDepth } from './events-depth';
 import { seedIntegrations } from './integrations';
@@ -60,5 +61,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'retention periods, capability switches, legal holds, a maintenance notice and owner invites',
     phase: 'P14',
     run: seedAdmin,
+  },
+  {
+    name: 'BI and assistant connectors, an allowed no-code platform, marketplace partners and widgets',
+    phase: 'P16',
+    run: seedEcosystem,
   },
 ];

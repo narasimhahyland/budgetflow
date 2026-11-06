@@ -326,6 +326,83 @@ const ADAPTIVE_PLAN = {
   ],
 };
 
+// Marketplace partners (Phase 16, 092d). Fictional partners with fictional prices.
+//
+// Booking answers are *stored*, not queued: a scenario arms the answer for the booking id it just
+// created, and the catalogue keeps returning it. Nothing another scenario does can consume it, so
+// two runs in the same stack never race for the same armed reply.
+const PARTNER_CATALOGUES = {
+  cityquest: [
+    {
+      externalRef: 'CQ-TREASURE-BLR',
+      title: 'Team treasure hunt, Bengaluru',
+      category: 'experiences',
+      city: 'Bengaluru',
+      pricePerHeadMinor: 185000,
+      currency: 'INR',
+      capacityMin: 20,
+      capacityMax: 120,
+      ratingBps: 45000,
+      ratingCount: 4,
+      includes: ['Two game masters', 'Props and clue kits', 'Prizes for the winning team'],
+      cancellationTerms: 'Free until 7 days before; half the deposit after that.',
+      deliveryCountries: [],
+    },
+    {
+      externalRef: 'CQ-ESCAPE-HYD',
+      title: 'Escape room afternoon, Hyderabad',
+      category: 'experiences',
+      city: 'Hyderabad',
+      pricePerHeadMinor: 140000,
+      currency: 'INR',
+      capacityMin: 10,
+      capacityMax: 60,
+      ratingBps: 42000,
+      ratingCount: 2,
+      includes: ['Three rooms booked out', 'Host and scorekeeping'],
+      cancellationTerms: 'Free until 5 days before.',
+      deliveryCountries: [],
+    },
+  ],
+  'fresh-plate': [
+    {
+      externalRef: 'FP-FESTIVAL-HYD',
+      title: 'Festival buffet, Hyderabad',
+      category: 'catering',
+      city: 'Hyderabad',
+      pricePerHeadMinor: 140000,
+      currency: 'INR',
+      capacityMin: 50,
+      capacityMax: 400,
+      ratingBps: 40000,
+      ratingCount: 3,
+      includes: ['Vegetarian and vegan counters', 'Service staff', 'Crockery and clearing'],
+      cancellationTerms: 'Final numbers 3 days before; deposit held after that.',
+      deliveryCountries: [],
+    },
+  ],
+  'kindly-gifts': [
+    {
+      externalRef: 'KG-SNACK-KIT',
+      title: 'Snack and team kit',
+      category: 'gifts_and_kits',
+      city: 'Bengaluru',
+      pricePerHeadMinor: 3500,
+      currency: 'USD',
+      capacityMin: 1,
+      capacityMax: 2000,
+      ratingBps: 44000,
+      ratingCount: 6,
+      includes: ['Snack box', 'Notebook and pen', 'Delivery'],
+      cancellationTerms: 'Free until dispatch.',
+      deliveryCountries: ['IN', 'US', 'GB'],
+    },
+  ],
+};
+
+/** booking id -> the answer the partner will give for it. */
+const partnerAnswers = new Map();
+
 // Routing ------------------------------------------------------------------------------------
 
 /** path -> handler for GET fetches. Each returns the provider's own envelope shape. */
@@ -396,7 +473,15 @@ const server = createServer(async (req, res) => {
   if (path === '/_control/reset' && req.method === 'POST') {
     armed.clear();
     received.length = 0;
+    partnerAnswers.clear();
     return json(res, 200, { reset: true });
+  }
+  // Decides what a marketplace partner will answer for one booking (Phase 16, 092d).
+  if (path === '/_control/partner-answer' && req.method === 'POST') {
+    const body = JSON.parse((await readBody(req)) || '{}');
+    if (!body.bookingId) return json(res, 422, { error: 'bookingId is required' });
+    partnerAnswers.set(body.bookingId, { ...body });
+    return json(res, 200, { armed: body.bookingId });
   }
   if (path === '/_control/arm' && req.method === 'POST') {
     const body = JSON.parse((await readBody(req)) || '{}');
@@ -408,6 +493,16 @@ const server = createServer(async (req, res) => {
     return json(res, 200, {
       items: want ? received.filter((r) => r.path === want) : received,
     });
+  }
+
+  // Marketplace partner catalogue: offers plus any answers to bookings it was asked about -------
+  const catalogue = /^\/partners\/([a-z0-9-]+)\/catalogue$/.exec(path);
+  if (catalogue && req.method === 'GET') {
+    const offers = PARTNER_CATALOGUES[catalogue[1]];
+    if (!offers) return json(res, 404, { error: `no mock partner ${catalogue[1]}` });
+    const failed = armedFailure(path);
+    if (failed) return json(res, failed, { error: 'The partner is unavailable' });
+    return json(res, 200, { offers, bookingAnswers: [...partnerAnswers.values()] });
   }
 
   // Webhook receivers: where BudgetFlow delivers its signed outbound webhooks -------------------
