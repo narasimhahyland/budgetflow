@@ -2,7 +2,8 @@
 // immutable close snapshot and reconciles to the ledger, that the FX bridge explains a currency
 // movement without ever entering spend or variance, that an open-period pack is marked Draft on
 // every page, that a page with no data keeps its place with a statement, and that generation runs
-// in the worker and lands in the DocumentStore behind a short-lived signed URL.
+// in the worker and lands in the DocumentStore behind a short-lived signed URL, and that the pack
+// admits exactly the roles holding `report.board_pack` at tenant scope.
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import {
   BoardPack,
@@ -11,6 +12,7 @@ import {
   BoardPackGenerationList,
   ClosePeriodList,
 } from '@bf/contracts';
+import type { SeedUserId } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 
@@ -297,16 +299,55 @@ test.describe('board and FP&A pack', () => {
     expect(((await replay.json()) as { id: string }).id).toBe(first.id);
   });
 
-  test('the pack is for finance, the CEO and auditors; owner roles are refused', async ({
+  // The pack is gated on `report.board_pack`, which is held only at tenant scope, so the navigation
+  // entry can name the same permission the endpoint checks. This pins the admitted set on both
+  // sides: the roles that may build it, the owner roles that may not, and that `GET /api/me`
+  // reports the action for exactly the first group.
+  const ADMITTED = ['ceo', 'finance-admin', 'finance-controller', 'auditor', 'analyst'] as const;
+  const REFUSED = [
+    'budget-owner',
+    'department-head',
+    'regional-manager',
+    'location-manager',
+  ] as const;
+
+  test('the pack admits finance, the CEO, auditors and the analyst; owner roles are refused', async ({
     request,
   }) => {
-    for (const user of ['finance-controller', 'ceo', 'auditor'] as const) {
+    for (const user of ADMITTED) {
       const allowed = await request.get('/api/reports/board-pack', { headers: await as(user) });
       expect(allowed.status(), `${user} may build the pack`).toBe(200);
     }
-    for (const user of ['regional-manager', 'employee'] as const) {
+    for (const user of [...REFUSED, 'employee', 'event-organizer', 'org-admin'] as const) {
       const refused = await request.get('/api/reports/board-pack', { headers: await as(user) });
       expect([403, 404], `${user} may not build the pack`).toContain(refused.status());
+      // Refused for every pack endpoint, not just the preview.
+      const listed = await request.get('/api/reports/board-pack/generations', {
+        headers: await as(user),
+      });
+      expect([403, 404], `${user} may not list packs`).toContain(listed.status());
+    }
+  });
+
+  test('report.board_pack in GET /api/me names exactly the roles the pack admits', async ({
+    request,
+  }) => {
+    const holds = async (user: SeedUserId) => {
+      const me = await request.get('/api/me', { headers: await as(user) });
+      expect(me.status(), `GET /api/me as ${user}`).toBe(200);
+      return ((await me.json()) as { permissions: string[] }).permissions;
+    };
+    for (const user of ADMITTED) {
+      const permissions = await holds(user);
+      expect(permissions, `${user} holds report.board_pack`).toContain('report.board_pack');
+    }
+    for (const user of REFUSED) {
+      const permissions = await holds(user);
+      // The owner roles do read `report.read` here, which is why the pack needs its own action.
+      expect(permissions, `${user} reads report.read at the tenant`).toContain('report.read');
+      expect(permissions, `${user} does not hold report.board_pack`).not.toContain(
+        'report.board_pack',
+      );
     }
   });
 });

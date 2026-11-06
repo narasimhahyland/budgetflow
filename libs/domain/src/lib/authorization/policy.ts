@@ -60,6 +60,13 @@ export const ACTIONS = [
   'forecast.manage',
   'report.read',
   'report.schedule',
+  /**
+   * Build, preview and generate the board and FP&A pack (016a). Separate from `report.read` because
+   * the pack is tenant-wide finance work: `report.read` is also granted at `owned` scope, which
+   * covers a tenant resource as soon as the actor owns a budget, so it cannot tell the roles the
+   * pack admits from the owner roles it refuses. This action is held only at tenant scope.
+   */
+  'report.board_pack',
   'audit.read',
   'integrity.run',
   'integrity.read',
@@ -121,6 +128,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'budget.create_root': 'tenant',
     'report.read': 'tenant',
     'report.schedule': 'tenant',
+    'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
     'org.read': 'tenant',
@@ -156,6 +164,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'forecast.manage': 'tenant',
     'report.read': 'tenant',
     'report.schedule': 'tenant',
+    'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
     'integrity.run': 'tenant',
@@ -180,6 +189,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'request.approve': 'tenant',
     'report.read': 'tenant',
     'report.schedule': 'tenant',
+    'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
     'integrity.run': 'tenant',
@@ -214,6 +224,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'actuals.read': 'tenant',
     'report.read': 'tenant',
     'report.schedule': 'tenant',
+    'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
     'integrity.read': 'tenant',
@@ -234,6 +245,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'ledger.read': 'tenant',
     'report.read': 'tenant',
     'report.schedule': 'tenant',
+    'report.board_pack': 'tenant',
     'event.read': 'tenant',
   },
 };

@@ -40,8 +40,8 @@ const NEEDS: Record<string, string> = {
   Reports: 'report.read',
   Utilization: 'report.read',
   'Forecast and variance': 'report.read',
-  // 016a is gated on audit.read, not the report.read the endpoint names: see the note in nav.ts.
-  'Board and FP&A pack': 'audit.read',
+  // 016a names the action its endpoint checks; it is held only at tenant scope, unlike report.read.
+  'Board and FP&A pack': 'report.board_pack',
   'Approval history': 'audit.read',
   'Audit log': 'audit.read',
   'Org import': 'org.manage',
@@ -56,7 +56,7 @@ const READ = ['Budget hierarchy', 'Budget list', 'Budget requests'];
 // follows request.create, which covers the home location's budgets as well as owned ones.
 const REQUESTS = ['Request funds', 'My requests', 'My budgets'];
 const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
-// The Insights entries report.read alone opens; 016a needs audit.read and is listed per role.
+// The Insights entries report.read alone opens; 016a needs report.board_pack and is listed per role.
 const INSIGHTS_READ = ['Reports', 'Utilization', 'Forecast and variance'];
 const OWNER = [
   'Home',
@@ -156,8 +156,8 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Rules and policies',
   ],
   'integration-admin': ['Home', 'Events', 'Integrations'],
-  // The analyst may build the pack but holds no audit.read, so 016a is not in their navigation.
-  analyst: ['Home', ...READ, 'Events', ...ORG, ...INSIGHTS_READ],
+  // The analyst holds report.board_pack, so 016a is in their navigation; the audit entries are not.
+  analyst: ['Home', ...READ, 'Events', ...ORG, ...INSIGHTS_READ, 'Board and FP&A pack'],
 };
 
 for (const [role, expected] of Object.entries(EXPECTED) as [RoleId, string[]][]) {

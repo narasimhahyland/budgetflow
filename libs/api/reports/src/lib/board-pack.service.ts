@@ -89,14 +89,18 @@ export class BoardPackService {
 
   private assertCanBuild(actor: RequestActor): void {
     // Building the pack is tenant-wide finance work; owner-scoped roles get a 403, never a subset.
-    this.policy.assert(
-      actor,
-      'report.read',
-      { kind: 'tenant', tenantId: actor.tenantId },
-      'board pack',
-    );
-    if (!this.reads.tenantWide(actor))
-      throw ApiProblem.forbidden('The board pack is open to finance roles, the CEO and auditors.');
+    // `report.board_pack` is held only at tenant scope, so it admits exactly the roles the pack is
+    // for and the navigation can be gated on the same permission (016a).
+    const decision = this.policy.can(actor, 'report.board_pack', {
+      kind: 'tenant',
+      tenantId: actor.tenantId,
+    });
+    if (!decision.allowed) {
+      if (!decision.visible) throw ApiProblem.notFound('board pack');
+      throw ApiProblem.forbidden(
+        'The board pack is open to finance roles, the CEO, auditors and the read-only analyst.',
+      );
+    }
   }
 
   preview(actor: RequestActor, opts: BoardPackOptions): Promise<BoardPack> {
