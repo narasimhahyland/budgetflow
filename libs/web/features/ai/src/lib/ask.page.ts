@@ -233,35 +233,37 @@ import { LoadState } from './load-state';
               (retry)="conversations.reload()"
             />
             @if (conversations.hasValue()) {
-              @if (conversationList().length === 0) {
-                <p class="bf-empty" data-testid="history-empty">
-                  Conversations you start are private to you and kept
-                  {{ historyDays() }} days.
-                </p>
-              } @else {
-                <ul class="bf-list" data-testid="conversation-list">
-                  @for (c of conversationList(); track c.id) {
-                    <li class="bf-list__item" [attr.data-testid]="'conversation-' + c.id">
-                      <div class="bf-list__row bf-history__row">
-                        <span class="bf-history__title">{{ c.title }}</span>
-                        <button
-                          mat-button
-                          type="button"
-                          class="bf-history__delete"
-                          (click)="deleteConversation(c.id)"
-                          [attr.aria-label]="'Delete conversation ' + c.title"
+              <!-- Fixed height: a 30-day history grows, and the panel beside it should not move. -->
+              <div class="bf-history" data-testid="conversation-list">
+                @if (conversationList().length === 0) {
+                  <p class="bf-empty" data-testid="history-empty">
+                    Conversations you start are private to you and kept {{ historyDays() }} days.
+                  </p>
+                } @else {
+                  <ul class="bf-list">
+                    @for (c of conversationList(); track c.id) {
+                      <li class="bf-list__item" [attr.data-testid]="'conversation-' + c.id">
+                        <div class="bf-list__row bf-history__row">
+                          <span class="bf-history__title">{{ c.title }}</span>
+                          <button
+                            mat-button
+                            type="button"
+                            class="bf-history__delete"
+                            (click)="deleteConversation(c.id)"
+                            [attr.aria-label]="'Delete conversation ' + c.title"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        <span class="bf-cell__secondary"
+                          >{{ c.turnCount }} {{ c.turnCount === 1 ? 'question' : 'questions' }} ·
+                          {{ c.channel }}</span
                         >
-                          Delete
-                        </button>
-                      </div>
-                      <span class="bf-cell__secondary"
-                        >{{ c.turnCount }} {{ c.turnCount === 1 ? 'question' : 'questions' }} ·
-                        {{ c.channel }}</span
-                      >
-                    </li>
-                  }
-                </ul>
-              }
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
             }
           </section>
           <section class="bf-card" aria-labelledby="how-title">
@@ -316,6 +318,10 @@ import { LoadState } from './load-state';
        past the card. Scoped here; the shared rule in libs/web/ui needs the same fix. */
     .bf-list__item {
       box-sizing: border-box;
+    }
+    .bf-history {
+      height: 180px;
+      overflow-y: auto;
     }
     .bf-history__row {
       align-items: center;

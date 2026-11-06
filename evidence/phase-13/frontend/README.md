@@ -76,6 +76,9 @@ and tablet variants of the ask panel and the outlook list were opened and read.
 - `[data-testid=log-rows]` (113a query log) — which calls the log holds depends on what the other AI
   captures logged moments earlier. The log's content is asserted in the journey instead.
 - `[data-testid=conversation-list]` (011a) — every capture that asks a question adds a conversation.
+  Masking the content was not enough: the list's height moved the card beside it, which CI caught as
+  a diff the local run could not. The history panel now has a fixed height and scrolls, and the
+  baselines were verified against a stack carrying twelve extra conversations.
 
 ## Bugs the visual pass found and fixed
 
