@@ -1,0 +1,161 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">My activity</h1>
+    <p class="bf-page__subtitle">
+      Everything you did in BudgetFlow and everything that happened to your requests. Only you see
+      this page; it never shows anybody else's activity.
+    </p>
+  </div>
+</header>
+
+<bf-load-state
+  [loading]="activity.isLoading() && !activity.hasValue()"
+  [error]="activity.error()"
+  what="your activity"
+  (retry)="activity.reload()"
+/>
+
+@if (valueOf(activity); as a) {
+  <section class="bf-card" aria-labelledby="totals-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="totals-title">
+        Your year{{ a.totals.fiscalYearLabel ? ' (' + a.totals.fiscalYearLabel + ')' : '' }}
+      </h2>
+    </div>
+    <div class="bf-card__body">
+      <div class="bf-kpis">
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Requests submitted</p>
+          <p class="bf-kpi__value" data-testid="requests-submitted">
+            {{ a.totals.requestsSubmitted }}
+          </p>
+        </div>
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Requests approved</p>
+          <p class="bf-kpi__value">{{ a.totals.requestsApproved }}</p>
+        </div>
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Approved in total</p>
+          <p class="bf-kpi__value">
+            @if (a.totals.approvedTotal; as total) {
+              <bf-money [amountMinor]="total.amountMinor" [currency]="total.currency" />
+            } @else {
+              Nothing yet
+            }
+          </p>
+          <p class="bf-kpi__delta">In the reporting currency.</p>
+        </div>
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Events attended</p>
+          <p class="bf-kpi__value">{{ a.totals.eventsAttended }}</p>
+        </div>
+        <div class="bf-kpi">
+          <p class="bf-kpi__label">Events organised</p>
+          <p class="bf-kpi__value">{{ a.totals.eventsOrganised }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bf-card" aria-labelledby="timeline-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="timeline-title">What happened</h2>
+        <p class="bf-card__hint" data-testid="entry-count">
+          {{ a.entryCount }} entries between {{ a.from }} and {{ a.to }}, newest first.
+        </p>
+      </div>
+    </div>
+    <div class="bf-filters">
+      <mat-form-field appearance="outline">
+        <mat-label>Kinds of activity</mat-label>
+        <mat-select
+          multiple
+          data-testid="activity-types"
+          [ngModel]="chosenTypes()"
+          (ngModelChange)="chosenTypes.set($event)"
+        >
+          @for (t of types; track t) {
+            <mat-option [value]="t">{{ typeLabel[t] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>From</mat-label>
+        <input
+          matInput
+          type="date"
+          data-testid="activity-from"
+          [ngModel]="from()"
+          (ngModelChange)="from.set($event)"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>To</mat-label>
+        <input
+          matInput
+          type="date"
+          [ngModel]="to()"
+          (ngModelChange)="to.set($event)"
+        />
+      </mat-form-field>
+      @if (filtered()) {
+        <button mat-button type="button" (click)="clear()">Clear filters</button>
+      }
+    </div>
+
+    @if (a.entries.length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>Nothing here yet</h3>
+        <p satEmptyStateDescription>
+          @if (filtered()) {
+            Nothing matches these filters. Widen the dates or choose more kinds of activity.
+          } @else {
+            Your requests, events and approvals will show here as you use BudgetFlow.
+          }
+        </p>
+        @if (filtered()) {
+          <button mat-stroked-button type="button" (click)="clear()">Clear filters</button>
+        }
+      </sat-empty-state>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="a.entries" aria-label="Your activity, newest first">
+          <ng-container matColumnDef="when">
+            <th mat-header-cell *matHeaderCellDef>When</th>
+            <td mat-cell *matCellDef="let e">
+              <span class="bf-cell__primary" data-testid="relative-time">{{
+                e.occurredAt | bfDateTime: timezone()
+              }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="what">
+            <th mat-header-cell *matHeaderCellDef>What happened</th>
+            <td mat-cell *matCellDef="let e">
+              <span class="bf-cell__primary">{{ e.summary }}</span>
+              @if (e.onBehalfOfName) {
+                <span class="bf-cell__secondary">As a delegate for {{ e.onBehalfOfName }}</span>
+              }
+              @if (e.itemType) {
+                <span class="bf-cell__secondary">{{ e.itemType }}</span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="kind">
+            <th mat-header-cell *matHeaderCellDef>Kind</th>
+            <td mat-cell *matCellDef="let e">
+              <sat-status-tag [status]="e.byMe ? 'info' : 'neutral'">{{
+                typeLabel[e.type] ?? e.type
+              }}</sat-status-tag>
+              <span class="bf-cell__secondary">{{
+                e.byMe ? 'You did this' : 'This happened to you'
+              }}</span>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+}

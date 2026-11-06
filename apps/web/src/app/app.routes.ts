@@ -1,6 +1,7 @@
 import { Route } from '@angular/router';
 import { authGuard, sessionGuard } from '@bf/web/data-access';
 import { accountingRoutes } from '@bf/web/features/accounting';
+import { adminRoutes } from '@bf/web/features/admin';
 import { authRoutes } from '@bf/web/features/auth';
 import { closeRoutes } from '@bf/web/features/close';
 import { financeAdminRoutes } from '@bf/web/features/finance-admin';
@@ -31,6 +32,9 @@ export const appRoutes: Route[] = [
       },
       ...orgRoutes,
       ...financeAdminRoutes,
+      // Before the lazily loaded `my` and `admin/*` areas: `my/activity` and the administration
+      // screens are plain routes here and a lazy area would otherwise swallow the path.
+      ...adminRoutes,
       {
         path: 'events',
         loadChildren: () => import('@bf/web/features/events').then((m) => m.eventRoutes),

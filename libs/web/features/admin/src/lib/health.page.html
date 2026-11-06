@@ -1,0 +1,339 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">System health</h1>
+    <p class="bf-page__subtitle">
+      How the services, queues and nightly jobs behind BudgetFlow are doing. No budgets or amounts
+      appear on this page.
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    <button mat-stroked-button type="button" [disabled]="busy()" (click)="health.reload()">
+      Refresh
+    </button>
+    @if (canManage() && !scheduling()) {
+      <button
+        mat-flat-button
+        type="button"
+        data-testid="schedule-notice"
+        (click)="scheduling.set(true); failure.set(null); notice.set(null)"
+      >
+        Announce maintenance
+      </button>
+    }
+  </div>
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success" class="bf-banner">
+    <sat-banner-message data-testid="health-notice">{{ notice() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (failure()) {
+  <sat-banner variant="important" class="bf-banner">
+    <sat-banner-message data-testid="health-error">{{ failure() }}</sat-banner-message>
+  </sat-banner>
+}
+
+<bf-load-state
+  [loading]="health.isLoading() && !health.hasValue()"
+  [error]="health.error()"
+  what="the system health"
+  (retry)="health.reload()"
+/>
+
+@if (valueOf(health); as h) {
+  @if (h.activeMaintenanceNotice) {
+    <sat-banner variant="warning" class="bf-banner">
+      <sat-banner-message data-testid="active-maintenance">{{
+        h.activeMaintenanceNotice
+      }}</sat-banner-message>
+    </sat-banner>
+  }
+
+  <section class="bf-card" aria-labelledby="overall-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="overall-title">Overall</h2>
+        <p class="bf-card__hint">{{ overallNote() }}</p>
+      </div>
+      <sat-status-tag data-testid="overall-status" [status]="statusTone[h.overall]">{{
+        statusLabel[h.overall]
+      }}</sat-status-tag>
+    </div>
+    <dl class="bf-facts">
+      <div>
+        <dt>Environment</dt>
+        <dd>{{ h.environment }}</dd>
+      </div>
+      <div>
+        <dt>Version</dt>
+        <dd>{{ h.version }}</dd>
+      </div>
+      <div>
+        <dt>Checked</dt>
+        <dd data-testid="relative-time">{{ h.checkedAt | bfDateTime: timezone() }}</dd>
+      </div>
+      <div>
+        <dt>Messages waiting to publish</dt>
+        <dd>{{ outboxNote(h) }}</dd>
+      </div>
+      <div>
+        <dt>Services needing attention</dt>
+        <dd>{{ attention().length }}</dd>
+      </div>
+      <div>
+        <dt>Nightly jobs that failed</dt>
+        <dd>{{ failedJobs().length }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="bf-card" aria-labelledby="services-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="services-title">Services</h2>
+    </div>
+    <ul class="bf-tiles">
+      @for (service of h.services; track service.key) {
+        <li class="bf-tile">
+          <div class="bf-tile__head">
+            <span class="bf-cell__primary">{{ service.name }}</span>
+            <sat-status-tag
+              [attr.data-testid]="'service-' + service.key"
+              [status]="statusTone[service.status]"
+              >{{ statusLabel[service.status] }}</sat-status-tag
+            >
+          </div>
+          <p class="bf-tile__detail">{{ service.detail }}</p>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="bf-card" aria-labelledby="queues-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="queues-title">Queues</h2>
+    </div>
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="h.queues" aria-label="Background job queues">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Queue</th>
+          <td mat-cell *matCellDef="let q">{{ q.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="waiting">
+          <th mat-header-cell *matHeaderCellDef class="bf-num">Waiting</th>
+          <td mat-cell *matCellDef="let q" class="bf-num">{{ q.waiting }}</td>
+        </ng-container>
+        <ng-container matColumnDef="active">
+          <th mat-header-cell *matHeaderCellDef class="bf-num">Running</th>
+          <td mat-cell *matCellDef="let q" class="bf-num">{{ q.active }}</td>
+        </ng-container>
+        <ng-container matColumnDef="failed">
+          <th mat-header-cell *matHeaderCellDef class="bf-num">Failed in 24 hours</th>
+          <td mat-cell *matCellDef="let q" class="bf-num">{{ q.failedLast24h }}</td>
+        </ng-container>
+        <ng-container matColumnDef="oldest">
+          <th mat-header-cell *matHeaderCellDef class="bf-num">Oldest waiting</th>
+          <td mat-cell *matCellDef="let q" class="bf-num">
+            {{ q.oldestWaitingSeconds === null ? 'Nothing waiting' : q.oldestWaitingSeconds + 's' }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="queueColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: queueColumns"></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="bf-card" aria-labelledby="jobs-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="jobs-title">Nightly jobs</h2>
+    </div>
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="h.nightlyJobs" aria-label="Nightly jobs">
+        <ng-container matColumnDef="job">
+          <th mat-header-cell *matHeaderCellDef>Job</th>
+          <td mat-cell *matCellDef="let j">{{ j.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="schedule">
+          <th mat-header-cell *matHeaderCellDef>Runs</th>
+          <td mat-cell *matCellDef="let j">{{ j.schedule }}</td>
+        </ng-container>
+        <ng-container matColumnDef="lastRun">
+          <th mat-header-cell *matHeaderCellDef>Last run</th>
+          <td mat-cell *matCellDef="let j">
+            @if (j.lastRunAt) {
+              <span class="bf-cell__primary" data-testid="relative-time">{{
+                j.lastRunAt | bfDateTime: timezone()
+              }}</span>
+              <span class="bf-cell__secondary">
+                {{ j.durationMs === null ? '' : j.durationMs + ' ms' }}
+              </span>
+            } @else {
+              <span class="bf-cell__secondary">Has not run in this environment</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="result">
+          <th mat-header-cell *matHeaderCellDef>Result</th>
+          <td mat-cell *matCellDef="let j">
+            <sat-status-tag [attr.data-testid]="'job-' + j.job" [status]="jobTone[j.status]">{{
+              jobLabel[j.status]
+            }}</sat-status-tag>
+            <span class="bf-cell__secondary">{{ j.result }}</span>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="jobColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: jobColumns"></tr>
+      </table>
+    </div>
+  </section>
+}
+
+<section class="bf-card" aria-labelledby="notices-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="notices-title">Planned maintenance</h2>
+      <p class="bf-card__hint">
+        A notice appears as a banner in the app from the time you choose until the work ends.
+      </p>
+    </div>
+  </div>
+  @if (scheduling()) {
+    <form class="bf-inline-form" (ngSubmit)="schedule()">
+      <mat-form-field appearance="outline">
+        <mat-label>What people should know</mat-label>
+        <input
+          matInput
+          name="message"
+          data-testid="notice-message"
+          [ngModel]="message()"
+          (ngModelChange)="message.set($event)"
+        />
+      </mat-form-field>
+      <div class="bf-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Starts</mat-label>
+          <input
+            matInput
+            type="datetime-local"
+            name="startsAt"
+            data-testid="notice-start"
+            [ngModel]="startsAt()"
+            (ngModelChange)="startsAt.set($event)"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Ends</mat-label>
+          <input
+            matInput
+            type="datetime-local"
+            name="endsAt"
+            data-testid="notice-end"
+            [ngModel]="endsAt()"
+            (ngModelChange)="endsAt.set($event)"
+          />
+        </mat-form-field>
+      </div>
+      <div class="bf-form__actions">
+        <button
+          mat-flat-button
+          type="submit"
+          data-testid="save-notice"
+          [disabled]="busy() || !message().trim() || !startsAt() || !endsAt()"
+        >
+          Schedule the notice
+        </button>
+        <button mat-button type="button" (click)="scheduling.set(false)">Cancel</button>
+      </div>
+    </form>
+  }
+  <bf-load-state
+    [loading]="notices.isLoading() && !notices.hasValue()"
+    [error]="notices.error()"
+    what="the maintenance notices"
+    [lines]="2"
+    (retry)="notices.reload()"
+  />
+  @if (valueOf(notices); as list) {
+    @if (list.items.length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>No maintenance is planned</h3>
+        <p satEmptyStateDescription>
+          Scheduled work appears here and as a banner in the app before it starts.
+        </p>
+      </sat-empty-state>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="list.items" aria-label="Planned maintenance notices">
+          <ng-container matColumnDef="message">
+            <th mat-header-cell *matHeaderCellDef>Notice</th>
+            <td mat-cell *matCellDef="let n">
+              <span class="bf-cell__primary">{{ n.message }}</span>
+              <span class="bf-cell__secondary">
+                Announced by {{ n.createdByName ?? 'someone who has left' }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="window">
+            <th mat-header-cell *matHeaderCellDef>When</th>
+            <td mat-cell *matCellDef="let n">
+              <span class="bf-cell__primary" data-testid="relative-time">
+                {{ n.startsAt | bfDateTime: timezone() }} to
+                {{ n.endsAt | bfDateTime: timezone() }}
+              </span>
+              <span class="bf-cell__secondary" data-testid="relative-time">
+                Shown in the app from {{ n.showFrom | bfDateTime: timezone() }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let n">
+              <sat-status-tag [status]="n.status === 'scheduled' ? 'info' : 'neutral'">{{
+                n.status === 'scheduled' ? 'Scheduled' : 'Cancelled'
+              }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
+            <td mat-cell *matCellDef="let n">
+              @if (canManage() && n.status === 'scheduled') {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="busy()"
+                  [attr.data-testid]="'cancel-notice-' + n.id"
+                  (click)="cancelling.set(n.id); cancelReason.set('')"
+                >
+                  Cancel notice
+                </button>
+              }
+              @if (cancelling() === n.id) {
+                <form class="bf-inline-form" (ngSubmit)="cancel(n.id)">
+                  <bf-reason-field
+                    label="Why the work is not happening"
+                    testId="cancel-reason"
+                    [value]="cancelReason()"
+                    (valueChange)="cancelReason.set($event)"
+                  />
+                  <div class="bf-form__actions">
+                    <button
+                      mat-flat-button
+                      type="submit"
+                      data-testid="cancel-notice-submit"
+                      [disabled]="busy() || !cancelReason().trim()"
+                    >
+                      Cancel the notice
+                    </button>
+                    <button mat-button type="button" (click)="cancelling.set(null)">Keep it</button>
+                  </div>
+                </form>
+              }
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="noticeColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: noticeColumns"></tr>
+        </table>
+      </div>
+    }
+  }
+</section>

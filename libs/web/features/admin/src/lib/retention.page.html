@@ -1,0 +1,649 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Data retention and legal holds</h1>
+    <p class="bf-page__subtitle">
+      How long each kind of data is kept, what happens to it then, and the legal holds that stop
+      anything in their scope being destroyed.
+    </p>
+  </div>
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success" class="bf-banner">
+    <sat-banner-message data-testid="retention-notice">{{ notice() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (failure()) {
+  <sat-banner variant="important" class="bf-banner">
+    <sat-banner-message data-testid="retention-error">{{ failure() }}</sat-banner-message>
+  </sat-banner>
+}
+
+@if (valueOf(policies); as list) {
+  <sat-banner variant="warning" class="bf-banner">
+    <sat-banner-message data-testid="provisional-note">
+      All {{ policyRows().length }} periods below are provisional defaults pending finance and legal
+      sign-off. They are not an approved legal position for any country. {{ list.note }}
+    </sat-banner-message>
+  </sat-banner>
+}
+
+<section class="bf-card" aria-labelledby="policies-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="policies-title">What is kept, and for how long</h2>
+      <p class="bf-card__hint" data-testid="automation-summary">
+        {{ automaticCount() }} of {{ policyRows().length }} categories are acted on by the nightly
+        run. The rest are stated policy only: nothing removes them automatically today.
+      </p>
+    </div>
+  </div>
+  <bf-load-state
+    [loading]="policies.isLoading() && !policies.hasValue()"
+    [error]="policies.error()"
+    what="the retention periods"
+    (retry)="policies.reload()"
+  />
+  @if (valueOf(policies)) {
+    <div class="bf-table-scroll">
+      <table
+        mat-table
+        multiTemplateDataRows
+        [dataSource]="policyRows()"
+        aria-label="Retention periods by category"
+      >
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let p">
+            <span class="bf-cell__primary">{{ p.label }}</span>
+            <span class="bf-cell__secondary">{{ p.covers }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="period">
+          <th mat-header-cell *matHeaderCellDef>Kept for</th>
+          <td mat-cell *matCellDef="let p">
+            <span class="bf-cell__primary" [attr.data-testid]="'period-' + p.category">{{
+              p.periodLabel
+            }}</span>
+            @if (p.minimumLabel) {
+              <span class="bf-cell__secondary">Minimum {{ p.minimumLabel }}</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="then">
+          <th mat-header-cell *matHeaderCellDef>Then</th>
+          <td mat-cell *matCellDef="let p">{{ actionLabel[p.action] }}</td>
+        </ng-container>
+        <ng-container matColumnDef="applied">
+          <th mat-header-cell *matHeaderCellDef>Is it acted on?</th>
+          <td mat-cell *matCellDef="let p">
+            <sat-status-tag
+              [attr.data-testid]="'automation-' + p.category"
+              [status]="p.automation === 'automatic' ? 'info' : 'neutral'"
+              >{{ p.automation === 'automatic' ? 'Applied nightly' : 'Stated policy only' }}</sat-status-tag
+            >
+            <span class="bf-cell__secondary">{{ automationLabel(p) }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="signoff">
+          <th mat-header-cell *matHeaderCellDef>Sign-off</th>
+          <td mat-cell *matCellDef="let p">
+            <sat-status-tag
+              [attr.data-testid]="'signoff-' + p.category"
+              [status]="p.signoffStatus === 'approved' ? 'success' : 'warning'"
+              >{{ p.signoffStatus === 'approved' ? 'Approved' : 'Provisional' }}</sat-status-tag
+            >
+            @if (p.signoffNote) {
+              <span class="bf-cell__secondary">{{ p.signoffNote }}</span>
+            }
+            @if (p.locked) {
+              <span class="bf-cell__secondary" [attr.data-testid]="'locked-' + p.category"
+                >Locked: {{ p.lockedReason }}</span
+              >
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
+          <td mat-cell *matCellDef="let p">
+            @if (canEditPolicies() && !p.locked && !p.pendingChange) {
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="busy()"
+                [attr.data-testid]="'edit-' + p.category"
+                (click)="openEdit(p)"
+              >
+                Change period
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="detail">
+          <td mat-cell *matCellDef="let p" [attr.colspan]="policyColumns.length">
+            @if (p.pendingChange; as change) {
+              <bf-pending-change
+                [change]="change"
+                [inForce]="p.periodLabel"
+                [canDecide]="canConfirmPolicy()"
+                [busy]="busy()"
+                [testId]="'pending-' + p.category"
+                (confirm)="openDecision(p, 'confirm')"
+                (decline)="openDecision(p, 'decline')"
+                (cancel)="openDecision(p, 'cancel')"
+              />
+            }
+            @if (deciding(); as open) {
+              @if (open.category === p.category) {
+                <form class="bf-inline-form" (ngSubmit)="decidePolicy(p)">
+                  <h4 class="bf-inline-form__title">
+                    {{
+                      open.decision === 'confirm'
+                        ? 'Confirm the new period'
+                        : open.decision === 'decline'
+                          ? 'Decline the new period'
+                          : 'Withdraw your request'
+                    }}
+                  </h4>
+                  <bf-reason-field
+                    testId="policy-decision-reason"
+                    [value]="decisionReason()"
+                    (valueChange)="decisionReason.set($event)"
+                  />
+                  <div class="bf-form__actions">
+                    <button
+                      mat-flat-button
+                      type="submit"
+                      data-testid="policy-decision-submit"
+                      [disabled]="busy() || !decisionReason().trim()"
+                    >
+                      Save decision
+                    </button>
+                    <button mat-button type="button" (click)="deciding.set(null)">Cancel</button>
+                  </div>
+                </form>
+              }
+            }
+            @if (editing() === p.category) {
+              <form class="bf-inline-form" (ngSubmit)="savePolicy(p)">
+                <h4 class="bf-inline-form__title">Change how long {{ p.label }} is kept</h4>
+                <p class="bf-inline-form__note">
+                  In force today: {{ p.periodLabel }}
+                  @if (p.minimumLabel) {
+                    The shortest period this category accepts is {{ p.minimumLabel }}.
+                  }
+                </p>
+                @if (p.financial) {
+                  <sat-banner variant="warning">
+                    <sat-banner-message>
+                      This is a financial category. Shortening it needs a Finance Controller to
+                      confirm, and the period above stays in force until they do.
+                    </sat-banner-message>
+                  </sat-banner>
+                }
+                <mat-form-field appearance="outline">
+                  <mat-label>Days to keep it (leave empty to keep it permanently)</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    inputmode="numeric"
+                    data-testid="period-days"
+                    [ngModel]="periodDays()"
+                    name="periodDays"
+                    (ngModelChange)="periodDays.set($event)"
+                  />
+                </mat-form-field>
+                <bf-reason-field
+                  testId="period-reason"
+                  [value]="editReason()"
+                  (valueChange)="editReason.set($event)"
+                />
+                <div class="bf-form__actions">
+                  <button
+                    mat-flat-button
+                    type="submit"
+                    data-testid="period-save"
+                    [disabled]="busy() || !editReason().trim()"
+                  >
+                    Save period
+                  </button>
+                  <button mat-button type="button" (click)="editing.set(null)">Cancel</button>
+                </div>
+              </form>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="policyColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: policyColumns"></tr>
+        <tr
+          mat-row
+          class="bf-detail-row"
+          *matRowDef="let row; columns: ['detail']; when: hasDetail"
+        ></tr>
+      </table>
+    </div>
+  }
+</section>
+
+<section class="bf-card" aria-labelledby="holds-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="holds-title">Legal holds</h2>
+      <p class="bf-card__hint">
+        A legal hold is what stops a record being destroyed by retention. It only protects anything
+        once a second person has confirmed it, and the person who placed it cannot be that second
+        person. Releasing a hold makes the records in its scope removable again.
+      </p>
+    </div>
+    @if (canManageHolds() && !placingHold()) {
+      <button
+        mat-flat-button
+        type="button"
+        data-testid="place-hold"
+        (click)="placingHold.set(true); failure.set(null); notice.set(null)"
+      >
+        Place a hold
+      </button>
+    }
+  </div>
+  <div class="bf-card__body">
+    <p class="bf-card__hint" data-testid="hold-summary">
+      {{ activeHolds() }} hold(s) in force, {{ waitingHolds() }} waiting for a second person.
+    </p>
+  </div>
+  @if (placingHold()) {
+    <form class="bf-inline-form bf-inline-form--padded" (ngSubmit)="placeHold()">
+      <h3 class="bf-inline-form__title">Place a legal hold</h3>
+      <sat-banner variant="info">
+        <sat-banner-message>
+          The hold is created waiting for confirmation. Nothing in its scope is protected until
+          somebody else who may manage legal holds confirms it.
+        </sat-banner-message>
+      </sat-banner>
+      <div class="bf-form">
+        <mat-form-field appearance="outline">
+          <mat-label>What the hold covers</mat-label>
+          <mat-select
+            data-testid="hold-scope"
+            name="scopeKind"
+            [ngModel]="holdScope()"
+            (ngModelChange)="holdScope.set($event)"
+          >
+            @for (k of scopeKinds; track k) {
+              <mat-option [value]="k">{{ scopeLabel[k] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (holdScope() === 'date_range') {
+          <mat-form-field appearance="outline">
+            <mat-label>From</mat-label>
+            <input
+              matInput
+              type="date"
+              data-testid="hold-from"
+              name="from"
+              [ngModel]="holdFrom()"
+              (ngModelChange)="holdFrom.set($event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>To</mat-label>
+            <input
+              matInput
+              type="date"
+              data-testid="hold-to"
+              name="to"
+              [ngModel]="holdTo()"
+              (ngModelChange)="holdTo.set($event)"
+            />
+          </mat-form-field>
+        } @else {
+          <mat-form-field appearance="outline">
+            <mat-label>Identifier of the {{ scopeLabel[holdScope()].toLowerCase() }}</mat-label>
+            <input
+              matInput
+              data-testid="hold-ref"
+              name="ref"
+              [ngModel]="holdRefId()"
+              (ngModelChange)="holdRefId.set($event)"
+            />
+          </mat-form-field>
+        }
+      </div>
+      <bf-reason-field
+        label="Why this hold is needed"
+        testId="hold-reason"
+        [value]="holdReason()"
+        (valueChange)="holdReason.set($event)"
+      />
+      <div class="bf-form__actions">
+        <button
+          mat-flat-button
+          type="submit"
+          data-testid="hold-submit"
+          [disabled]="busy() || !holdReason().trim()"
+        >
+          Place the hold
+        </button>
+        <button mat-button type="button" (click)="placingHold.set(false)">Cancel</button>
+      </div>
+    </form>
+  }
+  <bf-load-state
+    [loading]="holds.isLoading() && !holds.hasValue()"
+    [error]="holds.error()"
+    what="the legal holds"
+    [lines]="3"
+    (retry)="holds.reload()"
+  />
+  @if (valueOf(holds); as h) {
+    @if (h.items.length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>No legal hold has been placed</h3>
+        <p satEmptyStateDescription>
+          Every record follows the retention periods above until somebody places a hold.
+        </p>
+      </sat-empty-state>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="h.items" aria-label="Legal holds">
+          <ng-container matColumnDef="scope">
+            <th mat-header-cell *matHeaderCellDef>What is held</th>
+            <td mat-cell *matCellDef="let hold">
+              <span class="bf-cell__primary">{{ hold.scopeLabel }}</span>
+              <span class="bf-cell__secondary">{{ scopeLabel[hold.scopeKind] }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="reason">
+            <th mat-header-cell *matHeaderCellDef>Why</th>
+            <td mat-cell *matCellDef="let hold">{{ hold.reason }}</td>
+          </ng-container>
+          <ng-container matColumnDef="who">
+            <th mat-header-cell *matHeaderCellDef>Who</th>
+            <td mat-cell *matCellDef="let hold">
+              <span class="bf-cell__primary"
+                >Placed by {{ hold.placedByName ?? 'someone who has left' }}</span
+              >
+              <span class="bf-cell__secondary" data-testid="relative-time">{{
+                hold.createdAt | bfDateTime: timezone()
+              }}</span>
+              <span class="bf-cell__secondary">
+                {{
+                  hold.confirmedByName
+                    ? 'Confirmed by ' + hold.confirmedByName
+                    : 'Not confirmed by a second person'
+                }}
+              </span>
+              @if (hold.releasedByName) {
+                <span class="bf-cell__secondary"
+                  >Released by {{ hold.releasedByName }}: {{ hold.releaseReason }}</span
+                >
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Is it in force?</th>
+            <td mat-cell *matCellDef="let hold">
+              <sat-status-tag
+                [attr.data-testid]="'hold-status-' + hold.id"
+                [status]="holdStatusTone(hold)"
+                >{{ holdStatusLabel(hold) }}</sat-status-tag
+              >
+              <span class="bf-cell__secondary">{{ holdStatusNote(hold) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
+            <td mat-cell *matCellDef="let hold">
+              <div class="bf-row-actions">
+                @if (canDecideHold(hold)) {
+                  <button
+                    mat-flat-button
+                    type="button"
+                    [disabled]="busy()"
+                    [attr.data-testid]="'confirm-hold-' + hold.id"
+                    (click)="openHoldDecision(hold, 'confirm')"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="busy()"
+                    (click)="openHoldDecision(hold, 'decline')"
+                  >
+                    Decline
+                  </button>
+                }
+                @if (canManageHolds() && hold.status === 'active') {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="busy()"
+                    [attr.data-testid]="'release-hold-' + hold.id"
+                    (click)="openHoldDecision(hold, 'release')"
+                  >
+                    Release
+                  </button>
+                }
+              </div>
+              @if (holdDeciding(); as open) {
+                @if (open.holdId === hold.id) {
+                  <form class="bf-inline-form" (ngSubmit)="decideHold(hold)">
+                    <h4 class="bf-inline-form__title">{{ holdDecisionLabel[open.decision] }}</h4>
+                    @if (open.decision === 'release') {
+                      <sat-banner variant="warning">
+                        <sat-banner-message>
+                          Releasing the hold makes the records in its scope removable again by the
+                          retention periods above.
+                        </sat-banner-message>
+                      </sat-banner>
+                    }
+                    <bf-reason-field
+                      testId="hold-decision-reason"
+                      [value]="holdDecisionReason()"
+                      (valueChange)="holdDecisionReason.set($event)"
+                    />
+                    <div class="bf-form__actions">
+                      <button
+                        mat-flat-button
+                        type="submit"
+                        data-testid="hold-decision-submit"
+                        [disabled]="busy() || !holdDecisionReason().trim()"
+                      >
+                        {{ holdDecisionLabel[open.decision] }}
+                      </button>
+                      <button mat-button type="button" (click)="holdDeciding.set(null)">
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                }
+              }
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="holdColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: holdColumns"></tr>
+        </table>
+      </div>
+    }
+  }
+</section>
+
+<section class="bf-card" aria-labelledby="runs-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="runs-title">Retention runs</h2>
+      <p class="bf-card__hint">
+        Always preview first. A preview removes nothing; applying it is irreversible and only
+        touches the categories the nightly run acts on, never anything under a legal hold.
+      </p>
+    </div>
+    @if (canEditPolicies() && !preview()) {
+      <button
+        mat-stroked-button
+        type="button"
+        data-testid="start-preview"
+        [disabled]="busy()"
+        (click)="startPreview()"
+      >
+        Preview what would be removed
+      </button>
+    }
+  </div>
+
+  @if (preview(); as run) {
+    <div class="bf-card__body">
+      <sat-banner variant="info">
+        <sat-banner-message data-testid="preview-banner">
+          This is a preview of {{ run.startedAt | bfDateTime: timezone() }}. Nothing has been
+          removed.
+          @if (previewTotals(); as totals) {
+            {{ totals.candidates }} record(s) match the periods and {{ totals.held }} are kept
+            because a legal hold covers them.
+          }
+        </sat-banner-message>
+      </sat-banner>
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="run.items" aria-label="What the preview found">
+          <ng-container matColumnDef="label">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let i">{{ i.label }}</td>
+          </ng-container>
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef>Then</th>
+            <td mat-cell *matCellDef="let i">{{ actionLabel[i.action] }}</td>
+          </ng-container>
+          <ng-container matColumnDef="candidates">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Would be removed</th>
+            <td mat-cell *matCellDef="let i" class="bf-num">{{ i.candidateCount }}</td>
+          </ng-container>
+          <ng-container matColumnDef="held">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Kept by a legal hold</th>
+            <td mat-cell *matCellDef="let i" class="bf-num">{{ i.skippedHoldCount }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['label', 'action', 'candidates', 'held']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['label', 'action', 'candidates', 'held']"></tr>
+        </table>
+      </div>
+
+      @if (!applyOpen()) {
+        <div class="bf-form__actions">
+          <button
+            mat-stroked-button
+            type="button"
+            data-testid="open-apply"
+            [disabled]="busy()"
+            (click)="applyOpen.set(true)"
+          >
+            Apply this preview
+          </button>
+          <button mat-button type="button" (click)="discardPreview()">Discard the preview</button>
+        </div>
+      } @else {
+        <form class="bf-inline-form" (ngSubmit)="applyPreview()">
+          <sat-banner variant="important">
+            <sat-banner-message data-testid="irreversible-warning">
+              This deletes and anonymises records permanently. There is no undo, no recycle bin and
+              no way to restore them from BudgetFlow.
+            </sat-banner-message>
+          </sat-banner>
+          <mat-form-field appearance="outline">
+            <mat-label>Type DELETE to confirm</mat-label>
+            <input
+              matInput
+              required
+              data-testid="confirmation"
+              name="confirmation"
+              [ngModel]="confirmation()"
+              (ngModelChange)="confirmation.set($event)"
+            />
+            <mat-hint>Exactly the word DELETE, in capitals.</mat-hint>
+          </mat-form-field>
+          <bf-reason-field
+            label="Why you are applying it"
+            testId="run-reason"
+            [value]="runReason()"
+            (valueChange)="runReason.set($event)"
+          />
+          <div class="bf-form__actions">
+            <button
+              mat-flat-button
+              type="submit"
+              data-testid="apply-run"
+              [disabled]="busy() || !confirmationValid()"
+            >
+              Delete these records permanently
+            </button>
+            <button mat-button type="button" (click)="applyOpen.set(false)">Cancel</button>
+          </div>
+        </form>
+      }
+    </div>
+  }
+
+  <bf-load-state
+    [loading]="runs.isLoading() && !runs.hasValue()"
+    [error]="runs.error()"
+    what="the retention runs"
+    [lines]="3"
+    (retry)="runs.reload()"
+  />
+  @if (valueOf(runs); as r) {
+    @if (r.items.length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>No retention run has happened yet</h3>
+        <p satEmptyStateDescription>
+          Previews and runs are listed here, newest first, with what each one found.
+        </p>
+      </sat-empty-state>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="r.items" aria-label="Retention runs">
+          <ng-container matColumnDef="started">
+            <th mat-header-cell *matHeaderCellDef>When</th>
+            <td mat-cell *matCellDef="let run">
+              <span class="bf-cell__primary" data-testid="relative-time">{{
+                run.startedAt | bfDateTime: timezone()
+              }}</span>
+              <span class="bf-cell__secondary">{{
+                run.requestedByName ?? 'Scheduled by BudgetFlow'
+              }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="mode">
+            <th mat-header-cell *matHeaderCellDef>Kind</th>
+            <td mat-cell *matCellDef="let run">
+              <sat-status-tag [status]="run.mode === 'apply' ? 'important' : 'info'">{{
+                run.mode === 'apply' ? 'Applied' : 'Preview only'
+              }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="summary">
+            <th mat-header-cell *matHeaderCellDef>What it did</th>
+            <td mat-cell *matCellDef="let run">{{ run.summary }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Result</th>
+            <td mat-cell *matCellDef="let run">
+              <sat-status-tag [status]="run.status === 'completed' ? 'success' : 'important'">{{
+                run.status === 'completed' ? 'Completed' : 'Failed'
+              }}</sat-status-tag>
+              @if (run.error) {
+                <span class="bf-cell__secondary">{{ run.error }}</span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Records</th>
+            <td mat-cell *matCellDef="let run" class="bf-num">{{ run.items.length }} categories</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="runColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: runColumns"></tr>
+        </table>
+      </div>
+    }
+  }
+</section>

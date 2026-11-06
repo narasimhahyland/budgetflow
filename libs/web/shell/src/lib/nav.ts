@@ -93,6 +93,7 @@ export const NAV: NavGroup[] = [
         icon: 'currency_dollar',
         permission: 'request.create',
       },
+      { label: 'My activity', path: '/my/activity', icon: 'clock', permission: 'tenant.read' },
     ],
   },
   {
@@ -221,7 +222,8 @@ export const NAV: NavGroup[] = [
       {
         label: 'Approval history',
         path: '/approvals/history',
-        icon: 'checklist',
+        // `checklist` is not in @hylandsoftware/satori-icons, so this item rendered no icon at all.
+        icon: 'checklist_rtl',
         permission: 'audit.read',
       },
       { label: 'Audit log', path: '/audit-log', icon: 'book', permission: 'audit.read' },
@@ -248,6 +250,30 @@ export const NAV: NavGroup[] = [
         label: 'Tenant settings',
         path: '/admin/settings',
         icon: 'gear',
+        permission: 'tenant.settings.manage',
+      },
+      {
+        label: 'Feature flags',
+        path: '/admin/features',
+        icon: 'toggle',
+        permission: 'tenant.settings.manage',
+      },
+      {
+        label: 'Data retention',
+        path: '/admin/retention',
+        icon: 'shield',
+        permission: 'tenant.settings.manage',
+      },
+      {
+        label: 'System health',
+        path: '/admin/health',
+        icon: 'monitor',
+        permission: 'tenant.settings.manage',
+      },
+      {
+        label: 'Set up BudgetFlow',
+        path: '/admin/setup',
+        icon: 'checklist_rtl',
         permission: 'tenant.settings.manage',
       },
     ],

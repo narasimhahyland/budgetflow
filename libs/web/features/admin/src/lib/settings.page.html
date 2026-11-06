@@ -1,0 +1,464 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Company settings</h1>
+    <p class="bf-page__subtitle">
+      Program branding, the notification defaults everyone starts from, upload rules for documents,
+      and how sessions and sign-in work.
+    </p>
+  </div>
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success" class="bf-banner">
+    <sat-banner-message data-testid="settings-notice">{{ notice() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (failure()) {
+  <sat-banner variant="important" class="bf-banner">
+    <sat-banner-message data-testid="settings-error">{{ failure() }}</sat-banner-message>
+  </sat-banner>
+}
+
+<bf-load-state
+  [loading]="settings.isLoading() && !settings.hasValue()"
+  [error]="settings.error()"
+  what="the company settings"
+  (retry)="settings.reload()"
+/>
+
+@if (valueOf(settings); as s) {
+  @if (readOnly()) {
+    <sat-banner variant="info" class="bf-banner">
+      <sat-banner-message data-testid="settings-read-only">
+        You can read these settings. Changing any of them needs company settings administration, so
+        no editing controls are shown.
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  <section class="bf-card" aria-labelledby="branding-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="branding-title">Program branding</h2>
+      @if (mayChange('branding') && editing() !== 'branding') {
+        <button mat-stroked-button type="button" data-testid="edit-branding" (click)="open('branding')">
+          Change branding
+        </button>
+      }
+    </div>
+    @if (editing() === 'branding') {
+      <form class="bf-inline-form" (ngSubmit)="saveBranding()">
+        <div class="bf-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Program name</mat-label>
+            <input
+              matInput
+              name="programName"
+              data-testid="program-name"
+              [ngModel]="programName()"
+              (ngModelChange)="programName.set($event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Tagline</mat-label>
+            <input
+              matInput
+              name="tagline"
+              data-testid="tagline"
+              [ngModel]="tagline()"
+              (ngModelChange)="tagline.set($event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Accent colour</mat-label>
+            <input
+              matInput
+              name="accent"
+              [ngModel]="accentColor()"
+              (ngModelChange)="accentColor.set($event)"
+            />
+            <mat-hint>Used in emails only; the Satori theme styles the app.</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="bf-form__wide">
+            <mat-label>Email footer</mat-label>
+            <input
+              matInput
+              name="footer"
+              [ngModel]="emailFooter()"
+              (ngModelChange)="emailFooter.set($event)"
+            />
+          </mat-form-field>
+        </div>
+        <bf-reason-field
+          testId="branding-reason"
+          [value]="reason()"
+          (valueChange)="reason.set($event)"
+        />
+        <div class="bf-form__actions">
+          <button
+            mat-flat-button
+            type="submit"
+            data-testid="save-branding"
+            [disabled]="busy() || !reason().trim()"
+          >
+            Save branding
+          </button>
+          <button mat-button type="button" (click)="editing.set(null)">Cancel</button>
+        </div>
+      </form>
+    } @else {
+      <dl class="bf-facts">
+        <div>
+          <dt>Program name</dt>
+          <dd data-testid="branding-program">{{ s.branding.programName }}</dd>
+        </div>
+        <div>
+          <dt>Tagline</dt>
+          <dd>{{ s.branding.tagline || 'Not set' }}</dd>
+        </div>
+        <div>
+          <dt>Email footer</dt>
+          <dd>{{ s.branding.emailFooter || 'Not set' }}</dd>
+        </div>
+        <div>
+          <dt>Accent colour</dt>
+          <dd>{{ s.branding.accentColor }}</dd>
+        </div>
+      </dl>
+    }
+  </section>
+
+  <section class="bf-card" aria-labelledby="notifications-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="notifications-title">Notification defaults</h2>
+        <p class="bf-card__hint">
+          Where each kind of message goes by default. People narrow these for themselves; required
+          types always reach in-app and email.
+        </p>
+      </div>
+      @if (mayChange('notifications') && editing() !== 'notifications') {
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="edit-notifications"
+          (click)="open('notifications')"
+        >
+          Change defaults
+        </button>
+      }
+    </div>
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="s.notifications.defaults" aria-label="Notification defaults">
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Message</th>
+          <td mat-cell *matCellDef="let d">
+            <span class="bf-cell__primary">{{ d.name }}</span>
+            @if (d.required) {
+              <sat-status-tag status="info">Always sent</sat-status-tag>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="audience">
+          <th mat-header-cell *matHeaderCellDef>Who gets it</th>
+          <td mat-cell *matCellDef="let d">{{ audienceLabel[d.audience] ?? d.audience }}</td>
+        </ng-container>
+        <ng-container matColumnDef="channels">
+          <th mat-header-cell *matHeaderCellDef>Channels</th>
+          <td mat-cell *matCellDef="let d">
+            @if (editing() === 'notifications') {
+              <mat-form-field appearance="outline" class="bf-channel-field">
+                <mat-label>Channels</mat-label>
+                <mat-select
+                  multiple
+                  [attr.data-testid]="'channels-' + d.type"
+                  [ngModel]="channelChoice()[d.type] ?? d.channels"
+                  [name]="'channels-' + d.type"
+                  (ngModelChange)="setChannels(d.type, $event)"
+                >
+                  @for (c of channels; track c) {
+                    <mat-option [value]="c">{{ channelLabel[c] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            } @else {
+              {{ d.channels.length === 0 ? 'Nowhere' : '' }}
+              @for (c of d.channels; track c) {
+                <span class="bf-chip">{{ channelLabel[c] }}</span>
+              }
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="notificationColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: notificationColumns"></tr>
+      </table>
+    </div>
+
+    @if (editing() === 'notifications' && quietHours(); as q) {
+      <form class="bf-inline-form bf-inline-form--padded" (ngSubmit)="saveNotifications()">
+        <h3 class="bf-inline-form__title">Quiet hours</h3>
+        <p class="bf-inline-form__note">
+          Held messages wait until quiet hours end, in each person's own office timezone. Email is
+          never held.
+        </p>
+        <div class="bf-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Quiet hours start</mat-label>
+            <input
+              matInput
+              name="quietStart"
+              data-testid="quiet-start"
+              [ngModel]="q.startTime"
+              (ngModelChange)="setQuietHours('startTime', $event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Quiet hours end</mat-label>
+            <input
+              matInput
+              name="quietEnd"
+              [ngModel]="q.endTime"
+              (ngModelChange)="setQuietHours('endTime', $event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Messages are signed</mat-label>
+            <input
+              matInput
+              name="senderName"
+              [ngModel]="q.senderName"
+              (ngModelChange)="setQuietHours('senderName', $event)"
+            />
+          </mat-form-field>
+        </div>
+        <mat-checkbox
+          [checked]="q.enabled"
+          (change)="setQuietHours('enabled', $event.checked)"
+          >Hold messages during quiet hours</mat-checkbox
+        >
+        <mat-checkbox
+          [checked]="q.escalationsIgnoreQuietHours"
+          (change)="setQuietHours('escalationsIgnoreQuietHours', $event.checked)"
+          >Escalations go out anyway</mat-checkbox
+        >
+        <bf-reason-field
+          testId="notifications-reason"
+          [value]="reason()"
+          (valueChange)="reason.set($event)"
+        />
+        <div class="bf-form__actions">
+          <button
+            mat-flat-button
+            type="submit"
+            data-testid="save-notifications"
+            [disabled]="busy() || !reason().trim()"
+          >
+            Save defaults
+          </button>
+          <button mat-button type="button" (click)="editing.set(null)">Cancel</button>
+        </div>
+      </form>
+    } @else {
+      <div class="bf-card__body">
+        <p class="bf-card__hint">
+          Quiet hours {{ s.notifications.quietHours.enabled ? 'are on' : 'are off' }} from
+          {{ s.notifications.quietHours.startTime }} to {{ s.notifications.quietHours.endTime }} in
+          each person's own timezone.
+          {{
+            s.notifications.quietHours.escalationsIgnoreQuietHours
+              ? 'Escalations go out anyway.'
+              : 'Escalations wait as well.'
+          }}
+        </p>
+      </div>
+    }
+  </section>
+
+  <section class="bf-card" aria-labelledby="documents-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="documents-title">Documents and attachments</h2>
+        <p class="bf-card__hint">{{ s.documents.note }}</p>
+      </div>
+      @if (mayChange('documents') && editing() !== 'documents') {
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="edit-documents"
+          (click)="open('documents')"
+        >
+          Change upload rules
+        </button>
+      }
+    </div>
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="s.documents.kinds" aria-label="Upload rules per document kind">
+        <ng-container matColumnDef="kind">
+          <th mat-header-cell *matHeaderCellDef>Document</th>
+          <td mat-cell *matCellDef="let k">
+            <span class="bf-cell__primary">{{ k.name }}</span>
+            <span class="bf-cell__secondary">{{ k.usedOn }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="types">
+          <th mat-header-cell *matHeaderCellDef>File types</th>
+          <td mat-cell *matCellDef="let k">{{ k.allowedContentTypes.join(', ') }}</td>
+        </ng-container>
+        <ng-container matColumnDef="size">
+          <th mat-header-cell *matHeaderCellDef>Largest file</th>
+          <td mat-cell *matCellDef="let k">{{ megabytes(k.maxBytes) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="download">
+          <th mat-header-cell *matHeaderCellDef>Downloads</th>
+          <td mat-cell *matCellDef="let k">
+            @if (editing() === 'documents') {
+              <mat-checkbox
+                [checked]="k.downloadAllowed"
+                [attr.data-testid]="'download-' + k.kind"
+                (change)="setDocumentKind(k.kind, { downloadAllowed: $event.checked })"
+                >Allowed</mat-checkbox
+              >
+            } @else {
+              <sat-status-tag [status]="k.downloadAllowed ? 'success' : 'neutral'">{{
+                k.downloadAllowed ? 'Allowed' : 'View only'
+              }}</sat-status-tag>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="documentColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: documentColumns"></tr>
+      </table>
+    </div>
+    @if (editing() === 'documents') {
+      <form class="bf-inline-form bf-inline-form--padded" (ngSubmit)="saveDocuments()">
+        <bf-reason-field
+          testId="documents-reason"
+          [value]="reason()"
+          (valueChange)="reason.set($event)"
+        />
+        <div class="bf-form__actions">
+          <button
+            mat-flat-button
+            type="submit"
+            data-testid="save-documents"
+            [disabled]="busy() || !reason().trim()"
+          >
+            Save upload rules
+          </button>
+          <button mat-button type="button" (click)="editing.set(null)">Cancel</button>
+        </div>
+      </form>
+    }
+  </section>
+
+  <section class="bf-card" aria-labelledby="security-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="security-title">Sign-in and sessions</h2>
+      @if (mayChange('security') && editing() !== 'security') {
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="edit-security"
+          (click)="open('security')"
+        >
+          Change session limits
+        </button>
+      }
+    </div>
+    <dl class="bf-facts">
+      <div>
+        <dt>Identity provider</dt>
+        <dd>
+          {{ s.security.identityProviderName }}
+          <sat-status-tag [status]="s.security.singleSignOnConnected ? 'success' : 'warning'">{{
+            s.security.singleSignOnConnected ? 'Connected' : 'Not connected'
+          }}</sat-status-tag>
+        </dd>
+      </div>
+      <div>
+        <dt>Multi-factor authentication</dt>
+        <dd>{{ s.security.multiFactorPolicy }}</dd>
+      </div>
+      <div>
+        <dt>Signed out after idle</dt>
+        <dd data-testid="idle-timeout">{{ s.security.idleTimeoutMinutes }} minutes</dd>
+      </div>
+      <div>
+        <dt>Longest session</dt>
+        <dd>{{ s.security.maxSessionHours }} hours</dd>
+      </div>
+      <div>
+        <dt>Local accounts</dt>
+        <dd>
+          {{
+            s.security.localAccountsForServiceUsersOnly
+              ? 'Service and test users only'
+              : 'Allowed for people as well'
+          }}
+        </dd>
+      </div>
+      <div>
+        <dt>Biometric unlock on mobile</dt>
+        <dd>{{ s.security.biometricUnlockAllowed ? 'Allowed' : 'Not allowed' }}</dd>
+      </div>
+    </dl>
+    <div class="bf-card__body">
+      <sat-banner variant="info">
+        <sat-banner-message>{{ s.security.breakGlassNote }}</sat-banner-message>
+      </sat-banner>
+    </div>
+    @if (editing() === 'security') {
+      <form class="bf-inline-form bf-inline-form--padded" (ngSubmit)="saveSecurity()">
+        <div class="bf-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Signed out after idle (minutes)</mat-label>
+            <input
+              matInput
+              type="number"
+              inputmode="numeric"
+              name="idle"
+              data-testid="idle-minutes"
+              [ngModel]="idleTimeout()"
+              (ngModelChange)="idleTimeout.set($event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Longest session (hours)</mat-label>
+            <input
+              matInput
+              type="number"
+              inputmode="numeric"
+              name="session"
+              data-testid="session-hours"
+              [ngModel]="maxSessionHours()"
+              (ngModelChange)="maxSessionHours.set($event)"
+            />
+          </mat-form-field>
+        </div>
+        <mat-checkbox
+          [checked]="serviceUsersOnly()"
+          (change)="serviceUsersOnly.set($event.checked)"
+          >Local accounts are for service and test users only</mat-checkbox
+        >
+        <mat-checkbox [checked]="biometricUnlock()" (change)="biometricUnlock.set($event.checked)"
+          >Allow biometric unlock in the mobile app</mat-checkbox
+        >
+        <bf-reason-field
+          testId="security-reason"
+          [value]="reason()"
+          (valueChange)="reason.set($event)"
+        />
+        <div class="bf-form__actions">
+          <button
+            mat-flat-button
+            type="submit"
+            data-testid="save-security"
+            [disabled]="busy() || !reason().trim()"
+          >
+            Save session limits
+          </button>
+          <button mat-button type="button" (click)="editing.set(null)">Cancel</button>
+        </div>
+      </form>
+    }
+  </section>
+}
