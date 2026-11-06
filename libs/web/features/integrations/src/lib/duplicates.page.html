@@ -121,9 +121,8 @@
                     [currency]="l.transactionAmount.currency"
                   />
                   @if (l.transactionAmount.currency !== l.reportingAmount.currency) {
-                    <span class="bf-muted"
-                      >=
-                      <bf-money
+                    <span class="bf-muted bf-reporting"
+                      ><bf-money
                         [amountMinor]="l.reportingAmount.amountMinor"
                         [currency]="l.reportingAmount.currency"
                       />

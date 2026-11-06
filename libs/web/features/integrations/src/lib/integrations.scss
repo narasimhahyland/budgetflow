@@ -72,7 +72,25 @@
   position: relative;
 }
 
+// Long provider paths and ids must wrap inside their cell rather than stretch the table.
+.bf-facts dd {
+  overflow-wrap: anywhere;
+}
+
+// A form field inside a table cell needs room above it for its floating label.
+.bf-cell-field {
+  display: block;
+  padding: 10px 0;
+}
+
 // Connector tiles (092) --------------------------------------------------------------------------
+
+.bf-card__subheading {
+  margin: 8px 0 0;
+  padding: 0 20px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+}
 
 .bf-tiles {
   display: grid;
@@ -180,6 +198,11 @@
   background: var(--mat-sys-surface-container-lowest);
 }
 
+// The SCIM endpoint is public information, not a secret: it gets no warning outline.
+.bf-secret__value--plain {
+  border-color: var(--mat-sys-outline-variant);
+}
+
 // Duplicate comparison (099a) --------------------------------------------------------------------
 
 .bf-compare {
@@ -202,6 +225,11 @@
 .bf-compare__line--kept {
   border-color: var(--sat-sys-success-icon);
   background: var(--sat-sys-success-container);
+}
+
+// The reporting-currency equivalent sits under the transaction amount, never folded into it.
+.bf-reporting {
+  display: block;
 }
 
 .bf-facts--tight {

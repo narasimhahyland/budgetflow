@@ -33,6 +33,7 @@ import {
   CONNECTION_STATUS_LABELS,
   CONNECTION_STATUS_TONES,
   MODE_LABELS,
+  sentence,
   type Tone,
 } from './labels';
 import { LoadState } from './load-state';
@@ -66,6 +67,7 @@ export class HubPage {
   private readonly router = inject(Router);
   private readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
+  protected readonly sentence = sentence;
   protected readonly timezone = computed(() => this.session.timezone());
 
   protected readonly hub = resource({ loader: () => data(this.api.getIntegrationsHub({})) });

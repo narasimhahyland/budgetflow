@@ -67,7 +67,7 @@
     <sat-banner variant="important" data-testid="connector-degraded">
       <sat-banner-message>
         <strong>{{ d.summary.displayName }} is not working.</strong>
-        {{ d.summary.attention ?? 'The last attempt to reach the provider failed.' }}
+        {{ sentence(d.summary.attention ?? 'The last attempt to reach the provider failed') }}
         Scheduled syncs keep failing until it is fixed, so BudgetFlow is working from data that
         stops at the last successful run.
       </sat-banner-message>
@@ -205,7 +205,13 @@
           </div>
           <div>
             <dt>Inbound callback path</dt>
-            <dd>{{ d.inboundWebhookPath ?? 'This provider does not call back' }}</dd>
+            <dd>
+              @if (d.inboundWebhookPath) {
+                <code>{{ d.inboundWebhookPath }}</code>
+              } @else {
+                This provider does not call back
+              }
+            </dd>
           </div>
         </dl>
         <div class="bf-card__body">
@@ -396,15 +402,17 @@
                 <th mat-header-cell *matHeaderCellDef>In BudgetFlow</th>
                 <td mat-cell *matCellDef="let m">
                   @if (canManage()) {
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                      <mat-label>Maps to</mat-label>
-                      <input
-                        matInput
-                        [ngModel]="draftFor(m)"
-                        (ngModelChange)="setDraft(m, $event)"
-                        [attr.data-testid]="'mapping-' + m.externalValue"
-                      />
-                    </mat-form-field>
+                    <div class="bf-cell-field">
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Maps to</mat-label>
+                        <input
+                          matInput
+                          [ngModel]="draftFor(m)"
+                          (ngModelChange)="setDraft(m, $event)"
+                          [attr.data-testid]="'mapping-' + m.externalValue"
+                        />
+                      </mat-form-field>
+                    </div>
                   } @else {
                     {{ m.internalValue ?? 'Not mapped' }}
                   }

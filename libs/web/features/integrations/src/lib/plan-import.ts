@@ -11,6 +11,7 @@ import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi } from './api';
+import { sentence } from './labels';
 
 /**
  * Screen 094a, inside the connector frame: the differences between an Adaptive Planning version and
@@ -47,8 +48,8 @@ import { data, errorMessage, injectApi } from './api';
         <sat-banner class="bf-banner" variant="important" data-testid="plan-blocked-credentials">
           <sat-banner-message>
             <strong>The planning system is refusing BudgetFlow’s credentials.</strong>
-            {{ connection().summary.attention }} Imports and exports stay paused until the
-            credential is replaced on the Connection tab.
+            {{ sentence(connection().summary.attention ?? 'It refused the last call') }} Imports and
+            exports stay paused until the credential is replaced on the Connection tab.
           </sat-banner-message>
         </sat-banner>
       }
@@ -255,6 +256,7 @@ export class PlanImport {
   readonly canManage = input(false);
 
   private readonly api = injectApi();
+  protected readonly sentence = sentence;
   protected readonly columns = ['level', 'current', 'proposed', 'difference', 'note'];
   protected readonly version = signal('');
   protected readonly fiscalYear = signal('');

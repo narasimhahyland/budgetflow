@@ -107,7 +107,9 @@
       }
     </div>
     <div class="bf-card__body bf-secret">
-      <code class="bf-secret__value" aria-label="SCIM endpoint">{{ o.scimEndpoint }}</code>
+      <code class="bf-secret__value bf-secret__value--plain" aria-label="SCIM endpoint">{{
+        o.scimEndpoint
+      }}</code>
       <button mat-stroked-button type="button" (click)="copyEndpoint()" data-testid="copy-endpoint">
         {{ copiedEndpoint() ? 'Copied' : 'Copy' }}
       </button>

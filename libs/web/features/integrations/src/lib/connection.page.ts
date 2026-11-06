@@ -48,6 +48,7 @@ import {
   SYNC_OBJECT_LABELS,
   SYNC_STATUS_LABELS,
   SYNC_STATUS_TONES,
+  sentence,
   type Tone,
 } from './labels';
 import { LoadState } from './load-state';
@@ -149,6 +150,7 @@ export class ConnectionPage {
   private readonly router = inject(Router);
   private readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
+  protected readonly sentence = sentence;
   protected readonly timezone = computed(() => this.session.timezone());
   protected readonly canManage = computed(() => this.session.can('integration.manage'));
   protected readonly mappingColumns = ['kind', 'external', 'internal', 'status'];
@@ -198,6 +200,12 @@ export class ConnectionPage {
       this.lastRun.set(null);
       this.disconnecting.set(false);
       this.confirmText.set('');
+      this.runObject.set(null);
+    });
+    // Preselect the connector's first object so "Run now" is usable without a choice first.
+    effect(() => {
+      const first = this.syncableObjects()[0];
+      if (first && !this.runObject()) this.runObject.set(first.key);
     });
   }
 
@@ -220,8 +228,22 @@ export class ConnectionPage {
       .sort((a, b) => a.key.localeCompare(b.key)),
   );
 
-  /** Objects a person can start by hand, which is every object the connector declares. */
-  protected readonly syncableObjects = computed(() => this.objects());
+  /**
+   * Objects a person can start by hand: every object the connector declares, with the ones it
+   * normally runs on a schedule first and inbound before outbound, so the obvious choice is the
+   * default. The object name and direction break any remaining tie.
+   */
+  protected readonly syncableObjects = computed(() => {
+    const scheduled = new Set(
+      (valueOf(this.detail)?.schedules ?? []).map((s) => `${s.object}:${s.direction}`),
+    );
+    return [...this.objects()].sort(
+      (a, b) =>
+        Number(scheduled.has(b.key)) - Number(scheduled.has(a.key)) ||
+        Number(b.direction === 'inbound') - Number(a.direction === 'inbound') ||
+        a.key.localeCompare(b.key),
+    );
+  });
 
   protected readonly schedules = computed(() =>
     [...(valueOf(this.detail)?.schedules ?? [])].sort(

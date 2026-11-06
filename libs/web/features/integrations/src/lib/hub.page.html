@@ -73,7 +73,7 @@
           {{ attention().length === 1 ? 'connector is' : 'connectors are' }} not working.</strong
         >
         @for (c of attention(); track c.id) {
-          {{ c.displayName }}: {{ c.attention ?? 'The last sync failed.' }}
+          {{ c.displayName }}: {{ sentence(c.attention ?? 'The last sync failed') }}
         }
         Data from
         {{ attention().length === 1 ? 'it' : 'them' }} is not reaching BudgetFlow until this is
@@ -173,18 +173,19 @@
   }
 
   @if (h.connections.length) {
-    @for (group of groups(); track group.category) {
-      <section class="bf-card" [attr.aria-labelledby]="'cat-' + group.category">
-        <div class="bf-card__header">
-          <h2 class="bf-card__title" [id]="'cat-' + group.category">
-            {{ categoryLabel(group.category) }}
-          </h2>
-          <span class="bf-muted"
-            >{{ group.items.length }}
-            {{ group.items.length === 1 ? 'connection' : 'connections' }}</span
-          >
-        </div>
-        <div class="bf-tiles">
+    <section class="bf-card" aria-labelledby="connected-title">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="connected-title">Connected systems</h2>
+        <span class="bf-muted"
+          >{{ h.connections.length }}
+          {{ h.connections.length === 1 ? 'connection' : 'connections' }}</span
+        >
+      </div>
+      @for (group of groups(); track group.category) {
+        <h3 class="bf-card__subheading" [id]="'cat-' + group.category">
+          {{ categoryLabel(group.category) }}
+        </h3>
+        <div class="bf-tiles" [attr.aria-labelledby]="'cat-' + group.category">
           @for (c of group.items; track c.id) {
             <a
               class="bf-tile"
@@ -220,7 +221,7 @@
                 >
               </p>
               @if (c.attention) {
-                <p class="bf-tile__attention">{{ c.attention }}</p>
+                <p class="bf-tile__attention">{{ sentence(c.attention) }}</p>
               }
               @if (c.pausedByName) {
                 <p class="bf-tile__attention">
@@ -230,8 +231,8 @@
             </a>
           }
         </div>
-      </section>
-    }
+      }
+    </section>
   } @else {
     <section class="bf-card">
       <sat-empty-state data-testid="hub-empty">

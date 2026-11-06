@@ -140,6 +140,15 @@ export const WEBHOOK_EVENT_LABELS: Record<WebhookEventType, string> = {
   'period.closed': 'Accounting period closed',
 };
 
+/**
+ * Provider messages ("401 Unauthorized: check the client secret") arrive without punctuation and
+ * would otherwise run into the sentence BudgetFlow writes after them.
+ */
+export const sentence = (text: string): string => {
+  const trimmed = text.trim();
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+};
+
 /** A connector is degraded when it cannot do the job it was connected for. */
 export const isDegraded = (status: ConnectionStatus): boolean =>
   status === 'needs_attention' || status === 'paused';
