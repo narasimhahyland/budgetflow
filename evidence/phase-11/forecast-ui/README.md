@@ -161,6 +161,11 @@ gate-summary.txt                 scripts/gate.sh static --affected
   pack reports zeros and an empty FX bridge, and two pages carry their "no data" statement. That is
   the honest state of the deterministic seed and the screen says so rather than implying more; the
   draft view of the open period shows the real figures. The seed was not changed.
+- **Row tags are shown on 087 only.** Every report carries `tags`, so rendering them in the shared
+  table moved the baselines of 080, 081, 085, 086 and 015a — caught by CI, not locally, because the
+  local visual run was grepped to this branch's own screens. They are now behind a `showRowTags`
+  input that only 087 turns on. Showing them on the Phase 10 reports is a worthwhile change and
+  belongs in its own pass with those baselines.
 - **The 087 `Commentary` column is given a minimum width** so a sentence is not squeezed into one
   word per line; the table scrolls sideways instead. It applies only to 087, so no other report's
   layout moved. The UX spec's "commentary moves into an expandable row on tablet" is a later

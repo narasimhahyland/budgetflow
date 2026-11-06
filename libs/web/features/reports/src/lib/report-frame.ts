@@ -218,7 +218,7 @@ export class Reconciliation {
                       [ngTemplateOutletContext]="{ $implicit: cell, column: c }"
                     />
                   }
-                  @if (c.key === 'label') {
+                  @if (c.key === 'label' && showRowTags()) {
                     @for (tag of row.tags; track tag) {
                       <sat-status-tag class="bf-row-tag" [status]="tagStatus(tag)">{{
                         tag
@@ -351,6 +351,12 @@ export class ReportTable {
   readonly forecastColumns = input<readonly string[]>([]);
   /** Column keys whose cells hold a sentence, not a label, and so need room to read. */
   readonly proseColumns = input<readonly string[]>([]);
+  /**
+   * Whether to show the API's row tags beside the row label. Off by default: every report carries
+   * tags, and turning them on everywhere is a change to screens 080-086 and 015a/015b that belongs
+   * in its own pass with their baselines.
+   */
+  readonly showRowTags = input(false);
   readonly drill = output<DrillRequest>();
   protected readonly percentOf = percentOf;
 

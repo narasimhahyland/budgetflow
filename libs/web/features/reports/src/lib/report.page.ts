@@ -375,6 +375,7 @@ const PROSE_COLUMNS = ['commentary'];
             [timezone]="session.timezone()"
             [forecastColumns]="forecastColumns()"
             [proseColumns]="proseColumns()"
+            [showRowTags]="isForecastReport()"
             (drill)="drill.set($event)"
           />
         } @else {
