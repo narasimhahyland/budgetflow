@@ -64254,14 +64254,12 @@
             }
           }
         }
-      }
-    },
-    "/api/admin/settings/notifications": {
-      "put": {
+      },
+      "patch": {
         "operationId": "updateNotificationSettings",
-        "summary": "Change company notification defaults and quiet hours",
+        "summary": "Save a notification channel preference, digest, quiet hours or privacy setting",
         "tags": [
-          "admin"
+          "channels"
         ],
         "security": [
           {
@@ -64296,7 +64294,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateNotificationDefaultsRequest"
+                "$ref": "#/components/schemas/UpdateNotificationSettingsRequest"
               }
             }
           }
@@ -64307,12 +64305,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotificationSettings"
+                  "$ref": "#/components/schemas/NotificationSettingsView"
                 }
               }
             }
           },
-          "401": {
+          "400": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {
@@ -64322,7 +64320,7 @@
               }
             }
           },
-          "403": {
+          "401": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {
@@ -76894,6 +76892,95 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BrandingSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/settings/notifications": {
+      "put": {
+        "operationId": "updateNotificationDefaults",
+        "summary": "Change company notification defaults and quiet hours",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationDefaultsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettings"
                 }
               }
             }

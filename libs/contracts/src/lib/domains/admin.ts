@@ -987,8 +987,8 @@ export const adminEndpoints = {
     response: { status: 200, schema: BrandingSettings },
     errors: [401, 403, 422],
   },
-  updateNotificationSettings: {
-    operationId: 'updateNotificationSettings',
+  updateNotificationDefaults: {
+    operationId: 'updateNotificationDefaults',
     method: 'put',
     path: '/api/admin/settings/notifications',
     summary: 'Change company notification defaults and quiet hours',
