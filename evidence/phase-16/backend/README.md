@@ -17,8 +17,9 @@ Branch `feat/p16-ecosystem-backend`, migration `0018_p16_ecosystem`, seed prefix
 | Embeddable widgets (102d)          | Exact-origin policy, wildcard refused, identity from the token only, unlisted host refused and recorded, cross-tenant widget not found, amounts hidden, paused widget                            | pass   |
 
 44 scenarios in `apps/api-e2e/src/ecosystem/`, all passing: `functional/api-scenarios.txt`.
-Full API suite after the change: 581 passing, 0 failing (one Phase 13 assertion that hard-coded the
-number of AI features was changed to read `AI_FEATURES.length`, since this phase adds `mcp`).
+Full API suite on the same stack from a fresh deterministic seed: **551 passing, 0 failing**. One
+Phase 13 assertion that hard-coded the number of AI features now reads `AI_FEATURES.length`, since
+this phase adds `mcp`; that is the only existing scenario this change touches.
 
 ## The guardrails are not vacuous
 
