@@ -90,6 +90,16 @@ export interface ParticipationFigures {
 
 const bps = (part: number, whole: number) => (whole > 0 ? Math.round((part * 10_000) / whole) : 0);
 
+/**
+ * Final tie-break for every report's row order. Rows tie on the figure they are ranked by more often
+ * than it looks (any two budgets with nothing authorized yet tie at zero), and the budget query has
+ * no ORDER BY, so without this the order of tied rows is whatever Postgres returned: the same report
+ * run twice, or run after unrelated rows were inserted, comes back in a different order. Label then
+ * key is a total order because row keys are unique.
+ */
+const tieBreak = (a: { label: string; key: string }, b: { label: string; key: string }) =>
+  a.label.localeCompare(b.label) || a.key.localeCompare(b.key);
+
 export function buildReport(
   reportId: ReportId,
   dataset: ReportDataset,
@@ -281,7 +291,7 @@ function utilization({ dataset, filters, money }: Ctx): BuiltReport {
         sort: t.authorized,
       };
     })
-    .sort((a, b) => b.sort - a.sort)
+    .sort((a, b) => b.sort - a.sort || tieBreak(a, b))
     .map(({ sort: _sort, ...row }) => row);
 
   const used = total.held + total.preEncumbered + total.encumbered + total.actual;
@@ -394,7 +404,7 @@ function budgetVsActual({ dataset, filters, money }: Ctx): BuiltReport {
         sort: t.authorized,
       };
     })
-    .sort((a, b) => b.sort - a.sort)
+    .sort((a, b) => b.sort - a.sort || tieBreak(a, b))
     .map(({ sort: _sort, ...row }) => row);
   const committed = total.held + total.preEncumbered + total.encumbered;
   return {
@@ -606,7 +616,7 @@ function unusedExpired({ dataset, money }: Ctx): BuiltReport {
         sort: forecastUnused,
       };
     })
-    .sort((a, b) => b.sort - a.sort)
+    .sort((a, b) => b.sort - a.sort || tieBreak(a, b))
     .map(({ sort: _sort, ...row }) => row);
   const forecastUnusedTotal = rows.reduce(
     (s, r) => s + (r.cells['forecastUnused'].money?.amountMinor ?? 0),
@@ -683,7 +693,7 @@ function comparison({ dataset, money }: Ctx, dimension: 'location' | 'department
         sort: t.authorized,
       };
     })
-    .sort((a, b) => b.sort - a.sort)
+    .sort((a, b) => b.sort - a.sort || tieBreak(a, b))
     .map(({ sort: _sort, ...row }) => row);
   const committed = total.held + total.preEncumbered + total.encumbered;
   const label = dimension === 'location' ? 'Location' : 'Department';
@@ -911,7 +921,7 @@ function spendPerHead({ dataset, extras, money }: Ctx): BuiltReport {
         sort: t.authorized,
       };
     })
-    .sort((a, b) => b.sort - a.sort)
+    .sort((a, b) => b.sort - a.sort || tieBreak(a, b))
     .map(({ sort: _sort, ...row }) => row);
   return {
     groupBy: 'location',
@@ -995,7 +1005,12 @@ function spendPerHead({ dataset, extras, money }: Ctx): BuiltReport {
 // 015b Participation and reach ---------------------------------------------------------------------
 
 function participationReach({ extras }: Ctx): BuiltReport {
-  const figures = [...extras.participation.values()].sort((a, b) => b.eligible - a.eligible);
+  const figures = [...extras.participation.values()].sort(
+    (a, b) =>
+      b.eligible - a.eligible ||
+      a.label.localeCompare(b.label) ||
+      (a.locationId ?? 'none').localeCompare(b.locationId ?? 'none'),
+  );
   const rows = figures.map((f) => ({
     key: f.locationId ?? 'none',
     label: f.label,

@@ -26,6 +26,15 @@ type MatrixRow = z.infer<typeof HealthMatrixRowSchema>;
 
 const RANK: Record<HealthLevel, number> = { healthy: 0, watch: 1, at_risk: 2 };
 
+/**
+ * Final tie-break for every ordered list on this screen. Budgets tie on level and pace often (two
+ * untouched budgets both pace at zero), and the budget query has no ORDER BY, so without this the
+ * order is whatever Postgres returned and two people running the same report see different orders.
+ * Name then id is a total order because ids are unique.
+ */
+const byNameThenId = (a: { name: string; id: string }, b: { name: string; id: string }) =>
+  a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+
 interface SubtreeRow {
   held: number;
   preEncumbered: number;
@@ -123,7 +132,8 @@ export class HealthService {
         .sort(
           (a, b) =>
             RANK[b.outcome.level] - RANK[a.outcome.level] ||
-            b.outcome.pacedToDateBps - a.outcome.pacedToDateBps,
+            b.outcome.pacedToDateBps - a.outcome.pacedToDateBps ||
+            byNameThenId(a.budget.row, b.budget.row),
         )
         .slice(0, q.limit ?? 200);
 
@@ -299,13 +309,15 @@ function matrixOf(
     outcome: { level: HealthLevel; reasons: { check: string; level: HealthLevel }[] };
   }[],
 ): MatrixRow[] {
-  const tops = evaluated.filter(
-    (e) =>
-      !evaluated.some(
-        (o) =>
-          o.budget.row.id !== e.budget.row.id && e.budget.row.path.startsWith(o.budget.row.path),
-      ),
-  );
+  const tops = evaluated
+    .filter(
+      (e) =>
+        !evaluated.some(
+          (o) =>
+            o.budget.row.id !== e.budget.row.id && e.budget.row.path.startsWith(o.budget.row.path),
+        ),
+    )
+    .sort((a, b) => byNameThenId(a.budget.row, b.budget.row));
   return tops.map((top) => {
     const members = evaluated.filter((e) => e.budget.row.path.startsWith(top.budget.row.path));
     const cells: MatrixRow['cells'] = {};

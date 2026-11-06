@@ -506,7 +506,9 @@ export class ReportSchedulesPage {
    * made in one batch share it, which leaves their order to the database.
    */
   protected readonly ordered = computed(() =>
-    [...(valueOf(this.schedules)?.items ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    [...(valueOf(this.schedules)?.items ?? [])].sort(
+      (a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id),
+    ),
   );
   protected readonly exports = resource({ loader: () => data(this.api.listReportExports({})) });
   protected readonly catalog = resource({ loader: () => data(this.api.getReportCatalog({})) });
