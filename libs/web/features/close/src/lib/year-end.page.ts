@@ -92,7 +92,11 @@ import { LoadState } from './load-state';
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
               <td mat-cell *matCellDef="let r">
-                <sat-status-tag [status]="status(r).tone">{{ status(r).text }}</sat-status-tag>
+                <span class="bf-tag-cell"
+                  ><sat-status-tag [status]="status(r).tone">{{
+                    status(r).text
+                  }}</sat-status-tag></span
+                >
               </td>
             </ng-container>
             <ng-container matColumnDef="carry">

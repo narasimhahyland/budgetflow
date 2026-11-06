@@ -116,7 +116,11 @@ import { LoadState } from './load-state';
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let p">
-                <sat-status-tag [status]="statusOf(p).tone">{{ statusOf(p).text }}</sat-status-tag>
+                <span class="bf-tag-cell"
+                  ><sat-status-tag [status]="statusOf(p).tone">{{
+                    statusOf(p).text
+                  }}</sat-status-tag></span
+                >
                 @if (p.reopenRequestPending) {
                   <span class="bf-cell__secondary">Reopen requested</span>
                 }
@@ -143,6 +147,7 @@ import { LoadState } from './load-state';
       }
     </section>
   `,
+  styleUrl: './close.scss',
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

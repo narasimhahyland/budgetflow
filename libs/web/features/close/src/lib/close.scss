@@ -1,5 +1,11 @@
 // Close and year-end screens: pieces the shared page layout does not cover.
 
+// Absolutely positioned labels (bf-sr) stay inside the table's scroll container instead of
+// widening the document, which otherwise scrolls sideways on a phone.
+.bf-table-scroll {
+  position: relative;
+}
+
 .bf-sr {
   position: absolute;
   width: 1px;
@@ -138,4 +144,10 @@
 .bf-total-row td {
   background: var(--mat-sys-surface-container-low);
   font: var(--mat-sys-title-small);
+}
+
+// A status tag keeps its label on one line; the explanation beside it still wraps.
+.bf-tag-cell {
+  display: inline-block;
+  white-space: nowrap;
 }

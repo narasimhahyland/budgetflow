@@ -108,9 +108,11 @@ import { LoadState } from './load-state';
             <ng-container matColumnDef="mode">
               <th mat-header-cell *matHeaderCellDef scope="col">Mode</th>
               <td mat-cell *matCellDef="let p">
-                <sat-status-tag [status]="p.mode === 'lapse' ? 'neutral' : 'info'">{{
-                  mode(p)
-                }}</sat-status-tag>
+                <span class="bf-tag-cell"
+                  ><sat-status-tag [status]="p.mode === 'lapse' ? 'neutral' : 'info'">{{
+                    mode(p)
+                  }}</sat-status-tag></span
+                >
               </td>
             </ng-container>
             <ng-container matColumnDef="cap">
