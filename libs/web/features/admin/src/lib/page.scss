@@ -186,12 +186,15 @@
   background: var(--mat-sys-surface-container-low);
 }
 
+// Visually hidden but kept in flow: an absolutely positioned label in a table header has no
+// positioned ancestor, so it is laid out against the document and stretches the page behind the
+// shell's own scroll area, which shows up as dead space under every long screen.
 .bf-sr {
-  position: absolute;
+  display: inline-block;
   width: 1px;
   height: 1px;
   overflow: hidden;
-  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 

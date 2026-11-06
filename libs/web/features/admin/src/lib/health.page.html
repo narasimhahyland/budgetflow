@@ -113,34 +113,46 @@
     <div class="bf-card__header">
       <h2 class="bf-card__title" id="queues-title">Queues</h2>
     </div>
-    <div class="bf-table-scroll">
-      <table mat-table [dataSource]="h.queues" aria-label="Background job queues">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Queue</th>
-          <td mat-cell *matCellDef="let q">{{ q.name }}</td>
-        </ng-container>
-        <ng-container matColumnDef="waiting">
-          <th mat-header-cell *matHeaderCellDef class="bf-num">Waiting</th>
-          <td mat-cell *matCellDef="let q" class="bf-num">{{ q.waiting }}</td>
-        </ng-container>
-        <ng-container matColumnDef="active">
-          <th mat-header-cell *matHeaderCellDef class="bf-num">Running</th>
-          <td mat-cell *matCellDef="let q" class="bf-num">{{ q.active }}</td>
-        </ng-container>
-        <ng-container matColumnDef="failed">
-          <th mat-header-cell *matHeaderCellDef class="bf-num">Failed in 24 hours</th>
-          <td mat-cell *matCellDef="let q" class="bf-num">{{ q.failedLast24h }}</td>
-        </ng-container>
-        <ng-container matColumnDef="oldest">
-          <th mat-header-cell *matHeaderCellDef class="bf-num">Oldest waiting</th>
-          <td mat-cell *matCellDef="let q" class="bf-num">
-            {{ q.oldestWaitingSeconds === null ? 'Nothing waiting' : q.oldestWaitingSeconds + 's' }}
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="queueColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: queueColumns"></tr>
-      </table>
-    </div>
+    @if (h.queues.length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>No queue statistics in this deployment</h3>
+        <p satEmptyStateDescription>
+          The worker reports its own status above; the per-queue numbers are not readable from the
+          API here.
+        </p>
+      </sat-empty-state>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="h.queues" aria-label="Background job queues">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Queue</th>
+            <td mat-cell *matCellDef="let q">{{ q.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="waiting">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Waiting</th>
+            <td mat-cell *matCellDef="let q" class="bf-num">{{ q.waiting }}</td>
+          </ng-container>
+          <ng-container matColumnDef="active">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Running</th>
+            <td mat-cell *matCellDef="let q" class="bf-num">{{ q.active }}</td>
+          </ng-container>
+          <ng-container matColumnDef="failed">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Failed in 24 hours</th>
+            <td mat-cell *matCellDef="let q" class="bf-num">{{ q.failedLast24h }}</td>
+          </ng-container>
+          <ng-container matColumnDef="oldest">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Oldest waiting</th>
+            <td mat-cell *matCellDef="let q" class="bf-num">
+              {{
+                q.oldestWaitingSeconds === null ? 'Nothing waiting' : q.oldestWaitingSeconds + 's'
+              }}
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="queueColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: queueColumns"></tr>
+        </table>
+      </div>
+    }
   </section>
 
   <section class="bf-card" aria-labelledby="jobs-title">
@@ -269,7 +281,7 @@
             <td mat-cell *matCellDef="let n">
               <span class="bf-cell__primary">{{ n.message }}</span>
               <span class="bf-cell__secondary">
-                Announced by {{ n.createdByName ?? 'someone who has left' }}
+                Announced by {{ n.createdByName ?? 'name not recorded' }}
               </span>
             </td>
           </ng-container>

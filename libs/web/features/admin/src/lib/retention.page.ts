@@ -184,12 +184,6 @@ export class RetentionPage {
     };
   });
 
-  protected automationLabel(policy: RetentionPolicy): string {
-    return policy.automation === 'automatic'
-      ? 'The nightly run applies this.'
-      : 'Stated policy only: nothing removes this automatically today.';
-  }
-
   protected holdStatusTone(hold: LegalHold): 'success' | 'warning' | 'neutral' {
     if (hold.status === 'active') return 'success';
     if (hold.status === 'pending_confirmation') return 'warning';

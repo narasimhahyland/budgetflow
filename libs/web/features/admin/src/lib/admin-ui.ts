@@ -27,7 +27,7 @@ import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
         Requested: {{ change().summary }}. This has not taken effect.
       </p>
       <p class="bf-pending__meta">
-        Asked for by {{ change().requestedByName ?? 'someone who has since left' }} on
+        Asked for by {{ change().requestedByName ?? 'a person no longer recorded' }} on
         {{ change().requestedAt | bfDateTime: timezone() }} — “{{ change().reason }}”
       </p>
       @if (canConfirm()) {

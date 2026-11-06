@@ -228,7 +228,7 @@
             <th mat-header-cell *matHeaderCellDef>Invitation</th>
             <td mat-cell *matCellDef="let i">
               <span class="bf-cell__primary">
-                Sent by {{ i.invitedByName ?? 'someone who has left' }}
+                Sent by {{ i.invitedByName ?? 'name not recorded' }}
               </span>
               <span class="bf-cell__secondary" data-testid="relative-time">
                 Expires {{ i.expiresAt | bfDateTime: timezone() }}

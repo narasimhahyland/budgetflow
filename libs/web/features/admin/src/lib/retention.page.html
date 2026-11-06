@@ -22,8 +22,8 @@
 @if (valueOf(policies); as list) {
   <sat-banner variant="warning" class="bf-banner">
     <sat-banner-message data-testid="provisional-note">
-      All {{ policyRows().length }} periods below are provisional defaults pending finance and legal
-      sign-off. They are not an approved legal position for any country. {{ list.note }}
+      {{ list.note }} None of the {{ policyRows().length }} periods below is an approved legal
+      position for any country.
     </sat-banner-message>
   </sat-banner>
 }
@@ -35,6 +35,10 @@
       <p class="bf-card__hint" data-testid="automation-summary">
         {{ automaticCount() }} of {{ policyRows().length }} categories are acted on by the nightly
         run. The rest are stated policy only: nothing removes them automatically today.
+      </p>
+      <p class="bf-card__hint" data-testid="signoff-summary">
+        {{ provisionalCount() }} of {{ policyRows().length }} periods are provisional defaults from
+        the product. Finance and legal still have to sign each of them off.
       </p>
     </div>
   </div>
@@ -84,7 +88,9 @@
                 p.automation === 'automatic' ? 'Applied nightly' : 'Stated policy only'
               }}</sat-status-tag
             >
-            <span class="bf-cell__secondary">{{ automationLabel(p) }}</span>
+            @if (p.automation === 'manual') {
+              <span class="bf-cell__secondary">No job removes this today.</span>
+            }
           </td>
         </ng-container>
         <ng-container matColumnDef="signoff">
@@ -95,9 +101,6 @@
               [status]="p.signoffStatus === 'approved' ? 'success' : 'warning'"
               >{{ p.signoffStatus === 'approved' ? 'Approved' : 'Provisional' }}</sat-status-tag
             >
-            @if (p.signoffNote) {
-              <span class="bf-cell__secondary">{{ p.signoffNote }}</span>
-            }
             @if (p.locked) {
               <span class="bf-cell__secondary" [attr.data-testid]="'locked-' + p.category"
                 >Locked: {{ p.lockedReason }}</span
@@ -366,7 +369,7 @@
             <th mat-header-cell *matHeaderCellDef>Who</th>
             <td mat-cell *matCellDef="let hold">
               <span class="bf-cell__primary"
-                >Placed by {{ hold.placedByName ?? 'someone who has left' }}</span
+                >Placed by {{ hold.placedByName ?? 'name not recorded' }}</span
               >
               <span class="bf-cell__secondary" data-testid="relative-time">{{
                 hold.createdAt | bfDateTime: timezone()

@@ -39,9 +39,9 @@
   <div class="bf-card__header">
     <div>
       <h2 class="bf-card__title" id="users-title">People</h2>
-      <p class="bf-card__hint">
-        {{ privilegedCount() }} of {{ rows().length }} people hold a role covered by the quarterly
-        privileged-access review.
+      <p class="bf-card__hint" data-testid="privileged-summary">
+        Covered by the quarterly privileged-access review: {{ privilegedCount() }} of
+        {{ rows().length }}.
       </p>
     </div>
   </div>
@@ -92,11 +92,18 @@
           <ng-container matColumnDef="person">
             <th mat-header-cell *matHeaderCellDef>Person</th>
             <td mat-cell *matCellDef="let u">
-              <span class="bf-cell__primary">{{ u.displayName }}</span>
-              <span class="bf-cell__secondary">{{ u.email ?? 'No work email' }}</span>
-              <span class="bf-cell__secondary">
-                {{ u.jobTitle ?? 'No job title' }} · {{ u.locationName ?? 'No location' }}
-              </span>
+              @if (u.personId) {
+                <span class="bf-cell__primary">{{ u.displayName }}</span>
+                <span class="bf-cell__secondary">{{ u.email ?? 'No work email' }}</span>
+                <span class="bf-cell__secondary">
+                  {{ u.jobTitle ?? 'No job title' }} · {{ u.locationName ?? 'No location' }}
+                </span>
+              } @else {
+                <span class="bf-cell__primary">Account without a person record</span>
+                <span class="bf-cell__secondary">
+                  A platform or service account, so there is nobody in the directory behind it.
+                </span>
+              }
             </td>
           </ng-container>
           <ng-container matColumnDef="roles">

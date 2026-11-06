@@ -121,9 +121,7 @@
               <th mat-header-cell *matHeaderCellDef>Last change</th>
               <td mat-cell *matCellDef="let f">
                 @if (f.changedAt) {
-                  <span class="bf-cell__primary">{{
-                    f.changedByName ?? 'Someone who has left'
-                  }}</span>
+                  <span class="bf-cell__primary">{{ f.changedByName ?? 'Name not recorded' }}</span>
                   <span class="bf-cell__secondary" data-testid="relative-time">{{
                     f.changedAt | bfDateTime: timezone()
                   }}</span>
@@ -443,9 +441,7 @@
             <ng-container matColumnDef="who">
               <th mat-header-cell *matHeaderCellDef>Who</th>
               <td mat-cell *matCellDef="let c">
-                <span class="bf-cell__primary">{{
-                  c.requestedByName ?? 'Someone who has left'
-                }}</span>
+                <span class="bf-cell__primary">{{ c.requestedByName ?? 'Name not recorded' }}</span>
                 <span class="bf-cell__secondary" data-testid="relative-time">{{
                   c.requestedAt | bfDateTime: timezone()
                 }}</span>
