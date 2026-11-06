@@ -235,4 +235,43 @@ test.describe('domain events reach subscribed endpoints', () => {
     // The payload carries identifiers and the fields of the event, never a secret.
     expect(JSON.stringify(delivery!.body)).not.toContain(created.signingSecret);
   });
+
+  test('an endpoint receives events from after it was registered, never the backlog before it', async ({
+    request,
+  }) => {
+    const { a, b } = await tree(request, 2_000_000, 500_000);
+
+    // Happens before anyone subscribes: the new owner was never authorized to see it.
+    await freeze(request, a.id);
+
+    const created = await createEndpoint(request);
+
+    // Happens after: this one is theirs.
+    await freeze(request, b.id);
+
+    const later = await waitForDelivery(created.signingSecret);
+    expect(later, 'the event raised after registration was delivered').toBeTruthy();
+    expect(later!.body?.data).toMatchObject({ budgetId: b.id });
+
+    // The drain publishes a tenant's outbox in created_at order and sends each delivery in turn, so
+    // the earlier freeze was already offered to the fan-out by the time this one arrived. Its
+    // absence here is a decision not to deliver it, not a message still in flight.
+    const mine = await deliveriesSignedWith(created.signingSecret);
+    expect(mine.map((d) => d.body?.data?.['budgetId'])).toEqual([b.id]);
+
+    const log = await expectContract(
+      await request.get('/api/integrations/webhook-deliveries', {
+        headers: await as('integration-admin'),
+        params: { endpointId: created.endpoint.id },
+      }),
+      200,
+      WebhookDeliveryList,
+    );
+    // Each event leaves the queued row and the attempt that sent it, so count the subjects, not rows.
+    expect(log.items.length, 'the endpoint has a delivery log to judge').toBeGreaterThan(0);
+    expect(
+      [...new Set(log.items.map((d) => d.payload['budgetId']))],
+      'the delivery log holds only the event raised after the endpoint existed',
+    ).toEqual([b.id]);
+  });
 });
