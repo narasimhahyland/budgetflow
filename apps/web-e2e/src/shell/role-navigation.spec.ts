@@ -39,6 +39,9 @@ const NEEDS: Record<string, string> = {
   'Delegation of authority': 'doa.read',
   Reports: 'report.read',
   Utilization: 'report.read',
+  'Forecast and variance': 'report.read',
+  // 016a is gated on audit.read, not the report.read the endpoint names: see the note in nav.ts.
+  'Board and FP&A pack': 'audit.read',
   'Approval history': 'audit.read',
   'Audit log': 'audit.read',
   'Org import': 'org.manage',
@@ -53,6 +56,8 @@ const READ = ['Budget hierarchy', 'Budget list', 'Budget requests'];
 // follows request.create, which covers the home location's budgets as well as owned ones.
 const REQUESTS = ['Request funds', 'My requests', 'My budgets'];
 const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
+// The Insights entries report.read alone opens; 016a needs audit.read and is listed per role.
+const INSIGHTS_READ = ['Reports', 'Utilization', 'Forecast and variance'];
 const OWNER = [
   'Home',
   'Budget hierarchy',
@@ -64,8 +69,7 @@ const OWNER = [
   'Approval inbox',
   ...REQUESTS,
   ...ORG,
-  'Reports',
-  'Utilization',
+  ...INSIGHTS_READ,
 ];
 
 const EXPECTED: Record<RoleId, string[]> = {
@@ -74,10 +78,10 @@ const EXPECTED: Record<RoleId, string[]> = {
   ceo: [
     ...OWNER.slice(0, 5),
     'Plans and versions',
-    ...OWNER.slice(5, -2),
+    ...OWNER.slice(5, -INSIGHTS_READ.length),
     'Delegation of authority',
-    'Reports',
-    'Utilization',
+    ...INSIGHTS_READ,
+    'Board and FP&A pack',
     'Approval history',
     'Audit log',
     'Rules and policies',
@@ -109,8 +113,8 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Reason codes',
     'Vendors',
     'Delegation of authority',
-    'Reports',
-    'Utilization',
+    ...INSIGHTS_READ,
+    'Board and FP&A pack',
     'Approval history',
     'Audit log',
     'Rules and policies',
@@ -127,8 +131,8 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Fiscal periods',
     ...CLOSE,
     'Delegation of authority',
-    'Reports',
-    'Utilization',
+    ...INSIGHTS_READ,
+    'Board and FP&A pack',
     'Approval history',
     'Audit log',
     'Rules and policies',
@@ -145,14 +149,15 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Events',
     ...ORG,
     'Delegation of authority',
-    'Reports',
-    'Utilization',
+    ...INSIGHTS_READ,
+    'Board and FP&A pack',
     'Approval history',
     'Audit log',
     'Rules and policies',
   ],
   'integration-admin': ['Home', 'Events', 'Integrations'],
-  analyst: ['Home', ...READ, 'Events', ...ORG, 'Reports', 'Utilization'],
+  // The analyst may build the pack but holds no audit.read, so 016a is not in their navigation.
+  analyst: ['Home', ...READ, 'Events', ...ORG, ...INSIGHTS_READ],
 };
 
 for (const [role, expected] of Object.entries(EXPECTED) as [RoleId, string[]][]) {

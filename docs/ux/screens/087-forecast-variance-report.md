@@ -47,6 +47,11 @@ Table (October reforecast, as of 31 Oct 2026, amounts USD):
 
 `reports.ts` forecast endpoint over `forecast_snapshots` (budget or event, method `run_rate`, `committed_pipeline` or `owner_input`, as-of date, amount, `variance_bps`, commentary, status draft, submitted, commentary required, accepted, superseded) joined with ledger balances. Roll-ups count child budgets once and show "Mixed" when children use different methods. Scope by `report.read`. Forecasts are read here; owners submit them in 87a.
 
+The sidebar entry (Insights > Forecast and variance) and the route guard both use `report.read`, and
+that matches the server: `ReportsService.assertCanRead` admits tenant-wide roles and owners scoped to
+their subtree, which is exactly the set holding `report.read` in `GET /api/me`. Unlike 16a, no
+difference is needed here.
+
 ## States
 
 | State                   | Behaviour                                                                            |
