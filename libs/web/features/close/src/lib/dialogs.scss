@@ -95,8 +95,9 @@
 // desktop and stacked on a phone, with the owner's own figure as the last card.
 .bf-method-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
+  align-items: stretch;
   margin-top: 8px;
 }
 

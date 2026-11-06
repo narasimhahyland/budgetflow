@@ -541,7 +541,7 @@ export class ForecastCyclePage {
     if (!cycle) return;
     const ref = this.dialog.open(SubmitForecastDialog, {
       data: { cycle, line },
-      width: '720px',
+      width: '860px',
       maxHeight: '90vh',
     });
     ref.afterClosed().subscribe((submission?: ForecastSubmission) => {

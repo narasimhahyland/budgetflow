@@ -233,10 +233,10 @@ export class NewForecastCycleDialog {
             <mat-radio-button
               satInteractiveCardSelectionControl
               [value]="option.method"
+              [attr.aria-label]="label(option.method)"
               [attr.data-testid]="'method-' + option.method"
-            >
-              <span satInteractiveCardTitle>{{ label(option.method) }}</span>
-            </mat-radio-button>
+            />
+            <span satInteractiveCardTitle>{{ label(option.method) }}</span>
             <sat-interactive-card-content>
               <p class="bf-method__amount">
                 <bf-money
@@ -252,10 +252,10 @@ export class NewForecastCycleDialog {
           <mat-radio-button
             satInteractiveCardSelectionControl
             value="owner_input"
+            aria-label="My own figure"
             data-testid="method-owner_input"
-          >
-            <span satInteractiveCardTitle>My own figure</span>
-          </mat-radio-button>
+          />
+          <span satInteractiveCardTitle>My own figure</span>
           <sat-interactive-card-content>
             <mat-form-field class="bf-field">
               <mat-label>Year-end forecast in {{ line().authorized.currency }}</mat-label>

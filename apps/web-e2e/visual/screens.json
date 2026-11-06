@@ -1781,6 +1781,110 @@
       ]
     },
     {
+      "id": "087-forecast-variance",
+      "role": "finance-controller",
+      "path": "/reports/forecast-variance",
+      "waitFor": "role=heading[name=\"Forecast and variance\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "commentary-required-only",
+          "path": "/reports/forecast-variance?commentaryRequiredOnly=true",
+          "waitFor": "[data-testid=report-notes]"
+        },
+        {
+          "state": "compare-snapshots",
+          "path": "/reports/forecast-variance?forecastCycleId=80000000-0000-4000-8000-000000000041&compareCycleId=80000000-0000-4000-8000-000000000040",
+          "waitFor": "text=Previous forecast"
+        },
+        {
+          "state": "scoped-owner",
+          "role": "location-manager",
+          "waitFor": "[data-testid=report-scope-note]"
+        }
+      ]
+    },
+    {
+      "id": "087a-forecast-cycles",
+      "role": "finance-admin",
+      "path": "/finance/forecast-cycles",
+      "waitFor": "role=heading[name=\"Forecast cycles\"]",
+      "states": [
+        {
+          "state": "list"
+        },
+        {
+          "state": "monitor",
+          "path": "/finance/forecast-cycles/80000000-0000-4000-8000-000000000041",
+          "waitFor": "[data-testid=cycle-reconciliation]"
+        },
+        {
+          "state": "closed",
+          "path": "/finance/forecast-cycles/80000000-0000-4000-8000-000000000040",
+          "waitFor": "[data-testid=cycle-closed]"
+        },
+        {
+          "state": "owner",
+          "role": "department-head",
+          "path": "/finance/forecast-cycles/80000000-0000-4000-8000-000000000041",
+          "waitFor": "[data-testid=cycle-scope-note]"
+        },
+        {
+          "state": "owner-submission",
+          "role": "department-head",
+          "path": "/finance/forecast-cycles/80000000-0000-4000-8000-000000000041",
+          "waitFor": "[data-testid=forecast-71000000-0000-4000-8000-000000000003]",
+          "actions": [
+            {
+              "click": "[data-testid=forecast-71000000-0000-4000-8000-000000000003]"
+            },
+            {
+              "waitFor": "[data-testid=method-owner_input]"
+            }
+          ],
+          "fullPage": false
+        },
+        {
+          "state": "forbidden",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
+      "id": "016a-board-pack",
+      "role": "finance-admin",
+      "path": "/reports/board-pack",
+      "waitFor": "role=heading[name=\"Hyland — budget pack — Sep 2026\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "draft",
+          "actions": [
+            {
+              "click": "role=checkbox[name=\"Current open period (draft)\"]"
+            },
+            {
+              "waitFor": "[data-testid=pack-draft]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "forbidden-owner",
+          "role": "location-manager",
+          "waitFor": "role=heading[name=\"You cannot see the board and FP&A pack\"]"
+        }
+      ],
+      "mask": ["[data-testid=relative-time]"]
+    },
+    {
       "id": "092-integrations-hub",
       "role": "integration-admin",
       "path": "/admin/integrations",
