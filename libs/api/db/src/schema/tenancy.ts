@@ -49,6 +49,11 @@ export const featureFlags = pgTable(
     tenantId: tenantRef().references(() => tenants.id),
     key: varchar('key', { length: 100 }).notNull(),
     enabled: boolean('enabled').notNull().default(false),
+    /** `everyone` or `pilot`: a pilot reveals the capability only to the groups below (P14, screen 105). */
+    rolloutMode: varchar('rollout_mode', { length: 20 }).notNull().default('everyone'),
+    pilotOrgUnitIds: uuid('pilot_org_unit_ids').array().notNull().default([]),
+    pilotRoleIds: text('pilot_role_ids').array().notNull().default([]),
+    updatedByPersonId: uuid('updated_by_person_id'),
     updatedAt: updatedAt(),
   },
   (t) => [uniqueIndex('feature_flags_tenant_key').on(t.tenantId, t.key)],

@@ -17,3 +17,4 @@ export * from './events-depth';
 export * from './reports';
 export * from './integrations';
 export * from './close';
+export * from './admin';
