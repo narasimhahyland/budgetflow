@@ -521,12 +521,13 @@ export const AiMatchSuggestion = named(
         .object({
           endpoint: z.literal('matchActual'),
           actualId: Id,
+          /** Exactly the `MatchActualRequest` parts of the normal match endpoint. */
           parts: z.array(
             z
               .object({
-                commitmentId: Id.nullable(),
-                budgetId: Id.nullable(),
-                amountMinor: z.int(),
+                commitmentId: Id.optional(),
+                budgetId: Id.optional(),
+                amountMinor: z.int().positive().optional(),
               })
               .strict(),
           ),

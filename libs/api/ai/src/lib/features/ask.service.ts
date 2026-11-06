@@ -296,7 +296,7 @@ export class AiAskService {
       consideredCount: considered,
       permittedCount: permitted,
     };
-    if (facts.length === 0 && considered > 0) {
+    if (facts.length === 0) {
       const named = [...terms, ...refs][0];
       return {
         facts,

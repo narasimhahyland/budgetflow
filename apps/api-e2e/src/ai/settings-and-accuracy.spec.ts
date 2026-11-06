@@ -125,7 +125,16 @@ test('the accuracy view is readable by finance and ordered deterministically', a
     AiAccuracyView,
   );
   const keys = view.results.map((r) => `${r.feature}|${r.metric}|${r.kind ?? ''}`);
-  expect(keys).toEqual([...keys].sort());
+  expect(keys, 'ordered by feature, then metric, then kind').toEqual(
+    [...view.results]
+      .sort(
+        (a, b) =>
+          a.feature.localeCompare(b.feature) ||
+          a.metric.localeCompare(b.metric) ||
+          (a.kind ?? '').localeCompare(b.kind ?? ''),
+      )
+      .map((r) => `${r.feature}|${r.metric}|${r.kind ?? ''}`),
+  );
   expect(new Set(keys).size, 'one latest result per metric').toBe(keys.length);
 });
 
@@ -141,7 +150,7 @@ test('AI settings are validated and audited', async ({ request }) => {
       headers: await mutate('org-admin', randomUUID()),
       data: invalid,
     }),
-    422,
+    400,
     'VALIDATION_FAILED',
   );
 

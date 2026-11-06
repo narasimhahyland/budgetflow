@@ -18,7 +18,7 @@ import type {
   AiSourceRef,
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { AiGateway } from '../ai-gateway.service';
 import type { Fact } from '../provider/ai-provider';
@@ -70,6 +70,8 @@ export class AiMatchingService {
           and(
             eq(actuals.tenantId, actor.tenantId),
             eq(actuals.matchStatus, 'unmatched'),
+            // Cross-source duplicates held by 099a are never suggested: a person resolves those first.
+            isNull(actuals.duplicateOfActualId),
             req.actualIds?.length ? inArray(actuals.id, [...req.actualIds]) : undefined,
           ),
         )
@@ -326,18 +328,11 @@ export class AiMatchingService {
       applyWith: {
         endpoint: 'matchActual',
         actualId: line.id,
+        // No amount: the match consumes what is left, in the line's own transaction currency.
         parts: [
           suggested.targetType === 'commitment'
-            ? {
-                commitmentId: suggested.targetId,
-                budgetId: null,
-                amountMinor: payload.budgetAmountMinor,
-              }
-            : {
-                commitmentId: null,
-                budgetId: suggested.targetId,
-                amountMinor: payload.budgetAmountMinor,
-              },
+            ? { commitmentId: suggested.targetId }
+            : { budgetId: suggested.targetId },
         ],
       },
       sources: (row.sources as AiSourceRef[]) ?? [],

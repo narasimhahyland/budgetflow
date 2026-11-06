@@ -73,7 +73,7 @@ export const AI_SEED_DOCUMENTS = [
     tenantId: TENANTS.acme,
     ownerType: 'request',
     ownerId: P5_IDS.requests.teamLunch,
-    kind: 'quote',
+    kind: 'quotation',
     fileName: 'quote-deccan-kitchen.pdf',
     contentType: 'application/pdf',
     sizeBytes: 96_440,

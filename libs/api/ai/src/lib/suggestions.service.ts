@@ -236,7 +236,7 @@ export class AiSuggestionsService {
             reasonCode: { from: null, to: req.reasonCode ?? null },
           },
         });
-        await this.gateway.logOnly({
+        const logged = await this.gateway.logOnly({
           tx,
           actor,
           feature,
@@ -271,7 +271,7 @@ export class AiSuggestionsService {
           appliedResourceType: appliedType,
           appliedResourceId: appliedId,
           auditEventId: audited.id,
-          queryLogId: '',
+          queryLogId: logged.queryLogId,
         } satisfies AiSuggestionDecision;
       },
     );
