@@ -3,7 +3,7 @@
   "authDir": "tmp/e2e-auth",
   "themes": ["light"],
   "freezeTime": "2026-11-16T09:00:00Z",
-  "mask": ["[data-testid=relative-time]"],
+  "mask": ["[data-testid=relative-time]", "[data-testid=ai-ids]"],
   "ignore": {
     "console": [],
     "requests": []

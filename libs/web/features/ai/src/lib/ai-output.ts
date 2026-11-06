@@ -261,7 +261,7 @@ export class AiWhy {
       AI-generated. Check the figures before you act. Model {{ provenance().modelId }}
       {{ provenance().modelVersion }} through {{ provenance().provider }}. Query log entry
       <!-- Ids are generated per call, so visual baselines mask them. -->
-      <span data-testid="ai-ids">
+      <span class="bf-ai-provenance__ids" data-testid="ai-ids">
         {{ provenance().queryLogId.slice(0, 8) }}
         @if (provenance().suggestionId) {
           , suggestion {{ provenance().suggestionId!.slice(0, 8) }}
@@ -275,6 +275,16 @@ export class AiWhy {
       margin: 0;
       color: var(--mat-sys-on-surface-variant);
       font: var(--mat-sys-body-small);
+    }
+
+    // A per-call id is a different width every time, which rewraps the sentence around it and moves
+    // everything below. A fixed box keeps the line stable for the visual baselines.
+    .bf-ai-provenance__ids {
+      display: inline-block;
+      width: 20ch;
+      overflow: hidden;
+      white-space: nowrap;
+      vertical-align: bottom;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
