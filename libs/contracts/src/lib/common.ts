@@ -336,6 +336,15 @@ export const PROBLEM_CODES = [
   'FORECAST_NOT_IN_SCOPE',
   'BOARD_PACK_NOT_READY',
   'BOARD_PACK_NO_SNAPSHOT',
+  // AI layer (P13). AI suggests; people decide: none of these ever authorize a financial action.
+  'AI_FEATURE_DISABLED',
+  'AI_PROVIDER_NOT_CONFIGURED',
+  'AI_UNAVAILABLE',
+  'AI_OUTPUT_DISCARDED',
+  'AI_SUGGESTION_NOT_OPEN',
+  'AI_SUGGESTION_NOT_APPLIED',
+  'AI_FINANCE_CONFIRMATION_REQUIRED',
+  'AI_FLAG_KIND_PAUSED',
   // Administration and experience (P14)
   'FLAG_UNKNOWN',
   'FLAG_DEPENDENCY_MISSING',

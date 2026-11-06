@@ -18,3 +18,4 @@ export * from './reports';
 export * from './integrations';
 export * from './close';
 export * from './admin';
+export * from './ai';

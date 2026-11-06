@@ -55,6 +55,7 @@
       "@bf/api/integrations": ["./libs/api/integrations/src/index.ts"],
       "@bf/api/admin": ["./libs/api/admin/src/index.ts"],
       "@bf/api/close": ["./libs/api/close/src/index.ts"],
+      "@bf/api/ai": ["./libs/api/ai/src/index.ts"],
       "@bf/web/features/mobile": ["./libs/web/features/mobile/src/index.ts"],
       "@bf/web/features/rules": ["./libs/web/features/rules/src/index.ts"],
       "@bf/web/features/reports": ["./libs/web/features/reports/src/index.ts"],

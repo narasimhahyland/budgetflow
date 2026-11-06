@@ -1,0 +1,268 @@
+# Scrubbed API samples (local stack, deterministic seed, AI_PROVIDER=fake)
+
+## POST /api/ai/ask - a location manager asks about a budget in their own scope
+{
+    "outcome": "answered",
+    "answer": "Bengaluru Events has USD 3,081.71 available under its rules, of USD 12,000.00 authorized. USD 4,459.88 is committed and USD 1,685.89 is spent.",
+    "why": [
+        "Bengaluru Events is active and its ledger balances were read for this answer."
+    ],
+    "figures": [
+        {
+            "key": "authorized",
+            "label": "Authorized",
+            "amount": {
+                "amountMinor": 1200000,
+                "currency": "USD"
+            },
+            "source": {
+                "type": "budget",
+                "id": "70000000-0000-4000-8000-000000000005",
+                "label": "Bengaluru Events"
+            }
+        },
+        {
+            "key": "pending",
+            "label": "Pending",
+            "amount": {
+                "amountMinor": 21600,
+                "currency": "USD"
+            },
+            "source": {
+                "type": "budget",
+                "id": "70000000-0000-4000-8000-000000000005",
+                "label": "Bengaluru Events"
+            }
+        },
+        {
+            "key": "committed",
+            "label": "Committed",
+            "amount": {
+                "amountMinor": 445988,
+                "currency": "USD"
+            },
+            "source": {
+                "type": "budget",
+                "id": "70000000-0000-4000-8000-000000000005",
+                "label": "Bengaluru Events"
+            }
+        },
+        {
+            "key": "actual",
+            "label": "Actual",
+            "amount": {
+                "amountMinor": 168589,
+                "currency": "USD"
+            },
+            "source": {
+                "type": "budget",
+                "id": "70000000-0000-4000-8000-000000000005",
+                "label": "Bengaluru Events"
+            }
+        },
+        {
+            "key": "available",
+            "label": "Available under this budget's rules",
+            "amount": {
+                "amountMinor": 308171,
+                "currency": "USD"
+            },
+            "source": {
+                "type": "budget",
+                "id": "70000000-0000-4000-8000-000000000005",
+                "label": "Bengaluru Events"
+            }
+        }
+    ],
+    "sources": [
+        {
+            "type": "budget",
+            "id": "70000000-0000-4000-8000-000000000005",
+            "label": "Bengaluru Events"
+        }
+    ],
+    "followUps": [
+        "Show the pending requests",
+        "What is committed but not spent yet?"
+    ],
+    "confidence": "high",
+    "refusal": null,
+    "provenance": {
+        "suggestionId": null,
+        "queryLogId": "b75f25a3-9080-4a1e-ad94-64da3fc2d92a",
+        "provider": "fake",
+        "modelId": "budgetflow-fake",
+        "modelVersion": "2026.11",
+        "generatedAt": "2026-11-06T10:21:54Z",
+        "latencyMs": 0
+    },
+    "conversationId": "9bf57b26-6d32-49c5-8e74-92049493b298",
+    "turnId": "3853b4a6-6d01-4615-af7b-9fedef0a03bc",
+    "asOf": "2026-11-06T10:21:54Z"
+}
+
+## POST /api/ai/ask - the same person asks about another subtree (refused, nothing confirmed)
+{
+    "outcome": "refused_out_of_scope",
+    "answer": null,
+    "why": [],
+    "figures": [],
+    "sources": [],
+    "followUps": [],
+    "confidence": null,
+    "refusal": {
+        "kind": "out_of_scope",
+        "message": "I can only answer about records you can see. I found nothing you have access to called \"Europe Wellbeing\".",
+        "redirect": null
+    },
+    "provenance": {
+        "suggestionId": null,
+        "queryLogId": "86886286-daa8-4d39-bae2-227f5939fad3",
+        "provider": "fake",
+        "modelId": "budgetflow-fake",
+        "modelVersion": "2026.11",
+        "generatedAt": "2026-11-06T10:21:54Z",
+        "latencyMs": 0
+    },
+    "conversationId": "b62ea77e-09aa-43a0-ae40-6c48e4f74615",
+    "turnId": "739d5796-6bbf-4762-895c-90d3f31c8135",
+    "asOf": "2026-11-06T10:21:54Z"
+}
+
+## POST /api/ai/ask - an action request is redirected, never performed
+{
+    "outcome": "refused_action",
+    "answer": null,
+    "why": [],
+    "figures": [],
+    "sources": [],
+    "followUps": [],
+    "confidence": null,
+    "refusal": {
+        "kind": "action",
+        "message": "I can't approve or reject requests. Open the request to decide.",
+        "redirect": {
+            "label": "Open the screen",
+            "resourceType": "request",
+            "resourceId": null
+        }
+    },
+    "provenance": {
+        "suggestionId": null,
+        "queryLogId": "813f8472-60f7-4b7e-a361-c77820d24a4d",
+        "provider": "fake",
+        "modelId": "budgetflow-fake",
+        "modelVersion": "2026.11",
+        "generatedAt": "2026-11-06T10:21:54Z",
+        "latencyMs": 0
+    },
+    "conversationId": "f89d5d58-6551-4eea-9ab6-c00b8b3c480d",
+    "turnId": "169d055b-cdc6-47a3-be86-d7b58af48401",
+    "asOf": "2026-11-06T10:21:54Z"
+}
+
+## POST /api/ai/matching-suggestions/run - a suggestion carries the body a person submits
+{
+  "acceptedLast30Days": 1,
+  "shownLast30Days": 14,
+  "items": [
+    {
+      "id": "5407c4d9-7bf9-4a75-b1be-1f96fbeda1e1",
+      "actualId": "71659fe4-8b78-46f6-8af9-90dcd7e9dd3d",
+      "source": "erp",
+      "merchant": null,
+      "memo": "Hack Week team travel",
+      "postedDate": "2026-11-03",
+      "transactionAmount": {
+        "amountMinor": 4750000,
+        "currency": "INR"
+      },
+      "budgetAmount": {
+        "amountMinor": 4750000,
+        "currency": "INR"
+      },
+      "suggested": {
+        "reasons": [
+          "The spend line carries the same event code.",
+          "The cost centre maps to this budget.",
+          "The dates are 15 days apart."
+        ],
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "targetId": "78000000-0000-4000-8000-000000000003",
+        "budgetName": "India Region",
+        "confidence": "high",
+        "targetType": "commitment",
+        "targetLabel": "Hack Week meals and venue"
+      },
+      "candidates": [
+        {
+          "reasons": [
+            "The spend line carries the same event code.",
+            "The cost centre maps to this budget.",
+            "The dates are 15 days apart."
+          ],
+          "budgetId": "70000000-0000-4000-8000-000000000002",
+          "targetId": "78000000-0000-4000-8000-000000000004",
+          "budgetName": "India Region",
+          "confidence": "low",
+          "targetType": "commitment",
+          "targetLabel": "Hack Week team travel"
+        },
+        {
+          "reasons": [
+            "The cost centre maps to this budget.",
+            "The amount matches exactly."
+          ],
+          "budgetId": "70000000-0000-4000-8000-000000000006",
+          "targetId": "70000000-0000-4000-8000-000000000006",
+          "budgetName": "Hyderabad Events",
+          "confidence": "low",
+          "targetType": "budget",
+          "targetLabel": "Hyderabad Events"
+        }
+      ],
+      "status": "open",
+      "decisionReason": null,
+      "applyWith": {
+        "endpoint": "matchActual",
+        "actualId": "71659fe4-8b78-46f6-8af9-90dcd7e9dd3d",
+        "parts": [
+          {
+            "commitmentId": "78000000-0000-4000-8000-000000000003"
+          }
+        ]
+      },
+      "sources": [
+        {
+          "id": "71659fe4-8b78-46f6-8af9-90dcd7e9dd3d",
+          "type": "actual",
+          "label": "ERP-2611-0004"
+        },
+        {
+          "id": "78000000-0000-4000-8000-000000000003",
+          "type": "commitment",
+          "label": "Hack Week meals and venue"
+        },
+        {
+          "id": "78000000-0000-4000-8000-000000000004",
+          "type": "commitment",
+          "label": "Hack Week team travel"
+        },
+        {
+          "id": "70000000-0000-4000-8000-000000000006",
+          "type": "budget",
+          "label": "Hyderabad Events"
+        }
+      ],
+      "provenance": {
+        "suggestionId": "5407c4d9-7bf9-4a75-b1be-1f96fbeda1e1",
+        "queryLogId": "68106541-8116-40aa-a327-184c41931c74",
+        "provider": "fake",
+        "modelId": "budgetflow-fake",
+        "modelVersion": "2026.11",
+        "generatedAt": "2026-11-06T10:21:54Z",
+        "latencyMs": 0
+      }
+    }
+  ]
+}

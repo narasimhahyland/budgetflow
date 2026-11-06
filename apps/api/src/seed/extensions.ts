@@ -1,4 +1,5 @@
 import type { INestApplicationContext } from '@nestjs/common';
+import { seedAi } from './ai';
 import { seedActuals } from './actuals';
 import { seedAdmin } from './admin';
 import { seedBudgets } from './budgets';
@@ -49,6 +50,11 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'connected systems in Mock mode, mappings, an API key and a webhook endpoint',
     phase: 'P12',
     run: seedIntegrations,
+  },
+  {
+    name: 'AI feature switches, settings, extraction fixtures and evaluation runs',
+    phase: 'P13',
+    run: seedAi,
   },
   {
     name: 'retention periods, capability switches, legal holds, a maintenance notice and owner invites',

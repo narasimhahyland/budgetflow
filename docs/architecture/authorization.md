@@ -58,6 +58,7 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `integration.manage`     |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |
 | `integration.read`       |  –  |  –  |  T  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  T  |  –  |
 | `notification.manage`    |  –  |  T  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `ai.confirm_finance`     |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `flags.confirm_finance`  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `retention.confirm`      |  –  |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `legal_hold.manage`      |  –  |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |
