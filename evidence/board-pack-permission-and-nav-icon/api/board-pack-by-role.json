@@ -1,0 +1,83 @@
+[
+  {
+    "role": "ceo",
+    "boardPackStatus": 200,
+    "detail": null,
+    "code": null,
+    "hasReportRead": true,
+    "hasReportBoardPack": true,
+    "hasAuditRead": true
+  },
+  {
+    "role": "finance-admin",
+    "boardPackStatus": 200,
+    "detail": null,
+    "code": null,
+    "hasReportRead": true,
+    "hasReportBoardPack": true,
+    "hasAuditRead": true
+  },
+  {
+    "role": "finance-controller",
+    "boardPackStatus": 200,
+    "detail": null,
+    "code": null,
+    "hasReportRead": true,
+    "hasReportBoardPack": true,
+    "hasAuditRead": true
+  },
+  {
+    "role": "auditor",
+    "boardPackStatus": 200,
+    "detail": null,
+    "code": null,
+    "hasReportRead": true,
+    "hasReportBoardPack": true,
+    "hasAuditRead": true
+  },
+  {
+    "role": "analyst",
+    "boardPackStatus": 200,
+    "detail": null,
+    "code": null,
+    "hasReportRead": true,
+    "hasReportBoardPack": true,
+    "hasAuditRead": false
+  },
+  {
+    "role": "budget-owner",
+    "boardPackStatus": 403,
+    "detail": "The board pack is open to finance roles, the CEO and auditors.",
+    "code": "FORBIDDEN",
+    "hasReportRead": true,
+    "hasReportBoardPack": false,
+    "hasAuditRead": false
+  },
+  {
+    "role": "department-head",
+    "boardPackStatus": 403,
+    "detail": "The board pack is open to finance roles, the CEO and auditors.",
+    "code": "FORBIDDEN",
+    "hasReportRead": true,
+    "hasReportBoardPack": false,
+    "hasAuditRead": false
+  },
+  {
+    "role": "regional-manager",
+    "boardPackStatus": 403,
+    "detail": "The board pack is open to finance roles, the CEO and auditors.",
+    "code": "FORBIDDEN",
+    "hasReportRead": true,
+    "hasReportBoardPack": false,
+    "hasAuditRead": false
+  },
+  {
+    "role": "location-manager",
+    "boardPackStatus": 403,
+    "detail": "The board pack is open to finance roles, the CEO and auditors.",
+    "code": "FORBIDDEN",
+    "hasReportRead": true,
+    "hasReportBoardPack": false,
+    "hasAuditRead": false
+  }
+]
