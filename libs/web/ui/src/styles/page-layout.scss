@@ -355,6 +355,9 @@
 
   .bf-list__item {
     display: block;
+    // width: 100% is the item filling its card, and the side padding is inside that width.
+    // Without border-box the padding is added on top and the item overruns the card.
+    box-sizing: border-box;
     width: 100%;
     padding: 12px 20px;
     border: 0;
