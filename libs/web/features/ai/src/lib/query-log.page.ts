@@ -115,7 +115,7 @@ import { LoadState } from './load-state';
                   <th>Confirmed by a person</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody data-testid="log-rows">
                 @for (e of rows(); track e.id) {
                   <tr [attr.data-testid]="'log-row-' + e.id">
                     <td>
@@ -152,12 +152,14 @@ import { LoadState } from './load-state';
                     <td class="bf-num">{{ e.latencyMs }} ms</td>
                     <td>
                       @if (e.appliedResourceType) {
-                        <span class="bf-cell__primary"
-                          >{{ e.appliedResourceType }} {{ e.appliedResourceId?.slice(0, 8) }}</span
-                        >
-                        <span class="bf-cell__secondary"
-                          >audit entry {{ e.auditEventId?.slice(0, 8) ?? '—' }}</span
-                        >
+                        <span class="bf-cell__primary">
+                          {{ e.appliedResourceType }}
+                          <span data-testid="ai-ids">{{ e.appliedResourceId?.slice(0, 8) }}</span>
+                        </span>
+                        <span class="bf-cell__secondary">
+                          audit entry
+                          <span data-testid="ai-ids">{{ e.auditEventId?.slice(0, 8) ?? '—' }}</span>
+                        </span>
                       } @else {
                         <span class="bf-cell__secondary">Nothing changed</span>
                       }

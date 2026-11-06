@@ -485,6 +485,9 @@ export class AiSettingsPage {
       enabled ? AiTurnOnDialog : AiTurnOffDialog,
       { data: feature, width: '560px' },
     );
+    // The toggle moves as soon as it is clicked; re-reading the server state puts it back, so the
+    // row never shows a feature as on while the confirmation is still open.
+    this.view.reload();
     const confirmed = await new Promise<boolean | undefined>((resolve) =>
       dialog.afterClosed().subscribe(resolve),
     );

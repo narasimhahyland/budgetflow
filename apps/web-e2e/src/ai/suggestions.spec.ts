@@ -1,21 +1,11 @@
 // Phase 13 journeys for the surfaces where a person acts on an AI suggestion (080f, 022d, 017c, 121a).
 // Each one proves the same rule from a different angle: the suggestion proposes, the person applies it
 // through the normal authorized command, and only then is the decision recorded against the suggestion.
-import { expect, request as pwRequest, test, type APIRequestContext } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { SEED } from '@bf/seed';
-import { apiToken, expectShell } from '../support/auth';
-import { API_URL } from '../support/env';
-import { authFile, type RoleId } from '../support/roles';
-
-async function apiAs(role: RoleId): Promise<APIRequestContext> {
-  return pwRequest.newContext({
-    baseURL: API_URL,
-    extraHTTPHeaders: {
-      authorization: `Bearer ${await apiToken(role)}`,
-      'x-tenant-id': SEED.tenants.acme,
-    },
-  });
-}
+import { expectShell } from '../support/auth';
+import { authFile } from '../support/roles';
+import { apiAs, setAiFeature } from './support';
 
 // Accepting a suggestion is a one-shot human decision: the API refuses a second decision on the same
 // suggestion. A retry would therefore run against state the first attempt already changed, so these
@@ -23,6 +13,7 @@ async function apiAs(role: RoleId): Promise<APIRequestContext> {
 test.describe('AI matching suggestions (080f)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('finance-controller') });
+  test.beforeAll(() => setAiFeature('matching', true));
 
   test('ranks unmatched lines without matching anything, then matches through the normal command and records the decision', async ({
     page,
@@ -35,7 +26,8 @@ test.describe('AI matching suggestions (080f)', () => {
     await expect(page.getByRole('heading', { name: 'Matching suggestions' })).toBeVisible();
 
     await page.getByTestId('run-matching').click();
-    await expect(page.getByTestId('kpi-shown')).toContainText('2');
+    const queue = page.getByRole('table', { name: 'AI matching suggestions' });
+    await expect(queue.getByRole('row')).toHaveCount(3); // header plus the two seeded lines
     // Ranking alone matches nothing: every line is still open and waiting for a person.
     await expect(page.getByTestId('kpi-accepted')).toContainText('0');
 
@@ -102,7 +94,6 @@ test.describe('AI matching suggestions (080f)', () => {
     expect(log.items.length).toBeGreaterThan(0);
     expect(log.items[0].appliedResourceType).toBe('actual');
     expect(log.items[0].auditEventId).not.toBeNull();
-    await api.dispose();
   });
 
   test('refuses an acceptance that was never applied, straight from the API the screen uses', async () => {
@@ -133,13 +124,13 @@ test.describe('AI matching suggestions (080f)', () => {
     expect((await res.json()) as { code: string }).toMatchObject({
       code: 'AI_SUGGESTION_NOT_APPLIED',
     });
-    await api.dispose();
   });
 });
 
 test.describe('Suggested allocations (022d)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('regional-manager') });
+  test.beforeAll(() => setAiFeature('allocation_suggestions', true));
 
   test('suggests a split the owner can change, then posts it through the normal allocation command', async ({
     page,
@@ -189,14 +180,13 @@ test.describe('Suggested allocations (022d)', () => {
       appliedResourceType: 'budget',
       appliedResourceId: SEED.budgets.india,
     });
-    await auditApi.dispose();
-    await api.dispose();
   });
 });
 
 test.describe('Anomaly flags (017c)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('finance-controller') });
+  test.beforeAll(() => setAiFeature('anomaly_flags', true));
 
   test('raises an advisory flag with evidence from the records and clears it with a reason', async ({
     page,
@@ -232,6 +222,7 @@ test.describe('Anomaly flags (017c)', () => {
 test.describe('Receipt extraction (121a)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('finance-admin') });
+  test.beforeAll(() => setAiFeature('extraction', true));
 
   test('prefills the details from the verified receipt and records only what the person confirms', async ({
     page,

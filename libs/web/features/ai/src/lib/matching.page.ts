@@ -106,11 +106,15 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
         <div class="bf-kpis">
           <div class="bf-kpi" data-testid="kpi-shown">
             <p class="bf-kpi__label">Suggestions shown, last 30 days</p>
-            <p class="bf-kpi__value">{{ valueOf(suggestions)?.shownLast30Days }}</p>
+            <p class="bf-kpi__value" data-testid="ai-live-count">
+              {{ valueOf(suggestions)?.shownLast30Days }}
+            </p>
           </div>
           <div class="bf-kpi" data-testid="kpi-accepted">
             <p class="bf-kpi__label">Accepted by a person, last 30 days</p>
-            <p class="bf-kpi__value">{{ valueOf(suggestions)?.acceptedLast30Days }}</p>
+            <p class="bf-kpi__value" data-testid="ai-live-count">
+              {{ valueOf(suggestions)?.acceptedLast30Days }}
+            </p>
             <p class="bf-kpi__delta">Every one of them through the normal match command</p>
           </div>
         </div>
@@ -130,7 +134,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
                 (click)="status.set(s)"
                 (keydown.enter)="status.set(s)"
                 [attr.data-testid]="'status-' + s"
-                >{{ s }}</sat-status-tag
+                >{{ statusLabel(s) }}</sat-status-tag
               >
             }
           </div>
@@ -201,7 +205,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
                       </td>
                       <td>
                         <sat-status-tag [status]="statusTone(s.status)">{{
-                          s.status
+                          statusLabel(s.status)
                         }}</sat-status-tag>
                       </td>
                     </tr>
@@ -348,7 +352,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
               } @else {
                 <sat-banner variant="info" data-testid="already-decided">
                   <sat-banner-message>
-                    This suggestion is {{ s.status
+                    This suggestion is {{ statusLabel(s.status).toLowerCase()
                     }}{{ s.decisionReason ? ': ' + s.decisionReason : '' }}.
                     @if (s.status === 'stale') {
                       The target changed since the suggestion was made, so it cannot be accepted.
@@ -445,6 +449,12 @@ export class MatchingPage {
 
   protected confidenceTone(c: AiConfidence): 'success' | 'info' | 'warning' {
     return c === 'high' ? 'success' : c === 'medium' ? 'info' : 'warning';
+  }
+
+  protected statusLabel(status: AiMatchSuggestion['status']): string {
+    return status === 'stale'
+      ? 'No longer valid'
+      : status.charAt(0).toUpperCase() + status.slice(1);
   }
 
   protected statusTone(

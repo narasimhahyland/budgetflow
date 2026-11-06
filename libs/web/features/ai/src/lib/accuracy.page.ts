@@ -34,6 +34,14 @@ const METRIC_LABELS: Record<string, string> = {
   range_contains_likely: 'Range contains the most likely value',
 };
 
+const KIND_LABELS: Record<string, string> = {
+  possible_split: 'Possible split',
+  possible_duplicate: 'Possible duplicate',
+  receipt_reused: 'Receipt reused',
+  unusual_cost_per_head: 'Unusual cost per head',
+  unusual_vendor: 'Unusual vendor',
+};
+
 /**
  * Screen 113a, Accuracy tab: the latest evaluation run per feature and metric against its threshold.
  * A metric below its threshold is shown in the error tone, and for anomaly flags the kind is paused
@@ -139,7 +147,7 @@ const METRIC_LABELS: Record<string, string> = {
                   >
                     <td>{{ r.feature }}</td>
                     <td>{{ metric(r) }}</td>
-                    <td>{{ r.kind ?? '—' }}</td>
+                    <td>{{ kind(r) }}</td>
                     <td class="bf-num">{{ ratio(r.thresholdBps) }}</td>
                     <td class="bf-num">{{ ratio(r.resultBps) }}</td>
                     <td class="bf-num">{{ r.cases }}</td>
@@ -194,9 +202,15 @@ export class AccuracyPage {
   protected readonly failing = computed(() => this.rows().filter((r) => !r.passed));
   protected readonly failingNames = computed(() =>
     this.failing()
-      .map((r) => `${r.feature} ${this.metric(r)}${r.kind ? ` (${r.kind})` : ''}`)
+      .map((r) => `${r.feature} ${this.metric(r)}${r.kind ? ` (${this.kind(r)})` : ''}`)
       .join(', '),
   );
+
+  /** Anomaly kinds read as words here too, matching the queue on 017c. */
+  protected kind(r: AiEvaluationResult): string {
+    if (!r.kind) return '\u2014';
+    return KIND_LABELS[r.kind] ?? r.kind;
+  }
 
   protected metric(r: AiEvaluationResult): string {
     return METRIC_LABELS[r.metric] ?? r.metric;

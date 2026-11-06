@@ -363,6 +363,11 @@ import { LoadState } from './load-state';
     }
   `,
   styles: `
+    /* The shared .bf-list__item is width:100% in a content-box, so its side padding pushes it past
+       the card. Scoped here; the shared rule in libs/web/ui needs the same fix. */
+    .bf-list__item {
+      box-sizing: border-box;
+    }
     .bf-weights {
       display: flex;
       flex-direction: column;

@@ -1,21 +1,11 @@
 // Phase 13 journeys for 113a (AI settings, query log, accuracy), 016b (spending outlook) and 069a
 // (policy assistant): who may change a switch, what a feature sends to the model before it is turned
 // on, the finance confirmation a finance-affecting feature needs, and the query log's own permission.
-import { expect, request as pwRequest, test, type APIRequestContext } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { SEED } from '@bf/seed';
-import { apiToken, expectShell } from '../support/auth';
-import { API_URL } from '../support/env';
-import { authFile, type RoleId } from '../support/roles';
-
-async function apiAs(role: RoleId): Promise<APIRequestContext> {
-  return pwRequest.newContext({
-    baseURL: API_URL,
-    extraHTTPHeaders: {
-      authorization: `Bearer ${await apiToken(role)}`,
-      'x-tenant-id': SEED.tenants.acme,
-    },
-  });
-}
+import { expectShell } from '../support/auth';
+import { authFile } from '../support/roles';
+import { apiAs, setAiFeature } from './support';
 
 // Turning a feature on changes tenant state, so a retry would start from what the first attempt
 // left behind. These journeys do not retry: a failure is real on a freshly seeded stack.
@@ -23,8 +13,9 @@ test.describe('AI settings (113a)', () => {
   test.describe.configure({ retries: 0 });
   test.use({ storageState: authFile('org-admin') });
 
-  test('shows the exact fields a feature would send before it is turned on, and holds a finance feature pending', async ({
+  test('shows the exact fields a feature would send before it is turned on, and holds a finance feature pending until a Finance Admin confirms', async ({
     page,
+    browser,
   }, info) => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
     const api = await apiAs('org-admin');
@@ -82,8 +73,10 @@ test.describe('AI settings (113a)', () => {
     await expect(page.getByTestId('pending-banner')).toContainText(
       'Transaction matching suggestions',
     );
-    // Still off for everyone until finance agrees.
-    const refused = await api.post('/api/ai/matching-suggestions/run', {
+    // Still off for everyone until finance agrees. Asked as the finance controller, who holds the
+    // actuals permission the feature needs, so the only thing standing in the way is the switch.
+    const financeApi = await apiAs('finance-controller');
+    const refused = await financeApi.post('/api/ai/matching-suggestions/run', {
       data: {},
       headers: { 'idempotency-key': crypto.randomUUID() },
     });
@@ -91,8 +84,27 @@ test.describe('AI settings (113a)', () => {
     expect((await refused.json()) as { code: string }).toMatchObject({
       code: 'AI_FEATURE_DISABLED',
     });
-    await askApi.dispose();
-    await api.dispose();
+
+    // The Organization Admin cannot confirm it themselves; the Finance Admin can, in their own right.
+    await expect(page.getByTestId('confirm-finance-matching')).toHaveCount(0);
+    const financePage = await (
+      await browser.newContext({
+        storageState: authFile('finance-admin'),
+      })
+    ).newPage();
+    await financePage.goto('/admin/ai/features');
+    await financePage.getByTestId('confirm-finance-matching').click();
+    await expect(financePage.getByTestId('status-matching')).toContainText('On');
+    await financePage.context().close();
+
+    const allowed = await financeApi.post('/api/ai/matching-suggestions/run', {
+      data: {},
+      headers: { 'idempotency-key': crypto.randomUUID() },
+    });
+    expect(allowed.status(), 'the feature runs once finance has confirmed it').toBe(200);
+
+    // Leave the tenant as the seed had it, so no other journey inherits this one's switches.
+    await setAiFeature('ask_chat', false);
   });
 
   test('validates the limits in plain English before they can be saved', async ({ page }) => {
@@ -129,7 +141,6 @@ test.describe('AI query log and accuracy (113a)', () => {
     await expect(page.getByRole('table', { name: 'AI query log' })).not.toContainText(
       'Europe Region',
     );
-    await api.dispose();
     await ctx.close();
   });
 
@@ -194,7 +205,7 @@ test.describe('Spending outlook (016b)', () => {
 test.describe('Policy assistant (069a)', () => {
   test.use({ storageState: authFile('employee') });
 
-  test('shows the rules engine outcome first and the plain-English version under an AI label', async ({
+  test('leads with the rules engine outcome and never repeats it back as an AI explanation', async ({
     page,
   }) => {
     await page.goto('/policy-assistant');
@@ -204,9 +215,31 @@ test.describe('Policy assistant (069a)', () => {
 
     const result = page.getByTestId('policy-result');
     await expect(result).toBeVisible();
-    // The headline is the rules engine's own outcome; the AI text sits beside it, labelled.
-    await expect(result.getByTestId('policy-headline')).toBeVisible();
-    await expect(result.getByTestId('ai-label')).toBeVisible();
+    // The outcome and its wording come from the rules engine, unchanged.
+    await expect(result.getByTestId('outcome-not_covered')).toContainText('No policy covers this');
+    await expect(result.getByTestId('policy-headline')).toContainText(
+      'No BudgetFlow policy limits this. Normal approval applies.',
+    );
+    // On the seeded data the model's sentence is the engine's own, so nothing appears under an AI
+    // label: the assistant explains a decision, it never restates one as if it were its own.
+    await expect(result.getByTestId('policy-no-extra')).toBeVisible();
+    await expect(result.getByTestId('ai-prose')).toHaveCount(0);
     await expect(result.getByTestId('ai-provenance')).toContainText('budgetflow-fake');
   });
+
+  test('refuses to explain a request that belongs to someone else', async ({ page }) => {
+    await page.goto('/policy-assistant');
+    // The seeded team lunch request is not this employee's, so the assistant will not explain it.
+    await page.getByTestId('policy-request-id').fill(TEAM_LUNCH_REQUEST);
+    await page.getByTestId('policy-explain').click();
+
+    const refusal = page.getByTestId('policy-result').getByTestId('refusal-refused_out_of_scope');
+    await expect(refusal).toContainText(
+      "I can only explain your own requests or requests you're deciding.",
+    );
+    await expect(page.getByTestId('ai-prose')).toHaveCount(0);
+  });
 });
+
+/** The seeded Phase 5 team lunch request (libs/seed P5_IDS.requests.teamLunch). */
+const TEAM_LUNCH_REQUEST = '73000000-0000-4000-8000-000000000010';

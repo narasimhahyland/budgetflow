@@ -6,6 +6,7 @@ import { SEED } from '@bf/seed';
 import { apiToken, expectShell } from '../support/auth';
 import { API_URL } from '../support/env';
 import { authFile } from '../support/roles';
+import { setAiFeature } from './support';
 
 /** The same figures the answer shows, read straight from the budget read model. */
 async function budgetFigures(role: 'location-manager', budgetId: string) {
@@ -52,7 +53,7 @@ test.describe('Ask BudgetFlow (011a)', () => {
     const prose = page.getByTestId('ai-prose');
     await expect(prose).toBeVisible();
     await expect(prose).toContainText('Bengaluru Events');
-    await expect(prose).toContainText('Amounts to act on are in the figures below');
+    await expect(prose).toContainText('Every amount BudgetFlow shows is read from its own records');
     await expect(page.getByTestId('ai-label').first()).toBeVisible();
 
     // The figures table is rendered by BudgetFlow and matches the read model exactly.
@@ -135,6 +136,8 @@ test.describe('Ask BudgetFlow (011a)', () => {
 
 test.describe('Ask BudgetFlow in Slack and Teams (061f)', () => {
   test.use({ storageState: authFile('location-manager') });
+  // The chat feature ships off; say so outright rather than trusting the order of the suites.
+  test.beforeAll(() => setAiFeature('ask_chat', false));
 
   test('shows the chat feature\u2019s own kill switch as its own state, not as empty data', async ({
     page,

@@ -51,9 +51,7 @@ export class AiLabel {
   template: `
     <div class="bf-ai-prose" data-testid="ai-prose">
       <p class="bf-ai-prose__text">{{ text() }}</p>
-      <p class="bf-ai-prose__note">
-        Written by the model from BudgetFlow's records. Amounts to act on are in the figures below.
-      </p>
+      <p class="bf-ai-prose__note">{{ note() }}</p>
     </div>
   `,
   styles: `
@@ -77,6 +75,10 @@ export class AiLabel {
 })
 export class AiProse {
   readonly text = input.required<string>();
+  /** True on every surface: the model writes sentences, BudgetFlow reads the amounts. */
+  readonly note = input(
+    'Written by the model. Every amount BudgetFlow shows is read from its own records.',
+  );
 }
 
 /**
@@ -258,10 +260,13 @@ export class AiWhy {
     <p class="bf-ai-provenance" data-testid="ai-provenance">
       AI-generated. Check the figures before you act. Model {{ provenance().modelId }}
       {{ provenance().modelVersion }} through {{ provenance().provider }}. Query log entry
-      {{ provenance().queryLogId.slice(0, 8) }}
-      @if (provenance().suggestionId) {
-        , suggestion {{ provenance().suggestionId!.slice(0, 8) }}
-      }
+      <!-- Ids are generated per call, so visual baselines mask them. -->
+      <span data-testid="ai-ids">
+        {{ provenance().queryLogId.slice(0, 8) }}
+        @if (provenance().suggestionId) {
+          , suggestion {{ provenance().suggestionId!.slice(0, 8) }}
+        }
+      </span>
       .
     </p>
   `,
@@ -370,10 +375,9 @@ const OPEN_LABELS: Record<string, string> = {
   imports: [MatButtonModule, RouterLink, SAT_EMPTY_STATE_IMPORTS],
   template: `
     <sat-empty-state data-testid="ai-disabled">
-      <h2 satEmptyStateHeadline>{{ feature() }} is turned off for this company</h2>
+      <h2 satEmptyStateHeadline>{{ headline() }}</h2>
       <p satEmptyStateDescription>
-        {{ detail() || 'An Organization Admin can turn it on in AI settings.' }}
-        {{ stillWorks() }}
+        An Organization Admin can turn it on in AI settings. {{ stillWorks() }}
       </p>
       <a mat-stroked-button satEmptyStateAction routerLink="/admin/ai">Open AI settings</a>
     </sat-empty-state>
@@ -382,7 +386,11 @@ const OPEN_LABELS: Record<string, string> = {
 })
 export class AiDisabled {
   readonly feature = input('This AI feature');
+  /** The API's own plain-English sentence; it is the headline, so it is never repeated below. */
   readonly detail = input('');
+  protected readonly headline = computed(
+    () => this.detail().trim() || `${this.feature()} is turned off for this company`,
+  );
   /** What a person can still do without the feature; the task never waits for AI. */
   readonly stillWorks = input('Everything else on this screen works as usual.');
 }

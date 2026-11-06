@@ -125,11 +125,19 @@ const OUTCOMES: Record<
 
           @if (e.refusal; as refusal) {
             <bf-ai-refusal [refusal]="refusal" />
-          } @else if (e.explanation) {
+          } @else if (addsSomething(e)) {
             <div class="bf-policy__ai">
               <bf-ai-label text="AI explanation" />
-              <bf-ai-prose [text]="e.explanation" />
+              <bf-ai-prose
+                [text]="e.explanation!"
+                note="Written by the model. The outcome above is the rules engine's own, unchanged."
+              />
             </div>
+          } @else if (e.explanation) {
+            <p class="bf-cell__secondary" data-testid="policy-no-extra">
+              The rules engine's own wording above says it plainly, so there is nothing for the
+              assistant to add.
+            </p>
           } @else {
             <bf-ai-unavailable noun="explanations" (retry)="explain()" />
           }
@@ -221,6 +229,12 @@ export class PolicyAssistantPage {
 
   protected outcome(e: PolicyExplanation) {
     return OUTCOMES[e.outcome];
+  }
+
+  /** The rules engine's own words are never repeated back under an AI label. */
+  protected addsSomething(e: PolicyExplanation): boolean {
+    const plain = (s: string) => s.trim().replace(/\s+/g, ' ').toLowerCase();
+    return Boolean(e.explanation) && plain(e.explanation!) !== plain(e.headline);
   }
 
   protected optionLink(resourceType: string | null, resourceId: string | null): string | null {

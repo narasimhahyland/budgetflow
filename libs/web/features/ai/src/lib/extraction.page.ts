@@ -139,10 +139,13 @@ import { data, errorMessage, injectApi } from './api';
             @if (needsCheck().length) {
               <sat-banner variant="warning" data-testid="needs-check">
                 <sat-banner-message>
-                  {{ needsCheck().length }}
-                  {{ needsCheck().length === 1 ? 'field needs' : 'fields need' }} checking: we could
-                  not read {{ needsCheckNames() }} clearly, so nothing was guessed. Fill them in
-                  yourself.
+                  @if (needsCheck().length === 1) {
+                    One field needs checking: we could not read {{ needsCheckNames() }} clearly, so
+                    nothing was guessed. Fill it in yourself.
+                  } @else {
+                    {{ needsCheck().length }} fields need checking: we could not read
+                    {{ needsCheckNames() }} clearly, so nothing was guessed. Fill them in yourself.
+                  }
                 </sat-banner-message>
               </sat-banner>
             }
@@ -283,17 +286,17 @@ export class ExtractionPage {
   );
 
   protected valueFor(field: ExtractedField): string {
-    return this.values()[field.field] ?? field.value ?? '';
+    const edited = this.values()[field.field];
+    if (edited !== undefined) return edited;
+    if (field.amount) return formatMoney(field.amount.amountMinor, field.amount.currency);
+    return field.value ?? '';
   }
 
   protected hint(field: ExtractedField): string {
     if (field.needsCheck) return 'Please check: we could not read this clearly';
-    const money = field.amount
-      ? ` (${formatMoney(field.amount.amountMinor, field.amount.currency)})`
-      : '';
-    if (this.values()[field.field] !== undefined) return `Edited by you${money}`;
+    if (this.values()[field.field] !== undefined) return 'Edited by you';
     const confidence = field.confidence ? `, ${field.confidence} confidence` : '';
-    return `AI-filled${confidence}${money}`;
+    return `AI-filled${confidence}`;
   }
 
   protected confirmedEntries(r: ExtractionResult): [string, string][] {

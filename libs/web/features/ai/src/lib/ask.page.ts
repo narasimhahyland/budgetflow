@@ -239,14 +239,15 @@ import { LoadState } from './load-state';
                   {{ historyDays() }} days.
                 </p>
               } @else {
-                <ul class="bf-list">
+                <ul class="bf-list" data-testid="conversation-list">
                   @for (c of conversationList(); track c.id) {
                     <li class="bf-list__item" [attr.data-testid]="'conversation-' + c.id">
-                      <div class="bf-list__row">
-                        <span>{{ c.title }}</span>
+                      <div class="bf-list__row bf-history__row">
+                        <span class="bf-history__title">{{ c.title }}</span>
                         <button
                           mat-button
                           type="button"
+                          class="bf-history__delete"
                           (click)="deleteConversation(c.id)"
                           [attr.aria-label]="'Delete conversation ' + c.title"
                         >
@@ -310,6 +311,22 @@ import { LoadState } from './load-state';
       gap: 8px;
       padding-top: 8px;
       border-top: 1px solid var(--mat-sys-outline-variant);
+    }
+    /* The shared .bf-list__item is width:100% in a content-box, so its 20px side padding pushes it
+       past the card. Scoped here; the shared rule in libs/web/ui needs the same fix. */
+    .bf-list__item {
+      box-sizing: border-box;
+    }
+    .bf-history__row {
+      align-items: center;
+      gap: 8px;
+    }
+    .bf-history__title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .bf-history__delete {
+      flex: 0 0 auto;
     }
     .bf-how {
       margin: 0;
