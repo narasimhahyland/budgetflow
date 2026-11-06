@@ -1,0 +1,13 @@
+            action             | count 
+-------------------------------+-------
+ report.exported               |     6
+ report.schedule_created       |    19
+ report.schedule_deleted       |    16
+ report.schedule_delivered     |     8
+ report.schedule_paused        |     6
+ report.schedule_resumed       |     6
+ report.schedule_run_requested |     6
+ report.view_deleted           |     6
+ report.view_saved             |     6
+(9 rows)
+

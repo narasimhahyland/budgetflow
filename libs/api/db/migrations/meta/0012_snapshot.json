@@ -1,5 +1,5 @@
 {
-  "id": "146c20d1-8c47-4d47-a864-f7f2de5305bc",
+  "id": "b567a79e-c75b-4e1c-9f85-af1d6488eb53",
   "prevId": "903518df-3a63-4100-b2ce-fae46a4a4074",
   "version": "7",
   "dialect": "postgresql",
@@ -6286,12 +6286,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "carried_from_commitment_id": {
-          "name": "carried_from_commitment_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -11774,26 +11768,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "currency": {
-          "name": "currency",
-          "type": "char(3)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "budget_count": {
-          "name": "budget_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
         }
       },
       "indexes": {
@@ -11814,39 +11788,6 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "period_close_snapshots_version": {
-          "name": "period_close_snapshots_version",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "fiscal_period_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "legal_entity_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "version",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -12131,42 +12072,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "target_fiscal_year_id": {
-          "name": "target_fiscal_year_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "target_plan_version_id": {
-          "name": "target_plan_version_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "root_budget_id": {
-          "name": "root_budget_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "executed_at": {
-          "name": "executed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "executed_by": {
-          "name": "executed_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "error": {
-          "name": "error",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -12212,32 +12117,6 @@
           "tableTo": "fiscal_years",
           "columnsFrom": [
             "fiscal_year_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "year_end_runs_target_fiscal_year_id_fiscal_years_id_fk": {
-          "name": "year_end_runs_target_fiscal_year_id_fiscal_years_id_fk",
-          "tableFrom": "year_end_runs",
-          "tableTo": "fiscal_years",
-          "columnsFrom": [
-            "target_fiscal_year_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "year_end_runs_root_budget_id_budgets_id_fk": {
-          "name": "year_end_runs_root_budget_id_budgets_id_fk",
-          "tableFrom": "year_end_runs",
-          "tableTo": "budgets",
-          "columnsFrom": [
-            "root_budget_id"
           ],
           "columnsTo": [
             "id"
@@ -18574,8 +18453,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.period_close_acknowledgements": {
-      "name": "period_close_acknowledgements",
+    "public.report_exports": {
+      "name": "report_exports",
       "schema": "",
       "columns": {
         "id": {
@@ -18591,184 +18470,59 @@
           "primaryKey": false,
           "notNull": true
         },
-        "fiscal_period_id": {
-          "name": "fiscal_period_id",
-          "type": "uuid",
+        "report_id": {
+          "name": "report_id",
+          "type": "varchar(40)",
           "primaryKey": false,
           "notNull": true
         },
-        "legal_entity_id": {
-          "name": "legal_entity_id",
-          "type": "uuid",
+        "format": {
+          "name": "format",
+          "type": "varchar(10)",
           "primaryKey": false,
           "notNull": true
         },
-        "check_code": {
-          "name": "check_code",
-          "type": "close_check_code",
-          "typeSchema": "public",
+        "filters": {
+          "name": "filters",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
-        "reason_code": {
-          "name": "reason_code",
-          "type": "varchar(50)",
+        "row_count": {
+          "name": "row_count",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
         },
-        "reason": {
-          "name": "reason",
-          "type": "text",
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'queued'"
         },
-        "acknowledged_by": {
-          "name": "acknowledged_by",
+        "document_id": {
+          "name": "document_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "acknowledged_at": {
-          "name": "acknowledged_at",
-          "type": "timestamp with time zone",
+        "size_bytes": {
+          "name": "size_bytes",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": false
         },
-        "close_attempt": {
-          "name": "close_attempt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        }
-      },
-      "indexes": {
-        "period_close_acks_period": {
-          "name": "period_close_acks_period",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "fiscal_period_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "legal_entity_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "close_attempt",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "period_close_acknowledgements_tenant_id_tenants_id_fk": {
-          "name": "period_close_acknowledgements_tenant_id_tenants_id_fk",
-          "tableFrom": "period_close_acknowledgements",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "period_close_acknowledgements_fiscal_period_id_fiscal_periods_id_fk": {
-          "name": "period_close_acknowledgements_fiscal_period_id_fiscal_periods_id_fk",
-          "tableFrom": "period_close_acknowledgements",
-          "tableTo": "fiscal_periods",
-          "columnsFrom": [
-            "fiscal_period_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "period_close_acknowledgements_legal_entity_id_legal_entities_id_fk": {
-          "name": "period_close_acknowledgements_legal_entity_id_legal_entities_id_fk",
-          "tableFrom": "period_close_acknowledgements",
-          "tableTo": "legal_entities",
-          "columnsFrom": [
-            "legal_entity_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.period_reopen_requests": {
-      "name": "period_reopen_requests",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
+        "schedule_id": {
+          "name": "schedule_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "fiscal_period_id": {
-          "name": "fiscal_period_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "action": {
-          "name": "action",
-          "type": "reopen_action",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reason_code": {
-          "name": "reason_code",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reason": {
-          "name": "reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "requested_by": {
-          "name": "requested_by",
+        "requested_by_person_id": {
+          "name": "requested_by_person_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -18780,36 +18534,16 @@
           "notNull": true,
           "default": "now()"
         },
-        "status": {
-          "name": "status",
-          "type": "reopen_request_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pending'"
-        },
-        "decided_by": {
-          "name": "decided_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "decided_at": {
-          "name": "decided_at",
+        "expires_at": {
+          "name": "expires_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
-        },
-        "decision_reason": {
-          "name": "decision_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {
-        "period_reopen_requests_period": {
-          "name": "period_reopen_requests_period",
+        "report_exports_tenant_requested": {
+          "name": "report_exports_tenant_requested",
           "columns": [
             {
               "expression": "tenant_id",
@@ -18818,13 +18552,7 @@
               "nulls": "last"
             },
             {
-              "expression": "fiscal_period_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
+              "expression": "requested_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -18837,9 +18565,9 @@
         }
       },
       "foreignKeys": {
-        "period_reopen_requests_tenant_id_tenants_id_fk": {
-          "name": "period_reopen_requests_tenant_id_tenants_id_fk",
-          "tableFrom": "period_reopen_requests",
+        "report_exports_tenant_id_tenants_id_fk": {
+          "name": "report_exports_tenant_id_tenants_id_fk",
+          "tableFrom": "report_exports",
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
@@ -18850,12 +18578,25 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "period_reopen_requests_fiscal_period_id_fiscal_periods_id_fk": {
-          "name": "period_reopen_requests_fiscal_period_id_fiscal_periods_id_fk",
-          "tableFrom": "period_reopen_requests",
-          "tableTo": "fiscal_periods",
+        "report_exports_schedule_id_report_schedules_id_fk": {
+          "name": "report_exports_schedule_id_report_schedules_id_fk",
+          "tableFrom": "report_exports",
+          "tableTo": "report_schedules",
           "columnsFrom": [
-            "fiscal_period_id"
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "report_exports_requested_by_person_id_people_id_fk": {
+          "name": "report_exports_requested_by_person_id_people_id_fk",
+          "tableFrom": "report_exports",
+          "tableTo": "people",
+          "columnsFrom": [
+            "requested_by_person_id"
           ],
           "columnsTo": [
             "id"
@@ -18870,8 +18611,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.year_end_commitment_carries": {
-      "name": "year_end_commitment_carries",
+    "public.report_saved_views": {
+      "name": "report_saved_views",
       "schema": "",
       "columns": {
         "id": {
@@ -18887,51 +18628,41 @@
           "primaryKey": false,
           "notNull": true
         },
-        "run_id": {
-          "name": "run_id",
-          "type": "uuid",
+        "report_id": {
+          "name": "report_id",
+          "type": "varchar(40)",
           "primaryKey": false,
           "notNull": true
         },
-        "source_commitment_id": {
-          "name": "source_commitment_id",
-          "type": "uuid",
+        "name": {
+          "name": "name",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "carried_commitment_id": {
-          "name": "carried_commitment_id",
-          "type": "uuid",
+        "filters": {
+          "name": "filters",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
-        "amount_minor": {
-          "name": "amount_minor",
-          "type": "bigint",
+        "favourite": {
+          "name": "favourite",
+          "type": "boolean",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": false
         },
-        "currency": {
-          "name": "currency",
-          "type": "char(3)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "release_journal_id": {
-          "name": "release_journal_id",
+        "owner_person_id": {
+          "name": "owner_person_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "carry_journal_id": {
-          "name": "carry_journal_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "accounting_date": {
-          "name": "accounting_date",
-          "type": "date",
+        "last_opened_at": {
+          "name": "last_opened_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -18941,11 +18672,18 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {
-        "year_end_commitment_carries_source": {
-          "name": "year_end_commitment_carries_source",
+        "report_saved_views_owner": {
+          "name": "report_saved_views_owner",
           "columns": [
             {
               "expression": "tenant_id",
@@ -18954,28 +18692,13 @@
               "nulls": "last"
             },
             {
-              "expression": "source_commitment_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "year_end_commitment_carries_run": {
-          "name": "year_end_commitment_carries_run",
-          "columns": [
-            {
-              "expression": "tenant_id",
+              "expression": "owner_person_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
-              "expression": "run_id",
+              "expression": "report_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -18988,9 +18711,9 @@
         }
       },
       "foreignKeys": {
-        "year_end_commitment_carries_tenant_id_tenants_id_fk": {
-          "name": "year_end_commitment_carries_tenant_id_tenants_id_fk",
-          "tableFrom": "year_end_commitment_carries",
+        "report_saved_views_tenant_id_tenants_id_fk": {
+          "name": "report_saved_views_tenant_id_tenants_id_fk",
+          "tableFrom": "report_saved_views",
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
@@ -19001,28 +18724,15 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "year_end_commitment_carries_run_id_year_end_runs_id_fk": {
-          "name": "year_end_commitment_carries_run_id_year_end_runs_id_fk",
-          "tableFrom": "year_end_commitment_carries",
-          "tableTo": "year_end_runs",
+        "report_saved_views_owner_person_id_people_id_fk": {
+          "name": "report_saved_views_owner_person_id_people_id_fk",
+          "tableFrom": "report_saved_views",
+          "tableTo": "people",
           "columnsFrom": [
-            "run_id"
+            "owner_person_id"
           ],
           "columnsTo": [
             "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "year_end_commitment_carries_currency_currencies_code_fk": {
-          "name": "year_end_commitment_carries_currency_currencies_code_fk",
-          "tableFrom": "year_end_commitment_carries",
-          "tableTo": "currencies",
-          "columnsFrom": [
-            "currency"
-          ],
-          "columnsTo": [
-            "code"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -19034,8 +18744,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.year_end_run_lines": {
-      "name": "year_end_run_lines",
+    "public.report_schedule_runs": {
+      "name": "report_schedule_runs",
       "schema": "",
       "columns": {
         "id": {
@@ -19051,146 +18761,85 @@
           "primaryKey": false,
           "notNull": true
         },
-        "run_id": {
-          "name": "run_id",
+        "schedule_id": {
+          "name": "schedule_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "budget_id": {
-          "name": "budget_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "currency": {
-          "name": "currency",
-          "type": "char(3)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "available_minor": {
-          "name": "available_minor",
-          "type": "bigint",
+        "run_at": {
+          "name": "run_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": "now()"
         },
-        "authorized_minor": {
-          "name": "authorized_minor",
-          "type": "bigint",
+        "trigger": {
+          "name": "trigger",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": "'scheduled'"
         },
-        "rollover_policy_id": {
-          "name": "rollover_policy_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "carry_minor": {
-          "name": "carry_minor",
-          "type": "bigint",
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": "'delivered'"
         },
-        "lapse_minor": {
-          "name": "lapse_minor",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "sweep_to_budget_id": {
-          "name": "sweep_to_budget_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "open_commitment_count": {
-          "name": "open_commitment_count",
+        "delivered_count": {
+          "name": "delivered_count",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 0
         },
-        "open_commitment_minor": {
-          "name": "open_commitment_minor",
-          "type": "bigint",
+        "skipped_count": {
+          "name": "skipped_count",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 0
         },
-        "target_budget_id": {
-          "name": "target_budget_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "year_end_line_status",
-          "typeSchema": "public",
+        "channel_count": {
+          "name": "channel_count",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "'planned'"
+          "default": 0
         },
-        "blocked_reason": {
-          "name": "blocked_reason",
-          "type": "text",
+        "row_count": {
+          "name": "row_count",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
-        "approved_carry_minor": {
-          "name": "approved_carry_minor",
-          "type": "bigint",
+        "skipped": {
+          "name": "skipped",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'[]'::jsonb"
         },
-        "decided_by": {
-          "name": "decided_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "decided_at": {
-          "name": "decided_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "decision_reason": {
-          "name": "decision_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "journal_ids": {
-          "name": "journal_ids",
+        "export_ids": {
+          "name": "export_ids",
           "type": "uuid[]",
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'"
         },
-        "executed_at": {
-          "name": "executed_at",
-          "type": "timestamp with time zone",
+        "error": {
+          "name": "error",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {
-        "year_end_run_lines_run_budget": {
-          "name": "year_end_run_lines_run_budget",
+        "report_schedule_runs_schedule": {
+          "name": "report_schedule_runs_schedule",
           "columns": [
             {
               "expression": "tenant_id",
@@ -19199,40 +18848,13 @@
               "nulls": "last"
             },
             {
-              "expression": "run_id",
+              "expression": "schedule_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
-              "expression": "budget_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "year_end_run_lines_run": {
-          "name": "year_end_run_lines_run",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "run_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
+              "expression": "run_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -19245,9 +18867,9 @@
         }
       },
       "foreignKeys": {
-        "year_end_run_lines_tenant_id_tenants_id_fk": {
-          "name": "year_end_run_lines_tenant_id_tenants_id_fk",
-          "tableFrom": "year_end_run_lines",
+        "report_schedule_runs_tenant_id_tenants_id_fk": {
+          "name": "report_schedule_runs_tenant_id_tenants_id_fk",
+          "tableFrom": "report_schedule_runs",
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
@@ -19258,12 +18880,237 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "year_end_run_lines_run_id_year_end_runs_id_fk": {
-          "name": "year_end_run_lines_run_id_year_end_runs_id_fk",
-          "tableFrom": "year_end_run_lines",
-          "tableTo": "year_end_runs",
+        "report_schedule_runs_schedule_id_report_schedules_id_fk": {
+          "name": "report_schedule_runs_schedule_id_report_schedules_id_fk",
+          "tableFrom": "report_schedule_runs",
+          "tableTo": "report_schedules",
           "columnsFrom": [
-            "run_id"
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.report_schedules": {
+      "name": "report_schedules",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "report_id": {
+          "name": "report_id",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "saved_view_id": {
+          "name": "saved_view_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "filters": {
+          "name": "filters",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "formats": {
+          "name": "formats",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"pdf\"}'"
+        },
+        "frequency": {
+          "name": "frequency",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'weekly'"
+        },
+        "weekday": {
+          "name": "weekday",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day_of_month": {
+          "name": "day_of_month",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "send_time": {
+          "name": "send_time",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'08:00'"
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UTC'"
+        },
+        "recipient_person_ids": {
+          "name": "recipient_person_ids",
+          "type": "uuid[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "channels": {
+          "name": "channels",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_person_id": {
+          "name": "owner_person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "paused_reason": {
+          "name": "paused_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_run_at": {
+          "name": "next_run_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_run_at": {
+          "name": "last_run_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_run_status": {
+          "name": "last_run_status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "report_schedules_owner": {
+          "name": "report_schedules_owner",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "owner_person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "report_schedules_due": {
+          "name": "report_schedules_due",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "active",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "next_run_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "report_schedules_tenant_id_tenants_id_fk": {
+          "name": "report_schedules_tenant_id_tenants_id_fk",
+          "tableFrom": "report_schedules",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
           ],
           "columnsTo": [
             "id"
@@ -19271,12 +19118,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "year_end_run_lines_budget_id_budgets_id_fk": {
-          "name": "year_end_run_lines_budget_id_budgets_id_fk",
-          "tableFrom": "year_end_run_lines",
-          "tableTo": "budgets",
+        "report_schedules_saved_view_id_report_saved_views_id_fk": {
+          "name": "report_schedules_saved_view_id_report_saved_views_id_fk",
+          "tableFrom": "report_schedules",
+          "tableTo": "report_saved_views",
           "columnsFrom": [
-            "budget_id"
+            "saved_view_id"
           ],
           "columnsTo": [
             "id"
@@ -19284,51 +19131,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "year_end_run_lines_currency_currencies_code_fk": {
-          "name": "year_end_run_lines_currency_currencies_code_fk",
-          "tableFrom": "year_end_run_lines",
-          "tableTo": "currencies",
+        "report_schedules_owner_person_id_people_id_fk": {
+          "name": "report_schedules_owner_person_id_people_id_fk",
+          "tableFrom": "report_schedules",
+          "tableTo": "people",
           "columnsFrom": [
-            "currency"
-          ],
-          "columnsTo": [
-            "code"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "year_end_run_lines_rollover_policy_id_rollover_policies_id_fk": {
-          "name": "year_end_run_lines_rollover_policy_id_rollover_policies_id_fk",
-          "tableFrom": "year_end_run_lines",
-          "tableTo": "rollover_policies",
-          "columnsFrom": [
-            "rollover_policy_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "year_end_run_lines_sweep_to_budget_id_budgets_id_fk": {
-          "name": "year_end_run_lines_sweep_to_budget_id_budgets_id_fk",
-          "tableFrom": "year_end_run_lines",
-          "tableTo": "budgets",
-          "columnsFrom": [
-            "sweep_to_budget_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "year_end_run_lines_target_budget_id_budgets_id_fk": {
-          "name": "year_end_run_lines_target_budget_id_budgets_id_fk",
-          "tableFrom": "year_end_run_lines",
-          "tableTo": "budgets",
-          "columnsFrom": [
-            "target_budget_id"
+            "owner_person_id"
           ],
           "columnsTo": [
             "id"
@@ -19463,21 +19271,6 @@
         "4-5-4",
         "5-4-4",
         "13-period"
-      ]
-    },
-    "public.close_check_code": {
-      "name": "close_check_code",
-      "schema": "public",
-      "values": [
-        "gl_tieout_signed_off",
-        "journals_balanced",
-        "ledger_check_clean",
-        "audit_chain_verified",
-        "actuals_imported",
-        "unmatched_actuals_cleared",
-        "accruals_reviewed",
-        "prepaids_recognized",
-        "commitments_accrued"
       ]
     },
     "public.commitment_status": {
@@ -19734,23 +19527,6 @@
         "cancelled"
       ]
     },
-    "public.reopen_action": {
-      "name": "reopen_action",
-      "schema": "public",
-      "values": [
-        "reopen",
-        "unlock"
-      ]
-    },
-    "public.reopen_request_status": {
-      "name": "reopen_request_status",
-      "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "declined"
-      ]
-    },
     "public.reporting_line_kind": {
       "name": "reporting_line_kind",
       "schema": "public",
@@ -19841,18 +19617,6 @@
         "preferred",
         "blocked",
         "unknown"
-      ]
-    },
-    "public.year_end_line_status": {
-      "name": "year_end_line_status",
-      "schema": "public",
-      "values": [
-        "planned",
-        "awaiting_approval",
-        "approved",
-        "declined",
-        "blocked",
-        "executed"
       ]
     },
     "public.year_end_run_status": {

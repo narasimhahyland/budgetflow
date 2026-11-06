@@ -187,7 +187,8 @@ export async function seedChannels(_app: INestApplicationContext): Promise<void>
             type: 'discussion.mentioned',
             tone: 'info',
             title: 'Kavya Rao mentioned you on Diwali celebration 2026',
-            detail: 'Caterer quote came in for 230 people. @Rahul Menon can we fund it from Bengaluru Events?',
+            detail:
+              'Caterer quote came in for 230 people. @Rahul Menon can we fund it from Bengaluru Events?',
             itemType: 'event',
             itemId: P5_IDS.event,
             itemRef: 'EV-2026-DIWALI',
@@ -218,7 +219,8 @@ export async function seedChannels(_app: INestApplicationContext): Promise<void>
             type: 'discussion.mentioned',
             tone: 'info',
             title: 'Rahul Menon mentioned you on Diwali celebration 2026',
-            detail: 'Yes, submit it. @Ananya Iyer the Hyderabad gifts share will reach you as a co-funding request.',
+            detail:
+              'Yes, submit it. @Ananya Iyer the Hyderabad gifts share will reach you as a co-funding request.',
             itemType: 'event',
             itemId: P5_IDS.event,
             itemRef: 'EV-2026-DIWALI',

@@ -30,14 +30,21 @@ test.describe('employee', () => {
   });
 });
 
+test.describe('org admin', () => {
+  test.use({ storageState: authFile('org-admin') });
+
+  // Reports opened in Phase 10, so the placeholder state moves to tenant settings, which Phase 14 owns.
+  test('an allowed area that opens later shows its placeholder', async ({ page }) => {
+    await page.goto('/admin/settings');
+    await expect(page.getByRole('heading', { level: 1, name: 'Tenant settings' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Tenant settings is not open yet' }),
+    ).toBeVisible();
+  });
+});
+
 test.describe('finance controller', () => {
   test.use({ storageState: authFile('finance-controller') });
-
-  test('an allowed area that opens later shows its placeholder', async ({ page }) => {
-    await page.goto('/reports');
-    await expect(page.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Reports is not open yet' })).toBeVisible();
-  });
 
   test('a server error shows the error state and recovers on retry', async ({ page }) => {
     let fail = true;

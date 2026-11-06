@@ -5,7 +5,9 @@ import { seedChannels } from './channels';
 import { seedClose } from './close';
 import { seedEvents } from './events';
 import { seedEventsDepth } from './events-depth';
+import { seedIntegrations } from './integrations';
 import { seedOrg } from './org';
+import { seedReports } from './reports';
 import { seedRules } from './rules';
 
 /**
@@ -36,9 +38,15 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     phase: 'P9',
     run: seedEventsDepth,
   },
+  { name: 'saved report views, scheduled deliveries and exports', phase: 'P10', run: seedReports },
   {
     name: 'rollover policies, close reason codes and a draft year-end run',
     phase: 'P11',
     run: seedClose,
+  },
+  {
+    name: 'connected systems in Mock mode, mappings, an API key and a webhook endpoint',
+    phase: 'P12',
+    run: seedIntegrations,
   },
 ];

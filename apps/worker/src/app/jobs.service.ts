@@ -1,14 +1,17 @@
 import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
-import {
-  CHANNEL_DELIVER_TOPIC,
-  ChannelsService,
-  type ChannelDeliverJob,
-} from '@bf/api/channels';
+import { CHANNEL_DELIVER_TOPIC, ChannelsService, type ChannelDeliverJob } from '@bf/api/channels';
 import { DB } from '@bf/api/core';
+import { WebhooksService } from '@bf/api/integrations';
 import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
 import { LEDGER_CHECK_TOPIC, RebuildService } from '@bf/api/integrity';
 import { EMAIL_TOPIC, NotificationsService, type EmailPayload } from '@bf/api/notifications';
+import {
+  REPORT_DELIVER_TOPIC,
+  REPORT_SWEEP_TOPIC,
+  ReportDeliveryService,
+  type ReportDeliverJob,
+} from '@bf/api/reports';
 import { BUDGET_THRESHOLD_TOPIC, BudgetAlertsConsumer, type ThresholdCrossed } from '@bf/api/spend';
 import {
   Inject,
@@ -22,6 +25,7 @@ import { PgBoss } from 'pg-boss';
 
 const NIGHTLY = 'integrity.nightly';
 const DEAD_LETTER = 'integrity.dead-letter';
+
 const BUDGET_EVENT_TOPICS = ['budget.change_requested'] as const;
 
 /**
@@ -33,7 +37,9 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
   private readonly log = new Logger('Jobs');
   private boss?: PgBoss;
   private timer?: NodeJS.Timeout;
+  private webhookTimer?: NodeJS.Timeout;
   private draining = false;
+  private deliveringWebhooks = false;
   ready = false;
 
   constructor(
@@ -44,6 +50,8 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly alerts: BudgetAlertsConsumer,
     private readonly channels: ChannelsService,
     private readonly slaSweep: SlaSweepService,
+    private readonly reportDelivery: ReportDeliveryService,
+    private readonly webhooks: WebhooksService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -77,6 +85,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       BUDGET_CONTROL_TOPIC,
       BUDGET_THRESHOLD_TOPIC,
       CHANNEL_DELIVER_TOPIC,
+      REPORT_DELIVER_TOPIC,
     ]) {
       await boss.createQueue(topic, {
         retryLimit: 5,
@@ -107,6 +116,11 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     await boss.work<ChannelDeliverJob>(CHANNEL_DELIVER_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.channels.deliverChannelJob(job.data);
     });
+    // Scheduled report delivery (screen 091): render with the owner's scope, email the recipients
+    // who may see the same data, post headline figures to the allowed channels.
+    await boss.work<ReportDeliverJob>(REPORT_DELIVER_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.reportDelivery.deliver(job.data);
+    });
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();
       this.log.log(`nightly ledger rebuild check ran for ${n} tenant(s)`);
@@ -134,10 +148,33 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       {},
       { tz: 'UTC' },
     );
+    // Queues the scheduled report deliveries that fell due.
+    await boss.createQueue(REPORT_SWEEP_TOPIC, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(REPORT_SWEEP_TOPIC, async () => {
+      const queued = await this.reportDelivery.sweepAllTenants();
+      if (queued) this.log.log(`queued ${queued} scheduled report delivery job(s)`);
+    });
+    await boss.schedule(
+      REPORT_SWEEP_TOPIC,
+      process.env.REPORT_SWEEP_CRON ?? '*/5 * * * *',
+      {},
+      { tz: 'UTC' },
+    );
     this.boss = boss;
     this.timer = setInterval(
       () => void this.drainOutbox(),
       Number(process.env.OUTBOX_POLL_MS ?? 1000),
+    );
+    // Phase 12: deliveries the outbox drain created, plus anything due for a retry (101). A timer
+    // rather than a queued job, so a delivery is never looked for before its row is committed.
+    this.webhookTimer = setInterval(
+      () => void this.deliverWebhooks(),
+      Number(process.env.WEBHOOK_POLL_MS ?? 2000),
     );
     this.ready = true;
     this.log.log(
@@ -147,7 +184,22 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
 
   async onApplicationShutdown(): Promise<void> {
     if (this.timer) clearInterval(this.timer);
+    if (this.webhookTimer) clearInterval(this.webhookTimer);
     await this.boss?.stop({ graceful: true, timeout: 10_000 });
+  }
+
+  /** Sends webhook deliveries that are pending or due for a retry. */
+  async deliverWebhooks(): Promise<void> {
+    if (this.deliveringWebhooks) return;
+    this.deliveringWebhooks = true;
+    try {
+      const sent = await this.webhooks.deliverDue();
+      if (sent > 0) this.log.log(`delivered ${sent} webhook(s) to customer endpoints`);
+    } catch (e) {
+      this.log.error(`webhook delivery failed: ${(e as Error).message}`);
+    } finally {
+      this.deliveringWebhooks = false;
+    }
   }
 
   /** Publishes unpublished outbox rows per tenant; the job's singleton key makes publication idempotent. */
@@ -167,6 +219,14 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
             .for('update', { skipLocked: true });
           for (const m of pending) {
             try {
+              // Phase 12 reuses this drain: subscribed customer endpoints get a pending delivery,
+              // written in the same transaction and sent by the webhook timer.
+              await this.webhooks.fanOutFromOutbox(
+                tx,
+                m.tenantId,
+                m.topic,
+                m.payload as Record<string, unknown>,
+              );
               await this.boss!.send(
                 m.topic,
                 { tenantId: m.tenantId, ...(m.payload as object) },

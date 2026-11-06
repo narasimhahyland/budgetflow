@@ -10,10 +10,12 @@ import { eventEndpoints } from './domains/events';
 import { financeEndpoints } from './domains/finance';
 import { healthEndpoints } from './domains/health';
 import { identityEndpoints } from './domains/identity';
+import { integrationEndpoints } from './domains/integrations';
 import { integrityEndpoints } from './domains/integrity';
 import { ledgerEndpoints } from './domains/ledger';
 import { orgEndpoints } from './domains/org';
 import { planningEndpoints } from './domains/planning';
+import { reportEndpoints } from './domains/reports';
 import { requestEndpoints } from './domains/requests';
 import { channelEndpoints } from './domains/channels';
 import { closeEndpoints } from './domains/close';
@@ -44,6 +46,8 @@ export const endpoints = {
   ...actualsEndpoints,
   ...channelEndpoints,
   ...rulesEndpoints,
+  ...reportEndpoints,
+  ...integrationEndpoints,
   ...closeEndpoints,
 } as const;
 

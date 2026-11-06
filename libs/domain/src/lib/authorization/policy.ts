@@ -52,14 +52,17 @@ export const ACTIONS = [
   'contribution.request',
   'contribution.decide',
   'event.manage',
+  'event.read',
   'actuals.manage',
   'actuals.read',
   'gl.sign_off',
   'report.read',
+  'report.schedule',
   'audit.read',
   'integrity.run',
   'integrity.read',
   'integration.manage',
+  'integration.read',
   'notification.manage',
 ] as const;
 export type Action = (typeof ACTIONS)[number];
@@ -85,7 +88,9 @@ const OWNER: Grants = {
   'contribution.request': 'owned',
   'contribution.decide': 'owned',
   'event.manage': 'owned',
+  'event.read': 'owned',
   'report.read': 'owned',
+  'report.schedule': 'owned',
 };
 
 export const ROLE_GRANTS: Record<RoleId, Grants> = {
@@ -106,9 +111,12 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'ledger.read': 'tenant',
     'budget.create_root': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
+    'event.read': 'tenant',
     'audit.read': 'tenant',
     'org.read': 'tenant',
     'doa.read': 'tenant',
+    'integration.read': 'tenant',
     // The CEO approves submitted DoA matrix versions; Finance drafts them.
     'doa.manage': 'tenant',
     'rules.read': 'tenant',
@@ -136,9 +144,12 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'actuals.read': 'tenant',
     'gl.sign_off': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
+    'event.read': 'tenant',
     'audit.read': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
+    'integration.read': 'tenant',
     'notification.manage': 'tenant',
     'rules.read': 'tenant',
     'rules.manage': 'tenant',
@@ -156,9 +167,12 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'actuals.read': 'tenant',
     'request.approve': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
+    'event.read': 'tenant',
     'audit.read': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
+    'integration.read': 'tenant',
     'org.read': 'tenant',
     'doa.read': 'tenant',
     'rules.read': 'tenant',
@@ -176,6 +190,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'request.create': 'owned',
     'contribution.request': 'owned',
     'event.manage': 'self',
+    'event.read': 'self',
   },
   employee: { 'tenant.read': 'tenant', 'org.read': 'self', 'request.create': 'self' },
   auditor: {
@@ -184,19 +199,28 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'ledger.read': 'tenant',
     'actuals.read': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
+    'event.read': 'tenant',
     'audit.read': 'tenant',
     'integrity.read': 'tenant',
+    'integration.read': 'tenant',
     'org.read': 'tenant',
     'doa.read': 'tenant',
     'rules.read': 'tenant',
   },
-  'integration-admin': { 'tenant.read': 'tenant', 'integration.manage': 'tenant' },
+  'integration-admin': {
+    'tenant.read': 'tenant',
+    'integration.manage': 'tenant',
+    'integration.read': 'tenant',
+  },
   analyst: {
     'tenant.read': 'tenant',
     'org.read': 'tenant',
     'budget.read': 'tenant',
     'ledger.read': 'tenant',
     'report.read': 'tenant',
+    'report.schedule': 'tenant',
+    'event.read': 'tenant',
   },
 };
 
@@ -212,6 +236,11 @@ export interface Actor {
   orgScopeUnitIds?: readonly string[];
   /** The actor's own location and team (`self` org scope). */
   homeOrgUnitIds?: readonly string[];
+  /**
+   * Service identity (a public API key): the complete set of actions its scopes grant, all at tenant
+   * scope. When present it replaces role grants, so a key can only ever do what its scopes name.
+   */
+  serviceScopes?: readonly Action[];
 }
 
 export type Resource =
@@ -272,6 +301,7 @@ function scopeCovers(scope: Scope, actor: Actor, resource: Resource, action?: Ac
 }
 
 function bestScope(actor: Actor, action: Action): Scope | null {
+  if (actor.serviceScopes) return actor.serviceScopes.includes(action) ? 'tenant' : null;
   const order: Scope[] = ['tenant', 'owned', 'self'];
   const scopes = actor.roles
     .map((r) => ROLE_GRANTS[r]?.[action])

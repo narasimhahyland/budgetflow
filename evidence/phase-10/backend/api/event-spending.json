@@ -1,0 +1,175 @@
+{
+  "kpis": [
+    {
+      "key": "events",
+      "label": "Events",
+      "number": 51
+    },
+    {
+      "key": "funded",
+      "label": "Funded",
+      "money": {
+        "amountMinor": 10809500,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "actual",
+      "label": "Spent",
+      "money": {
+        "amountMinor": 936051,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "committed",
+      "label": "Open commitments",
+      "money": {
+        "amountMinor": 0,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "surplusReturned",
+      "label": "Surplus returned",
+      "money": {
+        "amountMinor": 1760000,
+        "currency": "USD"
+      }
+    },
+    {
+      "key": "costPerAttendee",
+      "label": "Average cost per attendee",
+      "money": {
+        "amountMinor": 117006,
+        "currency": "USD"
+      }
+    }
+  ],
+  "rows": [
+    {
+      "key": "153c44c3-bce2-401c-8893-ce8a95323c5d",
+      "label": "Quarterly lunch 052ee6 \u2014 2026-12-10 (EV-2026-7055D9)",
+      "budgetId": null,
+      "eventId": "153c44c3-bce2-401c-8893-ce8a95323c5d",
+      "orgUnitId": "30000000-0000-4000-8000-000000000008",
+      "status": null,
+      "tags": ["draft"],
+      "cells": {
+        "dates": {
+          "text": "2026-12-10"
+        },
+        "location": {
+          "text": "New York"
+        },
+        "eventStatus": {
+          "text": "draft"
+        },
+        "funded": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          }
+        },
+        "pending": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "pre_encumbered"
+        },
+        "committed": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "encumbered"
+        },
+        "actual": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "actual"
+        },
+        "attendees": {
+          "number": null
+        },
+        "costPerAttendee": {
+          "text": "\u2013"
+        },
+        "surplusReturned": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          }
+        },
+        "coFunders": {
+          "number": 0
+        }
+      }
+    },
+    {
+      "key": "5d1aaa14-6aa1-4264-a91a-19440b41023c",
+      "label": "Scenario event c8239e (EV-2026-D4111A)",
+      "budgetId": null,
+      "eventId": "5d1aaa14-6aa1-4264-a91a-19440b41023c",
+      "orgUnitId": "30000000-0000-4000-8000-000000000008",
+      "status": null,
+      "tags": ["funded"],
+      "cells": {
+        "dates": {
+          "text": "2026-12-03"
+        },
+        "location": {
+          "text": "New York"
+        },
+        "eventStatus": {
+          "text": "funded"
+        },
+        "funded": {
+          "money": {
+            "amountMinor": 400000,
+            "currency": "USD"
+          }
+        },
+        "pending": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "pre_encumbered"
+        },
+        "committed": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "encumbered"
+        },
+        "actual": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          },
+          "bucket": "actual"
+        },
+        "attendees": {
+          "number": null
+        },
+        "costPerAttendee": {
+          "text": "\u2013"
+        },
+        "surplusReturned": {
+          "money": {
+            "amountMinor": 0,
+            "currency": "USD"
+          }
+        },
+        "coFunders": {
+          "number": 0
+        }
+      }
+    }
+  ]
+}

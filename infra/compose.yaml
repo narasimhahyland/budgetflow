@@ -94,6 +94,29 @@ services:
       timeout: 3s
       retries: 20
 
+  # Phase 12: stands in for ERP, planning, card, expense, HR, calendar and identity providers, and
+  # receives BudgetFlow's outbound webhooks, so connector runs are deterministic and offline.
+  mock-providers:
+    image: node:24.12-alpine
+    command: ['node', '/srv/server.mjs']
+    environment:
+      PORT: '4010'
+    volumes:
+      - ./mock-providers:/srv:ro
+    ports:
+      - '127.0.0.1:${BF_MOCK_PROVIDERS_PORT:-4010}:4010'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:4010/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
   api:
     build:
       context: ..
@@ -118,12 +141,18 @@ services:
       DOCUMENT_STORE_SECRET_KEY: ${BF_MINIO_ROOT_PASSWORD:?}
       WEB_BASE_URL: http://localhost:${BF_WEB_PORT:-4200}
       APPROVAL_LINK_SECRET: ${BF_APPROVAL_LINK_SECRET:-}
+      # Phase 12: connectors and webhook deliveries only reach these hosts.
+      INTEGRATIONS_MOCK_BASE_URL: http://mock-providers:4010
+      INTEGRATIONS_ALLOWED_HOSTS: mock-providers,localhost,127.0.0.1
+      INTEGRATIONS_SECRET_KEY: ${BF_INTEGRATIONS_SECRET_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy
       keycloak:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      mock-providers:
         condition: service_healthy
     ports:
       - '127.0.0.1:${BF_API_PORT:-3000}:3000'
@@ -151,6 +180,9 @@ services:
       SMTP_URL: smtp://mailpit:1025
       WEB_BASE_URL: http://localhost:${BF_WEB_PORT:-4200}
       APPROVAL_LINK_SECRET: ${BF_APPROVAL_LINK_SECRET:-}
+      INTEGRATIONS_MOCK_BASE_URL: http://mock-providers:4010
+      INTEGRATIONS_ALLOWED_HOSTS: mock-providers,localhost,127.0.0.1
+      INTEGRATIONS_SECRET_KEY: ${BF_INTEGRATIONS_SECRET_KEY:-}
     depends_on:
       api:
         condition: service_healthy
