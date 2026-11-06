@@ -10,6 +10,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -18,7 +19,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   BUDGET_STATUSES,
+  FORECAST_METHODS,
   REPORT_IDS,
+  type ForecastMethod,
   type ReportFilters,
   type ReportFormat,
   type ReportGroupBy,
@@ -34,6 +37,7 @@ import { LoadState } from './load-state';
 import {
   percentOf,
   ReportChart,
+  ReportNotes,
   Reconciliation,
   ReportTable,
   ScopeNote,
@@ -57,10 +61,19 @@ const GROUP_BY_LABELS: Record<ReportGroupBy, string> = {
 const isReportId = (value: string | null): value is ReportId =>
   (REPORT_IDS as readonly string[]).includes(value ?? '');
 
+const METHOD_LABELS: Record<ForecastMethod, string> = {
+  run_rate: 'Run-rate',
+  committed_pipeline: 'Committed plus pipeline',
+  owner_input: 'Owner input',
+};
+
+/** 087 only: the columns holding a projection, so the frame can mark them as not-yet-spent money. */
+const FORECAST_COLUMNS = ['forecast', 'previousForecast', 'change'];
+
 /**
- * Screens 080-086 and 015a/015b: the nine Phase 10 reports in one frame. The server returns the
- * columns, the cells and the reconciliation; this page lays them out and never does money maths of
- * its own.
+ * Screens 080-087 and 015a/015b: the Phase 10 and 11 reports in one frame. The server returns the
+ * columns, the cells, the notes and the reconciliation; this page lays them out and never does money
+ * maths of its own.
  */
 @Component({
   selector: 'bf-report-page',
@@ -71,6 +84,7 @@ const isReportId = (value: string | null): value is ReportId =>
     FormsModule,
     LoadState,
     MatButtonModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -79,6 +93,7 @@ const isReportId = (value: string | null): value is ReportId =>
     Money,
     Reconciliation,
     ReportChart,
+    ReportNotes,
     ReportTable,
     RouterLink,
     SAT_BANNER_IMPORTS,
@@ -103,6 +118,11 @@ const isReportId = (value: string | null): value is ReportId =>
         <a mat-stroked-button routerLink="/reports">
           <mat-icon svgIcon="arrow_left" />All reports
         </a>
+        @if (isForecastReport()) {
+          <a mat-stroked-button routerLink="/finance/forecast-cycles">
+            <mat-icon svgIcon="calendar" />Forecast cycles
+          </a>
+        }
         <button mat-stroked-button type="button" (click)="startSave()" [disabled]="!report()">
           <mat-icon svgIcon="bookmark" />Save this view
         </button>
@@ -198,6 +218,49 @@ const isReportId = (value: string | null): value is ReportId =>
             (ngModelChange)="setFilter('periodTo', $event)"
           />
         </mat-form-field>
+        @if (isForecastReport()) {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Forecast snapshot</mat-label>
+            <mat-select
+              [ngModel]="forecastCycleId()"
+              (ngModelChange)="setFilter('forecastCycleId', $event)"
+            >
+              <mat-option [value]="''">Latest accepted forecast</mat-option>
+              @for (c of cycles(); track c.id) {
+                <mat-option [value]="c.id">{{ c.name }} (as of {{ c.asOfDate }})</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Compare with snapshot</mat-label>
+            <mat-select
+              [ngModel]="compareCycleId()"
+              (ngModelChange)="setFilter('compareCycleId', $event)"
+            >
+              <mat-option [value]="''">No comparison</mat-option>
+              @for (c of cycles(); track c.id) {
+                <mat-option [value]="c.id">{{ c.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Method</mat-label>
+            <mat-select
+              [ngModel]="forecastMethod()"
+              (ngModelChange)="setFilter('forecastMethod', $event)"
+            >
+              <mat-option [value]="''">Any method</mat-option>
+              @for (m of methods; track m) {
+                <mat-option [value]="m">{{ methodLabel(m) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-checkbox
+            [checked]="commentaryOnly()"
+            (change)="setFilter('commentaryRequiredOnly', $event.checked ? 'true' : '')"
+            >Commentary required only</mat-checkbox
+          >
+        }
         @if (rootBudgetId()) {
           <button mat-stroked-button type="button" (click)="setFilter('rootBudgetId', '')">
             <mat-icon svgIcon="clear_filter" aria-hidden="true" />Clear budget scope
@@ -291,6 +354,7 @@ const isReportId = (value: string | null): value is ReportId =>
             </p>
           </div>
         </div>
+        <bf-report-notes [notes]="r.notes" />
         @if (r.truncated) {
           <sat-banner class="bf-banner" variant="warning">
             <sat-banner-message
@@ -307,6 +371,7 @@ const isReportId = (value: string | null): value is ReportId =>
             [totals]="r.totals"
             [caption]="r.name"
             [timezone]="session.timezone()"
+            [forecastColumns]="forecastColumns()"
             (drill)="drill.set($event)"
           />
         } @else {
@@ -389,6 +454,7 @@ export class ReportPage {
   protected readonly valueOf = valueOf;
   protected readonly percentOf = percentOf;
   protected readonly statuses = BUDGET_STATUSES;
+  protected readonly methods = FORECAST_METHODS;
 
   /** Route param and query string as signals, so changing any filter re-runs the report. */
   private readonly pathParams = toSignal(this.route.paramMap, {
@@ -408,6 +474,26 @@ export class ReportPage {
   protected readonly periodTo = computed(() => this.query().get('periodTo') ?? '');
   protected readonly rootBudgetId = computed(() => this.query().get('rootBudgetId') ?? '');
   protected readonly viewId = computed(() => this.query().get('viewId') ?? '');
+  protected readonly forecastCycleId = computed(() => this.query().get('forecastCycleId') ?? '');
+  protected readonly compareCycleId = computed(() => this.query().get('compareCycleId') ?? '');
+  protected readonly forecastMethod = computed(() => this.query().get('forecastMethod') ?? '');
+  protected readonly commentaryOnly = computed(
+    () => this.query().get('commentaryRequiredOnly') === 'true',
+  );
+  protected readonly isForecastReport = computed(() => this.reportId() === 'forecast-variance');
+
+  /**
+   * 087 reports a named cycle or the latest accepted forecast per budget. The list is a close-domain
+   * read that owners may make too, so an owner can pick the same snapshot finance is looking at.
+   */
+  protected readonly cycleList = resource({
+    params: () => (this.isForecastReport() ? {} : undefined),
+    loader: () => data(this.api.listForecastCycles({ query: {} })),
+  });
+  protected readonly cycles = computed(() => valueOf(this.cycleList)?.items ?? []);
+  protected readonly forecastColumns = computed(() =>
+    this.isForecastReport() ? FORECAST_COLUMNS : [],
+  );
 
   protected readonly catalog = resource({ loader: () => data(this.api.getReportCatalog({})) });
   protected readonly definition = computed(() =>
@@ -455,11 +541,21 @@ export class ReportPage {
     if (this.periodFrom()) f.periodFrom = this.periodFrom();
     if (this.periodTo()) f.periodTo = this.periodTo();
     if (this.rootBudgetId()) f.rootBudgetId = this.rootBudgetId();
+    if (this.isForecastReport()) {
+      if (this.forecastCycleId()) f.forecastCycleId = this.forecastCycleId();
+      if (this.compareCycleId()) f.compareCycleId = this.compareCycleId();
+      if (this.forecastMethod()) f.forecastMethod = this.forecastMethod() as ForecastMethod;
+      if (this.commentaryOnly()) f.commentaryRequiredOnly = 'true';
+    }
     return f;
   }
 
   protected label(groupBy: ReportGroupBy): string {
     return GROUP_BY_LABELS[groupBy] ?? groupBy;
+  }
+
+  protected methodLabel(method: ForecastMethod): string {
+    return METHOD_LABELS[method];
   }
 
   protected statusLabel(status: string): string {

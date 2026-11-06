@@ -48,6 +48,31 @@ export class ScopeNote {
 }
 
 /**
+ * The plain-English statements the server attaches to a run, for example "No accepted forecast yet;
+ * showing system run-rate forecasts". The wording is the API's, so a report never has to invent an
+ * explanation of its own data.
+ */
+@Component({
+  selector: 'bf-report-notes',
+  imports: [SAT_BANNER_IMPORTS],
+  template: `
+    @if (notes().length) {
+      <sat-banner class="bf-banner" variant="info" data-testid="report-notes">
+        <sat-banner-message>
+          @for (note of notes(); track note; let last = $last) {
+            {{ note }}{{ last ? '' : ' ' }}
+          }
+        </sat-banner-message>
+      </sat-banner>
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ReportNotes {
+  readonly notes = input<readonly string[]>([]);
+}
+
+/**
  * Proof that the figures came from the ledger. When the server could not tie a total back to the
  * ledger buckets this says so, with the difference, instead of quietly showing a number nobody can
  * verify.
@@ -148,7 +173,16 @@ export class Reconciliation {
         <thead>
           <tr>
             @for (c of columns(); track c.key) {
-              <th [class.bf-num]="c.align === 'end'" [attr.title]="c.hint">{{ c.label }}</th>
+              <th
+                [class.bf-num]="c.align === 'end'"
+                [class.bf-cell--forecast]="isForecast(c)"
+                [attr.title]="c.hint"
+              >
+                {{ c.label }}
+                @if (isForecast(c)) {
+                  <span class="bf-forecast-mark">Forecast, not actual</span>
+                }
+              </th>
             }
           </tr>
         </thead>
@@ -156,7 +190,11 @@ export class Reconciliation {
           @for (row of rows(); track row.key) {
             <tr>
               @for (c of columns(); track c.key) {
-                <td [class.bf-num]="c.align === 'end'">
+                <td
+                  [class.bf-num]="c.align === 'end'"
+                  [class.bf-cell--forecast]="isForecast(c)"
+                  [attr.data-testid]="isForecast(c) ? 'forecast-cell' : null"
+                >
                   @let cell = cellFor(row, c);
                   @let request = drillRequest(row, c);
                   @if (request) {
@@ -178,6 +216,13 @@ export class Reconciliation {
                       [ngTemplateOutletContext]="{ $implicit: cell, column: c }"
                     />
                   }
+                  @if (c.key === 'label') {
+                    @for (tag of row.tags; track tag) {
+                      <sat-status-tag class="bf-row-tag" [status]="tagStatus(tag)">{{
+                        tag
+                      }}</sat-status-tag>
+                    }
+                  }
                 </td>
               }
             </tr>
@@ -185,7 +230,7 @@ export class Reconciliation {
           @if (totals(); as t) {
             <tr class="bf-total">
               @for (c of columns(); track c.key) {
-                <td [class.bf-num]="c.align === 'end'">
+                <td [class.bf-num]="c.align === 'end'" [class.bf-cell--forecast]="isForecast(c)">
                   <ng-container
                     [ngTemplateOutlet]="value"
                     [ngTemplateOutletContext]="{ $implicit: cellFor(t, c), column: c }"
@@ -270,6 +315,23 @@ export class Reconciliation {
     .bf-tone--success {
       color: var(--sat-sys-on-success-container);
     }
+    /* A forecast is a projection: hatched, so it never reads like committed or actual money. */
+    .bf-cell--forecast {
+      background: repeating-linear-gradient(
+        135deg,
+        transparent 0 5px,
+        var(--mat-sys-surface-container-high) 5px 7px
+      );
+    }
+    .bf-forecast-mark {
+      display: block;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-small);
+      text-transform: none;
+    }
+    .bf-row-tag {
+      margin-inline-start: 8px;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -279,8 +341,19 @@ export class ReportTable {
   readonly totals = input<ReportRow | null>(null);
   readonly caption = input('Report');
   readonly timezone = input('UTC');
+  /** Column keys holding a projection rather than money the ledger moved. */
+  readonly forecastColumns = input<readonly string[]>([]);
   readonly drill = output<DrillRequest>();
   protected readonly percentOf = percentOf;
+
+  protected isForecast(c: ReportColumn): boolean {
+    return this.forecastColumns().includes(c.key);
+  }
+
+  /** Row tags are written by the API; "Commentary due" is the only one that asks for action. */
+  protected tagStatus(tag: string): 'info' | 'warning' {
+    return tag.toLowerCase().includes('commentary') ? 'warning' : 'info';
+  }
 
   /** The `label` column names the row and is carried on the row itself, not among its cells. */
   protected cellFor(row: ReportRow, c: ReportColumn): ReportCell | undefined {

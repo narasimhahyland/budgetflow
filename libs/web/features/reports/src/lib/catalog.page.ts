@@ -58,6 +58,12 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
         <a mat-stroked-button routerLink="/reports/health">
           <mat-icon svgIcon="monitor" aria-hidden="true" />Budget health
         </a>
+        <a mat-stroked-button routerLink="/reports/board-pack">
+          <mat-icon svgIcon="book" />Board and FP&A pack
+        </a>
+        <a mat-stroked-button routerLink="/finance/forecast-cycles">
+          <mat-icon svgIcon="chart_arrow_up" />Forecast cycles
+        </a>
         <a mat-stroked-button routerLink="/reports/schedules">
           <mat-icon svgIcon="calendar" />Scheduled reports
         </a>
