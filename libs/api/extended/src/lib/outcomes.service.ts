@@ -37,6 +37,12 @@ import {
 const ASSOCIATION_NOTE =
   'These figures show association, not cause. People who attend events may differ in other ways.';
 
+/**
+ * A person nobody is related to, used only to ask `PolicyService` whether a role reads people
+ * company-wide or only inside its own scope. It matches no row, so it can never leak anything.
+ */
+const PROBE_PERSON_ID = '00000000-0000-4000-8000-000000000000';
+
 /** Attendance that counts as taking part (47e). */
 const ATTENDED = ['attended', 'walk_in'] as const;
 
@@ -77,9 +83,7 @@ export class OutcomesService {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       const tenant = { kind: 'tenant' as const, tenantId: actor.tenantId };
       this.policy.assert(actor, 'report.read', tenant, 'outcome report');
-      // Retention is company and region level work for People Ops and leadership. A role that reads
-      // reports only inside what it owns gets the survey view and no retention cohorts.
-      const retentionAvailable = this.policy.can(actor, 'org.read', tenant).allowed;
+      const retentionAvailable = this.readsPeopleCompanyWide(actor);
       const year = await this.fiscalYear(tx, actor.tenantId, query.fiscalYearId);
       const scopedEvents = await this.eventsInYear(tx, actor.tenantId, year, query.regionOrgUnitId);
       const eventIds = scopedEvents.map((e) => e.id);
@@ -201,6 +205,21 @@ export class OutcomesService {
   }
 
   // Internals ----------------------------------------------------------------------------
+
+  /**
+   * Whether the actor reads people across the whole company, which is what retention cohorts need:
+   * a cohort spans every office, so a role scoped to its own region would be reading about people
+   * it has no business reading about. Asking `PolicyService` about a person outside the actor's own
+   * scope answers exactly that question — a region-scoped role is refused, a company-wide one is not.
+   */
+  private readsPeopleCompanyWide(actor: RequestActor): boolean {
+    return this.policy.can(actor, 'org.read', {
+      kind: 'person',
+      tenantId: actor.tenantId,
+      personId: PROBE_PERSON_ID,
+      ancestorIds: [],
+    }).allowed;
+  }
 
   private async fiscalYear(
     tx: Tx,

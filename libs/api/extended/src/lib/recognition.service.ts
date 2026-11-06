@@ -153,16 +153,18 @@ export class RecognitionService {
         status: 200,
       },
       async (tx) => {
-        this.policy.assert(
-          actor,
-          'tenant.settings.manage',
-          { kind: 'tenant', tenantId: actor.tenantId },
-          'award type',
-        );
         const budget = req.fundingBudgetId ? await this.views.row(tx, req.fundingBudgetId) : null;
-        // An award type that pays money has to name a budget its author can spend from, so nobody
-        // can point a new award type at someone else's Recognition budget.
+        // An award type that pays money is a money decision: its author has to be able to allocate
+        // from the Recognition budget behind it. A wordless type moves nothing, so it is ordinary
+        // administration.
         if (budget) this.policy.assert(actor, 'budget.allocate', budgetResource(budget), 'budget');
+        else
+          this.policy.assert(
+            actor,
+            'tenant.settings.manage',
+            { kind: 'tenant', tenantId: actor.tenantId },
+            'award type',
+          );
         if (req.kind !== 'thank_you' && (!req.amountMinor || !budget))
           throw new ApiProblem(
             422,

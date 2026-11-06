@@ -660,7 +660,8 @@ export const Wallet = named(
   'Wallet',
   z
     .object({
-      id: Id,
+      /** Null until the first claim creates the wallet row; the allowance is visible before that. */
+      id: Id.nullable(),
       programId: Id,
       programName: z.string(),
       programKind: z.enum(['wellbeing', 'learning']),
@@ -739,7 +740,8 @@ export const CreateWalletClaimRequest = named(
   'CreateWalletClaimRequest',
   z
     .object({
-      walletId: Id,
+      /** The programme to claim from; the caller's wallet in it is created on the first claim. */
+      programId: Id,
       category: z.string().trim().min(1).max(60),
       merchant: z.string().trim().min(1).max(160),
       amountMinor: z.int().positive(),

@@ -37,7 +37,7 @@ async function recognitionProgramme(
   await allocateOk(request, root.id, funding.id, usd(opts.fundingMinor));
   const type = await expectContract(
     await request.put('/api/recognition/award-types', {
-      headers: await mutate('org-admin'),
+      headers: await mutate('finance-admin'),
       data: {
         kind: opts.needsApproval ? 'peer' : 'spot',
         name: `${opts.needsApproval ? 'Peer' : 'Spot'} award ${randomUUID().slice(0, 8)}`,
@@ -373,7 +373,7 @@ test.describe('monetary awards are spend on a Recognition budget', () => {
     });
     const freeze = await request.post(`/api/budgets/${funding.id}/freeze`, {
       headers: await mutate('finance-admin'),
-      data: { reasonCode: 'cost_reduction', reason: reason('pausing recognition spend') },
+      data: { reasonCode: 'FRZ-POLICY', reason: reason('pausing recognition spend') },
     });
     expect(freeze.status(), await freeze.text()).toBe(200);
 
@@ -431,16 +431,22 @@ test.describe('monetary awards are spend on a Recognition budget', () => {
     expect(outsider.items.map((i) => i.id)).not.toContain(award.id);
   });
 
-  test('only the organization admin configures award types', async ({ request }) => {
+  test('an employee cannot invent an award type that pays them', async ({ request }) => {
+    const { funding } = await recognitionProgramme(request, {
+      fundingMinor: 100_000,
+      amountMinor: 5_000,
+    });
     const res = await request.put('/api/recognition/award-types', {
       headers: await mutate('employee'),
       data: {
         kind: 'spot',
         name: 'Employee-invented award',
         amountMinor: 100_000,
+        fundingBudgetId: funding.id,
         reason: reason('an employee trying to invent a paying award type'),
       },
     });
     expect([403, 404]).toContain(res.status());
+    expect((await buckets(request, funding.id)).encumbered).toBe(0);
   });
 });

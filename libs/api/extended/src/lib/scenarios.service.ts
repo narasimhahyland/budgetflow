@@ -197,7 +197,7 @@ export class ScenariosService {
         status: 201,
       },
       async (tx) => {
-        this.assertScenarioAccess(actor);
+        this.assertCanAuthor(actor);
         const baseline = await this.baseline(tx, actor.tenantId);
         const [row] = await tx
           .insert(scenarios)
@@ -654,14 +654,23 @@ export class ScenariosService {
    * tree, so an owner-scoped role is refused rather than shown a slice of the company.
    */
   private assertScenarioAccess(actor: RequestActor): void {
-    const tenant = { kind: 'tenant' as const, tenantId: actor.tenantId };
-    if (!this.policy.can(actor, 'budget.read', tenant).allowed)
+    // Reading a scenario means reading the whole company's budgets, which is what a scenario
+    // describes. The Finance Controller reads and comments without being able to change anything.
+    if (
+      !this.policy.can(actor, 'budget.read', { kind: 'tenant', tenantId: actor.tenantId }).allowed
+    )
       throw ApiProblem.notFound('scenario');
+  }
+
+  /** Creating, changing and promoting need the authority to change budgets company-wide. */
+  private assertCanAuthor(actor: RequestActor): void {
+    this.assertScenarioAccess(actor);
+    const tenant = { kind: 'tenant' as const, tenantId: actor.tenantId };
     const control = this.policy.can(actor, 'budget.control', tenant).allowed;
     const allocate = this.policy.can(actor, 'budget.allocate', tenant).allowed;
     if (!control && !allocate)
       throw ApiProblem.forbidden(
-        'Scenarios are for people who can change budgets company-wide; you can read budgets but not change them.',
+        'Scenarios are authored by people who can change budgets company-wide; you can read them but not author one.',
       );
   }
 
@@ -676,7 +685,7 @@ export class ScenariosService {
   }
 
   private assertAuthor(row: ScenarioRow, actor: RequestActor): void {
-    this.assertScenarioAccess(actor);
+    this.assertCanAuthor(actor);
     if (row.createdByPersonId && row.createdByPersonId !== actor.personId)
       throw ApiProblem.forbidden('Only the author of a scenario can change or promote it.');
   }

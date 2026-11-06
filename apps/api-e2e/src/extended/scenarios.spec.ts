@@ -94,7 +94,7 @@ test.describe('what-if scenarios never touch real money', () => {
     const refused = await request.post(`/api/scenarios/${scenario.id}/promote`, {
       headers: await mutate('finance-admin'),
       data: {
-        reasonCode: 'cost_reduction',
+        reasonCode: 'RED-COST-SAVING',
         reason: reason('promoting a blocked scenario'),
         baselineAt: (await impactOf(request, scenario.id)).baselineAt,
       },
@@ -132,7 +132,7 @@ test.describe('what-if scenarios never touch real money', () => {
       await request.post(`/api/scenarios/${scenario.id}/promote`, {
         headers: await mutate('finance-admin'),
         data: {
-          reasonCode: 'cost_reduction',
+          reasonCode: 'RED-COST-SAVING',
           reason: reason('mid-year reallocation agreed by leadership'),
           baselineAt: impact.baselineAt,
         },
@@ -177,7 +177,7 @@ test.describe('what-if scenarios never touch real money', () => {
     const refused = await request.post(`/api/scenarios/${scenario.id}/promote`, {
       headers: await mutate('budget-owner'),
       data: {
-        reasonCode: 'cost_reduction',
+        reasonCode: 'RED-COST-SAVING',
         reason: reason('owner trying to freeze their own budget through a scenario'),
         baselineAt: impact.baselineAt,
       },
@@ -190,7 +190,7 @@ test.describe('what-if scenarios never touch real money', () => {
     // nothing its author did not already have.
     const byHand = await request.post(`/api/budgets/${child.id}/freeze`, {
       headers: await mutate('budget-owner'),
-      data: { reasonCode: 'cost_reduction', reason: reason('owner freezing their own budget') },
+      data: { reasonCode: 'RED-COST-SAVING', reason: reason('owner freezing their own budget') },
     });
     expect(byHand.status()).toBe(403);
   });
@@ -249,7 +249,7 @@ test.describe('what-if scenarios never touch real money', () => {
     const refused = await request.post(`/api/scenarios/${scenario.id}/promote`, {
       headers: await mutate('finance-admin'),
       data: {
-        reasonCode: 'cost_reduction',
+        reasonCode: 'RED-COST-SAVING',
         reason: reason('promoting against a stale baseline'),
         baselineAt: impact.baselineAt,
       },
@@ -329,7 +329,7 @@ test.describe('what-if scenarios never touch real money', () => {
       destination: 'parent',
     });
     const impact = await impactOf(request, scenario.id);
-    const preview = await request.post(`/api/budgets/${child.id}/control-preview`, {
+    const preview = await request.post(`/api/budgets/${child.id}/controls/preview`, {
       headers: await as('finance-admin'),
       data: { action: 'reduce', amountMinor: 200_000, destination: 'parent' },
     });

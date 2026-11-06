@@ -26,7 +26,7 @@ async function programme(
   await allocateOk(request, root.id, funding.id, usd(opts.fundingMinor));
   const program = await expectContract(
     await request.put('/api/wallets/programs', {
-      headers: await mutate('org-admin'),
+      headers: await mutate('finance-admin'),
       data: {
         key: `wb_${randomUUID().replace(/-/g, '').slice(0, 10)}`,
         name: `Wellbeing ${randomUUID().slice(0, 6)}`,
@@ -61,14 +61,14 @@ async function myWallet(
 
 async function claim(
   request: import('@playwright/test').APIRequestContext,
-  walletId: string,
+  programId: string,
   amountMinor: number,
   opts: { as?: 'employee' | 'event-organizer'; category?: string; receipt?: boolean } = {},
 ) {
   return request.post('/api/wallets/claims', {
     headers: await mutate(opts.as ?? 'employee'),
     data: {
-      walletId,
+      programId,
       category: opts.category ?? 'Gym and fitness',
       merchant: 'Fitness First Indiranagar',
       amountMinor,
@@ -95,9 +95,8 @@ test.describe('wallet claims move through the ledger like any other spend', () =
     expect(afterSetup.encumbered).toBe(0);
     expect(afterSetup.actual).toBe(0);
 
-    const wallet = await myWallet(request, program.id);
     const submitted = await expectContract(
-      await claim(request, wallet.id, 12_000),
+      await claim(request, program.id, 12_000),
       201,
       WalletClaim,
     );
@@ -146,9 +145,8 @@ test.describe('wallet claims move through the ledger like any other spend', () =
       fundingMinor: 200_000,
       allowanceMinor: 30_000,
     });
-    const wallet = await myWallet(request, program.id);
     const submitted = await expectContract(
-      await claim(request, wallet.id, 9_000),
+      await claim(request, program.id, 9_000),
       201,
       WalletClaim,
     );
@@ -177,12 +175,11 @@ test.describe('wallet claims move through the ledger like any other spend', () =
       fundingMinor: 200_000,
       allowanceMinor: 30_000,
     });
-    const wallet = await myWallet(request, program.id);
-    const exact = await expectContract(await claim(request, wallet.id, 30_000), 201, WalletClaim);
+    const exact = await expectContract(await claim(request, program.id, 30_000), 201, WalletClaim);
     expect(exact.status).toBe('submitted');
     expect((await myWallet(request, program.id)).balance.amountMinor).toBe(0);
 
-    const over = await claim(request, wallet.id, 1);
+    const over = await claim(request, program.id, 1);
     await expectProblem(over, 422, 'WALLET_BALANCE_EXCEEDED');
     expect((await buckets(request, funding.id)).preEncumbered).toBe(30_000);
   });
@@ -198,7 +195,7 @@ test.describe('wallet claims move through the ledger like any other spend', () =
     });
     const wallet = await myWallet(request, program.id);
     expect(wallet.balance.amountMinor).toBe(50_000);
-    const refused = await claim(request, wallet.id, 20_000);
+    const refused = await claim(request, program.id, 20_000);
     await expectProblem(refused, 409, 'INSUFFICIENT_AVAILABLE');
     const after = await buckets(request, funding.id);
     expect(after.preEncumbered).toBe(0);
@@ -212,19 +209,19 @@ test.describe('wallet claims move through the ledger like any other spend', () =
       fundingMinor: 200_000,
       allowanceMinor: 30_000,
     });
-    const wallet = await myWallet(request, program.id);
-    const inFlight = await expectContract(await claim(request, wallet.id, 8_000), 201, WalletClaim);
-
-    await expectContract(
-      await request.post(`/api/budgets/${funding.id}/freeze`, {
-        headers: await mutate('finance-admin'),
-        data: { reasonCode: 'cost_reduction', reason: reason('pausing the wellbeing programme') },
-      }),
-      200,
-      (await import('@bf/contracts')).ControlResult,
+    const inFlight = await expectContract(
+      await claim(request, program.id, 8_000),
+      201,
+      WalletClaim,
     );
 
-    await expectProblem(await claim(request, wallet.id, 5_000), 409, 'BUDGET_FROZEN');
+    const freeze = await request.post(`/api/budgets/${funding.id}/freeze`, {
+      headers: await mutate('finance-admin'),
+      data: { reasonCode: 'FRZ-POLICY', reason: reason('pausing the wellbeing programme') },
+    });
+    expect(freeze.status(), await freeze.text()).toBe(200);
+
+    await expectProblem(await claim(request, program.id, 5_000), 409, 'BUDGET_FROZEN');
     // The claim that was already in flight still completes: controls stop new activity, not work in
     // progress.
     const approved = await expectContract(
@@ -244,15 +241,14 @@ test.describe('wallet claims move through the ledger like any other spend', () =
       fundingMinor: 200_000,
       allowanceMinor: 30_000,
     });
-    const wallet = await myWallet(request, program.id);
     await expectProblem(
-      await claim(request, wallet.id, 5_000, { category: 'Conference tickets' }),
+      await claim(request, program.id, 5_000, { category: 'Conference tickets' }),
       422,
       'WALLET_CATEGORY_NOT_ALLOWED',
     );
     // Every programme requires a receipt, so a claim without one is refused rather than queued.
     await expectProblem(
-      await claim(request, wallet.id, 5_000, { receipt: false }),
+      await claim(request, program.id, 5_000, { receipt: false }),
       422,
       'WALLET_RECEIPT_REQUIRED',
     );
@@ -263,9 +259,8 @@ test.describe('wallet claims move through the ledger like any other spend', () =
       fundingMinor: 200_000,
       allowanceMinor: 30_000,
     });
-    const wallet = await myWallet(request, program.id);
     const submitted = await expectContract(
-      await claim(request, wallet.id, 6_000),
+      await claim(request, program.id, 6_000),
       201,
       WalletClaim,
     );

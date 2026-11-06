@@ -110,15 +110,11 @@ export class WalletsService {
         status: 200,
       },
       async (tx) => {
-        this.policy.assert(
-          actor,
-          'tenant.settings.manage',
-          { kind: 'tenant', tenantId: actor.tenantId },
-          'wallet program',
-        );
         const budget = await this.views.row(tx, req.fundingBudgetId);
-        // The funding budget pays for the programme, so whoever sets it up has to be able to
-        // allocate from it. A program cannot point at a budget its author cannot spend.
+        // A wallet programme is a promise to spend a budget, so the authorization that matters is
+        // the money one: whoever sets it up has to be able to allocate from the funding budget.
+        // Administration alone is not enough, which is the same rule that stops a feature switch
+        // from conferring authority.
         this.policy.assert(actor, 'budget.allocate', budgetResource(budget), 'budget');
         if (req.yearlyAllowanceMinor <= 0)
           throw new ApiProblem(
@@ -242,8 +238,7 @@ export class WalletsService {
       },
       async (tx) => {
         if (!actor.personId) throw ApiProblem.forbidden('Only a person can claim from a wallet.');
-        const { wallet, program } = await this.loadWallet(tx, actor, req.walletId);
-        if (wallet.personId !== actor.personId) throw ApiProblem.notFound('wallet');
+        const { wallet, program } = await this.walletForClaim(tx, actor, req.programId);
         if (wallet.closedAt)
           throw new ApiProblem(
             409,
@@ -686,7 +681,7 @@ export class WalletsService {
     const prorated = this.prorate(allowance, person.startDate, year);
     if (!create) {
       return {
-        id: `${program.id}:${personId}`,
+        id: null as unknown as string,
         tenantId,
         programId: program.id,
         personId,
@@ -751,28 +746,18 @@ export class WalletsService {
     return Number(wallet.proratedAllowanceMinor) - consumed;
   }
 
-  private async loadWallet(
+  /**
+   * The caller's wallet in a programme, created on the first claim. Creating the row moves no money:
+   * it records the cap and the proration, and the ledger only hears about it when a claim posts.
+   */
+  private async walletForClaim(
     tx: Tx,
     actor: RequestActor,
-    walletId: string,
+    programId: string,
   ): Promise<{ wallet: WalletRow; program: ProgramRow }> {
-    const [row] = await tx
-      .select()
-      .from(wallets)
-      .where(and(eq(wallets.tenantId, actor.tenantId), eq(wallets.id, walletId)));
-    if (row) {
-      const program = (await this.programRows(tx, actor.tenantId)).find(
-        (p) => p.id === row.programId,
-      );
-      if (!program) throw ApiProblem.notFound('wallet program');
-      return { wallet: row, program };
-    }
-    // A wallet the employee has not used yet is addressed as `<programId>:<personId>`, so the first
-    // claim creates the row instead of needing a separate "open my wallet" call.
-    const [programId, personId] = walletId.split(':');
     const program = (await this.programRows(tx, actor.tenantId)).find((p) => p.id === programId);
-    if (!program || personId !== actor.personId) throw ApiProblem.notFound('wallet');
-    const created = await this.walletFor(tx, actor.tenantId, program, personId, true);
+    if (!program || !program.active) throw ApiProblem.notFound('wallet program');
+    const created = await this.walletFor(tx, actor.tenantId, program, actor.personId!, true);
     if (!created)
       throw new ApiProblem(
         422,
@@ -834,7 +819,7 @@ export class WalletsService {
     const balance = await this.balance(tx, wallet, program);
     const money = (amountMinor: number) => ({ amountMinor, currency: wallet.currency });
     return {
-      id: wallet.id,
+      id: wallet.id ?? null,
       programId: program.id,
       programName: program.name,
       programKind: program.kind as 'wellbeing' | 'learning',

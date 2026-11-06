@@ -1,6 +1,7 @@
 import { AiModule } from '@bf/api/ai';
 import { AuditModule } from '@bf/api/audit';
 import { BudgetsModule } from '@bf/api/budgets';
+import { LedgerModule } from '@bf/api/ledger';
 import { SpendModule } from '@bf/api/spend';
 import { Module } from '@nestjs/common';
 import { ExtendedController } from './extended.controller';
@@ -24,7 +25,7 @@ const SERVICES = [
  * through `libs/domain` posting builders and `PolicyService`.
  */
 @Module({
-  imports: [AuditModule, BudgetsModule, SpendModule, AiModule],
+  imports: [AuditModule, BudgetsModule, LedgerModule, SpendModule, AiModule],
   providers: SERVICES,
   exports: SERVICES,
 })
