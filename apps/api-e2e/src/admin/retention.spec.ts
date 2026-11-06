@@ -23,6 +23,7 @@ import {
   retentionPolicy,
   runItem,
   SANDBOX,
+  SCENARIO_ROUTE,
   setRetentionPeriod,
   setRetentionPeriodOk,
   startRun,
@@ -34,13 +35,13 @@ test.describe.configure({ mode: 'serial' });
 const ANALYTICS = 'product_analytics';
 const DEFAULT_ANALYTICS_DAYS = 25 * 30;
 
-/** How many of the given analytics event ids are still stored in the tenant. */
-async function analyticsRemaining(tenantId: string, ids: readonly string[]): Promise<number> {
-  if (!ids.length) return 0;
+/** How many of this scenario's analytics events are still stored for the given person. */
+async function analyticsRemaining(tenantId: string, personId: string): Promise<number> {
   return asAppRole(tenantId, async (c) => {
     const res = await c.query<{ n: string }>(
-      `select count(*) as n from product_analytics_events where id = any($1::uuid[])`,
-      [[...ids]],
+      `select count(*) as n from product_analytics_events
+       where actor_person_id = $1 and properties->>'route' = $2`,
+      [personId, SCENARIO_ROUTE],
     );
     return Number(res.rows[0].n);
   });
@@ -169,9 +170,17 @@ test.describe('legal holds beat retention', () => {
   }) => {
     const heldPerson = userById('sandbox-controller').personId!;
     // Records this scenario owns: two for the person the hold will cover, two for someone else.
-    const heldIds = await recordAnalytics(request, 'sandbox-controller', 2, SANDBOX);
-    const freeIds = await recordAnalytics(request, 'sandbox-auditor', 2, SANDBOX);
-    expect(await analyticsRemaining(SANDBOX, [...heldIds, ...freeIds])).toBe(4);
+    const freePerson = userById('sandbox-auditor').personId!;
+    // A re-run of this scenario may find rows left behind by an earlier failure, so count from where
+    // the tenant actually is rather than from zero.
+    const heldBefore = await analyticsRemaining(SANDBOX, heldPerson);
+    const freeBefore = await analyticsRemaining(SANDBOX, freePerson);
+    const held = await recordAnalytics(request, 'sandbox-controller', 2, SANDBOX);
+    const free = await recordAnalytics(request, 'sandbox-auditor', 2, SANDBOX);
+    const heldTotal = heldBefore + held.count;
+    const freeTotal = freeBefore + free.count;
+    expect(await analyticsRemaining(SANDBOX, heldPerson)).toBe(heldTotal);
+    expect(await analyticsRemaining(SANDBOX, freePerson)).toBe(freeTotal);
 
     const holdId = await activeHold(request, {
       placedBy: 'sandbox-auditor',
@@ -204,11 +213,12 @@ test.describe('legal holds beat retention', () => {
       });
       const previewItem = runItem(preview, ANALYTICS);
       expect(previewItem.appliedCount, 'a preview never removes anything').toBe(0);
-      expect(previewItem.candidateCount).toBeGreaterThanOrEqual(freeIds.length);
-      expect(previewItem.skippedHoldCount).toBeGreaterThanOrEqual(heldIds.length);
+      expect(previewItem.candidateCount).toBeGreaterThanOrEqual(freeTotal);
+      expect(previewItem.skippedHoldCount).toBeGreaterThanOrEqual(heldTotal);
       expect(previewItem.holdIds).toContain(holdId);
       expect(previewItem.note).toContain('hold always beats retention');
-      expect(await analyticsRemaining(SANDBOX, [...heldIds, ...freeIds])).toBe(4);
+      expect(await analyticsRemaining(SANDBOX, heldPerson)).toBe(heldTotal);
+      expect(await analyticsRemaining(SANDBOX, freePerson)).toBe(freeTotal);
 
       // Applying is fenced: no preview, wrong confirmation word, or no `retention.confirm`.
       await expectProblem(
@@ -250,7 +260,8 @@ test.describe('legal holds beat retention', () => {
         'FORBIDDEN',
       );
       // Nothing was deleted by any of the refusals.
-      expect(await analyticsRemaining(SANDBOX, [...heldIds, ...freeIds])).toBe(4);
+      expect(await analyticsRemaining(SANDBOX, heldPerson)).toBe(heldTotal);
+      expect(await analyticsRemaining(SANDBOX, freePerson)).toBe(freeTotal);
 
       // A run can never cover more than its preview did.
       await expectProblem(
@@ -279,18 +290,18 @@ test.describe('legal holds beat retention', () => {
       });
       const appliedItem = runItem(applied, ANALYTICS);
       expect(applied.dryRunId).toBe(preview.id);
-      expect(appliedItem.appliedCount).toBeGreaterThanOrEqual(freeIds.length);
-      expect(appliedItem.skippedHoldCount).toBeGreaterThanOrEqual(heldIds.length);
+      expect(appliedItem.appliedCount).toBeGreaterThanOrEqual(freeTotal);
+      expect(appliedItem.skippedHoldCount).toBeGreaterThanOrEqual(heldTotal);
       expect(appliedItem.holdIds).toContain(holdId);
 
       expect(
-        await analyticsRemaining(SANDBOX, freeIds),
+        await analyticsRemaining(SANDBOX, freePerson),
         'records with no hold over them are gone',
       ).toBe(0);
       expect(
-        await analyticsRemaining(SANDBOX, heldIds),
+        await analyticsRemaining(SANDBOX, heldPerson),
         'every held record survived a run that would otherwise have purged it',
-      ).toBe(heldIds.length);
+      ).toBe(heldTotal);
 
       // Releasing the hold is what makes them removable - nothing else changed.
       await releaseHold(request, holdId, 'sandbox-auditor', SANDBOX);
@@ -303,7 +314,7 @@ test.describe('legal holds beat retention', () => {
       });
       const releasedItem = runItem(afterRelease, ANALYTICS);
       expect(releasedItem.skippedHoldCount, 'no hold keeps anything now').toBe(0);
-      expect(releasedItem.candidateCount).toBeGreaterThanOrEqual(heldIds.length);
+      expect(releasedItem.candidateCount).toBeGreaterThanOrEqual(heldTotal);
 
       const cleanup = await startRunOk(request, {
         user: 'sandbox-controller',
@@ -314,8 +325,8 @@ test.describe('legal holds beat retention', () => {
         reason: reason('clear the records the scenario created'),
         tenant: SANDBOX,
       });
-      expect(runItem(cleanup, ANALYTICS).appliedCount).toBeGreaterThanOrEqual(heldIds.length);
-      expect(await analyticsRemaining(SANDBOX, heldIds)).toBe(0);
+      expect(runItem(cleanup, ANALYTICS).appliedCount).toBeGreaterThanOrEqual(heldTotal);
+      expect(await analyticsRemaining(SANDBOX, heldPerson)).toBe(0);
     } finally {
       await setRetentionPeriod(request, {
         user: 'sandbox-admin',
@@ -437,7 +448,9 @@ test.describe('legal holds beat retention', () => {
         .then(() => null)
         .catch((e: { message: string }) => e.message),
     );
-    expect(rewrite, 'a run report cannot be rewritten').toContain('append-only');
+    // The application role has no UPDATE grant and the table carries the append-only trigger; either
+    // answer proves the report cannot be rewritten.
+    expect(rewrite, 'a run report cannot be rewritten').toMatch(/append-only|permission denied/);
   });
 
   test("the seeded hold over Hyland's event is active and visible to the auditor", async ({

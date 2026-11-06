@@ -161,29 +161,33 @@ export function runItem(run: RetentionRun, category: string) {
   return item!;
 }
 
+/** Route these scenario-owned analytics events carry, so they can be counted apart from any other. */
+export const SCENARIO_ROUTE = '/admin/retention';
+
 /**
  * Records product analytics events the scenario owns, so a retention run has candidates that belong
- * to it rather than to the seed or to another scenario.
+ * to it rather than to the seed or to another scenario. The API derives the stored row id from the
+ * tenant, the subject and the client event id, so the scenario counts them by person and route.
  */
 export async function recordAnalytics(
   request: APIRequestContext,
   user: SeedUserId,
   count: number,
   tenant?: string,
-): Promise<string[]> {
-  const ids = Array.from({ length: count }, () => randomUUID());
+): Promise<{ personId: string; count: number }> {
   const res = await request.post('/api/analytics/events', {
     headers: await as(user, {}, tenant),
     data: {
-      events: ids.map((id) => ({
-        id,
+      events: Array.from({ length: count }, () => ({
+        id: randomUUID(),
         name: 'page.viewed' as const,
-        properties: { route: '/admin/retention' },
+        properties: { route: SCENARIO_ROUTE },
       })),
     },
   });
   expect(res.status(), await res.text()).toBe(202);
-  return ids;
+  expect(((await res.json()) as { accepted: number }).accepted).toBe(count);
+  return { personId: userById(user).personId!, count };
 }
 
 export async function users(

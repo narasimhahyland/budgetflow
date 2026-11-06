@@ -273,6 +273,11 @@ test.describe('company settings', () => {
   test('branding takes a hex accent colour and a program name, and nobody else may change it', async ({
     request,
   }) => {
+    const before = await expectContract(
+      await request.get('/api/admin/settings', { headers: await as('org-admin') }),
+      200,
+      AdminSettings,
+    );
     await expectProblem(
       await request.put('/api/admin/settings/branding', {
         headers: await mutate('org-admin'),
@@ -316,6 +321,22 @@ test.describe('company settings', () => {
       BrandingSettings,
     );
     expect(ok.tagline).toBe('Plan together, spend with care.');
+
+    const restored = await expectContract(
+      await request.put('/api/admin/settings/branding', {
+        headers: await mutate('org-admin'),
+        data: {
+          programName: before.branding.programName,
+          tagline: before.branding.tagline,
+          emailFooter: before.branding.emailFooter,
+          accentColor: before.branding.accentColor,
+          reason: reason('restore the seeded branding'),
+        },
+      }),
+      200,
+      BrandingSettings,
+    );
+    expect(restored.tagline).toBe(before.branding.tagline);
   });
 });
 

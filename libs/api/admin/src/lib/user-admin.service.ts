@@ -542,9 +542,13 @@ export class UserAdminService {
           );
         if (!held.length)
           throw new ApiProblem(409, 'ROLE_NOT_GRANTED', 'This person does not hold that role.');
+        // `valid_to` is inclusive everywhere (`ActorResolver`), so ending it today would leave the
+        // role in force until midnight. Taking access away has to be immediate, so the grant ends on
+        // the day before and stops counting from this request onwards.
+        const endedOn = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
         await tx
           .update(roleGrants)
-          .set({ validTo: today })
+          .set({ validTo: endedOn })
           .where(
             inArray(
               roleGrants.id,
@@ -560,7 +564,7 @@ export class UserAdminService {
           resourceId: membershipId,
           requestId: ctx.requestId,
           reason: req.reason,
-          changes: { role: req.role, validTo: { from: null, to: today } },
+          changes: { role: req.role, validTo: { from: null, to: endedOn } },
         });
         return { membershipId, role: req.role, revoked: true };
       },

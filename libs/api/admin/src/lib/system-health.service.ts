@@ -66,13 +66,17 @@ export class SystemHealthService {
   private async queues(tx: Tx): Promise<{ queues: HealthQueue[]; readable: boolean }> {
     try {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      const result = await tx.execute<{
-        name: string;
-        waiting: string;
-        active: string;
-        failed: string;
-        oldest_seconds: string | null;
-      }>(sql`
+      // The job tables belong to the worker and the application role may not be allowed to read
+      // them. A refused read aborts the surrounding transaction, so it runs in its own savepoint and
+      // the rest of the health report still answers.
+      return await tx.transaction(async (t) => {
+        const result = await t.execute<{
+          name: string;
+          waiting: string;
+          active: string;
+          failed: string;
+          oldest_seconds: string | null;
+        }>(sql`
         select name,
                count(*) filter (where state = 'created' or state = 'retry') as waiting,
                count(*) filter (where state = 'active') as active,
@@ -81,28 +85,28 @@ export class SystemHealthService {
         from pgboss.job
         group by name
       `);
-      const byName = new Map(result.rows.map((r) => [r.name, r]));
-      return {
-        readable: true,
-        queues: [...new Set([...QUEUE_NAMES, ...result.rows.map((r) => r.name)])]
-          .map((name) => {
-            const row = byName.get(name);
-            return {
-              name,
-              waiting: Number(row?.waiting ?? 0),
-              active: Number(row?.active ?? 0),
-              failedLast24h: Number(row?.failed ?? 0),
-              oldestWaitingSeconds:
-                row?.oldest_seconds === null || row?.oldest_seconds === undefined
-                  ? null
-                  : Number(row.oldest_seconds),
-            };
-          })
-          .sort((a, b) => a.name.localeCompare(b.name)),
-      };
+        const byName = new Map(result.rows.map((r) => [r.name, r]));
+        return {
+          readable: true,
+          queues: [...new Set([...QUEUE_NAMES, ...result.rows.map((r) => r.name)])]
+            .map((name) => {
+              const row = byName.get(name);
+              return {
+                name,
+                waiting: Number(row?.waiting ?? 0),
+                active: Number(row?.active ?? 0),
+                failedLast24h: Number(row?.failed ?? 0),
+                oldestWaitingSeconds:
+                  row?.oldest_seconds === null || row?.oldest_seconds === undefined
+                    ? null
+                    : Number(row.oldest_seconds),
+              };
+            })
+            .sort((a, b) => a.name.localeCompare(b.name)),
+        };
+      });
     } catch {
-      // The job tables belong to the worker; if this deployment cannot read them, say so instead of
-      // reporting zeros that look healthy.
+      // Cannot read them here: say so instead of reporting zeros that look healthy.
       return { readable: false, queues: [] };
     }
   }
