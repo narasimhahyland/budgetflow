@@ -50,6 +50,8 @@ const UNPROCESSABLE: readonly DomainErrorCode[] = [
   'PHASING_TOTAL_MISMATCH',
   'HEADCOUNT_MISSING',
   'CONFIRMATION_MISMATCH',
+  'FORECAST_COMMENTARY_REQUIRED',
+  'FORECAST_AMOUNT_REQUIRED',
 ];
 
 /** Domain failures become problems: 422 for invalid input, 409 for conflicts with current state. */

@@ -48,6 +48,8 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `actuals.manage`         |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `actuals.read`           |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |
 | `gl.sign_off`            |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `forecast.submit`        |  –  |  –  |  O  |  T  |  –  |  O  |  O  |  O  |  O  |  O  |  –  |  –  |  –  |  –  |
+| `forecast.manage`        |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `report.read`            |  –  |  –  |  T  |  T  |  T  |  O  |  O  |  O  |  O  |  –  |  –  |  T  |  –  |  T  |
 | `report.schedule`        |  –  |  –  |  T  |  T  |  T  |  O  |  O  |  O  |  O  |  –  |  –  |  T  |  –  |  T  |
 | `audit.read`             |  –  |  –  |  T  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |

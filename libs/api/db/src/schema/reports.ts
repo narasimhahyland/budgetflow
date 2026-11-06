@@ -1,5 +1,6 @@
 import { boolean, index, integer, jsonb, pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
 import { createdAt, minor, pk, tenantRef, ts, updatedAt } from './_columns';
+import { boardPackStatus } from './enums';
 import { people } from './org';
 import { tenants } from './tenancy';
 
@@ -107,4 +108,39 @@ export const reportExports = pgTable(
     expiresAt: ts('expires_at').notNull(),
   },
   (t) => [index('report_exports_tenant_requested').on(t.tenantId, t.requestedAt)],
+);
+
+/**
+ * A board and FP&A pack generation (16a). The request is recorded here and the worker renders the
+ * pages into the DocumentStore under tenant-scoped keys; `files` holds the key, size and digest of
+ * each rendered file, never the bytes. Links are short-lived and signed at download time.
+ */
+export const boardPackGenerations = pgTable(
+  'board_pack_generations',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    fiscalPeriodId: uuid('fiscal_period_id').notNull(),
+    sourceKind: varchar('source_kind', { length: 30 }).notNull().default('close_snapshot'),
+    snapshotVersion: integer('snapshot_version'),
+    snapshotTakenAt: ts('snapshot_taken_at'),
+    draft: boolean('draft').notNull().default(false),
+    pages: text('pages').array().notNull().default([]),
+    formats: text('formats').array().notNull().default(['pdf', 'xlsx']),
+    constantCurrency: boolean('constant_currency').notNull().default(true),
+    rootBudgetId: uuid('root_budget_id'),
+    forecastCycleId: uuid('forecast_cycle_id'),
+    currency: varchar('currency', { length: 3 }).notNull().default('USD'),
+    status: boardPackStatus('status').notNull().default('queued'),
+    pageCount: integer('page_count').notNull().default(0),
+    rowCount: integer('row_count').notNull().default(0),
+    files: jsonb('files').notNull().default([]),
+    failedPage: varchar('failed_page', { length: 40 }),
+    error: text('error'),
+    requestedByPersonId: uuid('requested_by_person_id').references(() => people.id),
+    requestedAt: ts('requested_at').notNull().defaultNow(),
+    completedAt: ts('completed_at'),
+    expiresAt: ts('expires_at').notNull(),
+  },
+  (t) => [index('board_pack_generations_tenant').on(t.tenantId, t.requestedAt)],
 );
