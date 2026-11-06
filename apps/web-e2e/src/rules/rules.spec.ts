@@ -62,10 +62,13 @@ test.describe('rules and policies', () => {
       page.getByRole('heading', { level: 1, name: 'Post-spend exceptions' }),
     ).toBeVisible();
 
+    // One seeded exception, picked by its rule code rather than by position or by "whichever row
+    // still offers Settle": the API scenarios settle the first open one, so a positional pick
+    // would act on a different exception depending on what ran before.
     const queue = page.getByRole('region', { name: /exception/ });
-    const first = queue.getByRole('row').filter({ hasText: 'Settle' }).first();
-    const summary = (await first.textContent()) ?? '';
-    await first.getByRole('button', { name: 'Settle' }).click();
+    const subject = queue.getByRole('row').filter({ hasText: 'R-22' });
+    await expect(subject).toContainText('Amelia Clarke');
+    await subject.getByRole('button', { name: 'Settle' }).click();
 
     await page
       .getByRole('textbox', { name: 'Reason' })
@@ -74,8 +77,7 @@ test.describe('rules and policies', () => {
 
     await expect(page.getByText('The exception is settled')).toBeVisible();
     // It leaves the open tab, and settling it again is not offered.
-    const reference = summary.trim().slice(0, 30);
-    await expect(queue).not.toContainText(reference);
+    await expect(queue.getByRole('row').filter({ hasText: 'R-22' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Settle this exception' })).toHaveCount(0);
   });
 });
@@ -90,12 +92,12 @@ test.describe('approval limits', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Approval limits' })).toBeVisible();
     await expect(page.getByText('Approvals in flight')).toBeVisible();
 
-    const approve = page.getByRole('button', { name: 'Approve this version' });
-    if (await approve.isVisible()) {
-      await approve.click();
-      await expect(page.getByText('Approved. The new limits apply')).toBeVisible();
-    }
-    // Whatever happened, a matrix is in force today: the screen never shows "None".
+    // The seed leaves version 2 waiting for the CEO, so the approval is asserted outright rather
+    // than only when a button happens to be there: a conditional would pass without approving.
+    await page.getByRole('button', { name: 'Approve this version' }).click();
+    await expect(page.getByText('Approved. The new limits apply')).toBeVisible();
+
+    // A matrix is in force today: the screen never shows "None".
     const inForce = page.getByText('In force today');
     await expect(inForce).toBeVisible();
     await expect(page.locator('.bf-kpi').filter({ hasText: 'In force today' })).not.toContainText(

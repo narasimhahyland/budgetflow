@@ -10,7 +10,9 @@
 #   visual          visual regression baselines in the pinned Playwright image
 #   static = lint typecheck build; functional = functional-api functional-e2e; all = every mode (default)
 # A secret scan always runs first. Functional and visual modes start the local stack with the deterministic
-# seed (scripts/stack.sh up && reset) once. Steps whose Nx target no project defines yet are reported as SKIP.
+# seed (scripts/stack.sh up && reset) once. Because the API scenarios mutate seeded state, every suite after
+# the first is reseeded first (scripts/stack.sh reset, about 40s each), so journeys and visual baselines
+# always start from the deterministic seed. Steps whose Nx target no project defines yet are reported as SKIP.
 # Logs: tmp/gate/<timestamp>/<step>.log. Exit code 1 if any step failed.
 set -uo pipefail
 
@@ -35,7 +37,7 @@ while [ $# -gt 0 ]; do
     --fail-fast) fail_fast=1 ;;
     --no-cache) nx_flags+=(--skip-nx-cache) ;;
     --evidence) evidence=${2:?--evidence needs a directory}; shift ;;
-    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
     *) echo "gate: unknown argument '$1'" >&2; exit 2 ;;
   esac
   shift
@@ -171,11 +173,19 @@ for m in functional-api functional-e2e visual; do
     continue
   fi
   case "$m" in
-    functional-api|functional-e2e) run_target "$m" "$m" ;;
+    functional-api) run_target "$m" "$m" ;;
+    functional-e2e)
+      # Journeys read the deterministic seed, but the API scenarios above mutate it (they settle
+      # exceptions, connect integrations, match actuals), so a journey would otherwise select a
+      # subject that has already moved. CI runs both suites in one job on one stack, so reseeding
+      # here keeps local and CI identical.
+      if want functional-api; then step reseed-e2e bash scripts/stack.sh reset; fi
+      run_target "$m" "$m"
+      ;;
     visual)
       if [ ! -f apps/web-e2e/visual/screens.json ]; then skip visual "apps/web-e2e/visual/screens.json not created yet"; continue; fi
       # Baselines come from the deterministic seed (as in CI's own visual job); functional runs add data.
-      if want functional-api || want functional-e2e; then step reseed bash scripts/stack.sh reset; fi
+      if want functional-api || want functional-e2e; then step reseed-visual bash scripts/stack.sh reset; fi
       step visual npm run e2e:visual
       ;;
   esac
