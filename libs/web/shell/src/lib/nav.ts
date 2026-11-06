@@ -139,7 +139,7 @@ export const NAV: NavGroup[] = [
       {
         label: 'Period close',
         path: '/finance/close',
-        icon: 'checklist',
+        icon: 'checklist_rtl',
         permission: 'period.manage',
       },
       {

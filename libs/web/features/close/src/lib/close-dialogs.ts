@@ -359,7 +359,7 @@ export class PeriodStatusDialog {
   template: `
     <div mat-dialog-title class="bf-dialog__head">
       <span class="bf-dialog__icon bf-dialog__icon--danger" aria-hidden="true">
-        <mat-icon svgIcon="warning" />
+        <mat-icon svgIcon="unlocked" />
       </span>
       <span>
         <span class="bf-dialog__title"
