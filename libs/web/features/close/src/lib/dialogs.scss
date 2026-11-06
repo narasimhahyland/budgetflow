@@ -91,6 +91,33 @@
   gap: 8px;
 }
 
+// Forecast methods (87a): the system amounts and the one sentence behind each, side by side on a
+// desktop and stacked on a phone, with the owner's own figure as the last card.
+.bf-method-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.bf-method__amount {
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-method__why {
+  margin: 4px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-section__title {
+  margin: 20px 0 0;
+  font: var(--mat-sys-title-small);
+}
+
 .bf-danger-button:not(:disabled) {
   background-color: var(--mat-sys-error);
   color: var(--mat-sys-on-error);

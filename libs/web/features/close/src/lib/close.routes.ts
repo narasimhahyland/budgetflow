@@ -8,7 +8,10 @@ const area = (pageTitle: string) => ({ pageTitle, section: 'Finance' });
  */
 const read = requirePermission('ledger.read', 'Period close and year-end');
 
-/** Period close and lock (80e), rollover policies (87c) and the year-end run (87b), as shell children. */
+/**
+ * Period close and lock (80e), rollover policies (87c), the year-end run (87b) and the forecast
+ * cycle (87a), as shell children.
+ */
 export const closeRoutes: Routes = [
   {
     path: 'finance/close',
@@ -30,6 +33,20 @@ export const closeRoutes: Routes = [
     data: area('Rollover policies'),
     canActivate: [read],
     loadComponent: () => import('./rollover-policies.page').then((m) => m.RolloverPoliciesPage),
+  },
+  {
+    path: 'finance/forecast-cycles',
+    title: 'Forecast cycles',
+    data: area('Forecast cycles'),
+    canActivate: [requirePermission('report.read', 'Forecast cycles')],
+    loadComponent: () => import('./forecast-cycles.page').then((m) => m.ForecastCyclesPage),
+  },
+  {
+    path: 'finance/forecast-cycles/:cycleId',
+    title: 'Forecast cycle',
+    data: area('Forecast cycles'),
+    canActivate: [requirePermission('report.read', 'Forecast cycles')],
+    loadComponent: () => import('./forecast-cycle.page').then((m) => m.ForecastCyclePage),
   },
   {
     path: 'finance/year-end',

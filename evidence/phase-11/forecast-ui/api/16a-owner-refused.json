@@ -1,0 +1,8 @@
+{
+  "type": "urn:budgetflow:problem:forbidden",
+  "title": "Forbidden",
+  "status": 403,
+  "code": "FORBIDDEN",
+  "detail": "The board pack is open to finance roles, the CEO and auditors.",
+  "instance": "/api/reports/board-pack"
+}
