@@ -172,9 +172,11 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
                           (click)="selected.set(s)"
                           [attr.data-testid]="'open-suggestion-' + s.actualId"
                         >
-                          {{ s.merchant ?? 'No merchant' }}
+                          {{ lineLabel(s) }}
                         </button>
-                        <span class="bf-cell__secondary">{{ s.memo ?? '' }}</span>
+                        @if (s.merchant && s.memo) {
+                          <span class="bf-cell__secondary">{{ s.memo }}</span>
+                        }
                       </td>
                       <td class="bf-num">
                         <bf-money
@@ -215,7 +217,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
             <div class="bf-card__header">
               <div class="bf-title-row">
                 <h2 class="bf-card__title" id="match-detail-title">
-                  {{ s.merchant ?? 'Spend line' }} on {{ s.postedDate }}
+                  {{ lineLabel(s) }} on {{ s.postedDate }}
                 </h2>
                 <bf-ai-label text="AI suggestion" />
               </div>
@@ -410,6 +412,11 @@ export class MatchingPage {
     isFeatureDisabled(this.suggestions.error()) ? undefined : this.suggestions.error(),
   );
 
+  /** What a person recognises the line by: the merchant, or the memo when a source sends none. */
+  protected lineLabel(s: AiMatchSuggestion): string {
+    return s.merchant ?? s.memo ?? `${s.source} line`;
+  }
+
   protected candidates(s: AiMatchSuggestion): AiMatchSuggestionTarget[] {
     const seen = new Set<string>();
     return [s.suggested, ...s.candidates].filter((c) => {
@@ -481,12 +488,14 @@ export class MatchingPage {
     try {
       const chosen = this.chosen();
       const target = this.candidates(s).find((c) => c.targetId === chosen) ?? s.suggested;
+      // Same shape as `applyWith`: the target only, so the match command computes the amount and
+      // runs its own tolerance and period checks exactly as it would without a suggestion.
       const parts =
         chosen && chosen !== s.suggested.targetId
           ? [
               target.targetType === 'commitment'
-                ? { commitmentId: target.targetId, amountMinor: s.budgetAmount.amountMinor }
-                : { budgetId: target.targetId, amountMinor: s.budgetAmount.amountMinor },
+                ? { commitmentId: target.targetId }
+                : { budgetId: target.targetId },
             ]
           : s.applyWith.parts;
 

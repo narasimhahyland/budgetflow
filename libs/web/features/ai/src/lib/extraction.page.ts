@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { formatMoney } from '@bf/web/ui';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -263,6 +264,12 @@ export class ExtractionPage {
   /** What the person has in the form: the extracted value until they change it. */
   protected readonly values = signal<Record<string, string>>({});
 
+  constructor() {
+    // The real entry point is 121 handing over a verified file, so a document id in the URL reads
+    // it straight away instead of making the person retype it.
+    if (this.documentId().trim()) void this.extract();
+  }
+
   protected readonly needsCheck = computed(
     () => this.result()?.fields.filter((f) => f.needsCheck) ?? [],
   );
@@ -281,10 +288,12 @@ export class ExtractionPage {
 
   protected hint(field: ExtractedField): string {
     if (field.needsCheck) return 'Please check: we could not read this clearly';
-    const edited = this.values()[field.field] !== undefined;
-    return edited
-      ? 'Edited by you'
-      : `AI-filled${field.confidence ? `, ${field.confidence} confidence` : ''}`;
+    const money = field.amount
+      ? ` (${formatMoney(field.amount.amountMinor, field.amount.currency)})`
+      : '';
+    if (this.values()[field.field] !== undefined) return `Edited by you${money}`;
+    const confidence = field.confidence ? `, ${field.confidence} confidence` : '';
+    return `AI-filled${confidence}${money}`;
   }
 
   protected confirmedEntries(r: ExtractionResult): [string, string][] {

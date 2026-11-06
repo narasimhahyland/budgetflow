@@ -102,8 +102,8 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
           <div class="bf-kpis">
             <div class="bf-kpi" data-testid="kpi-overspend">
               <p class="bf-kpi__label">Likely overspend</p>
-              <p class="bf-kpi__value">{{ s.likelyOverspend }}</p>
-              <p class="bf-kpi__delta">
+              <p class="bf-kpi__value" data-testid="ai-projection">{{ s.likelyOverspend }}</p>
+              <p class="bf-kpi__delta" data-testid="ai-projection">
                 <bf-money
                   [amountMinor]="s.overspendTotal.amountMinor"
                   [currency]="s.overspendTotal.currency"
@@ -113,8 +113,8 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
             </div>
             <div class="bf-kpi" data-testid="kpi-unused">
               <p class="bf-kpi__label">Likely unused</p>
-              <p class="bf-kpi__value">{{ s.likelyUnused }}</p>
-              <p class="bf-kpi__delta">
+              <p class="bf-kpi__value" data-testid="ai-projection">{{ s.likelyUnused }}</p>
+              <p class="bf-kpi__delta" data-testid="ai-projection">
                 <bf-money
                   [amountMinor]="s.unusedTotal.amountMinor"
                   [currency]="s.unusedTotal.currency"
@@ -124,11 +124,11 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
             </div>
             <div class="bf-kpi" data-testid="kpi-on-track">
               <p class="bf-kpi__label">On track</p>
-              <p class="bf-kpi__value">{{ s.onTrack }}</p>
+              <p class="bf-kpi__value" data-testid="ai-projection">{{ s.onTrack }}</p>
             </div>
             <div class="bf-kpi" data-testid="kpi-no-history">
               <p class="bf-kpi__label">Not enough history</p>
-              <p class="bf-kpi__value">{{ s.noHistory }}</p>
+              <p class="bf-kpi__value" data-testid="ai-projection">{{ s.noHistory }}</p>
               <p class="bf-kpi__delta">An outlook needs at least 3 months of spending</p>
             </div>
           </div>
@@ -138,7 +138,8 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
           <div class="bf-card__header">
             <div>
               <h2 class="bf-card__title" id="outlook-title">
-                Budgets, as of {{ valueOf(outlook)?.asOfDate }}
+                Budgets, as of
+                <span data-testid="relative-time">{{ valueOf(outlook)?.asOfDate }}</span>
               </h2>
               <p class="bf-card__hint">
                 Authorized, actual and committed are BudgetFlow figures. The year-end outlook and
@@ -221,7 +222,7 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
                           [currency]="o.toDate.currency"
                         />
                       </td>
-                      <td class="bf-num bf-outlook__projection">
+                      <td class="bf-num bf-outlook__projection" data-testid="ai-projection">
                         @if (o.likely) {
                           <bf-money
                             [amountMinor]="o.likely.amountMinor"
@@ -248,7 +249,7 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
                           <span class="bf-cell__secondary">Not enough history</span>
                         }
                       </td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-testid="ai-projection">
                         @if (o.gap) {
                           <bf-money [amountMinor]="o.gap.amountMinor" [currency]="o.gap.currency" />
                         } @else {
@@ -323,7 +324,7 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
               @if (o.drivers.length) {
                 <div>
                   <h3 class="bf-section__title">Drivers</h3>
-                  <dl class="bf-facts">
+                  <dl class="bf-facts" data-testid="ai-projection">
                     @for (d of o.drivers; track d.label) {
                       <div>
                         <dt>{{ d.label }}</dt>
@@ -368,7 +369,9 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
                 </div>
               }
               <p class="bf-cell__secondary" data-testid="detail-model">
-                Model {{ o.modelId }} {{ o.modelVersion }}, as of {{ o.asOfDate }}.
+                Model {{ o.modelId }} {{ o.modelVersion }}, as of
+                <span data-testid="relative-time">{{ o.asOfDate }}</span
+                >.
               </p>
             </div>
           </section>

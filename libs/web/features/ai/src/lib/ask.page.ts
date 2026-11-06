@@ -169,9 +169,14 @@ import { LoadState } from './load-state';
                     @if (turn.answer.figures.length) {
                       <bf-ai-figures
                         [figures]="turn.answer.figures"
-                        [asOf]="turn.answer.asOf | bfDateTime: session.timezone() : 'HH:mm'"
                         label="Figures behind this answer"
                       />
+                      <p class="bf-cell__secondary">
+                        Ledger figures as of
+                        <span data-testid="relative-time">{{
+                          turn.answer.asOf | bfDateTime: session.timezone() : 'HH:mm'
+                        }}</span>
+                      </p>
                     }
                     <bf-ai-why [why]="turn.answer.why" [confidence]="turn.answer.confidence" />
                     <bf-ai-sources [sources]="turn.answer.sources" />
