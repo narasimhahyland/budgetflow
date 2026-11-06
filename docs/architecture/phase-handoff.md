@@ -169,6 +169,13 @@ forecast. Also not in Phase 10: rendering an export file — an export is record
 days, and scheduled deliveries carry the headline figures and a sign-in link rather than an
 attachment.
 
+Still deferred after the Phase 11 UI: screens 87 and 16a are not built. The `forecast_snapshots`
+table exists, but nothing reads it over HTTP — `reports.ts` has no `forecast-variance` report id and
+no board-pack endpoints, and `close.ts` has no forecast-cycle records, so screen 87a has nowhere to
+write a forecast either. All three need a backend change first (a forecast report in
+`libs/api/reports`, pack pages rendered from `period_close_snapshots`, and forecast-cycle endpoints);
+the UI was not invented against a contract that does not exist.
+
 ## Wave 2 parallel split (P4, P5, P6)
 
 If Phases 4-6 run in parallel, scopes stay disjoint: P4 owns `libs/api/budgets` and `libs/web/features/budgets`; P5 owns the new modules listed above and their features; P6 owns `libs/api/actuals` and `libs/web/features/accounting`. Commitment posting is shared through `postCommitmentMovement` in `libs/domain` (already present), so P5 and P6 do not edit each other's modules: P5 creates and approves commitments, P6 consumes them through an exported `CommitmentsService` from P5's `libs/api/spend` (request the export in the report if it is missing). Merge order: P4, then P5, then P6; the integrator renumbers migrations in that order.

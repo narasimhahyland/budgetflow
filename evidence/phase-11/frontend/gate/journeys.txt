@@ -1,0 +1,50 @@
+Running 47 tests using 2 workers
+  ✓   1 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as super-admin (1.6s)
+  ✓   2 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as org-admin (1.1s)
+  ✓   3 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as ceo (1.1s)
+  ✓   4 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-admin (1.2s)
+  ✓   5 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-controller (1.1s)
+  ✓   6 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as budget-owner (1.1s)
+  ✓   7 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as department-head (1.1s)
+  ✓   8 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as regional-manager (1.1s)
+  ✓   9 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as location-manager (1.1s)
+  ✓  10 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as event-organizer (1.1s)
+  ✓  11 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as employee (1.1s)
+  ✓  12 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as auditor (1.1s)
+  ✓  13 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as integration-admin (1.3s)
+  ✓  14 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as analyst (1.1s)
+  ✓  16 [desktop] › apps/web-e2e/src/close/close.spec.ts:33:7 › period close checklist › a close that cannot happen says so and leaves the button disabled (546ms)
+  ✓  15 [desktop] › apps/web-e2e/src/close/close.spec.ts:21:7 › period close checklist › November lists every period of the fiscal year and opens its checklist (740ms)
+  ✓  17 [desktop] › apps/web-e2e/src/close/close.spec.ts:43:7 › period close checklist › a hard check cannot be accepted; only soft checks offer a reason (468ms)
+  ✓  18 [desktop] › apps/web-e2e/src/close/close.spec.ts:55:7 › accepting a soft check › the controller accepts a soft check with a reason and it stops holding the close (697ms)
+  ✓  20 [desktop] › apps/web-e2e/src/close/close.spec.ts:145:7 › period close scope › someone without ledger access is told so instead of seeing a blank page (403ms)
+  ✓  19 [desktop] › apps/web-e2e/src/close/close.spec.ts:87:7 › break-glass reopen › reopening a closed period needs two different people (1.4s)
+  ✓  21 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:14:7 › year-end run › the FY2026 run opens from the list and offers no execution until it is ready (594ms)
+  ✓  23 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:54:7 › rollover policies › every rollover mode is shown with what it does at year end (445ms)
+  ✓  22 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:26:7 › year-end run › a dry run fills the per-budget outcome and execute stays refused with the reason (586ms)
+  ✓  25 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:85:7 › year-end scope › an analyst reads the run but is offered no dry run or execution (392ms)
+  ✓  24 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:66:7 › rollover policies › a policy is assigned to a budget with a reason (645ms)
+  ✓  26 [tablet] › apps/web-e2e/src/close/close.spec.ts:21:7 › period close checklist › November lists every period of the fiscal year and opens its checklist (556ms)
+  ✓  27 [tablet] › apps/web-e2e/src/close/close.spec.ts:33:7 › period close checklist › a close that cannot happen says so and leaves the button disabled (438ms)
+  -  29 [tablet] › apps/web-e2e/src/close/close.spec.ts:55:7 › accepting a soft check › the controller accepts a soft check with a reason and it stops holding the close
+  -  30 [tablet] › apps/web-e2e/src/close/close.spec.ts:87:7 › break-glass reopen › reopening a closed period needs two different people
+  ✓  28 [tablet] › apps/web-e2e/src/close/close.spec.ts:43:7 › period close checklist › a hard check cannot be accepted; only soft checks offer a reason (425ms)
+  ✓  31 [tablet] › apps/web-e2e/src/close/close.spec.ts:145:7 › period close scope › someone without ledger access is told so instead of seeing a blank page (401ms)
+  -  33 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:26:7 › year-end run › a dry run fills the per-budget outcome and execute stays refused with the reason
+  ✓  32 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:14:7 › year-end run › the FY2026 run opens from the list and offers no execution until it is ready (563ms)
+  -  35 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:66:7 › rollover policies › a policy is assigned to a budget with a reason
+  ✓  34 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:54:7 › rollover policies › every rollover mode is shown with what it does at year end (444ms)
+  ✓  36 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:85:7 › year-end scope › an analyst reads the run but is offered no dry run or execution (416ms)
+  ✓  37 [mobile] › apps/web-e2e/src/close/close.spec.ts:21:7 › period close checklist › November lists every period of the fiscal year and opens its checklist (601ms)
+  ✓  38 [mobile] › apps/web-e2e/src/close/close.spec.ts:33:7 › period close checklist › a close that cannot happen says so and leaves the button disabled (473ms)
+  -  40 [mobile] › apps/web-e2e/src/close/close.spec.ts:55:7 › accepting a soft check › the controller accepts a soft check with a reason and it stops holding the close
+  -  41 [mobile] › apps/web-e2e/src/close/close.spec.ts:87:7 › break-glass reopen › reopening a closed period needs two different people
+  ✓  39 [mobile] › apps/web-e2e/src/close/close.spec.ts:43:7 › period close checklist › a hard check cannot be accepted; only soft checks offer a reason (459ms)
+  ✓  42 [mobile] › apps/web-e2e/src/close/close.spec.ts:145:7 › period close scope › someone without ledger access is told so instead of seeing a blank page (433ms)
+  -  44 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:26:7 › year-end run › a dry run fills the per-budget outcome and execute stays refused with the reason
+  ✓  43 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:14:7 › year-end run › the FY2026 run opens from the list and offers no execution until it is ready (594ms)
+  -  46 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:66:7 › rollover policies › a policy is assigned to a budget with a reason
+  ✓  45 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:54:7 › rollover policies › every rollover mode is shown with what it does at year end (477ms)
+  ✓  47 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:85:7 › year-end scope › an analyst reads the run but is offered no dry run or execution (445ms)
+  8 skipped
+  39 passed (24.9s)

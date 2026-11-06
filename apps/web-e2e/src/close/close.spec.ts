@@ -9,6 +9,10 @@ import { expectShell } from '../support/auth';
 import { authFile } from '../support/roles';
 
 const NOVEMBER = periodId(CALENDAR_INDEX.acmeGroup, 2026, 11);
+/**
+ * Reopening a period changes what its neighbours allow, so every assertion about September lives
+ * inside the one journey that reopens it rather than in a test that could run beside it.
+ */
 const SEPTEMBER = periodId(CALENDAR_INDEX.acmeGroup, 2026, 9);
 
 test.describe('period close checklist', () => {
@@ -42,14 +46,6 @@ test.describe('period close checklist', () => {
     await expect(page.getByText('GL tie-out signed off').first()).toBeVisible();
     await expect(page.getByTestId('acknowledge-gl_tieout_signed_off')).toHaveCount(0);
     await expect(page.getByTestId('acknowledge-accruals_reviewed').first()).toBeVisible();
-  });
-
-  test('a closed period offers no ordinary reopen, only break glass', async ({ page }) => {
-    await page.goto(`/finance/close/${SEPTEMBER}`);
-    await expectShell(page);
-    await expect(page.getByRole('heading', { name: 'Break glass: reopen Sep 2026' })).toBeVisible();
-    await expect(page.getByTestId('request-break-glass')).toBeVisible();
-    await expect(page.getByTestId('close-period')).toHaveCount(0);
   });
 });
 
@@ -92,10 +88,17 @@ test.describe('break-glass reopen', () => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
     const reason = `Auditor asked for an adjustment in the original period (${randomUUID().slice(0, 8)}).`;
 
-    // The controller asks. Nothing moves yet. (A retry finds its own earlier request still open.)
+    // A closed period offers no ordinary reopen: only the break-glass panel, away from the actions.
     await page.goto(`/finance/close/${SEPTEMBER}`);
     await expectShell(page);
-    if (await page.getByTestId('request-break-glass').isVisible()) {
+    await expect(page.getByRole('heading', { level: 1, name: 'Sep 2026' })).toBeVisible();
+    await expect(page.getByTestId('close-period')).toHaveCount(0);
+
+    // The controller asks. Nothing moves yet. (A retry finds its own earlier request still open.)
+    if ((await page.getByTestId('break-glass-pending').count()) === 0) {
+      await expect(
+        page.getByRole('heading', { name: 'Break glass: reopen Sep 2026' }),
+      ).toBeVisible();
       await page.getByTestId('request-break-glass').click();
       await page.getByTestId('break-glass-reason-code').click();
       await page.getByRole('option').first().click();
@@ -107,7 +110,7 @@ test.describe('break-glass reopen', () => {
       await expect(page.getByTestId('break-glass-pending')).toContainText(reason);
     }
     await expect(page.getByTestId('break-glass-pending')).toContainText('needs a second person');
-    await expect(page.getByRole('heading', { name: 'Sep 2026' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Sep 2026' })).toBeVisible();
     await expect(page.getByText('Closed', { exact: true }).first()).toBeVisible();
 
     // The same person cannot wave it through: the API refuses and the dialog shows why.
@@ -129,7 +132,7 @@ test.describe('break-glass reopen', () => {
     await admin.getByTestId('decision-reason').fill('Agreed: restate in the original period.');
     await admin.getByTestId('confirm-decision').click();
     await expect(admin.getByTestId('close-notice')).toContainText('Approved');
-    await expect(admin.getByRole('heading', { name: 'Sep 2026' })).toBeVisible();
+    await expect(admin.getByRole('heading', { level: 1, name: 'Sep 2026' })).toBeVisible();
     await expect(admin.getByTestId('close-blocked')).toContainText('Sep 2026 cannot close yet.');
     await admin.close();
     await second.close();
