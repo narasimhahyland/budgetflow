@@ -1,0 +1,16 @@
+  status   | amount_minor | currency |    account     | budget_amount_minor 
+-----------+--------------+----------+----------------+---------------------
+ submitted |         6000 | USD      | obligations    |                    
+ submitted |         6000 | USD      | pre_encumbered |                6000
+ approved  |         8000 | USD      | obligations    |                    
+ approved  |         8000 | USD      | pre_encumbered |                8000
+ approved  |         8000 | USD      | encumbered     |                8000
+ approved  |         8000 | USD      | pre_encumbered |               -8000
+ submitted |        30000 | USD      | pre_encumbered |               30000
+ submitted |        30000 | USD      | obligations    |                    
+ returned  |         9000 | USD      | pre_encumbered |                9000
+ returned  |         9000 | USD      | obligations    |                    
+ returned  |         9000 | USD      | obligations    |                    
+ returned  |         9000 | USD      | pre_encumbered |               -9000
+(12 rows)
+

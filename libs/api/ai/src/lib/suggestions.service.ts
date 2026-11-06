@@ -48,6 +48,10 @@ const DECISION_ACTIONS: Record<AiFeature, Action> = {
   matching: 'actuals.manage',
   extraction: 'request.create',
   anomaly_flags: 'exception.resolve',
+  // Drafted text is a draft: approving a leadership summary needs the same reading rights as
+  // writing it by hand, and a variance commentary belongs to the owner who forecasts the budget.
+  leadership_summary: 'report.read',
+  variance_commentary: 'forecast.submit',
 };
 
 export interface SuggestionInput {

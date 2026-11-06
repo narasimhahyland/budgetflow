@@ -1,0 +1,12 @@
+leadership_summaries|t|t|t
+organizer_thank_notes|t|t|t
+recognition_allowances|t|t|t
+recognition_award_types|t|t|t
+recognition_awards|t|t|t
+scenario_changes|t|t|t
+scenario_collaborators|t|t|t
+scenarios|t|t|t
+variance_commentaries|t|t|t
+wallet_claims|t|t|t
+wallet_programs|t|t|t
+wallets|t|t|t

@@ -22,9 +22,12 @@ export const AI_SEED_FEATURES: readonly { key: string; enabled: boolean }[] = [
   { key: 'ai.ask', enabled: true },
   { key: 'ai.ask_chat', enabled: false },
   { key: 'ai.extraction', enabled: true },
+  // Phase 15 drafting features; drafted text still needs a person to approve it before it counts.
+  { key: 'ai.leadership_summary', enabled: true },
   { key: 'ai.matching', enabled: true },
   { key: 'ai.outlook', enabled: true },
   { key: 'ai.policy_explain', enabled: true },
+  { key: 'ai.variance_commentary', enabled: true },
 ];
 
 /** 113a settings card: question limit, history retention and the nudge thresholds. */

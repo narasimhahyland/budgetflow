@@ -23,6 +23,9 @@ export const AI_FEATURES = [
   'matching',
   'extraction',
   'anomaly_flags',
+  // Phase 15 additions to the same surface: drafted narratives (011b) and the planning copilot (045b).
+  'leadership_summary',
+  'variance_commentary',
 ] as const;
 export const AiFeature = z
   .enum(AI_FEATURES)
@@ -38,6 +41,9 @@ export const AI_FINANCE_FEATURES: readonly AiFeature[] = [
   'extraction',
   'anomaly_flags',
   'outlook',
+  // A drafted narrative quotes the figures the board reads, so finance confirms it too.
+  'leadership_summary',
+  'variance_commentary',
 ];
 
 export const AiChannel = z
@@ -80,6 +86,9 @@ export const AI_SOURCE_TYPES = [
   'headcount_snapshot',
   'prior_year_budget',
   'participation',
+  // Phase 15: the closed-period snapshot a leadership summary quotes, and the survey behind a pulse.
+  'period_snapshot',
+  'survey',
 ] as const;
 
 export const AiSourceRef = named(
