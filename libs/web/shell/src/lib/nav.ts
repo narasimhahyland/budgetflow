@@ -17,13 +17,7 @@ export interface NavGroup {
 }
 
 export const NAV: NavGroup[] = [
-  {
-    label: null,
-    items: [
-      { label: 'Home', path: '/', icon: 'home' },
-      { label: 'Ask BudgetFlow', path: '/ask', icon: 'ai', permission: 'tenant.read' },
-    ],
-  },
+  { label: null, items: [{ label: 'Home', path: '/', icon: 'home' }] },
   {
     label: 'Budgets',
     items: [
@@ -99,12 +93,6 @@ export const NAV: NavGroup[] = [
         icon: 'currency_dollar',
         permission: 'request.create',
       },
-      {
-        label: 'Policy assistant',
-        path: '/policy-assistant',
-        icon: 'chat_info',
-        permission: 'tenant.read',
-      },
     ],
   },
   {
@@ -129,18 +117,6 @@ export const NAV: NavGroup[] = [
         path: '/finance/actuals',
         icon: 'table_chart',
         permission: 'actuals.manage',
-      },
-      {
-        label: 'Matching suggestions',
-        path: '/finance/actuals/suggestions',
-        icon: 'ai',
-        permission: 'actuals.read',
-      },
-      {
-        label: 'Anomaly flags',
-        path: '/finance/anomalies',
-        icon: 'flag',
-        permission: 'integrity.read',
       },
       {
         label: 'Intercompany recharges',
@@ -227,14 +203,7 @@ export const NAV: NavGroup[] = [
         icon: 'checklist',
         permission: 'audit.read',
       },
-      {
-        label: 'Spending outlook',
-        path: '/insights/outlook',
-        icon: 'chart_arrow_up',
-        permission: 'budget.read',
-      },
       { label: 'Audit log', path: '/audit-log', icon: 'book', permission: 'audit.read' },
-      { label: 'AI accuracy', path: '/admin/ai/accuracy', icon: 'ai', permission: 'audit.read' },
     ],
   },
   {
@@ -258,12 +227,6 @@ export const NAV: NavGroup[] = [
         label: 'Tenant settings',
         path: '/admin/settings',
         icon: 'gear',
-        permission: 'tenant.settings.manage',
-      },
-      {
-        label: 'AI settings',
-        path: '/admin/ai',
-        icon: 'gear_ai',
         permission: 'tenant.settings.manage',
       },
     ],

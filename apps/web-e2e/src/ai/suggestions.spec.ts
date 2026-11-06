@@ -136,8 +136,6 @@ test.describe('Suggested allocations (022d)', () => {
     page,
   }, info) => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
-    const api = await apiAs('regional-manager');
-
     await page.goto(`/budgets/${SEED.budgets.india}/suggest-split`);
     await expectShell(page);
     await expect(page.getByRole('heading', { name: 'Suggested allocations' })).toBeVisible();

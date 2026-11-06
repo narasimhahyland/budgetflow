@@ -18,8 +18,6 @@ test.describe('AI settings (113a)', () => {
     browser,
   }, info) => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
-    const api = await apiAs('org-admin');
-
     await page.goto('/admin/ai/features');
     await expectShell(page);
     await expect(page.getByRole('heading', { name: 'AI settings' })).toBeVisible();
