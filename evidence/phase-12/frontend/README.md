@@ -35,7 +35,7 @@ sandbox) and 094b (finance and payroll exports) have no backing endpoints in thi
 | Revoking a key states the consequence and needs the name typed                               | `functional/journeys.txt`, `visual-qa/101-api-keys--create-form--desktop.png`                                                                   |
 | A role without integration permissions is refused in place, and the API refuses it too       | `functional/journeys.txt`, `visual-qa/092-integrations-hub--forbidden--desktop.png`                                                             |
 | An auditor reads everything and is offered no action                                         | `functional/journeys.txt` (who may do what)                                                                                                     |
-| A duplicate is resolved without deleting a line, with the reversal stated first              | `functional/journeys.txt`, `visual-qa/099a-cross-source-duplicates--default--desktop.png`                                                       |
+| A duplicate is resolved without deleting a line, with the consequence stated first           | `functional/journeys.txt`, `visual-qa/099a-cross-source-duplicates--default--desktop.png`                                                       |
 | 60 visual baselines at desktop, tablet and mobile; stable across a reseed                    | `apps/web-e2e/src/__screenshots__/visual-light/`                                                                                                |
 | Static gate green on the affected projects                                                   | `gate-summary.txt`                                                                                                                              |
 
@@ -60,8 +60,10 @@ came from CI and were reproduced locally by running `apps/api-e2e/src/integratio
 - The API scenarios repair the seeded planning connector and break the ERP one, so "the connector that
   is not working" is a different connector there. The journey now breaks the planning connector itself
   (replace the credential with the placeholder the mock provider rejects, then test the connection) and
-  asserts on the failure it caused. Same for the duplicate queue: the journey picks a group holding a
-  matched line when one is left and asserts the reversal warning only for that case.
+  asserts on the failure it caused.
+- The duplicates journey now imports its own card and expense line and decides that pair. Deciding the
+  seeded duplicate excluded a line on `6140 / CC-IN-HYD-210`, which is the account the GL tie-out
+  journey reads, so it broke that journey at the viewports that happened to run after it.
 - An API key's prefix is generated per seed run, so its glyphs sized the key column and moved every
   column after it. `.bf-key-prefix` gives the prefix a fixed box; the baselines then survive a reseed
   with a different prefix (verified by capturing, reseeding and re-running the comparison).

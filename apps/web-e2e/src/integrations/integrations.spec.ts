@@ -11,6 +11,7 @@ import {
   type APIRequestContext,
   type Page,
 } from '@playwright/test';
+import { randomUUID } from 'node:crypto';
 import { SEED } from '@bf/seed';
 import { apiToken, expectShell } from '../support/auth';
 import { API_URL } from '../support/env';
@@ -82,6 +83,18 @@ async function getJson<T>(role: RoleId, path: string): Promise<T> {
   const ctx = await apiAs(role);
   const res = await ctx.get(path);
   expect(res.status(), `${role} GET ${path}: ${await res.text()}`).toBe(200);
+  const body = (await res.json()) as T;
+  await ctx.dispose();
+  return body;
+}
+
+async function postJson<T>(role: RoleId, path: string, data: unknown): Promise<T> {
+  const ctx = await apiAs(role);
+  const res = await ctx.post(path, {
+    data,
+    headers: { 'content-type': 'application/json', 'idempotency-key': randomUUID() },
+  });
+  expect(res.status(), `${role} POST ${path}: ${await res.text()}`).toBeLessThan(300);
   const body = (await res.json()) as T;
   await ctx.dispose();
   return body;
@@ -412,37 +425,53 @@ test.describe('cross-source duplicates (99a)', () => {
   test('finance keeps one line as the record and the other is excluded, not deleted', async ({
     page,
   }) => {
+    // The journey brings its own spend rather than deciding the seeded duplicate: resolving a group
+    // excludes a line, and the seeded one sits on an account the GL tie-out journey reads.
+    const ref = randomUUID().slice(0, 8).toUpperCase();
+    const row = (id: string) =>
+      [
+        'source_ref,transaction_date,amount,currency,legal_entity,cost_center,gl_account,merchant,memo',
+        `${id},2026-11-07,142.75,USD,HYL-US,CC-US-NYC-300,6100,Harbour Coffee,Team coffee`,
+      ].join('\n');
+    await postJson('finance-admin', '/api/actuals/imports', {
+      source: 'card',
+      fileName: `dup-card-${ref}.csv`,
+      content: row(`CARD-${ref}`),
+    });
+    const held = await postJson<{ summary: { crossSourceDuplicates: number } }>(
+      'finance-admin',
+      '/api/actuals/imports',
+      { source: 'expense', fileName: `dup-expense-${ref}.csv`, content: row(`EXP-${ref}`) },
+    );
+    expect(held.summary.crossSourceDuplicates, 'the second source is held, not counted twice').toBe(
+      1,
+    );
+
     const before = await getJson<{
-      items: { flagId: string; lines: { actualId: string; matchStatus: string }[] }[];
+      items: { flagId: string; lines: { actualId: string; sourceRef: string }[] }[];
       open: number;
     }>('finance-admin', '/api/integrations/duplicates?status=open');
-    expect(before.open, 'there is a cross-source duplicate to decide').toBeGreaterThan(0);
-    // A group holding a matched line is the one worth deciding on screen: excluding that line posts
-    // a reversal. Other suites on this stack may have decided it already, so fall back to any group.
-    const matched = (g: (typeof before.items)[number]) =>
-      g.lines.some((l) => l.matchStatus === 'matched');
-    const group = before.items.find(matched) ?? before.items[0];
+    const group = before.items.find((g) => g.lines.some((l) => l.sourceRef === `EXP-${ref}`));
+    expect(group, 'the pair is on the review queue').toBeTruthy();
 
     await page.goto('/finance/actuals/duplicates');
     await expectShell(page);
     await expect(page.getByTestId('duplicates-held')).toContainText('do not consume budget');
 
-    const card = page.getByTestId(`duplicate-group-${group.flagId}`);
+    const card = page.getByTestId(`duplicate-group-${group!.flagId}`);
     await expect(card).toBeVisible();
     // Both sides are on screen with their own amounts before anyone decides.
-    for (const line of group.lines)
+    for (const line of group!.lines)
       await expect(page.getByTestId(`duplicate-line-${line.actualId}`)).toBeVisible();
 
-    await page.getByTestId(`decide-${group.flagId}`).click();
-    // When a line is already matched, the screen warns that excluding it posts a reversal.
-    if (matched(group))
-      await expect(page.getByTestId('already-matched')).toContainText('writes a reversal');
-    else await expect(page.getByTestId('already-matched')).toBeHidden();
+    await page.getByTestId(`decide-${group!.flagId}`).click();
+    // The consequence is on screen before anyone commits to it.
+    await expect(card).toContainText('excluded from consumption and linked to the one you keep');
 
     await page.getByTestId('duplicate-reason-code').fill('CARD_ITEMIZATION');
     await page
       .getByTestId('duplicate-reason')
-      .fill('The card line is the same payment as the supplier invoice.');
+      .fill('The expense claim is the same payment as the card line.');
     await page.getByTestId('duplicate-resolve').click();
 
     await expect(page.getByTestId('duplicates-notice')).toContainText('nothing was deleted');
