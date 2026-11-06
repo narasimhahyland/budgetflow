@@ -252,9 +252,17 @@ test.describe('feature flags', () => {
   test('a capability that needs a connected system cannot be switched on without it', async ({
     request,
   }) => {
+    // The scenario owns the dependency rather than trusting the state another scenario left behind:
+    // it disconnects the Teams app, proves the refusal, connects it and proves the switch then works.
+    const disconnect = await request.patch('/api/admin/channels/teams', {
+      headers: await mutate('integration-admin'),
+      data: { action: 'disconnect', confirmText: 'DISCONNECT' },
+    });
+    expect(disconnect.status(), await disconnect.text()).toBe(200);
+
     const teams = await flag(request, 'channels.teams_app');
     expect(teams.dependsOn).toContain('Microsoft Teams');
-    expect(teams.dependencyMet, 'the Teams app is not connected in the seed').toBe(false);
+    expect(teams.dependencyMet, 'the Teams app is disconnected').toBe(false);
     await expectProblem(
       await switchFlag(request, {
         user: 'org-admin',
@@ -265,6 +273,29 @@ test.describe('feature flags', () => {
       409,
       'FLAG_DEPENDENCY_MISSING',
     );
+
+    const connect = await request.patch('/api/admin/channels/teams', {
+      headers: await mutate('integration-admin'),
+      data: { action: 'connect' },
+    });
+    expect(connect.status(), await connect.text()).toBe(200);
+    expect((await flag(request, 'channels.teams_app')).dependencyMet).toBe(true);
+
+    const allowed = await switchFlagOk(request, {
+      user: 'org-admin',
+      key: 'channels.teams_app',
+      enabled: true,
+      reason: reason('the app is connected, so the capability can be switched on'),
+    });
+    expect(allowed.applied, 'the dependency was the only thing in the way').toBe(true);
+
+    await switchFlagOk(request, {
+      user: 'org-admin',
+      key: 'channels.teams_app',
+      enabled: false,
+      reason: reason('restore the default off state'),
+    });
+    expect((await flag(request, 'channels.teams_app')).enabled).toBe(false);
   });
 
   test('flags and their history come back in a deterministic order', async ({ request }) => {
