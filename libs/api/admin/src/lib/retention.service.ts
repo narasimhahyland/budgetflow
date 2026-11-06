@@ -800,7 +800,13 @@ export class RetentionService {
         status: 201,
       },
       async (tx): Promise<RetentionRun> => {
-        this.assertMayEdit(actor);
+        // Previewing is for administrators and the Finance Controller; the irreversible run below
+        // needs `retention.confirm` on its own.
+        assertAnyTenant(this.policy, actor, [
+          'tenant.settings.manage',
+          'master_data.manage',
+          'retention.confirm',
+        ]);
         const requested = req.categories.length
           ? [...req.categories]
           : [...AUTOMATIC_RETENTION_CATEGORIES];

@@ -423,7 +423,10 @@ export class UserAdminService {
           if (!actor.personId || actor.personId !== change.requestedByPersonId)
             throw ApiProblem.forbidden('Only the person who asked for this grant can withdraw it.');
         } else {
-          assertTenant(this.policy, actor, 'users.manage', 'user administration');
+          // Confirming does not need user administration: it needs the authority the grant gives,
+          // which is what `canConfirmRoleGrant` checks. An administrator who holds no financial
+          // authority therefore cannot hand any out, alone or with a peer who holds none either.
+          assertTenant(this.policy, actor, 'tenant.read');
           const allowed = canConfirmRoleGrant({
             confirmerPersonId: actor.personId,
             confirmerRoles: actor.roles,
