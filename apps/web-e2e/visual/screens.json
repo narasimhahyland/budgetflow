@@ -2440,6 +2440,444 @@
           "role": "employee"
         }
       ]
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "role": "location-manager",
+      "path": "/ask",
+      "waitFor": "role=heading[name=\"Ask BudgetFlow\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "waitFor": "[data-testid=ask-empty]"
+            }
+          ]
+        },
+        {
+          "state": "answer",
+          "actions": [
+            {
+              "fill": ["[data-testid=question]", "How much is left in Bengaluru Events?"]
+            },
+            {
+              "click": "[data-testid=send]"
+            },
+            {
+              "waitFor": "[data-testid=ai-prose]"
+            },
+            {
+              "waitFor": "[data-testid=figure-available]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "refused-out-of-scope",
+          "actions": [
+            {
+              "fill": ["[data-testid=question]", "How much is left in Europe Region?"]
+            },
+            {
+              "click": "[data-testid=send]"
+            },
+            {
+              "waitFor": "[data-testid=refusal-refused_out_of_scope]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "action-redirect",
+          "actions": [
+            {
+              "fill": ["[data-testid=question]", "Approve REQ-00001 for me"]
+            },
+            {
+              "click": "[data-testid=send]"
+            },
+            {
+              "waitFor": "[data-testid=refusal-refused_action]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ],
+      "mask": ["[data-testid=conversation-list]"]
+    },
+    {
+      "id": "061f-chat-ask-budgetflow",
+      "role": "location-manager",
+      "path": "/ask/chat",
+      "waitFor": "role=heading[name=\"Ask BudgetFlow in Slack and Teams\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "waitFor": "[data-testid=chat-empty]"
+            }
+          ]
+        },
+        {
+          "state": "turned-off",
+          "actions": [
+            {
+              "fill": ["[data-testid=chat-question]", "How much is left in Bengaluru Events?"]
+            },
+            {
+              "click": "[data-testid=chat-send]"
+            },
+            {
+              "waitFor": "[data-testid=ai-disabled]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "016b-spending-outlook-nudges",
+      "role": "finance-admin",
+      "path": "/insights/outlook",
+      "waitFor": "role=heading[name=\"Spending outlook\"]",
+      "mask": ["[data-testid=ai-projection]"],
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "[data-testid=run-outlook]"
+            },
+            {
+              "waitFor": "[data-testid=outlook-row-70000000-0000-4000-8000-000000000005]"
+            },
+            {
+              "click": "role=button[name=\"Dismiss\"]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "budget-outlook",
+          "actions": [
+            {
+              "click": "[data-testid=run-outlook]"
+            },
+            {
+              "waitFor": "[data-testid=outlook-row-70000000-0000-4000-8000-000000000005]"
+            },
+            {
+              "click": "role=button[name=\"Dismiss\"]"
+            },
+            {
+              "click": "[data-testid=open-outlook-70000000-0000-4000-8000-000000000005]"
+            },
+            {
+              "waitFor": "[data-testid=outlook-detail]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "role": "finance-controller",
+      "path": "/finance/anomalies",
+      "waitFor": "role=heading[name=\"Anomaly flags\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "[data-testid=run-scan]"
+            },
+            {
+              "waitFor": "tr:has-text(\"Possible split\")"
+            },
+            {
+              "click": "role=button[name=\"Dismiss\"]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "detail",
+          "actions": [
+            {
+              "click": "[data-testid=run-scan]"
+            },
+            {
+              "waitFor": "tr:has-text(\"Possible split\")"
+            },
+            {
+              "click": "role=button[name=\"Dismiss\"]"
+            },
+            {
+              "click": "button:has-text(\"Possible split\")"
+            },
+            {
+              "waitFor": "[data-testid=flag-detail]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "empty",
+          "actions": [
+            {
+              "click": "[data-testid=flag-status-resolved]"
+            },
+            {
+              "waitFor": "[data-testid=flags-empty]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "022d-suggested-allocations",
+      "role": "regional-manager",
+      "path": "/budgets/70000000-0000-4000-8000-000000000002/suggest-split",
+      "waitFor": "role=heading[name=\"Suggested allocations\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "waitFor": "[data-testid=split-row-70000000-0000-4000-8000-000000000005]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "checked",
+          "actions": [
+            {
+              "waitFor": "[data-testid=split-row-70000000-0000-4000-8000-000000000005]"
+            },
+            {
+              "click": "[data-testid=check-split]"
+            },
+            {
+              "waitFor": "[data-testid=split-preview]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "069a-policy-assistant",
+      "role": "employee",
+      "path": "/policy-assistant",
+      "waitFor": "role=heading[name=\"Policy assistant\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "waitFor": "[data-testid=policy-empty]"
+            }
+          ]
+        },
+        {
+          "state": "is-allowed",
+          "actions": [
+            {
+              "fill": ["[data-testid=policy-question]", "Can I buy gifts for my team in Bengaluru?"]
+            },
+            {
+              "click": "[data-testid=policy-explain]"
+            },
+            {
+              "waitFor": "[data-testid=policy-result]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "080f-transaction-matching-review",
+      "role": "finance-controller",
+      "path": "/finance/actuals/suggestions",
+      "waitFor": "role=heading[name=\"Matching suggestions\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "click": "[data-testid=run-matching]"
+            },
+            {
+              "waitFor": "tr:has-text(\"Northside Print\")"
+            },
+            {
+              "click": "role=button[name=\"Dismiss\"]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "detail",
+          "actions": [
+            {
+              "click": "[data-testid=run-matching]"
+            },
+            {
+              "waitFor": "tr:has-text(\"Northside Print\")"
+            },
+            {
+              "click": "role=button[name=\"Dismiss\"]"
+            },
+            {
+              "click": "button:has-text(\"Northside Print\")"
+            },
+            {
+              "waitFor": "[data-testid=match-detail]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "empty",
+          "actions": [
+            {
+              "click": "[data-testid=status-accepted]"
+            },
+            {
+              "waitFor": "[data-testid=matching-empty]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ],
+      "mask": ["[data-testid=ai-live-count]"]
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "role": "org-admin",
+      "path": "/admin/ai/features",
+      "waitFor": "role=heading[name=\"AI settings\"]",
+      "states": [
+        {
+          "state": "features",
+          "actions": [
+            {
+              "waitFor": "[data-testid=feature-row-ask]"
+            }
+          ]
+        },
+        {
+          "state": "turn-on-dialog",
+          "actions": [
+            {
+              "waitFor": "[data-testid=feature-row-ask_chat]"
+            },
+            {
+              "click": "[data-testid=switch-ask_chat]"
+            },
+            {
+              "waitFor": "[data-testid=data-sent]"
+            }
+          ],
+          "fullPage": false
+        },
+        {
+          "state": "query-log",
+          "role": "auditor",
+          "path": "/admin/ai/log",
+          "waitFor": "role=heading[name=\"AI query log\"]",
+          "actions": [
+            {
+              "waitFor": "[data-testid=log-retention]"
+            },
+            {
+              "scrollTop": true
+            }
+          ],
+          "mask": ["[data-testid=log-rows]"]
+        },
+        {
+          "state": "accuracy",
+          "role": "finance-admin",
+          "path": "/admin/ai/accuracy",
+          "waitFor": "role=heading[name=\"AI accuracy\"]",
+          "actions": [
+            {
+              "waitFor": "[data-testid=accuracy-row-ask-refuses_out_of_scope]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "121a-receipt-quote-extraction",
+      "role": "finance-admin",
+      "path": "/documents/extraction?documentId=91000000-0000-4000-8000-000000000001&kind=receipt",
+      "waitFor": "role=heading[name=\"Receipt and quote details\"]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "waitFor": "[data-testid=extracted-fields]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "check-fields",
+          "path": "/documents/extraction?documentId=91000000-0000-4000-8000-000000000002&kind=receipt",
+          "actions": [
+            {
+              "waitFor": "[data-testid=needs-check]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
     }
   ]
 }

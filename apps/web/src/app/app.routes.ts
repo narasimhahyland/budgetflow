@@ -2,6 +2,7 @@ import { Route } from '@angular/router';
 import { authGuard, sessionGuard } from '@bf/web/data-access';
 import { accountingRoutes } from '@bf/web/features/accounting';
 import { adminRoutes } from '@bf/web/features/admin';
+import { aiRoutes } from '@bf/web/features/ai';
 import { authRoutes } from '@bf/web/features/auth';
 import { closeRoutes } from '@bf/web/features/close';
 import { financeAdminRoutes } from '@bf/web/features/finance-admin';
@@ -26,6 +27,8 @@ export const appRoutes: Route[] = [
     // Feature libs are wired here as children of the shell as their phases land; a lib mounted under its
     // own path loads lazily as one chunk.
     children: [
+      // Before `budgets`: /budgets/:budgetId/suggest-split is more specific than the lazy budgets lib.
+      ...aiRoutes,
       {
         path: 'budgets',
         loadChildren: () => import('@bf/web/features/budgets').then((m) => m.budgetsRoutes),
