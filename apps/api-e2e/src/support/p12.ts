@@ -2,6 +2,7 @@
 // inbound provider callback the way a real provider would, and finding seeded connections.
 import { request as playwrightRequest, type APIRequestContext } from '@playwright/test';
 import { createHmac } from 'node:crypto';
+import { WebhookDeliveryList, type WebhookDeliveryView } from '@bf/contracts';
 import { P12_IDS, P12_PLACEHOLDER_CREDENTIALS } from '@bf/seed';
 import { env } from './env';
 
@@ -109,6 +110,36 @@ export async function waitForDelivery(
     await new Promise((r) => setTimeout(r, 500));
   }
   return null;
+}
+
+/**
+ * The delivery log for one endpoint, polled until `settled` holds. Scenarios then assert on the
+ * snapshot that comes back: when the wait gives up it returns the last one it saw, so an unsettled
+ * log fails on the assertion that describes it rather than on a timeout with nothing to read.
+ */
+export async function deliveryLog(
+  api: APIRequestContext,
+  endpointId: string,
+  authHeaders: Record<string, string>,
+  settled: (items: WebhookDeliveryView[]) => boolean = () => true,
+  timeoutMs = 25_000,
+): Promise<WebhookDeliveryView[]> {
+  const until = Date.now() + timeoutMs;
+  let last: WebhookDeliveryView[] = [];
+  for (;;) {
+    const res = await api.get('/api/integrations/webhook-deliveries', {
+      headers: authHeaders,
+      params: { endpointId },
+    });
+    last = WebhookDeliveryList.parse(await res.json()).items;
+    if (settled(last) || Date.now() >= until) return last;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+}
+
+/** A delivery is finished when nothing more will happen to it without an operator asking. */
+export function isTerminal(d: WebhookDeliveryView): boolean {
+  return d.status === 'succeeded' || d.status === 'exhausted';
 }
 
 /** Calls the public API with a key instead of a session. */
