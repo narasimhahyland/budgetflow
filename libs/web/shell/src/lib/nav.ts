@@ -198,6 +198,27 @@ export const NAV: NavGroup[] = [
         permission: 'report.read',
       },
       {
+        label: 'Forecast and variance',
+        path: '/reports/forecast-variance',
+        icon: 'chart_arrow_up',
+        permission: 'report.read',
+      },
+      /**
+       * 016a. `report.read` is what the endpoint checks, but it checks it at tenant scope, and an
+       * owner's `owned` scope covers a tenant resource as soon as they own a budget, so `report.read`
+       * in GET /api/me does not separate the two. The pack then refuses owners a second time
+       * (`BoardPackService.assertCanBuild`), which would leave four owner roles with a nav entry that
+       * always 403s. `audit.read` is the widest permission no owner role holds; it costs the analyst
+       * the shortcut (the server does admit them), who reaches the pack from the 079 catalog header.
+       * Deliberate, like 090: see docs/ux/screens/016a-board-fpa-pack.md.
+       */
+      {
+        label: 'Board and FP&A pack',
+        path: '/reports/board-pack',
+        icon: 'book',
+        permission: 'audit.read',
+      },
+      {
         label: 'Approval history',
         path: '/approvals/history',
         icon: 'checklist',

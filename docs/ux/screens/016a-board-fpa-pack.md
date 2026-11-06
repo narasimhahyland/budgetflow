@@ -53,6 +53,25 @@ Cover page (generated PDF): "Hyland - Employee programs budget pack - October 20
 
 `reports.ts` pack endpoints render pages from `period_close_snapshots` (as-of balances per period and entity, append-only) for closed periods and from live read models for the draft option; plan versions from `plan_versions`; FX bridge from the currency triplet on actuals (transaction amount, rate type and rate) comparing plan rate with the reporting rate type set for the company (monthly average by default). Generation runs as a background job; files are stored in `DocumentStore` (7-day links). `report.read` at tenant scope to build and generate; saving definitions and schedules need `report.schedule` (new, 091).
 
+The route guard and the sidebar entry use different permissions on purpose; they are not to be "aligned".
+
+- The route guard uses `report.read`, the permission the endpoint names, so owner roles reach the
+  page and see the `sat-403-error-state` the spec calls for rather than a dead route. The baselines
+  `016a-board-pack--forbidden-owner--*` pin that state.
+- The sidebar entry uses `audit.read`. `BoardPackService.assertCanBuild` asks for `report.read` **at
+  tenant scope** and then refuses anyone who is not tenant-wide, but the permission set in
+  `GET /api/me` is evaluated against the tenant resource, where an `owned` grant counts as soon as
+  the actor owns a budget. So `report.read` in `/api/me` is true for `budget-owner`,
+  `department-head`, `regional-manager` and `location-manager`, none of whom the pack admits:
+  gating the entry on it would give four roles a navigation item that always answers 403.
+- `audit.read` is the widest permission no owner role holds. It covers `ceo`, `finance-admin`,
+  `finance-controller` and `auditor`. It costs `analyst` the shortcut, who the server does admit
+  (tenant-wide `report.read`) and who reaches the pack from the 079 catalog header instead. No
+  existing action covers the analyst without also covering the four owner roles, so one of the two
+  errors is unavoidable; showing a working entry to four roles that cannot use it is the worse one.
+  A dedicated action (for example `report.board_pack`) would fix it and belongs with 091's
+  `report.schedule` work, not here.
+
 ## States
 
 | State               | Behaviour                                                                                                                 |

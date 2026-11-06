@@ -15,11 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
-import type {
-  ChatAccountLinkView,
-  ChatFeatures,
-  ChatProvider,
-} from '@bf/contracts';
+import type { ChatAccountLinkView, ChatFeatures, ChatProvider } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { DateTimePipe } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
@@ -179,7 +175,10 @@ import { LoadState } from './load-state';
               }
             </div>
 
-            <p class="bf-cell__secondary" data-testid="slack-approvers-linked">
+            <p
+              class="bf-cell__secondary bf-admin-channels__delivery"
+              data-testid="slack-approvers-linked"
+            >
               {{ a.slack.linkedApproversCount }} of {{ a.slack.totalApproversCount }} approvers
               linked · Last 24h: {{ a.slack.delivery24h.sent }} sent,
               {{ a.slack.delivery24h.retried }} retried, {{ a.slack.delivery24h.failed }} failed
@@ -522,6 +521,11 @@ import { LoadState } from './load-state';
       gap: 8px;
       align-items: center;
     }
+    .bf-admin-channels__delivery {
+      /* The figures widen with the data, so in a narrow card the line count flips between one and
+         two and shifts everything below. Hold both lines whatever the figures are. */
+      min-block-size: calc(2 * var(--mat-sys-body-small-line-height));
+    }
     .bf-admin-channels__disconnect {
       margin-top: 12px;
       padding: 12px 16px;
@@ -581,11 +585,7 @@ export class AdminChannelsPage {
     }
   }
 
-  protected toggleFeature(
-    provider: ChatProvider,
-    key: keyof ChatFeatures,
-    enabled: boolean,
-  ): void {
+  protected toggleFeature(provider: ChatProvider, key: keyof ChatFeatures, enabled: boolean): void {
     void this.run(
       () =>
         data(
@@ -655,19 +655,16 @@ export class AdminChannelsPage {
   }
 
   protected confirmDisconnect(provider: ChatProvider): void {
-    void this.run(
-      async () => {
-        await data(
-          this.api.updateChatInstallation({
-            params: { provider },
-            body: { action: 'disconnect', confirmText: this.disconnectConfirm },
-          }),
-        );
-        this.showDisconnect.set(null);
-        this.disconnectConfirm = '';
-      },
-      'Workspace disconnected; approvals fall back to email and in-app',
-    );
+    void this.run(async () => {
+      await data(
+        this.api.updateChatInstallation({
+          params: { provider },
+          body: { action: 'disconnect', confirmText: this.disconnectConfirm },
+        }),
+      );
+      this.showDisconnect.set(null);
+      this.disconnectConfirm = '';
+    }, 'Workspace disconnected; approvals fall back to email and in-app');
   }
 
   protected unlink(link: ChatAccountLinkView): void {
