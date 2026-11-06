@@ -429,8 +429,11 @@ function scopeLabelFor(
   scoped: readonly ScopedBudget[],
 ): string {
   if (tenantWide) return actor.tenantName;
+  // Sorted so the label reads the same every time: the budget query has no ORDER BY, so joining the
+  // names in query order would show "Marketing, Sales and below" or "Sales, Marketing and below".
   const tops = scoped
     .filter((b) => !scoped.some((o) => o.row.id !== b.row.id && b.row.path.startsWith(o.row.path)))
+    .sort((a, b) => a.row.name.localeCompare(b.row.name) || a.row.id.localeCompare(b.row.id))
     .map((b) => b.row.name);
   return tops.length ? `${tops.join(', ')} and below` : actor.tenantName;
 }
