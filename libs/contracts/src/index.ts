@@ -20,6 +20,7 @@ export * from './lib/domains/channels';
 export * from './lib/domains/rules';
 export * from './lib/domains/reports';
 export * from './lib/domains/integrations';
+export * from './lib/domains/close';
 export * from './lib/endpoints';
 export * from './lib/openapi';
 export * from './lib/client';

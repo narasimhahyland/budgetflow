@@ -515,6 +515,12 @@ const PERSON_PLACEMENT: Partial<
     costCenter: COST_CENTERS.hq,
     seniority: 6,
   },
+  'sandbox-controller': {
+    location: ORG_UNITS.sandbox,
+    entity: LEGAL_ENTITIES.sandbox,
+    costCenter: COST_CENTERS.sandbox,
+    seniority: 6,
+  },
 };
 
 export const peopleData = ALL_USERS.filter((u) => u.personId).map((u) => {

@@ -10,3 +10,4 @@ export * from './lib/channels';
 export * from './lib/rules';
 export * from './lib/reports';
 export * from './lib/integrations';
+export * from './lib/close';

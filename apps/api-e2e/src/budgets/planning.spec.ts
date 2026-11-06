@@ -119,6 +119,9 @@ test.describe('plan versions and the root tie-out', () => {
     let t = await tieOut(request, FY27);
     expect(t).toMatchObject({ planVersionId: v1.id, tiedOut: true, differenceMinor: 0 });
     expect(t.planTotalMinor).toBe(t.rootAuthorizedMinor + t.savingsMinor);
+    // Year-wide savings also moves when a year-end run carries money into FY2027, so this scenario
+    // measures its own effect on it rather than an absolute floor.
+    const savingsBefore = t.savingsMinor;
 
     // Cut part of the root to savings: plan = roots + savings still ties out.
     const pv = await preview(request, rootId, {
@@ -139,7 +142,7 @@ test.describe('plan versions and the root tie-out', () => {
     );
     t = await tieOut(request, FY27);
     expect(t.tiedOut).toBe(true);
-    expect(t.savingsMinor).toBeGreaterThanOrEqual(5_000);
+    expect(t.savingsMinor).toBe(savingsBefore + 5_000);
 
     // Revision: +10,000 for this root (plan funding in); the version supersedes the previous one.
     const v2 = await nextVersion(request, [], (l) => (l.code === code ? 60_000 : null));

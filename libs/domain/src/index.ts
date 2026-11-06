@@ -9,6 +9,8 @@ export * from './lib/money/rate-selection';
 export * from './lib/fiscal/calendar';
 export * from './lib/fiscal/period';
 export * from './lib/fiscal/period-sequence';
+export * from './lib/fiscal/close';
+export * from './lib/fiscal/year-end';
 export * from './lib/ledger/accounts';
 export * from './lib/ledger/journal';
 export * from './lib/ledger/balances';

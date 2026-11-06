@@ -2,6 +2,7 @@ import type { INestApplicationContext } from '@nestjs/common';
 import { seedActuals } from './actuals';
 import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
+import { seedClose } from './close';
 import { seedEvents } from './events';
 import { seedEventsDepth } from './events-depth';
 import { seedIntegrations } from './integrations';
@@ -38,6 +39,11 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     run: seedEventsDepth,
   },
   { name: 'saved report views, scheduled deliveries and exports', phase: 'P10', run: seedReports },
+  {
+    name: 'rollover policies, close reason codes and a draft year-end run',
+    phase: 'P11',
+    run: seedClose,
+  },
   {
     name: 'connected systems in Mock mode, mappings, an API key and a webhook endpoint',
     phase: 'P12',

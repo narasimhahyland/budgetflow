@@ -1,0 +1,19 @@
+Phase 11 backend (feat/p11-close-backend) — gate results
+
+scripts/gate.sh static --affected (2026-11-06, worktree p11-close, base f8ecdc0)
+PASS|secrets|4s
+PASS|lint|6s
+PASS|styles|3s
+PASS|satori|25s
+PASS|typecheck|26s
+PASS|build|2s
+PASS|openapi|1s
+PASS|db|4s
+
+Functional (API scenarios), local stack bf-p11-close with the deterministic seed:
+npx playwright test -c apps/api-e2e/playwright.config.ts
+PASS|functional-api|327 passed, 0 failed (18 new in apps/api-e2e/src/close)
+
+Not run on the branch (backend-only change; CI runs the full matrix):
+SKIP|functional-e2e|no web change in this branch
+SKIP|visual|no UI change in this branch; the frontend half follows separately

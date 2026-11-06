@@ -49,6 +49,7 @@ const UNPROCESSABLE: readonly DomainErrorCode[] = [
   'TRANSFER_INVALID',
   'PHASING_TOTAL_MISMATCH',
   'HEADCOUNT_MISSING',
+  'CONFIRMATION_MISMATCH',
 ];
 
 /** Domain failures become problems: 422 for invalid input, 409 for conflicts with current state. */

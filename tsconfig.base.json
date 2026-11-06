@@ -53,6 +53,7 @@
       "@bf/web/features/insights": ["./libs/web/features/insights/src/index.ts"],
       "@bf/api/channels": ["./libs/api/channels/src/index.ts"],
       "@bf/api/integrations": ["./libs/api/integrations/src/index.ts"],
+      "@bf/api/close": ["./libs/api/close/src/index.ts"],
       "@bf/web/features/mobile": ["./libs/web/features/mobile/src/index.ts"],
       "@bf/web/features/rules": ["./libs/web/features/rules/src/index.ts"],
       "@bf/web/features/reports": ["./libs/web/features/reports/src/index.ts"]

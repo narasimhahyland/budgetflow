@@ -291,6 +291,18 @@ export const PROBLEM_CODES = [
   'API_KEY_SCOPE_MISSING',
   'API_KEY_IP_NOT_ALLOWED',
   'RATE_LIMIT_EXCEEDED',
+  // Period close, year end and roll-forward (P11)
+  'PERIOD_CLOSE_BLOCKED',
+  'CHECK_NOT_ACKNOWLEDGEABLE',
+  'CONFIRMATION_MISMATCH',
+  'SAME_PERSON_APPROVAL',
+  'REOPEN_ALREADY_REQUESTED',
+  'REOPEN_NOT_PENDING',
+  'YEAR_END_NOT_READY',
+  'YEAR_END_ALREADY_EXECUTED',
+  'YEAR_END_DRY_RUN_REQUIRED',
+  'ROLLOVER_POLICY_MISSING',
+  'CARRY_TARGET_MISSING',
 ] as const;
 export const ProblemCode = z.enum(PROBLEM_CODES);
 export type ProblemCode = z.infer<typeof ProblemCode>;

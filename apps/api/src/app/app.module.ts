@@ -7,6 +7,7 @@ import { CoreModule, HttpEdgeModule } from '@bf/api/core';
 import { DocumentsApiModule } from '@bf/api/documents';
 import { EventsApiModule } from '@bf/api/events';
 import { ChannelsApiModule } from '@bf/api/channels';
+import { CloseApiModule } from '@bf/api/close';
 import { FinanceApiModule } from '@bf/api/finance';
 import { IntegrationsApiModule } from '@bf/api/integrations';
 import { IntegrityApiModule } from '@bf/api/integrity';
@@ -39,6 +40,7 @@ import { HealthController, OpenApiController } from './health.controller';
     ActualsApiModule,
     IntegrationsApiModule,
     ChannelsApiModule,
+    CloseApiModule,
     RulesApiModule,
     ReportsApiModule,
   ],

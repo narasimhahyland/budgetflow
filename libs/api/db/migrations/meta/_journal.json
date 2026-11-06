@@ -99,6 +99,13 @@
       "when": 1793906321153,
       "tag": "0013_p12_integrations",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793906322153,
+      "tag": "0014_p11_period_close",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,37 @@
+             table             | rls_enabled | rls_forced | tenant_isolation | append_only 
+-------------------------------+-------------+------------+------------------+-------------
+ period_close_acknowledgements | t           | t          | t                | t
+ period_close_snapshots        | t           | t          | t                | t
+ period_reopen_requests        | t           | t          | t                | f
+ year_end_commitment_carries   | t           | t          | t                | t
+ year_end_run_lines            | t           | t          | t                | f
+ year_end_runs                 | t           | t          | t                | f
+(6 rows)
+
+           tgname            |     relname     
+-----------------------------+-----------------
+ ledger_journals_open_period | ledger_journals
+ ledger_lines_open_period    | ledger_lines
+(2 rows)
+
+                                                          pg_get_functiondef                                                           
+---------------------------------------------------------------------------------------------------------------------------------------
+ CREATE OR REPLACE FUNCTION public.app_reject_closed_period()                                                                         +
+  RETURNS trigger                                                                                                                     +
+  LANGUAGE plpgsql                                                                                                                    +
+ AS $function$                                                                                                                        +
+ DECLARE                                                                                                                              +
+   s period_status;                                                                                                                   +
+ BEGIN                                                                                                                                +
+   SELECT status INTO s FROM fiscal_periods WHERE id = NEW.fiscal_period_id;                                                          +
+   IF s IS NULL THEN                                                                                                                  +
+     RAISE EXCEPTION 'unknown fiscal period %', NEW.fiscal_period_id USING ERRCODE = 'BF002';                                         +
+   END IF;                                                                                                                            +
+   IF s IN ('closed', 'locked') THEN                                                                                                  +
+     RAISE EXCEPTION 'fiscal period % is %; late items post to the next open period', NEW.fiscal_period_id, s USING ERRCODE = 'BF002';+
+   END IF;                                                                                                                            +
+   RETURN NEW;                                                                                                                        +
+ END $function$                                                                                                                       +
+ 
+(1 row)
+
