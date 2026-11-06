@@ -1676,6 +1676,214 @@
           "fullPage": false
         }
       ]
+    },
+    {
+      "id": "092-integrations-hub",
+      "role": "integration-admin",
+      "path": "/admin/integrations",
+      "waitFor": "role=heading[name=\"Integrations\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "connect-form",
+          "actions": [
+            { "click": "[data-testid=connect-system]" },
+            { "waitFor": "[data-testid=connect-credential]" },
+            { "scrollTop": true }
+          ]
+        },
+        {
+          "state": "read-only",
+          "role": "auditor",
+          "waitFor": "[data-testid=hub-read-only]"
+        },
+        {
+          "state": "forbidden",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
+      "id": "092-connector-frame",
+      "role": "integration-admin",
+      "path": "/admin/integrations/connections/90000000-0000-4000-8000-000000000001",
+      "waitFor": "role=heading[name=\"ERPNext\"]",
+      "states": [
+        {
+          "state": "overview"
+        },
+        {
+          "state": "connection",
+          "actions": [
+            { "click": "[data-testid=tab-connection]" },
+            { "waitFor": "[data-testid=credential-note]" },
+            { "scrollTop": true }
+          ]
+        },
+        {
+          "state": "sync",
+          "actions": [
+            { "click": "[data-testid=tab-sync]" },
+            { "waitFor": "[data-testid=run-sync]" },
+            { "scrollTop": true }
+          ]
+        },
+        {
+          "state": "disconnect",
+          "actions": [
+            { "click": "[data-testid=start-disconnect]" },
+            { "waitFor": "[data-testid=disconnect-confirm]" },
+            { "scrollTop": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "093-hr-connector-mappings",
+      "role": "integration-admin",
+      "path": "/admin/integrations/connections/90000000-0000-4000-8000-000000000004",
+      "waitFor": "role=heading[name=\"HR file import\"]",
+      "states": [
+        {
+          "state": "mappings",
+          "actions": [
+            { "click": "[data-testid=tab-mappings]" },
+            { "waitFor": "[data-testid=save-mappings]" },
+            { "scrollTop": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "094a-adaptive-planning",
+      "role": "integration-admin",
+      "path": "/admin/integrations/connections/90000000-0000-4000-8000-000000000007",
+      "waitFor": "role=heading[name=\"Adaptive Planning\"]",
+      "states": [
+        {
+          "state": "degraded"
+        },
+        {
+          "state": "plan-import",
+          "actions": [
+            { "click": "[data-testid=tab-plan]" },
+            { "waitFor": "[data-testid=plan-blocked-credentials]" },
+            { "scrollTop": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "096-card-connector",
+      "role": "integration-admin",
+      "path": "/admin/integrations/connections/90000000-0000-4000-8000-000000000002",
+      "waitFor": "role=heading[name=\"Ramp\"]",
+      "states": [
+        {
+          "state": "settings",
+          "actions": [
+            { "click": "[data-testid=tab-connection]" },
+            { "waitFor": "[data-testid=setting-cardLimitPush]" },
+            { "scrollTop": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "098-identity-sso-scim",
+      "role": "integration-admin",
+      "path": "/admin/integrations/identity",
+      "waitFor": "role=heading[name=\"Identity and SCIM\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "099-sync-status",
+      "role": "integration-admin",
+      "path": "/admin/integrations/sync",
+      "waitFor": "role=heading[name=\"Sync status\"]",
+      "states": [
+        {
+          "state": "no-runs-yet"
+        }
+      ]
+    },
+    {
+      "id": "099a-cross-source-duplicates",
+      "role": "finance-admin",
+      "path": "/finance/actuals/duplicates",
+      "waitFor": "role=heading[name=\"Cross-source duplicates\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "099b-pushes",
+      "role": "integration-admin",
+      "path": "/admin/integrations/pushes",
+      "waitFor": "role=heading[name=\"Event codes and card limits\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "card-limits",
+          "actions": [
+            { "click": "[data-testid=tab-card-limits]" },
+            { "waitFor": "[data-testid=card-limit-off]" },
+            { "scrollTop": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "100-integration-errors",
+      "role": "integration-admin",
+      "path": "/admin/integrations/errors",
+      "waitFor": "role=heading[name=\"Errors and retries\"]",
+      "states": [
+        {
+          "state": "nothing-failing"
+        }
+      ]
+    },
+    {
+      "id": "101-api-keys",
+      "role": "integration-admin",
+      "path": "/admin/integrations/api-keys",
+      "waitFor": "role=heading[name=\"API keys\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "create-form",
+          "actions": [
+            { "click": "[data-testid=create-key]" },
+            { "waitFor": "[data-testid=scope-required]" },
+            { "scrollTop": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "101-webhooks",
+      "role": "integration-admin",
+      "path": "/admin/integrations/webhooks",
+      "waitFor": "role=heading[name=\"Webhooks\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
     }
   ]
 }
