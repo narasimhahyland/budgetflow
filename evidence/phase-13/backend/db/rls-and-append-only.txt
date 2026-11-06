@@ -1,4 +1,4 @@
-# Database guarantees for the Phase 13 tables (migration 0015_p13_ai)
+# Database guarantees for the Phase 13 tables (migration 0016_p13_ai)
 
 ## RLS: enabled, forced and a tenant_isolation policy on every new table
          table         | enabled | forced | policy 

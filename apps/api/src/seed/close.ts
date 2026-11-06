@@ -1,16 +1,18 @@
 import { DB } from '@bf/api/core';
 import * as s from '@bf/api/db';
-import { withTenant, type Db } from '@bf/api/db';
+import { withTenant, type Db, type Tx } from '@bf/api/db';
 import {
   CLOSE_BUDGET_POLICIES,
   CLOSE_REASON_CODES,
   CLOSE_ROLLOVER_POLICIES,
   CLOSE_YEAR_END_RUN,
+  FORECAST_CYCLES,
+  FORECAST_SHARES,
   TENANTS,
   userById,
 } from '@bf/seed';
 import type { INestApplicationContext } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 const T = TENANTS.acme;
 
@@ -62,5 +64,99 @@ export async function seedClose(app: INestApplicationContext): Promise<void> {
         createdBy: financeAdmin.personId,
       })
       .onConflictDoNothing();
+
+    await seedForecastCycles(tx, financeAdmin.personId);
   });
+}
+
+/**
+ * A closed September reforecast and an open October one. The forecast amount of each line is a
+ * share of that budget's net authorized amount read from the ledger, so the figures always sit
+ * beside real money without ever becoming any: nothing here writes a journal or a bucket.
+ */
+async function seedForecastCycles(tx: Tx, financeAdminId: string | null): Promise<void> {
+  for (const cycle of Object.values(FORECAST_CYCLES))
+    await tx
+      .insert(s.forecastCycles)
+      .values({
+        id: cycle.id,
+        tenantId: T,
+        name: cycle.name,
+        asOfDate: cycle.asOfDate,
+        dueDate: cycle.dueDate,
+        fiscalYearId: cycle.fiscalYearId,
+        status: cycle.status,
+        currency: 'USD',
+        varianceThresholdBps: 1_000,
+        varianceThresholdMinor: 100_000,
+        createdBy: financeAdminId,
+        closedAt: cycle.closedAt ? new Date(cycle.closedAt) : null,
+        closedBy: cycle.closedAt ? financeAdminId : null,
+      })
+      .onConflictDoNothing();
+
+  const budgetIds = [...new Set(FORECAST_SHARES.map((f) => f.budgetId))];
+  const facts = await tx.execute<{
+    budget_id: string;
+    authorized: string;
+    actual: string;
+    committed: string;
+    pending: string;
+    owner_person_id: string | null;
+  }>(sql`
+    -- authorized is credit-normal in the ledger, allocated_out debit-normal, so the budget's own
+    -- room is -(authorized) - allocated_out: exactly what the report nets so money counts once.
+    select b.id as budget_id, b.owner_person_id,
+           (-coalesce(sum(case when lb.bucket = 'authorized' then lb.reporting_amount_minor end), 0)
+            - coalesce(sum(case when lb.bucket = 'allocated_out' then lb.reporting_amount_minor end), 0))::text as authorized,
+           coalesce(sum(case when lb.bucket = 'actual' then lb.reporting_amount_minor end), 0)::text as actual,
+           coalesce(sum(case when lb.bucket in ('held', 'pre_encumbered', 'encumbered') then lb.reporting_amount_minor end), 0)::text as committed,
+           coalesce(sum(case when lb.bucket = 'pre_encumbered' then lb.reporting_amount_minor end), 0)::text as pending
+    from budgets b
+    left join ledger_balances lb on lb.budget_id = b.id
+    where b.id in (${sql.join(
+      budgetIds.map((id) => sql`${id}::uuid`),
+      sql`, `,
+    )})
+    group by b.id, b.owner_person_id`);
+  const byBudget = new Map(facts.rows.map((r) => [r.budget_id, r]));
+
+  for (const line of FORECAST_SHARES) {
+    const f = byBudget.get(line.budgetId);
+    if (!f) continue;
+    const cycle = FORECAST_CYCLES[line.cycle];
+    const authorizedMinor = Number(f.authorized);
+    const amountMinor = Math.round((authorizedMinor * line.forecastBps) / 10_000);
+    const varianceMinor = authorizedMinor - amountMinor;
+    const varianceBps =
+      authorizedMinor > 0 ? Math.round((varianceMinor * 10_000) / authorizedMinor) : 0;
+    const commentaryRequired = Math.abs(varianceMinor) >= 100_000 && Math.abs(varianceBps) >= 1_000;
+    await tx
+      .insert(s.forecastSnapshots)
+      .values({
+        tenantId: T,
+        cycleId: cycle.id,
+        budgetId: line.budgetId,
+        method: line.method,
+        asOfDate: cycle.asOfDate,
+        amountMinor,
+        currency: 'USD',
+        varianceBps,
+        varianceMinor,
+        commentary: line.commentary,
+        commentaryRequired,
+        commentaryNote: line.commentaryNote ?? null,
+        status: line.status,
+        authorizedMinor,
+        actualMinor: Number(f.actual),
+        committedMinor: Number(f.committed),
+        pendingMinor: Number(f.pending),
+        systemGenerated: false,
+        createdBy: f.owner_person_id,
+        submittedAt: line.status === 'draft' ? null : new Date(`${cycle.dueDate}T09:00:00.000Z`),
+        acceptedAt: line.status === 'accepted' ? new Date(`${cycle.dueDate}T12:00:00.000Z`) : null,
+        acceptedBy: line.status === 'accepted' ? financeAdminId : null,
+      })
+      .onConflictDoNothing();
+  }
 }

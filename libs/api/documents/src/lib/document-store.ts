@@ -22,6 +22,8 @@ export interface DocumentStore {
   downloadUrl(key: string, fileName: string, expiresSeconds: number): string;
   head(key: string): Promise<ObjectHead | null>;
   readStart(key: string, bytes: number): Promise<Buffer>;
+  /** Writes an object the server generated itself (a rendered report or pack). */
+  put(key: string, contentType: string, body: Buffer): Promise<void>;
   remove(key: string): Promise<void>;
 }
 
@@ -150,6 +152,26 @@ export class S3DocumentStore implements DocumentStore {
       sizeBytes: Number(res.headers.get('content-length') ?? 0),
       contentType: res.headers.get('content-type'),
     };
+  }
+
+  /**
+   * Writes an object the API or worker generated. Signed against the internal endpoint, not the
+   * public one: the browser-facing URL is not reachable from inside the API or worker container.
+   */
+  async put(key: string, contentType: string, body: Buffer): Promise<void> {
+    await this.ensureBucket();
+    const res = await fetch(
+      this.presign(
+        'PUT',
+        this.cfg.DOCUMENT_STORE_ENDPOINT,
+        key,
+        600,
+        {},
+        { 'content-type': contentType },
+      ),
+      { method: 'PUT', headers: { 'content-type': contentType }, body: new Uint8Array(body) },
+    );
+    if (!res.ok) throw new Error(`PUT ${key} failed: HTTP ${res.status}`);
   }
 
   async readStart(key: string, bytes: number): Promise<Buffer> {

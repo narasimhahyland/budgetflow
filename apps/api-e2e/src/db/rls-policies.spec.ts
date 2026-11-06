@@ -73,4 +73,51 @@ test.describe('row-level security as the application role', () => {
       }
     });
   });
+
+  // Migration 0015: the forecast cycle (87a) and the board pack (16a) carry a tenant's financial
+  // plans and its rendered board reporting, so they are isolated like every other tenant table.
+  test('the forecast cycle and board pack tables isolate tenants', async () => {
+    for (const table of ['forecast_cycles', 'forecast_snapshots', 'board_pack_generations']) {
+      const meta = await asAppRole(
+        null,
+        async (c) =>
+          (
+            await c.query(
+              `select c.relrowsecurity as enabled, c.relforcerowsecurity as forced,
+                      exists (select 1 from pg_policies p where p.tablename = c.relname and p.policyname = 'tenant_isolation') as policy
+               from pg_class c join pg_namespace n on n.oid = c.relnamespace
+               where n.nspname = 'public' and c.relname = $1`,
+              [table],
+            )
+          ).rows[0],
+      );
+      expect(meta, table).toEqual({ enabled: true, forced: true, policy: true });
+      await asAppRole(acme, async (c) => {
+        const other = await c.query(
+          `select count(*)::int as n from ${table} where tenant_id = $1`,
+          [globex],
+        );
+        expect(other.rows[0].n, `${table} leaks tenant B rows`).toBe(0);
+      });
+    }
+    // Hyland's own forecast cycles are visible to Hyland, so the check above is not vacuous.
+    await asAppRole(acme, async (c) => {
+      const own = await c.query(
+        `select count(*)::int as n from forecast_cycles where tenant_id = $1`,
+        [acme],
+      );
+      expect(own.rows[0].n).toBeGreaterThan(0);
+    });
+    // Writing another tenant's forecast cycle is refused by the policy, not silently ignored.
+    const insert = await pgError(
+      asAppRole(acme, (c) =>
+        c.query(
+          `insert into forecast_cycles (id, tenant_id, name, as_of_date, due_date, fiscal_year_id, currency)
+           values ($1, $2, 'Injected', '2026-09-30', '2026-10-12', $3, 'USD')`,
+          [randomUUID(), globex, SEED.fiscalYears.globexFy2026],
+        ),
+      ),
+    );
+    expect(insert?.code).toBe('42501');
+  });
 });

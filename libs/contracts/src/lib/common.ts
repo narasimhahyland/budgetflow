@@ -107,6 +107,28 @@ export const BudgetStatus = z.enum(BUDGET_STATUSES).describe('Budget lifecycle s
 export const BudgetType = z.enum(['operating', 'event', 'shared_event', 'contingency']);
 export const ControlMode = z.enum(['hard', 'soft', 'track']);
 
+/**
+ * Forecast methods and statuses. Shared by the forecast cycle (87a) and the forecast and variance
+ * report (087), so both name the same thing: a forecast, never an actual and never a posting.
+ */
+export const FORECAST_METHODS = ['run_rate', 'committed_pipeline', 'owner_input'] as const;
+export const ForecastMethod = z
+  .enum(FORECAST_METHODS)
+  .describe(
+    'How the year-end figure was produced: the system run-rate, committed plus pipeline, or the owner\u2019s own number.',
+  );
+export type ForecastMethod = z.infer<typeof ForecastMethod>;
+
+export const FORECAST_STATUSES = [
+  'draft',
+  'submitted',
+  'commentary_required',
+  'accepted',
+  'superseded',
+] as const;
+export const ForecastStatus = z.enum(FORECAST_STATUSES);
+export type ForecastStatus = z.infer<typeof ForecastStatus>;
+
 export const ROLE_IDS = [
   'super-admin',
   'org-admin',
@@ -303,6 +325,17 @@ export const PROBLEM_CODES = [
   'YEAR_END_DRY_RUN_REQUIRED',
   'ROLLOVER_POLICY_MISSING',
   'CARRY_TARGET_MISSING',
+  // Forecast cycles (87a) and the board and FP&A pack (16a)
+  'FORECAST_COMMENTARY_REQUIRED',
+  'FORECAST_AMOUNT_REQUIRED',
+  'FORECAST_CYCLE_CLOSED',
+  'FORECAST_ALREADY_ACCEPTED',
+  'FORECAST_SUPERSEDED',
+  'FORECAST_NOT_SUBMITTED',
+  'FORECAST_CYCLE_ALREADY_OPEN',
+  'FORECAST_NOT_IN_SCOPE',
+  'BOARD_PACK_NOT_READY',
+  'BOARD_PACK_NO_SNAPSHOT',
   // AI layer (P13). AI suggests; people decide: none of these ever authorize a financial action.
   'AI_FEATURE_DISABLED',
   'AI_PROVIDER_NOT_CONFIGURED',

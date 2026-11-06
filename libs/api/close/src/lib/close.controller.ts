@@ -8,23 +8,31 @@ import {
 import {
   AcknowledgeCheckRequest,
   AssignRolloverPolicyRequest,
+  CloseForecastCycleRequest,
   ClosePeriodRequest,
+  CreateForecastCycleRequest,
   CreateYearEndRunRequest,
   ExecuteYearEndRequest,
+  ForecastDecisionRequest,
   PeriodStatusRequest,
   ReopenDecisionRequest,
   RequestReopenRequest,
+  SubmitForecastRequest,
   YearEndCarryDecisionRequest,
 } from '@bf/contracts';
 import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, Res } from '@nestjs/common';
 import { z } from 'zod';
 import type { CommandContext } from './close-reads';
+import { ForecastCyclesService } from './forecast-cycles.service';
 import { PeriodCloseService } from './period-close.service';
 import { RolloverPoliciesService } from './rollover-policies.service';
 import { YearEndService } from './year-end.service';
 
 const Uuid = z.uuid();
 const ListQuery = z.object({ fiscalYearId: Uuid.optional() }).strict();
+const CycleListQuery = z
+  .object({ fiscalYearId: Uuid.optional(), status: z.enum(['open', 'closed']).optional() })
+  .strict();
 
 interface ResponseLike {
   setHeader(name: string, value: string): void;
@@ -48,6 +56,7 @@ export class CloseController {
     private readonly periods: PeriodCloseService,
     private readonly policies: RolloverPoliciesService,
     private readonly yearEnd: YearEndService,
+    private readonly forecasts: ForecastCyclesService,
   ) {}
 
   @Get('periods')
@@ -297,6 +306,100 @@ export class CloseController {
         actor,
         id(runId),
         parseWith(ExecuteYearEndRequest, body),
+        ctx(key, rid),
+      ),
+    );
+  }
+
+  @Get('forecast-cycles')
+  listForecastCycles(@CurrentActor() actor: RequestActor, @Query() query: unknown) {
+    return this.forecasts.list(actor, parseWith(CycleListQuery, query));
+  }
+
+  @Get('forecast-cycles/:cycleId')
+  getForecastCycle(@CurrentActor() actor: RequestActor, @Param('cycleId') cycleId: string) {
+    return this.forecasts.get(actor, id(cycleId));
+  }
+
+  @Post('forecast-cycles')
+  @HttpCode(201)
+  async createForecastCycle(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.forecasts.create(
+        actor,
+        parseWith(CreateForecastCycleRequest, body),
+        ctx(key, rid),
+      ),
+    );
+  }
+
+  @Post('forecast-cycles/:cycleId/submissions')
+  @HttpCode(201)
+  async submitForecast(
+    @CurrentActor() actor: RequestActor,
+    @Param('cycleId') cycleId: string,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.forecasts.submit(
+        actor,
+        id(cycleId),
+        parseWith(SubmitForecastRequest, body),
+        ctx(key, rid),
+      ),
+    );
+  }
+
+  @Post('forecast-cycles/:cycleId/submissions/:submissionId/decision')
+  @HttpCode(201)
+  async decideForecast(
+    @CurrentActor() actor: RequestActor,
+    @Param('cycleId') cycleId: string,
+    @Param('submissionId') submissionId: string,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.forecasts.decide(
+        actor,
+        id(cycleId),
+        id(submissionId),
+        parseWith(ForecastDecisionRequest, body),
+        ctx(key, rid),
+      ),
+    );
+  }
+
+  @Post('forecast-cycles/:cycleId/close')
+  @HttpCode(201)
+  async closeForecastCycle(
+    @CurrentActor() actor: RequestActor,
+    @Param('cycleId') cycleId: string,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.forecasts.close(
+        actor,
+        id(cycleId),
+        parseWith(CloseForecastCycleRequest, body),
         ctx(key, rid),
       ),
     );

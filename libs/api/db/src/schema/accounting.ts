@@ -19,6 +19,7 @@ import {
   actualKind,
   actualMatchStatus,
   actualSource,
+  forecastCycleStatus,
   forecastMethod,
   forecastStatus,
   integrityCheckStatus,
@@ -293,6 +294,56 @@ export const integrityFlags = pgTable(
   (t) => [index('integrity_flags_tenant').on(t.tenantId, t.kind, t.status)],
 );
 
+/**
+ * A reforecast round (87a). Finance opens it with an as-of date, a due date and the variance
+ * threshold above which an owner must explain themselves; owners submit one forecast per budget and
+ * included event into `forecast_snapshots`; closing locks the set. Nothing here posts: a cycle only
+ * ever writes forecast snapshots, so no row in it can move money or a ledger bucket.
+ */
+export const forecastCycles = pgTable(
+  'forecast_cycles',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    name: text('name').notNull(),
+    asOfDate: day('as_of_date').notNull(),
+    dueDate: day('due_date').notNull(),
+    fiscalYearId: uuid('fiscal_year_id')
+      .notNull()
+      .references(() => fiscalYears.id),
+    /** Null means every active budget in the tenant. */
+    scopeRootBudgetId: uuid('scope_root_budget_id').references(() => budgets.id),
+    status: forecastCycleStatus('status').notNull().default('open'),
+    currency: ccy('currency')
+      .notNull()
+      .references(() => currencies.code),
+    varianceThresholdBps: integer('variance_threshold_bps').notNull().default(1000),
+    varianceThresholdMinor: minor('variance_threshold_minor').notNull().default(100000),
+    defaultMethodOperating: forecastMethod('default_method_operating')
+      .notNull()
+      .default('run_rate'),
+    defaultMethodEvent: forecastMethod('default_method_event')
+      .notNull()
+      .default('committed_pipeline'),
+    includeOpenEvents: boolean('include_open_events').notNull().default(true),
+    reminderDaysBefore: integer('reminder_days_before').array().notNull().default([3, 1]),
+    createdBy: uuid('created_by'),
+    createdAt: createdAt(),
+    closedAt: ts('closed_at'),
+    closedBy: uuid('closed_by'),
+  },
+  (t) => [
+    uniqueIndex('forecast_cycles_name').on(t.tenantId, t.name),
+    index('forecast_cycles_year').on(t.tenantId, t.fiscalYearId, t.status),
+  ],
+);
+
+/**
+ * One forecast of where a budget or event will land. Never an actual: no `forecast_snapshots` row
+ * is ever read by the ledger, and the ledger facts the forecast was measured against are copied in
+ * (`authorized_minor`, `actual_minor`, `committed_minor`) so a closed cycle reports the same
+ * variance for ever without the forecast having touched a bucket.
+ */
 export const forecastSnapshots = pgTable(
   'forecast_snapshots',
   {
@@ -311,8 +362,30 @@ export const forecastSnapshots = pgTable(
     status: forecastStatus('status').notNull().default('draft'),
     createdBy: uuid('created_by'),
     createdAt: createdAt(),
+    cycleId: uuid('cycle_id').references(() => forecastCycles.id),
+    /** Ledger facts as of the cycle date, copied so the variance never drifts after the close. */
+    authorizedMinor: minor('authorized_minor').notNull().default(0),
+    actualMinor: minor('actual_minor').notNull().default(0),
+    committedMinor: minor('committed_minor').notNull().default(0),
+    pendingMinor: minor('pending_minor').notNull().default(0),
+    plannedEventsMinor: minor('planned_events_minor').notNull().default(0),
+    varianceMinor: minor('variance_minor').notNull().default(0),
+    commentaryRequired: boolean('commentary_required').notNull().default(false),
+    /** Finance's note when they sent the line back for more explanation. */
+    commentaryNote: text('commentary_note'),
+    /** True for the run-rate forecast the cycle close wrote because nobody submitted. */
+    systemGenerated: boolean('system_generated').notNull().default(false),
+    submittedAt: ts('submitted_at'),
+    acceptedAt: ts('accepted_at'),
+    acceptedBy: uuid('accepted_by'),
+    updatedAt: ts('updated_at').notNull().defaultNow(),
   },
-  (t) => [index('forecast_snapshots_budget').on(t.tenantId, t.budgetId, t.asOfDate)],
+  (t) => [
+    index('forecast_snapshots_budget').on(t.tenantId, t.budgetId, t.asOfDate),
+    uniqueIndex('forecast_snapshots_cycle_budget').on(t.tenantId, t.cycleId, t.budgetId),
+    uniqueIndex('forecast_snapshots_cycle_event').on(t.tenantId, t.cycleId, t.eventId),
+    index('forecast_snapshots_cycle').on(t.tenantId, t.cycleId, t.status),
+  ],
 );
 
 /** As-of balances when a period closes (append-only). */
