@@ -161,3 +161,11 @@ machine is shared; the visual gate was not run and no UI changed.
   `board-pack.service.ts` without touching the contract.
 - Forecast cycles for _events_ are modelled and submitted but have no scenario of their own; the
   seed's cycles exclude open events. Worth a follow-up when 046 (event forecast at completion) is built.
+
+## Pre-existing order sensitivity (not caused by this change)
+
+On a fresh seed, `src/close src/reports src/db` is 73 passed. Re-running `close/period-close.spec.ts`
+on the same stack without reseeding fails its soft-check scenario, because the first run already
+acknowledged the November check it asserts is blocking. It passes again after `scripts/stack.sh reset`.
+CI reseeds before `functional-api`, so it is green there; worth a follow-up to make that scenario own
+the check it acknowledges.
