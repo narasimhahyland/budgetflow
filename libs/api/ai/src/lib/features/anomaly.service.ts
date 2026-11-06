@@ -1,6 +1,5 @@
-import { budgetResource } from '@bf/api/budgets';
 import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
-import { aiSuggestions, budgets, events, requests, withTenant, type Db, type Tx } from '@bf/api/db';
+import { aiSuggestions, events, requests, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   AiSourceRef,
   AnomalyFlag,
