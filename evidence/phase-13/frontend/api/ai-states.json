@@ -1,0 +1,183 @@
+{
+  "askAnswered": {
+    "status": 200,
+    "body": {
+      "outcome": "answered",
+      "answer": "Bengaluru Events has USD 4,081.71 available under its rules, of USD 13,000.00 authorized. USD 4,459.88 is committed and USD 1,685.89 is spent.",
+      "why": ["Bengaluru Events is active and its ledger balances were read for this answer."],
+      "figures": [
+        {
+          "key": "authorized",
+          "label": "Authorized",
+          "amount": {
+            "amountMinor": 1300000,
+            "currency": "USD"
+          },
+          "source": {
+            "type": "budget",
+            "id": "<id>",
+            "label": "Bengaluru Events"
+          }
+        },
+        {
+          "key": "pending",
+          "label": "Pending",
+          "amount": {
+            "amountMinor": 21600,
+            "currency": "USD"
+          },
+          "source": {
+            "type": "budget",
+            "id": "<id>",
+            "label": "Bengaluru Events"
+          }
+        },
+        {
+          "key": "committed",
+          "label": "Committed",
+          "amount": {
+            "amountMinor": 445988,
+            "currency": "USD"
+          },
+          "source": {
+            "type": "budget",
+            "id": "<id>",
+            "label": "Bengaluru Events"
+          }
+        },
+        {
+          "key": "actual",
+          "label": "Actual",
+          "amount": {
+            "amountMinor": 168589,
+            "currency": "USD"
+          },
+          "source": {
+            "type": "budget",
+            "id": "<id>",
+            "label": "Bengaluru Events"
+          }
+        },
+        {
+          "key": "available",
+          "label": "Available under this budget's rules",
+          "amount": {
+            "amountMinor": 408171,
+            "currency": "USD"
+          },
+          "source": {
+            "type": "budget",
+            "id": "<id>",
+            "label": "Bengaluru Events"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "type": "budget",
+          "id": "<id>",
+          "label": "Bengaluru Events"
+        }
+      ],
+      "followUps": ["Show the pending requests", "What is committed but not spent yet?"],
+      "confidence": "high",
+      "refusal": null,
+      "provenance": {
+        "suggestionId": null,
+        "queryLogId": "<id>",
+        "provider": "fake",
+        "modelId": "budgetflow-fake",
+        "modelVersion": "2026.11",
+        "generatedAt": "2026-11-06T14:17:38Z",
+        "latencyMs": 1
+      },
+      "conversationId": "<id>",
+      "turnId": "<id>",
+      "asOf": "2026-11-06T14:17:38Z"
+    }
+  },
+  "askOutOfScope": {
+    "status": 200,
+    "body": {
+      "outcome": "refused_out_of_scope",
+      "answer": null,
+      "why": [],
+      "figures": [],
+      "sources": [],
+      "followUps": [],
+      "confidence": null,
+      "refusal": {
+        "kind": "out_of_scope",
+        "message": "I can only answer about records you can see. I found nothing you have access to called \"Europe Region\".",
+        "redirect": null
+      },
+      "provenance": {
+        "suggestionId": null,
+        "queryLogId": "<id>",
+        "provider": "fake",
+        "modelId": "budgetflow-fake",
+        "modelVersion": "2026.11",
+        "generatedAt": "2026-11-06T14:17:38Z",
+        "latencyMs": 0
+      },
+      "conversationId": "<id>",
+      "turnId": "<id>",
+      "asOf": "2026-11-06T14:17:38Z"
+    }
+  },
+  "askAction": {
+    "status": 200,
+    "body": {
+      "outcome": "refused_action",
+      "answer": null,
+      "why": [],
+      "figures": [],
+      "sources": [],
+      "followUps": [],
+      "confidence": null,
+      "refusal": {
+        "kind": "action",
+        "message": "I can't approve or reject requests. Open the request to decide.",
+        "redirect": {
+          "label": "Open the screen",
+          "resourceType": "request",
+          "resourceId": null
+        }
+      },
+      "provenance": {
+        "suggestionId": null,
+        "queryLogId": "<id>",
+        "provider": "fake",
+        "modelId": "budgetflow-fake",
+        "modelVersion": "2026.11",
+        "generatedAt": "2026-11-06T14:17:39Z",
+        "latencyMs": 0
+      },
+      "conversationId": "<id>",
+      "turnId": "<id>",
+      "asOf": "2026-11-06T14:17:39Z"
+    }
+  },
+  "chatDisabled": {
+    "status": 409,
+    "body": {
+      "type": "urn:budgetflow:problem:ai-feature-disabled",
+      "title": "Ai feature disabled",
+      "status": 409,
+      "code": "AI_FEATURE_DISABLED",
+      "detail": "Ask in Slack and Teams is turned off for this company.",
+      "instance": "/api/ai/ask"
+    }
+  },
+  "queryLogForbidden": {
+    "status": 403,
+    "body": {
+      "type": "urn:budgetflow:problem:forbidden",
+      "title": "Forbidden",
+      "status": 403,
+      "code": "FORBIDDEN",
+      "detail": "Reading the AI query log needs audit or tenant settings access.",
+      "instance": "/api/ai/query-log"
+    }
+  }
+}
