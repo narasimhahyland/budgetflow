@@ -137,6 +137,24 @@ export const NAV: NavGroup[] = [
         permission: 'period.manage',
       },
       {
+        label: 'Period close',
+        path: '/finance/close',
+        icon: 'checklist',
+        permission: 'period.manage',
+      },
+      {
+        label: 'Rollover policies',
+        path: '/finance/rollover-policies',
+        icon: 'rules',
+        permission: 'period.manage',
+      },
+      {
+        label: 'Year-end',
+        path: '/finance/year-end',
+        icon: 'calendar',
+        permission: 'period.manage',
+      },
+      {
         label: 'Exchange rates',
         path: '/finance/rates',
         icon: 'currency_dollar',

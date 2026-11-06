@@ -2,6 +2,7 @@ import { Route } from '@angular/router';
 import { authGuard, sessionGuard } from '@bf/web/data-access';
 import { accountingRoutes } from '@bf/web/features/accounting';
 import { authRoutes } from '@bf/web/features/auth';
+import { closeRoutes } from '@bf/web/features/close';
 import { financeAdminRoutes } from '@bf/web/features/finance-admin';
 import { orgRoutes } from '@bf/web/features/org';
 import { Shell, shellChildRoutes } from '@bf/web/shell';
@@ -94,6 +95,7 @@ export const appRoutes: Route[] = [
         loadChildren: () => import('@bf/web/features/reports').then((m) => m.reportsRoutes),
       },
       ...accountingRoutes,
+      ...closeRoutes,
       ...shellChildRoutes,
     ],
   },
