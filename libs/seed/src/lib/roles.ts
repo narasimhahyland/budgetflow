@@ -207,6 +207,18 @@ export const EXTRA_USERS = [
     'Sandbox finance controller',
     TENANTS.sandbox,
   ),
+  // A legal hold needs two different people who may manage holds (Auditor and Finance Controller).
+  // The destructive retention scenarios run in the sandbox tenant, so it needs its own auditor.
+  user(
+    21,
+    'sandbox-auditor',
+    'sandbox.auditor@example.test',
+    'Tomas',
+    'Nilsson',
+    ['auditor'],
+    'Sandbox internal auditor',
+    TENANTS.sandbox,
+  ),
 ] as const satisfies readonly SeedUser[];
 
 /** Signs in through the simulated corporate identity provider (Hyland SSO) as well as with a password. */

@@ -1,5 +1,6 @@
 import type { INestApplicationContext } from '@nestjs/common';
 import { seedActuals } from './actuals';
+import { seedAdmin } from './admin';
 import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
 import { seedClose } from './close';
@@ -48,5 +49,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'connected systems in Mock mode, mappings, an API key and a webhook endpoint',
     phase: 'P12',
     run: seedIntegrations,
+  },
+  {
+    name: 'retention periods, capability switches, legal holds, a maintenance notice and owner invites',
+    phase: 'P14',
+    run: seedAdmin,
   },
 ];
