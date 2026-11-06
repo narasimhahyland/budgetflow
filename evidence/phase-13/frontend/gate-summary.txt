@@ -1,0 +1,12 @@
+▶ db              nx_run affected -t db-check --base=88c18f4e00fd8c3877b27ac3f63c1b0554c0457e
+  ✓ db (1s)
+
+Gate summary (lint typecheck build) — logs in tmp/gate/20261106-194521
+  PASS secrets             4s
+  PASS lint                4s
+  PASS styles              2s
+  PASS satori             31s
+  PASS typecheck           5s
+  PASS build               1s
+  PASS openapi             1s
+  PASS db                  1s
