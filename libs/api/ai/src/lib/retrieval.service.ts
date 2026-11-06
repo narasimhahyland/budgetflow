@@ -44,6 +44,19 @@ export class AiRetrieval {
     return 'none';
   }
 
+  /**
+   * Every budget id the actor may read. Visibility filters use this rather than `budgetFacts`, whose
+   * limit is about how much a model is given, not about what a person is allowed to see.
+   */
+  async readableBudgetIds(tx: Tx, actor: RequestActor): Promise<Set<string>> {
+    const rows = await tx.select().from(budgets).where(eq(budgets.tenantId, actor.tenantId));
+    return new Set(
+      rows
+        .filter((row) => this.policy.can(actor, 'budget.read', budgetResource(row)).allowed)
+        .map((row) => row.id),
+    );
+  }
+
   /** Budgets the actor may read, with figures from the reconciled ledger read models. */
   async budgetFacts(
     tx: Tx,
@@ -52,7 +65,8 @@ export class AiRetrieval {
   ): Promise<ScopedFacts<BudgetDetail>> {
     const action: Action = 'budget.read';
     const scope = this.scopeKind(actor, action);
-    const limit = Math.min(opts.limit ?? 8, 25);
+    // Ask-style retrieval keeps the model's view small; a scan passes the ids it already scoped.
+    const limit = Math.min(opts.limit ?? 8, 200);
     const candidates = await tx
       .select()
       .from(budgets)

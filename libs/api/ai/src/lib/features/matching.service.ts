@@ -77,16 +77,15 @@ export class AiMatchingService {
           ),
         )
         .orderBy(actuals.transactionDate, actuals.id);
-      const scoped = await this.retrieval.budgetFacts(tx, actor, { limit: 25 });
-      const visibleBudgets = new Map(scoped.rows.map((b) => [b.id, b]));
-      const open = visibleBudgets.size
+      const readable = await this.retrieval.readableBudgetIds(tx, actor);
+      const open = readable.size
         ? await tx
             .select()
             .from(commitments)
             .where(
               and(
                 eq(commitments.tenantId, actor.tenantId),
-                inArray(commitments.budgetId, [...visibleBudgets.keys()]),
+                inArray(commitments.budgetId, [...readable]),
                 inArray(commitments.status, ['pre_encumbered', 'encumbered', 'partially_consumed']),
               ),
             )
@@ -292,9 +291,7 @@ export class AiMatchingService {
         ),
       );
     // A suggestion that points at a budget the reviewer cannot read is not shown to them.
-    const readable = new Set(
-      (await this.retrieval.budgetFacts(tx, actor, { limit: 25 })).rows.map((b) => b.id),
-    );
+    const readable = await this.retrieval.readableBudgetIds(tx, actor);
     const visible = rows.filter(
       (r) => !r.suggestion.budgetId || readable.has(r.suggestion.budgetId),
     );

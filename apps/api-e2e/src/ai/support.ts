@@ -7,6 +7,7 @@ import {
   ActualList,
   AiMatchSuggestion,
   AiMatchSuggestionList,
+  AiSettingsView,
   BudgetDetail,
 } from '@bf/contracts';
 import { SEED, userById } from '@bf/seed';
@@ -16,6 +17,28 @@ import { expectContract } from '../support/contract';
 import { createRoot } from '../support/plan-root';
 import { allocate } from '../support/factory';
 import { csv, importAndPost } from '../actuals/support';
+
+/**
+ * The product default is 50 questions per person per hour (113a). These scenarios ask on behalf of a
+ * handful of seeded people and are meant to be repeatable within the hour, so they run at the
+ * documented maximum instead. The limit itself still applies.
+ */
+export async function relaxAskLimit(request: APIRequestContext): Promise<void> {
+  const current = await expectContract(
+    await request.get('/api/ai/settings', { headers: await as('org-admin') }),
+    200,
+    AiSettingsView,
+  );
+  if (current.settings.questionsPerPersonPerHour === 200) return;
+  await expectContract(
+    await request.put('/api/ai/settings', {
+      headers: await mutate('org-admin', randomUUID()),
+      data: { ...current.settings, questionsPerPersonPerHour: 200 },
+    }),
+    200,
+    AiSettingsView,
+  );
+}
 
 /** A cost centre no seeded budget uses, so only this scenario's budget can be suggested. */
 const COST_CENTRE_CODE = 'CC-IN-BLR-220';
@@ -68,10 +91,14 @@ export async function unmatchedLine(
 ): Promise<{ budget: BudgetDetail; actual: ActualDetail }> {
   const budget = await budgetOnOwnCostCentre(request);
   const ref = `P13-${randomUUID().slice(0, 8).toUpperCase()}`;
+  // A distinct amount and date per scenario, so the Phase 6 cross-source duplicate check never holds
+  // the line (080f never suggests a held duplicate, which would leave the scenario with nothing).
+  const amount = (200 + Math.floor(Math.random() * 8000) / 100).toFixed(2);
+  const day = String(2 + Math.floor(Math.random() * 25)).padStart(2, '0');
   await importAndPost(
     request,
     csv([
-      `${ref},2026-11-10,240.00,USD,HYL-IN,${COST_CENTRE_CODE},6100,,,AI matching scenario,,,charge`,
+      `${ref},2026-11-${day},${amount},USD,HYL-IN,${COST_CENTRE_CODE},6100,,,AI matching scenario,,,charge`,
     ]),
   );
   const list = await expectContract(

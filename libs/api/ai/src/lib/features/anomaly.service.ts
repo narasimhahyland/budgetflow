@@ -65,8 +65,7 @@ export class AiAnomalyService {
           'AI_FLAG_KIND_PAUSED',
           'Every kind you asked for is paused because its measured precision is below its threshold.',
         );
-      const scoped = await this.retrieval.budgetFacts(tx, actor, { limit: 25 });
-      const budgetIds = scoped.rows.map((b) => b.id);
+      const budgetIds = [...(await this.retrieval.readableBudgetIds(tx, actor))];
       if (budgetIds.length) {
         if (wanted.includes('possible_split')) await this.scanSplits(tx, actor, budgetIds);
         if (wanted.includes('unusual_cost_per_head'))
@@ -328,11 +327,7 @@ export class AiAnomalyService {
       .where(
         and(eq(aiSuggestions.tenantId, actor.tenantId), eq(aiSuggestions.feature, 'anomaly_flags')),
       );
-    const readable = new Set(
-      (await tx.select().from(budgets).where(eq(budgets.tenantId, actor.tenantId)))
-        .filter((b) => this.policy.can(actor, 'budget.read', budgetResource(b)).allowed)
-        .map((b) => b.id),
-    );
+    const readable = await this.retrieval.readableBudgetIds(tx, actor);
     const items = rows
       .filter((r) => !r.budgetId || readable.has(r.budgetId))
       .map((row) => this.toFlag(row, statusMap[row.status] ?? 'open'))

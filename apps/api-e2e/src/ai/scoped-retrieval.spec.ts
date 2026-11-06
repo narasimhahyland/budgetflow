@@ -7,23 +7,34 @@ import { AiQueryLogList, AskAnswer, BudgetDetail } from '@bf/contracts';
 import { SEED } from '@bf/seed';
 import { as } from '../support/auth';
 import { expectContract } from '../support/contract';
+import { relaxAskLimit } from './support';
 
 const BENGALURU = SEED.budgets.bengaluru;
 const EUROPE = SEED.budgets.europe;
 
+test.beforeAll(async ({ request }) => {
+  await relaxAskLimit(request);
+});
+
 test('an owner is answered from the ledger read models, with every figure traceable to a budget', async ({
   request,
 }) => {
+  // Asked about one named budget, so the assertion is about this budget and not about whatever other
+  // scenarios have since created in the owner's subtree.
   const answer = await expectContract(
     await request.post('/api/ai/ask', {
       headers: await as('location-manager'),
-      data: { question: 'How much is left in my budgets?', channel: 'web' },
+      data: {
+        question: 'How much is left?',
+        channel: 'web',
+        context: { type: 'budget', id: BENGALURU },
+      },
     }),
     200,
     AskAnswer,
   );
   expect(answer.outcome).toBe('answered');
-  expect(answer.sources.length).toBeGreaterThan(0);
+  expect(answer.sources.map((s) => s.id)).toContain(BENGALURU);
   expect(answer.figures.length).toBeGreaterThan(0);
 
   // Every figure must equal what the budget read model reports: the model never computes a number.

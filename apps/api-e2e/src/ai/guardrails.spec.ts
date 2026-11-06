@@ -7,6 +7,7 @@ import { P5_IDS } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
+import { relaxAskLimit } from './support';
 import { SEED } from '@bf/seed';
 import { asAppRole } from '../support/db';
 
@@ -16,6 +17,10 @@ import { asAppRole } from '../support/db';
  */
 const INVENTED_FIGURE = '__eval:invent-figure';
 const BROKEN_SHAPE = '__eval:schema-invalid';
+
+test.beforeAll(async ({ request }) => {
+  await relaxAskLimit(request);
+});
 
 test('an answer containing a figure the ledger did not produce is discarded', async ({
   request,

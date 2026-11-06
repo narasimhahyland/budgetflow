@@ -129,6 +129,51 @@ calendar responses writing back to `event_participants.rsvp_status` (the P9 invi
 person-scoped); applying a planning import as a plan version (the preview is complete, applying goes
 through the existing P4 plan commands); the BI connector (092a-092d are Phase 16).
 
+## What Phase 13 delivers (backend half)
+
+The Angular screens (011a, 016b, 017c, 022d, 061f, 069a, 080f, 113a, 121a) follow as a separate
+change; this half is the API the frontend builds on. **AI suggests; people decide.** Nothing in
+`libs/api/ai` posts to the ledger, approves a request, moves budget or changes a control, and no
+endpoint applies a suggestion on a person's behalf: a suggestion carries what it proposes, what it
+proposes it from, and the body a person submits to the ordinary command, which runs its own
+`PolicyService.can` check, idempotency key and audit entry.
+
+| Area      | Where                                                              | How the frontend and later phases use it                                                                                                                                                                                                                                                                                    |
+| --------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contracts | `libs/contracts/src/lib/domains/ai.ts`                             | Ask and conversations, policy explanations, allocation suggestions, the spending outlook, matching suggestions, anomaly flags, extraction, suggestion decisions and feedback, settings, the query log and accuracy. 8 new problem codes.                                                                                    |
+| API       | `libs/api/ai` (`AiModule`, `AiApiModule`)                          | `AiProvider` (abstract) with `FakeAiProvider`; `AiGateway` (minimize, parse, figure guard, query log); `AiRetrieval` (PolicyService-scoped facts); `AiQueryLogService`; `AiSuggestionsService`; `AiSettingsService`; `AiEvaluationsService`; one service per feature under `features/`.                                     |
+| Schema    | `libs/api/db/src/schema/ai.ts`, migration `0015_p13_ai`            | `ai_query_log` (append-only), `ai_suggestions`, `ai_conversations`, `ai_conversation_turns`, `ai_outlook_snapshots`, `ai_evaluation_runs`. All with FORCE row level security and `tenant_isolation`.                                                                                                                        |
+| Policy    | `libs/domain/.../authorization/policy.ts`                          | One new action, `ai.confirm_finance` (Finance Admin), so a finance-affecting feature cannot be turned on by the Organization Admin alone. Every other AI endpoint reuses the action of the work it is about (`budget.read`, `budget.allocate`, `actuals.manage`, `integrity.read`, `tenant.settings.manage`, `audit.read`). |
+| Seed      | `libs/seed/src/lib/ai.ts` (prefix `91`), `apps/api/src/seed/ai.ts` | Feature switches on for Hyland, Globex and the sandbox (chat questions off: they need 061e), the 113a settings, two receipts and a vendor quote the fake provider has recorded answers for, and one evaluation run per feature so the accuracy tab starts populated.                                                        |
+| Tests     | `apps/api-e2e/src/ai/`                                             | 31 scenarios; invariant row 21 and new rows 68-71.                                                                                                                                                                                                                                                                          |
+
+How the guarantees are enforced, in one place each:
+
+- **Scoped retrieval.** `AiRetrieval` is the only way the AI layer reads tenant data. It runs inside
+  `withTenant` (so RLS applies) and then filters every candidate row through `PolicyService.can` for
+  the asking user. A record the asker could not open in the UI is never retrieved, never sent and
+  never cited, and the scope that was applied is recorded on the query-log row.
+- **Data minimization.** `minimize()` keeps only the field names a feature's allow-list names
+  (`ALLOWED_FACT_FIELDS`) and drops anything that looks like personal data or a credential whatever
+  it is called. The surviving field names go on the query-log row, so an auditor can see exactly what
+  left the server, and 113a shows the same list in the turn-on dialog.
+- **Figures.** Every amount shown comes from `BudgetViews` or another reconciled read model. The
+  figure guard rejects any model-written sentence containing a number that was not in the retrieved
+  facts, and the gateway then discards the whole output (`discarded_unreliable`).
+- **Nothing is applied by AI.** `AiSuggestionsService.decide` records `accepted` only after it finds
+  the audit entry that the real command wrote on the applied record (and, for matching, only once the
+  spend line is no longer unmatched). There is no privileged apply path.
+- **Evaluation.** `EVAL_SETS` measures each feature against a published threshold using the fake
+  provider; results land in `ai_evaluation_runs`, and an anomaly kind below its threshold stops
+  raising new flags.
+
+Not in this half: the Angular screens and journeys; nightly worker jobs for the outlook and the
+anomaly scan (both are endpoints a person or a job can call, `POST /api/ai/outlook/run` and
+`POST /api/ai/anomaly-flags/scan`); the `receipt_reused` and `unusual_vendor` flag kinds (in the
+contract for the UI, not raised by the scan yet, which needs document hashes and vendor categories);
+reported answers with their 90-day text retention (113a sub-tab); recording the suggestion id inside
+the actuals match audit entry, which needs a Phase 6 change to `QueueService.match`.
+
 ## Rules for every phase agent
 
 1. **Owned paths only.** Each phase below lists the paths it owns. Shared surfaces belong to the integrator (`git-worktree-workflow.mdc`): `package.json`, lockfile, `nx.json`, `tsconfig.base.json`, `eslint.config.mjs`, `.stylelintrc.mjs`, `libs/contracts/src/lib/{common,endpoint,endpoints,registry}.ts` and `index.ts`, `libs/api/db/**`, `libs/domain/src/index.ts` and `authorization/policy.ts`, `apps/api/src/app/app.module.ts`, `apps/worker/src/app/worker.module.ts`, `apps/api/src/seed/extensions.ts`, `apps/web/src/app/**`, `libs/web/ui/**`, `libs/web/data-access/**`, `apps/web-e2e/visual/screens.json`, `docs/testing/invariant-scenarios.md`, `infra/**`, `.cursor/**`, `.github/**`. Put requested changes to them in your report.
@@ -142,7 +187,7 @@ through the existing P4 plan commands); the BI connector (092a-092d are Phase 16
 9. **Web.** Phase 2 creates `libs/web/ui`, `libs/web/data-access` (on `createApiClient`) and `libs/web/shell`. Each screen group is `libs/web/features/<group>` (tags `type:feature`, `scope:web`) exporting `Routes`; features never import each other; the integrator wires lazy routes in `apps/web`. Light theme only.
 10. **Done** means `/functional-check` and `scripts/gate.sh` green, evidence under `evidence/<phase-id>/`.
 
-Reserved seed id prefixes: `10`-`24` tenancy and finance, `25`-`27` GL accounts, GL mappings and vendors (P3), `30`-`36` org (`36` org unit versions, P3), `40`-`42` people and memberships, `50` Keycloak subjects, `51` subjects in the Hyland SSO stand-in realm, `60`-`68` categories, plan, reason codes, DoA, flags, templates, `70` budgets. Phase 3 rows inside earlier prefixes start at n = 100 (n = 1000 for rates and closure rows) so Phase 1 ids never collide. `71` is used by P4 (demo budgets), `72`-`76` by P5, `77`-`79` by P6, `80`-`86` by P7 to P9, `90` by P12 (integrations). Next free: `91`+.
+Reserved seed id prefixes: `10`-`24` tenancy and finance, `25`-`27` GL accounts, GL mappings and vendors (P3), `30`-`36` org (`36` org unit versions, P3), `40`-`42` people and memberships, `50` Keycloak subjects, `51` subjects in the Hyland SSO stand-in realm, `60`-`68` categories, plan, reason codes, DoA, flags, templates, `70` budgets. Phase 3 rows inside earlier prefixes start at n = 100 (n = 1000 for rates and closure rows) so Phase 1 ids never collide. `71` is used by P4 (demo budgets), `72`-`76` by P5, `77`-`79` by P6, `80`-`86` by P7 to P9, `90` by P12 (integrations), `91` by P13 (AI). Next free: `92`+.
 
 ## Phase map
 

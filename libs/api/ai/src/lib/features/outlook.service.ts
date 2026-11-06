@@ -53,8 +53,8 @@ export class AiOutlookService {
       await this.settings.assertEnabled(tx, actor.tenantId, 'outlook');
       const asOfDate = req.asOfDate ?? new Date().toISOString().slice(0, 10);
       const scoped = await this.retrieval.budgetFacts(tx, actor, {
-        ids: req.budgetIds,
-        limit: 25,
+        ids: req.budgetIds ?? [...(await this.retrieval.readableBudgetIds(tx, actor))],
+        limit: 200,
       });
       const settings = await this.settings.settings(tx, actor.tenantId);
       const years = await this.fiscalYears(tx, scoped.rows);
@@ -191,8 +191,7 @@ export class AiOutlookService {
     actor: RequestActor,
     query: { category?: BudgetOutlook['category']; ownedOnly?: boolean },
   ): Promise<OutlookList> {
-    const scoped = await this.retrieval.budgetFacts(tx, actor, { limit: 25 });
-    const visible = new Set(scoped.rows.map((b) => b.id));
+    const visible = await this.retrieval.readableBudgetIds(tx, actor);
     const rows = visible.size
       ? await tx
           .select({ snapshot: aiOutlookSnapshots, budget: budgets })
@@ -207,6 +206,10 @@ export class AiOutlookService {
           )
           .orderBy(desc(aiOutlookSnapshots.asOfDate), budgets.name, budgets.id)
       : [];
+    const owners = await this.retrieval.nameOfPeople(
+      tx,
+      rows.map((r) => r.budget.ownerPersonId).filter((id): id is string => Boolean(id)),
+    );
     const latest = new Map<string, (typeof rows)[number]>();
     for (const row of rows) if (!latest.has(row.budget.id)) latest.set(row.budget.id, row);
     const owned = (budgetId: string) =>
@@ -216,11 +219,7 @@ export class AiOutlookService {
     const items = [...latest.values()]
       .filter((r) => !query.ownedOnly || owned(r.budget.id))
       .map((r) =>
-        this.toOutlook(
-          r.snapshot,
-          r.budget.name,
-          scoped.rows.find((b) => b.id === r.budget.id),
-        ),
+        this.toOutlook(r.snapshot, r.budget.name, owners.get(r.budget.ownerPersonId ?? '') ?? null),
       )
       .sort(
         (a, b) =>
@@ -257,7 +256,7 @@ export class AiOutlookService {
   private toOutlook(
     row: typeof aiOutlookSnapshots.$inferSelect,
     budgetName: string,
-    detail: BudgetDetail | undefined,
+    ownerName: string | null,
   ): BudgetOutlook {
     const currency = row.currency;
     const money = (minor: number | null): Money | null =>
@@ -267,7 +266,7 @@ export class AiOutlookService {
       id: row.id,
       budgetId: row.budgetId,
       budgetName,
-      ownerName: detail?.display.ownerName ?? null,
+      ownerName,
       asOfDate: row.asOfDate,
       currency,
       authorized: { amountMinor: row.authorizedMinor, currency },

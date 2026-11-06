@@ -65,7 +65,9 @@ test('a suggested split totals the amount exactly, stays within the parent, and 
     );
   }
   const names = suggestion.lines.map((l) => l.budgetName);
-  expect(names, 'lines are ordered by budget name').toEqual([...names].sort());
+  expect(names, 'lines are ordered by budget name').toEqual(
+    [...names].sort((a, b) => a.localeCompare(b)),
+  );
 });
 
 test('asking for a split of more than the parent has is refused', async ({ request }) => {
@@ -133,7 +135,16 @@ test('the spending outlook reports a range, cites the budget and changes no bala
     expect(item.drivers.length).toBeGreaterThan(0);
   }
   const keys = list.items.map((i) => `${i.category}|${i.budgetName}|${i.budgetId}`);
-  expect(keys, 'ordered by category, then name, then id').toEqual([...keys].sort());
+  expect(keys, 'ordered by category, then name, then id').toEqual(
+    [...list.items]
+      .sort(
+        (a, b) =>
+          a.category.localeCompare(b.category) ||
+          a.budgetName.localeCompare(b.budgetName) ||
+          a.budgetId.localeCompare(b.budgetId),
+      )
+      .map((i) => `${i.category}|${i.budgetName}|${i.budgetId}`),
+  );
 
   const after = await expectContract(
     await request.get(`/api/budgets/${SEED.budgets.bengaluru}`, {
@@ -186,7 +197,16 @@ test('anomaly flags are advisory: they cite records, carry evidence and decide n
     expect([200, 404], 'a flag never changes the record it is about').toContain(unchanged.status());
   }
   const keys = scan.items.map((f) => `${f.raisedAt}|${f.subjectLabel}|${f.id}`);
-  expect(keys).toEqual([...keys].sort());
+  expect(keys, 'ordered by raised time, then subject, then id').toEqual(
+    [...scan.items]
+      .sort(
+        (a, b) =>
+          a.raisedAt.localeCompare(b.raisedAt) ||
+          a.subjectLabel.localeCompare(b.subjectLabel) ||
+          a.id.localeCompare(b.id),
+      )
+      .map((f) => `${f.raisedAt}|${f.subjectLabel}|${f.id}`),
+  );
 
   // A requester never sees AI flags about their own requests.
   const refused = await request.get('/api/ai/anomaly-flags', { headers: await as('employee') });
