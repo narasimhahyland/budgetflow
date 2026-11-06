@@ -97,9 +97,7 @@ export class BoardPackService {
     });
     if (!decision.allowed) {
       if (!decision.visible) throw ApiProblem.notFound('board pack');
-      throw ApiProblem.forbidden(
-        'The board pack is open to finance roles, the CEO, auditors and the read-only analyst.',
-      );
+      throw ApiProblem.forbidden('The board pack is open to finance roles, the CEO and auditors.');
     }
   }
 
