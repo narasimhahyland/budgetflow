@@ -486,7 +486,7 @@
         touches the categories the nightly run acts on, never anything under a legal hold.
       </p>
     </div>
-    @if (canEditPolicies() && !preview()) {
+    @if (canPreview() && !preview()) {
       <button
         mat-stroked-button
         type="button"
@@ -536,15 +536,22 @@
 
       @if (!applyOpen()) {
         <div class="bf-form__actions">
-          <button
-            mat-stroked-button
-            type="button"
-            data-testid="open-apply"
-            [disabled]="busy()"
-            (click)="applyOpen.set(true)"
-          >
-            Apply this preview
-          </button>
+          @if (canConfirmPolicy()) {
+            <button
+              mat-stroked-button
+              type="button"
+              data-testid="open-apply"
+              [disabled]="busy()"
+              (click)="applyOpen.set(true)"
+            >
+              Apply this preview
+            </button>
+          } @else {
+            <p class="bf-inline-form__note" data-testid="apply-needs-controller">
+              Applying a run is irreversible, so only a Finance Controller can do it. Send them this
+              preview.
+            </p>
+          }
           <button mat-button type="button" (click)="discardPreview()">Discard the preview</button>
         </div>
       } @else {

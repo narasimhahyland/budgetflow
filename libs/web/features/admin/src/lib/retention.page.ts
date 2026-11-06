@@ -108,6 +108,8 @@ export class RetentionPage {
   );
   protected readonly canConfirmPolicy = computed(() => this.session.can('retention.confirm'));
   protected readonly canManageHolds = computed(() => this.session.can('legal_hold.manage'));
+  /** Previewing is open to administrators and the Finance Controller; applying is not. */
+  protected readonly canPreview = computed(() => this.canEditPolicies() || this.canConfirmPolicy());
 
   protected readonly busy = signal(false);
   protected readonly failure = signal<string | null>(null);
@@ -115,7 +117,7 @@ export class RetentionPage {
 
   // Policy editing ---------------------------------------------------------------------------
   protected readonly editing = signal<string | null>(null);
-  protected readonly periodDays = signal<string>('');
+  protected readonly periodDays = signal<string | number>('');
   protected readonly editReason = signal('');
   protected readonly deciding = signal<{
     category: string;
@@ -235,7 +237,8 @@ export class RetentionPage {
   }
 
   protected async savePolicy(policy: RetentionPolicy): Promise<void> {
-    const raw = this.periodDays().trim();
+    // A number input hands back a number, so normalize before deciding "kept permanently".
+    const raw = String(this.periodDays() ?? '').trim();
     await this.run(async () => {
       const result = await data(
         this.api.updateRetentionPolicy({
