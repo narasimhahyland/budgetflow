@@ -26,7 +26,6 @@ import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
-import { SAT_TABLE_WITH_ROW_STATES_IMPORTS } from '@hylandsoftware/satori-ui/table-with-row-states';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
 import { checkTag, ordered, PERIOD_STATUS } from './close-format';
@@ -60,7 +59,6 @@ type Action = ClosePeriodDetail['allowedActions'][number];
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
-    SAT_TABLE_WITH_ROW_STATES_IMPORTS,
     SatImportantButton,
     SatStatusTag,
   ],

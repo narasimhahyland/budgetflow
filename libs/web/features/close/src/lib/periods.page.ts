@@ -62,12 +62,17 @@ import { LoadState } from './load-state';
     }
     <section class="bf-card" aria-labelledby="periods-title">
       <div class="bf-card__header">
-        <h2 class="bf-card__title" id="periods-title">Accounting periods</h2>
+        <div>
+          <h2 class="bf-card__title" id="periods-title">Accounting periods</h2>
+          <p class="bf-card__hint">
+            One fiscal year at a time: each legal entity's calendar has its own periods.
+          </p>
+        </div>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Fiscal year</mat-label>
           <mat-select
             [ngModel]="fiscalYearId()"
-            (ngModelChange)="fiscalYearId.set($event)"
+            (ngModelChange)="chosenYear.set($event)"
             data-testid="fiscal-year"
           >
             @for (y of fiscalYears(); track y.id) {
@@ -147,15 +152,28 @@ export class ClosePeriodsPage {
   protected readonly valueOf = valueOf;
   protected readonly columns = ['period', 'status', 'target', 'snapshots', 'late'];
   protected readonly fiscalYears = computed(() => this.session.me()?.fiscalYears ?? []);
-  protected readonly fiscalYearId = signal<string | undefined>(undefined);
+  private readonly chosenYear = signal<string | null>(null);
+  /**
+   * Each legal entity's fiscal calendar has its own periods, so the unfiltered list repeats every
+   * month once per calendar. The screen always asks for one fiscal year: today's by default.
+   */
+  protected readonly fiscalYearId = computed(() => {
+    const chosen = this.chosenYear();
+    if (chosen) return chosen;
+    const years = this.fiscalYears();
+    const today = new Date().toISOString().slice(0, 10);
+    return (
+      years.find((y) => y.startDate <= today && today <= y.endDate)?.id ??
+      years[years.length - 1]?.id ??
+      null
+    );
+  });
   protected readonly periods = resource({
     params: () => ({ fiscalYearId: this.fiscalYearId() }),
     loader: ({ params }) =>
-      data(
-        this.api.listClosePeriods({
-          query: params.fiscalYearId ? { fiscalYearId: params.fiscalYearId } : {},
-        }),
-      ),
+      params.fiscalYearId
+        ? data(this.api.listClosePeriods({ query: { fiscalYearId: params.fiscalYearId } }))
+        : Promise.resolve({ items: [] }),
   });
   /** Chronological, then by period number, then by id: a tie never depends on the query order. */
   protected readonly rows = computed(() =>

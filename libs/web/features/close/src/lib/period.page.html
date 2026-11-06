@@ -132,7 +132,6 @@
           <div class="bf-table-scroll">
             <table
               mat-table
-              satTableWithRowStates
               [dataSource]="checks(entity)"
               [attr.aria-label]="'Close checks for ' + entity.legalEntityName"
             >
@@ -199,7 +198,7 @@
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="checkColumns"></tr>
-              <tr mat-row satRowState *matRowDef="let row; columns: checkColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: checkColumns"></tr>
             </table>
           </div>
         </section>
@@ -227,9 +226,11 @@
             {{ d.period.label }}
           </h2>
           <p class="bf-break-glass__body">
-            Reports and board packs already use this period's as-of snapshot. Reopening is
-            exceptional, is written to the audit log with your reason, and only takes effect once a
-            different person approves it. Prefer a reversal in the next open period.
+            @if (d.snapshots.length) {
+              Reports and board packs already use this period's as-of snapshot.
+            }
+            Reopening is exceptional, is written to the audit log with your reason, and only takes
+            effect once a different person approves it. Prefer a reversal in the next open period.
           </p>
           <button
             mat-stroked-button

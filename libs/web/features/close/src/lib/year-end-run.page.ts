@@ -19,7 +19,6 @@ import { Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
-import { SAT_TABLE_WITH_ROW_STATES_IMPORTS } from '@hylandsoftware/satori-ui/table-with-row-states';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { ordered, RUN_STATUS, YEAR_END_LINE_STATUS } from './close-format';
@@ -59,7 +58,6 @@ const FIX: Partial<Record<CheckCode, { path: string; label: string }>> = {
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
-    SAT_TABLE_WITH_ROW_STATES_IMPORTS,
     SatImportantButton,
     SatStatusTag,
   ],
