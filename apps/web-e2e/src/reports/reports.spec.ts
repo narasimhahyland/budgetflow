@@ -182,13 +182,14 @@ test.describe('budget health (13)', () => {
     for (const check of ['Pace', 'Forecast', 'Controls', 'Hygiene', 'Unused'])
       await expect(matrix.getByRole('columnheader', { name: check })).toBeVisible();
 
+    // The subject comes from the API response read above, so it is whatever the API reports rather
+    // than a positional guess; an empty list is a failure, not a test that quietly asserts nothing.
+    expect(overview.rows.length).toBeGreaterThan(0);
     const worst = overview.rows[0];
-    if (worst) {
-      const row = page.getByTestId(`health-row-${worst.budgetId}`);
-      await expect(row).toContainText(worst.name);
-      // The reason is a sentence the owner can act on, not a code.
-      await expect(row).toContainText(worst.reasons[0].text);
-    }
+    const row = page.getByTestId(`health-row-${worst.budgetId}`);
+    await expect(row).toContainText(worst.name);
+    // The reason is a sentence the owner can act on, not a code.
+    await expect(row).toContainText(worst.reasons[0].text);
   });
 });
 

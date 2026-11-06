@@ -6,6 +6,7 @@
 - Journeys (`src/<area>/`, target `functional-e2e`) prove user flows as the relevant role and cross-check numbers through the API. The core acceptance scenario lives in `src/acceptance/` and runs at every wave gate from Wave 2 onward.
 - Visual regression (`src/visual/visual.spec.ts`) takes `toHaveScreenshot` baselines for every entry in `visual/screens.json`, only inside the pinned Playwright image (`npm run e2e:visual`, `npm run e2e:update-snapshots` with a reason in the PR).
 - Selectors: `getByRole` / `getByLabel` / `getByText` first, `data-testid` only when nothing else is stable, never Satori or Material internal classes. No fixed sleeps.
+- Pick the subject of a journey by a seeded id, code, reference or name, or create it through the API first. Never by position or by a mutable property ("the first row", "whichever connector is degraded"): `functional-api` runs before `functional-e2e`, so a subject chosen by state becomes a different subject and the journey asserts the wrong thing while the product is correct. The gate reseeds between the suites, so assume a freshly seeded stack and assert outright instead of guarding assertions with `if`.
 - Traces and auth state stay in `dist/.playwright/` and `tmp/`; never commit them (they contain tokens).
 
 Rules: `.cursor/rules/testing-functional.mdc`, `.cursor/rules/testing-visual.mdc`.

@@ -11,6 +11,8 @@ A feature is done when it is proven to work end to end on the running product, a
 ## Stack and data
 - `scripts/stack.sh up && scripts/stack.sh reset` starts Docker Compose (Postgres 16, Keycloak, Mailpit, MinIO, API, worker, web) and loads the deterministic seed: tenant Hyland (all other seed data fictional), one Keycloak user per role, fixed ids, amounts, rates and fiscal calendar, fixed clock for journeys.
 - Functional runs and CI use MinIO for documents (no in-memory document store) and the deterministic fake `AiProvider` (fixed answers per prompt fixture) for AI features.
+- `functional-api`, `functional-e2e` and `visual` run in that order against one stack, so `scripts/gate.sh` reseeds between them: every suite starts from the deterministic seed. Write each suite as if it owns a freshly seeded stack, and never rely on what another suite left behind.
+- A journey must not depend on state the API scenarios mutate. Those scenarios legitimately settle exceptions, approve authority versions, connect integrations and match actuals, so anything a journey reads may have moved by the time it runs.
 - Never point checks at shared or real environments.
 
 ## Levels
@@ -26,6 +28,7 @@ A feature is done when it is proven to work end to end on the running product, a
 - When the area is touched, these API scenarios are mandatory: over-allocation rejected with the right reason (incl. cross-currency at the locked plan rate); set to zero blocks new requests while existing commitments complete; partial contribution approval amounts and attribution; DoA routing and approval hygiene; idempotent retries post once; concurrent allocations never exceed the parent; ledger rebuild equals cached balances (and detects injected drift); tenant and role scope enforced (RLS holds even with a forged `X-Tenant-Id`; `PolicyService` denies out-of-scope roles).
 - Worker scenarios: idempotent jobs, retry to dead letter, tenant context, nightly rebuild check.
 - Journeys: `getByRole`, `getByLabel`, `getByText` selectors; `data-testid` only when nothing else is stable; never Satori or Material internal classes. Web-first assertions, no fixed sleeps. Order-independent: each test creates its data through the API or resets the seed.
+- Pick the subject of a test deterministically: a seeded id, code, reference or name, or a record the test just created. Never "the first row", "whichever one is degraded" or "whichever still offers the button" — a subject chosen by a mutable property silently becomes a different subject, and the test then asserts the wrong thing while the product is correct. Make the subject wrong loudly instead of tolerating any data: do not wrap assertions in `if (found)`, which lets a check pass without checking.
 
 ## Evidence and the fix loop
 - Evidence per change in `evidence/<phase>/<change>/functional/`: commands run, roles used, an outcome table (scenario, expected, actual, result), screenshots of key states, API responses with tokens redacted, relevant log excerpts, Mailpit subjects. Traces, videos, auth state and HAR files stay in `tmp/`.
