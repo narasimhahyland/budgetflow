@@ -142,22 +142,46 @@ what 016b asks for.
 instead of being clipped, and the Phase 13 AI screens are in the navigation rail, which changes the
 rail on every screen.**
 
-| Run                                                         | Result                                       |
-| ----------------------------------------------------------- | -------------------------------------------- |
-| Compare before regenerating                                 | 153 failed, 476 passed                       |
-| Of those failures, byte-identical diff across both attempts | 150 (real change, not flake)                 |
-| Regenerate (`npm run e2e:update-snapshots`)                 | 152 baselines rewritten, 628 passed, 1 flaky |
-| Verify (`npm run e2e:visual`)                               | **629 passed, 0 failed, 0 flaky**            |
+| Run                                                                     | Result                       |
+| ----------------------------------------------------------------------- | ---------------------------- |
+| Compare before regenerating                                             | 153 failed, 476 passed       |
+| Of those failures, byte-identical diff across both attempts             | 150 (real change, not flake) |
+| Regenerate, after reseeding, in one pass                                | 154 baselines rewritten      |
+| Verify with `scripts/gate.sh visual` (reseed, then compare, as CI does) | **PASS, 629 screenshots**    |
 
-Moved baselines by viewport: 125 tablet, 19 desktop, 8 mobile. Tablet dominates because the rail
+Moved baselines by viewport: 126 tablet, 19 desktop, 9 mobile. Tablet dominates because the rail
 collapses to an icon column there, so adding entries moves every tablet screen; at desktop only the
 screens whose content the box-sizing fix touched moved, plus the drawer shots.
 
-The three failures whose diffs were not byte-identical across attempts differ by 2 bytes of PNG
-compression on otherwise identical images (`011a refused-out-of-scope`, `121a check-fields`), and one
-(`011a action-redirect`) by more; all three are the navigation change, not flake. The single flaky
-test in the regeneration run (`099-sync-status no-runs-yet mobile`) passed on retry and passes in the
-verification run.
+### Two mistakes in the first attempt, and what they turned up
+
+The first regeneration was done wrong and CI caught it. Recorded because the corrections are the
+interesting part.
+
+**Baselines captured on accumulated state.** The visual suite mutates what it looks at: it asks the
+assistant questions, links Slack, registers a push device. The first regeneration ran as the second
+of three suite runs against one stack, so four baselines encoded state that had piled up
+(`123-notifications-tasks` showed "Delivered via in-app, email, slack, push" where a fresh seed shows
+"in-app, email"). CI reseeds and runs once, so it failed. Corrected by doing what CI does, and what
+`apps/web-e2e/AGENTS.md` already says to assume: reseed, regenerate in a single pass, then verify
+through `scripts/gate.sh visual`. Worth knowing that the seed step of `scripts/stack.sh reset` is an
+nx target that can come back from cache; `ai_conversations` went 9 to 0 only once it actually re-ran.
+
+**A real determinism defect on 011a, found through this.** `011a action-redirect` at tablet kept
+failing even from a clean seed, on every run, in CI and locally. The cause is in `bf-ai-provenance`:
+the sentence ends "Query log entry <id>." with the id truncated to eight characters, and eight
+characters of a proportional font are not all the same width. A wider id rewrapped the sentence,
+which pushed the whole page down by one line — 36,530 pixels of diff. The id's pixels were masked,
+but a mask hides pixels, not their effect on line breaking, which is why this survived behind a
+passing check. Fixed in `ai-output.ts`: the ids render monospace, so eight characters are always one
+width; `white-space: nowrap` keeps the sentence from breaking inside them; and the ids are built into
+a single text node so no template whitespace can leave the full stop alone on the next line.
+`011a-action-redirect--instability--expected-top-actual-bottom.png` in `eyecheck/` is that exact wrap,
+expected above and actual below.
+
+**Two more specs hardcoded navigation order**, which only CI's full run surfaced: `auth/sso.spec.ts`
+asserts the employee's whole rail, and `shell/nav-overlay.spec.ts` asserts its last menu item and
+taps it. Both updated; the swipe test now ends on "AI accuracy" at `/admin/ai/accuracy`.
 
 ### Eye check
 
@@ -192,9 +216,6 @@ change's to make.
 | `role-navigation` journey (14 roles) | 28 passed                                                                                     |
 | Full visual suite, verification run  | 629 passed                                                                                    |
 
-The full `functional-api` and `functional-e2e` suites were not run locally: three other stacks were
-up on this machine and the load average sat above 25 for most of the run. CI runs both.
-
 ## Follow-ups found, not fixed here
 
 1. **022d at tablet clips its last column.** The "Suggested" amount input is cut off at the card's
@@ -209,5 +230,8 @@ up on this machine and the load average sat above 25 for most of the run. CI run
    assert `tenant.read`, so any member of the tenant may read the Features and Accuracy tabs, while
    113a's roles are Organization Admin, Finance Admin and Auditor. Tightening it would let the nav,
    the route guards and the server converge and the divergence note in the spec be deleted.
-4. **`notification-settings.page.ts` was unformatted on `main`.** `prettier --check` failed on it as
+4. **A mask is not determinism.** `[data-testid=ai-ids]` is masked globally, which hid the ids but
+   not their effect on layout. Anywhere a masked, variable-width value sits inside flowing text the
+   same trap is open; the ids in `query-log.page.ts` are in table cells, so they are safe today.
+5. **`notification-settings.page.ts` was unformatted on `main`.** `prettier --check` failed on it as
    committed, so it is reformatted in its own commit here; nothing else in that file changed.

@@ -112,7 +112,8 @@ test.describe('on a touch screen', () => {
 
       const nav = navigation(page);
       const last = nav.getByRole('menuitem').last();
-      await expect(last).toHaveText('Rules and policies');
+      // 113a's Accuracy entry closes the Admin group, and so the finance admin's whole menu.
+      await expect(last).toHaveText('AI accuracy');
       const account = page.getByRole('button', { name: 'Priya Raman', exact: true });
 
       const menu = await nav.boundingBox();
@@ -131,7 +132,7 @@ test.describe('on a touch screen', () => {
         .toBeGreaterThanOrEqual(0);
 
       await last.tap();
-      await expect(page).toHaveURL(/\/admin\/rules$/);
+      await expect(page).toHaveURL(/\/admin\/ai\/accuracy$/);
       await expectClosedWithoutCoveringContent(page);
     }
   });
