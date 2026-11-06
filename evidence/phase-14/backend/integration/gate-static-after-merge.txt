@@ -3,32 +3,32 @@
   ✓ secrets (1s)
 
 ▶ lint            nx_run run-many -t lint
-  ✓ lint (23s)
+  ✓ lint (3s)
 
 ▶ styles          npx stylelint {apps,libs}/**/*.scss --allow-empty-input
-  ✓ styles (4s)
+  ✓ styles (1s)
 
 ▶ satori          npx sdsc check all
-  ✓ satori (31s)
+  ✓ satori (32s)
 
 ▶ typecheck       nx_run run-many -t typecheck
-  ✓ typecheck (49s)
+  ✓ typecheck (5s)
 
 ▶ build           nx_run run-many -t build
-  ✓ build (17s)
+  ✓ build (18s)
 
 ▶ openapi         nx_run run-many -t openapi-check
-  ✓ openapi (1s)
+  ✓ openapi (3s)
 
 ▶ db              nx_run run-many -t db-check
-  ✓ db (1s)
+  ✓ db (2s)
 
-Gate summary (lint typecheck build) — logs in tmp/gate/20261106-174030
+Gate summary (lint typecheck build) — logs in tmp/gate/20261106-180333
   PASS secrets             1s
-  PASS lint               23s
-  PASS styles              4s
-  PASS satori             31s
-  PASS typecheck          49s
-  PASS build              17s
-  PASS openapi             1s
-  PASS db                  1s
+  PASS lint                3s
+  PASS styles              1s
+  PASS satori             32s
+  PASS typecheck           5s
+  PASS build              18s
+  PASS openapi             3s
+  PASS db                  2s
