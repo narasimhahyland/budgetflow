@@ -1,0 +1,303 @@
+# Query log: what an auditor sees after an AI-influenced decision (scrubbed)
+
+{
+ "feature": "ask",
+ "channel": "web",
+ "outcome": "refused_action",
+ "scope": {
+  "action": "budget.read",
+  "scope": "tenant",
+  "consideredCount": 0,
+  "permittedCount": 0
+ },
+ "recordsUsed": 0,
+ "sentFields": [],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "ask",
+ "channel": "web",
+ "outcome": "refused_out_of_scope",
+ "scope": {
+  "action": "budget.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 0
+ },
+ "recordsUsed": 0,
+ "sentFields": [],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "ask",
+ "channel": "web",
+ "outcome": "answered",
+ "scope": {
+  "action": "budget.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 1,
+ "sentFields": [
+  "actualMinor",
+  "allocatedOutMinor",
+  "authorizedMinor",
+  "availableMinor",
+  "budgetType",
+  "categoryCode",
+  "childCount",
+  "currency",
+  "encumberedMinor",
+  "fiscalYearLabel",
+  "heldMinor",
+  "ownerName",
+  "preEncumberedMinor",
+  "status",
+  "utilizationBps"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "extraction",
+ "channel": "web",
+ "outcome": "suggested",
+ "scope": {
+  "action": "request.create",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 1,
+ "sentFields": [
+  "documentKind",
+  "expectedCurrency",
+  "fileName",
+  "mimeType",
+  "sizeBytes"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "extraction",
+ "channel": "web",
+ "outcome": "suggested",
+ "scope": {
+  "action": "request.create",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 1,
+ "sentFields": [
+  "documentKind",
+  "expectedCurrency",
+  "fileName",
+  "mimeType",
+  "sizeBytes"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "anomaly_flags",
+ "channel": "system",
+ "outcome": "suggested",
+ "scope": {
+  "action": "integrity.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 2,
+ "sentFields": [
+  "amountMinor",
+  "combinedMinor",
+  "currency",
+  "daysApart",
+  "kind",
+  "limitMinor"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "anomaly_flags",
+ "channel": "system",
+ "outcome": "suggested",
+ "scope": {
+  "action": "integrity.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 2,
+ "sentFields": [
+  "amountMinor",
+  "combinedMinor",
+  "currency",
+  "daysApart",
+  "kind",
+  "limitMinor"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "anomaly_flags",
+ "channel": "system",
+ "outcome": "suggested",
+ "scope": {
+  "action": "integrity.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 2,
+ "sentFields": [
+  "amountMinor",
+  "currency",
+  "daysApart",
+  "kind"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "anomaly_flags",
+ "channel": "system",
+ "outcome": "suggested",
+ "scope": {
+  "action": "integrity.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 2,
+ "sentFields": [
+  "amountMinor",
+  "combinedMinor",
+  "currency",
+  "daysApart",
+  "kind",
+  "limitMinor"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "anomaly_flags",
+ "channel": "system",
+ "outcome": "suggested",
+ "scope": {
+  "action": "integrity.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 2,
+ "sentFields": [
+  "amountMinor",
+  "combinedMinor",
+  "currency",
+  "daysApart",
+  "kind",
+  "limitMinor"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "anomaly_flags",
+ "channel": "system",
+ "outcome": "suggested",
+ "scope": {
+  "action": "integrity.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 2,
+ "sentFields": [
+  "amountMinor",
+  "currency",
+  "daysApart",
+  "kind"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+
+{
+ "feature": "anomaly_flags",
+ "channel": "system",
+ "outcome": "suggested",
+ "scope": {
+  "action": "integrity.read",
+  "scope": "tenant",
+  "consideredCount": 1,
+  "permittedCount": 1
+ },
+ "recordsUsed": 2,
+ "sentFields": [
+  "amountMinor",
+  "combinedMinor",
+  "currency",
+  "daysApart",
+  "kind",
+  "limitMinor"
+ ],
+ "modelId": "budgetflow-fake",
+ "modelVersion": "2026.11",
+ "suggestionId": null,
+ "appliedResourceType": null,
+ "auditEventId": null
+}
+

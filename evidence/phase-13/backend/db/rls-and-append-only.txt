@@ -1,0 +1,28 @@
+# Database guarantees for the Phase 13 tables (migration 0015_p13_ai)
+
+## RLS: enabled, forced and a tenant_isolation policy on every new table
+         table         | enabled | forced | policy 
+-----------------------+---------+--------+--------
+ ai_conversation_turns | t       | t      | t
+ ai_conversations      | t       | t      | t
+ ai_evaluation_runs    | t       | t      | t
+ ai_outlook_snapshots  | t       | t      | t
+ ai_query_log          | t       | t      | t
+ ai_suggestions        | t       | t      | t
+(6 rows)
+
+## Append-only: the application role may only insert into the AI query log
+          tgname          
+--------------------------
+ ai_query_log_append_only
+ ai_query_log_no_truncate
+(2 rows)
+
+  grantee  | privilege_type 
+-----------+----------------
+ bf_app    | INSERT
+ bf_app    | SELECT
+ bf_worker | INSERT
+ bf_worker | SELECT
+(4 rows)
+
