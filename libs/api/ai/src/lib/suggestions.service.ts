@@ -48,6 +48,9 @@ const DECISION_ACTIONS: Record<AiFeature, Action> = {
   matching: 'actuals.manage',
   extraction: 'request.create',
   anomaly_flags: 'exception.resolve',
+  // The assistant connector (092c) only reads, so it raises no suggestion to decide on. The entry
+  // exists so the map stays total; `tenant.read` is the weakest action any signed-in person holds.
+  mcp: 'tenant.read',
 };
 
 export interface SuggestionInput {

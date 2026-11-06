@@ -1,5 +1,5 @@
 {
-  "id": "bcef76ef-6011-432c-b0df-d5d8b325097b",
+  "id": "232d80d5-936c-48ee-8c64-8654ac6a85a1",
   "prevId": "dc166d74-a1bf-41a2-b366-e726dd66e6d7",
   "version": "7",
   "dialect": "postgresql",
@@ -25370,6 +25370,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "person_subject": {
+          "name": "person_subject",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
         },
         "client_key": {
           "name": "client_key",

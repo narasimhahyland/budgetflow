@@ -17,6 +17,7 @@ CREATE TABLE "ecosystem_connections" (
 	"tenant_id" uuid NOT NULL,
 	"kind" varchar(20) NOT NULL,
 	"person_id" uuid,
+	"person_subject" varchar(255) NOT NULL,
 	"client_key" varchar(120) NOT NULL,
 	"label" text NOT NULL,
 	"token_prefix" varchar(40) NOT NULL,

@@ -48,6 +48,12 @@ export const ecosystemConnections = pgTable(
     tenantId: tenantRef().references(() => tenants.id),
     kind: varchar('kind', { length: 20 }).notNull(),
     personId: uuid('person_id'),
+    /**
+     * The identity provider subject of the person who connected. Authentication resolves the actor
+     * from it on every call, so a role change, a lost budget or a deactivated membership takes
+     * effect on the next request instead of being frozen into the token.
+     */
+    personSubject: varchar('person_subject', { length: 255 }).notNull(),
     /** Tool, assistant app or platform on the other end (`power_bi`, `zapier`, a client id). */
     clientKey: varchar('client_key', { length: 120 }).notNull(),
     label: text('label').notNull(),
