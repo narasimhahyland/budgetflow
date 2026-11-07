@@ -28,6 +28,11 @@ export const appRoutes: Route[] = [
     children: [
       // Before `budgets`: /budgets/:budgetId/suggest-split is more specific than the lazy budgets lib.
       ...aiRoutes,
+      // Likewise /budgets/scenarios, which the budgets lib would otherwise read as a budget id.
+      {
+        path: 'budgets/scenarios',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.scenarioRoutes),
+      },
       {
         path: 'budgets',
         loadChildren: () => import('@bf/web/features/budgets').then((m) => m.budgetsRoutes),
@@ -97,6 +102,26 @@ export const appRoutes: Route[] = [
       {
         path: 'reports',
         loadChildren: () => import('@bf/web/features/reports').then((m) => m.reportsRoutes),
+      },
+      {
+        path: 'wallets',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.walletRoutes),
+      },
+      {
+        path: 'recognition',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.recognitionRoutes),
+      },
+      {
+        path: 'insights',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.narrativeRoutes),
+      },
+      {
+        path: 'dashboards',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.outcomeRoutes),
+      },
+      {
+        path: 'participation',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.participationRoutes),
       },
       ...accountingRoutes,
       ...closeRoutes,

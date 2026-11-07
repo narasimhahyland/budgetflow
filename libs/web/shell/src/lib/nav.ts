@@ -64,6 +64,17 @@ export const NAV: NavGroup[] = [
         icon: 'copy',
         permission: 'master_data.manage',
       },
+      /**
+       * 031a. Reading a scenario needs `budget.read`, which is what the list endpoint asserts at
+       * tenant scope; whether the reader may also author or promote one is decided by the API per
+       * scenario, so the entry appears for the roles that can at least be collaborators.
+       */
+      {
+        label: 'What-if scenarios',
+        path: '/budgets/scenarios',
+        icon: 'graph_branch',
+        permission: 'budget.read',
+      },
     ],
   },
   {
@@ -75,6 +86,13 @@ export const NAV: NavGroup[] = [
         path: '/events/cofunding-board',
         icon: 'users',
         permission: 'event.manage',
+      },
+      /** 122a. Turnout contains no money and no individual, so every signed-in person may see it. */
+      {
+        label: 'Participation',
+        path: '/participation',
+        icon: 'user_group',
+        permission: 'tenant.read',
       },
     ],
   },
@@ -104,6 +122,24 @@ export const NAV: NavGroup[] = [
         path: '/my/budgets',
         icon: 'currency_dollar',
         permission: 'request.create',
+      },
+      /**
+       * 120b and 120a. Both endpoints assert `tenant.read`: a wallet and a thank-you note belong to
+       * a person rather than to a finance role, so every signed-in employee reaches them. The
+       * reviewer queue at /wallets/review is linked from the wallet page for the people who have
+       * claims to decide, rather than put in front of everyone.
+       */
+      {
+        label: 'My wallets',
+        path: '/wallets',
+        icon: 'currency_dollar',
+        permission: 'tenant.read',
+      },
+      {
+        label: 'Recognition',
+        path: '/recognition',
+        icon: 'star',
+        permission: 'tenant.read',
       },
       /**
        * 069a, which the spec places at "Requests > Policy assistant". The explain endpoint checks
@@ -266,6 +302,23 @@ export const NAV: NavGroup[] = [
         path: '/reports/board-pack',
         icon: 'book',
         permission: 'report.board_pack',
+      },
+      /**
+       * 011b and 015c, both gated on `report.read` at tenant scope, which is exactly what the
+       * summary and outcome endpoints assert. Drafting and approving a summary need `audit.read`
+       * on top, which the page checks by showing the actions the API would allow.
+       */
+      {
+        label: 'Leadership summaries',
+        path: '/insights/summaries',
+        icon: 'note',
+        permission: 'report.read',
+      },
+      {
+        label: 'Outcomes',
+        path: '/dashboards/outcomes',
+        icon: 'chart_arrow_up',
+        permission: 'report.read',
       },
       {
         label: 'Approval history',
