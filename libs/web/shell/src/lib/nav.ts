@@ -28,6 +28,17 @@ export const NAV: NavGroup[] = [
        * runs no further check and scopes every fact it retrieves to the asker.
        */
       { label: 'Ask BudgetFlow', path: '/ask', icon: 'ai', permission: 'tenant.read' },
+      /**
+       * 092c, the personal half. The connector endpoint runs no further check than tenant
+       * membership and scopes everything it returns to the asker, which is also what the page
+       * needs: anyone may connect an assistant to their own account.
+       */
+      {
+        label: 'My AI assistants',
+        path: '/me/ai-assistants',
+        icon: 'gear_ai',
+        permission: 'tenant.read',
+      },
     ],
   },
   {
@@ -119,6 +130,16 @@ export const NAV: NavGroup[] = [
         path: '/policy-assistant',
         icon: 'chat_info',
         permission: 'tenant.read',
+      },
+      /**
+       * 092b, the personal half. An automation only ever reads a balance or leaves a Draft for the
+       * person who connected it, so it sits with their own requests.
+       */
+      {
+        label: 'My automations',
+        path: '/me/automations',
+        icon: 'connectors',
+        permission: 'request.create',
       },
     ],
   },
@@ -279,6 +300,16 @@ export const NAV: NavGroup[] = [
         permission: 'audit.read',
       },
       { label: 'Audit log', path: '/audit-log', icon: 'book', permission: 'audit.read' },
+      /**
+       * 092a, the personal half. `report.read` is exactly what the connector asks for before it
+       * will let anyone connect a BI tool, so the entry appears for the people who can use it.
+       */
+      {
+        label: 'My BI connections',
+        path: '/me/bi-connections',
+        icon: 'dataset_linked',
+        permission: 'report.read',
+      },
     ],
   },
   {

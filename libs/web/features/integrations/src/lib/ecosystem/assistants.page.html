@@ -1,6 +1,8 @@
 <header class="bf-page__header">
   <div class="bf-page__heading">
-    <h1 class="bf-page__title">Connector for AI assistants</h1>
+    <h1 class="bf-page__title">
+      {{ personal() ? 'My connected AI assistants' : 'Connector for AI assistants' }}
+    </h1>
     <p class="bf-page__subtitle">
       Ask about your budgets from the assistant you already use. It can read; it cannot act.
     </p>
@@ -20,7 +22,9 @@
   </div>
 </header>
 
-<bf-ecosystem-nav />
+@if (!personal()) {
+  <bf-ecosystem-nav />
+}
 
 @if (notice()) {
   <sat-banner variant="success" data-testid="assistant-notice"
@@ -185,7 +189,7 @@
     </div>
     <div class="bf-card__body">
       @for (t of c.tools; track t.tool) {
-        <div class="bf-switch-row">
+        <div class="bf-switch-row" [attr.data-testid]="'assistant-tool-row-' + t.tool">
           <div class="bf-switch-row__text">
             <h3 class="bf-switch-row__title">
               {{ t.title }}

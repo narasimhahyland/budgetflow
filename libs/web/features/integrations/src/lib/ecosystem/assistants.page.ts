@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   inject,
+  input,
   resource,
   signal,
 } from '@angular/core';
@@ -54,6 +55,12 @@ import { EcosystemNav } from './ecosystem-nav';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssistantConnectorPage {
+  /**
+   * True on `/me/ai-assistants`, where a person manages the assistants they connected themselves.
+   * Bound from route data by `withComponentInputBinding`.
+   */
+  readonly personal = input(false);
+
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;

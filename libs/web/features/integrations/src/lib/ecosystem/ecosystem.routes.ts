@@ -53,6 +53,35 @@ export const ecosystemRoutes: Routes = [
   },
 ];
 
+/**
+ * The personal half of 092a, 092b and 092c. The analyst who connects Power BI and the organizer
+ * who connects an assistant hold no integration permission, so they get the same screens without
+ * the administration frame. They must be mounted ahead of the lazy `/me` lib in the app routes.
+ */
+export const myConnectionRoutes: Routes = [
+  {
+    path: 'me/bi-connections',
+    title: 'My BI connections',
+    data: { pageTitle: 'My BI connections', section: 'Profile', personal: true },
+    canActivate: [requirePermission('tenant.read', 'My BI connections')],
+    loadComponent: () => import('./bi.page').then((m) => m.BiConnectorPage),
+  },
+  {
+    path: 'me/ai-assistants',
+    title: 'My connected AI assistants',
+    data: { pageTitle: 'My connected AI assistants', section: 'Profile', personal: true },
+    canActivate: [requirePermission('tenant.read', 'My connected AI assistants')],
+    loadComponent: () => import('./assistants.page').then((m) => m.AssistantConnectorPage),
+  },
+  {
+    path: 'me/automations',
+    title: 'My automations',
+    data: { pageTitle: 'My automations', section: 'Profile', personal: true },
+    canActivate: [requirePermission('tenant.read', 'My automations')],
+    loadComponent: () => import('./automations.page').then((m) => m.AutomationConnectorPage),
+  },
+];
+
 /** 092d for organizers: browsing offers and asking a partner for a price. */
 export const marketplaceRoutes: Routes = [
   {

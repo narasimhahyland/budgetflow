@@ -161,11 +161,7 @@
               (ngModelChange)="peopleCount.set($event)"
               data-testid="offer-people"
             />
-            @if (capacityProblem(); as problem) {
-              <mat-error>{{ problem }}</mat-error>
-            } @else {
-              <mat-hint>{{ o.capacityMin | number }}–{{ o.capacityMax | number }}</mat-hint>
-            }
+            <mat-hint>{{ o.capacityMin | number }}–{{ o.capacityMax | number }}</mat-hint>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Date</mat-label>
@@ -182,6 +178,11 @@
             <input matInput [ngModel]="notes()" (ngModelChange)="notes.set($event)" />
           </mat-form-field>
         </div>
+        @if (capacityProblem(); as problem) {
+          <p class="bf-field-problem" data-testid="offer-capacity-problem" aria-live="polite">
+            {{ problem }}
+          </p>
+        }
         @if (estimatedTotal(); as total) {
           <p class="bf-note" data-testid="offer-estimate">
             At the listed price that would be

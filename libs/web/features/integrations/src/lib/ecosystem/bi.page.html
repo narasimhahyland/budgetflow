@@ -1,6 +1,6 @@
 <header class="bf-page__header">
   <div class="bf-page__heading">
-    <h1 class="bf-page__title">BI connector</h1>
+    <h1 class="bf-page__title">{{ personal() ? 'My BI connections' : 'BI connector' }}</h1>
     <p class="bf-page__subtitle">
       Power BI and Tableau read curated datasets with the access of the person who connected them
     </p>
@@ -20,7 +20,9 @@
   </div>
 </header>
 
-<bf-ecosystem-nav />
+@if (!personal()) {
+  <bf-ecosystem-nav />
+}
 
 @if (notice()) {
   <sat-banner variant="success" data-testid="bi-notice"

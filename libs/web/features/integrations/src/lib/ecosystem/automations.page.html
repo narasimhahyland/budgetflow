@@ -1,6 +1,6 @@
 <header class="bf-page__header">
   <div class="bf-page__heading">
-    <h1 class="bf-page__title">No-code automations</h1>
+    <h1 class="bf-page__title">{{ personal() ? 'My automations' : 'No-code automations' }}</h1>
     <p class="bf-page__subtitle">
       Zapier, Make, Power Automate and Workato, acting as the person who connected them
     </p>
@@ -20,7 +20,9 @@
   </div>
 </header>
 
-<bf-ecosystem-nav />
+@if (!personal()) {
+  <bf-ecosystem-nav />
+}
 
 @if (notice()) {
   <sat-banner variant="success" data-testid="automation-notice"

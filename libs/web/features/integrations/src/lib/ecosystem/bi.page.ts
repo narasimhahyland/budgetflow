@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   inject,
+  input,
   resource,
   signal,
 } from '@angular/core';
@@ -57,6 +58,12 @@ import { BI_TOOL_LABELS, READ_ONLY_NOTE } from './labels';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiConnectorPage {
+  /**
+   * True on `/me/bi-connections`, the page an analyst reaches: the same connector, without the
+   * administration frame they cannot open. Bound from route data by `withComponentInputBinding`.
+   */
+  readonly personal = input(false);
+
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;

@@ -93,19 +93,18 @@
           (ngModelChange)="originsText.set($event)"
           data-testid="widget-origins"
         ></textarea>
-        @if (newOriginProblems().length) {
-          <mat-error data-testid="widget-origin-error"
-            >Give the exact site address with no path, for example https://intranet.example.test.
-            These are not valid: {{ newOriginProblems().join(', ') }}</mat-error
-          >
-        } @else {
-          <mat-hint
-            >One address a line, scheme and host only. Wildcards are refused: any page on any host
-            could then frame the widget.</mat-hint
-          >
-        }
+        <mat-hint
+          >One address a line, scheme and host only. Wildcards are refused: any page on any host
+          could then frame the widget.</mat-hint
+        >
       </mat-form-field>
     </div>
+    @if (newOriginProblems().length) {
+      <p class="bf-field-problem" data-testid="widget-origin-error" aria-live="polite">
+        Give the exact site address with no path, for example https://intranet.example.test. These
+        are not valid: {{ newOriginProblems().join(', ') }}
+      </p>
+    }
     <div class="bf-card__body">
       <mat-slide-toggle
         [ngModel]="showAmounts()"
@@ -155,17 +154,19 @@
           (ngModelChange)="editOrigins.set($event)"
           data-testid="widget-edit-origins"
         ></textarea>
-        @if (editOriginProblems().length) {
-          <mat-error>Not valid site addresses: {{ editOriginProblems().join(', ') }}</mat-error>
-        } @else if (!editOriginList().length) {
-          <mat-error data-testid="widget-edit-empty"
-            >At least one site is required. With none, the widget is embeddable nowhere.</mat-error
-          >
-        } @else {
-          <mat-hint>One address a line.</mat-hint>
-        }
+        <mat-hint>One address a line.</mat-hint>
       </mat-form-field>
     </div>
+    @if (editOriginProblems().length) {
+      <p class="bf-field-problem" aria-live="polite">
+        Not valid site addresses: {{ editOriginProblems().join(', ') }}. Give the exact address,
+        scheme and host only; a wildcard would let any page on any host frame the widget.
+      </p>
+    } @else if (!editOriginList().length) {
+      <p class="bf-field-problem" data-testid="widget-edit-empty" aria-live="polite">
+        At least one site is required. With none, the widget is embeddable nowhere.
+      </p>
+    }
     <div class="bf-form__actions">
       <button mat-button type="button" (click)="editing.set(null)">Cancel</button>
       <button

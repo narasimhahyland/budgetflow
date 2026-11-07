@@ -7,6 +7,15 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
+// A problem with what someone typed, stated under the field. These forms are signal-bound rather
+// than validated form controls, so `mat-error` would never render; the message is its own line.
+.bf-field-problem {
+  margin: 0;
+  padding: 0 20px 12px;
+  color: var(--mat-sys-error);
+  font: var(--mat-sys-body-small);
+}
+
 // A switch with its explanation beside it, used for datasets, tools and platforms.
 .bf-switch-row {
   display: flex;
