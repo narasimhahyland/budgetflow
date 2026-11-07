@@ -59,18 +59,21 @@ control whether its host loads the reset, and because this is the rule that has 
 
 ### Local workarounds removed
 
-| Workaround                                                                    | Phase | Result after removal                  |
-| ----------------------------------------------------------------------------- | ----- | ------------------------------------- |
-| `box-sizing` on `.bf-settings__channel-row` (`notification-settings.page.ts`) | 8     | 059c page content pixel-identical     |
-| `box-sizing` on `.bf-list__item` (`ask.page.ts`)                              | 13    | 011a conversation row inside its card |
-| `box-sizing` on `.bf-list__item` (`suggest-split.page.ts`)                    | 13    | 022d page content pixel-identical     |
+| Workaround                                                                    | Phase | Result after removal                       |
+| ----------------------------------------------------------------------------- | ----- | ------------------------------------------ |
+| `box-sizing` on `.bf-settings__channel-row` (`notification-settings.page.ts`) | 8     | 059c page content pixel-identical          |
+| `box-sizing` on `.bf-list__item` (`ask.page.ts`)                              | 13    | 011a conversation row inside its card      |
+| `box-sizing` on `.bf-list__item` (`suggest-split.page.ts`)                    | 13    | 022d page content pixel-identical          |
+| `box-sizing` on `.bf-report` (`catalog.page.ts`)                              | 11    | 079 report-catalog content pixel-identical |
 
 Each was exactly the declaration the shared rule was missing, so none of them over-corrected once
-the shared rule was fixed: the two screens whose content is unmasked are pixel-identical before and
+the shared rule was fixed: every screen whose content is unmasked is pixel-identical before and
 after apart from the navigation rail.
 
-Phase 11's `box-sizing` on `.bf-report` is left alone. It is the same family but a different rule on
-another team's screen, and removing it is not needed for this fix.
+All four are gone. The `.bf-report` one came out last, after the rest: it is the fourth appearance of
+one defect, and leaving a local copy of a shared declaration is what let the shared rule stay broken
+for three phases. Removal cannot change rendering, because `reset.scss` declares the same value on
+`*`, and `079-report-catalog` is pixel-identical outside the rail, which is the measurement.
 
 ## 2. The nine Phase 13 AI screens in the navigation
 
@@ -216,6 +219,68 @@ change's to make.
 | `role-navigation` journey (14 roles) | 28 passed                                                                                     |
 | Full visual suite, verification run  | 629 passed                                                                                    |
 
+## Checking the regenerated baselines are right, not merely different
+
+A wholesale regeneration makes the next green diff worthless as evidence, so the 161 baselines this
+branch moved were checked a second way: each one was decoded against its pre-branch bytes and the
+differing pixels sorted into contiguous bands, to see whether anything changed that the navigation
+rail and the `.bf-list__item` fix do not account for.
+
+| Of the 161 moved baselines           | Count |
+| ------------------------------------ | ----- |
+| Changed only inside the rail column  | 85    |
+| Changed beyond the rail              | 75    |
+| Byte-different but pixel-identical   | 1     |
+| Changed size, i.e. the page reflowed | 0     |
+
+Every one of the 75 that reach past the rail resolves to one of four causes, none of them a spacing
+regression: the `.bf-list__item` fix unmasking content that `.bf-card` had been clipping; the AI
+answer rendering from the provenance commit; `113a` gaining two feature rows from Phase 15 on `main`;
+or a stale pre-branch baseline, which is covered below. Dialogs are the cleanest case —
+`080e acknowledge-dialog`, `080e request-dialog` and `021 controls-drawer` at tablet changed **only**
+in the rail column, so the reset moved nothing inside a dialog.
+
+Screens opened and read, rather than counted:
+
+| Screen                                                                  | Viewport | What the eye-check found                                                                                                                                     |
+| ----------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `043-events-dashboard` default                                          | desktop  | The defect, before and after. Was "Request contributio", "Send reminde", "Open checklis", "Compare quote"; now all four render in full, 20px inside the card |
+| `043-events-dashboard` default                                          | mobile   | Rows stack, both action links complete inside the card                                                                                                       |
+| `046-event-details` default                                             | desktop  | Lifecycle steps were 40px wider than their card and clipped; now inside it, card 10px shorter, nothing overlapping                                           |
+| `059c-notification-channels-push` default                               | mobile   | Phase 8's screen with its patch gone: every channel row and every button, including "Send a test notification" and "Unlink", inside the card                 |
+| `011a-ai-assistant-panel` default                                       | tablet   | List rows inside the card; the new Ask BudgetFlow rail entry draws its glyph and is the active item                                                          |
+| `011a-ai-assistant-panel` answer                                        | desktop  | Answer card and the figures table inside their cards, provenance sentence not rewrapped                                                                      |
+| `022d-suggested-allocations` default                                    | desktop  | Phase 13's other patched screen: sliders and the split grid inside the card                                                                                  |
+| `022d-suggested-allocations` default                                    | tablet   | The known pre-existing clip, unchanged: "Your amount" cut at the card edge, "Why this line" off-screen (follow-up 1)                                         |
+| `022-budget-allocation-workspace` default                               | desktop  | Dense allocation grid: columns redistributed by 2-4px, every column inside the card                                                                          |
+| `055-my-requests` default                                               | tablet   | Table cells are a few px narrower, so two titles wrap one line earlier and those rows are taller; nothing clipped or overlapping                             |
+| `082-utilization-report` default                                        | desktop  | Ten-column table pixel-identical; only the breadcrumb and a "1 budgets"/"1 budget" copy fix differ                                                           |
+| `079-report-catalog` default                                            | tablet   | The `.bf-report` screen, pixel-identical outside the rail: the Phase 11 patch removal is a no-op                                                             |
+| `080e acknowledge-dialog`, `080e request-dialog`, `021 controls-drawer` | tablet   | Rail-only change; dialog and drawer content pixel-identical                                                                                                  |
+
+The one honest cost of the reset: where a table cell declared a width and carried padding, its text
+box is now narrower by that padding, so long text can wrap a line earlier and the row grows taller
+(`055` at tablet is the clearest). That is the correct box model rather than a regression, and in no
+sampled screen did it clip or overlap anything.
+
+### The one baseline this branch had missed
+
+`086-unused-expired` at desktop failed the full run. It is the finance-controller's rail, and that
+role gains five entries, so the shot genuinely moved; it was missed because the state sits on the
+comparison tolerance (2610 differing pixels against an allowance of 2592), so on the day the set was
+regenerated it was a few pixels under and passed, in CI too. Splitting the diff by column showed the
+2610 pixels are three unrelated things, and only the first belongs here:
+
+| Region             | Pixels | Cause                                                                                                                                                    |
+| ------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| x 16-39            | ~3280  | The five new rail entries for this role                                                                                                                  |
+| x 259-440          | ~1177  | Breadcrumb "Report" became "Unused and expired budget" in `0fd198d`, one commit after the baseline was recorded in `75e59fd`; stale on `main` ever since |
+| x 496-509, 1257-66 | ~715   | "Days left in the fiscal year" and the "Days left" column, computed by the API from the real date                                                        |
+
+Confirmed by A/B rather than argued: with only the web sources reverted to `main` and the image
+rebuilt, the desktop shot passes and the tablet shot fails; with the branch's sources it is the other
+way round.
+
 ## Follow-ups found, not fixed here
 
 1. **022d at tablet clips its last column.** The "Suggested" amount input is cut off at the card's
@@ -235,3 +300,44 @@ change's to make.
    same trap is open; the ids in `query-log.page.ts` are in table cells, so they are safe today.
 5. **`notification-settings.page.ts` was unformatted on `main`.** `prettier --check` failed on it as
    committed, so it is reformatted in its own commit here; nothing else in that file changed.
+6. **086 counts days from the real date, so its baseline decays.** The "Days left in the fiscal year"
+   figure and the "Days left" column come from the API, and `screens.json` freezes only the browser
+   clock, so both fall by one every day and the shot drifts towards the tolerance on its own. It is
+   re-recorded here, which resets the clock on the problem without fixing it. The fix is either a
+   mask, which needs a handle on the report frame's cells that does not exist yet, or having the
+   report read its "today" from a request-scoped clock the tests can pin — both are changes to
+   another phase's screen.
+7. **A baseline can rot under the tolerance.** `086` carried a wrong breadcrumb on `main` for the
+   whole of Phase 11 and 13 because each individual drift stayed under `maxDiffPixelRatio` 0.002.
+   Nothing reports a state that is passing at 90% of its allowance, so the first change to push it
+   over inherits the backlog. A gate that fails on, say, 60% of the allowance would surface these
+   while they are still one cause each.
+
+## Final gates, after the merge with `main` and the `.bf-report` removal
+
+Run in this worktree on its own ports and compose project (`bf-p13-integrate`, web 4480, api 3280),
+against the deterministic seed, with the visual suite run in full rather than filtered.
+
+| Step                     | Result    |
+| ------------------------ | --------- |
+| secrets                  | PASS 5s   |
+| lint                     | PASS 30s  |
+| styles                   | PASS 3s   |
+| satori                   | PASS 37s  |
+| typecheck                | PASS 66s  |
+| build                    | PASS 2s   |
+| openapi                  | PASS 1s   |
+| db                       | PASS 1s   |
+| stack                    | PASS 80s  |
+| functional-api           | PASS 171s |
+| reseed-e2e               | PASS 65s  |
+| functional-e2e           | PASS 272s |
+| reseed-visual            | PASS 42s  |
+| visual (629 screenshots) | PASS 350s |
+
+`role-navigation` was also run on its own across all three viewports: 56 passed, which is the 14
+roles times three, asserting the exact item order per role, that every item renders an `svg` glyph,
+and that the labels match what `/api/me` returns.
+
+The `011a-ai-assistant-panel--action-redirect--tablet` state that issue #70 tracks did not fail in
+either full visual run here.
