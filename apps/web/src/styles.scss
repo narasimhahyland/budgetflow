@@ -1,4 +1,5 @@
 @use '@hylandsoftware/satori-ui/theme' as sat;
+@use '../../../libs/web/ui/src/styles/reset';
 @use '../../../libs/web/ui/src/styles/page-layout';
 
 // Light theme only for now (dark theme deferred): color-scheme pins Satori's light-dark() tokens to light.

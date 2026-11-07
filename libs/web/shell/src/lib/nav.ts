@@ -17,7 +17,19 @@ export interface NavGroup {
 }
 
 export const NAV: NavGroup[] = [
-  { label: null, items: [{ label: 'Home', path: '/', icon: 'home' }] },
+  {
+    label: null,
+    items: [
+      { label: 'Home', path: '/', icon: 'home' },
+      /**
+       * 011a. The spec reaches the assistant from a header button on every screen; it is built as a
+       * page, so it sits beside Home as a tool that belongs to no one area rather than in a group of
+       * its own. `tenant.read` is tenant membership, which is what the ask endpoint requires: it
+       * runs no further check and scopes every fact it retrieves to the asker.
+       */
+      { label: 'Ask BudgetFlow', path: '/ask', icon: 'ai', permission: 'tenant.read' },
+    ],
+  },
   {
     label: 'Budgets',
     items: [
@@ -93,6 +105,16 @@ export const NAV: NavGroup[] = [
         icon: 'currency_dollar',
         permission: 'request.create',
       },
+      /**
+       * 069a, which the spec places at "Requests > Policy assistant". The explain endpoint checks
+       * only that the feature is on, so `tenant.read` is the permission behind it.
+       */
+      {
+        label: 'Policy assistant',
+        path: '/policy-assistant',
+        icon: 'chat_info',
+        permission: 'tenant.read',
+      },
     ],
   },
   {
@@ -129,6 +151,24 @@ export const NAV: NavGroup[] = [
         path: '/finance/gl-tie-out',
         icon: 'checklist_rtl',
         permission: 'actuals.manage',
+      },
+      /**
+       * 080f and 017c, the two AI review queues the specs place under Finance. Both list endpoints
+       * assert their action at tenant scope, so the entry appears for exactly the roles the server
+       * admits: `actuals.read` and `integrity.read` are held only at tenant scope, by Finance Admin,
+       * Finance Controller and Auditor.
+       */
+      {
+        label: 'Matching suggestions',
+        path: '/finance/actuals/suggestions',
+        icon: 'ai',
+        permission: 'actuals.read',
+      },
+      {
+        label: 'Anomaly flags',
+        path: '/finance/anomalies',
+        icon: 'flag',
+        permission: 'integrity.read',
       },
       {
         label: 'Fiscal periods',
@@ -204,6 +244,18 @@ export const NAV: NavGroup[] = [
         permission: 'report.read',
       },
       /**
+       * 016b, at "Insights > Spending outlook" per the spec. The list endpoint runs no tenant-scope
+       * check and instead returns the budgets the asker can read, so `budget.read` is the permission
+       * that decides whether there is anything to see. It is granted at `owned` scope to the owner
+       * roles, which keeps the entry away from employees and organizers, as the spec asks.
+       */
+      {
+        label: 'Spending outlook',
+        path: '/insights/outlook',
+        icon: 'chart_arrow_up',
+        permission: 'budget.read',
+      },
+      /**
        * 016a. `report.board_pack` is the action the pack endpoint checks, held only at tenant scope,
        * so the entry appears for exactly the roles `BoardPackService.assertCanBuild` admits. The
        * route guard keeps `report.read` on purpose, so an owner reaching the URL sees the
@@ -247,6 +299,25 @@ export const NAV: NavGroup[] = [
         icon: 'gear',
         permission: 'tenant.settings.manage',
       },
+      /**
+       * 113a, one screen with Features, Query log and Accuracy tabs, reached by two entries because
+       * its two audiences hold different permissions. Both are stricter than the server, which gates
+       * reading settings and accuracy on `tenant.read`: that would put an Admin entry in front of
+       * every signed-in role, and 113a's roles are Organization Admin, Finance Admin and Auditor
+       * only. Recorded in docs/ux/screens/113a-ai-settings-query-log.md.
+       *
+       * `tenant.settings.manage` is the action behind the switches, so AI settings appears for the
+       * Organization Admin who sets them. `audit.read` carries the Finance Admin, Finance Controller,
+       * Auditor and CEO to the Accuracy tab, which is also how they reach the query log; the path is
+       * the tab's own route so the rail highlights the page the person is on.
+       */
+      {
+        label: 'AI settings',
+        path: '/admin/ai/features',
+        icon: 'gear_ai',
+        permission: 'tenant.settings.manage',
+      },
+      { label: 'AI accuracy', path: '/admin/ai/accuracy', icon: 'speed', permission: 'audit.read' },
     ],
   },
 ];
