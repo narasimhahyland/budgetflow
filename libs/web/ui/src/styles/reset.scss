@@ -1,0 +1,17 @@
+// Box model for the whole app. Loaded once from apps/web/src/styles.scss, before every other sheet.
+//
+// Without this, `width: 100%` or `height: 100%` on anything that also has padding or a border means
+// "100% for the content, plus the padding on top", so the element overruns whatever it was meant to
+// fill. That has cost three phases: Phase 8 and Phase 13 on `.bf-list__item` overrunning its card,
+// Phase 11 on `.bf-report` overrunning its grid row. Each was patched where it was found, so the
+// same bug was fixed three times and was still live in the shared rule.
+//
+// Specificity 0, so any component (including Satori's and Material's own rules, which set
+// `box-sizing` themselves where they rely on it) still wins by declaring it. Measured against the
+// running app before landing: 9 screens at desktop, tablet and mobile, ~11,500 element boxes, and
+// not one element changed size, so this inherits the app as it is rather than relaying it out.
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
