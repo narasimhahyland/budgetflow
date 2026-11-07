@@ -59,6 +59,11 @@ const NEEDS: Record<string, string> = {
   'Rules and policies': 'rules.read',
   Integrations: 'integration.manage',
   'Tenant settings': 'tenant.settings.manage',
+  // The four Phase 14 administration screens, all behind the same action as tenant settings.
+  'Feature flags': 'tenant.settings.manage',
+  'Data retention': 'tenant.settings.manage',
+  'System health': 'tenant.settings.manage',
+  'Set up BudgetFlow': 'tenant.settings.manage',
   // 113a is one screen with two entries: the server gates reading it on tenant.read, and the rail is
   // deliberately stricter so an Admin entry does not appear for every role. The divergence and the
   // reason are in docs/ux/screens/113a-ai-settings-query-log.md.
@@ -82,6 +87,14 @@ const OWNED_BUDGETS = [
 const REQUESTS = ['Request funds', 'My requests', 'My budgets', 'My activity', 'Policy assistant'];
 // What roles without request.create see of that group.
 const PERSONAL = ['My activity', 'Policy assistant'];
+// Everything tenant.settings.manage opens, in rail order; Phase 14 added the last four.
+const TENANT_ADMIN = [
+  'Tenant settings',
+  'Feature flags',
+  'Data retention',
+  'System health',
+  'Set up BudgetFlow',
+];
 const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
 // The Insights entries report.read alone opens, then 016b, which follows budget.read: no role holds
 // one without the other. 016a needs report.board_pack and is listed per role.
@@ -108,7 +121,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...ORG,
     'Org import',
     'Users and roles',
-    'Tenant settings',
+    ...TENANT_ADMIN,
     'AI settings',
   ],
   ceo: [
