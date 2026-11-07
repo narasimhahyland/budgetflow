@@ -1,6 +1,13 @@
 # 115a Native iOS and Android layouts
 
-Status: spec only - image pending (Stitch quota). Light theme only. UX Phase 16 batch. Build phase P16. Native shells in `apps/mobile` (Capacitor) wrapping the mobile web routes `/m/*` of 59a, 59b and 47c. This spec lists only what differs from the installable web app.
+Status: **deferred by product decision** - not built in Phase 16 and not scheduled. Spec only - image pending (Stitch quota). Light theme only. UX Phase 16 batch. Native shells in `apps/mobile` (Capacitor) wrapping the mobile web routes `/m/*` of 59a, 59b and 47c. This spec lists only what differs from the installable web app.
+
+The wrappers are app-store packaging over the existing web experience, and the Phase 8 mobile routes
+(`/m/approvals`, `/m/balance`, `/m/receipt`, `/m/alerts`) already serve phone users, so deferring them
+costs no user-facing capability. The decision and the conditions any future wrapper has to meet are
+recorded under "Native app wrappers: deferred by product decision" in
+[phase-handoff.md](../../architecture/phase-handoff.md). This spec is kept, not deleted, so the design
+survives if the wrappers are picked up later; `apps/mobile` does not exist in the repository today.
 
 ## Design
 

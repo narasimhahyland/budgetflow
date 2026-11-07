@@ -6,6 +6,7 @@ import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
 import { seedExtended } from './extended';
 import { seedClose } from './close';
+import { seedEcosystem } from './ecosystem';
 import { seedEvents } from './events';
 import { seedEventsDepth } from './events-depth';
 import { seedIntegrations } from './integrations';
@@ -66,5 +67,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'a draft what-if scenario, wallet programmes, recognition award types and organizer notes',
     phase: 'P15',
     run: seedExtended,
+  },
+  {
+    name: 'BI and assistant connectors, an allowed no-code platform, marketplace partners and widgets',
+    phase: 'P16',
+    run: seedEcosystem,
   },
 ];

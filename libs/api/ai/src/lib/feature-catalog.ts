@@ -63,6 +63,11 @@ export const FEATURE_CATALOG: readonly FeatureDefinition[] = AI_FEATURES.map((fe
       appearsOn: 'Forecast cycle owner form (087a)',
       seedEnabled: true,
     },
+    mcp: {
+      title: 'Connector for AI assistants',
+      appearsOn: 'AI assistants connector (092c)',
+      seedEnabled: true,
+    },
   };
   return {
     feature,

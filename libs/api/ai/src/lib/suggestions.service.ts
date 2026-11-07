@@ -52,6 +52,9 @@ const DECISION_ACTIONS: Record<AiFeature, Action> = {
   // writing it by hand, and a variance commentary belongs to the owner who forecasts the budget.
   leadership_summary: 'report.read',
   variance_commentary: 'forecast.submit',
+  // The assistant connector (092c) only reads, so it raises no suggestion to decide on. The entry
+  // exists so the map stays total; `tenant.read` is the weakest action any signed-in person holds.
+  mcp: 'tenant.read',
 };
 
 export interface SuggestionInput {

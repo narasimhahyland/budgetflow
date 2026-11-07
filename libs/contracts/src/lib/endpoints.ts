@@ -22,6 +22,7 @@ import { adminEndpoints } from './domains/admin';
 import { channelEndpoints } from './domains/channels';
 import { closeEndpoints } from './domains/close';
 import { extendedEndpoints } from './domains/extended';
+import { ecosystemEndpoints } from './domains/ecosystem';
 import { rulesEndpoints } from './domains/rules';
 
 export type { Endpoint } from './endpoint';
@@ -55,6 +56,7 @@ export const endpoints = {
   ...adminEndpoints,
   ...aiEndpoints,
   ...extendedEndpoints,
+  ...ecosystemEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;

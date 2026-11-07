@@ -157,6 +157,29 @@ export const ALLOWED_FACT_FIELDS: Record<AiFeature, readonly string[]> = {
     'combinedMinor',
     'limitMinor',
   ],
+  /**
+   * The assistant connector (092c). These fields are what a tool call may return to an outside
+   * assistant: names, statuses, amounts, dates and references, and never anyone's contact details.
+   */
+  mcp: [
+    ...COMMON_FIELDS,
+    'authorizedMinor',
+    'committedMinor',
+    'actualMinor',
+    'availableMinor',
+    'utilizationBps',
+    'amountMinor',
+    'budgetType',
+    'categoryCode',
+    'fiscalYearLabel',
+    'ownerName',
+    'eventDate',
+    'reference',
+    'childCount',
+    'dueDate',
+    'requestedByName',
+    'stepName',
+  ],
 };
 
 /** Field names that must never reach a model, whatever a feature's allow-list says. */

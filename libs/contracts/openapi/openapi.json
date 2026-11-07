@@ -1791,9 +1791,10 @@
               "mobile",
               "slack",
               "teams",
-              "system"
+              "system",
+              "mcp"
             ],
-            "description": "Where the request came from (061f covers slack and teams)."
+            "description": "Where the request came from (061f covers slack and teams; mcp is the assistant connector, 092c)."
           },
           "turnCount": {
             "type": "integer",
@@ -1930,7 +1931,8 @@
               "extraction",
               "anomaly_flags",
               "leadership_summary",
-              "variance_commentary"
+              "variance_commentary",
+              "mcp"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           },
@@ -2033,7 +2035,8 @@
               "extraction",
               "anomaly_flags",
               "leadership_summary",
-              "variance_commentary"
+              "variance_commentary",
+              "mcp"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           }
@@ -2055,7 +2058,8 @@
               "extraction",
               "anomaly_flags",
               "leadership_summary",
-              "variance_commentary"
+              "variance_commentary",
+              "mcp"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           },
@@ -2541,7 +2545,8 @@
               "extraction",
               "anomaly_flags",
               "leadership_summary",
-              "variance_commentary"
+              "variance_commentary",
+              "mcp"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           },
@@ -2552,9 +2557,10 @@
               "mobile",
               "slack",
               "teams",
-              "system"
+              "system",
+              "mcp"
             ],
-            "description": "Where the request came from (061f covers slack and teams)."
+            "description": "Where the request came from (061f covers slack and teams; mcp is the assistant connector, 092c)."
           },
           "actorName": {
             "type": [
@@ -2943,7 +2949,8 @@
               "extraction",
               "anomaly_flags",
               "leadership_summary",
-              "variance_commentary"
+              "variance_commentary",
+              "mcp"
             ],
             "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
           },
@@ -4897,9 +4904,10 @@
               "mobile",
               "slack",
               "teams",
-              "system"
+              "system",
+              "mcp"
             ],
-            "description": "Where the request came from (061f covers slack and teams)."
+            "description": "Where the request came from (061f covers slack and teams; mcp is the assistant connector, 092c)."
           },
           "conversationId": {
             "type": "string",
@@ -4986,6 +4994,137 @@
         "required": [
           "rolloverPolicyId",
           "reason"
+        ],
+        "additionalProperties": false
+      },
+      "AssistantConnectorView": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "serverUrl": {
+            "type": "string"
+          },
+          "protocolVersion": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantToolView"
+            }
+          },
+          "allowedApps": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Named assistant apps that may connect; null means any app that can sign in."
+          },
+          "connectedPeople": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "toolCallsLast7Days": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "maxRecordsPerCall": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Hard cap per call, so the connector is not a bulk export."
+          },
+          "connectionLifetimeDays": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "aiFeatureFlagKey": {
+            "type": "string",
+            "description": "`ai.mcp`: the 113a switch that must also be on."
+          },
+          "aiFeatureEnabled": {
+            "type": "boolean"
+          },
+          "consentText": {
+            "type": "string"
+          },
+          "neverDoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "canManage": {
+            "type": "boolean",
+            "description": "`integration.manage`: enable the surface and revoke anyone's connection."
+          },
+          "canConnect": {
+            "type": "boolean",
+            "description": "Whether this reader may create a connection of their own."
+          }
+        },
+        "required": [
+          "enabled",
+          "serverUrl",
+          "protocolVersion",
+          "tools",
+          "allowedApps",
+          "connectedPeople",
+          "toolCallsLast7Days",
+          "maxRecordsPerCall",
+          "connectionLifetimeDays",
+          "aiFeatureFlagKey",
+          "aiFeatureEnabled",
+          "consentText",
+          "neverDoes",
+          "canManage",
+          "canConnect"
+        ],
+        "additionalProperties": false
+      },
+      "AssistantToolView": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string",
+            "enum": [
+              "list_my_budgets",
+              "get_budget_balance",
+              "list_my_requests",
+              "get_request_status",
+              "list_waiting_approvals",
+              "search_events"
+            ],
+            "description": "A read-only tool an assistant may call. There is no tool that writes."
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "description": "Shown to assistants and in the consent dialog."
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "tool",
+          "title",
+          "description",
+          "enabled"
         ],
         "additionalProperties": false
       },
@@ -5211,6 +5350,260 @@
         ],
         "additionalProperties": false,
         "description": "Where the web app signs users in."
+      },
+      "AutomationBalanceResult": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "authorized": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "committed": {
+            "description": "Pre-encumbered plus encumbered: money promised but not yet spent.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "actual": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "availableUnderRules": {
+            "description": "\"Available under this budget's rules\" (the app's definition).",
+            "$ref": "#/components/schemas/Money"
+          }
+        },
+        "required": [
+          "budgetId",
+          "name",
+          "status",
+          "currency",
+          "authorized",
+          "committed",
+          "actual",
+          "availableUnderRules"
+        ],
+        "additionalProperties": false
+      },
+      "AutomationConnectorView": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoCodePlatformView"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "budget.balance.read",
+                    "request.draft.create"
+                  ],
+                  "description": "What an automation may do, as the person who connected it."
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "action",
+                "title",
+                "description"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "trigger": {
+                  "type": "string",
+                  "enum": [
+                    "budget.threshold_reached",
+                    "budget.frozen",
+                    "budget.reduced",
+                    "budget.set_to_zero",
+                    "request.submitted",
+                    "request.decided",
+                    "contribution.decided",
+                    "event.approved",
+                    "event.closed",
+                    "actual.matched",
+                    "period.closed"
+                  ]
+                },
+                "title": {
+                  "type": "string"
+                },
+                "deliveryAvailable": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "trigger",
+                "title",
+                "deliveryAvailable"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "automationsActive": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "runsLast7Days": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "connectionLifetimeDays": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "consentText": {
+            "type": "string"
+          },
+          "neverDoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "canManage": {
+            "type": "boolean",
+            "description": "`integration.manage`: enable the surface and revoke anyone's connection."
+          },
+          "canConnect": {
+            "type": "boolean",
+            "description": "Whether this reader may create a connection of their own."
+          }
+        },
+        "required": [
+          "enabled",
+          "platforms",
+          "actions",
+          "triggers",
+          "automationsActive",
+          "runsLast7Days",
+          "connectionLifetimeDays",
+          "consentText",
+          "neverDoes",
+          "canManage",
+          "canConnect"
+        ],
+        "additionalProperties": false
+      },
+      "AutomationDraftRequestBody": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "spendType": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 4000
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "neededBy": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          }
+        },
+        "required": [
+          "budgetId",
+          "amount",
+          "spendType",
+          "title",
+          "purpose"
+        ],
+        "additionalProperties": false,
+        "description": "Creates a Draft only. The person opens and submits it in BudgetFlow."
+      },
+      "AutomationDraftRequestResult": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "ref": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "const": "draft"
+          },
+          "label": {
+            "type": "string",
+            "description": "\"Drafted by Zapier for Kavya Shah\", shown on the request."
+          },
+          "openUrl": {
+            "type": "string"
+          },
+          "notice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "requestId",
+          "ref",
+          "status",
+          "label",
+          "openUrl",
+          "notice"
+        ],
+        "additionalProperties": false
       },
       "AvailableExplanation": {
         "type": "object",
@@ -5645,6 +6038,193 @@
         ],
         "additionalProperties": false
       },
+      "BiConnectorView": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "feedBaseUrl": {
+            "type": "string",
+            "description": "Where a BI tool points its feed; the person signs in with their own token."
+          },
+          "datasets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BiDatasetView"
+            }
+          },
+          "connectionsActive": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "refreshesLast24h": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "refreshLimitPerDay": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Refreshes one connection may make in a day (092a)."
+          },
+          "maxRowsPerRequest": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "connectionLifetimeDays": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "notice": {
+            "type": "string"
+          },
+          "canManage": {
+            "type": "boolean",
+            "description": "`integration.manage`: enable the surface and revoke anyone's connection."
+          },
+          "canConnect": {
+            "type": "boolean",
+            "description": "Whether this reader may create a connection of their own."
+          }
+        },
+        "required": [
+          "enabled",
+          "feedBaseUrl",
+          "datasets",
+          "connectionsActive",
+          "refreshesLast24h",
+          "refreshLimitPerDay",
+          "maxRowsPerRequest",
+          "connectionLifetimeDays",
+          "notice",
+          "canManage",
+          "canConnect"
+        ],
+        "additionalProperties": false
+      },
+      "BiDatasetView": {
+        "type": "object",
+        "properties": {
+          "dataset": {
+            "type": "string",
+            "enum": [
+              "budgets",
+              "company_rollup",
+              "ledger_summary",
+              "events",
+              "requests"
+            ],
+            "description": "A curated read-only dataset with the same definitions as the app."
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BiFieldRef"
+            }
+          }
+        },
+        "required": [
+          "dataset",
+          "title",
+          "description",
+          "enabled",
+          "fields"
+        ],
+        "additionalProperties": false
+      },
+      "BiFeedPage": {
+        "type": "object",
+        "properties": {
+          "dataset": {
+            "type": "string",
+            "enum": [
+              "budgets",
+              "company_rollup",
+              "ledger_summary",
+              "events",
+              "requests"
+            ],
+            "description": "A curated read-only dataset with the same definitions as the app."
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "Rows the connecting person may read, in a stable order (name, then id)."
+          },
+          "rowCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "refreshesRemainingToday": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "currency": {
+            "description": "Reporting currency of the figures in this page.",
+            "$ref": "#/components/schemas/CurrencyCode"
+          }
+        },
+        "required": [
+          "dataset",
+          "rows",
+          "rowCount",
+          "nextCursor",
+          "generatedAt",
+          "refreshesRemainingToday",
+          "currency"
+        ],
+        "additionalProperties": false
+      },
+      "BiFieldRef": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "additionalProperties": false
+      },
       "BoardPack": {
         "type": "object",
         "properties": {
@@ -6067,6 +6647,164 @@
         ],
         "additionalProperties": false,
         "description": "Where the pack read its numbers. A closed period reads an immutable snapshot."
+      },
+      "BookingList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingView"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "BookingView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "offerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "offerTitle": {
+            "type": "string"
+          },
+          "partnerName": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "peopleCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "requestedDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "waiting_for_partner",
+              "quoted",
+              "declined",
+              "cancelled"
+            ]
+          },
+          "partnerReference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quotedPricePerHead": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quotedTotal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "declineReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "alternatives": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+            }
+          },
+          "requestedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "respondedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offerId",
+          "offerTitle",
+          "partnerName",
+          "eventId",
+          "eventName",
+          "peopleCount",
+          "requestedDate",
+          "status",
+          "partnerReference",
+          "quotedPricePerHead",
+          "quotedTotal",
+          "declineReason",
+          "alternatives",
+          "requestedByName",
+          "createdAt",
+          "respondedAt",
+          "notice"
+        ],
+        "additionalProperties": false,
+        "description": "A booking request is a quote, never a commitment: approval happens the usual way."
       },
       "BrandingSettings": {
         "type": "object",
@@ -12029,6 +12767,134 @@
         ],
         "additionalProperties": false
       },
+      "CreateAssistantConnectionRequest": {
+        "type": "object",
+        "properties": {
+          "appKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "Client registration of the assistant app."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "tools": {
+            "minItems": 1,
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "list_my_budgets",
+                "get_budget_balance",
+                "list_my_requests",
+                "get_request_status",
+                "list_waiting_approvals",
+                "search_events"
+              ],
+              "description": "A read-only tool an assistant may call. There is no tool that writes."
+            }
+          },
+          "consentAcknowledged": {
+            "type": "boolean",
+            "const": true,
+            "description": "The person saw the consent text and chose Allow (092c)."
+          }
+        },
+        "required": [
+          "appKey",
+          "label",
+          "tools",
+          "consentAcknowledged"
+        ],
+        "additionalProperties": false
+      },
+      "CreateAutomationRequest": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "zapier",
+              "make",
+              "power_automate",
+              "workato"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "actions": {
+            "minItems": 1,
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "budget.balance.read",
+                "request.draft.create"
+              ],
+              "description": "What an automation may do, as the person who connected it."
+            }
+          },
+          "consentAcknowledged": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "platform",
+          "label",
+          "actions",
+          "consentAcknowledged"
+        ],
+        "additionalProperties": false
+      },
+      "CreateBiConnectionRequest": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string",
+            "enum": [
+              "power_bi",
+              "tableau"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "datasets": {
+            "minItems": 1,
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "budgets",
+                "company_rollup",
+                "ledger_summary",
+                "events",
+                "requests"
+              ],
+              "description": "A curated read-only dataset with the same definitions as the app."
+            },
+            "description": "Datasets this connection may read; each must be enabled for the company."
+          }
+        },
+        "required": [
+          "tool",
+          "label",
+          "datasets"
+        ],
+        "additionalProperties": false
+      },
       "CreateBoardPackRequest": {
         "type": "object",
         "properties": {
@@ -12093,6 +12959,45 @@
         },
         "additionalProperties": false,
         "description": "Queues a generation. Defaults: the latest closed period, every page, PDF and XLSX."
+      },
+      "CreateBookingRequest": {
+        "type": "object",
+        "properties": {
+          "offerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "peopleCount": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "requestedDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "offerId",
+          "eventId",
+          "peopleCount",
+          "requestedDate"
+        ],
+        "additionalProperties": false
       },
       "CreateBudgetRequest": {
         "type": "object",
@@ -14198,6 +15103,49 @@
         ],
         "additionalProperties": false
       },
+      "CreateWidgetRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "team_budget",
+              "upcoming_events"
+            ]
+          },
+          "allowedOrigins": {
+            "minItems": 1,
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WidgetOrigin"
+            }
+          },
+          "showAmounts": {
+            "default": true,
+            "type": "boolean"
+          },
+          "eventCount": {
+            "default": 3,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "name",
+          "kind",
+          "allowedOrigins",
+          "showAmounts",
+          "eventCount"
+        ],
+        "additionalProperties": false
+      },
       "CreateYearEndRunRequest": {
         "type": "object",
         "properties": {
@@ -16025,6 +16973,176 @@
           "matchStatus"
         ],
         "additionalProperties": false
+      },
+      "EcosystemConnectionCreated": {
+        "type": "object",
+        "properties": {
+          "connection": {
+            "$ref": "#/components/schemas/EcosystemConnectionView"
+          },
+          "token": {
+            "type": "string",
+            "description": "Shown once and stored hashed; paste it into the outside tool."
+          },
+          "notice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection",
+          "token",
+          "notice"
+        ],
+        "additionalProperties": false
+      },
+      "EcosystemConnectionList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EcosystemConnectionView"
+            }
+          },
+          "seesAll": {
+            "type": "boolean"
+          },
+          "canRevokeAll": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "seesAll",
+          "canRevokeAll"
+        ],
+        "additionalProperties": false
+      },
+      "EcosystemConnectionView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "bi",
+              "assistant",
+              "automation"
+            ],
+            "description": "What a personal connection is for; each kind has its own grants and lifetime."
+          },
+          "clientKey": {
+            "type": "string"
+          },
+          "clientLabel": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "description": "What the person called this connection."
+          },
+          "personId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "personName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "grants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Datasets, tools or actions this connection may use, never more than its person may."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "expiring_soon",
+              "expired",
+              "revoked"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "lastUsedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "revokedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "callsLast7Days": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "clientKey",
+          "clientLabel",
+          "label",
+          "personId",
+          "personName",
+          "grants",
+          "status",
+          "createdAt",
+          "lastUsedAt",
+          "expiresAt",
+          "revokedAt",
+          "callsLast7Days"
+        ],
+        "additionalProperties": false,
+        "description": "A personal connection from an outside tool, acting with its creator's scope."
       },
       "EditSummarySectionRequest": {
         "type": "object",
@@ -20909,9 +22027,10 @@
               "mobile",
               "slack",
               "teams",
-              "system"
+              "system",
+              "mcp"
             ],
-            "description": "Where the request came from (061f covers slack and teams)."
+            "description": "Where the request came from (061f covers slack and teams; mcp is the assistant connector, 092c)."
           }
         },
         "required": [
@@ -27209,6 +28328,173 @@
         ],
         "additionalProperties": false
       },
+      "McpToolCallRequest": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string",
+            "enum": [
+              "list_my_budgets",
+              "get_budget_balance",
+              "list_my_requests",
+              "get_request_status",
+              "list_waiting_approvals",
+              "search_events"
+            ],
+            "description": "A read-only tool an assistant may call. There is no tool that writes."
+          },
+          "arguments": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "tool",
+          "arguments"
+        ],
+        "additionalProperties": false
+      },
+      "McpToolCallResult": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string",
+            "enum": [
+              "list_my_budgets",
+              "get_budget_balance",
+              "list_my_requests",
+              "get_request_status",
+              "list_waiting_approvals",
+              "search_events"
+            ],
+            "description": "A read-only tool an assistant may call. There is no tool that writes."
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "recordCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "True when the cap hid further records the person may see."
+          },
+          "notice": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label",
+                "url"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "tool",
+          "records",
+          "recordCount",
+          "truncated",
+          "notice",
+          "links"
+        ],
+        "additionalProperties": false
+      },
+      "McpToolDescriptor": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "list_my_budgets",
+              "get_budget_balance",
+              "list_my_requests",
+              "get_request_status",
+              "list_waiting_approvals",
+              "search_events"
+            ],
+            "description": "A read-only tool an assistant may call. There is no tool that writes."
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "inputSchema": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "JSON Schema of the tool arguments."
+          },
+          "readOnly": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "name",
+          "title",
+          "description",
+          "inputSchema",
+          "readOnly"
+        ],
+        "additionalProperties": false
+      },
+      "McpToolListResult": {
+        "type": "object",
+        "properties": {
+          "protocolVersion": {
+            "type": "string"
+          },
+          "serverName": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpToolDescriptor"
+            }
+          },
+          "notice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "protocolVersion",
+          "serverName",
+          "tools",
+          "notice"
+        ],
+        "additionalProperties": false
+      },
       "MentionCandidate": {
         "type": "object",
         "properties": {
@@ -27769,6 +29055,59 @@
         ],
         "additionalProperties": false
       },
+      "NoCodePlatformView": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "zapier",
+              "make",
+              "power_automate",
+              "workato"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "automationsActive": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "lastChangedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lastChangedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "platform",
+          "title",
+          "allowed",
+          "automationsActive",
+          "lastChangedAt",
+          "lastChangedByName"
+        ],
+        "additionalProperties": false
+      },
       "NotificationDefault": {
         "type": "object",
         "properties": {
@@ -28321,6 +29660,138 @@
           "tasks",
           "counts",
           "nextCursor"
+        ],
+        "additionalProperties": false
+      },
+      "OfferList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfferView"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "additionalProperties": false
+      },
+      "OfferView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "partnerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "partnerName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "experiences",
+              "catering",
+              "gifts_and_kits"
+            ]
+          },
+          "city": {
+            "type": "string"
+          },
+          "pricePerHead": {
+            "description": "In the partner's local currency.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "pricePerHeadReporting": {
+            "description": "At the fiscal year plan rate; never consumes budget.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "capacityMin": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "capacityMax": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ratingBps": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average rating from past events, in basis points of 5."
+          },
+          "ratingCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "vendorStatus": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "includes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cancellationTerms": {
+            "type": "string"
+          },
+          "deliveryCountries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "partnerId",
+          "partnerName",
+          "title",
+          "category",
+          "city",
+          "pricePerHead",
+          "pricePerHeadReporting",
+          "capacityMin",
+          "capacityMax",
+          "ratingBps",
+          "ratingCount",
+          "vendorStatus",
+          "includes",
+          "cancellationTerms",
+          "deliveryCountries"
         ],
         "additionalProperties": false
       },
@@ -29870,6 +31341,186 @@
           "eventsHeld",
           "ranked",
           "notRankedReason"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerView"
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "canManage"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerSyncResult": {
+        "type": "object",
+        "properties": {
+          "partnerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "offersAdded": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "offersUpdated": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "offersWithdrawn": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "bookingResponses": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "partnerId",
+          "offersAdded",
+          "offersUpdated",
+          "offersWithdrawn",
+          "bookingResponses",
+          "syncedAt"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "experiences",
+                "catering",
+                "gifts_and_kits"
+              ]
+            }
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "vendorId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "vendorName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vendorStatus": {
+            "description": "From the vendor master (106c); offers need Approved or Preferred.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "mock",
+              "sandbox",
+              "live"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "paused"
+            ]
+          },
+          "offersCached": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "lastSyncedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dataShared": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "categories",
+          "cities",
+          "vendorId",
+          "vendorName",
+          "vendorStatus",
+          "mode",
+          "status",
+          "offersCached",
+          "lastSyncedAt",
+          "dataShared"
         ],
         "additionalProperties": false
       },
@@ -31819,9 +33470,10 @@
               "mobile",
               "slack",
               "teams",
-              "system"
+              "system",
+              "mcp"
             ],
-            "description": "Where the request came from (061f covers slack and teams)."
+            "description": "Where the request came from (061f covers slack and teams; mcp is the assistant connector, 092c)."
           },
           "requestId": {
             "description": "Explain the rules outcome on this request (the asker must be able to read it).",
@@ -32769,7 +34421,22 @@
               "RECOGNITION_TYPE_INACTIVE",
               "RECOGNITION_SELF_AWARD",
               "RECOGNITION_ALLOWANCE_EXCEEDED",
-              "RECOGNITION_AWARD_NOT_OPEN"
+              "RECOGNITION_AWARD_NOT_OPEN",
+              "ECOSYSTEM_SURFACE_DISABLED",
+              "ECOSYSTEM_CONNECTION_INVALID",
+              "ECOSYSTEM_CONNECTION_EXPIRED",
+              "ECOSYSTEM_CONNECTION_REVOKED",
+              "ECOSYSTEM_GRANT_MISSING",
+              "BI_DATASET_DISABLED",
+              "BI_REFRESH_LIMIT_REACHED",
+              "ASSISTANT_APP_NOT_ALLOWED",
+              "ASSISTANT_TOOL_DISABLED",
+              "AUTOMATION_PLATFORM_NOT_ALLOWED",
+              "WIDGET_ORIGIN_NOT_ALLOWED",
+              "WIDGET_PAUSED",
+              "PARTNER_PAUSED",
+              "PARTNER_VENDOR_NOT_APPROVED",
+              "OFFER_NOT_AVAILABLE"
             ],
             "description": "Stable machine-readable code; the UI branches on it."
           },
@@ -37943,6 +39610,16 @@
         "required": [
           "confirmName"
         ],
+        "additionalProperties": false
+      },
+      "RevokeConnectionRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
         "additionalProperties": false
       },
       "RevokeDelegationRequest": {
@@ -43805,6 +45482,97 @@
         },
         "additionalProperties": false
       },
+      "UpdateAssistantConnectorRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "tools": {
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tool": {
+                  "type": "string",
+                  "enum": [
+                    "list_my_budgets",
+                    "get_budget_balance",
+                    "list_my_requests",
+                    "get_request_status",
+                    "list_waiting_approvals",
+                    "search_events"
+                  ],
+                  "description": "A read-only tool an assistant may call. There is no tool that writes."
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "tool",
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "allowedApps": {
+            "anyOf": [
+              {
+                "maxItems": 50,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateBiConnectorRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "datasets": {
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dataset": {
+                  "type": "string",
+                  "enum": [
+                    "budgets",
+                    "company_rollup",
+                    "ledger_summary",
+                    "events",
+                    "requests"
+                  ],
+                  "description": "A curated read-only dataset with the same definitions as the app."
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "dataset",
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateBrandingRequest": {
         "type": "object",
         "properties": {
@@ -44492,6 +46260,18 @@
         },
         "additionalProperties": false
       },
+      "UpdateNoCodePlatformRequest": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "allowed"
+        ],
+        "additionalProperties": false
+      },
       "UpdateNotificationDefaultsRequest": {
         "type": "object",
         "properties": {
@@ -44648,6 +46428,40 @@
               "showAmountsInPush"
             ],
             "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdatePartnerRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "paused"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "mock",
+              "sandbox",
+              "live"
+            ]
+          },
+          "vendorId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false
@@ -45096,6 +46910,40 @@
           "enabled": {
             "description": "Re-enables an endpoint disabled after failures.",
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateWidgetRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "allowedOrigins": {
+            "minItems": 1,
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WidgetOrigin"
+            }
+          },
+          "showAmounts": {
+            "type": "boolean"
+          },
+          "eventCount": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused"
+            ]
           }
         },
         "additionalProperties": false
@@ -47327,6 +49175,321 @@
           "disabledReason",
           "secretSetAt",
           "secretRotatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "WidgetContent": {
+        "type": "object",
+        "properties": {
+          "widgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "team_budget",
+              "upcoming_events"
+            ]
+          },
+          "showAmounts": {
+            "type": "boolean"
+          },
+          "viewerName": {
+            "description": "The signed-in viewer, from their token and nothing else.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "teamBudget": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WidgetTeamBudget"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WidgetEvent"
+            }
+          },
+          "emptyMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "openInAppUrl": {
+            "type": "string"
+          },
+          "frameAncestors": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "widgetId",
+          "kind",
+          "showAmounts",
+          "viewerName",
+          "teamBudget",
+          "events",
+          "emptyMessage",
+          "openInAppUrl",
+          "frameAncestors"
+        ],
+        "additionalProperties": false,
+        "description": "What one viewer sees in one widget. Never more than they could see in BudgetFlow."
+      },
+      "WidgetEvent": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rsvpStatus": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "canRsvp": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "eventId",
+          "name",
+          "startDate",
+          "city",
+          "rsvpStatus",
+          "canRsvp"
+        ],
+        "additionalProperties": false
+      },
+      "WidgetList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WidgetView"
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "canManage"
+        ],
+        "additionalProperties": false
+      },
+      "WidgetOrigin": {
+        "type": "string",
+        "maxLength": 200,
+        "pattern": "^https?:\\/\\/[a-z0-9.-]+(:\\d{2,5})?$"
+      },
+      "WidgetTeamBudget": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetName": {
+            "type": "string"
+          },
+          "headline": {
+            "type": "string",
+            "description": "Plain sentence; carries no figure when amounts are hidden."
+          },
+          "available": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "authorized": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "utilizationBps": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "canRequest": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "budgetId",
+          "budgetName",
+          "headline",
+          "available",
+          "authorized",
+          "utilizationBps",
+          "status",
+          "canRequest"
+        ],
+        "additionalProperties": false
+      },
+      "WidgetView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "team_budget",
+              "upcoming_events"
+            ]
+          },
+          "allowedOrigins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WidgetOrigin"
+            }
+          },
+          "showAmounts": {
+            "type": "boolean"
+          },
+          "eventCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused"
+            ]
+          },
+          "viewsLast30Days": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "blockedOriginsLast30Days": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "origin": {
+                  "type": "string"
+                },
+                "attempts": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "origin",
+                "attempts"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Sites that tried to show the widget and are not on the list (102d)."
+          },
+          "frameAncestors": {
+            "type": "string",
+            "description": "The `frame-ancestors` value the embed route is served with."
+          },
+          "embedSnippet": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "allowedOrigins",
+          "showAmounts",
+          "eventCount",
+          "status",
+          "viewsLast30Days",
+          "blockedOriginsLast30Days",
+          "frameAncestors",
+          "embedSnippet",
+          "createdAt",
+          "updatedAt"
         ],
         "additionalProperties": false
       },
@@ -89683,7 +91846,8 @@
                 "extraction",
                 "anomaly_flags",
                 "leadership_summary",
-                "variance_commentary"
+                "variance_commentary",
+                "mcp"
               ],
               "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
             }
@@ -89823,7 +91987,8 @@
                 "extraction",
                 "anomaly_flags",
                 "leadership_summary",
-                "variance_commentary"
+                "variance_commentary",
+                "mcp"
               ],
               "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
             }
@@ -89953,7 +92118,8 @@
                 "extraction",
                 "anomaly_flags",
                 "leadership_summary",
-                "variance_commentary"
+                "variance_commentary",
+                "mcp"
               ],
               "description": "An AI surface with its own switch, evaluation set and accuracy threshold (113a)."
             }
@@ -94010,6 +96176,2960 @@
             }
           },
           "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/bi": {
+      "get": {
+        "operationId": "getBiConnector",
+        "summary": "BI connector status, datasets and usage (092a)",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BiConnectorView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateBiConnector",
+        "summary": "Enable the connector and choose which datasets it offers",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBiConnectorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BiConnectorView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/bi/connections": {
+      "get": {
+        "operationId": "listBiConnections",
+        "summary": "My BI connections, or everyone's for an Integration Admin",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBiConnection",
+        "summary": "Connect Power BI or Tableau with my own scope; the token is shown once",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBiConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/bi/connections/{connectionId}/revoke": {
+      "post": {
+        "operationId": "revokeBiConnection",
+        "summary": "Revoke a BI connection; the next refresh fails with \"Access revoked\"",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bi/v1/{dataset}": {
+      "get": {
+        "operationId": "readBiFeed",
+        "summary": "BI feed: read-only rows in the connecting person's scope (connection token)",
+        "tags": [
+          "bi-feed"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "dataset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "budgets",
+                "company_rollup",
+                "ledger_summary",
+                "events",
+                "requests"
+              ],
+              "description": "A curated read-only dataset with the same definitions as the app."
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BiFeedPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/assistants": {
+      "get": {
+        "operationId": "getAssistantConnector",
+        "summary": "AI assistant connector: tools, allowed apps and usage (092c)",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantConnectorView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateAssistantConnector",
+        "summary": "Enable the connector, choose tools and allow assistant apps",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssistantConnectorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantConnectorView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/assistants/connections": {
+      "get": {
+        "operationId": "listAssistantConnections",
+        "summary": "My connected assistants, or everyone's for an Integration Admin",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAssistantConnection",
+        "summary": "Allow an assistant to read what I can see for 30 days",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssistantConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/assistants/connections/{connectionId}/revoke": {
+      "post": {
+        "operationId": "revokeAssistantConnection",
+        "summary": "Revoke an assistant connection; the next tool call fails",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mcp/v1/tools/list": {
+      "post": {
+        "operationId": "listMcpTools",
+        "summary": "Model Context Protocol: the read-only tools this connection may call",
+        "tags": [
+          "mcp"
+        ],
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpToolListResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mcp/v1/tools/call": {
+      "post": {
+        "operationId": "callMcpTool",
+        "summary": "Model Context Protocol: call one read-only tool in the person's scope",
+        "tags": [
+          "mcp"
+        ],
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McpToolCallRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpToolCallResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/automations": {
+      "get": {
+        "operationId": "getAutomationConnector",
+        "summary": "No-code platforms, triggers and the actions an automation may take (092b)",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationConnectorView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/automations/platforms/{platform}": {
+      "patch": {
+        "operationId": "updateNoCodePlatform",
+        "summary": "Allow or stop allowing a no-code platform; all start Not allowed",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "platform",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "zapier",
+                "make",
+                "power_automate",
+                "workato"
+              ]
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNoCodePlatformRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationConnectorView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/automations/connections": {
+      "get": {
+        "operationId": "listAutomations",
+        "summary": "My automations, or everyone's for an Integration Admin",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAutomation",
+        "summary": "Connect a no-code platform as me, for the actions I allow",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAutomationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/automations/connections/{connectionId}/revoke": {
+      "post": {
+        "operationId": "revokeAutomation",
+        "summary": "Revoke an automation; the platform's next call fails",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcosystemConnectionView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/automation/v1/budgets/{budgetId}/balance": {
+      "get": {
+        "operationId": "readAutomationBalance",
+        "summary": "Automation: one budget's balance, if the connected person may read it",
+        "tags": [
+          "automation"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationBalanceResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/automation/v1/requests/drafts": {
+      "post": {
+        "operationId": "createAutomationDraftRequest",
+        "summary": "Automation: create a Draft request the person must submit in BudgetFlow",
+        "tags": [
+          "automation"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationDraftRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationDraftRequestResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/marketplace/partners": {
+      "get": {
+        "operationId": "listPartners",
+        "summary": "Marketplace partners with their vendor link and connection mode (092d)",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/marketplace/partners/{partnerId}": {
+      "patch": {
+        "operationId": "updatePartner",
+        "summary": "Enable or pause a partner and link it to an approved vendor",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partnerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePartnerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/marketplace/partners/{partnerId}/sync": {
+      "post": {
+        "operationId": "syncPartner",
+        "summary": "Pull the partner's catalogue and any answers to open booking requests",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partnerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerSyncResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/marketplace/offers": {
+      "get": {
+        "operationId": "listOffers",
+        "summary": "Browse offers from enabled partners, filtered by city, category, people and price",
+        "tags": [
+          "marketplace"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "experiences",
+                "catering",
+                "gifts_and_kits"
+              ]
+            }
+          },
+          {
+            "name": "people",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            }
+          },
+          {
+            "name": "maxPricePerHeadMinor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/marketplace/offers/{offerId}": {
+      "get": {
+        "operationId": "getOffer",
+        "summary": "One offer with what is included and its cancellation terms",
+        "tags": [
+          "marketplace"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "offerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/marketplace/bookings": {
+      "get": {
+        "operationId": "listBookings",
+        "summary": "Booking requests on events I can see",
+        "tags": [
+          "marketplace"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBooking",
+        "summary": "Ask a partner for a booking; it becomes a quote, never a commitment",
+        "tags": [
+          "marketplace"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/widgets": {
+      "get": {
+        "operationId": "listWidgets",
+        "summary": "Embeddable widgets with their allowed sites and usage (102d)",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createWidget",
+        "summary": "Create a widget; at least one exact site address is required",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWidgetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/widgets/{widgetId}": {
+      "patch": {
+        "operationId": "updateWidget",
+        "summary": "Change a widget's allowed sites, amounts switch or status",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "widgetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWidgetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteWidget",
+        "summary": "Remove a widget; embedded copies stop rendering",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "widgetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ecosystem/widgets/{widgetId}/content": {
+      "get": {
+        "operationId": "getWidgetContent",
+        "summary": "What the signed-in viewer sees in this widget, if the host site is allowed",
+        "tags": [
+          "ecosystem"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "widgetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetContent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {
