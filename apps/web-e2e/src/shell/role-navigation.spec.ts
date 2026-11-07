@@ -11,6 +11,14 @@ const NEEDS: Record<string, string> = {
   // 011a and 069a run no permission check of their own beyond tenant membership.
   'Ask BudgetFlow': 'tenant.read',
   'Policy assistant': 'tenant.read',
+  // Phase 16. Anyone may connect an assistant to their own account; the marketplace, the
+  // personal automations and the personal BI connections follow the action their endpoint
+  // asserts, and widget settings belong to the Organization Admin (102d).
+  'My AI assistants': 'tenant.read',
+  Marketplace: 'event.read',
+  'My automations': 'request.create',
+  'My BI connections': 'report.read',
+  'Embeddable widgets': 'tenant.settings.manage',
   'Budget hierarchy': 'budget.read',
   'Allocation workspace': 'budget.allocate',
   'Budget list': 'budget.read',
@@ -64,7 +72,7 @@ const NEEDS: Record<string, string> = {
   'AI accuracy': 'audit.read',
 };
 // 011a sits beside Home, so every role that is a member of the tenant opens with these two.
-const HOME = ['Home', 'Ask BudgetFlow'];
+const HOME = ['Home', 'Ask BudgetFlow', 'My AI assistants'];
 const ORG = ['Organization', 'People', 'Headcount'];
 const READ = ['Budget hierarchy', 'Budget list', 'Budget requests'];
 const OWNED_BUDGETS = [
@@ -76,7 +84,13 @@ const OWNED_BUDGETS = [
 // From Phase 5 everyone in the tenant browses events; requesting (and the employee's own budgets)
 // follows request.create, which covers the home location's budgets as well as owned ones. 069a
 // closes the group and needs only tenant.read, so roles without request.create see it on its own.
-const REQUESTS = ['Request funds', 'My requests', 'My budgets', 'Policy assistant'];
+const REQUESTS = [
+  'Request funds',
+  'My requests',
+  'My budgets',
+  'Policy assistant',
+  'My automations',
+];
 const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
 // The Insights entries report.read alone opens, then 016b, which follows budget.read: no role holds
 // one without the other. 016a needs report.board_pack and is listed per role.
@@ -87,11 +101,13 @@ const OWNER = [
   ...HOME,
   ...OWNED_BUDGETS,
   'Events',
+  'Marketplace',
   'Co-funding board',
   'Approval inbox',
   ...REQUESTS,
   ...ORG,
   ...INSIGHTS_READ,
+  'My BI connections',
 ];
 
 const EXPECTED: Record<RoleId, string[]> = {
@@ -104,6 +120,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Org import',
     'Users and roles',
     'Tenant settings',
+    'Embeddable widgets',
     'AI settings',
   ],
   ceo: [
@@ -111,6 +128,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...OWNED_BUDGETS,
     'Plans and versions',
     'Events',
+    'Marketplace',
     'Co-funding board',
     'Approval inbox',
     ...REQUESTS,
@@ -120,6 +138,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Board and FP&A pack',
     'Approval history',
     'Audit log',
+    'My BI connections',
     'Rules and policies',
     'AI accuracy',
   ],
@@ -131,6 +150,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Plans and versions',
     'Program templates',
     'Events',
+    'Marketplace',
     'Co-funding board',
     'Approval inbox',
     ...REQUESTS,
@@ -152,6 +172,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Board and FP&A pack',
     'Approval history',
     'Audit log',
+    'My BI connections',
     'Rules and policies',
     'AI accuracy',
   ],
@@ -159,6 +180,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...HOME,
     ...READ,
     'Events',
+    'Marketplace',
     'Approval inbox',
     'Policy assistant',
     ...ORG,
@@ -173,6 +195,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Board and FP&A pack',
     'Approval history',
     'Audit log',
+    'My BI connections',
     'Rules and policies',
     'AI accuracy',
   ],
@@ -180,12 +203,13 @@ const EXPECTED: Record<RoleId, string[]> = {
   'department-head': OWNER,
   'regional-manager': OWNER,
   'location-manager': OWNER,
-  'event-organizer': [...HOME, 'Events', 'Co-funding board', ...REQUESTS, ...ORG],
+  'event-organizer': [...HOME, 'Events', 'Marketplace', 'Co-funding board', ...REQUESTS, ...ORG],
   employee: [...HOME, 'Events', ...REQUESTS, ...ORG],
   auditor: [
     ...HOME,
     ...READ,
     'Events',
+    'Marketplace',
     'Policy assistant',
     ...ORG,
     ...AI_QUEUES,
@@ -194,6 +218,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Board and FP&A pack',
     'Approval history',
     'Audit log',
+    'My BI connections',
     'Rules and policies',
     'AI accuracy',
   ],
@@ -203,10 +228,12 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...HOME,
     ...READ,
     'Events',
+    'Marketplace',
     'Policy assistant',
     ...ORG,
     ...INSIGHTS_READ,
     'Board and FP&A pack',
+    'My BI connections',
   ],
 };
 

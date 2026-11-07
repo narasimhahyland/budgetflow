@@ -1,0 +1,11 @@
+Two consecutive full visual runs on the same stack, no reseed between them.
+Command: npm run e2e:visual (pinned Playwright image, visual-light project)
+
+Run 1: 679 passed (5.3m)
+Run 2: 679 passed (5.3m)
+
+The same commit passing twice with no reseed is what the second run proves: the
+widget administration baselines no longer depend on whether another visual state
+has recorded a refused embed.
+
+The 16 known-red 080e-period-close states of issue #73 passed in both runs.
