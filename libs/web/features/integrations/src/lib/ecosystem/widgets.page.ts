@@ -1,12 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  resource,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,8 +8,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
 import { WIDGET_KINDS, type WidgetKind, type WidgetView } from '@bf/contracts';
-import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
@@ -44,7 +35,6 @@ const ORIGIN = /^https?:\/\/[a-z0-9.-]+(:\d{2,5})?$/i;
 @Component({
   selector: 'bf-widgets-page',
   imports: [
-    DateTimePipe,
     DecimalPipe,
     EcosystemNav,
     FormsModule,
@@ -66,9 +56,7 @@ const ORIGIN = /^https?:\/\/[a-z0-9.-]+(:\d{2,5})?$/i;
 })
 export class WidgetsPage {
   private readonly api = injectApi();
-  private readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
-  protected readonly timezone = computed(() => this.session.timezone());
   protected readonly kinds = WIDGET_KINDS;
   protected readonly columns = ['name', 'origins', 'amounts', 'views', 'status', 'actions'];
 

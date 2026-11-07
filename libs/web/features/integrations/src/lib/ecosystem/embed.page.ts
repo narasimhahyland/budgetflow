@@ -29,9 +29,8 @@ import { data, errorMessage, errorStatus, injectApi, valueOf } from '../api';
         <sat-banner variant="important" data-testid="embed-not-allowed">
           <sat-banner-message>
             <strong>This site is not allowed to show the widget.</strong>
-            {{ message() }} An administrator adds the exact address of this page to the widget's
-            allowed sites before it will render here. Until then nothing is shown, and no data has
-            been read.
+            An administrator adds the exact address of this page to the widget's allowed sites
+            before it will render here. Until then nothing is shown, and no data has been read.
           </sat-banner-message>
         </sat-banner>
       } @else if (status() === 409) {

@@ -299,10 +299,7 @@
         <ng-container matColumnDef="views">
           <th mat-header-cell *matHeaderCellDef scope="col" class="bf-num">Views in 30 days</th>
           <td mat-cell *matCellDef="let w" class="bf-num">
-            <span class="bf-cell__primary">{{ w.viewsLast30Days | number }}</span>
-            <span class="bf-cell__secondary" data-testid="relative-time">{{
-              w.updatedAt | bfDateTime: timezone()
-            }}</span>
+            {{ w.viewsLast30Days | number }}
           </td>
         </ng-container>
 

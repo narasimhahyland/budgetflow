@@ -1773,7 +1773,7 @@
       "id": "087b-year-end-run",
       "role": "finance-admin",
       "path": "/finance/year-end/80000000-0000-4000-8000-000000000010",
-      "waitFor": "role=heading[name=\"Year end FY2026 \u2192 FY2027\"]",
+      "waitFor": "role=heading[name=\"Year end FY2026 → FY2027\"]",
       "states": [
         {
           "state": "draft"
@@ -2625,6 +2625,214 @@
               "scrollTop": true
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "092a-bi-connector",
+      "role": "integration-admin",
+      "path": "/admin/integrations/bi",
+      "waitFor": "role=heading[name=\"BI connector\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "dataset-fields",
+          "actions": [
+            {
+              "click": "[data-testid=bi-fields-budgets]"
+            },
+            {
+              "waitFor": ".bf-fields"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "forbidden",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
+      "id": "092a-my-bi-connections",
+      "role": "analyst",
+      "path": "/me/bi-connections",
+      "waitFor": "role=heading[name=\"My BI connections\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "connect-form",
+          "actions": [
+            {
+              "click": "[data-testid=bi-connect]"
+            },
+            {
+              "waitFor": "[data-testid=bi-connect-submit]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "092c-assistant-connector",
+      "role": "integration-admin",
+      "path": "/admin/integrations/assistants",
+      "waitFor": "role=heading[name=\"Connector for AI assistants\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "consent",
+          "role": "event-organizer",
+          "path": "/me/ai-assistants",
+          "waitFor": "role=heading[name=\"My connected AI assistants\"]",
+          "actions": [
+            {
+              "click": "[data-testid=assistant-connect]"
+            },
+            {
+              "waitFor": "[data-testid=assistant-consent-text]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "092b-no-code-connectors",
+      "role": "integration-admin",
+      "path": "/admin/integrations/automations",
+      "waitFor": "role=heading[name=\"No-code automations\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "consent",
+          "role": "event-organizer",
+          "path": "/me/automations",
+          "waitFor": "role=heading[name=\"My automations\"]",
+          "actions": [
+            {
+              "click": "[data-testid=automation-connect]"
+            },
+            {
+              "waitFor": "[data-testid=automation-consent-text]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "092d-partner-marketplace",
+      "role": "integration-admin",
+      "path": "/admin/integrations/partners",
+      "waitFor": "role=heading[name=\"Marketplace partners\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "read-only",
+          "role": "auditor",
+          "waitFor": "[data-testid=partners-read-only]"
+        }
+      ]
+    },
+    {
+      "id": "092d-marketplace",
+      "role": "event-organizer",
+      "path": "/marketplace",
+      "waitFor": "role=heading[name=\"Marketplace\"]",
+      "states": [
+        {
+          "state": "no-offers"
+        },
+        {
+          "state": "filtered",
+          "actions": [
+            {
+              "fill": ["[data-testid=marketplace-city]", "Bengaluru"]
+            },
+            {
+              "waitFor": "[data-testid=marketplace-clear-filters]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "102d-embeddable-widgets",
+      "role": "integration-admin",
+      "path": "/admin/widgets",
+      "waitFor": "role=heading[name=\"Embeddable widgets\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "add-widget",
+          "actions": [
+            {
+              "click": "[data-testid=widget-create]"
+            },
+            {
+              "waitFor": "[data-testid=widget-origins]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "no-sites",
+          "actions": [
+            {
+              "click": "[data-testid=widget-create]"
+            },
+            {
+              "waitFor": "[data-testid=widget-origins]"
+            },
+            {
+              "fill": ["[data-testid=widget-origins]", "intranet.example.test"]
+            },
+            {
+              "waitFor": "[data-testid=widget-origin-error]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "102d-widget-embed",
+      "role": "employee",
+      "path": "/embed/93000000-0000-4000-8000-000000000021",
+      "waitFor": "[data-testid=embed-not-allowed]",
+      "states": [
+        {
+          "state": "origin-not-allowed"
         }
       ]
     }
