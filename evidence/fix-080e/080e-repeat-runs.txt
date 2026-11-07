@@ -1,0 +1,13 @@
+run 1 | integrity_check_runs before=0 |   38 passed (28.6s) 
+run 2 | integrity_check_runs before=0 |   38 passed (28.4s) 
+
+Each line: one `--grep 080e` run of the visual project in the pinned Playwright image against the
+bf-fix080e stack, from a single deterministic seed, retries off. 38 tests = 14 role sign-ins
+(the `setup` project, a dependency) + the 24 `080e` states.
+
+Runs discarded and repeated where a concurrent Playwright run in this worktree deleted the shared
+`dist/.playwright` artifacts directory mid-run and the `setup` project failed with ENOENT.
+
+Reproduction of the failure, same stack, after one POST /api/integrity/ledger-checks:
+  17 failed  21 passed   (the 16 CI states, plus acknowledge-dialog at mobile, which differs
+                          locally because the audit-entry count is 80 here and was 81 in CI)
