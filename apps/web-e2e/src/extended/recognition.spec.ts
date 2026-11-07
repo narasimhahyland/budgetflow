@@ -142,16 +142,19 @@ test.describe('organizer recognition credits the work without exposing a respond
       await expect(page.getByTestId(`note-${id}`)).toContainText(seeded!.authorName);
     }
 
-    // Feedback is either backed by enough responses or withheld with the threshold spelled out.
-    if (profile.averagePulse.suppressed) {
-      await expect(page.getByTestId('organizer-pulse-suppressed')).toHaveText(
-        profile.averagePulse.suppressionReason!,
-      );
-    } else {
-      await expect(page.getByTestId('organizer-pulse')).toContainText(
-        String(profile.averagePulse.groupSize),
-      );
-    }
+    // This organizer's feedback sits above the response threshold in the seed, so it is disclosed
+    // with the group size beside it. Asserted outright rather than branching on `suppressed`: a
+    // seed that fell under the threshold should fail here and be looked at, not silently swap to
+    // checking the other rendering. The suppressed wording is proved in outcomes.spec.ts, against
+    // a group that really is too small.
+    expect(
+      profile.averagePulse.suppressed,
+      'the seeded organizer has enough feedback to disclose',
+    ).toBe(false);
+    await expect(page.getByTestId('organizer-pulse')).toContainText(
+      String(profile.averagePulse.groupSize),
+    );
+    await expect(page.getByTestId('organizer-pulse-suppressed')).toHaveCount(0);
     await expect(page.getByTestId('organizer-events')).toContainText(
       String(profile.eventsOrganised),
     );

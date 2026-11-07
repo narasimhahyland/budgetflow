@@ -142,13 +142,11 @@ test.describe('the reviewer queue shows what is waiting, and nothing else (120b)
       'has already pre-encumbered its programme budget',
     );
 
-    // The queue is whatever the API says it is: every waiting claim has a row, and an empty queue
-    // says so rather than rendering an empty table.
-    if (queue.items.length === 0) {
-      await expect(page.getByTestId('review-empty')).toContainText('No claims waiting');
-    } else {
-      for (const claim of queue.items)
-        await expect(page.getByTestId(`review-claim-${claim.id}`)).toContainText(claim.merchant);
-    }
+    // The deterministic seed submits no claim, so this queue is empty and has to say so rather
+    // than render a headed table with nothing under it. Asserted outright instead of branching on
+    // the count: were the queue to go empty because scoping broke, a branch would quietly take the
+    // empty path and pass, and were a claim ever seeded, this fails here and asks to be extended.
+    expect(queue.items, 'the deterministic seed leaves no claim waiting for review').toEqual([]);
+    await expect(page.getByTestId('review-empty')).toContainText('No claims waiting');
   });
 });
