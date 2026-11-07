@@ -86,11 +86,11 @@ own stack side by side; give it a `.env` with different ports. API health is `/h
 generated OpenAPI document is at `/api/openapi.json`.
 
 The seed creates one Keycloak user per role in the single Hyland tenant (all other seed data is
-fictional). The shared dev-only password lives in `infra/.env.example` as `BF_E2E_PASSWORD`, and the
-usernames come from the realm export in [`infra/keycloak/`](infra/keycloak/) and the fixtures in
-[`libs/seed`](libs/seed/). The per-role username list and the admin-console table are kept in the
-local access note (`budgetflow-docs/local-access.md`) beside the checkout, outside this repository.
-Every value in `infra/.env.example` is a dev-only placeholder that works against a local stack only.
+fictional). [`docs/local-access.md`](docs/local-access.md) lists the per-role usernames, the
+scenario-only users, the service credentials and the stack commands. The shared dev-only password
+lives in `infra/.env.example` as `BF_E2E_PASSWORD`; the usernames are generated from the fixtures in
+[`libs/seed`](libs/seed/) into the realm export in [`infra/keycloak/`](infra/keycloak/). Every value
+in `infra/.env.example` is a dev-only placeholder that works against a local stack only.
 
 ## How verification works
 
