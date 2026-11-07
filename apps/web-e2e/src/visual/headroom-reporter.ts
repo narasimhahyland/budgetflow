@@ -41,7 +41,12 @@ export default class HeadroomReporter implements Reporter {
     }
     const message = result.errors.map((e) => e.message ?? '').join('\n');
     const pixels = Number(/(\d+) pixels \(ratio /.exec(message)?.[1]);
-    const expected = result.attachments.find((a) => a.name === 'expected')?.path;
+    // The allowance is a share of the baseline's own pixels, so it is measured from the baseline
+    // Playwright attached (named after the snapshot, suffixed `-expected`).
+    const isExpected = (s: string) => s.replace(/\.png$/, '').endsWith('expected');
+    const expected = result.attachments.find(
+      (a) => a.path && (isExpected(a.name) || isExpected(a.path)),
+    )?.path;
     const size = expected ? pngSize(expected) : null;
     if (!Number.isFinite(pixels) || !size) {
       // Not a comparison result: the state failed to reach its baseline at all (a timeout, a

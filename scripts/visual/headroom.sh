@@ -21,6 +21,7 @@ bash scripts/visual/pw-docker.sh npx playwright test \
   -c apps/web-e2e/playwright.config.ts \
   --project=visual-light \
   --retries=0 \
+  --trace=off \
   --reporter=list,./apps/web-e2e/src/visual/headroom-reporter.ts \
   "$@"
 exit 0
