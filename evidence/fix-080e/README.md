@@ -118,6 +118,10 @@ screen: they start at the event title, status and action bar rather than halfway
 Flaky once in two full runs before the change; 5 of 5 clean runs of the state after it, then clean
 in both full verification runs below.
 
+Only the mobile baseline moves for the scroll (259px). Re-recording picked up the same navigation
+rail staleness as the `080e` set in the desktop and tablet ones: their whole difference against
+`main` is x 16–40, y 174–622.
+
 ## Verification
 
 Both runs: full `visual-light` project, no `-g` filter, each from a fresh stack and a fresh
