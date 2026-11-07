@@ -17,14 +17,22 @@ const NEEDS: Record<string, string> = {
   'Budget requests': 'budget.read',
   'Plans and versions': 'budget.create_root',
   'Program templates': 'master_data.manage',
+  // 031a reads budgets to model against; who may author or promote a scenario is decided per
+  // scenario by the API, so the entry follows the same budget.read the list endpoint asserts.
+  'What-if scenarios': 'budget.read',
   Events: 'tenant.read',
   'Co-funding board': 'event.manage',
+  // 122a turnout carries no money and names no individual, so tenant membership is enough.
+  Participation: 'tenant.read',
   'Approval inbox': 'request.approve',
   'Request funds': 'request.create',
   'My requests': 'request.create',
   'My budgets': 'request.create',
   // 010a lists only the signed-in person's own activity, so tenant membership is the whole check.
   'My activity': 'tenant.read',
+  // 120b and 120a belong to a person rather than to a finance role, so every member reaches them.
+  'My wallets': 'tenant.read',
+  Recognition: 'tenant.read',
   Organization: 'org.read',
   People: 'org.read',
   Headcount: 'org.read',
@@ -52,6 +60,10 @@ const NEEDS: Record<string, string> = {
   'Spending outlook': 'budget.read',
   // 016a names the action its endpoint checks; it is held only at tenant scope, unlike report.read.
   'Board and FP&A pack': 'report.board_pack',
+  // 011b and 015c read the same reporting scope; drafting and approving a summary need audit.read
+  // on top, which the page itself decides rather than the rail.
+  'Leadership summaries': 'report.read',
+  Outcomes: 'report.read',
   'Approval history': 'audit.read',
   'Audit log': 'audit.read',
   'Org import': 'org.manage',
@@ -73,7 +85,8 @@ const NEEDS: Record<string, string> = {
 // 011a sits beside Home, so every role that is a member of the tenant opens with these two.
 const HOME = ['Home', 'Ask BudgetFlow'];
 const ORG = ['Organization', 'People', 'Headcount'];
-const READ = ['Budget hierarchy', 'Budget list', 'Budget requests'];
+// 031a closes the Budgets group, so for a reader without allocate it follows the three read entries.
+const READ = ['Budget hierarchy', 'Budget list', 'Budget requests', 'What-if scenarios'];
 const OWNED_BUDGETS = [
   'Budget hierarchy',
   'Allocation workspace',
@@ -81,12 +94,11 @@ const OWNED_BUDGETS = [
   'Budget requests',
 ];
 // From Phase 5 everyone in the tenant browses events; requesting (and the employee's own budgets)
-// follows request.create, which covers the home location's budgets as well as owned ones. 010a and
-// 069a close the group and need only tenant.read, so roles without request.create see those two on
-// their own.
-const REQUESTS = ['Request funds', 'My requests', 'My budgets', 'My activity', 'Policy assistant'];
-// What roles without request.create see of that group.
-const PERSONAL = ['My activity', 'Policy assistant'];
+// follows request.create, which covers the home location's budgets as well as owned ones. 010a,
+// 120b, 120a and 069a sit at the end of the group on tenant.read alone, so a role without
+// request.create still sees those four on their own.
+const PERSONAL = ['My activity', 'My wallets', 'Recognition', 'Policy assistant'];
+const REQUESTS = ['Request funds', 'My requests', 'My budgets', ...PERSONAL];
 // Everything tenant.settings.manage opens, in rail order; Phase 14 added the last four.
 const TENANT_ADMIN = [
   'Tenant settings',
@@ -99,17 +111,23 @@ const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
 // The Insights entries report.read alone opens, then 016b, which follows budget.read: no role holds
 // one without the other. 016a needs report.board_pack and is listed per role.
 const INSIGHTS_READ = ['Reports', 'Utilization', 'Forecast and variance', 'Spending outlook'];
+// 011b and 015c follow 016a in the group, so they come after the board pack for the roles that
+// hold report.board_pack and straight after the read entries for the roles that do not.
+const INSIGHTS_DRAFTED = ['Leadership summaries', 'Outcomes'];
 // The two AI review queues in Finance, both tenant-scope only (Finance Admin, Controller, Auditor).
 const AI_QUEUES = ['Matching suggestions', 'Anomaly flags'];
 const OWNER = [
   ...HOME,
   ...OWNED_BUDGETS,
+  'What-if scenarios',
   'Events',
   'Co-funding board',
+  'Participation',
   'Approval inbox',
   ...REQUESTS,
   ...ORG,
   ...INSIGHTS_READ,
+  ...INSIGHTS_DRAFTED,
 ];
 
 const EXPECTED: Record<RoleId, string[]> = {
@@ -117,6 +135,7 @@ const EXPECTED: Record<RoleId, string[]> = {
   'org-admin': [
     ...HOME,
     'Events',
+    'Participation',
     ...PERSONAL,
     ...ORG,
     'Org import',
@@ -128,14 +147,17 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...HOME,
     ...OWNED_BUDGETS,
     'Plans and versions',
+    'What-if scenarios',
     'Events',
     'Co-funding board',
+    'Participation',
     'Approval inbox',
     ...REQUESTS,
     ...ORG,
     'Delegation of authority',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
+    ...INSIGHTS_DRAFTED,
     'Approval history',
     'Audit log',
     'Rules and policies',
@@ -148,8 +170,10 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...OWNED_BUDGETS,
     'Plans and versions',
     'Program templates',
+    'What-if scenarios',
     'Events',
     'Co-funding board',
+    'Participation',
     'Approval inbox',
     ...REQUESTS,
     ...ORG,
@@ -168,6 +192,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Delegation of authority',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
+    ...INSIGHTS_DRAFTED,
     'Approval history',
     'Audit log',
     'Rules and policies',
@@ -177,6 +202,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...HOME,
     ...READ,
     'Events',
+    'Participation',
     'Approval inbox',
     ...PERSONAL,
     ...ORG,
@@ -189,6 +215,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Delegation of authority',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
+    ...INSIGHTS_DRAFTED,
     'Approval history',
     'Audit log',
     'Rules and policies',
@@ -198,33 +225,37 @@ const EXPECTED: Record<RoleId, string[]> = {
   'department-head': OWNER,
   'regional-manager': OWNER,
   'location-manager': OWNER,
-  'event-organizer': [...HOME, 'Events', 'Co-funding board', ...REQUESTS, ...ORG],
-  employee: [...HOME, 'Events', ...REQUESTS, ...ORG],
+  'event-organizer': [...HOME, 'Events', 'Co-funding board', 'Participation', ...REQUESTS, ...ORG],
+  employee: [...HOME, 'Events', 'Participation', ...REQUESTS, ...ORG],
   auditor: [
     ...HOME,
     ...READ,
     'Events',
+    'Participation',
     ...PERSONAL,
     ...ORG,
     ...AI_QUEUES,
     'Delegation of authority',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
+    ...INSIGHTS_DRAFTED,
     'Approval history',
     'Audit log',
     'Rules and policies',
     'AI accuracy',
   ],
-  'integration-admin': [...HOME, 'Events', ...PERSONAL, 'Integrations'],
+  'integration-admin': [...HOME, 'Events', 'Participation', ...PERSONAL, 'Integrations'],
   // The analyst holds report.board_pack, so 016a is in their navigation; the audit entries are not.
   analyst: [
     ...HOME,
     ...READ,
     'Events',
+    'Participation',
     ...PERSONAL,
     ...ORG,
     ...INSIGHTS_READ,
     'Board and FP&A pack',
+    ...INSIGHTS_DRAFTED,
   ],
 };
 
