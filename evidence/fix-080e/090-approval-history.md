@@ -31,10 +31,17 @@ Full `visual-light` project, no filter, fresh stack and deterministic seed befor
 pinned image `mcr.microsoft.com/playwright:v1.64.1-noble`:
 
 ```text
-run 1: 629 passed (5.5m)                    0 failed, 0 flaky
-run 2: 628 passed, 1 flaky (5.6m)           0 failed
-       flaky: 016a-board-pack draft › mobile (passed on retry)
+run 1: 629 passed (5.2m)                    0 failed, 0 flaky
+run 2: 628 passed, 1 flaky (5.5m)           0 failed
+       flaky: 047b-attendee-needs default › desktop (passed on retry)
 ```
+
+The flaky state is not a pixel difference and not near-threshold drift: its `waitFor` element was
+not found inside the timeout, so the screen had not finished loading. It sits at 48% of its
+allowance and passed in 0.5s on retry. A different state flaked this way in an earlier pair of
+runs (`016a-board-pack draft › mobile`), so roughly one state per full run loses a race with its
+own data. That is a separate, pre-existing problem with no ticket — worth one, but not something
+this change touches.
 
 States specifically checked in run 2:
 
@@ -50,6 +57,6 @@ else, the rest of the page is unchanged, and the navigation rail is current.
 
 ## Predicted by the headroom report
 
-`npm run visual:headroom`, added in #76, had this state at **93% of its allowance** before it
-tipped over — it is in `visual-headroom-report.md` in this directory at 2402 px of 2592. That is
-what the report is for. 41 states remain at 70% or more.
+`npm run visual:headroom`, added in #76, had this state at **89% of its allowance** before it
+tipped over — it is in `visual-headroom-report.md` in this directory at 2300 px of 2592. That is
+what the report is for. 44 states remain at 70% or more.
