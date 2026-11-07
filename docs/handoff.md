@@ -314,6 +314,6 @@ Loose ends without a ticket:
 | [`docs/ai-harness/README.md`](ai-harness/README.md)                     | How the agent harness builds this repository — skills, subagents, hooks, worktrees                                                                                                                                                                  |
 | [`evidence/`](../evidence/)                                             | Per-phase proof. `evidence/README.md` explains the layout; named folders (`gate-reseed`, `stale-rail`, `fix-080e`, `guard-worktrees`, `nav-overlap`) hold investigations rather than phases, and several are better reading than the phase packs    |
 
-Published pages: [leadership overview](https://narasimhahyland.github.io/budgetflow/overview/),
-[capabilities](https://narasimhahyland.github.io/budgetflow/capabilities/),
-[clickable design preview](https://narasimhahyland.github.io/budgetflow/).
+Three pages are published outside the repository — a leadership overview, a capabilities page and the
+clickable design preview. The [README](../README.md#documentation) links all three; the preview is
+built from the approved Stitch exports and is described in [`docs/ux/preview.md`](ux/preview.md).
