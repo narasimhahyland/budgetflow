@@ -25,6 +25,8 @@ test('signing in with Hyland SSO lands in BudgetFlow as the linked employee', as
     'Request funds',
     'My requests',
     'My budgets',
+    // 010a lists only this person's own activity, so tenant membership is the whole check.
+    'My activity',
     'Policy assistant',
     'Organization',
     'People',
