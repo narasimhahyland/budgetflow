@@ -199,8 +199,7 @@ export class SummaryListPage {
 
   /**
    * Periods are only offered for drafting when they are closed, because a closed period has the
-   * snapshot the summary quotes. Roles that cannot read the close calendar simply get no button;
-   * the API would refuse them anyway.
+   * snapshot the summary quotes.
    */
   private readonly periods = resource({
     loader: async () => {
@@ -211,7 +210,14 @@ export class SummaryListPage {
       }
     },
   });
+  /**
+   * Drafting is `audit.read`, the same action the API checks: leadership and finance draft the
+   * company summary, an analyst reads the approved one. Reading the close calendar is not enough
+   * to stand in for it — an analyst can read it — so without this the button is offered to someone
+   * the API will refuse the moment they press it.
+   */
   protected readonly draftablePeriod = computed(() => {
+    if (!this.session.can('audit.read')) return undefined;
     const summarised = new Set(this.items().map((s) => s.periodId));
     const closed = (valueOf(this.periods)?.items ?? []).filter(
       (p) => (p.status === 'closed' || p.status === 'locked') && !summarised.has(p.id),
