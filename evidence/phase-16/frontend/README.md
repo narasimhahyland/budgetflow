@@ -115,10 +115,9 @@ the widget journey deletes the widget it made.
 **Visual baselines.** 51 new baselines for the Phase 16 screens at three viewports. 123 existing
 baselines changed, all of them the navigation rail gaining its Phase 16 entries; the before/after
 pair in `baseline-review/` shows the only difference on an unrelated screen. The 16 known-red
-`080e-period-close` states of issue #73 passed in both full runs; seven of their tablet baselines are
-among the 123 that changed, for the navigation rail alone, so they will conflict with the fix on
-`fix/080e-period-close-visual` and the integrator should take that branch's content with this
-branch's rail.
+`080e-period-close` states of issue #73 pass: #76 landed on main during this work and fixed their
+cause (the worker's nightly rebuild firing under the suite). This branch only re-records their
+navigation rail.
 
 **One visual state was rewritten after review.** The embed state first asked for a real widget from
 a host that is not on its list. That is refused _and recorded_, and the widget administration screen
@@ -131,13 +130,14 @@ Activity tab, which scrolls the shell's content box by an amount that varies, so
 at a different offset from one run to the next. The state now returns to the top before it is
 captured, which also makes it a better baseline: the event header is in the frame.
 
-**A pre-existing determinism gap surfaced and was fixed in the visual configuration.**
-`090-approval-history` renders its Decided cell with `bfDateTime` but without the
+**A pre-existing determinism gap surfaced, and main had already fixed it.**
+`090-approval-history` rendered its Decided cell with `bfDateTime` but without the
 `relative-time` marker the rest of the app uses, so the committed baseline recorded the minute
-the seed happened to run (5 Nov) and the state failed after any reseed. The nav rail crops of
-the expected and actual images are byte-identical, so this is not the Phase 16 rail; the cell is
-now masked for the baseline. Tagging the cell in the Phase 7 component would be the better fix
-and belongs to whoever owns that screen.
+the seed happened to run and the state failed after any reseed. The nav rail crops of the
+expected and actual images were byte-identical, so it was never the Phase 16 rail. This branch
+masked it in the visual configuration; #77 fixed it properly in the component, so on merging
+main that mask was dropped, main's baselines were taken, and only the tablet one was
+re-recorded for the Phase 16 navigation entries.
 
 **Two defects were found by opening the regenerated baselines.** The embed refusal said the same
 sentence twice (the headline and the API's detail), and the widget list paired a view count with a
