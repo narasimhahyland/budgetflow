@@ -30,6 +30,14 @@ import { PgBoss } from 'pg-boss';
 const NIGHTLY = 'integrity.nightly';
 const DEAD_LETTER = 'integrity.dead-letter';
 
+/**
+ * A wall-clock schedule set to `off` is not registered. The local stack turns every sweep off so a
+ * run never finds state that appeared under it between one assertion and the next: the suites drive
+ * the same work through its API (`/api/integrity/ledger-checks`, `/api/approvals/sla-sweep`,
+ * `/api/admin/retention/runs`, a report run now), which they can time.
+ */
+const SCHEDULE_OFF = 'off';
+
 const BUDGET_EVENT_TOPICS = ['budget.change_requested'] as const;
 
 /**
@@ -137,12 +145,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       const n = await this.rebuild.runNightly();
       this.log.log(`nightly ledger rebuild check ran for ${n} tenant(s)`);
     });
-    await boss.schedule(
-      NIGHTLY,
-      process.env.NIGHTLY_LEDGER_CHECK_CRON ?? '0 2 * * *',
-      {},
-      { tz: 'UTC' },
-    );
+    await this.schedule(boss, NIGHTLY, process.env.NIGHTLY_LEDGER_CHECK_CRON ?? '0 2 * * *');
     // Escalates approvals that passed their service level to the next delegation-of-authority step.
     await boss.createQueue(SLA_SWEEP_TOPIC, {
       retryLimit: 2,
@@ -154,12 +157,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       const escalated = await this.slaSweep.runForAllTenants();
       this.log.log(`SLA sweep escalated ${escalated} overdue approval(s)`);
     });
-    await boss.schedule(
-      SLA_SWEEP_TOPIC,
-      process.env.SLA_SWEEP_CRON ?? '*/30 * * * *',
-      {},
-      { tz: 'UTC' },
-    );
+    await this.schedule(boss, SLA_SWEEP_TOPIC, process.env.SLA_SWEEP_CRON ?? '*/30 * * * *');
     // Queues the scheduled report deliveries that fell due.
     await boss.createQueue(REPORT_SWEEP_TOPIC, {
       retryLimit: 2,
@@ -171,12 +169,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       const queued = await this.reportDelivery.sweepAllTenants();
       if (queued) this.log.log(`queued ${queued} scheduled report delivery job(s)`);
     });
-    await boss.schedule(
-      REPORT_SWEEP_TOPIC,
-      process.env.REPORT_SWEEP_CRON ?? '*/5 * * * *',
-      {},
-      { tz: 'UTC' },
-    );
+    await this.schedule(boss, REPORT_SWEEP_TOPIC, process.env.REPORT_SWEEP_CRON ?? '*/5 * * * *');
     // Nightly data retention (111): fixed scope, legal holds always win, append-only run report.
     await boss.createQueue(RETENTION_SWEEP_TOPIC, {
       retryLimit: 2,
@@ -188,11 +181,10 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       const n = await this.retention.runNightly();
       this.log.log(`nightly retention run ran for ${n} tenant(s)`);
     });
-    await boss.schedule(
+    await this.schedule(
+      boss,
       RETENTION_SWEEP_TOPIC,
       process.env.RETENTION_SWEEP_CRON ?? '0 1 * * *',
-      {},
-      { tz: 'UTC' },
     );
     // Bulk owner invitations (103a): the invitation itself grants nothing.
     await boss.createQueue(OWNER_INVITED_TOPIC, {
@@ -239,6 +231,15 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     this.log.log(
       'worker ready: outbox drain, email, budget-control, budget-alert and integrity jobs running',
     );
+  }
+
+  private async schedule(boss: PgBoss, queue: string, cron: string): Promise<void> {
+    if (cron === SCHEDULE_OFF) {
+      await boss.unschedule(queue);
+      this.log.log(`${queue}: schedule off`);
+      return;
+    }
+    await boss.schedule(queue, cron, {}, { tz: 'UTC' });
   }
 
   async onApplicationShutdown(): Promise<void> {

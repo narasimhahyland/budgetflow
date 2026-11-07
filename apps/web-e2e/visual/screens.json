@@ -980,8 +980,7 @@
         {
           "state": "default"
         }
-      ],
-      "mask": ["[data-testid^=decision-] td:first-child"]
+      ]
     },
     {
       "id": "115-employee-dashboard",
