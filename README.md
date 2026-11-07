@@ -19,31 +19,35 @@ repository read [`AGENTS.md`](AGENTS.md) instead.
 Delivery runs as 20 gated phases. A phase is on `main` only when its evidence pack is committed under
 `evidence/phase-NN/`, so the table below is derived from the repository, not from the plan.
 
-| Phase | Scope                                                | On `main`                          |
-| ----- | ---------------------------------------------------- | ---------------------------------- |
-| 1     | Architecture, domain, ledger, schema, test harness   | [yes](evidence/phase-01/)          |
-| 2     | Shell, identity, tenancy, Keycloak sign-in           | [yes](evidence/phase-02/)          |
-| 3     | Org and finance master data                          | [yes](evidence/phase-03/)          |
-| 4     | Budgets: allocation, controls, versions, phasing     | [yes](evidence/phase-04/)          |
-| 5     | Events, co-funding, approvals, requests              | [yes](evidence/phase-05/)          |
-| 6     | Actuals, matching, GL tie-out, accruals              | [yes](evidence/phase-06/)          |
-| 7     | Rules engine, workflows, delegation hygiene          | [yes](evidence/phase-07/)          |
-| 8     | Channels: Slack, Teams, actionable email, phone      | [yes](evidence/phase-08/)          |
-| 9     | Event depth: quotes, checklists, surveys             | [yes](evidence/phase-09/)          |
-| 10    | Reports, dashboards, analytics                       | [yes](evidence/phase-10/)          |
-| 11    | Close, forecast, board pack                          | [yes](evidence/phase-11/)          |
-| 12    | Integrations and public API                          | [yes](evidence/phase-12/)          |
-| 13    | AI layer (suggests only, never acts)                 | [yes](evidence/phase-13/)          |
-| 14    | Experience and administration                        | [backend only](evidence/phase-14/) |
-| 15    | Extended product features                            | [backend only](evidence/phase-15/) |
-| 16-20 | Ecosystem, quality, security, evidence, final report | not started                        |
+| Phase | Scope                                              | On `main`                          |
+| ----- | -------------------------------------------------- | ---------------------------------- |
+| 1     | Architecture, domain, ledger, schema, test harness | [yes](evidence/phase-01/)          |
+| 2     | Shell, identity, tenancy, Keycloak sign-in         | [yes](evidence/phase-02/)          |
+| 3     | Org and finance master data                        | [yes](evidence/phase-03/)          |
+| 4     | Budgets: allocation, controls, versions, phasing   | [yes](evidence/phase-04/)          |
+| 5     | Events, co-funding, approvals, requests            | [yes](evidence/phase-05/)          |
+| 6     | Actuals, matching, GL tie-out, accruals            | [yes](evidence/phase-06/)          |
+| 7     | Rules engine, workflows, delegation hygiene        | [yes](evidence/phase-07/)          |
+| 8     | Channels: Slack, Teams, actionable email, phone    | [yes](evidence/phase-08/)          |
+| 9     | Event depth: quotes, checklists, surveys           | [yes](evidence/phase-09/)          |
+| 10    | Reports, dashboards, analytics                     | [yes](evidence/phase-10/)          |
+| 11    | Close, forecast, board pack                        | [yes](evidence/phase-11/)          |
+| 12    | Integrations and public API                        | [yes](evidence/phase-12/)          |
+| 13    | AI layer (suggests only, never acts)               | [yes](evidence/phase-13/)          |
+| 14    | Experience and administration                      | [backend only](evidence/phase-14/) |
+| 15    | Extended product features                          | [backend only](evidence/phase-15/) |
+| 16    | Ecosystem: BI, assistant, no-code, marketplace     | [backend only](evidence/phase-16/) |
+| 17-20 | Quality, security, evidence, final report          | not started                        |
 
-Phases 14 and 15 merged their API, domain and database halves; their Angular screens are not on `main`
-yet. Each pack holds the gate summary, the functional outcome table, scrubbed API responses and
+Phases 14, 15 and 16 merged their API, domain and database halves; their Angular screens are not on
+`main` yet. Each pack holds the gate summary, the functional outcome table, scrubbed API responses and
 database proofs, and the visual QA report — [`evidence/README.md`](evidence/README.md) explains the
 layout. Screens are tracked individually in
 [`docs/ux/screen-inventory.md`](docs/ux/screen-inventory.md) (124 specified screens plus the ones
 added by product and finance review).
+
+For the state of play in more detail — what is in flight, what was deferred and why, the known gaps,
+and the operational traps that cost time to learn — read [`docs/handoff.md`](docs/handoff.md).
 
 ## Run it locally
 
@@ -158,8 +162,9 @@ A newcomer would otherwise trip over these. Each is a decision, not an oversight
   ([ADR 0004](docs/adr/0004-light-theme-only.md)).
 - **English only.** App copy is plain English in the templates; there are no translation files.
 - **Accessibility checks are deferred.** They are not part of the gates yet.
-- **No native app.** The phone experience is the responsive web app; the Capacitor wrappers are
-  Phase 16 work and are not on `main`.
+- **No native app.** The phone experience is the responsive web app. Native wrappers (115a) are
+  deferred by decision: the Phase 8 mobile routes already serve phone users, so deferring costs no
+  user-facing capability.
 - **The AI layer runs on a deterministic fake provider.** No model token, no live model call. The
   features are real and guarded — retrieval scoped by the same authorization as the rest of the API,
   data minimization, a query log, and a person confirming every action — but the answers come from
@@ -170,14 +175,15 @@ A newcomer would otherwise trip over these. Each is a decision, not an oversight
 
 ## Documentation
 
-| Where                                                  | What                                                                             |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------- |
-| [`docs/architecture/`](docs/architecture/)             | Domain model, ledger, state machines, authorization, API conventions             |
-| [`docs/adr/`](docs/adr/)                               | Architecture decisions and their consequences                                    |
-| [`docs/ux/`](docs/ux/)                                 | Screen inventory, per-screen specs, design system, design preview                |
-| [`docs/testing/`](docs/testing/invariant-scenarios.md) | Invariant-to-scenario map                                                        |
-| [`docs/ai-harness/`](docs/ai-harness/README.md)        | How the agent harness builds this repository                                     |
-| [`evidence/`](evidence/)                               | Per-phase proof: gate summaries, outcomes, screenshots, API and database samples |
+| Where                                                  | What                                                                              |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| [`docs/handoff.md`](docs/handoff.md)                   | State of play: what is in flight, what is deferred, known gaps, operational traps |
+| [`docs/architecture/`](docs/architecture/)             | Domain model, ledger, state machines, authorization, API conventions              |
+| [`docs/adr/`](docs/adr/)                               | Architecture decisions and their consequences                                     |
+| [`docs/ux/`](docs/ux/)                                 | Screen inventory, per-screen specs, design system, design preview                 |
+| [`docs/testing/`](docs/testing/invariant-scenarios.md) | Invariant-to-scenario map                                                         |
+| [`docs/ai-harness/`](docs/ai-harness/README.md)        | How the agent harness builds this repository                                      |
+| [`evidence/`](evidence/)                               | Per-phase proof: gate summaries, outcomes, screenshots, API and database samples  |
 
 Published pages: [overview](https://narasimhahyland.github.io/budgetflow/overview/),
 [capabilities](https://narasimhahyland.github.io/budgetflow/capabilities/),
