@@ -1,0 +1,344 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">{{ personal() ? 'My automations' : 'No-code automations' }}</h1>
+    <p class="bf-page__subtitle">
+      Zapier, Make, Power Automate and Workato, acting as the person who connected them
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    @if (canConnect() && !connecting()) {
+      <button
+        mat-flat-button
+        satImportantButton
+        type="button"
+        (click)="startConnect()"
+        data-testid="automation-connect"
+      >
+        Connect a platform
+      </button>
+    }
+  </div>
+</header>
+
+@if (!personal()) {
+  <bf-ecosystem-nav />
+}
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="automation-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="automation-error"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+@if (connector.isLoading() && !valueOf(connector)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the automations" /></section>
+} @else if (connector.error()) {
+  <section class="bf-card">
+    <bf-load-state
+      [error]="connector.error()"
+      what="the automations"
+      (retry)="connector.reload()"
+    />
+  </section>
+} @else if (valueOf(connector); as c) {
+  @if (created(); as token) {
+    <section
+      class="bf-card"
+      aria-labelledby="automation-token-title"
+      data-testid="automation-token"
+    >
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="automation-token-title">Your connection token</h2>
+      </div>
+      <p class="bf-card__hint">{{ token.notice }}</p>
+      <bf-one-time-secret
+        [secret]="token.token"
+        what="connection token"
+        testId="automation-connection-token"
+        (done)="dismissToken()"
+      />
+    </section>
+  }
+
+  <section class="bf-card" aria-labelledby="automation-limits-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="automation-limits-title">What an automation can do</h2>
+    </div>
+    <div class="bf-card__body">
+      <ul class="bf-never" data-testid="automation-never">
+        <li class="bf-never__title">An automation reads, and leaves drafts for a person.</li>
+        @for (line of c.neverDoes; track line) {
+          <li>{{ line }}</li>
+        }
+        <li>
+          A draft it creates stays a Draft, labelled with the platform and the person, until that
+          person opens it in BudgetFlow and submits it themselves.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  @if (!allowedPlatforms().length) {
+    <sat-banner variant="info" data-testid="automation-none-allowed">
+      <sat-banner-message>
+        <strong>No platform is allowed yet.</strong>
+        Every platform starts Not allowed. Sign-in from one ends with "This company has not allowed
+        that platform. Ask your Integration Admin." until someone allows it below.
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  <section class="bf-kpis" aria-label="Automation usage">
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Platforms allowed</p>
+      <p class="bf-kpi__value" data-testid="automation-platforms-allowed">
+        {{ allowedPlatforms().length }}
+      </p>
+      <p class="bf-kpi__delta">of {{ c.platforms.length }}</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Automations active</p>
+      <p class="bf-kpi__value" data-testid="automation-active">
+        {{ c.automationsActive | number }}
+      </p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Runs in 7 days</p>
+      <p class="bf-kpi__value">{{ c.runsLast7Days | number }}</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Connection lasts</p>
+      <p class="bf-kpi__value">{{ c.connectionLifetimeDays }} days</p>
+    </div>
+  </section>
+
+  <section class="bf-card" aria-labelledby="automation-platforms-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="automation-platforms-title">Platforms</h2>
+        <p class="bf-card__hint">
+          Allowing a platform lets people connect their own account to it. It grants nothing by
+          itself.
+        </p>
+      </div>
+    </div>
+    <div class="bf-card__body">
+      @for (p of c.platforms; track p.platform) {
+        <div class="bf-switch-row">
+          <div class="bf-switch-row__text">
+            <h3 class="bf-switch-row__title">
+              {{ p.title }}
+              @if (p.allowed) {
+                <sat-status-tag status="success">Allowed</sat-status-tag>
+              } @else {
+                <sat-status-tag status="neutral">Not allowed</sat-status-tag>
+              }
+            </h3>
+            <p class="bf-switch-row__hint">
+              {{ p.automationsActive }}
+              {{ p.automationsActive === 1 ? 'automation' : 'automations' }} connected
+            </p>
+          </div>
+          @if (canManage()) {
+            <mat-slide-toggle
+              [checked]="p.allowed"
+              [disabled]="busy()"
+              (change)="setPlatform(p.platform, $event.checked)"
+              [attr.data-testid]="'automation-platform-' + p.platform"
+              >{{ p.allowed ? 'Allowed' : 'Not allowed' }}</mat-slide-toggle
+            >
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="bf-card" aria-labelledby="automation-actions-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="automation-actions-title">Actions</h2>
+    </div>
+    <div class="bf-card__body">
+      @for (a of c.actions; track a.action) {
+        <div class="bf-switch-row">
+          <div class="bf-switch-row__text">
+            <h3 class="bf-switch-row__title">{{ a.title }}</h3>
+            <p class="bf-switch-row__hint">{{ a.description }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="bf-card" aria-labelledby="automation-triggers-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="automation-triggers-title">Triggers</h2>
+        <p class="bf-card__hint">BudgetFlow events an automation would start from.</p>
+      </div>
+    </div>
+    @if (!triggersDeliver()) {
+      <sat-banner variant="warning" class="bf-banner" data-testid="automation-triggers-pending">
+        <sat-banner-message>
+          <strong>Triggers are not delivered yet.</strong>
+          The catalogue below is settled, but nothing is sent to a platform until each payload can
+          be cut down to what the connected person may see. Build automations on the actions above
+          in the meantime.
+        </sat-banner-message>
+      </sat-banner>
+    }
+    <ul class="bf-card__body bf-chip-list">
+      @for (t of c.triggers; track t.trigger) {
+        <li class="bf-chip" [attr.data-testid]="'automation-trigger-' + t.trigger">
+          {{ t.title }}
+        </li>
+      }
+    </ul>
+  </section>
+
+  @if (connecting()) {
+    <section
+      class="bf-card"
+      aria-labelledby="automation-consent-title"
+      data-testid="automation-form"
+    >
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="automation-consent-title">Connect a platform as you</h2>
+      </div>
+      <div class="bf-card__body">
+        <ul class="bf-never" data-testid="automation-consent-text">
+          <li class="bf-never__title">{{ c.consentText }}</li>
+          @for (line of c.neverDoes; track line) {
+            <li>{{ line }}</li>
+          }
+        </ul>
+      </div>
+      <div class="bf-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Platform</mat-label>
+          <mat-select
+            [ngModel]="platform()"
+            (ngModelChange)="platform.set($event)"
+            data-testid="automation-platform-pick"
+          >
+            @for (p of allowedPlatforms(); track p.platform) {
+              <mat-option [value]="p.platform">{{ p.title }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>What is this automation for?</mat-label>
+          <input
+            matInput
+            [ngModel]="label()"
+            (ngModelChange)="label.set($event)"
+            data-testid="automation-label"
+          />
+          <mat-hint>For example, Event request intake form.</mat-hint>
+        </mat-form-field>
+      </div>
+      <fieldset class="bf-card__body">
+        <legend class="bf-card__hint">What this automation may do as you</legend>
+        @for (a of c.actions; track a.action) {
+          <mat-checkbox
+            [checked]="hasAction(a.action)"
+            (change)="pickAction(a.action, $event.checked)"
+            [attr.data-testid]="'automation-pick-' + a.action"
+            >{{ a.title }}</mat-checkbox
+          >
+        }
+      </fieldset>
+      <div class="bf-card__body">
+        <mat-checkbox
+          [ngModel]="consented()"
+          (ngModelChange)="consented.set($event)"
+          data-testid="automation-consent"
+          >I understand this platform acts as me and cannot approve, submit or move
+          money</mat-checkbox
+        >
+      </div>
+      <div class="bf-form__actions">
+        <button mat-button type="button" (click)="connecting.set(false)">Cancel</button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="busy() || !consented() || !platform() || !label().trim() || !actions().size"
+          (click)="connect()"
+          data-testid="automation-connect-submit"
+        >
+          Allow
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (revoking(); as r) {
+    <section
+      class="bf-card"
+      aria-labelledby="automation-revoke-title"
+      data-testid="automation-revoke"
+    >
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" id="automation-revoke-title">Revoke {{ r.label }}?</h2>
+          <p class="bf-card__hint">
+            The next call from {{ r.clientLabel }} fails with "Access revoked". Drafts it already
+            created stay where they are.
+          </p>
+        </div>
+      </div>
+      <div class="bf-form">
+        <mat-form-field appearance="outline" class="bf-form__wide">
+          <mat-label>Reason (optional)</mat-label>
+          <input
+            matInput
+            [ngModel]="revokeReason()"
+            (ngModelChange)="revokeReason.set($event)"
+            data-testid="automation-revoke-reason"
+          />
+        </mat-form-field>
+      </div>
+      <div class="bf-form__actions">
+        <button mat-button type="button" (click)="revoking.set(null)">Cancel</button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="busy()"
+          (click)="revoke()"
+          data-testid="automation-revoke-confirm"
+        >
+          Revoke
+        </button>
+      </div>
+    </section>
+  }
+
+  <section class="bf-card">
+    @if (connections.isLoading() && !valueOf(connections)) {
+      <bf-load-state [loading]="true" what="the automations" />
+    } @else if (connections.error()) {
+      <bf-load-state
+        [error]="connections.error()"
+        what="the automations"
+        (retry)="connections.reload()"
+      />
+    } @else {
+      <bf-ecosystem-connections
+        [list]="valueOf(connections)"
+        heading="Automations"
+        headingId="automation-connections-title"
+        grantsHeading="May do"
+        [grantLabel]="actionLabel"
+        emptyHeadline="No automations yet"
+        emptyDescription="Nobody has connected a no-code platform. Each automation acts as the person who connected it."
+        testId="automation-connections"
+        [timezone]="timezone()"
+        (revoke)="startRevoke($event)"
+      />
+    }
+  </section>
+}

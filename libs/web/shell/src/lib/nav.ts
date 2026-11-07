@@ -28,6 +28,17 @@ export const NAV: NavGroup[] = [
        * runs no further check and scopes every fact it retrieves to the asker.
        */
       { label: 'Ask BudgetFlow', path: '/ask', icon: 'ai', permission: 'tenant.read' },
+      /**
+       * 092c, the personal half. The connector endpoint runs no further check than tenant
+       * membership and scopes everything it returns to the asker, which is also what the page
+       * needs: anyone may connect an assistant to their own account.
+       */
+      {
+        label: 'My AI assistants',
+        path: '/me/ai-assistants',
+        icon: 'gear_ai',
+        permission: 'tenant.read',
+      },
     ],
   },
   {
@@ -70,6 +81,11 @@ export const NAV: NavGroup[] = [
     label: 'Events',
     items: [
       { label: 'Events', path: '/events', icon: 'calendar', permission: 'tenant.read' },
+      /**
+       * 092d. The offers endpoint asserts `event.read` at tenant scope, so the entry appears for
+       * exactly the roles that can see anything there.
+       */
+      { label: 'Marketplace', path: '/marketplace', icon: 'market', permission: 'event.read' },
       {
         label: 'Co-funding board',
         path: '/events/cofunding-board',
@@ -114,6 +130,16 @@ export const NAV: NavGroup[] = [
         path: '/policy-assistant',
         icon: 'chat_info',
         permission: 'tenant.read',
+      },
+      /**
+       * 092b, the personal half. An automation only ever reads a balance or leaves a Draft for the
+       * person who connected it, so it sits with their own requests.
+       */
+      {
+        label: 'My automations',
+        path: '/me/automations',
+        icon: 'connectors',
+        permission: 'request.create',
       },
     ],
   },
@@ -274,6 +300,16 @@ export const NAV: NavGroup[] = [
         permission: 'audit.read',
       },
       { label: 'Audit log', path: '/audit-log', icon: 'book', permission: 'audit.read' },
+      /**
+       * 092a, the personal half. `report.read` is exactly what the connector asks for before it
+       * will let anyone connect a BI tool, so the entry appears for the people who can use it.
+       */
+      {
+        label: 'My BI connections',
+        path: '/me/bi-connections',
+        icon: 'dataset_linked',
+        permission: 'report.read',
+      },
     ],
   },
   {
@@ -297,6 +333,17 @@ export const NAV: NavGroup[] = [
         label: 'Tenant settings',
         path: '/admin/settings',
         icon: 'gear',
+        permission: 'tenant.settings.manage',
+      },
+      /**
+       * 102d. The Organization Admin owns widget settings, so the rail entry is theirs; the
+       * Integration Admin, who co-manages them, reaches the same screen from the connector frame
+       * of 092 instead of getting a second entry here.
+       */
+      {
+        label: 'Embeddable widgets',
+        path: '/admin/widgets',
+        icon: 'apps',
         permission: 'tenant.settings.manage',
       },
       /**

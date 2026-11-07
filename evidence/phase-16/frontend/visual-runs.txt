@@ -1,0 +1,33 @@
+Visual regression, pinned Playwright image, visual-light project.
+Command: npm run e2e:visual
+
+After merging origin/main (which brought #76 for issue #73 and #77 for the 090
+timestamps):
+
+  Run 1 (inside scripts/gate.sh, after reseed-visual): 680 passed (320s)
+  Run 2 (CI, Visual regression job):                   pass (12m51s)
+
+Before the merge, on the same tree, two consecutive local runs with no reseed
+between them also passed 680 each. That second run is the point: no visual state
+writes data another visual state reads, and no baseline records the minute the
+seed ran.
+
+The 16 known-red 080e-period-close states of issue #73 pass; #76 fixed their cause
+(the worker rebuild firing under the suite) and this branch only re-records their
+navigation rail.
+
+States made deterministic by this branch:
+  102d-widget-embed             asked for a real widget from a host not on its list,
+                                which is refused AND recorded, and the widget admin
+                                screen then showed the refusal: the baselines passed
+                                once and failed on the next run. It now asks for a
+                                widget that does not exist, refused before any write.
+  050-event-approval-workflow   clicking the Activity tab scrolls the content box by
+    mobile                      a varying amount on mobile; the state now returns to
+                                the top before the shot.
+
+090-approval-history was failing for a pre-existing reason (a seeded timestamp with
+no relative-time marker). This branch had masked it in the visual configuration;
+main fixed it properly in the component in #77, so that mask was dropped on the
+merge and main total baselines were taken, with the tablet one re-recorded for the
+Phase 16 navigation entries.

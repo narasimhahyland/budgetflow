@@ -1,0 +1,356 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">
+      {{ personal() ? 'My connected AI assistants' : 'Connector for AI assistants' }}
+    </h1>
+    <p class="bf-page__subtitle">
+      Ask about your budgets from the assistant you already use. It can read; it cannot act.
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    @if (canConnect() && usable() && !connecting()) {
+      <button
+        mat-flat-button
+        satImportantButton
+        type="button"
+        (click)="startConnect()"
+        data-testid="assistant-connect"
+      >
+        Connect an assistant
+      </button>
+    }
+  </div>
+</header>
+
+@if (!personal()) {
+  <bf-ecosystem-nav />
+}
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="assistant-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="assistant-error"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+@if (connector.isLoading() && !valueOf(connector)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the connector" /></section>
+} @else if (connector.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="connector.error()" what="the connector" (retry)="connector.reload()" />
+  </section>
+} @else if (valueOf(connector); as c) {
+  @if (created(); as token) {
+    <section class="bf-card" aria-labelledby="assistant-token-title" data-testid="assistant-token">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="assistant-token-title">Your connection token</h2>
+      </div>
+      <p class="bf-card__hint">{{ token.notice }}</p>
+      <bf-one-time-secret
+        [secret]="token.token"
+        what="connection token"
+        testId="assistant-connection-token"
+        (done)="dismissToken()"
+      />
+    </section>
+  }
+
+  <section class="bf-card" aria-labelledby="assistant-readonly-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="assistant-readonly-title">Read-only by design</h2>
+    </div>
+    <div class="bf-card__body">
+      <ul class="bf-never" data-testid="assistant-never">
+        <li class="bf-never__title">An assistant connected here can only read.</li>
+        @for (line of c.neverDoes; track line) {
+          <li>{{ line }}</li>
+        }
+        <li>
+          Every tool below returns records. There is no tool that approves, submits, applies a
+          control, creates anything or moves money, so an assistant cannot be talked into doing any
+          of it.
+        </li>
+        <li>
+          A lookup outside what the person can see answers "Not found in budgets you can see", which
+          is the same answer a record that does not exist gets.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  @if (!c.enabled) {
+    <sat-banner variant="warning" data-testid="assistant-disabled">
+      <sat-banner-message>
+        <strong>The connector is off.</strong>
+        Assistants are told "BudgetFlow connector is turned off for this company" and receive
+        nothing.
+      </sat-banner-message>
+    </sat-banner>
+  } @else if (!c.aiFeatureEnabled) {
+    <sat-banner variant="warning" data-testid="assistant-feature-off">
+      <sat-banner-message>
+        <strong>The AI feature switch is off, so this connector is not working.</strong>
+        The connector is on, but <code>{{ c.aiFeatureFlagKey }}</code> in AI settings is off and
+        every tool call is refused. An Organization Admin turns it on under Admin, AI settings.
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  <section class="bf-kpis" aria-label="Assistant connector usage">
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Status</p>
+      <p class="bf-kpi__value" data-testid="assistant-status">
+        {{ usable() ? 'On' : 'Not working' }}
+      </p>
+      <p class="bf-kpi__delta">
+        Connector {{ c.enabled ? 'on' : 'off' }}, AI switch {{ c.aiFeatureEnabled ? 'on' : 'off' }}
+      </p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Tools on</p>
+      <p class="bf-kpi__value" data-testid="assistant-tools-on">{{ enabledTools().length }}</p>
+      <p class="bf-kpi__delta">of {{ c.tools.length }}, all read-only</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">People connected</p>
+      <p class="bf-kpi__value" data-testid="assistant-connected">
+        {{ c.connectedPeople | number }}
+      </p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Tool calls in 7 days</p>
+      <p class="bf-kpi__value">{{ c.toolCallsLast7Days | number }}</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Records per call</p>
+      <p class="bf-kpi__value">{{ c.maxRecordsPerCall | number }}</p>
+      <p class="bf-kpi__delta">A hard cap, so this is not a bulk export</p>
+    </div>
+  </section>
+
+  <section class="bf-card" aria-labelledby="assistant-server-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="assistant-server-title">Server</h2>
+        <p class="bf-card__hint">
+          Model Context Protocol {{ c.protocolVersion }}. A connection lasts
+          {{ c.connectionLifetimeDays }} days, then the person signs in again.
+        </p>
+      </div>
+      @if (canManage()) {
+        <mat-slide-toggle
+          [checked]="c.enabled"
+          [disabled]="busy()"
+          (change)="setEnabled($event.checked)"
+          data-testid="assistant-enable"
+          >{{ c.enabled ? 'On' : 'Off' }}</mat-slide-toggle
+        >
+      }
+    </div>
+    <div class="bf-card__body">
+      <div class="bf-address">
+        <code class="bf-address__value" data-testid="assistant-server-url">{{ c.serverUrl }}</code>
+      </div>
+    </div>
+    <dl class="bf-facts">
+      <div>
+        <dt>Assistant apps allowed</dt>
+        <dd data-testid="assistant-allowed-apps">
+          @if (allowedApps(); as apps) {
+            <ul class="bf-chip-list">
+              @for (app of apps; track app) {
+                <li class="bf-chip">{{ app }}</li>
+              }
+            </ul>
+          } @else {
+            Any assistant that can sign in
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>AI feature switch</dt>
+        <dd>{{ c.aiFeatureFlagKey }} is {{ c.aiFeatureEnabled ? 'on' : 'off' }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="bf-card" aria-labelledby="assistant-tools-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="assistant-tools-title">Tools</h2>
+        <p class="bf-card__hint">
+          Every tool reads and returns records. The description is what the assistant is shown.
+        </p>
+      </div>
+    </div>
+    <div class="bf-card__body">
+      @for (t of c.tools; track t.tool) {
+        <div class="bf-switch-row" [attr.data-testid]="'assistant-tool-row-' + t.tool">
+          <div class="bf-switch-row__text">
+            <h3 class="bf-switch-row__title">
+              {{ t.title }}
+              <sat-status-tag status="info">Read-only</sat-status-tag>
+              @if (!t.enabled) {
+                <sat-status-tag status="neutral">Off</sat-status-tag>
+              }
+            </h3>
+            <p class="bf-switch-row__hint">{{ t.description }}</p>
+          </div>
+          @if (canManage()) {
+            <mat-slide-toggle
+              [checked]="t.enabled"
+              [disabled]="busy() || !c.enabled"
+              (change)="setTool(t.tool, $event.checked)"
+              [attr.data-testid]="'assistant-tool-' + t.tool"
+              >{{ t.enabled ? 'On' : 'Off' }}</mat-slide-toggle
+            >
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (connecting()) {
+    <section class="bf-card" aria-labelledby="assistant-consent-title" data-testid="assistant-form">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="assistant-consent-title">Allow an assistant to read</h2>
+      </div>
+      <div class="bf-card__body">
+        <ul class="bf-never" data-testid="assistant-consent-text">
+          <li class="bf-never__title">{{ c.consentText }}</li>
+          @for (line of c.neverDoes; track line) {
+            <li>{{ line }}</li>
+          }
+        </ul>
+      </div>
+      <div class="bf-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Assistant app</mat-label>
+          <input
+            matInput
+            [ngModel]="appKey()"
+            (ngModelChange)="appKey.set($event)"
+            data-testid="assistant-app-key"
+          />
+          <mat-hint>{{ appKeyHint() }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>What do you call this assistant?</mat-label>
+          <input
+            matInput
+            [ngModel]="label()"
+            (ngModelChange)="label.set($event)"
+            data-testid="assistant-label"
+          />
+        </mat-form-field>
+      </div>
+      <fieldset class="bf-card__body">
+        <legend class="bf-card__hint">Tools this assistant may call</legend>
+        @if (enabledTools().length) {
+          @for (t of enabledTools(); track t.tool) {
+            <mat-checkbox
+              [checked]="hasTool(t.tool)"
+              (change)="pickTool(t.tool, $event.checked)"
+              [attr.data-testid]="'assistant-pick-' + t.tool"
+              >{{ t.title }}</mat-checkbox
+            >
+          }
+        } @else {
+          <p class="bf-note">No tool is turned on, so there is nothing to allow yet.</p>
+        }
+      </fieldset>
+      <div class="bf-card__body">
+        <mat-checkbox
+          [ngModel]="consented()"
+          (ngModelChange)="consented.set($event)"
+          data-testid="assistant-consent"
+          >I understand this assistant reads what I can see and cannot change anything</mat-checkbox
+        >
+      </div>
+      <div class="bf-form__actions">
+        <button mat-button type="button" (click)="connecting.set(false)">Cancel</button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="
+            busy() || !consented() || !appKey().trim() || !label().trim() || !tools().size
+          "
+          (click)="connect()"
+          data-testid="assistant-connect-submit"
+        >
+          Allow
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (revoking(); as r) {
+    <section
+      class="bf-card"
+      aria-labelledby="assistant-revoke-title"
+      data-testid="assistant-revoke"
+    >
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" id="assistant-revoke-title">Revoke {{ r.label }}?</h2>
+          <p class="bf-card__hint">
+            The next tool call from {{ r.clientLabel }} fails with "Access revoked". The token
+            cannot be brought back.
+          </p>
+        </div>
+      </div>
+      <div class="bf-form">
+        <mat-form-field appearance="outline" class="bf-form__wide">
+          <mat-label>Reason (optional)</mat-label>
+          <input
+            matInput
+            [ngModel]="revokeReason()"
+            (ngModelChange)="revokeReason.set($event)"
+            data-testid="assistant-revoke-reason"
+          />
+        </mat-form-field>
+      </div>
+      <div class="bf-form__actions">
+        <button mat-button type="button" (click)="revoking.set(null)">Cancel</button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="busy()"
+          (click)="revoke()"
+          data-testid="assistant-revoke-confirm"
+        >
+          Revoke
+        </button>
+      </div>
+    </section>
+  }
+
+  <section class="bf-card">
+    @if (connections.isLoading() && !valueOf(connections)) {
+      <bf-load-state [loading]="true" what="the connected assistants" />
+    } @else if (connections.error()) {
+      <bf-load-state
+        [error]="connections.error()"
+        what="the connected assistants"
+        (retry)="connections.reload()"
+      />
+    } @else {
+      <bf-ecosystem-connections
+        [list]="valueOf(connections)"
+        heading="Connected assistants"
+        headingId="assistant-connections-title"
+        grantsHeading="Tools it may call"
+        [grantLabel]="toolTitle"
+        emptyHeadline="No assistants connected"
+        emptyDescription="Nobody has connected an assistant. Each one reads only what the person who connected it can see."
+        testId="assistant-connections"
+        [timezone]="timezone()"
+        (revoke)="startRevoke($event)"
+      />
+    }
+  </section>
+}
