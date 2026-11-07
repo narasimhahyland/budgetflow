@@ -1887,7 +1887,7 @@
       "id": "016a-board-pack",
       "role": "finance-admin",
       "path": "/reports/board-pack",
-      "waitFor": "role=heading[name=\"Hyland — budget pack — Sep 2026\"]",
+      "waitFor": "role=heading[name=\"Hyland \u2014 budget pack \u2014 Sep 2026\"]",
       "states": [
         {
           "state": "default"
@@ -2623,6 +2623,227 @@
           "actions": [
             {
               "waitFor": "[data-testid=needs-check]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "031a-what-if-scenarios",
+      "role": "finance-admin",
+      "path": "/budgets/scenarios",
+      "waitFor": "role=heading[name=\"What-if scenarios\"]",
+      "states": [
+        {
+          "state": "list",
+          "actions": [
+            {
+              "waitFor": "[data-testid=scenario-92000000-0000-4000-8000-000000000001]"
+            }
+          ]
+        },
+        {
+          "state": "editor",
+          "path": "/budgets/scenarios/92000000-0000-4000-8000-000000000001",
+          "waitFor": "role=heading[name=\"Europe -20% to fund India festivals\"]",
+          "actions": [
+            {
+              "waitFor": "[data-testid=change-92000000-0000-4000-8000-000000000002]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "compare-empty",
+          "path": "/budgets/scenarios/compare",
+          "waitFor": "role=heading[name=\"Compare scenarios\"]",
+          "actions": [
+            {
+              "waitFor": "[data-testid=compare-none-selected]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "011b-leadership-summary-commentary",
+      "role": "finance-admin",
+      "path": "/insights/summaries",
+      "waitFor": "role=heading[name=\"Leadership summaries\"]",
+      "states": [
+        {
+          "state": "list-empty",
+          "actions": [
+            {
+              "waitFor": "[data-testid=summaries-empty]"
+            }
+          ]
+        },
+        {
+          "state": "commentary",
+          "path": "/insights/commentary",
+          "waitFor": "role=heading[name=\"Variance commentary\"]",
+          "actions": [
+            {
+              "waitFor": "[data-testid=commentary-budget]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "015c-outcome-linkage",
+      "role": "ceo",
+      "path": "/dashboards/outcomes",
+      "waitFor": "[data-testid=association-note]",
+      "states": [
+        {
+          "state": "default",
+          "actions": [
+            {
+              "waitFor": "[data-testid=retention]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "no-retention",
+          "role": "regional-manager",
+          "actions": [
+            {
+              "waitFor": "[data-testid=retention-not-available]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "122a-gamified-participation",
+      "role": "employee",
+      "path": "/participation",
+      "waitFor": "role=heading[name=\"Participation\"]",
+      "states": [
+        {
+          "state": "offices",
+          "actions": [
+            {
+              "waitFor": "[data-testid=leaderboard-note]"
+            }
+          ]
+        },
+        {
+          "state": "teams",
+          "actions": [
+            {
+              "waitFor": "[data-testid=leaderboard-note]"
+            },
+            {
+              "click": "role=tab[name=\"Teams\"]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "120b-wellbeing-learning-wallets",
+      "role": "event-organizer",
+      "path": "/wallets",
+      "waitFor": "role=heading[name=\"My wallets\"]",
+      "states": [
+        {
+          "state": "my-wallets",
+          "actions": [
+            {
+              "waitFor": "[data-testid=wallet-92000000-0000-4000-8000-000000000004]"
+            }
+          ]
+        },
+        {
+          "state": "claim-needs-receipt",
+          "actions": [
+            {
+              "waitFor": "[data-testid=claim-from-92000000-0000-4000-8000-000000000004]"
+            },
+            {
+              "click": "[data-testid=claim-from-92000000-0000-4000-8000-000000000004]"
+            },
+            {
+              "waitFor": "[data-testid=claim-receipt-blocked]"
+            }
+          ],
+          "fullPage": false
+        },
+        {
+          "state": "review-queue",
+          "role": "location-manager",
+          "path": "/wallets/review",
+          "waitFor": "role=heading[name=\"Wallet claims to review\"]",
+          "actions": [
+            {
+              "waitFor": "[data-testid=review-note]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "120a-recognition-awards",
+      "role": "location-manager",
+      "path": "/recognition",
+      "waitFor": "role=heading[name=\"Recognition\"]",
+      "states": [
+        {
+          "state": "feed",
+          "actions": [
+            {
+              "waitFor": "[data-testid=recognition-feed]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "give",
+          "actions": [
+            {
+              "waitFor": "[data-testid=recognition-feed]"
+            },
+            {
+              "click": "[data-testid=give-recognition]"
+            },
+            {
+              "waitFor": "[data-testid=recognition-message]"
+            }
+          ],
+          "fullPage": false
+        }
+      ]
+    },
+    {
+      "id": "122b-organizer-recognition",
+      "role": "employee",
+      "path": "/recognition/organizers/40000000-0000-4000-8000-000000000010",
+      "waitFor": "[data-testid=thank-notes]",
+      "states": [
+        {
+          "state": "profile",
+          "actions": [
+            {
+              "waitFor": "[data-testid=note-92000000-0000-4000-8000-000000000011]"
             },
             {
               "scrollTop": true
