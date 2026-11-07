@@ -709,6 +709,9 @@
             },
             {
               "waitFor": "role=heading[name=\"Activity\"]"
+            },
+            {
+              "scrollTop": true
             }
           ]
         }

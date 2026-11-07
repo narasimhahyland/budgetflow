@@ -4,6 +4,15 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
+import { MEASURING_HEADROOM } from '../support/visual-allowance';
+
+// A headroom run (`npm run visual:headroom`) compares the same states with no allowance at all, so
+// Playwright reports the exact pixel difference of every state that has drifted at all, including
+// the ones still inside the gate's allowance. The short timeout keeps it to one comparison per
+// state: a drifting state would otherwise be re-shot until the expect timeout ran out.
+const COMPARE = MEASURING_HEADROOM
+  ? { maxDiffPixels: 0, maxDiffPixelRatio: 0, timeout: 2_000 }
+  : {};
 
 type Action = {
   click?: string;
@@ -77,6 +86,7 @@ for (const screen of config.screens) {
           await expect(page).toHaveScreenshot(`${screen.id}--${state.state}--${viewport}.png`, {
             fullPage: state.fullPage ?? true,
             mask,
+            ...COMPARE,
           });
         });
       }

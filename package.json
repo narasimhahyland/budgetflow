@@ -18,6 +18,7 @@
     "functional:e2e": "nx run web-e2e:functional-e2e",
     "e2e:visual": "bash scripts/visual/pw-docker.sh npx playwright test -c apps/web-e2e/playwright.config.ts --project=visual-light",
     "e2e:update-snapshots": "bash scripts/visual/pw-docker.sh npx playwright test -c apps/web-e2e/playwright.config.ts --project=visual-light --update-snapshots",
+    "visual:headroom": "bash scripts/visual/headroom.sh",
     "visual:capture": "node scripts/visual/capture.mjs",
     "visual:parity": "node scripts/visual/design-parity.mjs",
     "visual:selftest": "node scripts/visual/self-test.mjs",

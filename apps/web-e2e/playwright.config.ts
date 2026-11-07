@@ -3,6 +3,7 @@
 // Visual checks are light-only by default (dark theme deferred).
 import { defineConfig, devices } from '@playwright/test';
 import { env } from './src/support/env';
+import { MAX_DIFF_PIXEL_RATIO } from './src/support/visual-allowance';
 
 // Journeys that sign in fresh sessions, change a password or trip lockout counters run once, on desktop.
 const SESSION_JOURNEYS = [/src\/auth\//, /src\/shell\/analytics\.spec\.ts/];
@@ -35,7 +36,7 @@ export default defineConfig({
     // Signed-in pages first pass through the OIDC redirect to Keycloak and back.
     timeout: 15_000,
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.002,
+      maxDiffPixelRatio: MAX_DIFF_PIXEL_RATIO,
       threshold: 0.2,
       animations: 'disabled',
       caret: 'hide',
