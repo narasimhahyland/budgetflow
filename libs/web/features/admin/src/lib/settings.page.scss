@@ -1,0 +1,41 @@
+.bf-inline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 720px;
+  padding: 8px 20px 20px;
+}
+
+.bf-inline-form--padded {
+  padding: 12px 20px 20px;
+}
+
+.bf-inline-form__title {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.bf-inline-form__note {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-inline-form .bf-form,
+.bf-inline-form .bf-form__actions {
+  padding: 0;
+}
+
+.bf-channel-field {
+  min-width: 220px;
+}
+
+.bf-chip {
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+  padding: 2px 8px;
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-label-small);
+}

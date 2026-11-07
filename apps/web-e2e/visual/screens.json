@@ -69,12 +69,6 @@
           "waitFor": "role=heading[name=\"Nothing to show here yet\"]"
         },
         {
-          "state": "placeholder",
-          "role": "org-admin",
-          "path": "/admin/settings",
-          "waitFor": "role=heading[name=\"Tenant settings is not open yet\"]"
-        },
-        {
           "state": "not-found",
           "role": "employee",
           "path": "/no-such-page",
@@ -980,7 +974,8 @@
         {
           "state": "default"
         }
-      ]
+      ],
+      "mask": ["table[aria-label=\"Approval decisions\"] tbody td:first-child"]
     },
     {
       "id": "115-employee-dashboard",
@@ -1887,7 +1882,7 @@
       "id": "016a-board-pack",
       "role": "finance-admin",
       "path": "/reports/board-pack",
-      "waitFor": "role=heading[name=\"Hyland — budget pack — Sep 2026\"]",
+      "waitFor": "role=heading[name=\"Hyland \u2014 budget pack \u2014 Sep 2026\"]",
       "states": [
         {
           "state": "default"
@@ -2190,6 +2185,259 @@
               "scrollTop": true
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "105-feature-flags",
+      "role": "org-admin",
+      "path": "/admin/features",
+      "waitFor": "[data-testid=capability-summary]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "pending-confirmation",
+          "role": "finance-controller",
+          "actions": [
+            {
+              "fill": ["[data-testid=flag-search]", "card"]
+            },
+            {
+              "waitFor": "[data-testid='pending-integrations.card_limit_push']"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "switch-form",
+          "actions": [
+            {
+              "fill": ["[data-testid=flag-search]", "Auto-approve"]
+            },
+            {
+              "click": "[data-testid='turn-on-approvals.auto_approve_within_policy']"
+            },
+            {
+              "waitFor": "[data-testid=switch-reason]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "pilot-rollout",
+          "actions": [
+            {
+              "fill": ["[data-testid=flag-search]", "Waitlist"]
+            },
+            {
+              "waitFor": "[data-testid='flag-state-events.waitlist_auto_promotion']"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "read-only",
+          "role": "analyst"
+        },
+        {
+          "state": "change-history",
+          "actions": [
+            {
+              "click": "role=button[name=\"Show change history\"]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Change history\"]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "111-data-retention-settings",
+      "role": "org-admin",
+      "path": "/admin/retention",
+      "waitFor": "[data-testid='period-ledger_journals']",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "legal-holds",
+          "role": "auditor",
+          "actions": [
+            {
+              "waitFor": "[data-testid=hold-summary]"
+            },
+            {
+              "hover": "#holds-title"
+            }
+          ]
+        },
+        {
+          "state": "place-hold",
+          "role": "auditor",
+          "actions": [
+            {
+              "waitFor": "[data-testid=place-hold]"
+            },
+            {
+              "click": "[data-testid=place-hold]"
+            },
+            {
+              "waitFor": "[data-testid=hold-reason]"
+            }
+          ]
+        },
+        {
+          "state": "shorten-period",
+          "actions": [
+            {
+              "click": "[data-testid=edit-financial_evidence]"
+            },
+            {
+              "waitFor": "[data-testid=period-days]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "103-user-role-management",
+      "role": "org-admin",
+      "path": "/admin/users",
+      "waitFor": "table[aria-label='People and roles']",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "manage-roles",
+          "actions": [
+            {
+              "fill": ["[data-testid=user-search]", "Ananya"]
+            },
+            {
+              "waitFor": "text=Ananya Iyer"
+            },
+            {
+              "click": "role=button[name=\"Manage roles\"]"
+            },
+            {
+              "waitFor": "[data-testid=grant-role]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "103a-bulk-owner-invites",
+      "role": "org-admin",
+      "path": "/admin/users/invitations",
+      "waitFor": "[data-testid=invite-funnel]",
+      "states": [
+        {
+          "state": "capability-off"
+        }
+      ]
+    },
+    {
+      "id": "102b-company-settings",
+      "role": "org-admin",
+      "path": "/admin/settings",
+      "waitFor": "[data-testid=branding-program]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "branding-form",
+          "actions": [
+            {
+              "click": "[data-testid=edit-branding]"
+            },
+            {
+              "waitFor": "[data-testid=program-name]"
+            }
+          ]
+        },
+        {
+          "state": "security-form",
+          "actions": [
+            {
+              "click": "[data-testid=edit-security]"
+            },
+            {
+              "waitFor": "[data-testid=idle-minutes]"
+            }
+          ]
+        },
+        {
+          "state": "read-only",
+          "role": "analyst"
+        }
+      ]
+    },
+    {
+      "id": "114-system-health-dashboard",
+      "role": "org-admin",
+      "path": "/admin/health",
+      "waitFor": "[data-testid=overall-status]",
+      "mask": ["[data-testid=health-varies]"],
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "schedule-notice",
+          "actions": [
+            {
+              "click": "[data-testid=schedule-notice]"
+            },
+            {
+              "waitFor": "[data-testid=notice-message]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "010a-guided-setup-checklist",
+      "role": "org-admin",
+      "path": "/admin/setup",
+      "waitFor": "[data-testid=step-org_structure]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "122-personal-activity-history",
+      "role": "department-head",
+      "path": "/my/activity",
+      "waitFor": "[data-testid=entry-count]",
+      "mask": ["[data-testid=entry-count]"],
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "employee",
+          "role": "employee"
         }
       ]
     },

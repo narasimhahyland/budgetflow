@@ -23,6 +23,8 @@ const NEEDS: Record<string, string> = {
   'Request funds': 'request.create',
   'My requests': 'request.create',
   'My budgets': 'request.create',
+  // 010a lists only the signed-in person's own activity, so tenant membership is the whole check.
+  'My activity': 'tenant.read',
   Organization: 'org.read',
   People: 'org.read',
   Headcount: 'org.read',
@@ -57,6 +59,11 @@ const NEEDS: Record<string, string> = {
   'Rules and policies': 'rules.read',
   Integrations: 'integration.manage',
   'Tenant settings': 'tenant.settings.manage',
+  // The four Phase 14 administration screens, all behind the same action as tenant settings.
+  'Feature flags': 'tenant.settings.manage',
+  'Data retention': 'tenant.settings.manage',
+  'System health': 'tenant.settings.manage',
+  'Set up BudgetFlow': 'tenant.settings.manage',
   // 113a is one screen with two entries: the server gates reading it on tenant.read, and the rail is
   // deliberately stricter so an Admin entry does not appear for every role. The divergence and the
   // reason are in docs/ux/screens/113a-ai-settings-query-log.md.
@@ -74,9 +81,20 @@ const OWNED_BUDGETS = [
   'Budget requests',
 ];
 // From Phase 5 everyone in the tenant browses events; requesting (and the employee's own budgets)
-// follows request.create, which covers the home location's budgets as well as owned ones. 069a
-// closes the group and needs only tenant.read, so roles without request.create see it on its own.
-const REQUESTS = ['Request funds', 'My requests', 'My budgets', 'Policy assistant'];
+// follows request.create, which covers the home location's budgets as well as owned ones. 010a and
+// 069a close the group and need only tenant.read, so roles without request.create see those two on
+// their own.
+const REQUESTS = ['Request funds', 'My requests', 'My budgets', 'My activity', 'Policy assistant'];
+// What roles without request.create see of that group.
+const PERSONAL = ['My activity', 'Policy assistant'];
+// Everything tenant.settings.manage opens, in rail order; Phase 14 added the last four.
+const TENANT_ADMIN = [
+  'Tenant settings',
+  'Feature flags',
+  'Data retention',
+  'System health',
+  'Set up BudgetFlow',
+];
 const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
 // The Insights entries report.read alone opens, then 016b, which follows budget.read: no role holds
 // one without the other. 016a needs report.board_pack and is listed per role.
@@ -99,11 +117,11 @@ const EXPECTED: Record<RoleId, string[]> = {
   'org-admin': [
     ...HOME,
     'Events',
-    'Policy assistant',
+    ...PERSONAL,
     ...ORG,
     'Org import',
     'Users and roles',
-    'Tenant settings',
+    ...TENANT_ADMIN,
     'AI settings',
   ],
   ceo: [
@@ -160,7 +178,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...READ,
     'Events',
     'Approval inbox',
-    'Policy assistant',
+    ...PERSONAL,
     ...ORG,
     'Actuals and matching',
     'Intercompany recharges',
@@ -186,7 +204,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...HOME,
     ...READ,
     'Events',
-    'Policy assistant',
+    ...PERSONAL,
     ...ORG,
     ...AI_QUEUES,
     'Delegation of authority',
@@ -197,13 +215,13 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Rules and policies',
     'AI accuracy',
   ],
-  'integration-admin': [...HOME, 'Events', 'Policy assistant', 'Integrations'],
+  'integration-admin': [...HOME, 'Events', ...PERSONAL, 'Integrations'],
   // The analyst holds report.board_pack, so 016a is in their navigation; the audit entries are not.
   analyst: [
     ...HOME,
     ...READ,
     'Events',
-    'Policy assistant',
+    ...PERSONAL,
     ...ORG,
     ...INSIGHTS_READ,
     'Board and FP&A pack',

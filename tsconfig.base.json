@@ -63,7 +63,8 @@
       "@bf/web/features/rules": ["./libs/web/features/rules/src/index.ts"],
       "@bf/web/features/reports": ["./libs/web/features/reports/src/index.ts"],
       "@bf/web/features/close": ["./libs/web/features/close/src/index.ts"],
-      "@bf/web/features/integrations": ["./libs/web/features/integrations/src/index.ts"]
+      "@bf/web/features/integrations": ["./libs/web/features/integrations/src/index.ts"],
+      "@bf/web/features/admin": ["./libs/web/features/admin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
