@@ -180,6 +180,13 @@ services:
       SMTP_URL: smtp://mailpit:1025
       WEB_BASE_URL: http://localhost:${BF_WEB_PORT:-4200}
       APPROVAL_LINK_SECRET: ${BF_APPROVAL_LINK_SECRET:-}
+      # Wall-clock sweeps are off in this stack: a suite freezes the browser clock and asserts exact
+      # rendered state, so a sweep firing mid-run changes what the next assertion sees. Scenarios
+      # drive the same work through its API instead. Set a cron here to watch one run on a schedule.
+      NIGHTLY_LEDGER_CHECK_CRON: ${BF_NIGHTLY_LEDGER_CHECK_CRON:-off}
+      SLA_SWEEP_CRON: ${BF_SLA_SWEEP_CRON:-off}
+      REPORT_SWEEP_CRON: ${BF_REPORT_SWEEP_CRON:-off}
+      RETENTION_SWEEP_CRON: ${BF_RETENTION_SWEEP_CRON:-off}
       INTEGRATIONS_MOCK_BASE_URL: http://mock-providers:4010
       INTEGRATIONS_ALLOWED_HOSTS: mock-providers,localhost,127.0.0.1
       INTEGRATIONS_SECRET_KEY: ${BF_INTEGRATIONS_SECRET_KEY:-}
