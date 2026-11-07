@@ -51,12 +51,15 @@ export async function postJson<T>(
   return body;
 }
 
-/** The exact text `bf-money` renders for an amount in integer minor units. */
+/**
+ * The exact text `bf-money` renders for an amount in integer minor units, including where the sign
+ * goes: the shared formatter writes a negative as `-USD 100,000.00`, not `USD -100,000.00`.
+ */
 export const money = (minor: number, currency = 'USD'): string =>
-  `${currency} ${new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(minor / 100)}`;
+  `${minor < 0 ? '-' : ''}${currency} ${new Intl.NumberFormat(
+    currency === 'INR' ? 'en-IN' : 'en-US',
+    { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+  ).format(Math.abs(minor) / 100)}`;
 
 export interface Money {
   amountMinor: number;

@@ -94,62 +94,61 @@ test.describe('a wallet is an allowance inside a budget (120b)', () => {
     expect(walletFor(after, FEEL_GOOD).balance.amountMinor).toBe(wallet.balance.amountMinor);
   });
 
-  test('a claim within the allowance is submitted, reviewed and returned with its reason', async ({
+  test('a claim states the receipt it needs and refuses to submit without one', async ({
     page,
-    browser,
   }) => {
-    const before = await getJson<WalletOverview>('event-organizer', '/api/wallets');
-    const wallet = walletFor(before, FEEL_GOOD);
+    const overview = await getJson<WalletOverview>('event-organizer', '/api/wallets');
+    const wallet = walletFor(overview, FEEL_GOOD);
     const amountMinor = 1_200;
     expect(wallet.balance.amountMinor).toBeGreaterThan(amountMinor);
-    const merchant = `Journey Gym ${Date.now()}`;
 
     await page.goto('/wallets');
     await page.getByTestId(`claim-from-${FEEL_GOOD}`).click();
-    await page.getByTestId('claim-merchant').fill(merchant);
+    await page.getByTestId('claim-merchant').fill('Fitness First Indiranagar');
     await page.getByTestId('claim-amount').fill((amountMinor / 100).toFixed(2));
+
+    // Within the allowance, so the check line is encouraging — and the claim is still refused,
+    // because this programme pays nothing without a receipt and there is no way to attach one yet.
     await expect(page.getByTestId('claim-check')).toContainText(
       money(wallet.balance.amountMinor - amountMinor, wallet.balance.currency),
     );
-    await page.getByTestId('claim-submit').click();
-
-    // The claim pre-encumbers the programme budget, so the allowance left drops by exactly its size.
-    const afterSubmit = await getJson<WalletOverview>('event-organizer', '/api/wallets');
-    const claim = afterSubmit.claims.find((c) => c.merchant === merchant);
-    expect(claim, 'the claim the journey just made is in the history').toBeTruthy();
-    expect(claim!.status).toBe('submitted');
-    expect(walletFor(afterSubmit, FEEL_GOOD).balance.amountMinor).toBe(
-      wallet.balance.amountMinor - amountMinor,
+    await expect(page.getByTestId('claim-receipt-blocked')).toContainText(
+      'this programme pays nothing without one',
     );
-    await expect(page.getByTestId(`claim-${claim!.id}`)).toContainText('Submitted');
+    await expect(page.getByTestId('claim-submit')).toBeDisabled();
 
-    // The programme reviewer returns it, in their own session.
-    const reviewer = await browser.newContext({ storageState: authFile('location-manager') });
-    const reviewerPage = await reviewer.newPage();
-    await reviewerPage.goto('/wallets/review');
-    await expect(
-      reviewerPage.getByRole('heading', { name: 'Wallet claims to review' }),
-    ).toBeVisible();
-    const row = reviewerPage.getByTestId(`review-claim-${claim!.id}`);
-    await expect(row).toContainText(merchant);
-    await reviewerPage.getByTestId(`return-${claim!.id}`).click();
-    await reviewerPage
-      .getByTestId('decision-reason')
-      .fill('The receipt is for a different person; please attach your own.');
-    await reviewerPage.getByTestId('decision-confirm').click();
-    await expect(reviewerPage.getByTestId(`review-claim-${claim!.id}`)).toHaveCount(0);
-    await reviewer.close();
+    // Nothing was submitted, so the programme budget is untouched.
+    const after = await getJson<WalletOverview>('event-organizer', '/api/wallets');
+    expect(walletFor(after, FEEL_GOOD).balance.amountMinor).toBe(wallet.balance.amountMinor);
+    expect(after.claims.length).toBe(overview.claims.length);
+  });
+});
 
-    // Returning releases the pre-encumbrance in full, and the employee is told why.
-    const afterReturn = await getJson<WalletOverview>('event-organizer', '/api/wallets');
-    const returned = afterReturn.claims.find((c) => c.id === claim!.id);
-    expect(returned!.status).toBe('returned');
-    expect(returned!.decisionReason).toContain('different person');
-    expect(walletFor(afterReturn, FEEL_GOOD).balance.amountMinor).toBe(wallet.balance.amountMinor);
+test.describe('the reviewer queue shows what is waiting, and nothing else (120b)', () => {
+  test.use({ storageState: authFile('location-manager') });
 
-    await page.reload();
-    const historyRow = page.getByTestId(`claim-${claim!.id}`);
-    await expect(historyRow).toContainText('Returned');
-    await expect(historyRow).toContainText('different person');
+  test('a programme reviewer sees the queue with its pre-encumbrance explained', async ({
+    page,
+  }) => {
+    const queue = await getJson<{ items: WalletClaim[] }>(
+      'location-manager',
+      '/api/wallets/claims?status=submitted',
+    );
+
+    await page.goto('/wallets/review');
+    await expectShell(page);
+    await expect(page.getByRole('heading', { name: 'Wallet claims to review' })).toBeVisible();
+    await expect(page.getByTestId('review-note')).toContainText(
+      'has already pre-encumbered its programme budget',
+    );
+
+    // The queue is whatever the API says it is: every waiting claim has a row, and an empty queue
+    // says so rather than rendering an empty table.
+    if (queue.items.length === 0) {
+      await expect(page.getByTestId('review-empty')).toContainText('No claims waiting');
+    } else {
+      for (const claim of queue.items)
+        await expect(page.getByTestId(`review-claim-${claim.id}`)).toContainText(claim.merchant);
+    }
   });
 });

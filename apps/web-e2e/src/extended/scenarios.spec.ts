@@ -33,7 +33,7 @@ interface Scenario {
 interface BudgetDetail {
   id: string;
   status: string;
-  balances: { authorized: Money };
+  balances: { budgetCurrency: { authorized: Money } };
 }
 
 const SEEDED = P15_IDS.scenarioEuropeToIndia;
@@ -88,7 +88,9 @@ test.describe('a what-if scenario is a projection, not a decision (031a)', () =>
     // The reduction is real arithmetic, not a no-op the screen could show safely by accident.
     expect(europe!.newAuthorized.amountMinor).toBeLessThan(europe!.currentAuthorized.amountMinor);
     // And the budget itself still holds the "before" number: modelling posted nothing.
-    expect(budget.balances.authorized.amountMinor).toBe(europe!.currentAuthorized.amountMinor);
+    expect(budget.balances.budgetCurrency.authorized.amountMinor).toBe(
+      europe!.currentAuthorized.amountMinor,
+    );
     expect(budget.status).not.toBe('frozen');
 
     const row = page.getByTestId(`change-${europe!.changeId}`);

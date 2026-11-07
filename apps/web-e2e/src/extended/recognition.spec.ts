@@ -60,7 +60,7 @@ test.describe('recognition spends a budget, a thank-you note does not (120a)', (
 
     await page.goto('/recognition');
     await expectShell(page);
-    await expect(page.getByRole('heading', { name: 'Recognition' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Recognition', exact: true })).toBeVisible();
     await expect(page.getByTestId('recognition-frozen')).toContainText(frozen!.name);
     await expect(page.getByTestId('recognition-frozen')).toContainText(
       'Thank-you notes, which move no money, still work',
@@ -75,6 +75,24 @@ test.describe('recognition spends a budget, a thank-you note does not (120a)', (
     await expect(page.getByTestId(`award-type-${thankYou!.id}`).locator('input')).toBeEnabled();
   });
 
+  test('the giver is never offered as their own recipient', async ({ page }) => {
+    const me = userById('employee');
+
+    await page.goto('/recognition');
+    await page.getByTestId('give-recognition').click();
+    await page.getByTestId('recognition-recipient').click();
+
+    // Nobody recognises themselves, so the signed-in person is absent from the list rather than
+    // present and refused at the end.
+    await expect(page.getByRole('option').first()).toBeVisible();
+    await expect(page.getByRole('option', { name: me.displayName })).toHaveCount(0);
+    await expect(page.getByTestId('recognition-give-confirm')).toBeDisabled();
+  });
+});
+
+test.describe('a people manager gives a thank-you note (120a)', () => {
+  test.use({ storageState: authFile('location-manager') });
+
   test('a thank-you note is given without touching a budget', async ({ page }) => {
     const recipient = userById('event-organizer');
     const message = `Thank you for organising the Diwali celebration so calmly. ${Date.now()}`;
@@ -83,13 +101,13 @@ test.describe('recognition spends a budget, a thank-you note does not (120a)', (
     await page.getByTestId('give-recognition').click();
     await page.getByTestId('recognition-recipient').click();
     await page.getByRole('option', { name: recipient.displayName }).click();
-    await page.getByTestId(`award-type-${P15_IDS.awardTypeThankYou}`).click();
+    await page.getByTestId(`award-type-${P15_IDS.awardTypeThankYou}`).locator('input').check();
     await page.getByTestId('recognition-message').fill(message);
     await page.getByTestId('recognition-visibility').click();
     await page.getByRole('option', { name: 'Public, in the recognition feed' }).click();
     await page.getByTestId('recognition-give-confirm').click();
 
-    const feed = await getJson<RecognitionFeed>('employee', '/api/recognition');
+    const feed = await getJson<RecognitionFeed>('location-manager', '/api/recognition');
     const given = feed.items.find((a) => a.message === message);
     expect(given, 'the note the journey just left is in the feed').toBeTruthy();
     expect(given!.recipientName).toBe(recipient.displayName);

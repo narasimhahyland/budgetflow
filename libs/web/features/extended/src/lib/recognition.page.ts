@@ -98,6 +98,14 @@ interface GiveDialogData {
           }
         </mat-select>
       </mat-form-field>
+      @if (data.people.length === 0) {
+        <sat-banner variant="warning" data-testid="recognition-no-directory">
+          <sat-banner-message>
+            You cannot look anyone up: your role reads only your own record in the people directory.
+            Ask your manager to give the award, or ask an administrator for directory access.
+          </sat-banner-message>
+        </sat-banner>
+      }
 
       <fieldset class="bf-give__types">
         <legend class="bf-give__legend">Award</legend>
@@ -253,7 +261,15 @@ export class GiveRecognitionDialog {
         <p class="bf-page__subtitle">Thank people properly, and pay for it from the right budget</p>
       </div>
       <div class="bf-page__actions">
-        <button mat-flat-button type="button" (click)="give()" data-testid="give-recognition">
+        <!-- The dialog is built from the award types and directory this page loaded, so it opens
+             only once both are in, rather than showing an empty form that fills in behind it. -->
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="!ready()"
+          (click)="give()"
+          data-testid="give-recognition"
+        >
           <mat-icon svgIcon="star" />Thank someone
         </button>
       </div>
@@ -309,7 +325,13 @@ export class GiveRecognitionDialog {
           <sat-empty-state data-testid="recognition-empty">
             <h3 satEmptyStateHeadline>No recognition yet</h3>
             <p satEmptyStateDescription>Be the first to thank a colleague.</p>
-            <button mat-stroked-button satEmptyStateAction type="button" (click)="give()">
+            <button
+              mat-stroked-button
+              satEmptyStateAction
+              type="button"
+              [disabled]="!ready()"
+              (click)="give()"
+            >
               Thank someone
             </button>
           </sat-empty-state>
@@ -463,7 +485,7 @@ export class RecognitionPage {
   protected readonly failure = signal<string | null>(null);
   protected readonly feed = resource({ loader: () => data(this.api.getRecognitionFeed({})) });
   /** The directory the giver picks a recipient from; roles that cannot read it simply get none. */
-  private readonly directory = resource({
+  protected readonly directory = resource({
     loader: async (): Promise<readonly Person[]> => {
       try {
         return (await data(this.api.listPeople({ query: { limit: 100 } }))).items;
@@ -482,6 +504,7 @@ export class RecognitionPage {
       .map((t) => t.name),
   );
   protected readonly myPersonId = computed(() => this.session.me()?.personId ?? null);
+  protected readonly ready = computed(() => this.feed.hasValue() && !this.directory.isLoading());
 
   protected label = (s: RecognitionAwardStatus) => AWARD_STATUS_LABEL[s];
   protected tone = (s: RecognitionAwardStatus) => AWARD_STATUS_TONE[s];

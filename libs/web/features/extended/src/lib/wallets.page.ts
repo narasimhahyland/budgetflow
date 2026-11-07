@@ -50,7 +50,12 @@ export const CLAIM_STATUS_TONE: Record<
 
 interface ClaimDialogData {
   wallet: Wallet;
-  receipts: readonly { id: string; label: string }[];
+  /**
+   * Whether a receipt can be attached at all. Every programme requires one, and the document
+   * contract has no owner type for a wallet claim yet, so today this is always false and the form
+   * says so rather than letting someone fill it in and be refused at the end.
+   */
+  canAttachReceipt: boolean;
 }
 
 /**
@@ -112,25 +117,13 @@ interface ClaimDialogData {
         <mat-label>Date of the spend</mat-label>
         <input matInput type="date" [(ngModel)]="claimDate" data-testid="claim-date" />
       </mat-form-field>
-      <mat-form-field appearance="outline" class="bf-field">
-        <mat-label>Receipt</mat-label>
-        <mat-select [(ngModel)]="documentId" data-testid="claim-receipt">
-          @for (r of data.receipts; track r.id) {
-            <mat-option [value]="r.id">{{ r.label }}</mat-option>
-          }
-        </mat-select>
-        <mat-hint>
-          This programme pays nothing without a receipt. Pick one you have already uploaded to
-          BudgetFlow.
-        </mat-hint>
-      </mat-form-field>
-      @if (data.receipts.length === 0) {
-        <sat-banner variant="warning" data-testid="claim-no-receipts">
-          <sat-banner-message>
-            You have no uploaded receipts to attach yet. Upload the receipt first, then claim.
-          </sat-banner-message>
-        </sat-banner>
-      }
+      <sat-banner variant="important" data-testid="claim-receipt-blocked">
+        <sat-banner-message>
+          Attach the receipt: this programme pays nothing without one. Attaching a receipt to a
+          wallet claim is not available yet, so this claim cannot be submitted. Everything else on
+          this page works as usual.
+        </sat-banner-message>
+      </sat-banner>
       <mat-form-field appearance="outline" class="bf-field">
         <mat-label>Note (optional)</mat-label>
         <textarea
@@ -184,7 +177,6 @@ export class WalletClaimDialog {
   protected readonly merchant = signal('');
   protected readonly amount = signal<number | null>(null);
   protected readonly claimDate = signal(todayIso());
-  protected readonly documentId = signal(this.data.receipts[0]?.id ?? '');
   protected readonly note = signal('');
 
   protected readonly ref =
@@ -212,6 +204,7 @@ export class WalletClaimDialog {
 
   protected readonly canSubmit = computed(
     () =>
+      this.data.canAttachReceipt &&
       !this.data.wallet.fundingFrozen &&
       !this.overBalance() &&
       this.amountMinor() > 0 &&
@@ -228,7 +221,6 @@ export class WalletClaimDialog {
       amountMinor: this.amountMinor(),
       currency: this.data.wallet.balance.currency,
       claimDate: this.claimDate(),
-      ...(this.documentId() ? { documentId: this.documentId() } : {}),
       ...(this.note().trim() ? { note: this.note().trim() } : {}),
     };
   }
@@ -479,26 +471,6 @@ export class WalletsPage {
   protected readonly wallets = computed(() => valueOf(this.overview)?.wallets ?? []);
   protected readonly claims = computed(() => valueOf(this.overview)?.claims ?? []);
 
-  /**
-   * Receipts the employee already has in BudgetFlow. Wallet claims have no document owner type of
-   * their own yet, so a receipt is attached by reference to one the employee uploaded earlier.
-   */
-  private readonly receipts = resource({
-    loader: async () => {
-      const requests = await data(this.api.listRequests({ query: { scope: 'mine', limit: 10 } }));
-      const found: { id: string; label: string }[] = [];
-      for (const request of requests.items) {
-        const docs = await data(
-          this.api.listDocuments({ query: { ownerType: 'request', ownerId: request.id } }),
-        );
-        for (const doc of docs.items)
-          if (doc.kind === 'receipt' && doc.status === 'available')
-            found.push({ id: doc.id, label: `${doc.fileName} (${request.ref})` });
-      }
-      return found;
-    },
-  });
-
   protected statusLabel = (s: WalletClaimStatus) => CLAIM_STATUS_LABEL[s];
   protected statusTone = (s: WalletClaimStatus) => CLAIM_STATUS_TONE[s];
 
@@ -506,7 +478,9 @@ export class WalletsPage {
     this.dialog
       .open(WalletClaimDialog, {
         width: '520px',
-        data: { wallet, receipts: valueOf(this.receipts) ?? [] } satisfies ClaimDialogData,
+        // Receipt upload for wallet claims needs a document owner type the contract does not
+        // have yet, so the dialog opens in its blocked state and explains why.
+        data: { wallet, canAttachReceipt: false } satisfies ClaimDialogData,
       })
       .afterClosed()
       .subscribe(async (request) => {

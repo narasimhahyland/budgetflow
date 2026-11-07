@@ -71,9 +71,10 @@ test.describe('outcome linkage never exposes an individual (015c)', () => {
 
     await page.goto('/dashboards/outcomes');
     await expectShell(page);
-    await expect(page.getByRole('heading', { name: 'Outcomes' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Outcomes', exact: true })).toBeVisible();
 
-    await expect(page.getByTestId('association-note')).toHaveText(outcomes.associationNote);
+    // `toContainText`, not `toHaveText`: the Satori banner prefixes its own "Info" label.
+    await expect(page.getByTestId('association-note')).toContainText(outcomes.associationNote);
     await expect(page.getByTestId('association-note')).toContainText('association, not cause');
     await expect(page.getByTestId('thresholds')).toContainText(
       `at least ${outcomes.thresholds.surveyResponses} responses`,
@@ -122,7 +123,7 @@ test.describe('retention cohorts stay with the roles that read people company-wi
     expect(outcomes.retentionBands).toEqual([]);
 
     await page.goto('/dashboards/outcomes');
-    await expect(page.getByRole('heading', { name: 'Outcomes' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Outcomes', exact: true })).toBeVisible();
     await expect(page.getByTestId('retention-not-available')).toContainText(
       'Retention cohorts span the whole company',
     );
