@@ -19,8 +19,11 @@ test('signing in with Hyland SSO lands in BudgetFlow as the linked employee', as
   const nav = page.getByRole('navigation', { name: 'Platform Navigation' });
   await expect(nav.getByRole('menuitem')).toHaveText([
     'Home',
-    // 011a and 069a need only tenant.read, so every member of the tenant sees them.
+    // 011a and 069a need only tenant.read, so every member of the tenant sees them; 092c is the
+    // same, because anyone may connect an assistant to their own account.
     'Ask BudgetFlow',
+    'My AI assistants',
+    // No Marketplace: an employee holds no tenant-scope event.read (092d).
     'Events',
     // 122a, 120b and 120a are an employee's own turnout, allowance and thank-you notes, so they
     // need only tenant.read as well.
@@ -33,6 +36,7 @@ test('signing in with Hyland SSO lands in BudgetFlow as the linked employee', as
     'My wallets',
     'Recognition',
     'Policy assistant',
+    'My automations',
     'Organization',
     'People',
     'Headcount',

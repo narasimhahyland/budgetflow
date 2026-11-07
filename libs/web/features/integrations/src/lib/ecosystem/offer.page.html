@@ -1,0 +1,221 @@
+@if (offer.isLoading() && !valueOf(offer)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="this offer" /></section>
+} @else if (offer.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="offer.error()" what="this offer" (retry)="offer.reload()" />
+  </section>
+} @else if (valueOf(offer); as o) {
+  <header class="bf-page__header">
+    <div class="bf-page__heading">
+      <h1 class="bf-page__title">{{ o.title }}</h1>
+      <p class="bf-page__subtitle">{{ o.partnerName }} · {{ o.city }}</p>
+    </div>
+    <div class="bf-page__actions">
+      <a mat-button routerLink="/marketplace">Back to the marketplace</a>
+      @if (canRequest() && !requesting()) {
+        <button
+          mat-flat-button
+          satImportantButton
+          type="button"
+          (click)="startRequest()"
+          data-testid="offer-request"
+        >
+          Ask for a price
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (failure()) {
+    <sat-banner variant="important" data-testid="offer-error"
+      ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+    >
+  }
+
+  @if (booked(); as b) {
+    <sat-banner variant="success" data-testid="offer-booked">
+      <sat-banner-message>
+        <strong>Asked {{ b.partnerName }} for a price on {{ b.eventName }}.</strong>
+        {{ b.notice }}
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  <section class="bf-card" aria-labelledby="offer-summary-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="offer-summary-title">What this costs</h2>
+        <p class="bf-card__hint">
+          Per head in {{ o.pricePerHead.currency }}, with the figure at your reporting currency's
+          plan rate beside it. Exchange differences never consume budget.
+        </p>
+      </div>
+      <div class="bf-tile__tags">
+        <sat-status-tag status="neutral">{{ categoryLabel(o.category) }}</sat-status-tag>
+        @if (o.vendorStatus) {
+          <sat-status-tag status="success">Vendor {{ o.vendorStatus }}</sat-status-tag>
+        }
+      </div>
+    </div>
+    <dl class="bf-facts">
+      <div>
+        <dt>Price per head</dt>
+        <dd data-testid="offer-price">
+          <bf-money
+            [amountMinor]="o.pricePerHead.amountMinor"
+            [currency]="o.pricePerHead.currency"
+          />
+        </dd>
+      </div>
+      <div>
+        <dt>At the plan rate</dt>
+        <dd>
+          <bf-money
+            [amountMinor]="o.pricePerHeadReporting.amountMinor"
+            [currency]="o.pricePerHeadReporting.currency"
+          />
+        </dd>
+      </div>
+      <div>
+        <dt>People</dt>
+        <dd>{{ o.capacityMin | number }} to {{ o.capacityMax | number }}</dd>
+      </div>
+      <div>
+        <dt>Rating</dt>
+        <dd>
+          @if (rating(o.ratingBps); as r) {
+            {{ r }} out of 5, from {{ o.ratingCount }} past events
+          } @else {
+            Not rated yet
+          }
+        </dd>
+      </div>
+      @if (o.deliveryCountries.length) {
+        <div>
+          <dt>Delivers to</dt>
+          <dd>{{ o.deliveryCountries.join(', ') }}</dd>
+        </div>
+      }
+    </dl>
+  </section>
+
+  <section class="bf-card" aria-labelledby="offer-includes-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="offer-includes-title">What is included</h2>
+    </div>
+    @if (o.includes.length) {
+      <ul class="bf-card__body bf-chip-list">
+        @for (item of o.includes; track item) {
+          <li class="bf-chip">{{ item }}</li>
+        }
+      </ul>
+    } @else {
+      <p class="bf-empty">The partner has not listed what is included.</p>
+    }
+    <dl class="bf-facts">
+      <div>
+        <dt>Cancellation</dt>
+        <dd data-testid="offer-cancellation">{{ o.cancellationTerms }}</dd>
+      </div>
+      <div>
+        <dt>Shared with the partner</dt>
+        <dd>
+          The event date, city, number of people and dietary totals. No budget figures and no
+          attendee names.
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  @if (requesting()) {
+    <section class="bf-card" aria-labelledby="offer-form-title" data-testid="offer-form">
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" id="offer-form-title">Ask {{ o.partnerName }} for a price</h2>
+          <p class="bf-card__hint">
+            This sends a request for a quote. No money is held, no commitment is made, and nothing
+            is booked until you select the quote on the event and it is approved the usual way.
+          </p>
+        </div>
+      </div>
+      @if (eventOptions().length) {
+        <div class="bf-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Event</mat-label>
+            <mat-select
+              [ngModel]="eventId()"
+              (ngModelChange)="eventId.set($event)"
+              data-testid="offer-event"
+            >
+              @for (e of eventOptions(); track e.id) {
+                <mat-option [value]="e.id">{{ e.name }} · {{ e.eventCode }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>People</mat-label>
+            <input
+              matInput
+              inputmode="numeric"
+              [ngModel]="peopleCount()"
+              (ngModelChange)="peopleCount.set($event)"
+              data-testid="offer-people"
+            />
+            <mat-hint>{{ o.capacityMin | number }}–{{ o.capacityMax | number }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date</mat-label>
+            <input
+              matInput
+              type="date"
+              [ngModel]="requestedDate()"
+              (ngModelChange)="requestedDate.set($event)"
+              data-testid="offer-date"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="bf-form__wide">
+            <mat-label>Notes for the partner (optional)</mat-label>
+            <input matInput [ngModel]="notes()" (ngModelChange)="notes.set($event)" />
+          </mat-form-field>
+        </div>
+        @if (capacityProblem(); as problem) {
+          <p class="bf-field-problem" data-testid="offer-capacity-problem" aria-live="polite">
+            {{ problem }}
+          </p>
+        }
+        @if (estimatedTotal(); as total) {
+          <p class="bf-note" data-testid="offer-estimate">
+            At the listed price that would be
+            <bf-money [amountMinor]="total.amountMinor" [currency]="total.currency" />. The partner
+            quotes its own price, which may differ.
+          </p>
+        }
+        <div class="bf-form__actions">
+          <button mat-button type="button" (click)="requesting.set(false)">Cancel</button>
+          <button
+            mat-flat-button
+            type="button"
+            [disabled]="busy() || !eventId() || !people() || !!capacityProblem()"
+            (click)="request()"
+            data-testid="offer-request-submit"
+          >
+            Ask for a price
+          </button>
+        </div>
+      } @else {
+        <sat-empty-state data-testid="offer-no-events">
+          <h3 satEmptyStateHeadline>No event to book against</h3>
+          <p satEmptyStateDescription>
+            A booking request sits on an event you manage. Create or take over an event first.
+          </p>
+        </sat-empty-state>
+      }
+    </section>
+  }
+
+  @if (!canRequest()) {
+    <p class="bf-note" data-testid="offer-read-only">
+      You can see what partners offer. Asking for a price needs the ability to manage an event.
+    </p>
+  }
+}

@@ -1,0 +1,428 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Embeddable widgets</h1>
+    <p class="bf-page__subtitle">
+      Team budget and upcoming events on an intranet page, for each viewer with their own sign-in
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    @if (canManage() && !creating()) {
+      <button
+        mat-flat-button
+        satImportantButton
+        type="button"
+        (click)="startCreate()"
+        data-testid="widget-create"
+      >
+        Add a widget
+      </button>
+    }
+  </div>
+</header>
+
+<bf-ecosystem-nav />
+
+<sat-banner variant="info" data-testid="widget-identity-note">
+  <sat-banner-message>
+    <strong>A widget never carries an identity.</strong>
+    Whoever opens the host page signs in to BudgetFlow themselves and sees only what they could see
+    in the app. The embedding page cannot name a person, a team or a budget, and no key or token is
+    placed in it. The list of allowed sites decides where the frame may render, and nothing else
+    does.
+  </sat-banner-message>
+</sat-banner>
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="widget-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="widget-error"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+@if (creating()) {
+  <section class="bf-card" aria-labelledby="widget-create-title" data-testid="widget-form">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="widget-create-title">Add a widget</h2>
+        <p class="bf-card__hint">
+          At least one exact site address is required. A widget with no allowed site renders
+          nowhere.
+        </p>
+      </div>
+    </div>
+    <div class="bf-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input
+          matInput
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+          data-testid="widget-name"
+        />
+        <mat-hint>Shown as the frame title on the host page.</mat-hint>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <mat-select [ngModel]="kind()" (ngModelChange)="kind.set($event)" data-testid="widget-kind">
+          @for (k of kinds; track k) {
+            <mat-option [value]="k">{{ kindLabel(k) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (kind() === 'upcoming_events') {
+        <mat-form-field appearance="outline">
+          <mat-label>Events to show</mat-label>
+          <mat-select [ngModel]="eventCount()" (ngModelChange)="eventCount.set($event)">
+            @for (n of [1, 2, 3, 4, 5]; track n) {
+              <mat-option [value]="n">{{ n }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      <mat-form-field appearance="outline" class="bf-form__wide">
+        <mat-label>Allowed sites</mat-label>
+        <textarea
+          matInput
+          rows="3"
+          placeholder="https://intranet.example.test"
+          [ngModel]="originsText()"
+          (ngModelChange)="originsText.set($event)"
+          data-testid="widget-origins"
+        ></textarea>
+        <mat-hint
+          >One address a line, scheme and host only. Wildcards are refused: any page on any host
+          could then frame the widget.</mat-hint
+        >
+      </mat-form-field>
+    </div>
+    @if (newOriginProblems().length) {
+      <p class="bf-field-problem" data-testid="widget-origin-error" aria-live="polite">
+        Give the exact site address with no path, for example https://intranet.example.test. These
+        are not valid: {{ newOriginProblems().join(', ') }}
+      </p>
+    }
+    <div class="bf-card__body">
+      <mat-slide-toggle
+        [ngModel]="showAmounts()"
+        (ngModelChange)="showAmounts.set($event)"
+        data-testid="widget-amounts"
+        >{{
+          showAmounts()
+            ? 'Show figures'
+            : 'Hide figures — the widget says there is budget without naming an amount'
+        }}</mat-slide-toggle
+      >
+    </div>
+    <div class="bf-form__actions">
+      <button mat-button type="button" (click)="creating.set(false)">Cancel</button>
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="
+          busy() || !name().trim() || !newOrigins().length || newOriginProblems().length > 0
+        "
+        (click)="create()"
+        data-testid="widget-create-submit"
+      >
+        Add widget
+      </button>
+    </div>
+  </section>
+}
+
+@if (editing(); as w) {
+  <section class="bf-card" aria-labelledby="widget-edit-title" data-testid="widget-edit">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="widget-edit-title">Allowed sites for {{ w.name }}</h2>
+        <p class="bf-card__hint">
+          This list is the boundary. Removing the last address makes the widget renderable nowhere.
+        </p>
+      </div>
+    </div>
+    <div class="bf-form">
+      <mat-form-field appearance="outline" class="bf-form__wide">
+        <mat-label>Allowed sites</mat-label>
+        <textarea
+          matInput
+          rows="4"
+          [ngModel]="editOrigins()"
+          (ngModelChange)="editOrigins.set($event)"
+          data-testid="widget-edit-origins"
+        ></textarea>
+        <mat-hint>One address a line.</mat-hint>
+      </mat-form-field>
+    </div>
+    @if (editOriginProblems().length) {
+      <p class="bf-field-problem" aria-live="polite">
+        Not valid site addresses: {{ editOriginProblems().join(', ') }}. Give the exact address,
+        scheme and host only; a wildcard would let any page on any host frame the widget.
+      </p>
+    } @else if (!editOriginList().length) {
+      <p class="bf-field-problem" data-testid="widget-edit-empty" aria-live="polite">
+        At least one site is required. With none, the widget is embeddable nowhere.
+      </p>
+    }
+    <div class="bf-form__actions">
+      <button mat-button type="button" (click)="editing.set(null)">Cancel</button>
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="busy() || !editOriginList().length || editOriginProblems().length > 0"
+        (click)="saveOrigins()"
+        data-testid="widget-edit-submit"
+      >
+        Save sites
+      </button>
+    </div>
+  </section>
+}
+
+@if (removing(); as w) {
+  <section class="bf-card" aria-labelledby="widget-remove-title" data-testid="widget-remove">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="widget-remove-title">Remove {{ w.name }}?</h2>
+        <p class="bf-card__hint">
+          Every page with this snippet stops showing anything. The snippet itself keeps sitting in
+          those pages until someone takes it out.
+        </p>
+      </div>
+    </div>
+    <div class="bf-form__actions">
+      <button mat-button type="button" (click)="removing.set(null)">Cancel</button>
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="busy()"
+        (click)="remove()"
+        data-testid="widget-remove-confirm"
+      >
+        Remove
+      </button>
+    </div>
+  </section>
+}
+
+@if (widgets.isLoading() && !valueOf(widgets)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the widgets" /></section>
+} @else if (widgets.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="widgets.error()" what="the widgets" (retry)="widgets.reload()" />
+  </section>
+} @else if (items().length) {
+  @if (totalRefused()) {
+    <sat-banner variant="warning" data-testid="widget-refused-banner">
+      <sat-banner-message>
+        <strong
+          >{{ totalRefused() }} {{ totalRefused() === 1 ? 'site is' : 'sites are' }} trying to show
+          a widget and are not on its list.</strong
+        >
+        The browser refuses those frames and the API refuses the data behind them. Each address is
+        listed with its widget below, so it can be added deliberately or left refused.
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  <section class="bf-card" aria-labelledby="widgets-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="widgets-title">Widgets</h2>
+      <span class="bf-muted">{{ items().length }} configured</span>
+    </div>
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="items()" aria-labelledby="widgets-title">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef scope="col">Widget</th>
+          <td mat-cell *matCellDef="let w">
+            <span class="bf-cell__primary">{{ w.name }}</span>
+            <span class="bf-cell__secondary">{{ kindLabel(w.kind) }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="origins">
+          <th mat-header-cell *matHeaderCellDef scope="col">Allowed sites</th>
+          <td mat-cell *matCellDef="let w">
+            @if (w.allowedOrigins.length) {
+              <ul class="bf-origins" [attr.data-testid]="'widget-origins-' + w.id">
+                @for (o of w.allowedOrigins; track o) {
+                  <li class="bf-chip">{{ o }}</li>
+                }
+              </ul>
+            } @else {
+              <span class="bf-origins__none" [attr.data-testid]="'widget-no-origins-' + w.id"
+                >No site allowed. This widget is embeddable nowhere.</span
+              >
+            }
+            @if (w.blockedOriginsLast30Days.length) {
+              @for (b of w.blockedOriginsLast30Days; track b.origin) {
+                <p class="bf-refused" [attr.data-testid]="'widget-refused-' + w.id">
+                  Refused {{ b.attempts }} {{ b.attempts === 1 ? 'time' : 'times' }}:
+                  {{ b.origin }} is not on the list.
+                  @if (canManage()) {
+                    <button
+                      mat-button
+                      type="button"
+                      [disabled]="busy()"
+                      (click)="allowRefused(w, b.origin)"
+                      [attr.data-testid]="'widget-allow-' + w.id"
+                    >
+                      Allow this site
+                    </button>
+                  }
+                </p>
+              }
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="amounts">
+          <th mat-header-cell *matHeaderCellDef scope="col">Figures</th>
+          <td mat-cell *matCellDef="let w">
+            @if (canManage()) {
+              <mat-slide-toggle
+                [checked]="w.showAmounts"
+                [disabled]="busy()"
+                (change)="setAmounts(w, $event.checked)"
+                [attr.data-testid]="'widget-amounts-' + w.id"
+                >{{ w.showAmounts ? 'Shown' : 'Hidden' }}</mat-slide-toggle
+              >
+            } @else {
+              {{ w.showAmounts ? 'Shown' : 'Hidden' }}
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="views">
+          <th mat-header-cell *matHeaderCellDef scope="col" class="bf-num">Views in 30 days</th>
+          <td mat-cell *matCellDef="let w" class="bf-num">
+            {{ w.viewsLast30Days | number }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
+          <td mat-cell *matCellDef="let w">
+            <sat-status-tag
+              [status]="statusTone(w.status)"
+              [attr.data-testid]="'widget-status-' + w.id"
+              >{{ statusLabel(w.status) }}</sat-status-tag
+            >
+            @if (w.status === 'paused') {
+              <span class="bf-cell__secondary">Embedded copies show nothing.</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
+          <td mat-cell *matCellDef="let w">
+            <div class="bf-row-actions">
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="copySnippet(w)"
+                [attr.data-testid]="'widget-copy-' + w.id"
+              >
+                {{ copied() === w.id ? 'Copied' : 'Copy embed code' }}
+              </button>
+              @if (canManage()) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="startEdit(w)"
+                  [attr.data-testid]="'widget-edit-' + w.id"
+                >
+                  Sites
+                </button>
+                @if (w.status === 'active') {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="busy()"
+                    (click)="setStatus(w, 'paused')"
+                    [attr.data-testid]="'widget-pause-' + w.id"
+                  >
+                    Pause
+                  </button>
+                } @else {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="busy()"
+                    (click)="setStatus(w, 'active')"
+                    [attr.data-testid]="'widget-resume-' + w.id"
+                  >
+                    Resume
+                  </button>
+                }
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="removing.set(w)"
+                  [attr.data-testid]="'widget-remove-' + w.id"
+                >
+                  Remove
+                </button>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: columns"
+          [class.bf-row--dead]="row.status === 'paused'"
+        ></tr>
+      </table>
+    </div>
+  </section>
+
+  @for (w of items(); track w.id) {
+    <section class="bf-card" [attr.aria-labelledby]="'snippet-' + w.id">
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" [id]="'snippet-' + w.id">Embed code for {{ w.name }}</h2>
+          <p class="bf-card__hint">
+            Paste this into a page on an allowed site. It carries no key and no identity.
+          </p>
+        </div>
+      </div>
+      <div class="bf-card__body">
+        <div class="bf-address">
+          <code class="bf-address__value" [attr.data-testid]="'widget-snippet-' + w.id">{{
+            w.embedSnippet
+          }}</code>
+        </div>
+        <p class="bf-card__hint">
+          Served with <code>Content-Security-Policy: {{ w.frameAncestors }}</code
+          >, which is what stops any other page from framing it.
+        </p>
+      </div>
+    </section>
+  }
+} @else {
+  <section class="bf-card">
+    <sat-empty-state data-testid="widgets-empty">
+      <h2 satEmptyStateHeadline>No widgets yet</h2>
+      <p satEmptyStateDescription>
+        Nothing from BudgetFlow is shown on another site. A widget needs at least one exact site
+        address before it renders anywhere.
+      </p>
+      @if (canManage()) {
+        <button mat-flat-button type="button" (click)="startCreate()">Add a widget</button>
+      }
+    </sat-empty-state>
+  </section>
+}
+
+@if (!canManage()) {
+  <p class="bf-note" data-testid="widgets-read-only">
+    You can see every widget and where it is allowed to render. Adding one, changing its sites and
+    pausing it need tenant settings or integration access.
+  </p>
+}
