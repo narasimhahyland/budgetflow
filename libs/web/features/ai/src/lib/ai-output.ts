@@ -260,14 +260,17 @@ export class AiWhy {
     <p class="bf-ai-provenance" data-testid="ai-provenance">
       AI-generated. Check the figures before you act. Model {{ provenance().modelId }}
       {{ provenance().modelVersion }} through {{ provenance().provider }}. Query log entry
-      <!-- Ids are generated per call, so visual baselines mask them. -->
+      <!-- Ids are generated per call, so visual baselines mask them. A mask hides the characters but
+           not their width, and this line ends close enough to the edge that a few pixels decide
+           whether it wraps. Each id therefore gets a fixed box, as the audit log's hash does, and the
+           full stop is glued to it so it can never be left on a line of its own. -->
       <span data-testid="ai-ids">
-        {{ provenance().queryLogId.slice(0, 8) }}
+        <code class="bf-ai-provenance__id">{{ provenance().queryLogId.slice(0, 8) }}</code>
         @if (provenance().suggestionId) {
-          , suggestion {{ provenance().suggestionId!.slice(0, 8) }}
-        }
-      </span>
-      .
+          , suggestion
+          <code class="bf-ai-provenance__id">{{ provenance().suggestionId!.slice(0, 8) }}</code>
+        }</span
+      >.
     </p>
   `,
   styles: `
@@ -275,6 +278,12 @@ export class AiWhy {
       margin: 0;
       color: var(--mat-sys-on-surface-variant);
       font: var(--mat-sys-body-small);
+    }
+    .bf-ai-provenance__id {
+      display: inline-block;
+      width: 8ch;
+      overflow: hidden;
+      white-space: nowrap;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
