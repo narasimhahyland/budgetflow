@@ -1,0 +1,31 @@
+== before-run1 ==
+  2 flaky
+  627 passed (5.6m)
+    050-event-approval-workflow default › mobile 
+    011a-ai-assistant-panel refused-out-of-scope › tablet 
+
+== before-run2 ==
+  2 flaky
+  627 passed (6.0m)
+    050-event-approval-workflow default › mobile 
+    011a-ai-assistant-panel action-redirect › tablet 
+
+== after-survey ==
+  9 failed
+  620 passed (5.4m)
+    011a-ai-assistant-panel refused-out-of-scope › desktop 
+    011a-ai-assistant-panel refused-out-of-scope › tablet 
+    011a-ai-assistant-panel refused-out-of-scope › mobile 
+    011a-ai-assistant-panel action-redirect › desktop 
+    011a-ai-assistant-panel action-redirect › tablet 
+    011a-ai-assistant-panel action-redirect › mobile 
+    069a-policy-assistant is-allowed › desktop 
+    069a-policy-assistant is-allowed › tablet 
+    121a-receipt-quote-extraction check-fields › tablet 
+
+== after-run1 ==
+  629 passed (5.2m)
+
+== after-run2 ==
+  629 passed (5.2m)
+
