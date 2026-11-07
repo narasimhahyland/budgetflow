@@ -5,7 +5,13 @@ import { aiRoutes } from '@bf/web/features/ai';
 import { authRoutes } from '@bf/web/features/auth';
 import { closeRoutes } from '@bf/web/features/close';
 import { financeAdminRoutes } from '@bf/web/features/finance-admin';
-import { duplicateRoutes, integrationsRoutes } from '@bf/web/features/integrations';
+import {
+  duplicateRoutes,
+  ecosystemRoutes,
+  integrationsRoutes,
+  marketplaceRoutes,
+  widgetEmbedRoutes,
+} from '@bf/web/features/integrations';
 import { orgRoutes } from '@bf/web/features/org';
 import { Shell, shellChildRoutes } from '@bf/web/shell';
 
@@ -18,6 +24,15 @@ export const appRoutes: Route[] = [
   {
     path: 'link/chat',
     loadChildren: () => import('@bf/web/features/mobile').then((m) => m.chatLinkRoutes),
+  },
+  /**
+   * 102d. Outside the shell on purpose: a host page frames one card, not the application. The
+   * guards stay, so the viewer is whoever is signed in to BudgetFlow in that browser.
+   */
+  {
+    path: 'embed',
+    canActivate: [authGuard, sessionGuard],
+    children: widgetEmbedRoutes,
   },
   {
     path: '',
@@ -101,7 +116,9 @@ export const appRoutes: Route[] = [
       ...accountingRoutes,
       ...closeRoutes,
       ...integrationsRoutes,
+      ...ecosystemRoutes,
       ...duplicateRoutes,
+      { path: 'marketplace', children: marketplaceRoutes },
       ...shellChildRoutes,
     ],
   },

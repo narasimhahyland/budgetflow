@@ -248,6 +248,67 @@
     </section>
   }
 
+  <section class="bf-card" aria-labelledby="surfaces-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="surfaces-title">Surfaces for outside tools</h2>
+        <p class="bf-card__hint">
+          Where something that is not BudgetFlow reads BudgetFlow. Each one acts as the person who
+          connected it and none of them can approve, submit, apply a control or move money.
+        </p>
+      </div>
+    </div>
+    <div class="bf-tiles">
+      <a class="bf-tile" routerLink="/admin/integrations/bi" data-testid="surface-tile-bi">
+        <h3 class="bf-tile__name">BI connector</h3>
+        <p class="bf-tile__facts">
+          <span
+            >Power BI and Tableau read curated datasets with the connecting person's access</span
+          >
+        </p>
+      </a>
+      <a
+        class="bf-tile"
+        routerLink="/admin/integrations/assistants"
+        data-testid="surface-tile-assistants"
+      >
+        <h3 class="bf-tile__name">AI assistants</h3>
+        <p class="bf-tile__facts">
+          <span>Read-only tools an assistant may call. There is no tool that writes.</span>
+        </p>
+      </a>
+      <a
+        class="bf-tile"
+        routerLink="/admin/integrations/automations"
+        data-testid="surface-tile-automations"
+      >
+        <h3 class="bf-tile__name">No-code automations</h3>
+        <p class="bf-tile__facts">
+          <span>Zapier, Make, Power Automate and Workato. Every platform starts Not allowed.</span>
+        </p>
+      </a>
+      <a
+        class="bf-tile"
+        routerLink="/admin/integrations/partners"
+        data-testid="surface-tile-partners"
+      >
+        <h3 class="bf-tile__name">Marketplace partners</h3>
+        <p class="bf-tile__facts">
+          <span>Who may offer experiences, catering and gifts to organizers</span>
+        </p>
+      </a>
+      <a class="bf-tile" routerLink="/admin/widgets" data-testid="surface-tile-widgets">
+        <h3 class="bf-tile__name">Embeddable widgets</h3>
+        <p class="bf-tile__facts">
+          <span
+            >Team budget and events on an intranet page, for each viewer with their own
+            sign-in</span
+          >
+        </p>
+      </a>
+    </div>
+  </section>
+
   @if (available().length) {
     <section class="bf-card" aria-labelledby="available-title">
       <div class="bf-card__header">

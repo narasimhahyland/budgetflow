@@ -70,6 +70,11 @@ export const NAV: NavGroup[] = [
     label: 'Events',
     items: [
       { label: 'Events', path: '/events', icon: 'calendar', permission: 'tenant.read' },
+      /**
+       * 092d. The offers endpoint asserts `event.read` at tenant scope, so the entry appears for
+       * exactly the roles that can see anything there.
+       */
+      { label: 'Marketplace', path: '/marketplace', icon: 'market', permission: 'event.read' },
       {
         label: 'Co-funding board',
         path: '/events/cofunding-board',
@@ -297,6 +302,17 @@ export const NAV: NavGroup[] = [
         label: 'Tenant settings',
         path: '/admin/settings',
         icon: 'gear',
+        permission: 'tenant.settings.manage',
+      },
+      /**
+       * 102d. The Organization Admin owns widget settings, so the rail entry is theirs; the
+       * Integration Admin, who co-manages them, reaches the same screen from the connector frame
+       * of 092 instead of getting a second entry here.
+       */
+      {
+        label: 'Embeddable widgets',
+        path: '/admin/widgets',
+        icon: 'apps',
         permission: 'tenant.settings.manage',
       },
       /**
