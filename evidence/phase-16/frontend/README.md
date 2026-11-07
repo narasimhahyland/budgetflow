@@ -105,12 +105,12 @@ the widget journey deletes the widget it made.
 
 ## Verification
 
-| Check                      | Result                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------ |
-| `scripts/gate.sh` (all)    | see `gate-summary.txt`                                                         |
-| Phase 16 journeys, desktop | 12 passed                                                                      |
-| Full visual suite          | 679 passed, twice in a row with no reseed between the runs (`visual-runs.txt`) |
-| `scripts/secret-scan.sh`   | clean on every commit (pre-commit hook) and on the final tree                  |
+| Check                    | Result                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `scripts/gate.sh` (all)  | every mode PASS (`gate-summary.txt`)                                           |
+| Phase 16 journeys        | 40 passed, 10 skipped: the mutating ones run once, on desktop (`journeys.txt`) |
+| Full visual suite        | 680 passed, twice in a row with no reseed between the runs (`visual-runs.txt`) |
+| `scripts/secret-scan.sh` | clean on every commit (pre-commit hook) and on the final tree                  |
 
 **Visual baselines.** 51 new baselines for the Phase 16 screens at three viewports. 123 existing
 baselines changed, all of them the navigation rail gaining its Phase 16 entries; the before/after
@@ -125,6 +125,19 @@ a host that is not on its list. That is refused _and recorded_, and the widget a
 then showed the refusal, so the baselines passed once and failed on the next run with a different
 attempt count. The state now asks for a widget that does not exist, which is refused before anything
 is written. The origin refusal keeps its journey and its screenshot in `screens/`.
+
+**A second state was made deterministic.** `050-event-approval-workflow` on mobile clicks the
+Activity tab, which scrolls the shell's content box by an amount that varies, so the shot landed
+at a different offset from one run to the next. The state now returns to the top before it is
+captured, which also makes it a better baseline: the event header is in the frame.
+
+**A pre-existing determinism gap surfaced and was fixed in the visual configuration.**
+`090-approval-history` renders its Decided cell with `bfDateTime` but without the
+`relative-time` marker the rest of the app uses, so the committed baseline recorded the minute
+the seed happened to run (5 Nov) and the state failed after any reseed. The nav rail crops of
+the expected and actual images are byte-identical, so this is not the Phase 16 rail; the cell is
+now masked for the baseline. Tagging the cell in the Phase 7 component would be the better fix
+and belongs to whoever owns that screen.
 
 **Two defects were found by opening the regenerated baselines.** The embed refusal said the same
 sentence twice (the headline and the API's detail), and the widget list paired a view count with a

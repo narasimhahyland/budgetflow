@@ -1,11 +1,20 @@
-Two consecutive full visual runs on the same stack, no reseed between them.
-Command: npm run e2e:visual (pinned Playwright image, visual-light project)
+Visual regression, pinned Playwright image, visual-light project.
+Command: npm run e2e:visual
 
-Run 1: 679 passed (5.3m)
-Run 2: 679 passed (5.3m)
+Run 1 (inside scripts/gate.sh, after reseed-visual): 680 passed (373s)
+Run 2 (immediately after, no reseed):               680 passed (5.5m)
 
-The same commit passing twice with no reseed is what the second run proves: the
-widget administration baselines no longer depend on whether another visual state
-has recorded a refused embed.
+The second run with no reseed between them is the point: no visual state writes
+data another visual state reads, and no baseline records the minute the seed ran.
 
-The 16 known-red 080e-period-close states of issue #73 passed in both runs.
+The 16 known-red 080e-period-close states of issue #73 passed in both runs. Seven
+of their tablet baselines are among the 123 this branch regenerated, for the
+navigation rail alone.
+
+Two states were made deterministic along the way:
+  090-approval-history desktop  the Decided cell renders a seeded timestamp with no
+                                relative-time marker, so the baseline recorded the
+                                minute the seed ran; masked in the visual config.
+  050-event-approval-workflow   clicking the Activity tab scrolls the content box by
+    mobile                      a varying amount on mobile; the state now returns to
+                                the top before the shot.
