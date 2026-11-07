@@ -69,19 +69,33 @@ export async function expectShell(page: Page): Promise<void> {
   await expect(page.getByTestId('header-company')).toHaveText('Hyland');
 }
 
-/** A real access token from the local realm (direct grant on the local test client) to cross-check the UI. */
+/**
+ * A real access token from the local realm (direct grant on the local test client) to cross-check the UI.
+ *
+ * The local Keycloak is a single container and refuses a direct grant when several workers mint their
+ * first token at the same moment, so a refusal is retried a few times before the test is failed. The
+ * message carries the status and body: a bare "token for X" says nothing about whether Keycloak was
+ * overloaded, the realm was missing or the credentials were wrong.
+ */
 export async function apiToken(user: SeedUserId): Promise<string> {
   const ctx = await request.newContext();
-  const res = await ctx.post(`${KEYCLOAK_ISSUER}/protocol/openid-connect/token`, {
-    form: {
-      grant_type: 'password',
-      client_id: env('BF_E2E_CLIENT_ID'),
-      username: userById(user).username,
-      password: password(),
-    },
-  });
-  expect(res.ok(), `token for ${user}`).toBe(true);
-  const body = (await res.json()) as { access_token: string };
-  await ctx.dispose();
-  return body.access_token;
+  let last = '';
+  try {
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 250 * 2 ** (attempt - 1)));
+      const res = await ctx.post(`${KEYCLOAK_ISSUER}/protocol/openid-connect/token`, {
+        form: {
+          grant_type: 'password',
+          client_id: env('BF_E2E_CLIENT_ID'),
+          username: userById(user).username,
+          password: password(),
+        },
+      });
+      if (res.ok()) return ((await res.json()) as { access_token: string }).access_token;
+      last = `HTTP ${res.status()} ${(await res.text()).slice(0, 200)}`;
+    }
+  } finally {
+    await ctx.dispose();
+  }
+  throw new Error(`token for ${user}: ${last} (4 attempts; is the stack up?)`);
 }
