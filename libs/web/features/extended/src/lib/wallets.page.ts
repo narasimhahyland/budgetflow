@@ -149,6 +149,7 @@ interface ClaimDialogData {
     <mat-dialog-actions align="end">
       <button mat-button type="button" (click)="ref.close()">Cancel</button>
       <button
+        mat-flat-button
         satImportantButton
         type="button"
         [disabled]="!canSubmit()"

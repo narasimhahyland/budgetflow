@@ -272,6 +272,7 @@ interface PromoteData {
     <mat-dialog-actions align="end">
       <button mat-button type="button" (click)="ref.close()">Cancel</button>
       <button
+        mat-flat-button
         satImportantButton
         type="button"
         [disabled]="reason().trim().length < 1"
@@ -366,6 +367,7 @@ export class PromoteScenarioDialog {
               <mat-icon svgIcon="circle_add" />Add change
             </button>
             <button
+              mat-flat-button
               satImportantButton
               type="button"
               [disabled]="!canPromote()"

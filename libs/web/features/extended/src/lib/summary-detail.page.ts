@@ -127,6 +127,7 @@ export class EditSectionDialog {
     <mat-dialog-actions align="end">
       <button mat-button type="button" (click)="ref.close()">Cancel</button>
       <button
+        mat-flat-button
         satImportantButton
         type="button"
         [disabled]="!attested()"
@@ -194,6 +195,7 @@ export class ApproveSummaryDialog {
           }}</sat-status-tag>
           @if (s.status !== 'approved') {
             <button
+              mat-flat-button
               satImportantButton
               type="button"
               [disabled]="!canApprove()"

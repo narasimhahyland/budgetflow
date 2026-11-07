@@ -169,6 +169,7 @@ const PLACEHOLDER = '[Explain';
 
           <div class="bf-commentary__actions">
             <button
+              mat-flat-button
               satImportantButton
               type="button"
               [disabled]="!canSubmit()"
