@@ -48,6 +48,10 @@ const DECISION_ACTIONS: Record<AiFeature, Action> = {
   matching: 'actuals.manage',
   extraction: 'request.create',
   anomaly_flags: 'exception.resolve',
+  // Drafted text is a draft: approving a leadership summary needs the same reading rights as
+  // writing it by hand, and a variance commentary belongs to the owner who forecasts the budget.
+  leadership_summary: 'report.read',
+  variance_commentary: 'forecast.submit',
   // The assistant connector (092c) only reads, so it raises no suggestion to decide on. The entry
   // exists so the map stays total; `tenant.read` is the weakest action any signed-in person holds.
   mcp: 'tenant.read',

@@ -4,7 +4,7 @@ The BI connector (092a), no-code connectors (092b), the connector for AI assista
 partner marketplace (092d) and embeddable widgets (102d). Native app wrappers (115a) are deferred by
 product decision and are not in this change.
 
-Branch `feat/p16-ecosystem-backend`, migration `0018_p16_ecosystem`, seed prefix `92`.
+Branch `feat/p16-ecosystem-backend`, migration `0019_p16_ecosystem`, seed prefix `93`, invariant rows 88-94.
 
 ## Outcome
 

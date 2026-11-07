@@ -1,5 +1,6 @@
 import { AdminApiModule } from '@bf/api/admin';
 import { AiApiModule } from '@bf/api/ai';
+import { ExtendedApiModule } from '@bf/api/extended';
 import { EcosystemApiModule } from '@bf/api/ecosystem';
 import { ApprovalsApiModule } from '@bf/api/approvals';
 import { ActualsApiModule } from '@bf/api/actuals';
@@ -48,6 +49,7 @@ import { HealthController, OpenApiController } from './health.controller';
     ReportsApiModule,
     AdminApiModule,
     AiApiModule,
+    ExtendedApiModule,
     EcosystemApiModule,
   ],
   controllers: [HealthController, OpenApiController],

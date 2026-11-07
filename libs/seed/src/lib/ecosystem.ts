@@ -1,7 +1,7 @@
 import { seedId } from './ids';
 
 /**
- * Phase 16 seed (prefix 92): the ecosystem surfaces as a company that has started using them would
+ * Phase 16 seed (prefix 93): the ecosystem surfaces as a company that has started using them would
  * have them. The BI connector on with two datasets, the connector for AI assistants on with its
  * read-only tools, one no-code platform allowed and the rest not, three marketplace partners (two
  * enabled against approved vendors, one paused awaiting its vendor link) and two embeddable widgets.
@@ -12,23 +12,23 @@ import { seedId } from './ids';
  */
 export const P16_IDS = {
   vendors: {
-    cityQuest: seedId('92000000', 1),
-    freshPlate: seedId('92000000', 2),
-    kindlyGifts: seedId('92000000', 3),
+    cityQuest: seedId('93000000', 1),
+    freshPlate: seedId('93000000', 2),
+    kindlyGifts: seedId('93000000', 3),
   },
   partners: {
-    cityQuest: seedId('92000000', 11),
-    freshPlate: seedId('92000000', 12),
-    kindlyGifts: seedId('92000000', 13),
+    cityQuest: seedId('93000000', 11),
+    freshPlate: seedId('93000000', 12),
+    kindlyGifts: seedId('93000000', 13),
   },
   widgets: {
-    teamBudget: seedId('92000000', 21),
-    upcomingEvents: seedId('92000000', 22),
+    teamBudget: seedId('93000000', 21),
+    upcomingEvents: seedId('93000000', 22),
   },
   connections: {
-    analystPowerBi: seedId('92000000', 31),
-    organizerAssistant: seedId('92000000', 32),
-    organizerAutomation: seedId('92000000', 33),
+    analystPowerBi: seedId('93000000', 31),
+    organizerAssistant: seedId('93000000', 32),
+    organizerAutomation: seedId('93000000', 33),
   },
 } as const;
 

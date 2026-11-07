@@ -23,6 +23,7 @@ export * from './lib/domains/integrations';
 export * from './lib/domains/close';
 export * from './lib/domains/admin';
 export * from './lib/domains/ai';
+export * from './lib/domains/extended';
 export * from './lib/domains/ecosystem';
 export * from './lib/endpoints';
 export * from './lib/openapi';

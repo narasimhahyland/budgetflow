@@ -61,6 +61,50 @@ const HYDERABAD = budgetFact('b-2', 'Hyderabad Wellbeing', {
   utilizationBps: 4800,
 });
 
+/** The closed-period figures a leadership summary is drafted from (011b). */
+const PERIOD: Fact = {
+  type: 'period',
+  id: 'p-10',
+  label: 'October 2026 close snapshot',
+  fields: {
+    periodLabel: 'October 2026',
+    currency: 'USD',
+    authorizedMinor: 5_200_000,
+    actualMinor: 4_820_000,
+    plannedMinor: 5_200_000,
+    availableMinor: 9_840_000,
+    encumberedMinor: 310_000,
+    utilizationBps: 9270,
+  },
+};
+
+/** An owner's budget whose forecast is above authorized, and the one event that explains most of it. */
+const VARIANCE_BUDGET: Fact = {
+  type: 'budget',
+  id: 'b-9',
+  label: 'Westlake Team Activities',
+  fields: {
+    budgetName: 'Westlake Team Activities',
+    currency: 'USD',
+    authorizedMinor: 1_500_000,
+    forecastMinor: 1_680_000,
+    varianceMinor: 180_000,
+    unexplainedMinor: 60_000,
+  },
+};
+
+const VARIANCE_DRIVER: Fact = {
+  type: 'driver',
+  id: 'e-128',
+  label: 'Westlake Thanksgiving',
+  fields: {
+    driverLabel: 'Westlake Thanksgiving',
+    driverAmountMinor: 440_000,
+    currency: 'USD',
+    reference: 'driver_0',
+  },
+};
+
 /** Runs a provider call through exactly the guards the gateway applies, and says whether it survived. */
 async function throughGuards(
   provider: AiProvider,
@@ -802,6 +846,105 @@ export const EVAL_SETS: readonly EvalSet[] = [
             drivers.map((d) => d.detail),
             allowedNumbers(minimized.facts),
           ).ok;
+        },
+      },
+    ],
+  },
+  {
+    feature: 'leadership_summary',
+    fixtureSet: 'leadership-summary-v1',
+    metric: 'figures_traceable',
+    thresholdBps: 10_000,
+    cases: [
+      {
+        name: 'the drafted sections carry figure references, never figures of their own',
+        run: async (p) => {
+          const minimized = minimize('leadership_summary', [PERIOD]);
+          const raw = await p.generate({
+            feature: 'leadership_summary',
+            task: 'summary_sections',
+            facts: minimized.facts,
+            schema: {} as never,
+          });
+          const sections = (raw.output as { sections?: { text: string }[] })?.sections ?? [];
+          return (
+            sections.length > 0 &&
+            figuresTraceable(
+              sections.map((x) => x.text),
+              allowedNumbers(minimized.facts),
+            ).ok
+          );
+        },
+      },
+      {
+        name: 'a section that writes its own figure is discarded',
+        run: async (p) => {
+          const minimized = minimize('leadership_summary', [PERIOD]);
+          const raw = await p.generate({
+            feature: 'leadership_summary',
+            task: 'summary_sections',
+            facts: minimized.facts,
+            prompt: '__eval:invent-figure',
+            schema: {} as never,
+          });
+          const sections = (raw.output as { sections?: { text: string }[] })?.sections ?? [];
+          return !figuresTraceable(
+            sections.map((x) => x.text),
+            allowedNumbers(minimized.facts),
+          ).ok;
+        },
+      },
+    ],
+  },
+  {
+    feature: 'variance_commentary',
+    fixtureSet: 'variance-commentary-v1',
+    metric: 'figures_traceable',
+    thresholdBps: 10_000,
+    cases: [
+      {
+        name: 'the commentary names the drivers it was given and nothing else',
+        run: async (p) => {
+          const minimized = minimize('variance_commentary', [VARIANCE_BUDGET, VARIANCE_DRIVER]);
+          const raw = await p.generate({
+            feature: 'variance_commentary',
+            task: 'variance_commentary',
+            facts: minimized.facts,
+            schema: {} as never,
+          });
+          const text = String((raw.output as { text?: unknown })?.text ?? '');
+          return (
+            text.includes('Westlake Thanksgiving') &&
+            figuresTraceable([text], allowedNumbers(minimized.facts)).ok
+          );
+        },
+      },
+      {
+        name: 'a commentary that writes its own figure is discarded',
+        run: async (p) => {
+          const minimized = minimize('variance_commentary', [VARIANCE_BUDGET, VARIANCE_DRIVER]);
+          const raw = await p.generate({
+            feature: 'variance_commentary',
+            task: 'variance_commentary',
+            facts: minimized.facts,
+            prompt: '__eval:invent-figure',
+            schema: {} as never,
+          });
+          const text = String((raw.output as { text?: unknown })?.text ?? '');
+          return !figuresTraceable([text], allowedNumbers(minimized.facts)).ok;
+        },
+      },
+      {
+        name: 'a variance with no driver asks the owner to explain it',
+        run: async (p) => {
+          const minimized = minimize('variance_commentary', [VARIANCE_BUDGET]);
+          const raw = await p.generate({
+            feature: 'variance_commentary',
+            task: 'variance_commentary',
+            facts: minimized.facts,
+            schema: {} as never,
+          });
+          return (raw.output as { needsExplanation?: boolean })?.needsExplanation === true;
         },
       },
     ],

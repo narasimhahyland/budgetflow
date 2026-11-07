@@ -53,6 +53,16 @@ export const FEATURE_CATALOG: readonly FeatureDefinition[] = AI_FEATURES.map((fe
       seedEnabled: true,
     },
     anomaly_flags: { title: 'Anomaly flags', appearsOn: 'Anomaly flags (017c)', seedEnabled: true },
+    leadership_summary: {
+      title: 'Auto-drafted leadership summary',
+      appearsOn: 'Leadership summary (011b)',
+      seedEnabled: true,
+    },
+    variance_commentary: {
+      title: 'Drafted variance commentary',
+      appearsOn: 'Forecast cycle owner form (087a)',
+      seedEnabled: true,
+    },
     mcp: {
       title: 'Connector for AI assistants',
       appearsOn: 'AI assistants connector (092c)',

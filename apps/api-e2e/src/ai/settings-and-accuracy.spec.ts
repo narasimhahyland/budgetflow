@@ -59,6 +59,7 @@ test('the turn-on dialog can show exactly what a feature sends, and never a cred
     200,
     AiSettingsView,
   );
+  // The dialog shows every feature in the catalog, so a phase that adds one cannot add it silently.
   expect(view.features.length).toBe(AI_FEATURES.length);
   for (const feature of view.features) {
     expect(feature.dataSent.length, `${feature.feature} lists the fields it sends`).toBeGreaterThan(
