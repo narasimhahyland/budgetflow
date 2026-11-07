@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule, type MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -88,12 +88,10 @@ const STATUS_TONE: Record<ScenarioStatus, 'info' | 'success' | 'neutral'> = {
 export class CreateScenarioDialog {
   protected readonly name = signal('');
   protected readonly note = signal('');
-  constructor(
-    protected readonly ref: MatDialogRef<
-      CreateScenarioDialog,
-      { name: string; note?: string } | undefined
-    >,
-  ) {}
+  protected readonly ref =
+    inject<MatDialogRef<CreateScenarioDialog, { name: string; note?: string } | undefined>>(
+      MatDialogRef,
+    );
 }
 
 /** Screen 031a: the what-if scenarios this person authored or was invited to collaborate on. */

@@ -4,6 +4,7 @@ import { accountingRoutes } from '@bf/web/features/accounting';
 import { aiRoutes } from '@bf/web/features/ai';
 import { authRoutes } from '@bf/web/features/auth';
 import { closeRoutes } from '@bf/web/features/close';
+import { narrativeRoutes, outcomeRoutes, participationRoutes } from '@bf/web/features/extended';
 import { financeAdminRoutes } from '@bf/web/features/finance-admin';
 import { duplicateRoutes, integrationsRoutes } from '@bf/web/features/integrations';
 import { orgRoutes } from '@bf/web/features/org';
@@ -28,6 +29,11 @@ export const appRoutes: Route[] = [
     children: [
       // Before `budgets`: /budgets/:budgetId/suggest-split is more specific than the lazy budgets lib.
       ...aiRoutes,
+      // Likewise /budgets/scenarios, which the budgets lib would otherwise read as a budget id.
+      {
+        path: 'budgets/scenarios',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.scenarioRoutes),
+      },
       {
         path: 'budgets',
         loadChildren: () => import('@bf/web/features/budgets').then((m) => m.budgetsRoutes),
@@ -98,6 +104,17 @@ export const appRoutes: Route[] = [
         path: 'reports',
         loadChildren: () => import('@bf/web/features/reports').then((m) => m.reportsRoutes),
       },
+      {
+        path: 'wallets',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.walletRoutes),
+      },
+      {
+        path: 'recognition',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.recognitionRoutes),
+      },
+      ...narrativeRoutes,
+      ...outcomeRoutes,
+      ...participationRoutes,
       ...accountingRoutes,
       ...closeRoutes,
       ...integrationsRoutes,

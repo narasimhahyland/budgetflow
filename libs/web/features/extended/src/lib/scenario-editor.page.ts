@@ -13,7 +13,7 @@ import {
   MatDialog,
   MatDialogModule,
   MAT_DIALOG_DATA,
-  type MatDialogRef,
+  MatDialogRef,
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,7 +26,6 @@ import type {
   AddScenarioChangeRequest,
   BudgetDetail,
   Scenario,
-  ScenarioChange,
   ScenarioChangeImpact,
   ScenarioChangeKind,
   ScenarioImpact,
@@ -176,9 +175,8 @@ export class AddChangeDialog {
   protected readonly destination = signal<'parent' | 'savings' | 'reallocation'>('parent');
   protected readonly destinationBudgetId = signal('');
 
-  constructor(
-    protected readonly ref: MatDialogRef<AddChangeDialog, AddScenarioChangeRequest | undefined>,
-  ) {}
+  protected readonly ref =
+    inject<MatDialogRef<AddChangeDialog, AddScenarioChangeRequest | undefined>>(MatDialogRef);
 
   protected request(): AddScenarioChangeRequest {
     const kind = this.kind();
@@ -313,12 +311,13 @@ export class PromoteScenarioDialog {
   protected readonly reasonCode = signal('RED-REALLOCATION');
   protected readonly reason = signal('');
 
-  constructor(
-    protected readonly ref: MatDialogRef<
-      PromoteScenarioDialog,
-      { reasonCode: string; reason: string; baselineAt: string } | undefined
-    >,
-  ) {}
+  protected readonly ref =
+    inject<
+      MatDialogRef<
+        PromoteScenarioDialog,
+        { reasonCode: string; reason: string; baselineAt: string } | undefined
+      >
+    >(MatDialogRef);
 
   protected label = (kind: ScenarioChangeKind) => KIND_LABEL[kind];
   protected becomes = (kind: ScenarioChangeKind) => KIND_BECOMES[kind];
