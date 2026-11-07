@@ -4,7 +4,6 @@ import { accountingRoutes } from '@bf/web/features/accounting';
 import { aiRoutes } from '@bf/web/features/ai';
 import { authRoutes } from '@bf/web/features/auth';
 import { closeRoutes } from '@bf/web/features/close';
-import { narrativeRoutes, outcomeRoutes, participationRoutes } from '@bf/web/features/extended';
 import { financeAdminRoutes } from '@bf/web/features/finance-admin';
 import { duplicateRoutes, integrationsRoutes } from '@bf/web/features/integrations';
 import { orgRoutes } from '@bf/web/features/org';
@@ -112,9 +111,18 @@ export const appRoutes: Route[] = [
         path: 'recognition',
         loadChildren: () => import('@bf/web/features/extended').then((m) => m.recognitionRoutes),
       },
-      ...narrativeRoutes,
-      ...outcomeRoutes,
-      ...participationRoutes,
+      {
+        path: 'insights',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.narrativeRoutes),
+      },
+      {
+        path: 'dashboards',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.outcomeRoutes),
+      },
+      {
+        path: 'participation',
+        loadChildren: () => import('@bf/web/features/extended').then((m) => m.participationRoutes),
+      },
       ...accountingRoutes,
       ...closeRoutes,
       ...integrationsRoutes,

@@ -36,21 +36,21 @@ export const scenarioRoutes: Routes = [
 /** /insights/summaries and /insights/commentary: drafted leadership narratives (011b). */
 export const narrativeRoutes: Routes = [
   {
-    path: 'insights/summaries',
+    path: 'summaries',
     title: 'Leadership summaries',
     data: { pageTitle: 'Leadership summaries', section: 'Insights' },
     canActivate: [requirePermission('report.read', 'Leadership summaries')],
     loadComponent: () => import('./summary-list.page').then((m) => m.SummaryListPage),
   },
   {
-    path: 'insights/summaries/:summaryId',
+    path: 'summaries/:summaryId',
     title: 'Leadership summary',
     data: { pageTitle: 'Leadership summary', section: 'Insights' },
     canActivate: [requirePermission('report.read', 'Leadership summary')],
     loadComponent: () => import('./summary-detail.page').then((m) => m.SummaryDetailPage),
   },
   {
-    path: 'insights/commentary',
+    path: 'commentary',
     title: 'Variance commentary',
     data: { pageTitle: 'Variance commentary', section: 'Insights' },
     canActivate: [requirePermission('budget.read', 'Variance commentary')],
@@ -61,7 +61,7 @@ export const narrativeRoutes: Routes = [
 /** /dashboards/outcomes: outcome linkage (015c). */
 export const outcomeRoutes: Routes = [
   {
-    path: 'dashboards/outcomes',
+    path: 'outcomes',
     title: 'Outcomes',
     data: { pageTitle: 'Outcomes', section: 'Insights' },
     canActivate: [requirePermission('report.read', 'Outcomes')],
@@ -72,7 +72,8 @@ export const outcomeRoutes: Routes = [
 /** /participation: the turnout leaderboard every employee may see (122a). */
 export const participationRoutes: Routes = [
   {
-    path: 'participation',
+    path: '',
+    pathMatch: 'full',
     title: 'Participation',
     data: { pageTitle: 'Participation', section: 'Events' },
     canActivate: [requirePermission('tenant.read', 'Participation')],
