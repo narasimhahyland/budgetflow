@@ -2828,11 +2828,11 @@
     {
       "id": "102d-widget-embed",
       "role": "employee",
-      "path": "/embed/93000000-0000-4000-8000-000000000021",
-      "waitFor": "[data-testid=embed-not-allowed]",
+      "path": "/embed/00000000-0000-4000-8000-00000000ffff",
+      "waitFor": "[data-testid=embed-missing]",
       "states": [
         {
-          "state": "origin-not-allowed"
+          "state": "widget-removed"
         }
       ]
     }
