@@ -72,11 +72,12 @@ seed() {
 # The unpublished outbox rows are counted alongside the jobs, because a quiet queue on its own
 # only means the dispatcher has not got there yet. Only the queues the seed feeds are named: a
 # blanket wait would never finish, as queues whose consumer lives elsewhere park jobs in `created`
-# indefinitely. Quiet has to hold twice running before it counts.
+# indefinitely. A job in `retry` counts as outstanding: it is work that has not landed yet. Quiet
+# has to hold twice running before it counts.
 settle() {
   local queues="'channel.deliver','notification.email'" waited=0 quiet=0
   local sql="select (select count(*) from outbox_messages where published_at is null)
-                  + (select count(*) from pgboss.job where name in ($queues) and state in ('created','active'))"
+                  + (select count(*) from pgboss.job where name in ($queues) and state in ('created','active','retry'))"
   while [ "$waited" -lt 60 ]; do
     local pending
     pending=$(dc exec -T postgres sh -lc \
