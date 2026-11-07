@@ -41,6 +41,10 @@ export class FakeAiProvider extends AiProvider {
         return { output: this.extractFields(facts) };
       case 'anomaly_explain':
         return { output: this.anomalyExplain(facts) };
+      case 'summary_sections':
+        return { output: this.summarySections(facts) };
+      case 'variance_commentary':
+        return { output: this.varianceCommentary(facts) };
       default:
         return { output: null, unavailable: true };
     }
@@ -52,6 +56,28 @@ export class FakeAiProvider extends AiProvider {
     const name = prompt.slice('__eval:'.length).split(/\s/)[0];
     if (name === 'unavailable') return { output: null, unavailable: true };
     if (name === 'schema-invalid') return { output: { answer: 42, why: 'not an array' } };
+    if (name === 'invent-figure' && task === 'summary_sections')
+      return {
+        output: {
+          sections: [
+            {
+              key: 'headline',
+              // A figure written by the model instead of read from the ledger: the guard must
+              // discard the whole draft rather than show a number nobody can trace.
+              text: 'October spend was USD 61,450.00, comfortably inside plan.',
+            },
+          ],
+          confidence: 'high',
+        },
+      };
+    if (name === 'invent-figure' && task === 'variance_commentary')
+      return {
+        output: {
+          text: 'The forecast is USD 9,900.00 above authorized because of extra catering.',
+          needsExplanation: false,
+          confidence: 'high',
+        },
+      };
     if (name === 'invent-figure')
       return {
         output: {
@@ -240,6 +266,68 @@ export class FakeAiProvider extends AiProvider {
     if (kind === 'quote')
       fields.push({ field: 'currency', value: currency, confidence: 'high' as const });
     return { readable: true, fields: fields.sort((a, b) => a.field.localeCompare(b.field)) };
+  }
+
+  /**
+   * Leadership summary sections (011b). The provider writes sentences with `{{figure:<token>}}`
+   * placeholders and never a figure of its own: BudgetFlow substitutes each token with the value the
+   * read model produced, so the words can change without the numbers moving.
+   */
+  private summarySections(facts: readonly Fact[]) {
+    const period = facts.find((f) => f.type === 'period');
+    const label = str(period, 'periodLabel') ?? 'the period';
+    const region = facts.find((f) => f.type === 'region');
+    const risk = facts.find((f) => f.type === 'risk');
+    const engagement = facts.find((f) => f.type === 'engagement');
+    const sections = [
+      {
+        key: 'headline',
+        text: `${label} spend was {{figure:period_actual}} against a phased plan of {{figure:period_plan}}. Year to date the company has used {{figure:ytd_utilization}} of authorized budgets, with {{figure:company_available}} available company-wide.`,
+      },
+      {
+        key: 'variances',
+        text: region
+          ? `${region.label} is {{figure:largest_variance}} away from its plan for ${label}, driven by committed spend of {{figure:largest_variance_committed}}.`
+          : `No region moved far enough from its plan for ${label} to be worth a sentence.`,
+      },
+      {
+        key: 'risks',
+        text: risk
+          ? `{{figure:at_risk_budgets}} budgets are likely to leave {{figure:at_risk_unused}} unused by year end, so reclaim is worth planning.`
+          : 'No budget is far enough from its plan to need action this month.',
+      },
+      {
+        key: 'engagement',
+        text: engagement
+          ? 'Reach was {{figure:reach}} of eligible employees and the post-event pulse was {{figure:pulse}}.'
+          : 'There is not enough survey data this period to describe engagement.',
+      },
+    ];
+    return { sections, confidence: period ? 'high' : 'low' };
+  }
+
+  /**
+   * Variance commentary (011b in 087a). Every driver sentence names a real record; the part of the
+   * variance the drivers do not explain becomes an `[Explain: ...]` note the owner has to replace,
+   * because the model has nothing truthful to say about it.
+   */
+  private varianceCommentary(facts: readonly Fact[]) {
+    const budget = facts.find((f) => f.type === 'budget');
+    const drivers = facts.filter((f) => f.type === 'driver');
+    const sentences = drivers
+      .slice(0, 3)
+      .map(
+        (d, i) =>
+          `${i === 0 ? 'The forecast is above authorized because' : 'It is also affected by'} ${d.label} ({{figure:driver_${i}}}).`,
+      );
+    if (!sentences.length)
+      sentences.push('I found no record in BudgetFlow that explains this variance.');
+    const unexplained = num(budget, 'unexplainedMinor');
+    return {
+      text: sentences.join(' '),
+      needsExplanation: unexplained > 0,
+      confidence: drivers.length >= 2 ? 'high' : drivers.length === 1 ? 'medium' : 'low',
+    };
   }
 
   private anomalyExplain(facts: readonly Fact[]) {

@@ -4,6 +4,7 @@ import { seedActuals } from './actuals';
 import { seedAdmin } from './admin';
 import { seedBudgets } from './budgets';
 import { seedChannels } from './channels';
+import { seedExtended } from './extended';
 import { seedClose } from './close';
 import { seedEvents } from './events';
 import { seedEventsDepth } from './events-depth';
@@ -60,5 +61,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'retention periods, capability switches, legal holds, a maintenance notice and owner invites',
     phase: 'P14',
     run: seedAdmin,
+  },
+  {
+    name: 'a draft what-if scenario, wallet programmes, recognition award types and organizer notes',
+    phase: 'P15',
+    run: seedExtended,
   },
 ];

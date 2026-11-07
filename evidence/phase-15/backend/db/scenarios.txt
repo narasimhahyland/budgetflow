@@ -1,0 +1,77 @@
+                name                 |  status  |    kind     | promotion_status |              journal_id              
+-------------------------------------+----------+-------------+------------------+--------------------------------------
+ Compare A 09b93a                    | draft    | reduce      |                  | 
+ Compare A 180a26                    | draft    | reduce      |                  | 
+ Compare A 3e7d07                    | draft    | reduce      |                  | 
+ Compare A 52a4c8                    | draft    | reduce      |                  | 
+ Compare A ca9754                    | draft    | reduce      |                  | 
+ Compare A f6f8d6                    | draft    | reduce      |                  | 
+ Compare B 0f2c0f                    | draft    | reduce      |                  | 
+ Compare B 215031                    | draft    | reduce      |                  | 
+ Compare B 4cb693                    | draft    | reduce      |                  | 
+ Compare B 804abc                    | draft    | reduce      |                  | 
+ Compare B bb8066                    | draft    | reduce      |                  | 
+ Compare B d35c59                    | draft    | reduce      |                  | 
+ Europe -20% to fund India festivals | draft    | reduce      |                  | 
+ Europe -20% to fund India festivals | draft    | freeze      |                  | 
+ What-if 07b0f81d                    | promoted | reduce      | applied          | eca2c974-613f-4890-a944-44b0fe7488a9
+ What-if 07b0f81d                    | promoted | freeze      | applied          | 
+ What-if 098d0d2b                    | draft    | reduce      |                  | 
+ What-if 11d5776d                    | draft    | reduce      |                  | 
+ What-if 11d5776d                    | draft    | freeze      |                  | 
+ What-if 11d5776d                    | draft    | set_to_zero |                  | 
+ What-if 27a94780                    | draft    | freeze      |                  | 
+ What-if 2a13e4bc                    | draft    | reduce      | failed           | 
+ What-if 2a13e4bc                    | draft    | freeze      |                  | 
+ What-if 34663f5f                    | promoted | reduce      | applied          | dcac8b3a-bc88-43cb-bc2a-efb908ac0be0
+ What-if 34663f5f                    | promoted | freeze      | applied          | 
+ What-if 365c6968                    | draft    | reduce      |                  | 
+ What-if 365c6968                    | draft    | freeze      |                  | 
+ What-if 365c6968                    | draft    | set_to_zero |                  | 
+ What-if 3c68c885                    | draft    | reduce      |                  | 
+ What-if 3fa3d9ea                    | draft    | reduce      |                  | 
+ What-if 4d2487a4                    | draft    | freeze      |                  | 
+ What-if 51b52d1c                    | promoted | reduce      | applied          | f2f1b732-0801-4e5a-8327-7d7b534d1dac
+ What-if 51b52d1c                    | promoted | freeze      | applied          | 
+ What-if 52c042d0                    | draft    | reduce      |                  | 
+ What-if 52c042d0                    | draft    | freeze      |                  | 
+ What-if 52c042d0                    | draft    | set_to_zero |                  | 
+ What-if 56f85664                    | draft    | freeze      |                  | 
+ What-if 570393d8                    | draft    | reduce      |                  | 
+ What-if 570393d8                    | draft    | freeze      |                  | 
+ What-if 570393d8                    | draft    | set_to_zero |                  | 
+ What-if 61641266                    | draft    | reduce      |                  | 
+ What-if 650b18ce                    | draft    | reduce      |                  | 
+ What-if 6a3ff425                    | draft    | reduce      |                  | 
+ What-if 6bf24d33                    | draft    | reduce      |                  | 
+ What-if 79ad74a4                    | draft    | reduce      |                  | 
+ What-if 80b0f908                    | draft    | reduce      |                  | 
+ What-if 8a3abe88                    | draft    | reduce      |                  | 
+ What-if 8b100d31                    | promoted | reduce      | applied          | b091d7c3-9e14-4c17-af6b-db52a0a1cbd5
+ What-if 8b100d31                    | promoted | freeze      | applied          | 
+ What-if 8b5a3eeb                    | promoted | reduce      | applied          | 62585597-a64c-48ed-b9f6-26a3d0571eea
+ What-if 8b5a3eeb                    | promoted | freeze      | applied          | 
+ What-if 96ce1c5f                    | draft    | reduce      |                  | 
+ What-if a0fdda01                    | draft    | freeze      |                  | 
+ What-if a791126b                    | draft    | freeze      |                  | 
+ What-if ac32bea6                    | draft    | reduce      |                  | 
+ What-if be208d47                    | draft    | reduce      |                  | 
+ What-if ca4bd22a                    | draft    | freeze      |                  | 
+ What-if cc40c825                    | draft    | reduce      |                  | 
+ What-if cc40c825                    | draft    | freeze      |                  | 
+ What-if cc40c825                    | draft    | set_to_zero |                  | 
+ What-if d21b819c                    | draft    | reduce      |                  | 
+ What-if dd243b11                    | draft    | reduce      |                  | 
+ What-if dd5a1337                    | draft    | reduce      |                  | 
+ What-if e108e009                    | draft    | reduce      |                  | 
+ What-if e108e009                    | draft    | freeze      |                  | 
+ What-if e108e009                    | draft    | set_to_zero |                  | 
+ What-if f3fd2797                    | draft    | reduce      |                  | 
+ What-if f688b071                    | draft    | reduce      |                  | 
+(68 rows)
+
+ ledger_lines_referencing_a_scenario 
+-------------------------------------
+                                   0
+(1 row)
+
