@@ -1,0 +1,330 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">{{ personal() ? 'My BI connections' : 'BI connector' }}</h1>
+    <p class="bf-page__subtitle">
+      Power BI and Tableau read curated datasets with the access of the person who connected them
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    @if (canConnect() && enabled() && !connecting()) {
+      <button
+        mat-flat-button
+        satImportantButton
+        type="button"
+        (click)="startConnect()"
+        data-testid="bi-connect"
+      >
+        Connect a BI tool
+      </button>
+    }
+  </div>
+</header>
+
+@if (!personal()) {
+  <bf-ecosystem-nav />
+}
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="bi-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="bi-error"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+
+@if (connector.isLoading() && !valueOf(connector)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the BI connector" /></section>
+} @else if (connector.error()) {
+  <section class="bf-card">
+    <bf-load-state
+      [error]="connector.error()"
+      what="the BI connector"
+      (retry)="connector.reload()"
+    />
+  </section>
+} @else if (valueOf(connector); as c) {
+  @if (created(); as token) {
+    <section class="bf-card" aria-labelledby="bi-token-title" data-testid="bi-token">
+      <div class="bf-card__header">
+        <h2 class="bf-card__title" id="bi-token-title">Your connection token</h2>
+      </div>
+      <p class="bf-card__hint">{{ token.notice }}</p>
+      <bf-one-time-secret
+        [secret]="token.token"
+        what="connection token"
+        testId="bi-connection-token"
+        (done)="dismissToken()"
+      />
+    </section>
+  }
+
+  @if (!c.enabled) {
+    <sat-banner variant="warning" data-testid="bi-disabled">
+      <sat-banner-message>
+        <strong>The BI connector is off.</strong>
+        No BI tool can read from BudgetFlow, and existing connections get nothing until it is turned
+        on again.
+      </sat-banner-message>
+    </sat-banner>
+  }
+
+  <section class="bf-kpis" aria-label="BI connector usage">
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Status</p>
+      <p class="bf-kpi__value" data-testid="bi-status">{{ c.enabled ? 'On' : 'Off' }}</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Datasets offered</p>
+      <p class="bf-kpi__value" data-testid="bi-datasets-on">{{ enabledDatasets().length }}</p>
+      <p class="bf-kpi__delta">of {{ c.datasets.length }} available</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Connections active</p>
+      <p class="bf-kpi__value" data-testid="bi-connections-active">
+        {{ c.connectionsActive | number }}
+      </p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Refreshes in 24 h</p>
+      <p class="bf-kpi__value">{{ c.refreshesLast24h | number }}</p>
+      <p class="bf-kpi__delta">{{ c.refreshLimitPerDay }} per connection per day</p>
+    </div>
+    <div class="bf-kpi">
+      <p class="bf-kpi__label">Rows per request</p>
+      <p class="bf-kpi__value">{{ c.maxRowsPerRequest | number }}</p>
+      <p class="bf-kpi__delta">Paged; a connection lasts {{ c.connectionLifetimeDays }} days</p>
+    </div>
+  </section>
+
+  <section class="bf-card" aria-labelledby="bi-overview-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="bi-overview-title">How a BI tool reads BudgetFlow</h2>
+        <p class="bf-card__hint">{{ c.notice }}</p>
+      </div>
+      @if (canManage()) {
+        <mat-slide-toggle
+          [checked]="c.enabled"
+          [disabled]="busy()"
+          (change)="setEnabled($event.checked)"
+          data-testid="bi-enable"
+          >{{ c.enabled ? 'On' : 'Off' }}</mat-slide-toggle
+        >
+      }
+    </div>
+    <div class="bf-card__body">
+      <ul class="bf-never" data-testid="bi-never">
+        <li class="bf-never__title">The feed only reads.</li>
+        <li>{{ readOnlyNote }}</li>
+      </ul>
+    </div>
+    <div class="bf-card__body">
+      <p class="bf-card__hint">Feed address</p>
+      <div class="bf-address">
+        <code class="bf-address__value" data-testid="bi-feed-url">{{
+          c.feedBaseUrl + '/{dataset}'
+        }}</code>
+      </div>
+    </div>
+    <div class="bf-card__body">
+      <ol class="bf-steps">
+        <li>Make a connection below and copy the token it shows you once.</li>
+        <li>
+          In Power BI choose Get data, then OData feed, and paste the address with the dataset you
+          want. Tableau uses its OData connector the same way.
+        </li>
+        <li>Sign in with the token. The tool then reads exactly what you can read, and no more.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="bf-card" aria-labelledby="bi-datasets-title">
+    <div class="bf-card__header">
+      <div>
+        <h2 class="bf-card__title" id="bi-datasets-title">Datasets</h2>
+        <p class="bf-card__hint">
+          Each dataset uses the app's own definitions. The two Available figures are named apart so
+          a report cannot mix them up.
+        </p>
+      </div>
+    </div>
+    <div class="bf-card__body">
+      @for (d of c.datasets; track d.dataset) {
+        <div class="bf-switch-row">
+          <div class="bf-switch-row__text">
+            <h3 class="bf-switch-row__title">
+              {{ d.title }}
+              @if (!d.enabled) {
+                <sat-status-tag status="neutral">Not offered</sat-status-tag>
+              }
+            </h3>
+            <p class="bf-switch-row__hint">{{ d.description }}</p>
+            <button
+              mat-button
+              type="button"
+              (click)="toggleExpanded(d.dataset)"
+              [attr.data-testid]="'bi-fields-' + d.dataset"
+              [attr.aria-expanded]="expanded() === d.dataset"
+            >
+              {{ expanded() === d.dataset ? 'Hide fields' : d.fields.length + ' fields' }}
+            </button>
+            @if (expanded() === d.dataset) {
+              <dl class="bf-fields">
+                @for (f of d.fields; track f.name) {
+                  <div>
+                    <dt>{{ f.name }}</dt>
+                    <dd>{{ f.description }}</dd>
+                  </div>
+                }
+              </dl>
+            }
+          </div>
+          @if (canManage()) {
+            <mat-slide-toggle
+              [checked]="d.enabled"
+              [disabled]="busy() || !c.enabled"
+              (change)="setDataset(d.dataset, $event.checked)"
+              [attr.data-testid]="'bi-dataset-' + d.dataset"
+              >{{ d.enabled ? 'On' : 'Off' }}</mat-slide-toggle
+            >
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (connecting()) {
+    <section class="bf-card" aria-labelledby="bi-connect-title">
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" id="bi-connect-title">Connect a BI tool</h2>
+          <p class="bf-card__hint">
+            The connection acts as you. It reads what you can read today, and stops reading anything
+            you lose access to.
+          </p>
+        </div>
+      </div>
+      <div class="bf-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Tool</mat-label>
+          <mat-select [ngModel]="tool()" (ngModelChange)="tool.set($event)" data-testid="bi-tool">
+            @for (t of tools; track t) {
+              <mat-option [value]="t">{{ toolLabel(t) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>What is this connection for?</mat-label>
+          <input
+            matInput
+            [ngModel]="label()"
+            (ngModelChange)="label.set($event)"
+            data-testid="bi-label"
+          />
+          <mat-hint>For example, Finance modelling workbook.</mat-hint>
+        </mat-form-field>
+      </div>
+      <fieldset class="bf-card__body">
+        <legend class="bf-card__hint">Datasets this connection may read</legend>
+        @if (selectableDatasets().length) {
+          @for (d of selectableDatasets(); track d.dataset) {
+            <mat-checkbox
+              [checked]="hasDataset(d.dataset)"
+              (change)="pickDataset(d.dataset, $event.checked)"
+              [attr.data-testid]="'bi-pick-' + d.dataset"
+              >{{ d.title }}</mat-checkbox
+            >
+          }
+        } @else {
+          <p class="bf-note" data-testid="bi-no-datasets">
+            No dataset is offered yet. An Integration Admin turns one on before anyone can connect.
+          </p>
+        }
+      </fieldset>
+      <div class="bf-form__actions">
+        <button mat-button type="button" (click)="connecting.set(false)">Cancel</button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="busy() || !label().trim() || datasets().size === 0"
+          (click)="connect()"
+          data-testid="bi-connect-submit"
+        >
+          Connect
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (revoking(); as r) {
+    <section class="bf-card" aria-labelledby="bi-revoke-title" data-testid="bi-revoke">
+      <div class="bf-card__header">
+        <div>
+          <h2 class="bf-card__title" id="bi-revoke-title">Revoke {{ r.label }}?</h2>
+          <p class="bf-card__hint">
+            The next refresh from {{ r.clientLabel }} fails with "Access revoked". The token cannot
+            be brought back; a new connection means a new token.
+          </p>
+        </div>
+      </div>
+      <div class="bf-form">
+        <mat-form-field appearance="outline" class="bf-form__wide">
+          <mat-label>Reason (optional)</mat-label>
+          <input
+            matInput
+            [ngModel]="revokeReason()"
+            (ngModelChange)="revokeReason.set($event)"
+            data-testid="bi-revoke-reason"
+          />
+        </mat-form-field>
+      </div>
+      <div class="bf-form__actions">
+        <button mat-button type="button" (click)="revoking.set(null)">Cancel</button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="busy()"
+          (click)="revoke()"
+          data-testid="bi-revoke-confirm"
+        >
+          Revoke
+        </button>
+      </div>
+    </section>
+  }
+
+  <section class="bf-card">
+    @if (connections.isLoading() && !valueOf(connections)) {
+      <bf-load-state [loading]="true" what="the connections" />
+    } @else if (connections.error()) {
+      <bf-load-state
+        [error]="connections.error()"
+        what="the connections"
+        (retry)="connections.reload()"
+      />
+    } @else {
+      <bf-ecosystem-connections
+        [list]="valueOf(connections)"
+        heading="BI connections"
+        headingId="bi-connections-title"
+        grantsHeading="Datasets"
+        [grantLabel]="datasetTitle"
+        emptyHeadline="No BI connections yet"
+        emptyDescription="Nobody has pointed a BI tool at BudgetFlow. A connection reads only what the person who made it can read."
+        testId="bi-connections"
+        [timezone]="timezone()"
+        (revoke)="startRevoke($event)"
+      />
+    }
+  </section>
+
+  @if (!canConnect()) {
+    <p class="bf-note" data-testid="bi-no-scope">
+      BI connections need report access. You can see how the connector is set up, but not connect a
+      tool of your own.
+    </p>
+  }
+}

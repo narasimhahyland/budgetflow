@@ -1,0 +1,231 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Marketplace</h1>
+    <p class="bf-page__subtitle">
+      Offers from partners your company enabled. Asking for one gets you a price, not a booking.
+    </p>
+  </div>
+</header>
+
+<sat-banner variant="info" data-testid="marketplace-sample">
+  <sat-banner-message>
+    <strong>Sample partners.</strong>
+    The partners, prices and ratings here are fictional data for this build. A booking request is a
+    request for a quote: it becomes a commitment only when you select it on the event and the usual
+    approval route decides.
+  </sat-banner-message>
+</sat-banner>
+
+<section class="bf-card" aria-labelledby="marketplace-filters-title">
+  <div class="bf-card__header">
+    <h2 class="bf-card__title" id="marketplace-filters-title">Find an offer</h2>
+    @if (hasFilters()) {
+      <button
+        mat-button
+        type="button"
+        (click)="clearFilters()"
+        data-testid="marketplace-clear-filters"
+      >
+        Clear filters
+      </button>
+    }
+  </div>
+  <div class="bf-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>City</mat-label>
+      <input
+        matInput
+        [ngModel]="city()"
+        (ngModelChange)="city.set($event)"
+        data-testid="marketplace-city"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Category</mat-label>
+      <mat-select
+        [ngModel]="category()"
+        (ngModelChange)="category.set($event)"
+        data-testid="marketplace-category"
+      >
+        <mat-option value="">Any category</mat-option>
+        @for (c of categories; track c) {
+          <mat-option [value]="c">{{ categoryLabel(c) }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>People</mat-label>
+      <input
+        matInput
+        inputmode="numeric"
+        [ngModel]="people()"
+        (ngModelChange)="people.set($event)"
+        data-testid="marketplace-people"
+      />
+      <mat-hint>Only offers that take this many are shown.</mat-hint>
+    </mat-form-field>
+  </div>
+</section>
+
+<section class="bf-card" aria-labelledby="marketplace-offers-title">
+  <div class="bf-card__header">
+    <h2 class="bf-card__title" id="marketplace-offers-title">Offers</h2>
+    <span class="bf-muted">{{ items().length }} shown</span>
+  </div>
+  @if (offers.isLoading() && !valueOf(offers)) {
+    <bf-load-state [loading]="true" what="the offers" />
+  } @else if (offers.error()) {
+    <bf-load-state [error]="offers.error()" what="the offers" (retry)="offers.reload()" />
+  } @else if (items().length) {
+    <p class="bf-sample-note">
+      Prices are per head in the partner's currency, with the figure at your reporting currency's
+      plan rate underneath. The plan rate is what budgets are checked against; exchange differences
+      never consume budget.
+    </p>
+    <div class="bf-offers">
+      @for (o of items(); track o.id) {
+        <a
+          class="bf-offer"
+          [routerLink]="['/marketplace/offers', o.id]"
+          [attr.data-testid]="'offer-' + o.id"
+          [attr.aria-label]="
+            o.title + ' from ' + o.partnerName + ', ' + o.city + ', per head price'
+          "
+        >
+          <h3 class="bf-offer__title">{{ o.title }}</h3>
+          <p class="bf-offer__partner">{{ o.partnerName }} · {{ o.city }}</p>
+          <span class="bf-offer__price">
+            <bf-money
+              [amountMinor]="o.pricePerHead.amountMinor"
+              [currency]="o.pricePerHead.currency"
+            />
+            <span class="bf-muted">
+              <bf-money
+                [amountMinor]="o.pricePerHeadReporting.amountMinor"
+                [currency]="o.pricePerHeadReporting.currency"
+              />
+              at the plan rate
+            </span>
+          </span>
+          <div class="bf-tile__tags">
+            <sat-status-tag status="neutral">{{ categoryLabel(o.category) }}</sat-status-tag>
+            @if (o.vendorStatus) {
+              <sat-status-tag status="success">{{ o.vendorStatus }}</sat-status-tag>
+            }
+          </div>
+          <p class="bf-offer__facts">
+            <span>{{ o.capacityMin | number }}–{{ o.capacityMax | number }} people</span>
+            @if (rating(o.ratingBps); as r) {
+              <span>Rated {{ r }} out of 5 from {{ o.ratingCount }} past events</span>
+            } @else {
+              <span>Not rated yet</span>
+            }
+          </p>
+        </a>
+      }
+    </div>
+  } @else {
+    <sat-empty-state data-testid="marketplace-empty">
+      <h3 satEmptyStateHeadline>No partner offers{{ filterSummary() }}</h3>
+      <p satEmptyStateDescription>
+        Nothing matches. Widen the filters, or ask vendors for quotes on the event instead: the
+        marketplace is one way to get a price, not the only one.
+      </p>
+      @if (hasFilters()) {
+        <button mat-stroked-button type="button" (click)="clearFilters()">Clear filters</button>
+      }
+    </sat-empty-state>
+  }
+</section>
+
+<section class="bf-card" aria-labelledby="marketplace-bookings-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="marketplace-bookings-title">Your booking requests</h2>
+      <p class="bf-card__hint">Requests on events you can see.</p>
+    </div>
+  </div>
+  @if (bookings.isLoading() && !valueOf(bookings)) {
+    <bf-load-state [loading]="true" what="the booking requests" />
+  } @else if (bookings.error()) {
+    <bf-load-state
+      [error]="bookings.error()"
+      what="the booking requests"
+      (retry)="bookings.reload()"
+    />
+  } @else if (bookingItems().length) {
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="bookingItems()" aria-labelledby="marketplace-bookings-title">
+        <ng-container matColumnDef="offer">
+          <th mat-header-cell *matHeaderCellDef scope="col">Offer</th>
+          <td mat-cell *matCellDef="let b">
+            <span class="bf-cell__primary">{{ b.offerTitle }}</span>
+            <span class="bf-cell__secondary">{{ b.partnerName }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="event">
+          <th mat-header-cell *matHeaderCellDef scope="col">Event</th>
+          <td mat-cell *matCellDef="let b">{{ b.eventName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="people">
+          <th mat-header-cell *matHeaderCellDef scope="col" class="bf-num">People</th>
+          <td mat-cell *matCellDef="let b" class="bf-num">{{ b.peopleCount | number }}</td>
+        </ng-container>
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef scope="col">Requested for</th>
+          <td mat-cell *matCellDef="let b">{{ b.requestedDate }}</td>
+        </ng-container>
+        <ng-container matColumnDef="quote">
+          <th mat-header-cell *matHeaderCellDef scope="col" class="bf-num">Quoted</th>
+          <td mat-cell *matCellDef="let b" class="bf-num">
+            @if (b.quotedTotal) {
+              <bf-money
+                [amountMinor]="b.quotedTotal.amountMinor"
+                [currency]="b.quotedTotal.currency"
+              />
+              <span class="bf-cell__secondary">Not a commitment until approved</span>
+            } @else {
+              <span class="bf-muted">No price yet</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
+          <td mat-cell *matCellDef="let b">
+            <sat-status-tag
+              [status]="bookingStatusTone(b.status)"
+              [attr.data-testid]="'booking-status-' + b.id"
+              >{{ bookingStatusLabel(b.status) }}</sat-status-tag
+            >
+            @if (b.declineReason) {
+              <span class="bf-cell__secondary">{{ b.declineReason }}</span>
+            }
+            @if (b.alternatives.length) {
+              <span class="bf-cell__secondary"
+                >Alternative dates offered: {{ b.alternatives.join(', ') }}</span
+              >
+            }
+            @if (b.respondedAt) {
+              <span class="bf-cell__secondary" data-testid="relative-time">{{
+                b.respondedAt | bfDateTime: timezone()
+              }}</span>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="bookingColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: bookingColumns"
+          [class.bf-row--dead]="row.status === 'cancelled'"
+        ></tr>
+      </table>
+    </div>
+  } @else {
+    <sat-empty-state data-testid="bookings-empty">
+      <h3 satEmptyStateHeadline>No booking requests</h3>
+      <p satEmptyStateDescription>
+        Nobody has asked a partner for a price on an event you can see.
+      </p>
+    </sat-empty-state>
+  }
+</section>

@@ -1,0 +1,235 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Marketplace partners</h1>
+    <p class="bf-page__subtitle">
+      Who may put offers in front of organizers, and which vendor record each one spends against
+    </p>
+  </div>
+</header>
+
+<bf-ecosystem-nav />
+
+<sat-banner variant="info" data-testid="partners-sample">
+  <sat-banner-message>
+    <strong>These partners are sample data.</strong>
+    The names, prices and ratings in this build are fictional and nothing here is a commercial
+    arrangement with a real company. Mock mode talks to the local mock partner service.
+  </sat-banner-message>
+</sat-banner>
+
+@if (notice()) {
+  <sat-banner variant="success" data-testid="partners-notice"
+    ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
+  >
+}
+@if (failure()) {
+  <sat-banner variant="important" data-testid="partners-error"
+    ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+  >
+}
+@if (synced(); as s) {
+  <sat-banner variant="success" data-testid="partners-synced">
+    <sat-banner-message>
+      {{ s.name }}: {{ s.offersAdded }} offers added, {{ s.offersUpdated }} updated,
+      {{ s.offersWithdrawn }} withdrawn, {{ s.bookingResponses }} answers to booking requests.
+      Nothing posted to the ledger: partner invoices go through the actuals review.
+    </sat-banner-message>
+  </sat-banner>
+}
+
+@if (partners.isLoading() && !valueOf(partners)) {
+  <section class="bf-card"><bf-load-state [loading]="true" what="the partners" /></section>
+} @else if (partners.error()) {
+  <section class="bf-card">
+    <bf-load-state [error]="partners.error()" what="the partners" (retry)="partners.reload()" />
+  </section>
+} @else if (items().length) {
+  <section class="bf-card" aria-labelledby="partners-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="partners-title">Partners</h2>
+      <span class="bf-muted">{{ items().length }} listed</span>
+    </div>
+    <div class="bf-table-scroll">
+      <table mat-table [dataSource]="items()" aria-labelledby="partners-title">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef scope="col">Partner</th>
+          <td mat-cell *matCellDef="let p">
+            <span class="bf-cell__primary">{{ p.name }}</span>
+            <span class="bf-cell__secondary">{{ p.cities.join(', ') }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="categories">
+          <th mat-header-cell *matHeaderCellDef scope="col">Categories</th>
+          <td mat-cell *matCellDef="let p">
+            <ul class="bf-chip-list">
+              @for (c of p.categories; track c) {
+                <li class="bf-chip">{{ categoryLabel(c) }}</li>
+              }
+            </ul>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="vendor">
+          <th mat-header-cell *matHeaderCellDef scope="col">Vendor</th>
+          <td mat-cell *matCellDef="let p">
+            @if (p.vendorName) {
+              <span class="bf-cell__primary">{{ p.vendorName }}</span>
+              <span class="bf-cell__secondary">{{ p.vendorStatus }}</span>
+            } @else if (canManage() && canLinkVendor()) {
+              <mat-form-field appearance="outline" class="bf-cell-field">
+                <mat-label>Link a vendor</mat-label>
+                <mat-select
+                  [disabled]="busy()"
+                  (selectionChange)="setVendor(p, $event.value)"
+                  [attr.data-testid]="'partner-vendor-' + p.id"
+                >
+                  @for (v of approvedVendors(); track v.id) {
+                    <mat-option [value]="v.id">{{ v.name }} · {{ v.status }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            } @else {
+              <span class="bf-muted">Not linked</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="mode">
+          <th mat-header-cell *matHeaderCellDef scope="col">Mode</th>
+          <td mat-cell *matCellDef="let p">
+            @if (canManage()) {
+              <mat-form-field appearance="outline" class="bf-cell-field">
+                <mat-label>Mode</mat-label>
+                <mat-select
+                  [value]="p.mode"
+                  [disabled]="busy()"
+                  (selectionChange)="setMode(p, $event.value)"
+                  [attr.data-testid]="'partner-mode-' + p.id"
+                >
+                  <mat-option value="mock">Mock</mat-option>
+                  <mat-option value="sandbox">Sandbox</mat-option>
+                  <mat-option value="live">Live</mat-option>
+                </mat-select>
+              </mat-form-field>
+            } @else {
+              {{ modeLabel(p.mode) }}
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="offers">
+          <th mat-header-cell *matHeaderCellDef scope="col" class="bf-num">Offers</th>
+          <td mat-cell *matCellDef="let p" class="bf-num">
+            <span class="bf-cell__primary">{{ p.offersCached | number }}</span>
+            <span class="bf-cell__secondary">
+              @if (p.lastSyncedAt) {
+                <span data-testid="relative-time">{{
+                  p.lastSyncedAt | bfDateTime: timezone()
+                }}</span>
+              } @else {
+                Never synced
+              }
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
+          <td mat-cell *matCellDef="let p">
+            <sat-status-tag
+              [status]="statusTone(p.status)"
+              [attr.data-testid]="'partner-status-' + p.id"
+              >{{ statusLabel(p.status) }}</sat-status-tag
+            >
+            @if (blockedReason(p); as reason) {
+              <span class="bf-cell__secondary" [attr.data-testid]="'partner-blocked-' + p.id">{{
+                reason
+              }}</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
+          <td mat-cell *matCellDef="let p">
+            @if (canManage()) {
+              <div class="bf-row-actions">
+                @if (p.status === 'enabled') {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="busy()"
+                    (click)="setStatus(p, 'paused')"
+                    [attr.data-testid]="'partner-pause-' + p.id"
+                  >
+                    Pause
+                  </button>
+                } @else {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="busy() || !!blockedReason(p)"
+                    (click)="setStatus(p, 'enabled')"
+                    [attr.data-testid]="'partner-enable-' + p.id"
+                  >
+                    Enable
+                  </button>
+                }
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="sync(p)"
+                  [attr.data-testid]="'partner-sync-' + p.id"
+                >
+                  Sync
+                </button>
+              </div>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: columns"
+          [class.bf-row--dead]="row.status === 'paused'"
+        ></tr>
+      </table>
+    </div>
+    <dl class="bf-facts">
+      <div>
+        <dt>Shared with a partner</dt>
+        <dd data-testid="partners-data-shared">
+          Event date, city, number of people and dietary totals. Delivery addresses only for gifts
+          the recipient agreed to. No budget figures and no attendee names.
+        </dd>
+      </div>
+      <div>
+        <dt>What a booking is</dt>
+        <dd>
+          A request for a quote. It becomes a commitment only when someone selects it on the event
+          and the usual approval route decides. BudgetFlow processes no payments.
+        </dd>
+      </div>
+    </dl>
+  </section>
+} @else {
+  <section class="bf-card">
+    <sat-empty-state data-testid="partners-empty">
+      <h2 satEmptyStateHeadline>No partners yet</h2>
+      <p satEmptyStateDescription>
+        Nothing is offered in the marketplace. A partner has to be linked to an Approved or
+        Preferred vendor before it can be enabled.
+      </p>
+    </sat-empty-state>
+  </section>
+}
+
+@if (!canManage()) {
+  <p class="bf-note" data-testid="partners-read-only">
+    You can see every partner and how it is set up. Enabling, pausing, linking a vendor and syncing
+    need the Integration Admin role.
+  </p>
+}
