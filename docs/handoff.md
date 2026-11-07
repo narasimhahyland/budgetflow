@@ -84,7 +84,21 @@ model), and the README status row for Phase 14 moved to `yes`.
 
 ### 2.2 Visual-suite hygiene
 
-Four items. None blocks a merge; each is a baseline that is lying or about to.
+**`main` is currently red on four visual states, and this is the first thing to fix here.**
+`055-my-requests--default` and `123-notifications-tasks--tasks`, both at desktop and tablet, fail on
+every branch: they failed identically on [#69](https://github.com/narasimhahyland/budgetflow/pull/69)
+and on [#87](https://github.com/narasimhahyland/budgetflow/pull/87), a documentation-only change that
+cannot move a pixel. Both baselines were recorded on 7 November and `main`'s last green run was
+16:32 UTC the same day, so the drift crossed a threshold **within a single day** — which makes this
+worse than issue [#86](https://github.com/narasimhahyland/budgetflow/issues/86) assumed when it
+predicted daily turnovers on 10 and 13 November. The cause is the same: `freezeTime`
+(`2026-11-16T09:00:00Z`) is applied with `page.clock.setFixedTime`, which freezes **the browser
+clock only**, so every figure the server computes from the real time keeps moving. Until this is
+fixed, no PR can show a green visual gate, and a red Visual job tells a reviewer nothing. Re-record
+and the next threshold re-reds it.
+
+The four items below are the rest. None blocks a merge; each is a baseline that is lying or about
+to.
 
 | Item                                                                                                                                                                                                                                                                                                                                                        | Where                                                                                                           | Done when                                                                                                                               |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -409,7 +423,7 @@ Open issues: [`gh issue list`](https://github.com/narasimhahyland/budgetflow/iss
 | #                                                             | Issue                                                                                                                                                                                 | State                                                                                                                                                                                                                                                   |
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [82](https://github.com/narasimhahyland/budgetflow/issues/82) | **Blank-render flake.** About one visual state per run fails its readiness wait and saves a **blank page** — the app never bootstrapped. Different state every time, passes on retry. | Open. Not urgent (self-heals with `retries: 1`) but one unlucky retry from a red `main` on an unrelated change. The project runs with `trace: 'off'`, so there is no trace to read; the hypothesis is a silent Keycloak re-auth that does not complete. |
-| [86](https://github.com/narasimhahyland/budgetflow/issues/86) | **Calendar drift.** `046b` and `086` tablet baselines change with the real date, not with the code: a seeded task turns overdue, a fiscal-year countdown ticks down.                  | Open, and **self-triggering around 10 and 13 November 2026**. Already re-recorded as collateral twice, which bakes in that day's figure. Fix is masking in `screens.json`, or pinning the seeded dates to the suite's frozen clock.                     |
+| [86](https://github.com/narasimhahyland/budgetflow/issues/86) | **Calendar drift.** Baselines change with the real clock, not with the code: a seeded task turns overdue, a fiscal-year countdown ticks down. Raised for `046b` and `086`.            | Open, and **already firing**: `055-my-requests` and `123-notifications-tasks` are red on every branch, having been recorded the same day they drifted. Wider and faster than the issue assumes -- see [2.2](#22-visual-suite-hygiene).                  |
 
 Loose ends without a ticket:
 
