@@ -25,9 +25,14 @@ test('signing in with Hyland SSO lands in BudgetFlow as the linked employee', as
     'My AI assistants',
     // No Marketplace: an employee holds no tenant-scope event.read (092d).
     'Events',
+    // 122a, 120b and 120a are an employee's own turnout, allowance and thank-you notes, so they
+    // need only tenant.read as well.
+    'Participation',
     'Request funds',
     'My requests',
     'My budgets',
+    'My wallets',
+    'Recognition',
     'Policy assistant',
     'My automations',
     'Organization',
