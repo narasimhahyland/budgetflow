@@ -8,6 +8,9 @@ import { authFile } from '../support/roles';
 
 /** Navigation label -> API permission it needs (Home needs none). */
 const NEEDS: Record<string, string> = {
+  // 011a and 069a run no permission check of their own beyond tenant membership.
+  'Ask BudgetFlow': 'tenant.read',
+  'Policy assistant': 'tenant.read',
   'Budget hierarchy': 'budget.read',
   'Allocation workspace': 'budget.allocate',
   'Budget list': 'budget.read',
@@ -20,6 +23,8 @@ const NEEDS: Record<string, string> = {
   'Request funds': 'request.create',
   'My requests': 'request.create',
   'My budgets': 'request.create',
+  // 010a lists only the signed-in person's own activity, so tenant membership is the whole check.
+  'My activity': 'tenant.read',
   Organization: 'org.read',
   People: 'org.read',
   Headcount: 'org.read',
@@ -27,6 +32,9 @@ const NEEDS: Record<string, string> = {
   'Actuals and matching': 'actuals.manage',
   'Intercompany recharges': 'actuals.manage',
   'GL tie-out': 'actuals.manage',
+  // 080f and 017c assert these at tenant scope; both are held only at tenant scope.
+  'Matching suggestions': 'actuals.read',
+  'Anomaly flags': 'integrity.read',
   'Fiscal periods': 'period.manage',
   'Period close': 'period.manage',
   'Rollover policies': 'period.manage',
@@ -40,6 +48,8 @@ const NEEDS: Record<string, string> = {
   Reports: 'report.read',
   Utilization: 'report.read',
   'Forecast and variance': 'report.read',
+  // 016b returns the budgets the asker can read rather than checking a tenant-scope action.
+  'Spending outlook': 'budget.read',
   // 016a names the action its endpoint checks; it is held only at tenant scope, unlike report.read.
   'Board and FP&A pack': 'report.board_pack',
   'Approval history': 'audit.read',
@@ -49,21 +59,38 @@ const NEEDS: Record<string, string> = {
   'Rules and policies': 'rules.read',
   Integrations: 'integration.manage',
   'Tenant settings': 'tenant.settings.manage',
+  // 113a is one screen with two entries: the server gates reading it on tenant.read, and the rail is
+  // deliberately stricter so an Admin entry does not appear for every role. The divergence and the
+  // reason are in docs/ux/screens/113a-ai-settings-query-log.md.
+  'AI settings': 'tenant.settings.manage',
+  'AI accuracy': 'audit.read',
 };
+// 011a sits beside Home, so every role that is a member of the tenant opens with these two.
+const HOME = ['Home', 'Ask BudgetFlow'];
 const ORG = ['Organization', 'People', 'Headcount'];
 const READ = ['Budget hierarchy', 'Budget list', 'Budget requests'];
-// From Phase 5 everyone in the tenant browses events; requesting (and the employee's own budgets)
-// follows request.create, which covers the home location's budgets as well as owned ones.
-const REQUESTS = ['Request funds', 'My requests', 'My budgets'];
-const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
-// The Insights entries report.read alone opens; 016a needs report.board_pack and is listed per role.
-const INSIGHTS_READ = ['Reports', 'Utilization', 'Forecast and variance'];
-const OWNER = [
-  'Home',
+const OWNED_BUDGETS = [
   'Budget hierarchy',
   'Allocation workspace',
   'Budget list',
   'Budget requests',
+];
+// From Phase 5 everyone in the tenant browses events; requesting (and the employee's own budgets)
+// follows request.create, which covers the home location's budgets as well as owned ones. 010a and
+// 069a close the group and need only tenant.read, so roles without request.create see those two on
+// their own.
+const REQUESTS = ['Request funds', 'My requests', 'My budgets', 'My activity', 'Policy assistant'];
+// What roles without request.create see of that group.
+const PERSONAL = ['My activity', 'Policy assistant'];
+const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
+// The Insights entries report.read alone opens, then 016b, which follows budget.read: no role holds
+// one without the other. 016a needs report.board_pack and is listed per role.
+const INSIGHTS_READ = ['Reports', 'Utilization', 'Forecast and variance', 'Spending outlook'];
+// The two AI review queues in Finance, both tenant-scope only (Finance Admin, Controller, Auditor).
+const AI_QUEUES = ['Matching suggestions', 'Anomaly flags'];
+const OWNER = [
+  ...HOME,
+  ...OWNED_BUDGETS,
   'Events',
   'Co-funding board',
   'Approval inbox',
@@ -74,26 +101,38 @@ const OWNER = [
 
 const EXPECTED: Record<RoleId, string[]> = {
   'super-admin': ['Home'],
-  'org-admin': ['Home', 'Events', ...ORG, 'Org import', 'Users and roles', 'Tenant settings'],
+  'org-admin': [
+    ...HOME,
+    'Events',
+    ...PERSONAL,
+    ...ORG,
+    'Org import',
+    'Users and roles',
+    'Tenant settings',
+    'AI settings',
+  ],
   ceo: [
-    ...OWNER.slice(0, 5),
+    ...HOME,
+    ...OWNED_BUDGETS,
     'Plans and versions',
-    ...OWNER.slice(5, -INSIGHTS_READ.length),
+    'Events',
+    'Co-funding board',
+    'Approval inbox',
+    ...REQUESTS,
+    ...ORG,
     'Delegation of authority',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
     'Approval history',
     'Audit log',
     'Rules and policies',
+    'AI accuracy',
   ],
   // Owner-scoped grants (requests, events, approvals) need an owned budget; from Phase 4 the seeded finance
   // admin owns the central contingency reserve.
   'finance-admin': [
-    'Home',
-    'Budget hierarchy',
-    'Allocation workspace',
-    'Budget list',
-    'Budget requests',
+    ...HOME,
+    ...OWNED_BUDGETS,
     'Plans and versions',
     'Program templates',
     'Events',
@@ -105,6 +144,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Actuals and matching',
     'Intercompany recharges',
     'GL tie-out',
+    ...AI_QUEUES,
     'Fiscal periods',
     ...CLOSE,
     'Exchange rates',
@@ -118,16 +158,19 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Approval history',
     'Audit log',
     'Rules and policies',
+    'AI accuracy',
   ],
   'finance-controller': [
-    'Home',
+    ...HOME,
     ...READ,
     'Events',
     'Approval inbox',
+    ...PERSONAL,
     ...ORG,
     'Actuals and matching',
     'Intercompany recharges',
     'GL tie-out',
+    ...AI_QUEUES,
     'Fiscal periods',
     ...CLOSE,
     'Delegation of authority',
@@ -136,28 +179,40 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Approval history',
     'Audit log',
     'Rules and policies',
+    'AI accuracy',
   ],
   'budget-owner': OWNER,
   'department-head': OWNER,
   'regional-manager': OWNER,
   'location-manager': OWNER,
-  'event-organizer': ['Home', 'Events', 'Co-funding board', ...REQUESTS, ...ORG],
-  employee: ['Home', 'Events', ...REQUESTS, ...ORG],
+  'event-organizer': [...HOME, 'Events', 'Co-funding board', ...REQUESTS, ...ORG],
+  employee: [...HOME, 'Events', ...REQUESTS, ...ORG],
   auditor: [
-    'Home',
+    ...HOME,
     ...READ,
     'Events',
+    ...PERSONAL,
     ...ORG,
+    ...AI_QUEUES,
     'Delegation of authority',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
     'Approval history',
     'Audit log',
     'Rules and policies',
+    'AI accuracy',
   ],
-  'integration-admin': ['Home', 'Events', 'Integrations'],
+  'integration-admin': [...HOME, 'Events', ...PERSONAL, 'Integrations'],
   // The analyst holds report.board_pack, so 016a is in their navigation; the audit entries are not.
-  analyst: ['Home', ...READ, 'Events', ...ORG, ...INSIGHTS_READ, 'Board and FP&A pack'],
+  analyst: [
+    ...HOME,
+    ...READ,
+    'Events',
+    ...PERSONAL,
+    ...ORG,
+    ...INSIGHTS_READ,
+    'Board and FP&A pack',
+  ],
 };
 
 for (const [role, expected] of Object.entries(EXPECTED) as [RoleId, string[]][]) {

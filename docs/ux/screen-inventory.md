@@ -8,7 +8,7 @@ Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 10
 
 Phase 8 to 12 screens are specified spec-first in `docs/ux/screens/` (images pending a later Stitch session; status in [review-log.md](review-log.md)). Screens 47e, 59b, 59c, 61d and 61e (Phases 8 and 9), 80g, 80h and 87c (Phase 11) and 94a, 94b and 99b (Phase 12) were added with those batches for plan features that had no screen. Phase 10 reports share the report frame defined in `079-reports-dashboard.md`; Phase 12 connectors share the connector frame defined in `092-integrations-dashboard.md`.
 
-Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and 113a (Phase 13) were added for plan features that had no screen (questions in Slack and Teams; AI feature switches and the AI query log), the shared pattern 000b (Phase 14) for chart table alternatives and the keyboard-first grid, and 15c, 80i and 122b (Phase 15) for outcome linkage, withholding tax and organizer recognition. Every AI surface uses the AI output pattern defined in `011a-ai-assistant-panel.md`. Screens 105a (plans and entitlements) and 102e (white-label for resellers) are deferred with the multi-customer backlog and are not specified.
+Phase 13 to 16 screens are specified spec-first in the same way. Screens 61f and 113a (Phase 13) were added for plan features that had no screen (questions in Slack and Teams; AI feature switches and the AI query log), the shared pattern 000b (Phase 14) for chart table alternatives and the keyboard-first grid, and 15c, 80i and 122b (Phase 15) for outcome linkage, withholding tax and organizer recognition. Every AI surface uses the AI output pattern defined in `011a-ai-assistant-panel.md`. Screens 105a (plans and entitlements) and 102e (white-label for resellers) are deferred with the multi-customer backlog and are not specified. Screen 115a (native iOS and Android layouts) is deferred by product decision: its spec is kept so the design survives, but no native wrapper is built and `apps/mobile` does not exist (see "Native app wrappers: deferred by product decision" in [phase-handoff.md](../architecture/phase-handoff.md)).
 
 ## Shared patterns
 
@@ -278,26 +278,26 @@ Specs that apply across many screens. The design system (000) and the applicatio
 
 ## Group 11: Employee experience
 
-| #    | Screen                                            | Build phase | Primary roles                    | Notes            |
-| ---- | ------------------------------------------------- | ----------- | -------------------------------- | ---------------- |
-| 115  | Employee dashboard                                | P5          | EMP, EO; all roles for own items | Stitch, start 10 |
-| 115a | Native iOS and Android layouts                    | P16         | EMP, approvers                   | review-added     |
-| 116  | Available budgets                                 | P5          | EMP, EO; all roles for own items |                  |
-| 116a | "Your team's budget" card                         | P14         | EMP                              | review-added     |
-| 117  | Submit spending request                           | P5          | EMP, EO; all roles for own items |                  |
-| 117a | Hand-off of approved spend to a prefilled expense | P12         | EMP, EO                          | review-added     |
-| 118  | Request event funding                             | P5          | EMP, EO; all roles for own items |                  |
-| 119  | View request status                               | P5          | EMP, EO; all roles for own items |                  |
-| 120  | View approved allocations                         | P5          | EMP, EO; all roles for own items |                  |
-| 120a | Recognition awards                                | P15         | Managers, EMP                    | review-added     |
-| 120b | Wellbeing and learning wallets                    | P15         | EMP                              | review-added     |
-| 121  | Upload receipt or document                        | P5          | EMP, EO; all roles for own items |                  |
-| 121a | Receipt and quote extraction                      | P13         | EMP, EO                          | review-added     |
-| 122  | Personal activity history                         | P14         | EMP, EO; all roles for own items |                  |
-| 122a | Gamified participation                            | P15         | EMP, EO                          | review-added     |
-| 122b | Organizer recognition                             | P15         | EO, EMP, managers                | review-added     |
-| 123  | Notifications and tasks                           | P8          | EMP, EO; all roles for own items |                  |
-| 124  | Profile and preferences                           | P2          | All roles                        |                  |
+| #    | Screen                                            | Build phase | Primary roles                    | Notes                                                 |
+| ---- | ------------------------------------------------- | ----------- | -------------------------------- | ----------------------------------------------------- |
+| 115  | Employee dashboard                                | P5          | EMP, EO; all roles for own items | Stitch, start 10                                      |
+| 115a | Native iOS and Android layouts                    | deferred    | EMP, approvers                   | review-added; deferred by product decision, spec kept |
+| 116  | Available budgets                                 | P5          | EMP, EO; all roles for own items |                                                       |
+| 116a | "Your team's budget" card                         | P14         | EMP                              | review-added                                          |
+| 117  | Submit spending request                           | P5          | EMP, EO; all roles for own items |                                                       |
+| 117a | Hand-off of approved spend to a prefilled expense | P12         | EMP, EO                          | review-added                                          |
+| 118  | Request event funding                             | P5          | EMP, EO; all roles for own items |                                                       |
+| 119  | View request status                               | P5          | EMP, EO; all roles for own items |                                                       |
+| 120  | View approved allocations                         | P5          | EMP, EO; all roles for own items |                                                       |
+| 120a | Recognition awards                                | P15         | Managers, EMP                    | review-added                                          |
+| 120b | Wellbeing and learning wallets                    | P15         | EMP                              | review-added                                          |
+| 121  | Upload receipt or document                        | P5          | EMP, EO; all roles for own items |                                                       |
+| 121a | Receipt and quote extraction                      | P13         | EMP, EO                          | review-added                                          |
+| 122  | Personal activity history                         | P14         | EMP, EO; all roles for own items |                                                       |
+| 122a | Gamified participation                            | P15         | EMP, EO                          | review-added                                          |
+| 122b | Organizer recognition                             | P15         | EO, EMP, managers                | review-added                                          |
+| 123  | Notifications and tasks                           | P8          | EMP, EO; all roles for own items |                                                       |
+| 124  | Profile and preferences                           | P2          | All roles                        |                                                       |
 
 ## Screens per build phase
 

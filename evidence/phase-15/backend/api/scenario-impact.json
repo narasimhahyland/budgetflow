@@ -1,0 +1,97 @@
+{
+  "scenarioId": "92000000-0000-4000-8000-000000000001",
+  "computedAt": "2026-11-06T16:17:45Z",
+  "baselineAt": "2026-11-06T15:58:54Z",
+  "stale": true,
+  "ledgerWritesSinceBaseline": 1437,
+  "companyAvailableBefore": {
+    "amountMinor": 3716894197,
+    "currency": "USD"
+  },
+  "companyAvailableAfter": {
+    "amountMinor": 3716894197,
+    "currency": "USD"
+  },
+  "changes": [
+    {
+      "changeId": "92000000-0000-4000-8000-000000000003",
+      "budgetId": "71000000-0000-4000-8000-000000000003",
+      "budgetName": "Berlin Events",
+      "kind": "freeze",
+      "currentAuthorized": {
+        "amountMinor": 800000,
+        "currency": "USD"
+      },
+      "floor": {
+        "amountMinor": 0,
+        "currency": "USD"
+      },
+      "reduction": {
+        "amountMinor": 0,
+        "currency": "USD"
+      },
+      "newAuthorized": {
+        "amountMinor": 800000,
+        "currency": "USD"
+      },
+      "availableBefore": {
+        "amountMinor": 800000,
+        "currency": "USD"
+      },
+      "availableAfter": {
+        "amountMinor": 800000,
+        "currency": "USD"
+      },
+      "maxReduction": {
+        "amountMinor": 800000,
+        "currency": "USD"
+      },
+      "unfitRequestIds": [],
+      "blocked": false,
+      "problemCode": null,
+      "problemDetail": null
+    },
+    {
+      "changeId": "92000000-0000-4000-8000-000000000002",
+      "budgetId": "70000000-0000-4000-8000-000000000004",
+      "budgetName": "Europe Region",
+      "kind": "reduce",
+      "currentAuthorized": {
+        "amountMinor": 3000000,
+        "currency": "USD"
+      },
+      "floor": {
+        "amountMinor": 824000,
+        "currency": "USD"
+      },
+      "reduction": {
+        "amountMinor": 600000,
+        "currency": "USD"
+      },
+      "newAuthorized": {
+        "amountMinor": 2400000,
+        "currency": "USD"
+      },
+      "availableBefore": {
+        "amountMinor": 2176000,
+        "currency": "USD"
+      },
+      "availableAfter": {
+        "amountMinor": 1576000,
+        "currency": "USD"
+      },
+      "maxReduction": {
+        "amountMinor": 2176000,
+        "currency": "USD"
+      },
+      "unfitRequestIds": [],
+      "blocked": false,
+      "problemCode": null,
+      "problemDetail": null
+    }
+  ],
+  "atRisk": [],
+  "fairness": [],
+  "blocked": false,
+  "blockingReasons": []
+}

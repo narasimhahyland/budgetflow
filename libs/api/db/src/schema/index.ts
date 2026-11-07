@@ -19,3 +19,5 @@ export * from './integrations';
 export * from './close';
 export * from './admin';
 export * from './ai';
+export * from './extended';
+export * from './ecosystem';

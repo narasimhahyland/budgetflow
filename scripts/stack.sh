@@ -60,6 +60,39 @@ up() { build && dc up -d --build --wait; }
 seed() {
   export DATABASE_URL_OWNER="postgres://${BF_PG_OWNER_USER}:${BF_PG_OWNER_PASSWORD}@127.0.0.1:${BF_PG_PORT:-5432}/${BF_PG_DB}"
   eval "${BF_SEED_CMD:-npx nx run api:seed --outputStyle=static}"
+  settle
+}
+
+# The seed command returns before the stack has finished reacting to it. Seeding writes to the
+# outbox, and the worker then fans a notification out over its channels one job per channel, so a
+# suite that starts too early reads a row that is still filling up — "Delivered via in-app, email"
+# where a moment later it says "in-app, email, slack, push". That is one notification row taller or
+# shorter, which moves everything below it.
+#
+# The unpublished outbox rows are counted alongside the jobs, because a quiet queue on its own
+# only means the dispatcher has not got there yet. Only the queues the seed feeds are named: a
+# blanket wait would never finish, as queues whose consumer lives elsewhere park jobs in `created`
+# indefinitely. A job in `retry` counts as outstanding: it is work that has not landed yet. Quiet
+# has to hold twice running before it counts.
+settle() {
+  local queues="'channel.deliver','notification.email'" waited=0 quiet=0
+  local sql="select (select count(*) from outbox_messages where published_at is null)
+                  + (select count(*) from pgboss.job where name in ($queues) and state in ('created','active','retry'))"
+  while [ "$waited" -lt 60 ]; do
+    local pending
+    pending=$(dc exec -T postgres sh -lc \
+      "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -At -c \"$sql\"" 2>/dev/null | tr -d '[:space:]')
+    case "$pending" in '' | *[!0-9]*) return 0 ;; esac   # tables not there yet: nothing to wait for
+    if [ "$pending" = 0 ]; then
+      quiet=$((quiet + 1))
+      [ "$quiet" -ge 2 ] && { echo "stack: seed settled after ${waited}s"; return 0; }
+    else
+      quiet=0
+    fi
+    sleep 2
+    waited=$((waited + 2))
+  done
+  echo "stack: seed has not settled after ${waited}s, carrying on" >&2
 }
 
 case "$cmd" in

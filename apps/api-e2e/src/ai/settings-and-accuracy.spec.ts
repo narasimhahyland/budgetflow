@@ -2,7 +2,7 @@
 // need, who may read the AI query log, and the evaluation sets that measure each feature against its
 // published threshold instead of asserting quality by hand.
 import { expect, test } from '@playwright/test';
-import { AiAccuracyView, AiSettings, AiSettingsView } from '@bf/contracts';
+import { AI_FEATURES, AiAccuracyView, AiSettings, AiSettingsView } from '@bf/contracts';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
@@ -59,7 +59,8 @@ test('the turn-on dialog can show exactly what a feature sends, and never a cred
     200,
     AiSettingsView,
   );
-  expect(view.features.length).toBe(8);
+  // The dialog shows every feature in the catalog, so a phase that adds one cannot add it silently.
+  expect(view.features.length).toBe(AI_FEATURES.length);
   for (const feature of view.features) {
     expect(feature.dataSent.length, `${feature.feature} lists the fields it sends`).toBeGreaterThan(
       0,

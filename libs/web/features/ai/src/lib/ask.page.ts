@@ -314,11 +314,6 @@ import { LoadState } from './load-state';
       padding-top: 8px;
       border-top: 1px solid var(--mat-sys-outline-variant);
     }
-    /* The shared .bf-list__item is width:100% in a content-box, so its 20px side padding pushes it
-       past the card. Scoped here; the shared rule in libs/web/ui needs the same fix. */
-    .bf-list__item {
-      box-sizing: border-box;
-    }
     .bf-history {
       height: 180px;
       overflow-y: auto;

@@ -261,13 +261,8 @@ export class AiWhy {
       AI-generated. Check the figures before you act. Model {{ provenance().modelId }}
       {{ provenance().modelVersion }} through {{ provenance().provider }}. Query log entry
       <!-- Ids are generated per call, so visual baselines mask them. -->
-      <span class="bf-ai-provenance__ids" data-testid="ai-ids">
-        {{ provenance().queryLogId.slice(0, 8) }}
-        @if (provenance().suggestionId) {
-          , suggestion {{ provenance().suggestionId!.slice(0, 8) }}
-        }
-      </span>
-      .
+      <span data-testid="ai-ids">{{ ids() }}</span
+      >.
     </p>
   `,
   styles: `
@@ -276,21 +271,29 @@ export class AiWhy {
       color: var(--mat-sys-on-surface-variant);
       font: var(--mat-sys-body-small);
     }
-
-    // A per-call id is a different width every time, which rewraps the sentence around it and moves
-    // everything below. A fixed box keeps the line stable for the visual baselines.
-    .bf-ai-provenance__ids {
-      display: inline-block;
-      width: 20ch;
-      overflow: hidden;
+    /*
+     * The ids change per call, and eight characters of a proportional font do not all come out the
+     * same width, so a wider id used to rewrap this sentence and shift the rest of the page down by
+     * a line. Monospace makes eight characters one width whatever they are, and nowrap keeps the
+     * sentence from breaking inside the ids. The full stop follows the span with no space between,
+     * so it can never end up alone on the next line either.
+     */
+    .bf-ai-provenance [data-testid='ai-ids'] {
+      font-family: ui-monospace, monospace;
       white-space: nowrap;
-      vertical-align: bottom;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiProvenanceNote {
   readonly provenance = input.required<AiProvenance>();
+
+  /** One text node, so no template whitespace can land between the ids and the full stop. */
+  protected readonly ids = computed(() => {
+    const { queryLogId, suggestionId } = this.provenance();
+    const suggestion = suggestionId ? `, suggestion ${suggestionId.slice(0, 8)}` : '';
+    return `${queryLogId.slice(0, 8)}${suggestion}`;
+  });
 }
 
 /**

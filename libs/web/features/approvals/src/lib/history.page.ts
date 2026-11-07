@@ -147,7 +147,11 @@ const DECISION_LABELS: Record<string, string> = {
             <tbody>
               @for (i of rows(); track i.actionId) {
                 <tr [attr.data-testid]="'decision-' + i.ref">
-                  <td>{{ i.decidedAt | bfDateTime: session.timezone() }}</td>
+                  <td>
+                    <span data-testid="relative-time">{{
+                      i.decidedAt | bfDateTime: session.timezone()
+                    }}</span>
+                  </td>
                   <td>
                     <a [routerLink]="['/requests', i.subjectId]">{{ i.ref }}</a>
                     <span class="bf-cell__secondary">{{ i.title }}</span>

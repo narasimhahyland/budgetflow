@@ -214,6 +214,114 @@ tabs 2 and 3); break-glass request and approval (112, the grant table exists); A
 `sync_runs` are kept while their messages reference them, so the webhook delivery log is what the
 `integration_logs` category removes.
 
+## What Phase 15 delivers (backend half)
+
+The Angular screens (011b, 015c, 017b, 031a, 120a, 120b, 122a, 122b) follow as a separate change; this half is the API they build on. Three different promises hold this phase together, and each is enforced in one place.
+
+| Area      | Where                                                                          | How the frontend and later phases use it                                                                                                                                                                                                                                      |
+| --------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contracts | `libs/contracts/src/lib/domains/extended.ts`                                   | Scenarios with their impact and comparison, leadership summaries and variance commentary, outcome linkage, the participation leaderboard, wallet programmes, wallets and claims, recognition award types, allowances and awards, organizer recognition. 20 new problem codes. |
+| API       | `libs/api/extended` (`ExtendedModule`, `ExtendedApiModule`)                    | `ScenariosService`, `NarrativesService`, `OutcomesService`, `WalletsService`, `RecognitionService`. Wallet and recognition money posts through `PostingSupport` and `postCommitmentMovement`; nothing here writes `ledger_*` directly.                                        |
+| Schema    | `libs/api/db/src/schema/extended.ts`, migration `0018_p15_extended`            | 13 tenant tables, all with FORCE row level security and `tenant_isolation`; `organizer_thank_notes` cannot be deleted, only hidden.                                                                                                                                           |
+| AI        | `libs/contracts/.../ai.ts`, `libs/api/ai`                                      | Two new features on the Phase 13 surface, `leadership_summary` and `variance_commentary`, with their allow-lists, catalog entries, decision actions and recorded fake-provider answers. Both are finance-confirmed features.                                                  |
+| Policy    | unchanged                                                                      | No new actions. Scenarios use `budget.read` to see and `budget.control` / `budget.allocate` to author and promote; wallets and recognition use `budget.allocate` on the funding budget; outcomes use `report.read` with `org.read` deciding retention.                        |
+| Seed      | `libs/seed/src/lib/extended.ts` (prefix `92`), `apps/api/src/seed/extended.ts` | A draft scenario cutting Europe to fund India, two wallet programmes, Bengaluru's award types with a manager allowance, and two organizer thank-you notes. Dates are relative to the seed run (`daysAgo`, `quarterKey`), never hard-coded.                                    |
+| Tests     | `apps/api-e2e/src/extended/`                                                   | 47 scenarios; invariant rows 83-87.                                                                                                                                                                                                                                           |
+
+How the guarantees are enforced, in one place each:
+
+- **A scenario never touches money.** `ScenariosService.impact` runs outside `CommandRunner`, takes no
+  row locks and writes nothing; it measures each modelled change with the same domain functions the
+  real commands use (`reductionFloor`, `previewReduction`, `availableOf`), so a scenario that passes
+  will pass on promotion. Promotion has no apply path of its own: it authorizes every change first,
+  then calls `ControlsService.reduce`, `.freeze`, `.setToZero` and `.transfer`, each with its own
+  derived idempotency key, reason code, confirmed floor and audit entry.
+- **Drafted text is a draft.** Figures are read from the ledger read models, stored as
+  `{{figure:<token>}}` references with their values and sources, and rendered by BudgetFlow. Phase
+  13's figure guard discards any output containing a number the facts did not carry, and an unknown
+  token is discarded the same way. A summary stays `ai_draft` until its author has read every
+  section, and an open-period draft can never be approved at all.
+- **Aggregates protect people.** Survey responses carry no person reference in the database, so a
+  pulse figure cannot be traced to a respondent even inside the API. Every aggregate is returned with
+  its group size and is dropped (not rounded) below five responses or ten people, and the
+  participation leaderboard reads no money at all.
+- **Wallet and recognition money is ordinary ledger money.** A claim or a monetary award creates a
+  `commitments` row and posts pre-encumbered, encumbered and actual through
+  `postCommitmentMovement`, so the funding budget's controls, available amount, threshold alerts and
+  nightly rebuild all see it. The wallet allowance and the manager allowance are caps on top of the
+  budget, never balances beside it.
+
+Not in this half: the Angular screens and journeys; the event planning copilot (045b), holiday
+overlay (043a), polls and idea board (044a), QR check-in (047c), remote participation (047d) and
+withholding tax (080i), which are the rest of the Phase 15 screen set; red-flag analytics (017b),
+which needs approval open and decision timestamps that `approval_tasks` does not record yet; cost per
+attendee on the outcomes view, which belongs to the ledger-backed event spending report (085) and is
+returned as null rather than recomputed here; badges and challenges for 122a (the turnout ranking is
+complete, the badge rules are not); the manager's quarterly organizer summary email (122b).
+
+Two deliberate deviations from the screen specs, both reported rather than hidden:
+
+- **A manager's recognition allowance is a cap, not a commitment.** 120a describes the quarterly
+  allowance as one commitment on the Recognition budget that each award then consumes. Here the
+  allowance is a recorded cap and every award is committed in its own right, which keeps each award
+  visible on the budget and avoids a pot of money sitting between the budget and the awards. The
+  controls are the same either way; the difference is where the encumbrance sits.
+- **A paying programme needs budget authority, not administration rights.** 120a and 120b put
+  programme settings with the Organization Admin, but pointing a programme or an award type at a
+  budget is a money decision, so it requires `budget.allocate` on that budget (the Finance Admin, or
+  the budget's owner). A wordless award type is ordinary administration.
+
+## What Phase 16 delivers (backend half)
+
+The Angular screens (092a-092d, 102d) follow as a separate change; this half is the API they build
+on. Everything here is an **outside** surface, so three rules hold the phase together.
+
+**A person, not a service.** Every connection is made by one person and acts with their scope. The
+actor is resolved from their identity provider subject on every call (`ActorResolver.resolve`), not
+frozen into the token, so a lost role, a lost budget or a closed membership takes effect on the next
+request. There is no company-wide key anywhere in this phase.
+
+**Read first.** The only write any external surface can reach is a Draft request, created through
+the ordinary `RequestsService.create` with `submit: false`, which runs its own `PolicyService` check,
+idempotency key and single audit entry. Nothing here approves, submits, applies a control, creates a
+commitment or posts to the ledger.
+
+**Identity never comes from the caller's page.** A widget takes its viewer from the bearer token; the
+embedding site only decides whether the frame may render at all.
+
+| Area      | Where                                                                            | How the frontend and later phases use it                                                                                                                                                                                                                                                                                                              |
+| --------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contracts | `libs/contracts/src/lib/domains/ecosystem.ts`                                    | The BI connector and its feed, the assistant connector and the Model Context Protocol surface, no-code platforms and automation actions, marketplace partners, offers and bookings, and embeddable widgets. 15 new problem codes.                                                                                                                     |
+| API       | `libs/api/ecosystem` (`EcosystemModule`, `EcosystemApiModule`)                   | `EcosystemSurfacesService` (per-tenant switch and configuration), `EcosystemConnectionsService` (issue, authenticate, rate limit, revoke, log), `EcosystemScopedReads` (the only way a surface reads tenant records), `BiConnectorService`, `AssistantConnectorService`, `AutomationConnectorService`, `MarketplaceService`, `WidgetsService`.        |
+| Schema    | `libs/api/db/src/schema/ecosystem.ts`, migration `0019_p16_ecosystem`            | `ecosystem_surfaces`, `ecosystem_connections`, `ecosystem_calls` (append-only), `embedded_widgets`, `marketplace_partners`, `marketplace_offers`, `marketplace_bookings`. All with FORCE row level security and `tenant_isolation`.                                                                                                                   |
+| Policy    | no new actions                                                                   | The surfaces reuse the action of the work they are about: `integration.manage` / `integration.read` to configure, `report.read` to connect a BI tool, `budget.read`, `event.read`, `request.create` and `request.approve` for what a call returns, `event.manage` to request a booking, `tenant.settings.manage` or `integration.manage` for widgets. |
+| AI        | `libs/contracts/.../ai.ts`, `libs/api/ai`                                        | One new AI feature `mcp` (flag key `ai.mcp`) and one new channel `mcp`, so the assistant connector is governed by the same 113a switch, minimization allow-list and `ai_query_log` as the in-app assistant. It raises no suggestion: its tools only read.                                                                                             |
+| Seed      | `libs/seed/src/lib/ecosystem.ts` (prefix `93`), `apps/api/src/seed/ecosystem.ts` | The BI and assistant connectors on, Zapier allowed and the other three not, three marketplace partners (two against approved vendors, one paused without a vendor link), two widgets on `.test` sites, and one personal connection of each kind. Tokens are generated at seed time and only their hashes kept; every expiry is relative to the run.   |
+| Infra     | `infra/mock-providers/server.mjs`                                                | Marketplace partner catalogues and a `/_control/partner-answer` control plane. Answers are stored against a booking id rather than queued, so one scenario cannot consume another's.                                                                                                                                                                  |
+| Tests     | `apps/api-e2e/src/ecosystem/`                                                    | 44 scenarios; invariant rows 88-94.                                                                                                                                                                                                                                                                                                                   |
+
+Not in this half: the Angular screens and the `/embed/*` routes that serve the widget frame with the
+`frame-ancestors` policy the API already computes; trigger delivery for no-code automations (see
+below); comments as an automation action; selecting a partner quote as an event quote, which goes
+through the existing 51a path; the `create_draft_request` assistant tool.
+
+**Automation triggers are deliberately not delivered yet.** The Phase 12 fan-out builds one payload
+per tenant-wide endpoint, and delivering those to a personal automation would hand the platform
+records the connected person may not be allowed to see. The trigger catalogue is published so the
+frontend can show it, every entry marked `deliveryAvailable: false`, until the fan-out learns
+per-person scoping.
+
+### Native app wrappers: deferred by product decision
+
+Native iOS and Android wrappers (115a) are **deferred** and are not part of Phase 16. The wrappers
+are app-store packaging over the existing web experience, and the Phase 8 mobile routes
+(`/m/approvals`, `/m/balance`, `/m/receipt`, `/m/alerts`) already serve phone users, so deferring
+costs no user-facing capability. A future wrapper is a packaging exercise rather than new product
+surface: it must stay thin, wrap those same routes, introduce no authorization of its own and no
+second source of truth, and ship no embedded secret. The 115a spec and its screen-inventory row now
+record the deferral, and the phase map no longer lists `apps/mobile`, so the repository reads the same
+way everywhere. The spec is kept rather than deleted so the design survives if the wrappers are picked up.
+
 ## Rules for every phase agent
 
 1. **Owned paths only.** Each phase below lists the paths it owns. Shared surfaces belong to the integrator (`git-worktree-workflow.mdc`): `package.json`, lockfile, `nx.json`, `tsconfig.base.json`, `eslint.config.mjs`, `.stylelintrc.mjs`, `libs/contracts/src/lib/{common,endpoint,endpoints,registry}.ts` and `index.ts`, `libs/api/db/**`, `libs/domain/src/index.ts` and `authorization/policy.ts`, `apps/api/src/app/app.module.ts`, `apps/worker/src/app/worker.module.ts`, `apps/api/src/seed/extensions.ts`, `apps/web/src/app/**`, `libs/web/ui/**`, `libs/web/data-access/**`, `apps/web-e2e/visual/screens.json`, `docs/testing/invariant-scenarios.md`, `infra/**`, `.cursor/**`, `.github/**`. Put requested changes to them in your report.
@@ -227,7 +335,7 @@ tabs 2 and 3); break-glass request and approval (112, the grant table exists); A
 9. **Web.** Phase 2 creates `libs/web/ui`, `libs/web/data-access` (on `createApiClient`) and `libs/web/shell`. Each screen group is `libs/web/features/<group>` (tags `type:feature`, `scope:web`) exporting `Routes`; features never import each other; the integrator wires lazy routes in `apps/web`. Light theme only.
 10. **Done** means `/functional-check` and `scripts/gate.sh` green, evidence under `evidence/<phase-id>/`.
 
-Reserved seed id prefixes: `10`-`24` tenancy and finance, `25`-`27` GL accounts, GL mappings and vendors (P3), `30`-`36` org (`36` org unit versions, P3), `40`-`42` people and memberships, `50` Keycloak subjects, `51` subjects in the Hyland SSO stand-in realm, `60`-`68` categories, plan, reason codes, DoA, flags, templates, `70` budgets. Phase 3 rows inside earlier prefixes start at n = 100 (n = 1000 for rates and closure rows) so Phase 1 ids never collide. `71` is used by P4 (demo budgets), `72`-`76` by P5, `77`-`79` by P6, `80`-`86` by P7 to P9, `90` by P12 (integrations), `91` by P13 (AI, `documents`) and P14 (administration, `feature_flags` and the other admin tables; the two sets overlap on n = 1-3 but land in different tables). Next free: `92`+.
+Reserved seed id prefixes: `10`-`24` tenancy and finance, `25`-`27` GL accounts, GL mappings and vendors (P3), `30`-`36` org (`36` org unit versions, P3), `40`-`42` people and memberships, `50` Keycloak subjects, `51` subjects in the Hyland SSO stand-in realm, `60`-`68` categories, plan, reason codes, DoA, flags, templates, `70` budgets. Phase 3 rows inside earlier prefixes start at n = 100 (n = 1000 for rates and closure rows) so Phase 1 ids never collide. `71` is used by P4 (demo budgets), `72`-`76` by P5, `77`-`79` by P6, `80`-`86` by P7 to P9, `90` by P12 (integrations), `91` by P13 (AI, `documents`) and P14 (administration, `feature_flags` and the other admin tables; the two sets overlap on n = 1-3 but land in different tables), `92` by P15 (extended product: the draft scenario, wallet programmes, recognition award types and allowance, organizer notes), `93` by P16 (ecosystem: partner vendors, marketplace partners, widgets and personal connections). Next free: `94`+.
 
 ## Phase map
 
@@ -246,7 +354,7 @@ Reserved seed id prefixes: `10`-`24` tenancy and finance, `25`-`27` GL accounts,
 | P12 Integrations                    | `libs/api/integrations` (+ mock provider services in `infra/`), `libs/web/features/integrations`                                                                                                                                                                                                | → `integration_connections`, `sync_runs`, `webhooks`, `api_keys`                                                                                                                                                                                               | `integrations.ts`                                                              | `seed/integrations.ts`                                                 | Retry, dead letter, HMAC, dedupe                                                         | 92-101, 99a, 101a, 117a                              |
 | P13 AI                              | `libs/api/ai` (`AiProvider`, fake provider)                                                                                                                                                                                                                                                     | → `ai_query_log`                                                                                                                                                                                                                                               | `ai.ts`                                                                        | `seed/ai.ts`                                                           | 21                                                                                       | AI review screens                                    |
 | P14 Experience and admin            | `libs/web/features/{admin,onboarding}`                                                                                                                                                                                                                                                          | `entitlements`, `feature_flags` → `retention_policies`                                                                                                                                                                                                         | `admin.ts`                                                                     | `seed/demo.ts`                                                         | Entitlements gate features                                                               | 105, 109-114, 122, 10a, 103a, 105a, 102b, 102c, 116a |
-| P15-P16 Extended and ecosystem      | per feature libs; `apps/mobile` (P16)                                                                                                                                                                                                                                                           | → `scenarios`, `wallets`, `recognition_awards`                                                                                                                                                                                                                 | per feature                                                                    | per feature                                                            | Scope for widgets and connectors                                                         | Review-added P15-P16 screens                         |
+| P15-P16 Extended and ecosystem      | per feature libs (115a native wrappers deferred)                                                                                                                                                                                                                                                | → `scenarios`, `wallets`, `recognition_awards`                                                                                                                                                                                                                 | per feature                                                                    | per feature                                                            | Scope for widgets and connectors                                                         | Review-added P15-P16 screens                         |
 
 Not in Phase 10: the forecast and variance report (screen 87) and the board pack (16a). Both read
 `forecast_snapshots`, which Phase 11 creates, so Phase 11 picks them up with the rest of close and

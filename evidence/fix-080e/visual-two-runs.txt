@@ -1,0 +1,13 @@
+Full visual-light project, no -g filter, fresh stack + deterministic seed before each run,
+pinned image mcr.microsoft.com/playwright:v1.64.1-noble. 2026-11-07
+
+run 1: 629 passed (5.7m)
+run 2: 629 passed (5.8m)
+
+issue #70 check:
+  ✓  568 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:63:13 › 011a-ai-assistant-panel action-redirect › tablet (623ms)
+  ✓  568 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:63:13 › 011a-ai-assistant-panel action-redirect › tablet (471ms)
+
+issue #74 state:
+  ✓  155 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:63:13 › 050-event-approval-workflow default › mobile (484ms)
+  ✓  155 [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:63:13 › 050-event-approval-workflow default › mobile (485ms)

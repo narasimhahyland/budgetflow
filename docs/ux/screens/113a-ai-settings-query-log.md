@@ -51,6 +51,32 @@ Tab Accuracy: per feature, the latest evaluation run (fixture set, run date, env
 
 New P13 `ai.ts` contract: feature switches stored as `feature_flags` keys (`ai.ask`, `ai.ask_chat`, `ai.outlook`, `ai.allocation_suggestions`, `ai.policy_explain`, `ai.matching`, `ai.extraction`, `ai.anomaly_flags`) plus AI settings in `tenant_settings.settings`; `ai_query_log` per the phase handoff (actor, feature, channel, fact ids, model id and version, latency, outcome; no raw question, answer or personal data); reported answers in a separate table with 90-day retention. `tenant.settings.manage` (Organization Admin) to change switches and settings; a new `ai.confirm_finance` action for Finance Admin (integrator adds); `audit.read` (Auditor) and `tenant.settings.manage` to read the log. Switching a feature off takes effect on the next request; the API refuses calls to a disabled feature.
 
+The route guards and the sidebar entries use different permissions on purpose; they are not to be
+"aligned".
+
+- The route guards use `tenant.read`, because that is what the server asks for.
+  `AiSettingsService.viewInTx` and `AiEvaluationsService.accuracy` both assert `tenant.read` at
+  tenant scope, so every authenticated member of the tenant may read the Features and Accuracy tabs.
+  Only the controls behind them are narrower: switches and settings assert `tenant.settings.manage`,
+  running an evaluation asserts the same, confirming a finance feature asserts `ai.confirm_finance`,
+  and the Query log tab asserts `audit.read` or `tenant.settings.manage`
+  (`AiQueryLogService.assertCanRead`).
+- The sidebar has two entries for this one screen, because its audiences hold different permissions
+  and nav items carry a single permission each. "AI settings" (`/admin/ai/features`) uses
+  `tenant.settings.manage`, the action behind the switches, so it appears for the Organization Admin
+  who sets them. "AI accuracy" (`/admin/ai/accuracy`) uses `audit.read`, which carries the Finance
+  Admin, Finance Controller, Auditor and CEO to the Accuracy tab and, from its tabs, to the query
+  log. Both entries are stricter than the guard on purpose.
+- Loosening either entry to `tenant.read` would put an Admin entry in front of every signed-in role,
+  including `employee`, `event-organizer` and the owner roles, for whom the Roles section above
+  reads "Other roles: none". Tightening the guards to match the nav would revoke reading that the
+  server intends to grant, and would send the Finance Admin and the Auditor to a 403 on a screen the
+  spec gives them.
+- Worth raising with the backend rather than papering over here: the read gate on the Features and
+  Accuracy tabs (`tenant.read`) is looser than this spec's Roles section intends. If it tightens to
+  `audit.read` or `tenant.settings.manage`, the guards and both nav entries can converge and this
+  note can go.
+
 ## States
 
 | State            | Behaviour                                                                                                                                   |

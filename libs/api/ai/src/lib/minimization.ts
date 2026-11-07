@@ -105,6 +105,43 @@ export const ALLOWED_FACT_FIELDS: Record<AiFeature, readonly string[]> = {
     'sizeBytes',
     'expectedCurrency',
   ],
+  /**
+   * Drafted narratives (011b). Only the headline figures the read models already reconciled go to
+   * the model, so the sentences it writes can be checked against them number by number.
+   */
+  leadership_summary: [
+    ...COMMON_FIELDS,
+    'periodLabel',
+    'authorizedMinor',
+    'actualMinor',
+    'plannedMinor',
+    'availableMinor',
+    'encumberedMinor',
+    'varianceMinor',
+    'utilizationBps',
+    'plannedUseBps',
+    'reachBps',
+    'pulseMilli',
+    'unusedMinor',
+    'budgetsAtRisk',
+    'eventName',
+    'eventCode',
+    'regionName',
+  ],
+  variance_commentary: [
+    ...COMMON_FIELDS,
+    'budgetName',
+    'authorizedMinor',
+    'forecastMinor',
+    'varianceMinor',
+    'varianceBps',
+    'driverLabel',
+    'driverAmountMinor',
+    'unexplainedMinor',
+    'eventName',
+    'eventCode',
+    'reference',
+  ],
   anomaly_flags: [
     ...COMMON_FIELDS,
     'kind',
@@ -119,6 +156,29 @@ export const ALLOWED_FACT_FIELDS: Record<AiFeature, readonly string[]> = {
     'imageSimilarityBps',
     'combinedMinor',
     'limitMinor',
+  ],
+  /**
+   * The assistant connector (092c). These fields are what a tool call may return to an outside
+   * assistant: names, statuses, amounts, dates and references, and never anyone's contact details.
+   */
+  mcp: [
+    ...COMMON_FIELDS,
+    'authorizedMinor',
+    'committedMinor',
+    'actualMinor',
+    'availableMinor',
+    'utilizationBps',
+    'amountMinor',
+    'budgetType',
+    'categoryCode',
+    'fiscalYearLabel',
+    'ownerName',
+    'eventDate',
+    'reference',
+    'childCount',
+    'dueDate',
+    'requestedByName',
+    'stepName',
   ],
 };
 

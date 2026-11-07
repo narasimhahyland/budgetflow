@@ -1,0 +1,532 @@
+{
+  "bi-connector": {
+    "status": 200,
+    "body": {
+      "enabled": true,
+      "feedBaseUrl": "/api/bi/v1",
+      "datasets": [
+        {
+          "dataset": "budgets",
+          "title": "Budgets",
+          "description": "One row per budget the connecting person may read, with the app definition of every bucket.",
+          "enabled": true,
+          "fields": [
+            {
+              "name": "budgetId",
+              "description": "Budget identifier."
+            },
+            {
+              "name": "name",
+              "description": "Budget name."
+            },
+            {
+              "name": "parentId",
+              "description": "Parent budget, empty for a root."
+            },
+            {
+              "name": "ownerName",
+              "description": "Owner display name; no email address."
+            },
+            {
+              "name": "status",
+              "description": "Budget status."
+            },
+            {
+              "name": "categoryCode",
+              "description": "Spend category."
+            },
+            {
+              "name": "currency",
+              "description": "Budget currency, ISO 4217."
+            },
+            {
+              "name": "authorizedMinor",
+              "description": "Integer minor units of the row currency."
+            },
+            {
+              "name": "allocatedOutMinor",
+              "description": "Integer minor units of the row currency."
+            },
+            {
+              "name": "heldMinor",
+              "description": "Integer minor units of the row currency."
+            },
+            {
+              "name": "preEncumberedMinor",
+              "description": "Pending. Integer minor units of the row currency."
+            },
+            {
+              "name": "encumberedMinor",
+              "description": "Committed. Integer minor units of the row currency."
+            },
+            {
+              "name": "actualMinor",
+              "description": "Integer minor units of the row currency."
+            },
+            {
+              "name": "availableUnderRulesMinor",
+              "description": "Available under this budget rules, the definition the app shows."
+            },
+            {
+              "name": "utilizationBps",
+              "description": "Utilization in basis points of the authorized amount."
+            },
+            {
+              "name": "fiscalYearLabel",
+              "description": "Fiscal year of the budget."
+            }
+          ]
+        },
+        {
+          "dataset": "company_rollup",
+          "title": "Company roll-up",
+          "description": "One row per root budget with company-wide Available, where a child allocation is counted once.",
+          "enabled": true,
+          "fields": [
+            {
+              "name": "budgetId",
+              "description": "Root budget identifier."
+            },
+            {
+              "name": "name",
+              "description": "Root budget name."
+            },
+            {
+              "name": "currency",
+              "description": "Budget currency, ISO 4217."
+            },
+            {
+              "name": "authorizedMinor",
+              "description": "Integer minor units of the row currency."
+            },
+            {
+              "name": "availableCompanyWideMinor",
+              "description": "Available, company-wide: authorized less held, pending, committed and actual over the whole subtree."
+            },
+            {
+              "name": "childCount",
+              "description": "Budgets directly under this root."
+            }
+          ]
+        },
+        {
+          "dataset": "ledger_summary",
+          "title": "Ledger summary",
+          "description": "Posted amounts by budget, accounting period and bucket. Single lines stay in BudgetFlow.",
+          "enabled": true,
+          "fields": [
+            {
+              "name": "budgetId",
+              "description": "Budget identifier."
+            },
+            {
+              "name": "budgetName",
+              "description": "Budget name."
+            },
+            {
+              "name": "accountingPeriodId",
+              "description": "Accounting period of the postings."
+            },
+            {
+              "name": "bucket",
+              "description": "Ledger bucket the amount sits in."
+            },
+            {
+              "name": "currency",
+              "description": "Budget currency, ISO 4217."
+            },
+            {
+              "name": "amountMinor",
+              "description": "Net posted to the bucket. Integer minor units of the row currency."
+            },
+            {
+              "name": "lineCount",
+              "description": "Ledger lines behind the amount."
+            }
+          ]
+        },
+        {
+          "dataset": "events",
+          "title": "Events",
+          "description": "Events funded from budgets the connecting person may read.",
+          "enabled": false,
+          "fields": [
+            {
+              "name": "eventId",
+              "description": "Event identifier."
+            },
+            {
+              "name": "eventCode",
+              "description": "Event reference."
+            },
+            {
+              "name": "name",
+              "description": "Event name."
+            },
+            {
+              "name": "status",
+              "description": "Event status."
+            },
+            {
+              "name": "startDate",
+              "description": "First day of the event."
+            },
+            {
+              "name": "endDate",
+              "description": "Last day of the event."
+            },
+            {
+              "name": "currency",
+              "description": "Event currency, ISO 4217."
+            },
+            {
+              "name": "estimateMinor",
+              "description": "Integer minor units of the row currency."
+            }
+          ]
+        },
+        {
+          "dataset": "requests",
+          "title": "Requests",
+          "description": "Spending requests on budgets the connecting person may read, with their status.",
+          "enabled": false,
+          "fields": [
+            {
+              "name": "requestId",
+              "description": "Request identifier."
+            },
+            {
+              "name": "ref",
+              "description": "Request reference."
+            },
+            {
+              "name": "budgetId",
+              "description": "Budget the request draws on."
+            },
+            {
+              "name": "status",
+              "description": "Request status."
+            },
+            {
+              "name": "kind",
+              "description": "Request kind."
+            },
+            {
+              "name": "categoryCode",
+              "description": "Spend category."
+            },
+            {
+              "name": "currency",
+              "description": "Request currency, ISO 4217."
+            },
+            {
+              "name": "amountMinor",
+              "description": "Integer minor units of the row currency."
+            },
+            {
+              "name": "createdAt",
+              "description": "When the request was raised, UTC."
+            }
+          ]
+        }
+      ],
+      "connectionsActive": 1,
+      "refreshesLast24h": 0,
+      "refreshLimitPerDay": 8,
+      "maxRowsPerRequest": 1000,
+      "connectionLifetimeDays": 90,
+      "notice": "The feed is read-only and each connection carries its own sign-in, so a report never shows more than the person who built it can see.",
+      "canManage": true,
+      "canConnect": false
+    }
+  },
+  "assistant-connector": {
+    "status": 200,
+    "body": {
+      "enabled": true,
+      "serverUrl": "/api/mcp/v1",
+      "protocolVersion": "2025-06-18",
+      "tools": [
+        {
+          "tool": "list_my_budgets",
+          "title": "List my budgets",
+          "description": "Budgets you own or can see, each with Available under this budget rules. Read-only.",
+          "enabled": true
+        },
+        {
+          "tool": "get_budget_balance",
+          "title": "Get a budget balance",
+          "description": "Authorized, pending, committed, actual and available for one budget you can see. Read-only.",
+          "enabled": true
+        },
+        {
+          "tool": "list_my_requests",
+          "title": "List my requests",
+          "description": "Spending requests you raised or can see, with their status. Read-only.",
+          "enabled": true
+        },
+        {
+          "tool": "get_request_status",
+          "title": "Get a request status",
+          "description": "Where one request has got to. Read-only.",
+          "enabled": true
+        },
+        {
+          "tool": "list_waiting_approvals",
+          "title": "List approvals waiting for me",
+          "description": "Approvals assigned to you, with title, amount and when they are due. It cannot decide any of them.",
+          "enabled": true
+        },
+        {
+          "tool": "search_events",
+          "title": "Search events",
+          "description": "Events you can see, with their dates and status. Read-only.",
+          "enabled": true
+        }
+      ],
+      "allowedApps": ["bf-demo-assistant"],
+      "connectedPeople": 1,
+      "toolCallsLast7Days": 0,
+      "maxRecordsPerCall": 50,
+      "connectionLifetimeDays": 30,
+      "aiFeatureFlagKey": "ai.mcp",
+      "aiFeatureEnabled": true,
+      "consentText": "Your AI assistant wants to read budgets, requests, approvals and events you can see in BudgetFlow. It cannot approve or change anything.",
+      "neverDoes": [
+        "It cannot approve, reject, submit, apply a control or move money.",
+        "It never shows more than the person who connected it can see in BudgetFlow."
+      ],
+      "canManage": true,
+      "canConnect": true
+    }
+  },
+  "automation-connector": {
+    "status": 200,
+    "body": {
+      "enabled": true,
+      "platforms": [
+        {
+          "platform": "make",
+          "title": "Make",
+          "allowed": false,
+          "automationsActive": 0,
+          "lastChangedAt": null,
+          "lastChangedByName": null
+        },
+        {
+          "platform": "power_automate",
+          "title": "Microsoft Power Automate",
+          "allowed": false,
+          "automationsActive": 0,
+          "lastChangedAt": null,
+          "lastChangedByName": null
+        },
+        {
+          "platform": "workato",
+          "title": "Workato",
+          "allowed": false,
+          "automationsActive": 0,
+          "lastChangedAt": null,
+          "lastChangedByName": null
+        },
+        {
+          "platform": "zapier",
+          "title": "Zapier",
+          "allowed": true,
+          "automationsActive": 1,
+          "lastChangedAt": null,
+          "lastChangedByName": null
+        }
+      ],
+      "actions": [
+        {
+          "action": "budget.balance.read",
+          "title": "Look up a budget balance",
+          "description": "Reads Available under this budget rules for a budget the connected person can see."
+        },
+        {
+          "action": "request.draft.create",
+          "title": "Create a draft request",
+          "description": "Creates a Draft that stays a Draft until the person opens and submits it in BudgetFlow."
+        }
+      ],
+      "triggers": [
+        {
+          "trigger": "budget.threshold_reached",
+          "title": "Budget threshold reached",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "budget.frozen",
+          "title": "Budget frozen",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "budget.reduced",
+          "title": "Budget reduced",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "budget.set_to_zero",
+          "title": "Budget set to zero",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "request.submitted",
+          "title": "Request submitted",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "request.decided",
+          "title": "Request decided",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "contribution.decided",
+          "title": "Inter-Director Budget Contribution Request decided",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "event.approved",
+          "title": "Event approved",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "event.closed",
+          "title": "Event closed",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "actual.matched",
+          "title": "Actual matched",
+          "deliveryAvailable": false
+        },
+        {
+          "trigger": "period.closed",
+          "title": "Accounting period closed",
+          "deliveryAvailable": false
+        }
+      ],
+      "automationsActive": 1,
+      "runsLast7Days": 0,
+      "connectionLifetimeDays": 90,
+      "consentText": "The platform wants to read budgets you can see and create drafts as you. It cannot approve, submit or move money.",
+      "neverDoes": [
+        "It cannot approve, reject, submit, apply a control or move money.",
+        "It never shows more than the person who connected it can see in BudgetFlow."
+      ],
+      "canManage": true,
+      "canConnect": true
+    }
+  },
+  "marketplace-partners": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "93000000-0000-4000-8000-000000000011",
+          "name": "CityQuest Experiences",
+          "slug": "cityquest",
+          "categories": ["experiences"],
+          "cities": ["Bengaluru", "Hyderabad"],
+          "vendorId": "93000000-0000-4000-8000-000000000001",
+          "vendorName": "CityQuest Experiences",
+          "vendorStatus": "preferred",
+          "mode": "mock",
+          "status": "enabled",
+          "offersCached": 0,
+          "lastSyncedAt": null,
+          "dataShared": [
+            "Event date, city and number of people",
+            "Dietary totals as counts, never names",
+            "Delivery addresses only for gifts the recipient agreed to"
+          ]
+        },
+        {
+          "id": "93000000-0000-4000-8000-000000000012",
+          "name": "Fresh Plate Catering",
+          "slug": "fresh-plate",
+          "categories": ["catering"],
+          "cities": ["Hyderabad"],
+          "vendorId": "93000000-0000-4000-8000-000000000002",
+          "vendorName": "Fresh Plate Catering",
+          "vendorStatus": "approved",
+          "mode": "mock",
+          "status": "enabled",
+          "offersCached": 0,
+          "lastSyncedAt": null,
+          "dataShared": [
+            "Event date, city and number of people",
+            "Dietary totals as counts, never names",
+            "Delivery addresses only for gifts the recipient agreed to"
+          ]
+        },
+        {
+          "id": "93000000-0000-4000-8000-000000000013",
+          "name": "Kindly Gifts",
+          "slug": "kindly-gifts",
+          "categories": ["gifts_and_kits"],
+          "cities": ["Bengaluru", "Hyderabad", "New York"],
+          "vendorId": null,
+          "vendorName": null,
+          "vendorStatus": null,
+          "mode": "mock",
+          "status": "paused",
+          "offersCached": 0,
+          "lastSyncedAt": null,
+          "dataShared": [
+            "Event date, city and number of people",
+            "Dietary totals as counts, never names",
+            "Delivery addresses only for gifts the recipient agreed to"
+          ]
+        }
+      ],
+      "canManage": true
+    }
+  },
+  "widgets": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "93000000-0000-4000-8000-000000000022",
+          "name": "HR portal: upcoming events",
+          "kind": "upcoming_events",
+          "allowedOrigins": ["https://hr.example.test", "https://intranet.example.test"],
+          "showAmounts": false,
+          "eventCount": 3,
+          "status": "active",
+          "viewsLast30Days": 0,
+          "blockedOriginsLast30Days": [],
+          "frameAncestors": "frame-ancestors https://hr.example.test https://intranet.example.test",
+          "embedSnippet": "<iframe src=\"/embed/93000000-0000-4000-8000-000000000022\" title=\"BudgetFlow: HR portal: upcoming events\" width=\"100%\" height=\"220\" style=\"border:0\"></iframe>",
+          "createdAt": "2026-11-07T01:56:14Z",
+          "updatedAt": "2026-11-07T01:56:14Z"
+        },
+        {
+          "id": "93000000-0000-4000-8000-000000000021",
+          "name": "Intranet: your team budget",
+          "kind": "team_budget",
+          "allowedOrigins": ["https://intranet.example.test"],
+          "showAmounts": true,
+          "eventCount": 3,
+          "status": "active",
+          "viewsLast30Days": 0,
+          "blockedOriginsLast30Days": [],
+          "frameAncestors": "frame-ancestors https://intranet.example.test",
+          "embedSnippet": "<iframe src=\"/embed/93000000-0000-4000-8000-000000000021\" title=\"BudgetFlow: Intranet: your team budget\" width=\"100%\" height=\"220\" style=\"border:0\"></iframe>",
+          "createdAt": "2026-11-07T01:56:14Z",
+          "updatedAt": "2026-11-07T01:56:14Z"
+        }
+      ],
+      "canManage": true
+    }
+  },
+  "marketplace-offers": {
+    "status": 200,
+    "body": {
+      "items": [],
+      "nextCursor": null
+    }
+  }
+}

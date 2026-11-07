@@ -55,13 +55,20 @@ export const constantTimeEquals = (a: string, b: string): boolean => {
 };
 
 /**
- * Bearer secrets are `bf_<live|scim>_<tenant tag>_<random>`. The tenant tag is the tenant's own id,
+ * What a bearer secret is for. `live` and `scim` are the Phase 12 public API and provisioning
+ * tokens; `bi`, `mcp` and `auto` are the Phase 16 personal connections (092a, 092c, 092b), which
+ * share this format so one `tenantFromSecret` scopes every token lookup.
+ */
+export type BearerLabel = 'live' | 'scim' | 'bi' | 'mcp' | 'auto';
+
+/**
+ * Bearer secrets are `bf_<label>_<tenant tag>_<random>`. The tenant tag is the tenant's own id,
  * so a request can set the tenant context before it touches the database and row level security
  * applies to the key lookup itself. A forged tag simply finds no key: the hash will not match.
  * Only the hash and the short prefix are stored.
  */
 export function newBearerSecret(
-  label: 'live' | 'scim',
+  label: BearerLabel,
   tenantId: string,
 ): { secret: string; prefix: string } {
   // Hex throughout: the underscore separators stay unambiguous whatever the random bytes are.

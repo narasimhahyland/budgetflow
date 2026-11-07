@@ -1,0 +1,46 @@
+Baselines that still show the navigation rail from before 11ea17e but that also differ
+outside it, so they are NOT re-recorded with the rail set. Each needs its own look at why its
+content changed before anything is frozen into a baseline.
+
+Measured against origin/main from one --update-snapshots=all run on a fresh deterministic seed.
+'content' counts differing pixels right of the rail (x >= 56); the percentage is of that state's
+own allowance (0.002 of its pixels). Sorted by how much of the allowance the content drift uses.
+
+ 115%  rail   788  content   3004 /  2592   101-webhooks--add-endpoint--desktop.png
+  92%  rail  3239  content   2387 /  2592   061d-chat-balance-request-alerts--app-home--desktop.png
+  84%  rail  2258  content   2190 /  2592   059b-mobile-balance-receipts--receipt--desktop.png
+  60%  rail  2258  content   1566 /  2592   054a-survey-photo-gallery--default--desktop.png
+  56%  rail  2927  content   1476 /  2592   000a-app-shell--notifications-open--desktop.png
+  48%  rail  2258  content    894 /  1854   046b-checklist-tasks-agenda--default--tablet.png
+  48%  rail   733  content    892 /  1854   023-budget-hierarchy--set-to-zero-dialog--tablet.png
+  42%  rail  2807  content   1094 /  2592   023-budget-hierarchy--set-to-zero-dialog--desktop.png
+  41%  rail  3148  content   1068 /  2592   015b-participation-reach--default--desktop.png
+  41%  rail  3107  content   1067 /  2592   080-budget-vs-actual--default--desktop.png
+  37%  rail   788  content    976 /  2592   101-api-keys--create-form--desktop.png
+  34%  rail  2258  content    894 /  2592   046b-checklist-tasks-agenda--default--desktop.png
+  33%  rail  3107  content    856 /  2592   085-event-spending--default--desktop.png
+  32%  rail  3107  content    839 /  2592   084-department-comparison--default--desktop.png
+  25%  rail   788  content    476 /  1854   061e-chat-app-setup-linking--default--tablet.png
+  21%  rail  3089  content    570 /  2592   019-budget-list--default--desktop.png
+  20%  rail  3098  content    528 /  2592   066-rules-overview--default--desktop.png
+  19%  rail  3387  content    514 /  2592   059-approval-inbox--default--desktop.png
+  19%  rail   788  content    369 /  1854   101-api-keys--create-form--tablet.png
+  18%  rail  3387  content    480 /  2592   061-approval-decision--approve-part--desktop.png
+  18%  rail  3239  content    476 /  2592   123-notifications-tasks--default--desktop.png
+  17%  rail  2927  content    450 /  2592   020-create-budget--default--desktop.png
+  15%  rail  3107  content    404 /  2592   081-allocation-report--default--desktop.png
+  13%  rail  3239  content    341 /  2592   056a-inter-director-contribution-request--giver--desktop.png
+  10%  rail  2258  content    203 /  1854   060-request-details--requester--tablet.png
+  10%  rail  2028  content    274 /  2592   069a-policy-assistant--is-allowed--desktop.png
+   9%  rail  2258  content    173 /  1854   056a-inter-director-contribution-request--organizer--tablet.png
+   8%  rail  3321  content    223 /  2592   011a-ai-assistant-panel--action-redirect--desktop.png
+   7%  rail  2258  content    203 /  2592   060-request-details--requester--desktop.png
+   6%  rail  2258  content    173 /  2592   056a-inter-director-contribution-request--organizer--desktop.png
+   6%  rail  2258  content    128 /  1854   047e-attendance-per-head-recalculation--default--tablet.png
+   6%  rail  2258  content    115 /  1854   065-rejected-request-resubmission--counter-offer--tablet.png
+   5%  rail  3321  content    138 /  2592   011a-ai-assistant-panel--refused-out-of-scope--desktop.png
+   5%  rail  2927  content    154 /  2592   000a-app-shell--default--desktop.png
+   4%  rail  3098  content    109 /  2592   087c-rollover-policies--default--desktop.png
+   4%  rail  2258  content    128 /  2592   047e-attendance-per-head-recalculation--default--desktop.png
+   4%  rail  2258  content    115 /  2592   065-rejected-request-resubmission--counter-offer--desktop.png
+   2%  rail  3107  content     55 /  2592   013-budget-health--default--desktop.png
