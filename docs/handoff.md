@@ -1,6 +1,8 @@
 # Handoff: state of play
 
-Written 2026-11-07 against `main` at `23b36c3`, for whoever picks this repository up next.
+Written 2026-11-08 against `main` at `4e9c62c`, for whoever picks this repository up next. If you
+are starting cold, read section 1 for where the build is and section 2 for what to do about it; the
+rest is reference.
 
 [`README.md`](../README.md) says what BudgetFlow is and how to run it; [`AGENTS.md`](../AGENTS.md)
 says how to work in it. Neither says **where the build actually is, what was deliberately not built,
@@ -22,44 +24,108 @@ committed under `evidence/<phase>/`, so this table comes from `evidence/`, not f
 | 3    | 7–9    | Rules and approvals, channels, event depth         | **Complete**, packs `phase-07`–`phase-09`                            |
 | 4    | 10–11  | Reports and dashboards, close and forecast         | **Complete**, packs `phase-10`, `phase-11`                           |
 | 5    | 12–13  | Integrations and public API, AI layer              | **Complete**, packs `phase-12`, `phase-13` (each backend + frontend) |
-| 6    | 14–16  | Administration, extended product, ecosystem        | **Backends merged; three frontends in flight** — see below           |
+| 6    | 14–16  | Administration, extended product, ecosystem        | **Phases 15 and 16 complete; Phase 14 frontend is the last one**     |
 | 7    | 17–20  | Quality pass, security review, evidence, docs      | **Not started.** No branch, no evidence folder, no issue             |
 
 ### Wave 6 in detail (the live edge of the build)
 
-All three backend halves are merged with evidence packs (`evidence/phase-14/backend`,
-`phase-15/backend`, `phase-16/backend` + `phase-16/gate`). The Angular halves are three separate
-pull requests, all open at the time of writing:
+All three backends are merged with evidence packs (`evidence/phase-14/backend`, `phase-15/backend`,
+`phase-16/backend` + `phase-16/gate`). Two of the three Angular halves have since merged, so **one
+pull request is open in the whole repository**:
 
-| Phase | Frontend branch         | PR                                                           | CI at time of writing                                                    |
-| ----- | ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| 14    | `feat/p14-admin-ui`     | [#69](https://github.com/narasimhahyland/budgetflow/pull/69) | Static green; **Functional and Visual failing**, mergeability unresolved |
-| 15    | `feat/p15-extended-ui`  | none yet — branch pushed, PR not opened                      | —                                                                        |
-| 16    | `feat/p16-ecosystem-ui` | [#80](https://github.com/narasimhahyland/budgetflow/pull/80) | **All checks green**, mergeable                                          |
+| Phase | Frontend                | Where it is                                                                                                                                                    |
+| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 14    | `feat/p14-admin-ui`     | **Open: [#69](https://github.com/narasimhahyland/budgetflow/pull/69)**, the only open PR. See [section 2.1](#21-finish-pr-69--the-phase-14-frontend)           |
+| 15    | `feat/p15-extended-ui`  | Merged — [#84](https://github.com/narasimhahyland/budgetflow/pull/84), then [#85](https://github.com/narasimhahyland/budgetflow/pull/85) for a permission gate |
+| 16    | `feat/p16-ecosystem-ui` | Merged — [#80](https://github.com/narasimhahyland/budgetflow/pull/80), with `evidence/phase-16/frontend`                                                       |
 
-Each is being worked by an agent in its own worktree (`p14-admin-ui`, `p15-extended-ui`,
-`p16-ecosystem-ui`). Treat those three worktrees as occupied — see
-[operational traps](#6-the-operational-traps).
+Two things that look finished are not:
 
-**Update the README status table when these land.** It is correct as of this commit (Phase 16 shown
-as backend only); the three rows move to a full `yes` once each frontend merges with its evidence
-pack.
+- **Phase 15 merged without a frontend evidence pack.** There is no `evidence/phase-15/frontend`,
+  while Phase 16 has one. The definition of done asks for it; it is outstanding.
+- **The README status table still reads `backend only` for 14, 15 and 16.** It moves to `yes` per
+  phase as each frontend lands with its pack.
 
-### What remains after Wave 6
-
-Phase 17 (quality), 18 (security), 19 (local evidence), 20 (docs and final report). Two concrete
-items are already parked for Phase 17 in
-[`docs/architecture/phase-handoff.md`](architecture/phase-handoff.md): isolated Testcontainers runs
-(`API_E2E_ISOLATED=1`) and the migration-from-previous-release check are wired as Nx dependencies but
-no scenario uses them yet.
+Treat the worktrees under `../budget-delegation-and-control-worktrees/` as occupied until you have
+checked otherwise — see [operational traps](#7-the-operational-traps), the first three of which are
+about exactly that.
 
 ---
 
-## 2. Current technical state
+## 2. What to do next, in order
+
+Four blocks, in priority order. Only the first is holding the build; 2.2 to 2.4 can run in any
+order, and 2.4 is not work at all — it is four questions that need an answer from the product owner.
+
+### 2.1 Finish PR #69 — the Phase 14 frontend
+
+[PR #69](https://github.com/narasimhahyland/budgetflow/pull/69), branch `feat/p14-admin-ui`,
+worktree `p14-admin-ui`. 132 files, about +6,200 lines, covering screens 105, 111, 103, 103a,
+102b/109/110/112, 114, 010a and 122. Its backend is already on `main`. **The substantive work is
+sound** — four agents stalled on it for environmental reasons (see the merge-state trap in
+[section 7](#7-the-operational-traps)), not because the code is wrong.
+
+State at the time of writing: `main` (`4e9c62c`) is merged into the branch and pushed at `0917eab`,
+the PR reports `MERGEABLE`, the static gate is green and the heavy CI jobs are running. **Confirm
+that with `gh pr checks 69` before assuming it** rather than trusting this paragraph.
+
+What is left:
+
+| Step                                  | What it involves                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Re-merge `main` if it moves again** | One file genuinely conflicts: `apps/web-e2e/src/shell/role-navigation.spec.ts`. It asserts the rail **in order** (`toHaveText(expected)` over the menu items) and then cross-checks the same list against `/api/me` through its `NEEDS` map, so **rebuild each role's expected list from the merged `nav.ts` in rail order** — concatenating both sides produces an order no role renders. `apps/web-e2e/visual/screens.json` merges cleanly by id (153 unique entries after the last merge). A baseline PNG that conflicts is re-recorded, never hand-merged. Do the whole merge in one shell invocation. |
+| **Re-record the nav-rail baselines**  | Phase 14 adds five rail entries — `My activity`, and `Feature flags`, `Data retention`, `System health`, `Set up BudgetFlow` behind `tenant.settings.manage` (commit `63c3112` says six in its subject; the diff of `nav.ts` shows five). The rail renders on every screenshot, so this moves baselines across the whole suite: Phase 15's two passes moved six then five, Phase 16's moved 23 (`36c32ad`). Run `npm run e2e:update-snapshots` over the **full** visual project, then open the images and look at them.                                                                                    |
+| **Permission check**                  | **No action may be on screen that the API would refuse.** Phase 15 shipped exactly this bug and `978c20b` ([#85](https://github.com/narasimhahyland/budgetflow/pull/85)) fixed it: the summaries list offered Draft whenever a closed period had none, and `canApprove` on the detail page weighed the summary's state but not the reader's right, so an analyst got two buttons the API refuses on the press. Phase 14 is the most permission-dense group in the product. Every action gates on `session.can(<the action its endpoint asserts>)`, never on the shape of the data.                         |
+| **Two-person-change check**           | **A pending change must show the value still in force, not the requested one.** Admin changes queue as `adminChangeRequests` rows; the read models return the live value alongside a separate `pendingChange` object (`libs/api/admin/src/lib/feature-flags.service.ts`, `retention.service.ts`, `user-admin.service.ts`). The screen renders what is in force and marks the other as waiting for its second approver. Rendering the requested value as though applied is the failure mode.                                                                                                                |
+
+**Done** looks like: all five CI jobs green, PR merged, `evidence/phase-14/frontend/` committed
+(gate summary, journeys, screens, visual QA report, following `evidence/phase-16/frontend` as the
+model), and the README status row for Phase 14 moved to `yes`.
+
+### 2.2 Visual-suite hygiene
+
+Four items. None blocks a merge; each is a baseline that is lying or about to.
+
+| Item                                                                                                                                                                                                                                                                                                                                                        | Where                                                                                                           | Done when                                                                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **38 stale-rail baselines held back.** They carry the pre-`11ea17e` rail _and_ differ behind it, so re-recording would freeze a rendering nobody has explained. `086-unused-expired` carried a wrong breadcrumb for two phases in exactly this way.                                                                                                         | `evidence/stale-rail/remaining.txt`, each with its share of its allowance; `npm run visual:headroom` names them | Every one classified (real change, flake or drift) before anything is recorded, and the file emptied or reduced to a reasoned remainder |
+| **`086-unused-expired` computes "days left" from the real date.** The suite freezes the browser clock but not the report's arithmetic, so the figure falls by one a day and walks into its own tolerance.                                                                                                                                                   | commit `8a54717`; tracked as part of [#86](https://github.com/narasimhahyland/budgetflow/issues/86)             | The relative-date region is masked in `screens.json`, or the seeded dates are pinned to the suite's frozen clock                        |
+| **`113a` query-log baselines depend on cross-suite data.** The rows exist only because the AI screens run earlier in the same suite, so the state is meaningless in a filtered run.                                                                                                                                                                         | `apps/web-e2e/visual/screens.json`                                                                              | The state seeds or drives its own rows, so it passes when run alone                                                                     |
+| **Two open issues.** [#82](https://github.com/narasimhahyland/budgetflow/issues/82): about one state per full run renders a blank page and passes on retry. [#86](https://github.com/narasimhahyland/budgetflow/issues/86): `046b` and `086` tablet baselines drift with the real calendar and will go red on their own around **10 and 13 November 2026**. | `gh issue view 82`, `gh issue view 86`                                                                          | #86 before those dates, or it re-reds `main` for no reason; #82 when the blank render is explained rather than retried                  |
+
+### 2.3 Wave 7 — phases 17 to 20
+
+Nothing exists yet: no branch, no evidence folder, no issue. The contents below are what the
+repository itself parks for each phase, not a separate plan document — check
+[`docs/architecture/phase-handoff.md`](architecture/phase-handoff.md) and the rules under
+`.cursor/rules/` before committing to a scope.
+
+| Phase                    | What it is meant to produce                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **17 — quality pass**    | Close the holes the gates do not cover. Named inputs: isolated Testcontainers runs (`API_E2E_ISOLATED=1`) and the migration-from-previous-release check, both wired as Nx dependencies with no scenario using them (`phase-handoff.md`); accessibility checks, deliberately off today (see [section 4](#4-deferred-by-decision)); the performance runs autocannon is in the stack for; and everything in [2.2](#22-visual-suite-hygiene). Done: each either closed or recorded as a decision, with `evidence/phase-17/`.                              |
+| **18 — security review** | A security pass over the whole surface through `/security-review-handoff`, covering secrets and public-repo hygiene, tenant isolation, authorization, audit integrity, uploads, integrations and CI. One product item is parked here: `docs/architecture/authorization.md` says Phase 18 adds the break-glass grant flow, while [section 5](#5-blocked-or-unbuilt-with-the-blocker-named) records screen 112 as deferred with Phase 14 — **reconcile those two before building either**. Done: findings fixed or accepted, with `evidence/phase-18/`. |
+| **19 — local evidence**  | The whole product proven on the local stack from the deterministic seed, including the extended core acceptance scenario end to end (`apps/web-e2e/src/acceptance/`, which `testing-functional.mdc` says runs at every wave gate from Wave 2 and again in Phase 19) and `scripts/gate.sh` in all modes. Done: `evidence/phase-19/` holds the run, the outcome table and the gate summary.                                                                                                                                                             |
+| **20 — docs and report** | README, `docs/architecture/`, the screen inventory and this page refreshed against the finished build, plus the final report. Known stale text to fix: the README status table, `phase-handoff.md`'s claim that screens 87 and 16a "are not built" (they were built in Phase 11), and whatever of this page has aged. Done: `evidence/phase-20/`.                                                                                                                                                                                                     |
+
+### 2.4 Decisions that need the user
+
+Four open questions. Each is stated with its trade-off and no recommendation; the detail behind all
+four is in [section 6](#6-known-gaps-worth-a-decision).
+
+| Question                                                             | Where it stands                                                                                                                                                                                                                                                 | The trade-off                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Wire a real AI provider?**                                         | `AI_PROVIDER` is `z.enum(['fake'])` — a single-value enum — and no model token exists in the repository or the Compose stack. Every answer comes from `FakeAiProvider` fixtures.                                                                                | The fake keeps every test reproducible and the repository token-free. A real provider makes the AI features genuinely demonstrable but is an integration project with a secret to manage, non-deterministic tests and a cost, not a config change.                                  |
+| **Purge `ai_conversation_turns`, or stop promising a window?**       | `conversationHistoryDays` (default 30) is enforced in `ask.service.ts` as a read-side filter; nothing deletes a row, and Phase 14's retention categories do not cover the AI area. The text is kept forever.                                                    | Turning it into a real purge honours what screen `113a` says but loses history the evaluation sets might want. Changing the wording is cheap and honest but leaves a retention promise unmade.                                                                                      |
+| **Sign off the twelve retention periods, or keep them provisional?** | Every seeded category ships `signoff_status = 'provisional'`, pending finance and legal. Nine are periods those functions can still change; three are locked statements of policy.                                                                              | Shipping provisional is accurate about its own status but means the product states a legal position nobody has approved. Sign-off needs two functions the build cannot speak for.                                                                                                   |
+| **May a read-only role edit a summary draft's text?**                | `editSection` and `regenerate` in `libs/api/extended/src/lib/narratives.service.ts` are guarded by `assertDraft` (a status check) plus the `report.read` reader check — not `assertAuthor`, which is `audit.read`. `draft` and `approve` do use `assertAuthor`. | As built, anyone who can read summaries can rewrite an unapproved draft, which suits collaborative editing. Tightening it to `audit.read` matches who may draft and approve in the first place, and is the reading of [#85](https://github.com/narasimhahyland/budgetflow/pull/85). |
+
+---
+
+## 3. Current technical state
 
 | Thing                       | Value                                    | Where it is defined                                                     |
 | --------------------------- | ---------------------------------------- | ----------------------------------------------------------------------- |
-| `main`                      | `23b36c3`                                | `git log origin/main`                                                   |
+| `main`                      | `4e9c62c`                                | `git log origin/main`                                                   |
 | Last migration              | `0019_p16_ecosystem`, journal `idx` 19   | `libs/api/db/migrations/meta/_journal.json`                             |
 | **Next free migration**     | **`0020`**                               | same                                                                    |
 | Tables after `0019`         | 164                                      | `meta/0019_snapshot.json`                                               |
@@ -67,7 +133,12 @@ no scenario uses them yet.
 | **Next free seed prefix**   | **`94`**                                 | prefix table at the end of `docs/architecture/phase-handoff.md`         |
 | Highest invariant row       | 94 (Phase 16)                            | `docs/testing/invariant-scenarios.md`                                   |
 | **Next free invariant row** | **95**                                   | same                                                                    |
-| Visual baselines            | 615 images, 205 screen states, 629 tests | `apps/web-e2e/src/__screenshots__/visual-light/`, `visual/screens.json` |
+| Visual baselines            | 711 images, 237 screen states, 725 tests | `apps/web-e2e/src/__screenshots__/visual-light/`, `visual/screens.json` |
+
+Those last four rows move the moment PR #69 merges, and the baseline counts move again with every
+re-record. Re-derive rather than quote: `tail libs/api/db/migrations/meta/_journal.json`,
+the prefix table at the end of `phase-handoff.md`, the last row of `invariant-scenarios.md`,
+`find apps/web-e2e/src/__screenshots__ -name '*.png' | wc -l`.
 
 ### The seed prefix table is load-bearing
 
@@ -87,7 +158,7 @@ That has happened twice:
 
 ---
 
-## 3. Deferred by decision
+## 4. Deferred by decision
 
 None of these is an oversight, and none should be rebuilt or re-argued without a new decision. Each
 reason is the one on record.
@@ -105,7 +176,7 @@ reason is the one on record.
 
 ---
 
-## 4. Blocked or unbuilt, with the blocker named
+## 5. Blocked or unbuilt, with the blocker named
 
 | Not built                                                                                                                                                   | Blocked by                                                                                                                                                                                                                                                                                                        |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -119,7 +190,7 @@ reason is the one on record.
 
 ---
 
-## 5. Known gaps worth a decision
+## 6. Known gaps worth a decision
 
 These are stated plainly here because they are easy to miss and awkward to discover late.
 
@@ -150,11 +221,48 @@ are locked statements of policy (ledger journals and the audit log are never del
 go 30 days after the event closes). **This is not an approved legal position** — it is a stated
 default waiting for two functions to confirm it.
 
+### A read-only role can rewrite a leadership summary draft
+
+In `libs/api/extended/src/lib/narratives.service.ts`, `draft` and `approve` call `assertAuthor`,
+which requires `audit.read`: leadership and finance author the company summary. `editSection` and
+`regenerate` do not. They are guarded by `assertDraft`, a status check that only refuses an already
+approved summary, plus the `report.read` reader check every read runs. So anyone who can read
+summaries can rewrite an unapproved one's text, or regenerate it. Whether that is collaborative
+editing or a gap is a product decision, not a bug report — but it is not what
+[#85](https://github.com/narasimhahyland/budgetflow/pull/85) assumed when it tightened the buttons.
+
 ---
 
-## 6. The operational traps
+## 7. The operational traps
 
-The most valuable section. Each of these cost real time to learn.
+The most valuable section. Each of these cost real time to learn. The first one cost the most.
+
+### Git merge state in a worktree can be silently reverted
+
+**Read this before you merge anything in an agent worktree.** Four separate agents stalled trying to
+merge `main` into `feat/p14-admin-ui`, and this was why. A merge would run and report its conflicts;
+moments later the working tree would be clean again with `MERGE_HEAD` gone, as though
+`git merge --abort` had fired. No hook and no process was ever found responsible. Each agent lost
+its progress to this and appeared, from the outside, to simply stop.
+
+**The workaround that succeeded: do the merge, the conflict resolution, the commit and the push
+inside a single uninterruptible shell invocation.** Do not split a merge across tool calls. Do not
+leave a merge in progress, or a staged change, sitting between calls. The same caution applies to
+generating and committing visual baselines, which is the other long operation that leaves the tree
+dirty for a while.
+
+This reframes the "infrastructure stalls" recorded elsewhere on this page: at least some of those
+agents were not failing, they were having their work undone mid-operation. Worth knowing, because
+the natural response to a stall is to retry it the same way — which fails the same way.
+
+### A stalled agent is indistinguishable from a working one
+
+Phase 16's frontend PR sat green and unmerged for nearly five hours because its agent ended its turn
+without reporting. Nothing was wrong and nothing said so. **Poll the PR and the branch directly**
+(`gh pr checks <n>`, `gh pr view <n> --json mergeable,mergeStateStatus`, `git rev-parse <branch>`)
+rather than waiting on a completion notification that may never come. This is the mirror image of
+the trap below: a quiet agent is not necessarily finished, and a finished agent does not necessarily
+say so.
 
 ### A "stopped" subagent is usually still running
 
@@ -174,7 +282,9 @@ collided over the same files.
 
 Seven agents were stopped by infrastructure in a single day. In every case the work survived only
 because it had been pushed. Push early, push often, and prefer a branch with scrappy checkpoint
-commits over a clean working tree that exists nowhere else.
+commits over a clean working tree that exists nowhere else. Some of those seven were the reverted
+merge state above rather than infrastructure, which only strengthens the habit: a commit that was
+pushed cannot be undone underneath you.
 
 ### Renumbering a migration means regenerating the snapshot
 
@@ -197,6 +307,17 @@ A guard hook blocks reading or writing `.env` through file tools, deliberately, 
 (`export BF_WEB_PORT=…`, or append to `.env` from the shell). Do not try to work around the hook; if
 it blocks you, say so.
 
+### A UI phase that adds navigation entries invalidates baselines across the whole suite
+
+The rail renders on every screenshot, so adding one entry to `libs/web/shell/src/lib/nav.ts` moves
+every state that any affected role can reach — nothing to do with the screen under test. Phase 15
+added six entries and re-recorded six baselines, then five more; Phase 16 added five and re-recorded
+23 (`36c32ad`); Phase 14 adds five and the pass is still to come. **Budget a re-record pass into any
+phase that touches the rail, and run the full visual project** — a grepped subset tells you only
+that the states you thought of still pass, and the ones you did not think of are precisely the
+problem. The spec that has to move with it is
+`apps/web-e2e/src/shell/role-navigation.spec.ts`, which asserts each role's rail in order.
+
 ### A visual baseline can be wrong while the check is green
 
 The gate compares against `maxDiffPixelRatio` 0.002. A baseline that is wrong by less than that
@@ -207,7 +328,7 @@ passes forever and silently spends the screen's whole allowance on an unrelated 
   to do with the screen under test. They all passed. Then any small change tipped whichever one
   happened to be closest, and `main` went red on a different state each run.
   [PR #81](https://github.com/narasimhahyland/budgetflow/pull/81) re-recorded 208 of them; 38 are
-  deliberately held back (see [loose ends](#7-open-issues-and-loose-ends)).
+  deliberately held back (see [loose ends](#8-open-issues-and-loose-ends)).
 - `086-unused-expired` shipped the **wrong breadcrumb** ("Report" instead of "Unused and expired
   budget") for two phases, because the baseline was recorded one commit before the route title map
   changed it and the tolerance hid the difference ever since.
@@ -281,20 +402,23 @@ twice before being fixed globally. The reset is in place now. **Do not add per-c
 
 ---
 
-## 7. Open issues and loose ends
+## 8. Open issues and loose ends
 
 Open issues: [`gh issue list`](https://github.com/narasimhahyland/budgetflow/issues).
 
-| #                                                             | Issue                                                                                                                                                                                          | State                                                                                                                                                                                                                                                   |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [82](https://github.com/narasimhahyland/budgetflow/issues/82) | **Blank-render flake.** About one visual state per 629-test run fails its readiness wait and saves a **blank page** — the app never bootstrapped. Different state every time, passes on retry. | Open. Not urgent (self-heals with `retries: 1`) but one unlucky retry from a red `main` on an unrelated change. The project runs with `trace: 'off'`, so there is no trace to read; the hypothesis is a silent Keycloak re-auth that does not complete. |
+| #                                                             | Issue                                                                                                                                                                                 | State                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [82](https://github.com/narasimhahyland/budgetflow/issues/82) | **Blank-render flake.** About one visual state per run fails its readiness wait and saves a **blank page** — the app never bootstrapped. Different state every time, passes on retry. | Open. Not urgent (self-heals with `retries: 1`) but one unlucky retry from a red `main` on an unrelated change. The project runs with `trace: 'off'`, so there is no trace to read; the hypothesis is a silent Keycloak re-auth that does not complete. |
+| [86](https://github.com/narasimhahyland/budgetflow/issues/86) | **Calendar drift.** `046b` and `086` tablet baselines change with the real date, not with the code: a seeded task turns overdue, a fiscal-year countdown ticks down.                  | Open, and **self-triggering around 10 and 13 November 2026**. Already re-recorded as collateral twice, which bakes in that day's figure. Fix is masking in `screens.json`, or pinning the seeded dates to the suite's frozen clock.                     |
 
 Loose ends without a ticket:
 
 | Loose end                                                                                                                                                                                                                                                                                                                             | Where it is written down                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **38 stale-rail baselines held back.** They show the old nav rail _and_ differ behind it, so re-recording would freeze a rendering nobody has explained. Each needs its own look.                                                                                                                                                     | `evidence/stale-rail/remaining.txt`, with each one's share of its allowance; `npm run visual:headroom` names them every run |
-| **`086-unused-expired` computes "days left" from the real date.** Only the browser clock is frozen, so the figure falls by one each day and the state drifts towards its tolerance on its own. Masking it needs a handle on the report frame's cells that does not exist.                                                             | commit `8a54717`                                                                                                            |
+| **`086-unused-expired` computes "days left" from the real date.** Only the browser clock is frozen, so the figure falls by one each day and the state drifts towards its tolerance on its own. Masking it needs a handle on the report frame's cells that does not exist. Now also covered by issue #86.                              | commit `8a54717`                                                                                                            |
+| **Phase 15 merged its frontend without an evidence pack.** There is no `evidence/phase-15/frontend`, where Phase 16 has one. The definition of done asks for the gate summary, outcome table and visual QA report.                                                                                                                    | `evidence/phase-16/frontend/` is the model to copy                                                                          |
+| **The README status table still shows Phases 14, 15 and 16 as backend only.** Two of the three frontends are merged.                                                                                                                                                                                                                  | [`README.md`](../README.md#status)                                                                                          |
 | **`113a` depends on cross-suite data.** Its query-log state needs rows other screens' AI calls create.                                                                                                                                                                                                                                | `apps/web-e2e/visual/screens.json`                                                                                          |
 | **A monospace `font-family` slipped past stylelint.** `frontend-satori-styling.mdc` forbids it, but stylelint only enforces the ban in `.scss`, so an inline component style in `libs/web/features/ai/src/lib/ai-output.ts` was never checked.                                                                                        | issue #70's closing comment                                                                                                 |
 | **The default board pack (016a) renders all zeros.** The seed closes the period without writing `period_close_snapshots` rows, so the "latest closed period" view is empty. It is the seed, not the report — switch to the current open period and the figures are real. Fixing it moves the `016a-board-pack--default--*` baselines. | `docs/architecture/phase-handoff.md`, "Known follow-ups from Phase 11"                                                      |
@@ -302,7 +426,7 @@ Loose ends without a ticket:
 
 ---
 
-## 8. Where things live
+## 9. Where things live
 
 | Path                                                                    | What you will find                                                                                                                                                                                                                                  |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
