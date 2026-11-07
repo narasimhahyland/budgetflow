@@ -408,10 +408,19 @@ export class SummaryDetailPage {
   protected readonly unreviewed = computed(() =>
     (this.summary()?.sections ?? []).filter((x) => !x.reviewed).map((x) => x.title),
   );
+  /**
+   * Approving is `audit.read`, the action the API checks: leadership and finance approve the
+   * company summary, an analyst reads the approved one. Without the permission in here a reader
+   * is handed a live Approve button that the API refuses on the press.
+   */
   protected readonly canApprove = computed(() => {
     const s = this.summary();
     return Boolean(
-      s && s.status !== 'approved' && s.periodState === 'closed' && this.unreviewed().length === 0,
+      s &&
+        this.session.can('audit.read') &&
+        s.status !== 'approved' &&
+        s.periodState === 'closed' &&
+        this.unreviewed().length === 0,
     );
   });
 

@@ -123,10 +123,23 @@ test.describe('a read-only analyst reads summaries but does not draft or approve
   test.use({ storageState: authFile('analyst') });
 
   test('the analyst gets the list without a drafting action', async ({ page }) => {
+    const list = await getJson<{ items: LeadershipSummary[] }>(
+      'analyst',
+      '/api/insights/summaries',
+    );
+
     await page.goto('/insights/summaries');
     await expectShell(page);
     await expect(page.getByRole('heading', { name: 'Leadership summaries' })).toBeVisible();
     await expect(page.getByTestId('summaries-note')).toContainText('A drafted summary is a draft');
+
+    // The rows the API returned are on screen, so the absent button below means the page withheld
+    // it rather than that nothing had loaded yet.
+    for (const s of list.items) await expect(page.getByTestId(`summary-${s.id}`)).toBeVisible();
+
+    // Drafting is audit.read, which the analyst does not hold. The button follows the permission
+    // and not the close calendar, so it stays absent however many periods are waiting for a
+    // summary — a drafting test running beside this one cannot change the answer.
     await expect(page.getByTestId('draft-summary')).toHaveCount(0);
   });
 });
