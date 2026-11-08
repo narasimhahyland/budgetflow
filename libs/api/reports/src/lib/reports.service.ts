@@ -1,4 +1,4 @@
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, todayUtc, type RequestActor } from '@bf/api/core';
 import { budgets, reportExports, reportSchedules, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   LedgerLine,
@@ -20,8 +20,6 @@ import { ReportExtrasReads, type EventFiguresQuery } from './report-extras.servi
 import { SavedViewsService } from './saved-views.service';
 
 const DEFAULT_LIMIT = 200;
-
-const todayUtc = () => new Date().toISOString().slice(0, 10);
 
 const emptyExtras = (): ReportExtras => ({
   events: [],

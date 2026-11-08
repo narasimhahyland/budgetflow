@@ -31,6 +31,22 @@ while IFS='=' read -r key value; do
   case "$key" in '' | \#*) continue ;; esac
   [ -n "${!key:-}" ] || export "$key=$value"
 done <"$env_file"
+
+# One "now" for the whole stack. The visual suite freezes the *browser* clock to freezeTime in
+# apps/web-e2e/visual/screens.json; unless the API agrees, every age, countdown and overdue flag the
+# server computes drifts against a baseline that cannot move, and the state goes red on a day nobody
+# changed anything (issue #86). The value is read from screens.json rather than copied into a second
+# file, so the browser and the server cannot fall out of step. Override with BF_FIXED_NOW, or
+# BF_FIXED_NOW=real for a stack that runs on the real clock.
+screens_json=apps/web-e2e/visual/screens.json
+if [ -z "${BF_FIXED_NOW:-}" ] && [ -f "$screens_json" ]; then
+  BF_FIXED_NOW=$(node -e 'const t=JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8")).freezeTime; process.stdout.write(typeof t === "string" ? t : "")' "$screens_json") ||
+    die "could not read freezeTime from $screens_json (set BF_FIXED_NOW, or BF_FIXED_NOW=real)"
+  [ -n "$BF_FIXED_NOW" ] || die "$screens_json has no freezeTime (set BF_FIXED_NOW, or BF_FIXED_NOW=real)"
+fi
+[ "${BF_FIXED_NOW:-}" = real ] && BF_FIXED_NOW=''
+export BF_FIXED_NOW=${BF_FIXED_NOW:-}
+
 project=${COMPOSE_PROJECT_NAME:-bf-$default_project}
 
 cmd=${1:-status}
@@ -44,6 +60,11 @@ if [ "$cmd" = urls ]; then
   echo "minio     http://localhost:${BF_MINIO_PORT:-9000}"
   echo "mocks     http://localhost:${BF_MOCK_PROVIDERS_PORT:-4010}  (mock providers for the connectors)"
   echo "postgres  127.0.0.1:${BF_PG_PORT:-5432}  (database ${BF_PG_DB:-budgetflow})"
+  if [ -n "${BF_FIXED_NOW:-}" ]; then
+    echo "clock     pinned to $BF_FIXED_NOW  (the API computes ages and countdowns from this)"
+  else
+    echo "clock     real time  (server-computed ages and countdowns will drift against baselines)"
+  fi
   exit 0
 fi
 

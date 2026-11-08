@@ -134,6 +134,10 @@ services:
       KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/budgetflow/protocol/openid-connect/certs
       KEYCLOAK_AUDIENCE: budgetflow-api
       AI_PROVIDER: ${BF_AI_PROVIDER:-fake}
+      # Local stack only: pins the clock the API computes ages, countdowns and overdue flags from, so
+      # a visual baseline describes the product and not the day it was recorded (issue #86). Unset
+      # means real time. Keep it in step with freezeTime in apps/web-e2e/visual/screens.json.
+      FIXED_NOW: ${BF_FIXED_NOW:-}
       # Phase 5: documents on MinIO (signed URLs use the browser-reachable public URL), email links
       DOCUMENT_STORE_ENDPOINT: http://minio:9000
       DOCUMENT_STORE_PUBLIC_URL: http://localhost:${BF_MINIO_PORT:-9000}

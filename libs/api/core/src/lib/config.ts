@@ -19,6 +19,13 @@ const EnvSchema = z.object({
     .default('budgetflow-web')
     .describe('Public OIDC client the web app signs in with (served by /api/auth/config).'),
   AI_PROVIDER: z.enum(['fake']).default('fake'),
+  FIXED_NOW: z.iso
+    .datetime()
+    .optional()
+    .describe(
+      'Development and test only: the instant the API treats as now, so server-computed ages and ' +
+        'countdowns stay still for a visual run. Read by clock.ts. Never set it in a deployment.',
+    ),
 });
 
 export type AppConfig = z.infer<typeof EnvSchema> & { jwksUrl: string };

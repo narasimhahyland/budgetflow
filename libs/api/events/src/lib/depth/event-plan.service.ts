@@ -1,4 +1,4 @@
-import { ApiProblem, type CommandResult, type RequestActor } from '@bf/api/core';
+import { ApiProblem, type CommandResult, type RequestActor, todayUtc } from '@bf/api/core';
 import { eventAgendaItems, eventChecklists, eventTemplates, type Tx } from '@bf/api/db';
 import type {
   EventAgendaItem,
@@ -20,8 +20,6 @@ type TaskRow = typeof eventChecklists.$inferSelect;
 type AgendaRow = typeof eventAgendaItems.$inferSelect;
 type Comment = { id: string; authorName: string; text: string; createdAt: string };
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
-
 /**
  * The shared event plan (46b): checklist tasks in the Before, On the day and After sections, and the
  * agenda invitees see. The plan never moves money; its money steps link to the screens that do, and
@@ -35,7 +33,7 @@ export class EventPlanService {
   ) {}
 
   private taskView(t: TaskRow, assignees: Map<string, string>): EventChecklistTask {
-    const today = todayIso();
+    const today = todayUtc();
     return {
       id: t.id,
       section: t.section as 'before' | 'on_the_day' | 'after',
@@ -439,7 +437,7 @@ export class EventPlanService {
         and(inArray(eventChecklists.eventId, [...eventIds]), eq(eventChecklists.status, 'open')),
       )
       .orderBy(asc(eventChecklists.dueDate), asc(eventChecklists.sortOrder));
-    const today = todayIso();
+    const today = todayUtc();
     const out = new Map<string, { title: string; overdue: boolean }>();
     for (const r of rows) {
       if (out.has(r.eventId)) continue;
