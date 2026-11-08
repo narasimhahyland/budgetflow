@@ -36,6 +36,8 @@ const NEEDS: Record<string, string> = {
   'Request funds': 'request.create',
   'My requests': 'request.create',
   'My budgets': 'request.create',
+  // 010a lists only the signed-in person's own activity, so tenant membership is the whole check.
+  'My activity': 'tenant.read',
   // 120b and 120a belong to a person rather than to a finance role, so every member reaches them.
   'My wallets': 'tenant.read',
   Recognition: 'tenant.read',
@@ -77,6 +79,11 @@ const NEEDS: Record<string, string> = {
   'Rules and policies': 'rules.read',
   Integrations: 'integration.manage',
   'Tenant settings': 'tenant.settings.manage',
+  // The four Phase 14 administration screens, all behind the same action as tenant settings.
+  'Feature flags': 'tenant.settings.manage',
+  'Data retention': 'tenant.settings.manage',
+  'System health': 'tenant.settings.manage',
+  'Set up BudgetFlow': 'tenant.settings.manage',
   // 113a is one screen with two entries: the server gates reading it on tenant.read, and the rail is
   // deliberately stricter so an Admin entry does not appear for every role. The divergence and the
   // reason are in docs/ux/screens/113a-ai-settings-query-log.md.
@@ -95,13 +102,22 @@ const OWNED_BUDGETS = [
   'Budget requests',
 ];
 // From Phase 5 everyone in the tenant browses events; requesting (and the employee's own budgets)
-// follows request.create, which covers the home location's budgets as well as owned ones. 069a
-// closes the group and needs only tenant.read, so roles without request.create see it on its own.
-// 120b and 120a sit at the end of the group on tenant.read alone, so a role without request.create
-// still sees them; 069a closes the group on the same footing. 102c closes it after those, back on
-// request.create, so it is in REQUESTS rather than in PERSONAL.
-const PERSONAL = ['My wallets', 'Recognition', 'Policy assistant'];
+// follows request.create, which covers the home location's budgets as well as owned ones. 010a,
+// 120b, 120a and 069a sit on tenant.read alone, so a role without request.create still sees those
+// four on their own. 102c closes the group back on request.create, so it belongs to REQUESTS
+// rather than to PERSONAL.
+const PERSONAL = ['My activity', 'My wallets', 'Recognition', 'Policy assistant'];
 const REQUESTS = ['Request funds', 'My requests', 'My budgets', ...PERSONAL, 'My automations'];
+// Everything tenant.settings.manage opens, in rail order; Phase 14 added four of these and Phase
+// 16 added 102d. AI settings needs the same action but is listed per role, after this block.
+const TENANT_ADMIN = [
+  'Tenant settings',
+  'Feature flags',
+  'Data retention',
+  'System health',
+  'Set up BudgetFlow',
+  'Embeddable widgets',
+];
 const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
 // The Insights entries report.read alone opens, then 016b, which follows budget.read: no role holds
 // one without the other. 016a needs report.board_pack and is listed per role.
@@ -137,8 +153,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...ORG,
     'Org import',
     'Users and roles',
-    'Tenant settings',
-    'Embeddable widgets',
+    ...TENANT_ADMIN,
     'AI settings',
   ],
   ceo: [

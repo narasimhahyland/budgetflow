@@ -1,0 +1,466 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Feature flags</h1>
+    <p class="bf-page__subtitle">
+      Flags turn capabilities on or off for Hyland. There are no plans or paid tiers.
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    <button mat-stroked-button type="button" (click)="showHistory.set(!showHistory())">
+      {{ showHistory() ? 'Hide change history' : 'Show change history' }}
+    </button>
+  </div>
+</header>
+
+<sat-banner variant="info" class="bf-banner">
+  <sat-banner-message>
+    A capability switch is not permission. Turning a flag on only reveals the capability; the API
+    still checks whether you may do the action and refuses if you may not.
+  </sat-banner-message>
+</sat-banner>
+
+@if (notice()) {
+  <sat-banner variant="success" class="bf-banner">
+    <sat-banner-message data-testid="flags-notice">{{ notice() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (failure()) {
+  <sat-banner variant="important" class="bf-banner">
+    <sat-banner-message data-testid="flags-error">{{ failure() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (!canRequest()) {
+  <sat-banner variant="info" class="bf-banner">
+    <sat-banner-message>
+      You can read the capability switches. Changing one needs company settings or master data
+      administration.
+    </sat-banner-message>
+  </sat-banner>
+}
+
+<section class="bf-card" aria-labelledby="flags-title">
+  <div class="bf-card__header">
+    <h2 class="bf-card__title" id="flags-title">Capabilities</h2>
+  </div>
+  <div class="bf-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Search capabilities</mat-label>
+      <input
+        matInput
+        data-testid="flag-search"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Area</mat-label>
+      <mat-select data-testid="flag-area" [ngModel]="area()" (ngModelChange)="area.set($event)">
+        <mat-option value="all">Every area</mat-option>
+        @for (a of areas; track a) {
+          <mat-option [value]="a">{{ areaLabel[a] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <bf-load-state
+    [loading]="list.isLoading() && !list.hasValue()"
+    [error]="list.error()"
+    what="feature flags"
+    (retry)="list.reload()"
+  />
+
+  @if (valueOf(list)) {
+    @if (groups().length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>No capability matches your search</h3>
+        <p satEmptyStateDescription>Clear the search box or choose a different area.</p>
+        <button mat-stroked-button type="button" (click)="search.set(''); area.set('all')">
+          Clear filters
+        </button>
+      </sat-empty-state>
+    }
+    @for (group of groups(); track group.area) {
+      <div class="bf-card__body">
+        <h3 class="bf-group__title">{{ areaLabel[group.area] }}</h3>
+        <div class="bf-table-scroll">
+          <table
+            mat-table
+            multiTemplateDataRows
+            [dataSource]="group.flags"
+            [attr.aria-label]="areaLabel[group.area] + ' capabilities'"
+          >
+            <ng-container matColumnDef="capability">
+              <th mat-header-cell *matHeaderCellDef>Capability</th>
+              <td mat-cell *matCellDef="let f">
+                <span class="bf-cell__primary">{{ f.name }}</span>
+                <span class="bf-cell__secondary">{{ f.description }}</span>
+                @if (f.moneyAffecting) {
+                  <sat-status-tag status="important">Needs a second person</sat-status-tag>
+                }
+                @if (!f.dependencyMet) {
+                  <span class="bf-cell__secondary">{{ f.dependsOn }}</span>
+                }
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="state">
+              <th mat-header-cell *matHeaderCellDef>In force</th>
+              <td mat-cell *matCellDef="let f">
+                <sat-status-tag
+                  [attr.data-testid]="'flag-state-' + f.key"
+                  [status]="stateTone(f)"
+                  >{{ stateLabel(f) }}</sat-status-tag
+                >
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="rollout">
+              <th mat-header-cell *matHeaderCellDef>Who sees it</th>
+              <td mat-cell *matCellDef="let f">{{ rolloutLabel(f) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="change">
+              <th mat-header-cell *matHeaderCellDef>Last change</th>
+              <td mat-cell *matCellDef="let f">
+                @if (f.changedAt) {
+                  <span class="bf-cell__primary">{{ f.changedByName ?? 'Name not recorded' }}</span>
+                  <span class="bf-cell__secondary" data-testid="relative-time">{{
+                    f.changedAt | bfDateTime: timezone()
+                  }}</span>
+                } @else {
+                  <span class="bf-cell__secondary">Never changed</span>
+                }
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
+              <td mat-cell *matCellDef="let f">
+                @if (canRequest() && !f.pendingChange) {
+                  <div class="bf-row-actions">
+                    @if (f.enabled) {
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        [disabled]="busy()"
+                        (click)="openSwitch(f, false)"
+                      >
+                        Turn off
+                      </button>
+                    } @else {
+                      <button
+                        mat-flat-button
+                        type="button"
+                        [disabled]="busy() || !f.dependencyMet"
+                        [attr.data-testid]="'turn-on-' + f.key"
+                        (click)="openSwitch(f, true)"
+                      >
+                        Turn on
+                      </button>
+                    }
+                    <button
+                      mat-button
+                      type="button"
+                      [disabled]="busy() || !f.dependencyMet"
+                      (click)="openPilot(f)"
+                    >
+                      Pilot
+                    </button>
+                  </div>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="detail">
+              <td mat-cell *matCellDef="let f" [attr.colspan]="columns.length">
+                @if (f.pendingChange; as change) {
+                  <bf-pending-change
+                    [change]="change"
+                    [inForce]="stateLabel(f)"
+                    [canDecide]="canConfirmFinance()"
+                    [busy]="busy()"
+                    [testId]="'pending-' + f.key"
+                    (confirm)="openDecision(f, 'confirm')"
+                    (decline)="openDecision(f, 'decline')"
+                    (withdraw)="openDecision(f, 'cancel')"
+                  />
+                }
+                @if (deciding(); as open) {
+                  @if (open.key === f.key) {
+                    <form class="bf-inline-form" (ngSubmit)="decide(f)">
+                      <h4 class="bf-inline-form__title">{{ decisionLabel[open.decision] }}</h4>
+                      <bf-reason-field
+                        testId="decision-reason"
+                        [value]="decisionReason()"
+                        (valueChange)="decisionReason.set($event)"
+                      />
+                      <div class="bf-form__actions">
+                        <button
+                          mat-flat-button
+                          type="submit"
+                          data-testid="decision-submit"
+                          [disabled]="busy() || !decisionReason().trim()"
+                        >
+                          {{ decisionLabel[open.decision] }}
+                        </button>
+                        <button mat-button type="button" (click)="deciding.set(null)">
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  }
+                }
+                @if (editing() === f.key) {
+                  <form class="bf-inline-form" (ngSubmit)="submit(f)">
+                    <h4 class="bf-inline-form__title">
+                      {{ enabling() ? 'Turn on' : 'Turn off' }} {{ f.name }}
+                    </h4>
+                    <p class="bf-inline-form__note">
+                      {{
+                        enabling()
+                          ? 'People see the capability from their next request onwards.'
+                          : 'Work already done stays done: requests already approved stay approved.'
+                      }}
+                    </p>
+                    @if (f.moneyAffecting) {
+                      <sat-banner variant="warning">
+                        <sat-banner-message>
+                          This changes how money or approvals work, so a Finance Controller has to
+                          confirm it. {{ f.name }} stays {{ f.enabled ? 'on' : 'off' }} until they
+                          do.
+                        </sat-banner-message>
+                      </sat-banner>
+                    }
+                    @if (enabling()) {
+                      <mat-radio-group
+                        class="bf-radio-group"
+                        aria-label="Who the capability is for"
+                        [ngModel]="rolloutMode()"
+                        name="rollout"
+                        (ngModelChange)="rolloutMode.set($event)"
+                      >
+                        <mat-radio-button value="everyone">Everyone at Hyland</mat-radio-button>
+                        <mat-radio-button value="pilot">
+                          Pilot with chosen locations or roles
+                        </mat-radio-button>
+                      </mat-radio-group>
+                    }
+                    @if (enabling() && rolloutMode() === 'pilot') {
+                      <div class="bf-form">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Locations in the pilot</mat-label>
+                          <mat-select
+                            multiple
+                            data-testid="pilot-units"
+                            [ngModel]="pilotUnits()"
+                            name="units"
+                            (ngModelChange)="pilotUnits.set($event)"
+                          >
+                            @for (u of valueOf(units)?.items ?? []; track u.id) {
+                              <mat-option [value]="u.id">{{ u.name }}</mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Roles in the pilot</mat-label>
+                          <mat-select
+                            multiple
+                            data-testid="pilot-roles"
+                            [ngModel]="pilotRoles()"
+                            name="roles"
+                            (ngModelChange)="pilotRoles.set($event)"
+                          >
+                            @for (r of roles; track r) {
+                              <mat-option [value]="r">{{ roleLabel[r] ?? r }}</mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    }
+                    <bf-reason-field
+                      testId="switch-reason"
+                      [value]="reason()"
+                      (valueChange)="reason.set($event)"
+                    />
+                    <div class="bf-form__actions">
+                      <button
+                        mat-flat-button
+                        type="submit"
+                        data-testid="switch-submit"
+                        [disabled]="busy() || !reason().trim()"
+                      >
+                        {{ enabling() ? 'Turn on' : 'Turn off' }}
+                      </button>
+                      <button mat-button type="button" (click)="closeSwitch()">Cancel</button>
+                    </div>
+                  </form>
+                }
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+            <tr
+              mat-row
+              class="bf-detail-row"
+              *matRowDef="let row; columns: ['detail']; when: hasDetail"
+            ></tr>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</section>
+
+<section class="bf-card" aria-labelledby="capabilities-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="capabilities-title">How you see these capabilities</h2>
+      <p class="bf-card__hint">
+        <strong>Shown to you</strong> is what the flag reveals. <strong>Allowed for you</strong> is
+        what the policy permits. A capability works only when both are yes; a flag on its own
+        authorizes nothing and the API refuses the action anyway.
+      </p>
+    </div>
+  </div>
+  <bf-load-state
+    [loading]="mine.isLoading() && !mine.hasValue()"
+    [error]="mine.error()"
+    what="your capabilities"
+    [lines]="3"
+    (retry)="mine.reload()"
+  />
+  @if (valueOf(mine)) {
+    <div class="bf-card__body">
+      <p class="bf-card__hint" data-testid="capability-summary">
+        {{ availableCount() }} of {{ capabilities().length }} capabilities are available to you.
+      </p>
+      <div class="bf-table-scroll">
+        <table
+          mat-table
+          [dataSource]="capabilities()"
+          aria-label="Capabilities as they apply to you"
+        >
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Capability</th>
+            <td mat-cell *matCellDef="let c">
+              <span class="bf-cell__primary">{{ c.name }}</span>
+              <span class="bf-cell__secondary">{{ c.gatedAction ?? 'No action behind it' }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="on">
+            <th mat-header-cell *matHeaderCellDef>Shown to you</th>
+            <td mat-cell *matCellDef="let c">
+              <sat-status-tag [status]="c.on ? 'success' : 'neutral'">{{
+                c.on ? 'Yes' : 'No'
+              }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="allowed">
+            <th mat-header-cell *matHeaderCellDef>Allowed for you</th>
+            <td mat-cell *matCellDef="let c">
+              <sat-status-tag [status]="c.allowed ? 'success' : 'neutral'">{{
+                c.allowed ? 'Yes' : 'No'
+              }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="available">
+            <th mat-header-cell *matHeaderCellDef>You can use it</th>
+            <td mat-cell *matCellDef="let c">
+              <sat-status-tag
+                [attr.data-testid]="'capability-' + c.key"
+                [status]="c.available ? 'success' : 'neutral'"
+                >{{
+                  c.available
+                    ? 'Yes'
+                    : c.on
+                      ? 'No — shown but not allowed'
+                      : 'No — not switched on for you'
+                }}</sat-status-tag
+              >
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="capabilityColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: capabilityColumns"></tr>
+        </table>
+      </div>
+    </div>
+  }
+</section>
+
+@if (showHistory()) {
+  <section class="bf-card" aria-labelledby="history-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="history-title">Change history</h2>
+    </div>
+    <bf-load-state
+      [loading]="history.isLoading() && !history.hasValue()"
+      [error]="history.error()"
+      what="the change history"
+      [lines]="3"
+      (retry)="history.reload()"
+    />
+    @if (valueOf(history); as h) {
+      @if (h.items.length === 0) {
+        <sat-empty-state>
+          <h3 satEmptyStateHeadline>No capability has been switched yet</h3>
+          <p satEmptyStateDescription>
+            Every switch, confirmation and decline will be listed here with its reason.
+          </p>
+        </sat-empty-state>
+      } @else {
+        <div class="bf-table-scroll">
+          <table mat-table [dataSource]="h.items" aria-label="Capability change history">
+            <ng-container matColumnDef="what">
+              <th mat-header-cell *matHeaderCellDef>Change</th>
+              <td mat-cell *matCellDef="let c">
+                <span class="bf-cell__primary">{{ c.summary }}</span>
+                <span class="bf-cell__secondary">{{ c.reason }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let c">
+                <sat-status-tag
+                  [status]="
+                    c.status === 'applied'
+                      ? 'success'
+                      : c.status === 'pending'
+                        ? 'warning'
+                        : 'neutral'
+                  "
+                  >{{
+                    c.status === 'applied'
+                      ? 'In force'
+                      : c.status === 'pending'
+                        ? 'Waiting for a second person'
+                        : c.status === 'declined'
+                          ? 'Declined'
+                          : 'Withdrawn'
+                  }}</sat-status-tag
+                >
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="who">
+              <th mat-header-cell *matHeaderCellDef>Who</th>
+              <td mat-cell *matCellDef="let c">
+                <span class="bf-cell__primary">{{ c.requestedByName ?? 'Name not recorded' }}</span>
+                <span class="bf-cell__secondary" data-testid="relative-time">{{
+                  c.requestedAt | bfDateTime: timezone()
+                }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="confirmed">
+              <th mat-header-cell *matHeaderCellDef>Second person</th>
+              <td mat-cell *matCellDef="let c">
+                <span class="bf-cell__primary">{{ c.confirmedByName ?? 'Not needed' }}</span>
+                @if (c.decisionReason) {
+                  <span class="bf-cell__secondary">{{ c.decisionReason }}</span>
+                }
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: historyColumns"></tr>
+          </table>
+        </div>
+      }
+    }
+  </section>
+}

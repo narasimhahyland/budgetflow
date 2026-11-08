@@ -1,0 +1,351 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Users and roles</h1>
+    <p class="bf-page__subtitle">
+      Who is in BudgetFlow and what each person's roles let them see. A role never carries an
+      approval limit: the amount somebody may approve comes from the delegation-of-authority matrix.
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    @if (canInviteOwners()) {
+      <a mat-flat-button routerLink="/admin/users/invitations" data-testid="invite-owners">
+        Invite budget owners
+      </a>
+    }
+  </div>
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success" class="bf-banner">
+    <sat-banner-message data-testid="users-notice">{{ notice() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (failure()) {
+  <sat-banner variant="important" class="bf-banner">
+    <sat-banner-message data-testid="users-error">{{ failure() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (beyondRequester().length > 0) {
+  <sat-banner variant="warning" class="bf-banner">
+    <sat-banner-message data-testid="authority-beyond">
+      This grant would add authority you do not hold yourself:
+      {{ beyondRequester().join(', ') }}. Somebody who already holds it has to confirm the grant
+      before the person gets the role.
+    </sat-banner-message>
+  </sat-banner>
+}
+
+<section class="bf-card" aria-labelledby="users-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="users-title">People</h2>
+      <p class="bf-card__hint" data-testid="privileged-summary">
+        Covered by the quarterly privileged-access review: {{ privilegedCount() }} of
+        {{ rows().length }}.
+      </p>
+    </div>
+  </div>
+  <div class="bf-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Search by name</mat-label>
+      <input
+        matInput
+        data-testid="user-search"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Role</mat-label>
+      <mat-select
+        data-testid="user-role-filter"
+        [ngModel]="roleFilter()"
+        (ngModelChange)="roleFilter.set($event)"
+      >
+        <mat-option value="all">Every role</mat-option>
+        @for (r of roles; track r) {
+          <mat-option [value]="r">{{ roleLabel[r] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <bf-load-state
+    [loading]="list.isLoading() && !list.hasValue()"
+    [error]="list.error()"
+    what="the people in this tenant"
+    (retry)="list.reload()"
+  />
+
+  @if (valueOf(list)) {
+    @if (rows().length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>Nobody matches these filters</h3>
+        <p satEmptyStateDescription>Clear the search box or choose a different role.</p>
+        <button mat-stroked-button type="button" (click)="search.set(''); roleFilter.set('all')">
+          Clear filters
+        </button>
+      </sat-empty-state>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table multiTemplateDataRows [dataSource]="rows()" aria-label="People and roles">
+          <ng-container matColumnDef="person">
+            <th mat-header-cell *matHeaderCellDef>Person</th>
+            <td mat-cell *matCellDef="let u">
+              @if (u.personId) {
+                <span class="bf-cell__primary">{{ u.displayName }}</span>
+                <span class="bf-cell__secondary">{{ u.email ?? 'No work email' }}</span>
+                <span class="bf-cell__secondary">
+                  {{ u.jobTitle ?? 'No job title' }} · {{ u.locationName ?? 'No location' }}
+                </span>
+              } @else {
+                <span class="bf-cell__primary">Account without a person record</span>
+                <span class="bf-cell__secondary">
+                  A platform or service account, so there is nobody in the directory behind it.
+                </span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="roles">
+            <th mat-header-cell *matHeaderCellDef>Roles</th>
+            <td mat-cell *matCellDef="let u">
+              <span [attr.data-testid]="'roles-' + u.membershipId">{{ roleNames(u) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="review">
+            <th mat-header-cell *matHeaderCellDef>Access review</th>
+            <td mat-cell *matCellDef="let u">
+              @if (u.privileged) {
+                <sat-status-tag status="info">Privileged</sat-status-tag>
+              } @else {
+                <span class="bf-cell__secondary">Not in the review</span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let u">
+              <sat-status-tag [status]="u.status === 'active' ? 'success' : 'neutral'">{{
+                u.status === 'active' ? 'Active' : u.status
+              }}</sat-status-tag>
+              @if (u.anonymised) {
+                <span class="bf-cell__secondary">
+                  Personal details removed by the retention policy for leavers.
+                </span>
+              }
+              @if (u.pendingRoleChanges.length > 0) {
+                <sat-status-tag status="warning">
+                  {{ u.pendingRoleChanges.length }} role change waiting
+                </sat-status-tag>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
+            <td mat-cell *matCellDef="let u">
+              @if (canManage()) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [attr.data-testid]="'open-' + u.membershipId"
+                  (click)="toggle(u)"
+                >
+                  {{ open() === u.membershipId ? 'Close' : 'Manage roles' }}
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="detail">
+            <td mat-cell *matCellDef="let u" [attr.colspan]="columns.length">
+              @for (change of u.pendingRoleChanges; track change.id) {
+                <bf-pending-change
+                  [change]="change"
+                  [inForce]="roleNames(u)"
+                  [canDecide]="canManage()"
+                  [busy]="busy()"
+                  [testId]="'pending-role-' + u.membershipId"
+                  confirmerNote="Somebody who already holds the authority this role gives has to confirm it."
+                  (confirm)="openDecision(u, change.id, 'confirm')"
+                  (decline)="openDecision(u, change.id, 'decline')"
+                  (withdraw)="openDecision(u, change.id, 'cancel')"
+                />
+              }
+              @if (deciding(); as open) {
+                @if (open.membershipId === u.membershipId) {
+                  <form class="bf-inline-form" (ngSubmit)="decide(u)">
+                    <h4 class="bf-inline-form__title">
+                      {{
+                        open.decision === 'confirm'
+                          ? 'Confirm the role grant'
+                          : open.decision === 'decline'
+                            ? 'Decline the role grant'
+                            : 'Withdraw your request'
+                      }}
+                    </h4>
+                    <bf-reason-field
+                      testId="role-decision-reason"
+                      [value]="decisionReason()"
+                      (valueChange)="decisionReason.set($event)"
+                    />
+                    <div class="bf-form__actions">
+                      <button
+                        mat-flat-button
+                        type="submit"
+                        data-testid="role-decision-submit"
+                        [disabled]="busy() || !decisionReason().trim()"
+                      >
+                        Save decision
+                      </button>
+                      <button mat-button type="button" (click)="deciding.set(null)">Cancel</button>
+                    </div>
+                  </form>
+                }
+              }
+              @if (open() === u.membershipId) {
+                <div class="bf-detail">
+                  <h4 class="bf-inline-form__title">Roles {{ u.displayName }} holds</h4>
+                  @if (u.grants.length === 0) {
+                    <p class="bf-inline-form__note">No role yet.</p>
+                  } @else {
+                    <ul class="bf-grants">
+                      @for (g of u.grants; track g.id) {
+                        <li class="bf-grants__item">
+                          <span class="bf-cell__primary">{{ roleLabel[g.role] ?? g.role }}</span>
+                          <span class="bf-cell__secondary">
+                            {{ g.scopeOrgUnitName ?? 'Company-wide' }} · from {{ g.validFrom }}
+                          </span>
+                          <button
+                            mat-button
+                            type="button"
+                            [disabled]="busy()"
+                            [attr.data-testid]="'revoke-' + u.membershipId + '-' + g.role"
+                            (click)="openRevoke(u, g.role)"
+                          >
+                            Take away
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                  }
+
+                  @if (revoking(); as open) {
+                    @if (open.membershipId === u.membershipId) {
+                      <form class="bf-inline-form" (ngSubmit)="revoke(u)">
+                        <h4 class="bf-inline-form__title">
+                          Take {{ roleLabel[open.role] ?? open.role }} away from
+                          {{ u.displayName }}
+                        </h4>
+                        <bf-reason-field
+                          testId="revoke-reason"
+                          [value]="revokeReason()"
+                          (valueChange)="revokeReason.set($event)"
+                        />
+                        <div class="bf-form__actions">
+                          <button
+                            mat-flat-button
+                            type="submit"
+                            data-testid="revoke-submit"
+                            [disabled]="busy() || !revokeReason().trim()"
+                          >
+                            Take the role away
+                          </button>
+                          <button mat-button type="button" (click)="revoking.set(null)">
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    }
+                  }
+
+                  <form class="bf-inline-form" (ngSubmit)="grant(u)">
+                    <h4 class="bf-inline-form__title">Give {{ u.displayName }} another role</h4>
+                    <p class="bf-inline-form__note">
+                      A role gives visibility and the right to ask. Approving an amount comes from
+                      the delegation-of-authority matrix, never from here.
+                    </p>
+                    <div class="bf-form">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Role</mat-label>
+                        <mat-select
+                          data-testid="grant-role"
+                          name="role"
+                          [ngModel]="grantRole()"
+                          (ngModelChange)="grantRole.set($event)"
+                        >
+                          @for (r of roles; track r) {
+                            <mat-option [value]="r">{{ roleLabel[r] }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Where it applies</mat-label>
+                        <mat-select
+                          data-testid="grant-scope"
+                          name="scope"
+                          [ngModel]="grantScope()"
+                          (ngModelChange)="grantScope.set($event)"
+                        >
+                          <mat-option value="">Company-wide</mat-option>
+                          @for (unit of valueOf(units)?.items ?? []; track unit.id) {
+                            <mat-option [value]="unit.id">{{ unit.name }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <bf-reason-field
+                      testId="grant-reason"
+                      [value]="grantReason()"
+                      (valueChange)="grantReason.set($event)"
+                    />
+                    <div class="bf-form__actions">
+                      <button
+                        mat-flat-button
+                        type="submit"
+                        data-testid="grant-submit"
+                        [disabled]="busy() || !grantReason().trim()"
+                      >
+                        Give the role
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+          <tr
+            mat-row
+            class="bf-detail-row"
+            *matRowDef="let row; columns: ['detail']; when: hasDetail"
+          ></tr>
+        </table>
+      </div>
+    }
+  }
+</section>
+
+<section class="bf-card" aria-labelledby="invite-capability-title">
+  <div class="bf-card__header">
+    <h2 class="bf-card__title" id="invite-capability-title">Inviting budget owners in bulk</h2>
+  </div>
+  <div class="bf-card__body">
+    @if (inviteCapability(); as capability) {
+      <p class="bf-card__hint" data-testid="invite-capability">
+        Shown to you: {{ capability.on ? 'yes' : 'no' }}. Allowed for you:
+        {{ capability.allowed ? 'yes' : 'no' }}.
+        {{
+          capability.on && capability.allowed
+            ? 'You can invite budget owners in bulk.'
+            : capability.on
+              ? 'The capability is switched on, but your permissions do not include user administration, so the API refuses it.'
+              : 'The capability is switched off, so nobody sees it. Switching it on would still not give anyone permission.'
+        }}
+      </p>
+    } @else {
+      <p class="bf-card__hint">This capability is not in the catalog for this tenant.</p>
+    }
+  </div>
+</section>
