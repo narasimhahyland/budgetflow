@@ -19,13 +19,16 @@ node scripts/validate-harness.mjs || status=1
 echo "▶ shellcheck"
 if command -v shellcheck >/dev/null 2>&1; then
   # shellcheck disable=SC2046
-  shellcheck -x -S warning $(ls scripts/*.sh scripts/lib/*.sh scripts/visual/*.sh .cursor/*.sh .cursor/hooks/*.sh .githooks/* 2>/dev/null) || status=1
+  shellcheck -x -S warning $(ls scripts/*.sh scripts/lib/*.sh scripts/visual/*.sh .cursor/*.sh .cursor/hooks/*.sh .claude/hooks/*.sh .githooks/* 2>/dev/null) || status=1
 else
   echo "  shellcheck not installed; skipped"
 fi
 
 echo "▶ hook tests"
 sh .cursor/hooks/test-hooks.sh || status=1
+
+echo "▶ Claude Code hook bridge tests"
+sh .claude/hooks/test-bridge.sh || status=1
 
 echo "▶ visual tooling self-test (static fixtures, no app needed)"
 # Skips when Playwright is not installed locally; CI sets VISUAL_SELFTEST=required after scripts/visual/setup-tools.sh.

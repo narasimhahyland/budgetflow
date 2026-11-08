@@ -1,0 +1,1 @@
+../../.cursor/rules/frontend-angular.mdc

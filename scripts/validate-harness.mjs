@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Structural checks for the Cursor harness: JSON configs, rule/skill/agent frontmatter, links.
 // Run through scripts/validate-harness.sh, which adds shellcheck, hook tests and a secret scan.
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, readdirSync, readlinkSync, statSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { findSecrets } from './secret-patterns.mjs';
@@ -98,6 +98,7 @@ for (const file of [
   '.cursor/mcp.json',
   '.cursor/hooks.json',
   '.cursor/worktrees.json',
+  '.claude/settings.json',
 ]) {
   const p = join(root, file);
   if (existsSync(p) && findSecrets(readFileSync(p, 'utf8')).length)
@@ -161,6 +162,88 @@ for (const file of walk(join(root, '.cursor/agents'), (n) => n.endsWith('.md')))
     errors.push(`${rel(file)}: subagent name collides with skill ${fm.data.name}`);
 }
 
+// Mirrors for Claude Code and the agents convention (docs/ai-harness/mirrors.md).
+// Every mirror entry must resolve back into .cursor/, so the harness cannot drift into three copies.
+function mirrorTarget(link) {
+  const p = join(root, link);
+  if (!lstatSync(p, { throwIfNoEntry: false })) return null;
+  try {
+    return relative(root, resolve(root, link, '..', readlinkSync(p)));
+  } catch {
+    return 'not-a-symlink';
+  }
+}
+
+const skillSources = new Map(
+  walk(join(root, '.cursor/skills'), (n) => n === 'SKILL.md').map((f) => [
+    basename(dirname(f)),
+    rel(dirname(f)),
+  ]),
+);
+for (const [mirror, label] of [
+  ['.claude/skills', 'Claude Code'],
+  ['.agents/skills', 'the agents convention'],
+]) {
+  for (const [name, source] of skillSources) {
+    const target = mirrorTarget(`${mirror}/${name}`);
+    if (target === null) errors.push(`${mirror}/${name}: missing mirror of ${source} for ${label}`);
+    else if (target !== source)
+      errors.push(`${mirror}/${name}: points at ${target}, expected ${source}`);
+  }
+  for (const entry of existsSync(join(root, mirror)) ? readdirSync(join(root, mirror)) : []) {
+    if (!skillSources.has(entry))
+      errors.push(`${mirror}/${entry}: no such skill in .cursor/skills`);
+  }
+}
+
+for (const file of walk(join(root, '.cursor/agents'), (n) => n.endsWith('.md'))) {
+  const name = basename(file, '.md');
+  const mirror = join(root, '.claude/agents', `${name}.md`);
+  if (!existsSync(mirror)) {
+    errors.push(`.claude/agents/${name}.md: missing mirror of ${rel(file)}`);
+    continue;
+  }
+  const fm = frontmatter(mirror);
+  if (fm?.data.name !== name) errors.push(`.claude/agents/${name}.md: name must be ${name}`);
+  // Cursor's readonly: true is a field Claude Code ignores, so the mirror has to say it with `tools`.
+  if (frontmatter(file)?.data.readonly === true && !fm?.data.tools)
+    errors.push(`.claude/agents/${name}.md: mirrors a readonly subagent but sets no tools list`);
+}
+
+for (const file of rules) {
+  const name = basename(file, '.mdc');
+  const shim = mirrorTarget(`.claude/rule-sources/${name}.md`);
+  if (shim === null)
+    errors.push(`.claude/rule-sources/${name}.md: missing (Claude Code imports .md only)`);
+  else if (shim !== rel(file)) errors.push(`.claude/rule-sources/${name}.md: points at ${shim}`);
+  const mirror = join(root, '.claude/rules', `${name}.md`);
+  if (!existsSync(mirror)) {
+    errors.push(`.claude/rules/${name}.md: missing mirror of ${rel(file)}`);
+    continue;
+  }
+  const body = readFileSync(mirror, 'utf8');
+  if (!body.includes(`@../rule-sources/${name}.md`))
+    errors.push(`.claude/rules/${name}.md: must import @../rule-sources/${name}.md`);
+  const globs = frontmatter(file)?.data.globs;
+  if (globs && !('paths' in (frontmatter(mirror)?.data ?? {})))
+    errors.push(`.claude/rules/${name}.md: the Cursor rule has globs, so the mirror needs paths`);
+}
+
+const claudeSettings = readJson('.claude/settings.json');
+for (const defs of Object.values(claudeSettings?.hooks ?? {})) {
+  for (const def of defs) {
+    for (const handler of def.hooks ?? []) {
+      for (const arg of handler.args ?? []) {
+        const p = arg.replace('${CLAUDE_PROJECT_DIR}/', '');
+        if (/^\.(claude|cursor)\/.+\.(sh|mjs)$/.test(p) && !existsSync(join(root, p)))
+          errors.push(`.claude/settings.json: missing ${p}`);
+        if (/^[a-z-]+$/.test(arg) && !existsSync(join(root, '.cursor/hooks', `${arg}.mjs`)))
+          errors.push(`.claude/settings.json: no .cursor/hooks/${arg}.mjs for bridge guard ${arg}`);
+      }
+    }
+  }
+}
+
 // Required skills and subagents
 const REQUIRED_SKILLS = [
   'functional-check',
@@ -216,14 +299,24 @@ const BANNED = [
 ];
 const scanned = [
   'AGENTS.md',
+  'CLAUDE.md',
+  '.agents/README.md',
   '.cursor/BUGBOT.md',
   '.github/pull_request_template.md',
   '.github/workflows/ci.yml',
   'evidence/README.md',
   ...walk(join(root, '.cursor'), (n) => /\.(md|mdc|json|mjs|sh)$/.test(n)).map((p) => rel(p)),
+  ...walk(join(root, '.claude'), (n) => /\.(md|json|mjs|sh)$/.test(n)).map((p) => rel(p)),
   ...walk(join(root, 'docs'), (n) => /\.(md|json|ts)$/.test(n)).map((p) => rel(p)),
   ...walk(join(root, 'scripts'), (n) => /\.(mjs|sh|html)$/.test(n)).map((p) => rel(p)),
-].filter((f) => !['scripts/validate-harness.mjs', '.cursor/hooks/test-hooks.mjs'].includes(f));
+].filter(
+  (f) =>
+    ![
+      'scripts/validate-harness.mjs',
+      '.cursor/hooks/test-hooks.mjs',
+      '.claude/hooks/test-bridge.mjs',
+    ].includes(f),
+);
 for (const file of [...new Set(scanned)]) {
   const p = join(root, file);
   if (!existsSync(p)) continue;
@@ -263,7 +356,9 @@ if (new Set(pins.values()).size > 1)
 for (const file of [
   '.cursor/BUGBOT.md',
   'docs/ai-harness/README.md',
+  'docs/ai-harness/mirrors.md',
   'AGENTS.md',
+  'CLAUDE.md',
   'design/stitch/README.md',
   'docs/testing/invariant-scenarios.md',
   'evidence/README.md',

@@ -15,7 +15,9 @@ sh scripts/secret-scan.sh --staged --quiet || {
 prettier="node_modules/.bin/prettier"
 [ -x "$prettier" ] || exit 0
 
-files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|mts|cts|js|mjs|cjs|json|html|scss|css|md|ya?ml)$' | grep -v -E '(^|/)package-lock\.json$' || true)
+# Mode 120000 is a symlink; Prettier exits 2 when a symlink is named explicitly, and the harness
+# mirrors under .claude/ and .agents/ are symlinks into .cursor/.
+files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|mts|cts|js|mjs|cjs|json|html|scss|css|md|ya?ml)$' | grep -v -E '(^|/)package-lock\.json$' | while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done || true)
 [ -n "$files" ] || exit 0
 
 # shellcheck disable=SC2086

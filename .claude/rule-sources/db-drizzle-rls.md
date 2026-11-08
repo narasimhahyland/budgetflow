@@ -1,0 +1,1 @@
+../../.cursor/rules/db-drizzle-rls.mdc

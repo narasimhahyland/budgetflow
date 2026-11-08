@@ -1,0 +1,1 @@
+../../.cursor/rules/security.mdc
