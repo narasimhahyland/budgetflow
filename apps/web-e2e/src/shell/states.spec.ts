@@ -33,13 +33,13 @@ test.describe('employee', () => {
 test.describe('org admin', () => {
   test.use({ storageState: authFile('org-admin') });
 
-  // Reports opened in Phase 10, so the placeholder state moves to tenant settings, which Phase 14 owns.
-  test('an allowed area that opens later shows its placeholder', async ({ page }) => {
+  // Tenant settings was the last navigation entry still on the placeholder, and Phase 14 implements
+  // it, so no navigation area renders PlaceholderPage any more. The shell still falls back to it for
+  // an entry added before its feature lib lands; what is asserted here is that nothing does today.
+  test('every navigation area the role can open renders a real screen', async ({ page }) => {
     await page.goto('/admin/settings');
-    await expect(page.getByRole('heading', { level: 1, name: 'Tenant settings' })).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: 'Tenant settings is not open yet' }),
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Company settings' })).toBeVisible();
+    await expect(page.getByText('is not open yet')).toHaveCount(0);
   });
 });
 

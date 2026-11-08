@@ -1,0 +1,40 @@
+.bf-group__title {
+  margin: 8px 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-title-small);
+}
+
+.bf-detail-row td {
+  padding-block: 12px;
+  border-bottom-color: var(--mat-sys-outline-variant);
+}
+
+.bf-inline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+  margin-top: 12px;
+}
+
+.bf-inline-form__title {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.bf-inline-form__note {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-inline-form .bf-form,
+.bf-inline-form .bf-form__actions {
+  padding: 0;
+}
+
+.bf-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}

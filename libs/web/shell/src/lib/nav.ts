@@ -139,6 +139,7 @@ export const NAV: NavGroup[] = [
         icon: 'currency_dollar',
         permission: 'request.create',
       },
+      { label: 'My activity', path: '/my/activity', icon: 'clock', permission: 'tenant.read' },
       /**
        * 120b and 120a. Both endpoints assert `tenant.read`: a wallet and a thank-you note belong to
        * a person rather than to a finance role, so every signed-in employee reaches them. The
@@ -386,6 +387,30 @@ export const NAV: NavGroup[] = [
         label: 'Tenant settings',
         path: '/admin/settings',
         icon: 'gear',
+        permission: 'tenant.settings.manage',
+      },
+      {
+        label: 'Feature flags',
+        path: '/admin/features',
+        icon: 'toggle',
+        permission: 'tenant.settings.manage',
+      },
+      {
+        label: 'Data retention',
+        path: '/admin/retention',
+        icon: 'shield',
+        permission: 'tenant.settings.manage',
+      },
+      {
+        label: 'System health',
+        path: '/admin/health',
+        icon: 'monitor',
+        permission: 'tenant.settings.manage',
+      },
+      {
+        label: 'Set up BudgetFlow',
+        path: '/admin/setup',
+        icon: 'checklist_rtl',
         permission: 'tenant.settings.manage',
       },
       /**

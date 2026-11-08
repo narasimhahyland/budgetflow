@@ -1,0 +1,244 @@
+<header class="bf-page__header">
+  <div class="bf-page__heading">
+    <h1 class="bf-page__title">Invite budget owners</h1>
+    <p class="bf-page__subtitle">
+      Invite several budget owners in one pass and see who has accepted. An invitation grants
+      nothing: roles are still given in user administration.
+    </p>
+  </div>
+  <div class="bf-page__actions">
+    <a mat-stroked-button routerLink="/admin/users">Back to users and roles</a>
+  </div>
+</header>
+
+@if (notice()) {
+  <sat-banner variant="success" class="bf-banner">
+    <sat-banner-message data-testid="invite-notice">{{ notice() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (failure()) {
+  <sat-banner variant="important" class="bf-banner">
+    <sat-banner-message data-testid="invite-error">{{ failure() }}</sat-banner-message>
+  </sat-banner>
+}
+@if (skipped().length > 0) {
+  <sat-banner variant="info" class="bf-banner">
+    <sat-banner-message>
+      Already invited, so skipped: {{ skipped().join(', ') }}.
+    </sat-banner-message>
+  </sat-banner>
+}
+
+<bf-load-state
+  [loading]="mine.isLoading() && !mine.hasValue()"
+  [error]="mine.error()"
+  what="your capabilities"
+  [lines]="2"
+  (retry)="mine.reload()"
+/>
+
+@if (valueOf(mine)) {
+  @if (shownButNotAllowed()) {
+    <sat-banner variant="warning" class="bf-banner">
+      <sat-banner-message data-testid="shown-not-allowed">
+        Bulk owner invites are switched on for Hyland, but you do not have user administration, so
+        you cannot send them. A capability being on is not permission; the API refuses the request
+        either way.
+      </sat-banner-message>
+    </sat-banner>
+  } @else if (!canInvite()) {
+    <sat-banner variant="info" class="bf-banner">
+      <sat-banner-message data-testid="capability-off">
+        Bulk owner invites are switched off for Hyland. An administrator can turn the capability on
+        in feature flags; that alone still gives nobody permission to send invitations.
+      </sat-banner-message>
+    </sat-banner>
+  }
+}
+
+@if (canInvite()) {
+  <section class="bf-card" aria-labelledby="new-invites-title">
+    <div class="bf-card__header">
+      <h2 class="bf-card__title" id="new-invites-title">People to invite</h2>
+    </div>
+    <form class="bf-form" (ngSubmit)="addDraft()">
+      <mat-form-field appearance="outline">
+        <mat-label>Work email</mat-label>
+        <input
+          matInput
+          type="email"
+          name="email"
+          data-testid="invite-email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input
+          matInput
+          name="name"
+          data-testid="invite-name"
+          [ngModel]="displayName()"
+          (ngModelChange)="displayName.set($event)"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Role to propose</mat-label>
+        <mat-select
+          name="role"
+          data-testid="invite-role"
+          [ngModel]="role()"
+          (ngModelChange)="role.set($event)"
+        >
+          @for (r of roles; track r) {
+            <mat-option [value]="r">{{ roleLabel[r] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Where they work</mat-label>
+        <mat-select
+          name="unit"
+          data-testid="invite-unit"
+          [ngModel]="orgUnitId()"
+          (ngModelChange)="orgUnitId.set($event)"
+        >
+          <mat-option value="">Not set</mat-option>
+          @for (unit of valueOf(units)?.items ?? []; track unit.id) {
+            <mat-option [value]="unit.id">{{ unit.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <div class="bf-form__wide bf-form__actions">
+        <button
+          mat-stroked-button
+          type="submit"
+          data-testid="add-invite"
+          [disabled]="!email().trim() || !displayName().trim()"
+        >
+          Add to the list
+        </button>
+      </div>
+    </form>
+
+    @if (drafts().length === 0) {
+      <p class="bf-empty">Nobody added yet. Add at least one person before sending.</p>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="drafts()" aria-label="People about to be invited">
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let d">{{ d.email }}</td>
+          </ng-container>
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let d">{{ d.displayName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef>Role</th>
+            <td mat-cell *matCellDef="let d">{{ roleLabel[d.proposedRole] ?? d.proposedRole }}</td>
+          </ng-container>
+          <ng-container matColumnDef="remove">
+            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Remove</span></th>
+            <td mat-cell *matCellDef="let d; let i = index">
+              <button mat-button type="button" (click)="removeDraft(i)">Remove</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="draftColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: draftColumns"></tr>
+        </table>
+      </div>
+      <form class="bf-card__body" (ngSubmit)="send()">
+        <bf-reason-field
+          label="Why these people are being invited"
+          testId="invite-reason"
+          [value]="reason()"
+          (valueChange)="reason.set($event)"
+        />
+        <div class="bf-form__actions">
+          <button
+            mat-flat-button
+            type="submit"
+            data-testid="send-invites"
+            [disabled]="busy() || !reason().trim()"
+          >
+            Send {{ drafts().length }} invitation(s)
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+}
+
+<section class="bf-card" aria-labelledby="tracking-title">
+  <div class="bf-card__header">
+    <div>
+      <h2 class="bf-card__title" id="tracking-title">Invitations</h2>
+      <p class="bf-card__hint" data-testid="invite-funnel">
+        {{ accepted() }} of {{ (valueOf(invites)?.items ?? []).length }} invited people have signed
+        in.
+      </p>
+    </div>
+  </div>
+  <bf-load-state
+    [loading]="invites.isLoading() && !invites.hasValue()"
+    [error]="invites.error()"
+    what="the invitations"
+    (retry)="invites.reload()"
+  />
+  @if (valueOf(invites); as list) {
+    @if (list.items.length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>Nobody has been invited yet</h3>
+        <p satEmptyStateDescription>
+          People you invite appear here with whether they have signed in.
+        </p>
+      </sat-empty-state>
+    } @else {
+      <div class="bf-table-scroll">
+        <table mat-table [dataSource]="list.items" aria-label="Invited budget owners">
+          <ng-container matColumnDef="person">
+            <th mat-header-cell *matHeaderCellDef>Person</th>
+            <td mat-cell *matCellDef="let i">
+              <span class="bf-cell__primary">{{ i.displayName }}</span>
+              <span class="bf-cell__secondary">{{ i.email }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef>Role proposed</th>
+            <td mat-cell *matCellDef="let i">
+              <span class="bf-cell__primary">{{
+                roleLabel[i.proposedRole] ?? i.proposedRole
+              }}</span>
+              <span class="bf-cell__secondary">
+                Granted only through user administration, never by the invitation.
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let i">
+              <sat-status-tag [status]="statusTone[i.status]">{{
+                statusLabel[i.status]
+              }}</sat-status-tag>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="expires">
+            <th mat-header-cell *matHeaderCellDef>Invitation</th>
+            <td mat-cell *matCellDef="let i">
+              <span class="bf-cell__primary">
+                Sent by {{ i.invitedByName ?? 'name not recorded' }}
+              </span>
+              <span class="bf-cell__secondary" data-testid="relative-time">
+                Expires {{ i.expiresAt | bfDateTime: timezone() }}
+              </span>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+      </div>
+    }
+  }
+</section>
