@@ -13,10 +13,10 @@
  * **`FIXED_NOW` must never be set in a real deployment.** It is deliberately not gated on
  * `NODE_ENV`, because the local stack runs the API bundle with `NODE_ENV=production` and a gate
  * there would defeat the purpose. The protection is instead that the variable does not exist unless
- * something sets it, it is documented as dev-only in `infra/.env.example`, and pinning the clock
- * logs a warning on first use so a stack running on a frozen clock says so in its own logs. This is
- * the same posture the four wall-clock sweeps already take (`NIGHTLY_LEDGER_CHECK_CRON` and friends
- * default to `off` in Compose and are trusted to the environment).
+ * something sets it, it is documented as dev-only, and the API warns at startup when the clock is
+ * pinned (`apps/api/src/main.ts` calls `clockIsPinned`) so a stack on a frozen clock says so in its
+ * own logs. This is the same posture the four wall-clock sweeps already take
+ * (`NIGHTLY_LEDGER_CHECK_CRON` and friends default to `off` in Compose, trusted to the environment).
  *
  * Keep the value in step with `freezeTime` in `apps/web-e2e/visual/screens.json`. If the two
  * disagree the browser and the server are back to disagreeing about "now", which is the whole bug.
@@ -36,10 +36,6 @@ function resolveFixedNow(env: NodeJS.ProcessEnv): Date | null {
       `Invalid ${FIXED_NOW}: ${raw}. Expected an ISO 8601 instant, for example 2026-11-16T09:00:00Z.`,
     );
   }
-  console.warn(
-    `${FIXED_NOW} is set: the API treats now as ${parsed.toISOString()}. ` +
-      'Server-computed ages, countdowns and overdue flags are frozen. Development and test only.',
-  );
   return parsed;
 }
 

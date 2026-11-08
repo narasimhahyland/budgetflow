@@ -26,19 +26,34 @@ So the due dates are fixed, and the Overdue flag is a comparison against the rea
 - `libs/api/events/src/lib/depth/event-plan.service.ts:47` — `overdue: t.status !== 'done' && t.dueDate !== null && t.dueDate < today`
 - `libs/api/events/src/lib/depth/event-plan.service.ts:121` — `overdueTasks: views.filter((t) => t.overdue).length`
 
-Resolving the offsets against the `2026-11-20` start gives the turnover calendar:
+Resolving the offsets against the `2026-11-20` start gives the turnover calendar. The flag is
+`dueDate < today`, so a task goes overdue the **day after** its due date, and a task already `done`
+never does — which the seed's system tasks are, because they tick themselves when the linked work
+happens. Both details move the answer, so the table below is read from the running API
+(`GET /api/events/.../plan` as `event.organizer`) rather than worked out on paper:
 
-| Offset | Due date       | Task                                          | Status on 2026-11-08     |
-| ------ | -------------- | --------------------------------------------- | ------------------------ |
-| `-21`  | 2026-10-30     | Confirm the venue booking                     | already overdue          |
-| `-14`  | 2026-11-06     | Choose a caterer                              | already overdue          |
-| `-10`  | **2026-11-10** | Send invitations                              | **turns over in 2 days** |
-| `-7`   | **2026-11-13** | Book the photographer; Order decorations      | **two more at once**     |
-| `-2`   | 2026-11-18     | Share the dietary counts with the caterer     | later                    |
-| `0`    | 2026-11-20     | Set up the registration desk; Mark attendance | later                    |
+| Offset | Due date   | Task                                          | Seeded status | Goes overdue   |
+| ------ | ---------- | --------------------------------------------- | ------------- | -------------- |
+| `-21`  | 2026-10-30 | Confirm the venue booking                     | open          | fired, 10-31   |
+| `-14`  | 2026-11-06 | Choose a caterer                              | open          | fired, 11-07   |
+| `-10`  | 2026-11-10 | Send invitations                              | **done**      | **never**      |
+| `-7`   | 2026-11-13 | Book the photographer; Order decorations      | open          | **2026-11-14** |
+| `-2`   | 2026-11-18 | Share the dietary counts with the caterer     | open          | 2026-11-19     |
+| `0`    | 2026-11-20 | Set up the registration desk; Mark attendance | open, done    | 2026-11-21     |
 
-The `-14` turnover on 6 November is the one that already fired and was re-recorded as collateral by
+The `-14` turnover on 7 November is the one that already fired and was re-recorded as collateral by
 PR #69.
+
+**The next turnover is 14 November, and it moves the count by two at once** — the two `-7` tasks
+share a due date. Measured by pinning the clock either side of it:
+
+| Clock pinned to | `overdueTasks` |
+| --------------- | -------------- |
+| `2026-11-13`    | 2              |
+| `2026-11-14`    | **4**          |
+
+The 10 November date this note first carried was wrong: that task is seeded `done`, so it cannot go
+overdue at all.
 
 ### `086-unused-expired`
 
@@ -58,8 +73,8 @@ From `headroom-before.md` in this folder, a zero-allowance run of the whole suit
 
 - `046b-checklist-tasks-agenda default › tablet` — **1697 of 1855 pixels, 91% of its allowance**
 
-One more Overdue row is worth well over the 158 pixels left. The 10 November turnover is expected to
-take it red, on `main` and on every open branch at once, with no code change involved.
+Two more Overdue rows are worth well over the 158 pixels left. The 14 November turnover is expected
+to take it red, on `main` and on every open branch at once, with no code change involved.
 
 ## Why re-recording is the wrong fix
 
@@ -119,3 +134,62 @@ Masking was the first suggestion on #86. Neither state has a usable handle today
 
 So masking needs component changes in both places as well, it masks figures the two screens exist to
 show, and it has to be repeated for each new drifting figure. It is not the cheaper option.
+
+---
+
+## Stage 1 verified against the running stack
+
+Measured on 2026-11-08 on this checkout's stack, by restarting it with `BF_FIXED_NOW` set each way
+and reading the two figures back through the API. Same seed, same data, only the clock differs.
+
+| Clock                         | `046b` `overdueTasks`      | `086` `daysLeft` | Startup warning |
+| ----------------------------- | -------------------------- | ---------------- | --------------- |
+| real time (2026-11-08)        | 2 (10-30, 11-06)           | 53               | none            |
+| pinned `2026-11-16T09:00:00Z` | 4 (10-30, 11-06, 11-13 ×2) | 45               | logged          |
+| pinned `2026-11-13T09:00:00Z` | 2                          | 48               | logged          |
+| pinned `2026-11-14T09:00:00Z` | 4                          | 47               | logged          |
+
+Both figures now follow `FIXED_NOW` and nothing else, and `FIXED_NOW` comes from `freezeTime` in
+`screens.json` — the same constant the browser clock is set from. The figures are therefore the same
+on every future run, which is the property the baseline needs.
+
+`stack.sh urls` reports which clock the stack is on, and the API logs
+`Clock pinned: now is 2026-11-16T09:00:00.000Z` at startup.
+
+### Two defects found while verifying, both fixed here
+
+1. **An empty `FIXED_NOW` stopped the API from booting.** Compose passes
+   `FIXED_NOW: ${BF_FIXED_NOW:-}`, which is an empty string when the variable is unset, and
+   `z.iso.datetime().optional()` accepts `undefined` but not `''`. Any stack driven through Compose
+   without `stack.sh` setting a value would have failed startup with
+   `Invalid configuration: FIXED_NOW: Invalid ISO datetime`. The schema now treats empty as unset.
+   This was only caught by running the real-clock case; the pinned path always sets a value and hid
+   it.
+2. **The pin warning never appeared.** The clock resolves lazily on first use, so a stack that had
+   not yet served a date logged nothing. `apps/api/src/main.ts` now resolves it at startup.
+
+### What this stage does not cover
+
+Stage 1 re-points only the two definitions that drive #86, so the system is **half-pinned**: the
+event plan and the reports read the frozen clock while every other copy of the one-liner still reads
+real time. That is fine for this issue and wrong as an end state.
+
+Consequences to carry into Stage 2:
+
+- `generatedAt` on the report run is still real time
+  (`libs/api/reports/src/lib/reports.service.ts`). It does not reach a baseline because
+  `report.page.ts` renders it inside `data-testid="relative-time"`, which the global mask covers.
+- Three API scenarios compute dates from the real clock —
+  `apps/api-e2e/src/extended/wallets.spec.ts`, `apps/api-e2e/src/approvals/hygiene.spec.ts`,
+  `apps/api-e2e/src/extended/recognition.spec.ts`. They still agree with the services they exercise
+  only because those services were not re-pointed. They will need the pinned clock when Stage 2
+  lands.
+- The worker is not given `FIXED_NOW`. Its wall-clock sweeps are `off` by default, so nothing in a
+  test run depends on its clock today.
+
+### Expected baseline movement
+
+Pinning does not preserve today's picture; it corrects the picture to the frozen date and then holds
+it. So some baselines move once, deliberately: `046b` from 2 Overdue rows to 4, and `086` from 53
+days left to 45. Those are recorded with this reason, after looking at the images, not re-recorded
+silently — and after the move they stop depending on the date the run happened.

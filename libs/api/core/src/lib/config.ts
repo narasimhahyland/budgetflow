@@ -19,9 +19,13 @@ const EnvSchema = z.object({
     .default('budgetflow-web')
     .describe('Public OIDC client the web app signs in with (served by /api/auth/config).'),
   AI_PROVIDER: z.enum(['fake']).default('fake'),
-  FIXED_NOW: z.iso
-    .datetime()
-    .optional()
+  // Compose passes `FIXED_NOW: ${BF_FIXED_NOW:-}`, which is an empty string when the variable is
+  // unset rather than absent, so empty has to mean "not set" or an ordinary stack fails to boot.
+  FIXED_NOW: z
+    .preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.iso.datetime().optional(),
+    )
     .describe(
       'Development and test only: the instant the API treats as now, so server-computed ages and ' +
         'countdowns stay still for a visual run. Read by clock.ts. Never set it in a deployment.',
