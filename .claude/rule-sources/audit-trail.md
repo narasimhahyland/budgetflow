@@ -1,0 +1,1 @@
+../../.cursor/rules/audit-trail.mdc

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.cursor/hooks/node.sh",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/bridge.mjs",
+              "guard-shell"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.cursor/hooks/node.sh",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/bridge.mjs",
+              "guard-read"
+            ],
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Grep|Glob|Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.cursor/hooks/node.sh",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/bridge.mjs",
+              "guard-tool"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.cursor/hooks/node.sh",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/bridge.mjs",
+              "guard-prompt"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.cursor/hooks/node.sh",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/bridge.mjs",
+              "format"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.cursor/hooks/node.sh",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/bridge.mjs",
+              "stop-summary"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

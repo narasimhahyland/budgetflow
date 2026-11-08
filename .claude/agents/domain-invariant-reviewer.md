@@ -1,0 +1,1 @@
+../../.cursor/agents/domain-invariant-reviewer.md

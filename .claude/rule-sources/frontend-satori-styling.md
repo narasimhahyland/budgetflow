@@ -1,0 +1,1 @@
+../../.cursor/rules/frontend-satori-styling.mdc

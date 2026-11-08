@@ -1,0 +1,1 @@
+../../.cursor/rules/00-core.mdc

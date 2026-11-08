@@ -1,0 +1,1 @@
+../../.cursor/rules/git-worktree-workflow.mdc
