@@ -31,7 +31,8 @@ committed under `evidence/<phase>/`, so this table comes from `evidence/`, not f
 
 All three backends merged with evidence packs (`evidence/phase-14/backend`, `phase-15/backend`,
 `phase-16/backend` + `phase-16/gate`). All three Angular halves have now merged too, the last of
-them on 8 November, so **the repository has no open feature work**:
+them on 8 November. **Phases 1 to 16 are complete, `main` is green on its own post-merge run, and
+no feature pull request is open:**
 
 | Phase | Frontend                | Merged as                                                                                                                                             |
 | ----- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -56,9 +57,10 @@ idle before removing it with `scripts/worktree.sh remove`.
 
 ## 2. What to do next, in order
 
-Four blocks, in priority order. 2.1 closes out Wave 6 and is small. 2.2 is the visual suite, where
-one item is a latent red that will stop a future PR. 2.3 is the rest of the build. 2.4 is not work
-at all — it is four questions that need an answer from the product owner.
+Four blocks, in priority order. 2.1 is paperwork left over from Wave 6 and takes an afternoon. **2.2
+is the first real engineering task** — the visual suite, where one item is a latent red that will
+stop a future PR for reasons that have nothing to do with it. 2.3 is the rest of the build. 2.4 is
+not work at all: it is four questions that need an answer from the product owner.
 
 ### 2.1 Close out Wave 6
 
@@ -303,11 +305,19 @@ it blocks you, say so.
 The rail renders on every screenshot, so adding one entry to `libs/web/shell/src/lib/nav.ts` moves
 every state that any affected role can reach — nothing to do with the screen under test. Across
 Wave 6: Phase 15 added six entries and re-recorded six baselines, then five more; Phase 16 added
-five and re-recorded 23 (`36c32ad`); Phase 14 added five and re-recorded 82 (`8b2459c`), because by
-then it was merging on top of both. **Budget a re-record pass into any
-phase that touches the rail, and run the full visual project** — a grepped subset tells you only
-that the states you thought of still pass, and the ones you did not think of are precisely the
-problem. The spec that has to move with it is
+five and re-recorded 23 (`36c32ad`); Phase 14 added five and re-recorded 37 (`8b2459c`), because by
+then it was merging on top of both.
+
+**The damage is not confined to the rail.** Those successive merges took the shell from 47 to 65
+entries, and a taller rail narrows the content column — so nineteen of those 37 states had entirely
+unchanged page content that simply reflowed: table columns redistributed, a form grid wrapped a
+field, a banner re-wrapped. Masking the rail would not have saved them. Expect to re-record states
+that have nothing to do with navigation, and do not treat a diff outside the rail as evidence that
+something else broke.
+
+**Budget a re-record pass into any phase that touches the rail, and run the full visual project** —
+a grepped subset tells you only that the states you thought of still pass, and the ones you did not
+think of are precisely the problem. The spec that has to move with it is
 `apps/web-e2e/src/shell/role-navigation.spec.ts`, which asserts each role's rail in order.
 
 ### A visual baseline can be wrong while the check is green
@@ -357,6 +367,26 @@ create. `113a`'s query-log rows are the live example (the rows are masked, but t
 
 The rule that prevents all of it: **select subjects by id or name, never by mutable status.** "The
 first open exception" is a bug; `ACT-00318` is not.
+
+### Gate an action on the permission, never on the data
+
+A screen that infers a right from the shape of the data will eventually offer someone a button the
+API refuses on the press. Phase 15 shipped exactly that: the leadership summaries list offered
+Draft whenever a closed period had no summary yet, on the assumption that a role who cannot draft
+cannot read the close calendar either — but an analyst can, so an analyst got the button. The
+detail page's `canApprove` had the same gap, weighing the summary's state but not the reader's
+right. `978c20b` ([#85](https://github.com/narasimhahyland/budgetflow/pull/85)) fixed both by asking
+`session.can('audit.read')`, the action the endpoint actually asserts.
+
+It also turned `main` red, which is the second lesson: the analyst journey asserted the button was
+absent, and that was only true while some other test had already drafted a summary for the waiting
+period. Gating on data makes the answer depend on what else is running.
+
+Phase 14 — the most permission-dense group in the product — was checked against this before merge
+and came back clean: every consumer of `GET /api/me/features` gates on `on && allowed`, and three
+capabilities correctly returned `on: true, allowed: false` for an analyst. A pending two-person
+change renders "Off is still in force" and hides the request buttons rather than showing the
+requested value as applied. That is the shape to copy.
 
 ### An assertion inside an `if (visible)` conditional verifies nothing
 
@@ -411,6 +441,7 @@ Loose ends without a ticket:
 | **`086-unused-expired` computes "days left" from the real date.** Only the browser clock is frozen, so the figure falls by one each day and the state drifts towards its tolerance on its own. Masking it needs a handle on the report frame's cells that does not exist. Now also covered by issue #86.                              | commit `8a54717`                                                                                                            |
 | **Phase 15 merged its frontend without an evidence pack.** There is no `evidence/phase-15/frontend`, where Phases 14 and 16 both have one. The definition of done asks for the gate summary, outcome table and visual QA report.                                                                                                      | `evidence/phase-16/frontend/` is the model to copy                                                                          |
 | **The README status table still shows Phases 14, 15 and 16 as backend only.** All three frontends are now merged.                                                                                                                                                                                                                     | [`README.md`](../README.md#status)                                                                                          |
+| **Screen 090 carries a redundant mask.** The global mask already covers `[data-testid=relative-time]`, and `090-approval-history` masks the whole first cell (`table[aria-label="Approval decisions"] tbody td:first-child`) on top of it. Collapsing the two changes nothing visible.                                                | `apps/web-e2e/visual/screens.json`                                                                                          |
 | **`113a` depends on cross-suite data.** Its query-log state needs rows other screens' AI calls create.                                                                                                                                                                                                                                | `apps/web-e2e/visual/screens.json`                                                                                          |
 | **A monospace `font-family` slipped past stylelint.** `frontend-satori-styling.mdc` forbids it, but stylelint only enforces the ban in `.scss`, so an inline component style in `libs/web/features/ai/src/lib/ai-output.ts` was never checked.                                                                                        | issue #70's closing comment                                                                                                 |
 | **The default board pack (016a) renders all zeros.** The seed closes the period without writing `period_close_snapshots` rows, so the "latest closed period" view is empty. It is the seed, not the report — switch to the current open period and the figures are real. Fixing it moves the `016a-board-pack--default--*` baselines. | `docs/architecture/phase-handoff.md`, "Known follow-ups from Phase 11"                                                      |
