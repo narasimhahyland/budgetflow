@@ -54,8 +54,10 @@ about exactly that.
 
 ## 2. What to do next, in order
 
-Four blocks, in priority order. Only the first is holding the build; 2.2 to 2.4 can run in any
-order, and 2.4 is not work at all — it is four questions that need an answer from the product owner.
+Four blocks, in priority order. 2.1 is the last of the build; the top of 2.2 is a red visual gate
+on `main` that blocks every PR and should be fixed alongside it. The rest of 2.2 and all of 2.3 can
+run in any order after that, and 2.4 is not work at all — it is four questions that need an answer
+from the product owner.
 
 ### 2.1 Finish PR #69 — the Phase 14 frontend
 
@@ -86,9 +88,10 @@ model), and the README status row for Phase 14 moved to `yes`.
 
 **`main` is currently red on four visual states, and this is the first thing to fix here.**
 `055-my-requests--default` and `123-notifications-tasks--tasks`, both at desktop and tablet, fail on
-every branch: they failed identically on [#69](https://github.com/narasimhahyland/budgetflow/pull/69)
-and on [#87](https://github.com/narasimhahyland/budgetflow/pull/87), a documentation-only change that
-cannot move a pixel. Both baselines were recorded on 7 November and `main`'s last green run was
+every branch: the same four failed on [#69](https://github.com/narasimhahyland/budgetflow/pull/69)
+and twice on [#87](https://github.com/narasimhahyland/budgetflow/pull/87), a documentation-only
+change that cannot move a pixel, with the same pixel count each time rather than a flake's varying
+one. Both baselines were recorded on 7 November and `main`'s last green run was
 16:32 UTC the same day, so the drift crossed a threshold **within a single day** — which makes this
 worse than issue [#86](https://github.com/narasimhahyland/budgetflow/issues/86) assumed when it
 predicted daily turnovers on 10 and 13 November. The cause is the same: `freezeTime`
