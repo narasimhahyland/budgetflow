@@ -162,10 +162,14 @@ test.describe('AI conversation retention (113a)', () => {
         { conversations: 1, turns: 1 },
       );
 
+      // Applying is fenced on purpose: it repeats a named preview, types the word, and needs
+      // `retention.confirm`, which the Finance Controller has and the administrator does not.
       const applied = await startRunOk(request, {
-        user: 'sandbox-admin',
+        user: 'sandbox-controller',
         mode: 'apply',
         categories: [CATEGORY],
+        dryRunId: preview.id,
+        confirmation: 'DELETE',
         reason: reason('purge AI conversations past the window'),
         tenant: SANDBOX,
       });
@@ -210,10 +214,19 @@ test.describe('AI conversation retention (113a)', () => {
         tenant: SANDBOX,
       });
 
-      const applied = await startRunOk(request, {
+      const preview = await startRunOk(request, {
         user: 'sandbox-admin',
+        mode: 'dry_run',
+        categories: [CATEGORY],
+        reason: reason('preview the purge while a hold is active'),
+        tenant: SANDBOX,
+      });
+      const applied = await startRunOk(request, {
+        user: 'sandbox-controller',
         mode: 'apply',
         categories: [CATEGORY],
+        dryRunId: preview.id,
+        confirmation: 'DELETE',
         reason: reason('purge AI conversations while a hold is active'),
         tenant: SANDBOX,
       });
