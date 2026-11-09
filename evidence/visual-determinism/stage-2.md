@@ -31,7 +31,20 @@ Every site was read before it was changed; all want the same thing. A filename o
 id built from the date still uses real time in production, and two exports on one real day already
 shared both, so pinning adds no collision.
 
-`grep -rn "new Date().toISOString().slice(0, 10)" libs/api --include="*.ts"` now returns nothing.
+`grep -rn "new Date().toISOString().slice(0, 10)" libs/api --include="*.ts"` now returns nothing —
+**but that is a statement about one spelling, not about the class.** An earlier version of this page
+said "zero copies remain", which was too strong: the grep matched only the literal `new Date()` form.
+Widening it to `toISOString().slice(0, 10)` with any argument finds two more sites that take "today"
+from the wall clock, and a third clock question that no grep for date strings can find:
+
+| Site                                 | What it compares                                                | Treatment                                                                                                                                                               |
+| ------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `channels.service.ts` `deriveTasks`  | a task's `dueAt` against `Date.now()` for overdue and due-today | **Left on real time.** `dueAt` is itself `Date.now()` + 48 hours at routing, so real against real is stable; pinning only one side would make every seeded task overdue |
+| `user-admin.service.ts` deactivation | sets a leaver's end date to yesterday                           | **Re-pointed.** The end date is compared with `todayUtc` elsewhere, which is now pinned                                                                                 |
+
+The rule is the one 2.2 step 1 settled for the seed: a date follows whichever clock it is compared
+against. Instant-level `Date.now()` comparisons — SLA timers, security expiry, ages — are not covered
+by this change and are deliberately left on real time where their other side is real time too.
 
 ## What the money paths did — the risk that did not materialise
 
@@ -83,3 +96,42 @@ the single project-wide re-record in 2.2 step 2.
 | `scripts/gate.sh functional-e2e`       | PASS                                          |
 | Typecheck and lint, 17 touched modules | PASS, 0 errors                                |
 | Full visual suite before recording     | 14 failed, 774 passed — the two screens above |
+
+## Revocation would have kept access once real time passed `freezeTime`
+
+`user-admin.service.ts` ends a revoked role grant on "yesterday", because `valid_to` is inclusive.
+It took yesterday from the wall clock, while `ActorResolver` compares `valid_to` with the pinned
+`todayUtc`. From the real date of 17 November, real yesterday is on or after the pinned 16 November,
+so a revoked role would stay in force under test. The existing revocation scenario would stay green
+through it, because it asserts only `revoked: true`, not that the role stopped applying.
+
+Proven on one build with the stack pinned to 5 November, which reproduces the condition today:
+
+| `valid_to` on the revoked grant         | Active roles                |
+| --------------------------------------- | --------------------------- |
+| `2026-11-04` (fixed code: pinned − 1)   | `employee`                  |
+| `2026-11-08` (old code: real yesterday) | `employee, event-organizer` |
+| restored to `2026-11-04`                | `employee`                  |
+
+## The CI-only failure of `123`, and the seed race behind it
+
+After the baselines above were recorded, CI failed `123-notifications-tasks default › tablet` by 4215
+pixels on both attempts while the same commit passed every state locally, twice. CI's own images
+(the run's `visual-report` artifact) split the difference into the stale rail and one row: REQ-00004
+was "Delivered via in-app, email" in CI and "in-app, email, slack, push" locally.
+
+A channel delivery decides its channels from the database at the moment the job runs — slack only if
+the install and the person's chat link exist, push only if a subscription does. The seed writes
+requests before those channel rows, and the worker ran alongside it, so how many requests were
+delivered before the channel rows landed depended on the speed of the machine. CI's settle step
+reported "settled after 2s", correctly: every job had finished, against a seed that had not.
+
+`scripts/stack.sh` now stops the worker while the seed runs and starts it, waiting for healthy,
+afterwards. After a reseed every seeded request notification is delivered on in-app, email, slack and
+push. This is the other half of the race the settle step was written for: settle covers fan-out
+that has not finished; this covers fan-out that finished too early. `123` was re-recorded as
+collateral on 7 November (#69), which would have frozen whichever interleaving that machine produced.
+
+Verified with `scripts/gate.sh functional-api functional-e2e visual`, all PASS. The visual run had one
+flaky state, `090-approval-history default › desktop`: a readiness timeout whose saved screenshot is a
+single colour, passing on retry — issue #82's blank render, a different state each run, unrelated.
