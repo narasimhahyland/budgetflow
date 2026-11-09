@@ -6,6 +6,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  todayUtc,
 } from '@bf/api/core';
 import { policyConfigs, withTenant, workflowTemplates, type Db, type Tx } from '@bf/api/db';
 import type {
@@ -35,7 +36,6 @@ interface Ctx {
 }
 
 const TENANT = (actor: RequestActor) => ({ kind: 'tenant' as const, tenantId: actor.tenantId });
-const today = () => new Date().toISOString().slice(0, 10);
 
 const ROUTE_LABELS: Record<SaveWorkflowRouteRequest['requestKind'], string> = {
   spending: 'Spending requests',
@@ -188,7 +188,7 @@ export class PolicyConfigService {
           activeVersion: active?.version ?? 1,
           draftVersion: draft?.version ?? null,
           status: active ? 'active' : draft ? 'draft' : 'active',
-          validFrom: shown?.validFrom ?? today(),
+          validFrom: shown?.validFrom ?? todayUtc(),
           steps: (shown?.steps as WorkflowStepDef[] | undefined) ?? DEFAULT_WORKFLOW_STEPS,
           allowedActions,
         };
@@ -237,7 +237,7 @@ export class PolicyConfigService {
         const priorActive = existing.find((r) => r.status === 'active');
         const nextVersion = (existing[0]?.version ?? 0) + 1;
         const publish = body.publish ?? true;
-        const validFrom = body.validFrom ?? today();
+        const validFrom = body.validFrom ?? todayUtc();
 
         if (publish && priorActive) {
           await tx

@@ -1,5 +1,5 @@
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import {
   commitments,
   events,
@@ -261,7 +261,7 @@ export class PushesService {
       );
     }
     const open = c.amountMinor - c.consumedMinor - c.releasedMinor;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayUtc();
     return {
       reference: `CMT-${c.id.slice(-8).toUpperCase()}`,
       amountMinor: open,

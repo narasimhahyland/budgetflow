@@ -1,4 +1,4 @@
-import { PolicyService, type RequestActor } from '@bf/api/core';
+import { PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import { orgUnits, orgUnitVersions, people, type Tx } from '@bf/api/db';
 import type { OrgUnit } from '@bf/contracts';
 import type { Action, OrgUnitKind, Resource } from '@bf/domain';
@@ -22,7 +22,11 @@ export interface UnitAsOf {
 
 export type UnitMap = Map<string, UnitAsOf>;
 
-export const todayUtc = (): string => new Date().toISOString().slice(0, 10);
+/**
+ * Re-exported so this module's callers keep their existing import, with one implementation
+ * behind it: `@bf/api/core` owns the clock, which a test run can pin (`FIXED_NOW`).
+ */
+export { todayUtc };
 
 /** Ancestors from the root down to `id` (inclusive), following parents in the as-of map. */
 export function ancestorsOf(units: UnitMap, id: string): string[] {

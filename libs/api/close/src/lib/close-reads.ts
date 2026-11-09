@@ -1,4 +1,4 @@
-import { ApiProblem, type RequestActor } from '@bf/api/core';
+import { ApiProblem, type RequestActor, todayUtc } from '@bf/api/core';
 import { fiscalPeriods, fiscalYears, legalEntities, people, type Tx } from '@bf/api/db';
 import type { Action } from '@bf/domain';
 import { PolicyService } from '@bf/api/core';
@@ -14,7 +14,11 @@ export type PeriodRow = typeof fiscalPeriods.$inferSelect;
 export type FiscalYearRow = typeof fiscalYears.$inferSelect;
 export type LegalEntityRow = typeof legalEntities.$inferSelect;
 
-export const todayUtc = (): string => new Date().toISOString().slice(0, 10);
+/**
+ * Re-exported so this module's callers keep their existing import, with one implementation
+ * behind it: `@bf/api/core` owns the clock, which a test run can pin (`FIXED_NOW`).
+ */
+export { todayUtc };
 
 export const tenantOf = (actor: RequestActor) => ({
   kind: 'tenant' as const,

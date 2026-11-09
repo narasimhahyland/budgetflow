@@ -1,4 +1,4 @@
-import { DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import {
   auditEvents,
   budgets,
@@ -193,7 +193,7 @@ export class ExperienceService {
     query: { from?: string; to?: string; types?: string; limit?: number },
   ): Promise<MyActivity> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
-      const to = query.to ?? new Date().toISOString().slice(0, 10);
+      const to = query.to ?? todayUtc();
       const from =
         query.from ??
         new Date(Date.now() - DEFAULT_ACTIVITY_DAYS * 24 * 60 * 60 * 1000)
@@ -298,7 +298,7 @@ export class ExperienceService {
         )
         .slice(0, limit);
 
-      const today = new Date().toISOString().slice(0, 10);
+      const today = todayUtc();
       const [year] = await tx
         .select({
           label: fiscalYears.label,

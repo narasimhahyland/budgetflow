@@ -1,5 +1,5 @@
 import { personNames, RoutingService } from '@bf/api/approvals';
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import { budgets, orgUnits, withTenant, type Db } from '@bf/api/db';
 import type { TestWorkflowRouteRequest, TestWorkflowRouteResponse } from '@bf/contracts';
 import { evaluateRules, type EvaluationFacts } from '@bf/domain';
@@ -62,7 +62,7 @@ export class WorkflowTestService {
         alcohol_requested: false,
         is_cash_equivalent: false,
         request_kind: body.requestKind,
-        date: new Date().toISOString().slice(0, 10),
+        date: todayUtc(),
       };
       const evaluation = evaluateRules(await this.rules.activeRules(tx, actor.tenantId), facts);
 

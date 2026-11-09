@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  todayUtc,
 } from '@bf/api/core';
 import {
   postSpendExceptions,
@@ -57,8 +58,6 @@ interface Ctx {
   idempotencyKey: string;
   requestId: string | null;
 }
-
-const today = () => new Date().toISOString().slice(0, 10);
 
 /** Rules are tenant-wide policy, so authorization is a tenant-scoped check, never a budget one. */
 const TENANT = (actor: RequestActor) => ({ kind: 'tenant' as const, tenantId: actor.tenantId });
@@ -319,7 +318,7 @@ export class RulesService {
         })
         .filter((r): r is EvaluableRule => r !== null);
 
-      const day = today();
+      const day = todayUtc();
       let conflicts = 0;
       const conflictPairs: string[] = [];
       for (const { rule, versions } of all) {
@@ -715,7 +714,7 @@ export class RulesService {
           actions,
           scope: body.scope ?? seed?.scope ?? {},
           explanation: body.explanation ?? seed?.explanation ?? '',
-          validFrom: body.validFrom ?? today(),
+          validFrom: body.validFrom ?? todayUtc(),
           validTo: body.validTo ?? null,
           createdBy: actor.personId,
         });
@@ -918,7 +917,7 @@ export class RulesService {
               ),
             );
         }
-        const scheduled = validFrom > today();
+        const scheduled = validFrom > todayUtc();
         await tx
           .update(ruleVersions)
           .set({
@@ -999,7 +998,7 @@ export class RulesService {
         if (rule.activeVersion !== null) {
           await tx
             .update(ruleVersions)
-            .set({ status: 'retired', validTo: today() })
+            .set({ status: 'retired', validTo: todayUtc() })
             .where(
               and(
                 eq(ruleVersions.tenantId, actor.tenantId),
@@ -1092,7 +1091,7 @@ export class RulesService {
           actions: source.actions,
           scope: source.scope,
           explanation: source.explanation,
-          validFrom: today(),
+          validFrom: todayUtc(),
           validTo: source.validTo,
           createdBy: actor.personId,
         });
@@ -1176,7 +1175,7 @@ export class RulesService {
             const nextVersion = (max?.version ?? 0) + 1;
             await tx
               .update(ruleVersions)
-              .set({ status: 'expired', validTo: today() })
+              .set({ status: 'expired', validTo: todayUtc() })
               .where(eq(ruleVersions.id, version.id));
             await tx.insert(ruleVersions).values({
               tenantId: actor.tenantId,
@@ -1189,7 +1188,7 @@ export class RulesService {
               actions: version.actions,
               scope: version.scope,
               explanation: version.explanation,
-              validFrom: today(),
+              validFrom: todayUtc(),
               validTo: version.validTo,
               publishedAt: new Date(),
               publishedBy: actor.personId,

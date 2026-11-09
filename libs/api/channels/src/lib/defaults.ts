@@ -216,7 +216,12 @@ export const DEFAULT_DIGEST_TEMPLATES: readonly DefaultDigestSpec[] = [
     channelsAllowed: ['email', 'slack', 'teams'],
     introLine: 'Approvals waiting for your decision today, ordered by due time.',
     sections: [
-      { key: 'waiting_for_you', label: 'Waiting for you (count, oldest, due today)', enabled: true, maxItems: 5 },
+      {
+        key: 'waiting_for_you',
+        label: 'Waiting for you (count, oldest, due today)',
+        enabled: true,
+        maxItems: 5,
+      },
       { key: 'escalated_to_you', label: 'Escalated to you', enabled: true, maxItems: 5 },
       { key: 'delegations', label: 'Delegations starting or ending', enabled: true, maxItems: 5 },
     ],
@@ -229,9 +234,15 @@ export const DEFAULT_DIGEST_TEMPLATES: readonly DefaultDigestSpec[] = [
     weekday: 1,
     sendTime: '08:30',
     channelsAllowed: ['email', 'slack', 'teams'],
-    introLine: 'Your budgets this week: available under each budget’s rules, thresholds and open items.',
+    introLine:
+      'Your budgets this week: available under each budget’s rules, thresholds and open items.',
     sections: [
-      { key: 'budget_position', label: 'Budget position (available, utilization, change since last week)', enabled: true, maxItems: 5 },
+      {
+        key: 'budget_position',
+        label: 'Budget position (available, utilization, change since last week)',
+        enabled: true,
+        maxItems: 5,
+      },
       { key: 'thresholds_crossed', label: 'Thresholds crossed', enabled: true, maxItems: 5 },
       { key: 'pending_requests', label: 'Pending requests', enabled: true, maxItems: 5 },
       { key: 'unused_budget', label: 'Unused budget days left', enabled: true, maxItems: 5 },
@@ -248,7 +259,12 @@ export const DEFAULT_DIGEST_TEMPLATES: readonly DefaultDigestSpec[] = [
     channelsAllowed: ['email', 'slack'],
     introLine: 'Upcoming events, funding status and receipts still needed.',
     sections: [
-      { key: 'upcoming_events', label: 'Upcoming events with RSVP counts', enabled: true, maxItems: 5 },
+      {
+        key: 'upcoming_events',
+        label: 'Upcoming events with RSVP counts',
+        enabled: true,
+        maxItems: 5,
+      },
       { key: 'open_tasks', label: 'Open tasks and funding requests', enabled: true, maxItems: 5 },
       { key: 'receipts_missing', label: 'Receipts missing', enabled: true, maxItems: 5 },
     ],
@@ -266,7 +282,12 @@ export const DEFAULT_DIGEST_TEMPLATES: readonly DefaultDigestSpec[] = [
       { key: 'unmatched_actuals', label: 'Unmatched actuals by age', enabled: true, maxItems: 5 },
       { key: 'accruals_review', label: 'Accruals to review', enabled: true, maxItems: 5 },
       { key: 'tieout_status', label: 'GL tie-out status', enabled: true, maxItems: 5 },
-      { key: 'recharges_pending', label: 'Intercompany recharges awaiting tax approval', enabled: true, maxItems: 5 },
+      {
+        key: 'recharges_pending',
+        label: 'Intercompany recharges awaiting tax approval',
+        enabled: true,
+        maxItems: 5,
+      },
     ],
   },
   {
@@ -279,9 +300,24 @@ export const DEFAULT_DIGEST_TEMPLATES: readonly DefaultDigestSpec[] = [
     channelsAllowed: ['email', 'slack'],
     introLine: 'Company-wide Available, regional utilization and active budget controls.',
     sections: [
-      { key: 'company_available', label: 'Company-wide Available and utilization by region', enabled: true, maxItems: 5 },
-      { key: 'controls_applied', label: 'Controls applied (freeze, reduce, set to zero)', enabled: true, maxItems: 5 },
-      { key: 'approval_cycle', label: 'Approval cycle time and pending executive items', enabled: true, maxItems: 5 },
+      {
+        key: 'company_available',
+        label: 'Company-wide Available and utilization by region',
+        enabled: true,
+        maxItems: 5,
+      },
+      {
+        key: 'controls_applied',
+        label: 'Controls applied (freeze, reduce, set to zero)',
+        enabled: true,
+        maxItems: 5,
+      },
+      {
+        key: 'approval_cycle',
+        label: 'Approval cycle time and pending executive items',
+        enabled: true,
+        maxItems: 5,
+      },
     ],
   },
 ] as const;

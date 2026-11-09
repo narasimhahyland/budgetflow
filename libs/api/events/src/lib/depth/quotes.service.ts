@@ -1,4 +1,4 @@
-import { ApiProblem, unwrap, type CommandResult, type RequestActor } from '@bf/api/core';
+import { ApiProblem, unwrap, type CommandResult, type RequestActor, todayUtc } from '@bf/api/core';
 import { eventQuoteRequests, eventQuotes, vendors, type Tx } from '@bf/api/db';
 import { CommitmentsService, FundingSourcesService, PostingSupport } from '@bf/api/spend';
 import type {
@@ -19,8 +19,6 @@ import { EventPlanService } from './event-plan.service';
 type QuoteRow = typeof eventQuotes.$inferSelect;
 type RequestRow = typeof eventQuoteRequests.$inferSelect;
 type VendorStatus = VendorQuoteItem['vendorStatus'];
-
-const todayIso = () => new Date().toISOString().slice(0, 10);
 
 /**
  * Vendor quote requests and the side-by-side comparison (51a). Quotes never consume budget; only
@@ -56,7 +54,7 @@ export class EventQuotesService {
     perHeadLimitMinor: number | null,
     lowestMinor: number | null,
   ): VendorQuoteItem {
-    const expired = q.validUntil !== null && q.validUntil < todayIso();
+    const expired = q.validUntil !== null && q.validUntil < todayUtc();
     const exceeds = Math.max(0, q.budgetAmountMinor - availableMinor);
     const aboveLimit =
       perHeadLimitMinor !== null && q.perHeadMinor > 0 && q.perHeadMinor > perHeadLimitMinor;
@@ -385,7 +383,7 @@ export class EventQuotesService {
           vendorStatus: (vendor?.status ?? 'unknown') as VendorStatus,
           quoteStatus: quote.status,
           validUntil: quote.validUntil,
-          asOfDate: todayIso(),
+          asOfDate: todayUtc(),
           budgetAmountMinor: quote.budgetAmountMinor,
           availableMinor: Math.max(funding.capMinor - funding.committedMinor, 0),
           isLowest: quote.budgetAmountMinor <= lowest,

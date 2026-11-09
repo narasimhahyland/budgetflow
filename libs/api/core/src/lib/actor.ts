@@ -1,3 +1,4 @@
+import { todayUtc } from './clock';
 import {
   budgetCoOwners,
   budgets,
@@ -54,7 +55,7 @@ export class ActorResolver {
     subject: string,
     requestedTenantId: string | undefined,
     tokenName: string | undefined,
-    today = new Date().toISOString().slice(0, 10),
+    today = todayUtc(),
   ): Promise<RequestActor> {
     const rows = await withSubject(this.db, subject, (tx) =>
       tx

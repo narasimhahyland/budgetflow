@@ -1,4 +1,4 @@
-import { ApiProblem, DB, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, type RequestActor, todayUtc } from '@bf/api/core';
 import { withTenant, type Db, type Tx } from '@bf/api/db';
 import type { BudgetHealthOverview, BudgetHealthRow, Money } from '@bf/contracts';
 import type { z } from 'zod';
@@ -65,7 +65,7 @@ export class HealthService {
     if (!this.reads.tenantWide(actor) && this.reads.scopePaths(actor) === 'none')
       throw ApiProblem.forbidden('Budget health is for finance roles and budget owners.');
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = todayUtc();
       const dataset = await this.reads.dataset(
         tx,
         actor,

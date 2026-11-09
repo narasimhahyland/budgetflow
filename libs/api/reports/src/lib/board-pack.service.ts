@@ -6,6 +6,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  todayUtc,
 } from '@bf/api/core';
 import {
   boardPackGenerations,
@@ -447,7 +448,7 @@ export class BoardPackService {
       // As-of the period end: the ledger before this period closed, which a closed period freezes.
       periodTo: period.end_date,
     };
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayUtc();
     const dataset = await this.reads.dataset(tx, actor, filters, today);
     const budgetIds = dataset.budgets.map((b) => b.row.id);
     const [snapshots, fxLines, planRates, forecasts] = await Promise.all([

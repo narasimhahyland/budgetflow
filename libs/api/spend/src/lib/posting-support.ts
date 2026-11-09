@@ -1,5 +1,5 @@
 import { BudgetViews } from '@bf/api/budgets';
-import { ApiProblem, type RequestActor } from '@bf/api/core';
+import { ApiProblem, type RequestActor, todayUtc } from '@bf/api/core';
 import { ledgerLines, type Tx } from '@bf/api/db';
 import { LedgerReads, LedgerService, toPostingBudget, type PostingBudget } from '@bf/api/ledger';
 import type { BucketBalances, CurrencyCode, JournalDraft, PostingContext } from '@bf/domain';
@@ -7,7 +7,11 @@ import { Injectable } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 import type { BudgetRow } from '@bf/api/approvals';
 
-export const todayUtc = () => new Date().toISOString().slice(0, 10);
+/**
+ * Re-exported so this module's callers keep their existing import, with one implementation
+ * behind it: `@bf/api/core` owns the clock, which a test run can pin (`FIXED_NOW`).
+ */
+export { todayUtc };
 
 export type LockedBudget = PostingBudget & { balances: BucketBalances; row: BudgetRow };
 

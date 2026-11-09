@@ -21,6 +21,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  todayUtc,
 } from '@bf/api/core';
 import { LedgerReads, LedgerService, toPostingBudget } from '@bf/api/ledger';
 import type { Accrual, AccrualList } from '@bf/contracts';
@@ -187,7 +188,7 @@ export class AccrualsService {
             {
               reportingCurrency: actor.reportingCurrency,
               rates: await this.ledgerReads.planRates(tx, budget.fiscalYearId),
-              accountingDate: acc.accrualDate ?? new Date().toISOString().slice(0, 10),
+              accountingDate: acc.accrualDate ?? todayUtc(),
             },
           ),
         );
@@ -402,12 +403,12 @@ export class AccrualsService {
           actorSubject: actor.subject,
           action: 'accruals.exported',
           resourceType: 'accrual_export',
-          resourceId: new Date().toISOString().slice(0, 10),
+          resourceId: todayUtc(),
           requestId: ctx.requestId,
           changes: { accruals: { from: null, to: rows.map((r) => r.a.id) } },
         });
         return {
-          fileName: `accruals-${new Date().toISOString().slice(0, 10)}.csv`,
+          fileName: `accruals-${todayUtc()}.csv`,
           contentType: 'text/csv' as const,
           content: [header, ...lines].join('\n') + '\n',
           rows: rows.length,

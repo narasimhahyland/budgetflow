@@ -1,3 +1,4 @@
+import { todayUtc } from '@bf/api/core';
 import { people, type Tx } from '@bf/api/db';
 import { inArray } from 'drizzle-orm';
 
@@ -9,7 +10,11 @@ export interface CommandContext {
 /** ISO 8601 in UTC without sub-second precision, the shape every contract timestamp uses. */
 export const iso = (value: Date): string => value.toISOString().replace(/\.\d+Z$/, 'Z');
 
-export const todayUtc = (): string => new Date().toISOString().slice(0, 10);
+/**
+ * Re-exported so this module's callers keep their existing import, with one implementation
+ * behind it: `@bf/api/core` owns the clock, which a test run can pin (`FIXED_NOW`).
+ */
+export { todayUtc };
 
 /** Display names for a set of people, by id. Ids that do not resolve are simply absent. */
 export async function nameOfPeople(

@@ -111,9 +111,7 @@ export class ChannelsController {
   // Notification settings & push devices (059c) ------------------------------------------------
 
   @Get('me/notification-settings')
-  getNotificationSettings(
-    @CurrentActor() actor: RequestActor,
-  ): Promise<NotificationSettingsView> {
+  getNotificationSettings(@CurrentActor() actor: RequestActor): Promise<NotificationSettingsView> {
     return this.channels.getNotificationSettings(actor);
   }
 

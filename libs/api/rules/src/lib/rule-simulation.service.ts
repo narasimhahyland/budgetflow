@@ -1,4 +1,4 @@
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import {
   budgets,
   orgUnits,
@@ -140,7 +140,7 @@ export class RuleSimulationService {
   ): Promise<SingleSimulationResponse> {
     this.assertRead(actor);
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
-      const date = new Date().toISOString().slice(0, 10);
+      const date = todayUtc();
       const facts = factsFrom(body.facts, date);
       const { evaluables } = await this.rulesForSimulation(tx, actor, {
         ruleId: body.ruleId,
@@ -210,7 +210,7 @@ export class RuleSimulationService {
   async backtest(actor: RequestActor, body: BacktestRequest): Promise<BacktestResponse> {
     this.assertRead(actor);
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
-      const date = new Date().toISOString().slice(0, 10);
+      const date = todayUtc();
       const activeOnly = await this.rules.activeRules(tx, actor.tenantId);
       const { evaluables: withDraft } = await this.rulesForSimulation(tx, actor, {
         ruleId: body.ruleId,

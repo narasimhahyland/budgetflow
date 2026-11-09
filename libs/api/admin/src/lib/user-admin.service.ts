@@ -1,5 +1,12 @@
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, CommandRunner, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import {
+  ApiProblem,
+  CommandRunner,
+  DB,
+  PolicyService,
+  type RequestActor,
+  todayUtc,
+} from '@bf/api/core';
 import {
   adminChangeRequests,
   memberships,
@@ -69,7 +76,7 @@ export class UserAdminService {
   ) {}
 
   private today(): string {
-    return new Date().toISOString().slice(0, 10);
+    return todayUtc();
   }
 
   private activeGrantWhere(today: string) {
