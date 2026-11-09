@@ -167,17 +167,29 @@ repository itself parks for each phase, not a separate plan document — check
 | **19 — local evidence**  | The whole product proven on the local stack from the deterministic seed, including the extended core acceptance scenario end to end (`apps/web-e2e/src/acceptance/`, which `testing-functional.mdc` says runs at every wave gate from Wave 2 and again in Phase 19) and `scripts/gate.sh` in all modes. Done: `evidence/phase-19/` holds the run, the outcome table and the gate summary.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | **20 — docs and report** | README, `docs/architecture/`, the screen inventory and this page refreshed against the finished build, plus the final report. Known stale text to fix: the README status table, `phase-handoff.md`'s claim that screens 87 and 16a "are not built" (they were built in Phase 11), and whatever of this page has aged. Done: `evidence/phase-20/`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
-### 2.4 Decisions that need the user
+### 2.4 Decisions the user has taken
 
-Four open questions. Each is stated with its trade-off and no recommendation; the detail behind all
-four is in [section 6](#6-known-gaps-worth-a-decision).
+**All four were decided on 2026-11-09.** They are recorded here with what each one commits the build
+to, so they are not re-opened as questions. The detail behind them is in
+[section 6](#6-known-gaps-worth-a-decision).
 
-| Question                                                             | Where it stands                                                                                                                                                                                                                                                 | The trade-off                                                                                                                                                                                                                                                                       |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Wire a real AI provider?**                                         | `AI_PROVIDER` is `z.enum(['fake'])` — a single-value enum — and no model token exists in the repository or the Compose stack. Every answer comes from `FakeAiProvider` fixtures.                                                                                | The fake keeps every test reproducible and the repository token-free. A real provider makes the AI features genuinely demonstrable but is an integration project with a secret to manage, non-deterministic tests and a cost, not a config change.                                  |
-| **Purge `ai_conversation_turns`, or stop promising a window?**       | `conversationHistoryDays` (default 30) is enforced in `ask.service.ts` as a read-side filter; nothing deletes a row, and Phase 14's retention categories do not cover the AI area. The text is kept forever.                                                    | Turning it into a real purge honours what screen `113a` says but loses history the evaluation sets might want. Changing the wording is cheap and honest but leaves a retention promise unmade.                                                                                      |
-| **Sign off the twelve retention periods, or keep them provisional?** | Every seeded category ships `signoff_status = 'provisional'`, pending finance and legal. Nine are periods those functions can still change; three are locked statements of policy.                                                                              | Shipping provisional is accurate about its own status but means the product states a legal position nobody has approved. Sign-off needs two functions the build cannot speak for.                                                                                                   |
-| **May a read-only role edit a summary draft's text?**                | `editSection` and `regenerate` in `libs/api/extended/src/lib/narratives.service.ts` are guarded by `assertDraft` (a status check) plus the `report.read` reader check — not `assertAuthor`, which is `audit.read`. `draft` and `approve` do use `assertAuthor`. | As built, anyone who can read summaries can rewrite an unapproved draft, which suits collaborative editing. Tightening it to `audit.read` matches who may draft and approve in the first place, and is the reading of [#85](https://github.com/narasimhahyland/budgetflow/pull/85). |
+| Question                                                             | Decision                    | What it commits the build to                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Wire a real AI provider?**                                         | **No — keep the fake.**     | `AI_PROVIDER` stays `z.enum(['fake'])`, the repository stays token-free and every AI test stays reproducible. The standing consequence is that **nothing in the AI layer has been exercised against a real model**, and the first live provider will be an integration project rather than a config change. Do not treat the single-value enum as an oversight.                         |
+| **Purge `ai_conversation_turns`, or stop promising a window?**       | **Make it a real purge.**   | **This is the only one of the four that is work.** `conversationHistoryDays` (default 30, range 7–90) is today a read-side SQL filter in `libs/api/ai/src/lib/features/ask.service.ts` line 403, and nothing deletes a row. It becomes an actual deletion, so screen `113a` means what it says. Accepted cost: history the evaluation sets might have wanted is gone once it is purged. |
+| **Sign off the twelve retention periods, or keep them provisional?** | **Ship as provisional.**    | `signoff_status` stays `'provisional'` on every seeded category. The product therefore states a retention position that **finance and legal have not approved**, and says so on its own screen. This is accepted deliberately, not pending; it needs no further chasing unless those functions ask.                                                                                     |
+| **May a read-only role edit a summary draft's text?**                | **Yes — keep it as built.** | `editSection` and `regenerate` keep `assertDraft` plus the `report.read` reader check, so anyone who can read summaries can rewrite an unapproved draft. Collaborative editing is the intent. Note the asymmetry is now deliberate: `draft` and `approve` still require `audit.read` through `assertAuthor`. Do not "fix" this to match them.                                           |
+
+The one open piece of work from this block:
+
+| Work                            | Where                                                                                                                                               | Done when                                                                                                                                |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Purge AI conversation turns** | `libs/api/ai/src/lib/features/ask.service.ts:403` is the read-side filter; `ai_conversation_turns` in `libs/api/db/src/schema/ai.ts` holds the text | Rows past each tenant's window are deleted rather than filtered, on a sweep rather than a read, and `113a`'s wording is true of the data |
+
+Two things to settle while building it, neither decided here: Phase 13 owns the AI area and Phase
+14's twelve retention categories do not cover it, so the purge needs either its own sweep or a
+thirteenth category; and the existing wall-clock sweeps are `off` by default in Compose, so the
+scenario has to drive the purge through an API rather than wait for a cron.
 
 ---
 
@@ -260,9 +272,11 @@ Before adding a row here, check whether anything else schedules the item.
 
 ---
 
-## 6. Known gaps worth a decision
+## 6. Known gaps, and the decision taken on each
 
-These are stated plainly here because they are easy to miss and awkward to discover late.
+These are stated plainly here because they are easy to miss and awkward to discover late. **All four
+were decided on 2026-11-09** — each section ends with the decision, so read the decision before
+acting on the description above it. [Section 2.4](#24-decisions-the-user-has-taken) is the summary.
 
 ### The AI layer never calls a model
 
@@ -274,6 +288,10 @@ answer comes from `FakeAiProvider` fixtures. That makes the tests reproducible; 
 **nothing here has been exercised against a real model**, and the first live provider will be a real
 integration project, not a config change.
 
+**Decided 2026-11-09: keep the fake.** The repository stays token-free and the AI tests stay
+reproducible. The consequence above stands as an accepted, standing limitation rather than a gap to
+close: the single-value enum is the decision, not an oversight.
+
 ### AI conversation text is retained indefinitely, not for 30 days
 
 `ai_conversation_turns` stores question and answer text. The settings carry
@@ -283,6 +301,10 @@ nothing ever deletes a row. The text is hidden, not purged. Phase 14's twelve re
 do not cover the AI area at all (Phase 13 owns it), so no sweep picks it up either. Either the
 window becomes a real purge or the wording stops promising one.
 
+**Decided 2026-11-09: make it a real purge.** The window becomes an actual deletion rather than a
+read-side filter, so `113a`'s wording becomes true of the data. This is the only one of the four
+that is work; it is tracked in [section 2.4](#24-decisions-the-user-has-taken).
+
 ### All twelve retention periods are provisional
 
 `retention_policies.signoff_status` defaults to `'provisional'` and every seeded category ships that
@@ -290,6 +312,10 @@ way, pending finance and legal sign-off. Nine are periods finance and legal can 
 are locked statements of policy (ledger journals and the audit log are never deleted; attendee needs
 go 30 days after the event closes). **This is not an approved legal position** — it is a stated
 default waiting for two functions to confirm it.
+
+**Decided 2026-11-09: ship as provisional.** `signoff_status` stays `'provisional'`. The product
+states a position finance and legal have not approved and is explicit about that on screen. Accepted
+deliberately — it is not awaiting anybody.
 
 ### A read-only role can rewrite a leadership summary draft
 
@@ -300,6 +326,10 @@ approved summary, plus the `report.read` reader check every read runs. So anyone
 summaries can rewrite an unapproved one's text, or regenerate it. Whether that is collaborative
 editing or a gap is a product decision, not a bug report — but it is not what
 [#85](https://github.com/narasimhahyland/budgetflow/pull/85) assumed when it tightened the buttons.
+
+**Decided 2026-11-09: keep it as built.** Collaborative editing is the intent, so `editSection` and
+`regenerate` keep the `report.read` reader check. The asymmetry with `draft` and `approve`, which
+require `audit.read`, is now deliberate — do not tighten it to match them.
 
 ---
 
