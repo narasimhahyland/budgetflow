@@ -16,6 +16,7 @@ import {
 import { P15_IDS, userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
+import { nowUtc } from '../support/clock';
 import { expectContract, expectProblem } from '../support/contract';
 import { allocateOk, createChild, createRoot } from '../support/factory';
 import { auditFor, buckets, reason, usd } from './support';
@@ -23,7 +24,7 @@ import { auditFor, buckets, reason, usd } from './support';
 type Giver = 'employee' | 'location-manager' | 'event-organizer' | 'regional-manager';
 
 const quarterKey = (): string => {
-  const now = new Date();
+  const now = nowUtc();
   return `FY${now.getUTCFullYear()}-Q${Math.floor(now.getUTCMonth() / 3) + 1}`;
 };
 
