@@ -1,3 +1,4 @@
+export * from './lib/clock';
 export * from './lib/config';
 export * from './lib/db.module';
 export * from './lib/problem';
