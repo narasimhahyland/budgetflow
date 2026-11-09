@@ -80,7 +80,17 @@ build() {
 up() { build && dc up -d --build --wait; }
 seed() {
   export DATABASE_URL_OWNER="postgres://${BF_PG_OWNER_USER}:${BF_PG_OWNER_PASSWORD}@127.0.0.1:${BF_PG_PORT:-5432}/${BF_PG_DB}"
+  # The worker is stopped while the seed runs, so nothing it delivers reads a half-written seed.
+  # A channel delivery decides which channels it went out on from the data present at that moment:
+  # slack only if the install and the person's chat link exist, push only if a subscription does.
+  # The seed writes requests before it writes those channel rows, and a worker running alongside
+  # delivers some requests before the channel rows land and some after, depending on how fast the
+  # machine is. CI and a laptop then disagree about one row ("in-app, email" against "in-app,
+  # email, slack, push") and a visual state fails on one and passes on the other. Stopped, the
+  # worker finds the outbox full when it starts and every delivery reads the finished seed.
+  dc stop worker >/dev/null 2>&1 || true
   eval "${BF_SEED_CMD:-npx nx run api:seed --outputStyle=static}"
+  dc up -d --wait worker
   settle
 }
 
