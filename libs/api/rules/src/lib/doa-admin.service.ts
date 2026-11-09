@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  todayUtc,
 } from '@bf/api/core';
 import {
   approvalDelegations,
@@ -36,7 +37,6 @@ interface Ctx {
 }
 
 const TENANT = (actor: RequestActor) => ({ kind: 'tenant' as const, tenantId: actor.tenantId });
-const today = () => new Date().toISOString().slice(0, 10);
 
 type VersionRow = typeof doaMatrixVersions.$inferSelect;
 
@@ -77,7 +77,7 @@ export class DoaAdminService {
     // Approved versions are stored as active and effective-dated; one that has not started yet
     // reads as "scheduled" so the screen does not claim it is already in force.
     const status =
-      row.status === 'active' && row.validFrom > today()
+      row.status === 'active' && row.validFrom > todayUtc()
         ? 'scheduled'
         : (row.status as DoaMatrixVersionSummary['status']);
     return {
@@ -115,7 +115,7 @@ export class DoaAdminService {
       versionRows.map((v) => v.approvedBy),
     );
     // The matrix in force today, not simply the newest approved one (a version may start later).
-    const day = today();
+    const day = todayUtc();
     const active =
       versionRows.find(
         (v) => v.status === 'active' && v.validFrom <= day && (!v.validTo || v.validTo >= day),
@@ -406,7 +406,7 @@ export class DoaAdminService {
           );
         }
 
-        const day = today();
+        const day = todayUtc();
         const [priorActive] = await tx
           .select()
           .from(doaMatrixVersions)

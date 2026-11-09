@@ -364,7 +364,7 @@ export function buildTeamsApprovalAdaptiveCard(
     type: 'AdaptiveCard',
     version: '1.5',
     fallbackText: `${c.stateHeadline}: ${c.ref} ${c.title} (${amountText}) — ${c.detailsUrl}`,
-     refresh: {
+    refresh: {
       action: {
         type: 'Action.Execute',
         title: 'Refresh',
@@ -377,10 +377,7 @@ export function buildTeamsApprovalAdaptiveCard(
   };
 }
 
-export function formatMoneyTripletNote(
-  amount: Money,
-  budgetAmount: Money,
-): string | null {
+export function formatMoneyTripletNote(amount: Money, budgetAmount: Money): string | null {
   if (amount.currency === budgetAmount.currency) return null;
   return `${formatMoney(budgetAmount)} at the FY2026 plan rate`;
 }

@@ -1,3 +1,4 @@
+import { todayUtc } from '@bf/api/core';
 import type { Tx } from '@bf/api/db';
 import { LedgerReads, toPostingBudget } from '@bf/api/ledger';
 import type { BudgetImpact } from '@bf/contracts';
@@ -32,7 +33,7 @@ export class BudgetImpactService {
     const before = opts.pendingIncludesThis ? available + thisMinor : available;
     const after = consumes ? before - thisMinor : before;
     const fy = await this.reads.fiscalYear(tx, budget.fiscalYearId);
-    const today = opts.today ?? new Date().toISOString().slice(0, 10);
+    const today = opts.today ?? todayUtc();
     const months = (from: string, to: string) =>
       Math.max(
         1,

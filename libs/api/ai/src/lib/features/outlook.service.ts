@@ -1,5 +1,5 @@
 import { BudgetViews } from '@bf/api/budgets';
-import { ApiProblem, DB, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, type RequestActor, todayUtc } from '@bf/api/core';
 import { aiOutlookSnapshots, budgets, fiscalYears, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   AiSourceRef,
@@ -51,7 +51,7 @@ export class AiOutlookService {
   run(actor: RequestActor, req: OutlookRunRequest): Promise<OutlookList> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       await this.settings.assertEnabled(tx, actor.tenantId, 'outlook');
-      const asOfDate = req.asOfDate ?? new Date().toISOString().slice(0, 10);
+      const asOfDate = req.asOfDate ?? todayUtc();
       const scoped = await this.retrieval.budgetFacts(tx, actor, {
         ids: req.budgetIds ?? [...(await this.retrieval.readableBudgetIds(tx, actor))],
         limit: 200,
@@ -233,7 +233,7 @@ export class AiOutlookService {
         .filter((i) => i.category === category)
         .reduce((total, i) => total + Math.abs(i.gap?.amountMinor ?? 0), 0);
     return {
-      asOfDate: items[0]?.asOfDate ?? new Date().toISOString().slice(0, 10),
+      asOfDate: items[0]?.asOfDate ?? todayUtc(),
       summary: {
         likelyOverspend: items.filter((i) => i.category === 'likely_overspend').length,
         likelyUnused: items.filter((i) => i.category === 'likely_unused').length,

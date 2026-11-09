@@ -6,6 +6,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  todayUtc,
 } from '@bf/api/core';
 import {
   apiKeys,
@@ -32,7 +33,6 @@ import { ApiKeysService } from './api-keys.service';
 import { tenantOf, type CommandContext } from './connections.service';
 
 const SCIM_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:User';
-const todayUtc = () => new Date().toISOString().slice(0, 10);
 
 /**
  * SCIM 2.0 provisioning (098). The identity provider creates, updates and deactivates people; it

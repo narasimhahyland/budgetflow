@@ -26,8 +26,9 @@ import {
   taskOf,
   usd,
 } from '../support/p5';
+import { todayUtc } from '../support/clock';
 
-const today = new Date().toISOString().slice(0, 10);
+const today = todayUtc();
 const TRAVEL = { spendType: 'travel' };
 
 async function delegate(

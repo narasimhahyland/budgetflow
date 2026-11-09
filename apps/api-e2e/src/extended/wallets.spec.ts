@@ -12,6 +12,7 @@ import {
 import { P13_IDS, userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
+import { todayUtc } from '../support/clock';
 import { expectContract, expectProblem } from '../support/contract';
 import { allocateOk, createChild, createRoot } from '../support/factory';
 import { auditFor, buckets, reason, usd } from './support';
@@ -73,7 +74,7 @@ async function claim(
       merchant: 'Fitness First Indiranagar',
       amountMinor,
       currency: 'USD',
-      claimDate: new Date().toISOString().slice(0, 10),
+      claimDate: todayUtc(),
       // A seeded receipt file stands in for the upload the employee does in the UI. It is read-only
       // reference data, so no scenario can consume or change it.
       ...(opts.receipt === false ? {} : { documentId: P13_IDS.receiptCafeMocha }),

@@ -5,6 +5,7 @@ import {
   ApiProblem,
   type CommandResult,
   type RequestActor,
+  todayUtc,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import type { Tx } from '@bf/api/db';
@@ -25,7 +26,11 @@ import { LedgerReads, toPostingBudget } from './ledger-reads.service';
 import { LedgerService } from './ledger.service';
 import { ThresholdAlerts } from './threshold-alerts.service';
 
-export const todayUtc = (): string => new Date().toISOString().slice(0, 10);
+/**
+ * Re-exported so this module's callers keep their existing import, with one implementation
+ * behind it: `@bf/api/core` owns the clock, which a test run can pin (`FIXED_NOW`).
+ */
+export { todayUtc };
 
 export interface ManualJournalInput {
   transactionCurrency: string;

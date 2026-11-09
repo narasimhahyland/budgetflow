@@ -1,4 +1,4 @@
-import { ActorResolver, unwrap } from '@bf/api/core';
+import { ActorResolver, unwrap, todayUtc } from '@bf/api/core';
 import { budgets, memberships, people, roleGrants, type Tx } from '@bf/api/db';
 import { DoaService } from '@bf/api/finance';
 import { LedgerReads } from '@bf/api/ledger';
@@ -20,7 +20,11 @@ import { Injectable } from '@nestjs/common';
 import { and, eq, gte, inArray, isNull, lte, or } from 'drizzle-orm';
 import type { BudgetRow, Money } from './approval-handlers';
 
-export const todayUtc = () => new Date().toISOString().slice(0, 10);
+/**
+ * Re-exported so this module's callers keep their existing import, with one implementation
+ * behind it: `@bf/api/core` owns the clock, which a test run can pin (`FIXED_NOW`).
+ */
+export { todayUtc };
 
 export interface RouteRequest {
   subject: 'request' | 'contribution';

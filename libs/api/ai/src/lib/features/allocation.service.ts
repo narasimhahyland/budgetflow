@@ -1,5 +1,5 @@
 import { budgetResource, BudgetViews } from '@bf/api/budgets';
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import { budgets, people, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   AiSourceRef,
@@ -249,7 +249,7 @@ export class AiAllocationService {
         and(
           eq(people.tenantId, tenantId),
           eq(people.employmentType, 'employee'),
-          or(isNull(people.endDate), gte(people.endDate, new Date().toISOString().slice(0, 10))),
+          or(isNull(people.endDate), gte(people.endDate, todayUtc())),
         ),
       )
       .groupBy(people.locationOrgUnitId);

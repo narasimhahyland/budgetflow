@@ -1,5 +1,13 @@
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, CommandRunner, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import {
+  ApiProblem,
+  CommandRunner,
+  DB,
+  PolicyService,
+  type RequestActor,
+  todayUtc,
+  nowUtc,
+} from '@bf/api/core';
 import {
   adminChangeRequests,
   memberships,
@@ -69,7 +77,7 @@ export class UserAdminService {
   ) {}
 
   private today(): string {
-    return new Date().toISOString().slice(0, 10);
+    return todayUtc();
   }
 
   private activeGrantWhere(today: string) {
@@ -545,7 +553,11 @@ export class UserAdminService {
         // `valid_to` is inclusive everywhere (`ActorResolver`), so ending it today would leave the
         // role in force until midnight. Taking access away has to be immediate, so the grant ends on
         // the day before and stops counting from this request onwards.
-        const endedOn = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        // From the API's clock, because `ActorResolver` compares `valid_to` with `todayUtc`: a wall-clock
+        // yesterday would leave the role in force under a pinned clock once real time passes it.
+        const endedOn = new Date(nowUtc().getTime() - 24 * 60 * 60 * 1000)
+          .toISOString()
+          .slice(0, 10);
         await tx
           .update(roleGrants)
           .set({ validTo: endedOn })

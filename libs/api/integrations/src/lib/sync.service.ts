@@ -1,6 +1,6 @@
 import { ImportsService } from '@bf/api/actuals';
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import {
   integrationConnections,
   integrationMessages,
@@ -42,7 +42,6 @@ import { redact } from './crypto';
 import { classifyError, isRetryable, OutboundHttp, providerMessage } from './http';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const todayUtc = () => new Date().toISOString().slice(0, 10);
 
 /**
  * The identity a connector applies records with. A person authorizes the run; the records themselves
