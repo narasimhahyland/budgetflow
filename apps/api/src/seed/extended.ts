@@ -1,4 +1,4 @@
-import { DB } from '@bf/api/core';
+import { DB, nowUtc } from '@bf/api/core';
 import * as s from '@bf/api/db';
 import { withTenant, type Db } from '@bf/api/db';
 import {
@@ -99,7 +99,10 @@ export async function seedExtended(app: INestApplicationContext): Promise<void> 
           managerPersonId: manager.personId,
           fundingBudgetId: P15_ALLOWANCE.fundingBudgetId,
           // Relative, so the allowance always belongs to the quarter the stack is running in.
-          periodKey: quarterKey(),
+          // The pinned clock, not the real one: the recognition scenario computes the quarter from
+          // the same instant (apps/api-e2e/src/support/clock.ts), so on 1 January the two would
+          // otherwise disagree about which quarter the allowance belongs to.
+          periodKey: quarterKey(nowUtc()),
           grantedMinor: P15_ALLOWANCE.grantedMinor,
           currency: await budgetCurrency(P15_ALLOWANCE.fundingBudgetId),
           grantedByPersonId: granter.personId,
@@ -123,7 +126,9 @@ export async function seedExtended(app: INestApplicationContext): Promise<void> 
         name: P15_SCENARIO.name,
         note: P15_SCENARIO.note,
         status: 'draft',
-        baselineAt: new Date(),
+        // Rendered as an absolute date under the relative-time mask, which hides the glyphs but not
+        // their width, so a real-time value could reflow the row as the day of the month changes.
+        baselineAt: nowUtc(),
         baselineJournalCount: Number(journals?.n ?? 0),
         createdByPersonId: author.personId,
       })
@@ -168,7 +173,7 @@ export async function seedExtended(app: INestApplicationContext): Promise<void> 
           authorPersonId: noteAuthor.personId,
           note: note.note,
           visibility: 'public',
-          createdAt: momentsAgo(note.daysAgo),
+          createdAt: momentsAgo(note.daysAgo, nowUtc()),
         })
         .onConflictDoNothing();
     }

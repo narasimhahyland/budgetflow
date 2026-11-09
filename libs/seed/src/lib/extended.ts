@@ -8,7 +8,9 @@ import { P4_BUDGETS } from './budgets';
  *
  * Every date here is relative to the moment the seed runs (`daysAgo`, `quarterKey`), because a
  * hard-coded future timestamp drifts out of its window as real time passes and quietly breaks the
- * screens that filter on "this quarter" or "the last 30 days".
+ * screens that filter on "this quarter" or "the last 30 days". The seed passes the API's clock as
+ * `now` (`nowUtc` from `@bf/api/core`), so under a pinned clock these line up with what the API and
+ * the scenarios treat as today; the defaults stay `new Date()` for callers that have no clock.
  */
 export const P15_IDS = {
   scenarioEuropeToIndia: seedId('92000000', 1),
