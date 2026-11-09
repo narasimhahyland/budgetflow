@@ -58,9 +58,10 @@ idle before removing it with `scripts/worktree.sh remove`.
 ## 2. What to do next, in order
 
 Four blocks, in priority order. 2.1 is paperwork left over from Wave 6 and takes an afternoon. **2.2
-is the first real engineering task** — the visual suite, where one item is a latent red that will
-stop a future PR for reasons that have nothing to do with it. 2.3 is the rest of the build. 2.4 is
-not work at all: it is four questions that need an answer from the product owner.
+is the first real engineering task, and it is larger than it looks** — 513 of the 788 visual states
+already differ from their baselines while passing, so the suite has almost no headroom and the work
+has a required order. 2.3 is the rest of the build. 2.4 is not work at all: it is four questions
+that need an answer from the product owner.
 
 ### 2.1 Close out Wave 6
 
@@ -74,35 +75,83 @@ Wave 7 opens, because Phase 20 will otherwise inherit them.
 
 ### 2.2 Visual-suite hygiene
 
-Five items. The first is latent rather than live, but it is the one that will waste someone's
-afternoon.
+**Read this before touching a baseline.** This used to be a list of five items. It is really one
+problem with a required order of work, and the order matters more than the list: fix the causes of
+nondeterminism first, re-record once at the end, then keep the number visible. Re-recording first
+freezes whatever drift has not been fixed yet, which is how the suite reached its present state.
 
-> **Measured 2026-11-08, and this section understates the problem by an order of magnitude.** A
-> zero-allowance run of the whole project (`npm run visual:headroom`) found **513 of 788 states
-> differing from their baselines, 198 of them using 70% or more of their allowance — and all of them
-> passing.** The cause is not data: expected and actual are pixel-identical in the content area and
-> differ in the **navigation rail**, which now carries 65 entries where these baselines were recorded
-> against fewer. Wave 6's merges each re-recorded only the states that breached their allowance (23
-> for Phase 16, 37 for Phase 14) and left the rest differing-but-tolerated. The reading is identical
-> with the server clock pinned or real, so it is independent of issue #86.
->
-> The practical consequence is that **the suite has almost no headroom left**: any change costing a
-> few hundred pixels tips an arbitrary handful of states red, which is the "`main` went red on a
-> different state each run" symptom already recorded in [section 7](#7-the-operational-traps). The
-> "38 held-back baselines" row below is a subset of this, not the whole of it — the 38 are only the
-> ones that also differ _behind_ the rail.
->
-> This section therefore needs reshaping rather than ticking off, and that reshape is a decision
-> nobody has taken yet. Evidence and the full per-state reading:
-> `evidence/visual-determinism/` (`086-root-cause.md`, `headroom-before.md`).
+#### What the suite actually looks like
 
-| Item                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Where                                                                                                                         | Done when                                                                                                                                                                                |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Server-computed times drift, and re-recording hides it.** `freezeTime` (`2026-11-16T09:00:00Z`) is applied with `page.clock.setFixedTime`, which freezes the **browser** clock and nothing the API computes, so every server-derived age, countdown or overdue flag keeps moving. On 7 November this turned `055-my-requests` and `123-notifications-tasks` red on every branch at once — they failed on [#69](https://github.com/narasimhahyland/budgetflow/pull/69) and twice on [#87](https://github.com/narasimhahyland/budgetflow/pull/87), a documentation-only change, with the same pixel counts each time. Both had been recorded **that same day**, so the drift crossed a threshold within hours, not across a date boundary. #69 then re-recorded all four as collateral, which is why CI is green again — and why the next threshold will do it again. | issue [#86](https://github.com/narasimhahyland/budgetflow/issues/86), `apps/web-e2e/visual/screens.json`, `visual.spec.ts:64` | The server and the browser agree on "now" — seeded dates pinned to `freezeTime`, or the relative-time regions masked. Re-recording is not a fix; it resets the clock on the next failure |
-| **38 stale-rail baselines held back.** They carry the pre-`11ea17e` rail _and_ differ behind it, so re-recording would freeze a rendering nobody has explained. `086-unused-expired` carried a wrong breadcrumb for two phases in exactly this way.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `evidence/stale-rail/remaining.txt`, each with its share of its allowance; `npm run visual:headroom` names them               | Every one classified (real change, flake or drift) before anything is recorded, and the file emptied or reduced to a reasoned remainder                                                  |
-| **`086-unused-expired` computes "days left" from the real date.** The same mechanism as the first row, and the original subject of #86 along with `046b`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | commit `8a54717`; issue [#86](https://github.com/narasimhahyland/budgetflow/issues/86)                                        | Covered by fixing the first row properly                                                                                                                                                 |
-| **`113a` query-log baselines depend on cross-suite data.** The rows exist only because the AI screens run earlier in the same suite, so the state is meaningless in a filtered run.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `apps/web-e2e/visual/screens.json`                                                                                            | The state seeds or drives its own rows, so it passes when run alone                                                                                                                      |
-| **Blank-render flake**, issue [#82](https://github.com/narasimhahyland/budgetflow/issues/82). About one state per full run fails its readiness wait and saves a blank page; different state each time, passes on retry.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `gh issue view 82`                                                                                                            | The blank render is explained rather than retried. The project runs `trace: 'off'`, so step one is capturing a trace                                                                     |
+Measured 2026-11-08 with `npm run visual:headroom`, a zero-allowance run of the whole project:
+
+| Reading                                        | Count            |
+| ---------------------------------------------- | ---------------- |
+| States in the project                          | 788              |
+| Matching their baseline exactly                | 275              |
+| **Differing from their baseline**              | **513**          |
+| Of those, using 70% or more of their allowance | **198**          |
+| Failing the gate                               | 0 before Stage 1 |
+
+**All 513 pass.** The cause is not per-screen data: for `074-over-budget-policy` the expected and
+actual images are pixel-identical in the content area and differ only in the **navigation rail**,
+which `libs/web/shell/src/lib/nav.ts` now renders with **65 entries** where these baselines were
+recorded against fewer, so every icon below the insertion point shifts down. Dozens of unrelated
+tablet states differ by an identical pixel count, which is the signature of shared chrome rather
+than data. Every state inspected so far is rail-only; that is not the same as all 513 proven, so
+treat a non-rail difference as a finding rather than an assumption.
+
+How it got here: each Wave 6 merge re-recorded only the states that **breached** their allowance —
+23 for Phase 16, 37 for Phase 14 (`8b2459c`) — and left every state that differed **within**
+tolerance untouched. Nothing was hidden; the gate simply never asked.
+
+The reading is identical with the server clock pinned and with it real, so this is independent of
+issue [#86](https://github.com/narasimhahyland/budgetflow/issues/86).
+
+**The consequence is that the suite has almost no headroom.** With 198 states above 70% of their
+allowance and one shared cause, any change costing a few hundred pixels tips an arbitrary handful
+red — which is exactly the "`main` went red on a different state each run" symptom already recorded
+in [section 7](#7-the-operational-traps). Until the re-record pass happens, expect unrelated states
+to fail and do not treat such a failure as evidence that the change under test broke something.
+
+#### Step 1 — fix the causes of nondeterminism
+
+Nothing should be re-recorded until these are closed, because each one would otherwise be baked into
+the new baseline.
+
+| Cause                                                                                                                                                                                                                                                | State                                                                                                                                                                           | Done when                                                                                                        |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **The server and the browser disagreed about "now".** `freezeTime` froze only the browser clock, so every server-computed age, countdown and overdue flag drifted against a fixed baseline.                                                          | **Stage 1 done** — `libs/api/core/src/lib/clock.ts` and `FIXED_NOW`, derived from `freezeTime` by `scripts/stack.sh` so the two cannot diverge. Six baselines corrected. PR #89 | Both clocks read the same instant. Because both are now pinned, real time passing `freezeTime` no longer matters |
+| **Stage 2 of the same fix is outstanding.** 31 further copies of the `today` one-liner in `libs/api`, eight of them exported as `todayUtc` from eight modules, so most of the product still reads wall-clock time.                                   | `evidence/visual-determinism/stage-2-scope.md` lists every site, with the three API scenarios and the SQL `now()` question                                                      | One definition of today across the API, each site decided rather than re-pointed blindly                         |
+| **The seed anchors to real time while the API is pinned.** `libs/seed/src/lib/extended.ts` uses `daysAgo`, `momentsAgo` and `quarterKey` deliberately, so fixtures stay inside "this quarter" and "the last 30 days" windows as real time passes.    | `apps/api/src/seed/extended.ts`, and a second `daysAgo` of its own in `apps/api/src/seed/rules.ts`                                                                              | The seed reads the same pinned clock as the API. They agree today and diverge at a quarter or window boundary    |
+| **Blank-render flake**, issue [#82](https://github.com/narasimhahyland/budgetflow/issues/82). About one state per full run fails its readiness wait and saves a blank page — the app never bootstrapped. Different state each time, passes on retry. | `gh issue view 82`                                                                                                                                                              | The blank render is explained rather than retried. The project runs `trace: 'off'`, so step one is a trace       |
+| **`113a` query-log baselines depend on cross-suite data.** The rows exist only because the AI screens run earlier in the same suite, so the state is meaningless in a filtered run.                                                                  | `apps/web-e2e/visual/screens.json`                                                                                                                                              | The state seeds or drives its own rows, so it passes when run alone                                              |
+| **Screen 090 carries a redundant mask** over the global `[data-testid=relative-time]` one.                                                                                                                                                           | `apps/web-e2e/visual/screens.json`                                                                                                                                              | The two are collapsed; nothing visible changes                                                                   |
+
+#### Step 2 — then one deliberate re-record pass
+
+Not before step 1. Conditions, each of which has been got wrong at least once here:
+
+- The **whole project**, never a grepped subset: a scoped run cannot see shared-component drift, and
+  shared-component drift is the entire problem.
+- On a **fresh deterministic seed** and the **pinned clock**, in the pinned Playwright image, with
+  the rail at its final entry count.
+- **Open the images and look at them.** 513 baselines currently pass while differing; a green run
+  proves nothing about whether the picture is right.
+- **Classify before recording**, by [section 7](#7-the-operational-traps)'s table: same commit
+  passing on re-run is a flake, identical pixel counts across runs is a real change, differing counts
+  are nondeterminism where re-recording is the wrong fix.
+- The **38 held-back baselines** (`evidence/stale-rail/remaining.txt`) are a subset of the 513 — the
+  ones that also differ _behind_ the rail — and each still needs its own look, because that is how
+  `086-unused-expired` carried a wrong breadcrumb for two phases. Resolve them inside this pass
+  rather than as separate work.
+
+#### Step 3 — then keep the number visible
+
+The reason 513 went unnoticed is that `npm run visual:headroom` is informational by construction: a
+separate command, never part of `scripts/gate.sh`, exit code discarded. That is the right design for
+a gate and the wrong design for a trend. **Publish the differing-state count and the number above
+70% on every CI run** without gating on them, so a jump is noticeable the week it happens rather
+than a wave later. Keep it out of the gate: it is a measurement, not a pass condition.
 
 ### 2.3 Wave 7 — phases 17 to 20
 
@@ -118,17 +167,29 @@ repository itself parks for each phase, not a separate plan document — check
 | **19 — local evidence**  | The whole product proven on the local stack from the deterministic seed, including the extended core acceptance scenario end to end (`apps/web-e2e/src/acceptance/`, which `testing-functional.mdc` says runs at every wave gate from Wave 2 and again in Phase 19) and `scripts/gate.sh` in all modes. Done: `evidence/phase-19/` holds the run, the outcome table and the gate summary.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | **20 — docs and report** | README, `docs/architecture/`, the screen inventory and this page refreshed against the finished build, plus the final report. Known stale text to fix: the README status table, `phase-handoff.md`'s claim that screens 87 and 16a "are not built" (they were built in Phase 11), and whatever of this page has aged. Done: `evidence/phase-20/`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
-### 2.4 Decisions that need the user
+### 2.4 Decisions the user has taken
 
-Four open questions. Each is stated with its trade-off and no recommendation; the detail behind all
-four is in [section 6](#6-known-gaps-worth-a-decision).
+**All four were decided on 2026-11-09.** They are recorded here with what each one commits the build
+to, so they are not re-opened as questions. The detail behind them is in
+[section 6](#6-known-gaps-worth-a-decision).
 
-| Question                                                             | Where it stands                                                                                                                                                                                                                                                 | The trade-off                                                                                                                                                                                                                                                                       |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Wire a real AI provider?**                                         | `AI_PROVIDER` is `z.enum(['fake'])` — a single-value enum — and no model token exists in the repository or the Compose stack. Every answer comes from `FakeAiProvider` fixtures.                                                                                | The fake keeps every test reproducible and the repository token-free. A real provider makes the AI features genuinely demonstrable but is an integration project with a secret to manage, non-deterministic tests and a cost, not a config change.                                  |
-| **Purge `ai_conversation_turns`, or stop promising a window?**       | `conversationHistoryDays` (default 30) is enforced in `ask.service.ts` as a read-side filter; nothing deletes a row, and Phase 14's retention categories do not cover the AI area. The text is kept forever.                                                    | Turning it into a real purge honours what screen `113a` says but loses history the evaluation sets might want. Changing the wording is cheap and honest but leaves a retention promise unmade.                                                                                      |
-| **Sign off the twelve retention periods, or keep them provisional?** | Every seeded category ships `signoff_status = 'provisional'`, pending finance and legal. Nine are periods those functions can still change; three are locked statements of policy.                                                                              | Shipping provisional is accurate about its own status but means the product states a legal position nobody has approved. Sign-off needs two functions the build cannot speak for.                                                                                                   |
-| **May a read-only role edit a summary draft's text?**                | `editSection` and `regenerate` in `libs/api/extended/src/lib/narratives.service.ts` are guarded by `assertDraft` (a status check) plus the `report.read` reader check — not `assertAuthor`, which is `audit.read`. `draft` and `approve` do use `assertAuthor`. | As built, anyone who can read summaries can rewrite an unapproved draft, which suits collaborative editing. Tightening it to `audit.read` matches who may draft and approve in the first place, and is the reading of [#85](https://github.com/narasimhahyland/budgetflow/pull/85). |
+| Question                                                             | Decision                    | What it commits the build to                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Wire a real AI provider?**                                         | **No — keep the fake.**     | `AI_PROVIDER` stays `z.enum(['fake'])`, the repository stays token-free and every AI test stays reproducible. The standing consequence is that **nothing in the AI layer has been exercised against a real model**, and the first live provider will be an integration project rather than a config change. Do not treat the single-value enum as an oversight.                         |
+| **Purge `ai_conversation_turns`, or stop promising a window?**       | **Make it a real purge.**   | **This is the only one of the four that is work.** `conversationHistoryDays` (default 30, range 7–90) is today a read-side SQL filter in `libs/api/ai/src/lib/features/ask.service.ts` line 403, and nothing deletes a row. It becomes an actual deletion, so screen `113a` means what it says. Accepted cost: history the evaluation sets might have wanted is gone once it is purged. |
+| **Sign off the twelve retention periods, or keep them provisional?** | **Ship as provisional.**    | `signoff_status` stays `'provisional'` on every seeded category. The product therefore states a retention position that **finance and legal have not approved**, and says so on its own screen. This is accepted deliberately, not pending; it needs no further chasing unless those functions ask.                                                                                     |
+| **May a read-only role edit a summary draft's text?**                | **Yes — keep it as built.** | `editSection` and `regenerate` keep `assertDraft` plus the `report.read` reader check, so anyone who can read summaries can rewrite an unapproved draft. Collaborative editing is the intent. Note the asymmetry is now deliberate: `draft` and `approve` still require `audit.read` through `assertAuthor`. Do not "fix" this to match them.                                           |
+
+The one open piece of work from this block:
+
+| Work                            | Where                                                                                                                                               | Done when                                                                                                                                |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Purge AI conversation turns** | `libs/api/ai/src/lib/features/ask.service.ts:403` is the read-side filter; `ai_conversation_turns` in `libs/api/db/src/schema/ai.ts` holds the text | Rows past each tenant's window are deleted rather than filtered, on a sweep rather than a read, and `113a`'s wording is true of the data |
+
+Two things to settle while building it, neither decided here: Phase 13 owns the AI area and Phase
+14's twelve retention categories do not cover it, so the purge needs either its own sweep or a
+thirteenth category; and the existing wall-clock sweeps are `off` by default in Compose, so the
+scenario has to drive the purge through an API rather than wait for a cron.
 
 ---
 
@@ -211,9 +272,11 @@ Before adding a row here, check whether anything else schedules the item.
 
 ---
 
-## 6. Known gaps worth a decision
+## 6. Known gaps, and the decision taken on each
 
-These are stated plainly here because they are easy to miss and awkward to discover late.
+These are stated plainly here because they are easy to miss and awkward to discover late. **All four
+were decided on 2026-11-09** — each section ends with the decision, so read the decision before
+acting on the description above it. [Section 2.4](#24-decisions-the-user-has-taken) is the summary.
 
 ### The AI layer never calls a model
 
@@ -225,6 +288,10 @@ answer comes from `FakeAiProvider` fixtures. That makes the tests reproducible; 
 **nothing here has been exercised against a real model**, and the first live provider will be a real
 integration project, not a config change.
 
+**Decided 2026-11-09: keep the fake.** The repository stays token-free and the AI tests stay
+reproducible. The consequence above stands as an accepted, standing limitation rather than a gap to
+close: the single-value enum is the decision, not an oversight.
+
 ### AI conversation text is retained indefinitely, not for 30 days
 
 `ai_conversation_turns` stores question and answer text. The settings carry
@@ -234,6 +301,10 @@ nothing ever deletes a row. The text is hidden, not purged. Phase 14's twelve re
 do not cover the AI area at all (Phase 13 owns it), so no sweep picks it up either. Either the
 window becomes a real purge or the wording stops promising one.
 
+**Decided 2026-11-09: make it a real purge.** The window becomes an actual deletion rather than a
+read-side filter, so `113a`'s wording becomes true of the data. This is the only one of the four
+that is work; it is tracked in [section 2.4](#24-decisions-the-user-has-taken).
+
 ### All twelve retention periods are provisional
 
 `retention_policies.signoff_status` defaults to `'provisional'` and every seeded category ships that
@@ -241,6 +312,10 @@ way, pending finance and legal sign-off. Nine are periods finance and legal can 
 are locked statements of policy (ledger journals and the audit log are never deleted; attendee needs
 go 30 days after the event closes). **This is not an approved legal position** — it is a stated
 default waiting for two functions to confirm it.
+
+**Decided 2026-11-09: ship as provisional.** `signoff_status` stays `'provisional'`. The product
+states a position finance and legal have not approved and is explicit about that on screen. Accepted
+deliberately — it is not awaiting anybody.
 
 ### A read-only role can rewrite a leadership summary draft
 
@@ -251,6 +326,10 @@ approved summary, plus the `report.read` reader check every read runs. So anyone
 summaries can rewrite an unapproved one's text, or regenerate it. Whether that is collaborative
 editing or a gap is a product decision, not a bug report — but it is not what
 [#85](https://github.com/narasimhahyland/budgetflow/pull/85) assumed when it tightened the buttons.
+
+**Decided 2026-11-09: keep it as built.** Collaborative editing is the intent, so `editSection` and
+`regenerate` keep the `report.read` reader check. The asymmetry with `draft` and `approve`, which
+require `audit.read`, is now deliberate — do not tighten it to match them.
 
 ---
 
@@ -456,24 +535,24 @@ twice before being fixed globally. The reset is in place now. **Do not add per-c
 
 Open issues: [`gh issue list`](https://github.com/narasimhahyland/budgetflow/issues).
 
-| #                                                             | Issue                                                                                                                                                                                 | State                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [82](https://github.com/narasimhahyland/budgetflow/issues/82) | **Blank-render flake.** About one visual state per run fails its readiness wait and saves a **blank page** — the app never bootstrapped. Different state every time, passes on retry. | Open. Not urgent (self-heals with `retries: 1`) but one unlucky retry from a red `main` on an unrelated change. The project runs with `trace: 'off'`, so there is no trace to read; the hypothesis is a silent Keycloak re-auth that does not complete.                                                               |
-| [86](https://github.com/narasimhahyland/budgetflow/issues/86) | **Calendar drift.** Baselines change with the real clock, not with the code: a seeded task turns overdue, a countdown ticks down. Raised for `046b` and `086`.                        | Open, and it has already fired once beyond those two: `055-my-requests` and `123-notifications-tasks` went red on every branch on 7 November and were re-recorded as collateral by #69, which resets the clock rather than fixing it. Wider and faster than the issue assumes -- see [2.2](#22-visual-suite-hygiene). |
+| #                                                             | Issue                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | State                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [82](https://github.com/narasimhahyland/budgetflow/issues/82) | **Blank-render flake.** About one visual state per run fails its readiness wait and saves a **blank page** — the app never bootstrapped. Different state every time, passes on retry.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Open. Not urgent (self-heals with `retries: 1`) but one unlucky retry from a red `main` on an unrelated change. The project runs with `trace: 'off'`, so there is no trace to read; the hypothesis is a silent Keycloak re-auth that does not complete. |
+| [86](https://github.com/narasimhahyland/budgetflow/issues/86) | **Calendar drift.** Baselines change with the real clock, not with the code: a seeded task turns overdue, a countdown ticks down. Raised for `046b` and `086`. **Stage 1 fixed and in review** ([PR #89](https://github.com/narasimhahyland/budgetflow/pull/89), not yet merged): the API reads a pinned clock derived from `freezeTime`, and the six affected baselines are corrected. Measured turnover dates: the task due 10 November is seeded `done` and never goes overdue, and the real next turnover was 14 November, moving the count by two at once. **Stage 2 is outstanding** — 31 further copies of the one-liner still read wall-clock time (`evidence/visual-determinism/stage-2-scope.md`). Close the issue only when Stage 2 lands. |
 
 Loose ends without a ticket:
 
-| Loose end                                                                                                                                                                                                                                                                                                                             | Where it is written down                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **38 stale-rail baselines held back.** They show the old nav rail _and_ differ behind it, so re-recording would freeze a rendering nobody has explained. Each needs its own look.                                                                                                                                                     | `evidence/stale-rail/remaining.txt`, with each one's share of its allowance; `npm run visual:headroom` names them every run |
-| **`086-unused-expired` computes "days left" from the real date.** Only the browser clock is frozen, so the figure falls by one each day and the state drifts towards its tolerance on its own. Masking it needs a handle on the report frame's cells that does not exist. Now also covered by issue #86.                              | commit `8a54717`                                                                                                            |
-| **Phase 15 merged its frontend without an evidence pack.** There is no `evidence/phase-15/frontend`, where Phases 14 and 16 both have one. The definition of done asks for the gate summary, outcome table and visual QA report.                                                                                                      | `evidence/phase-16/frontend/` is the model to copy                                                                          |
-| **The README status table still shows Phases 14, 15 and 16 as backend only.** All three frontends are now merged.                                                                                                                                                                                                                     | [`README.md`](../README.md#status)                                                                                          |
-| **Screen 090 carries a redundant mask.** The global mask already covers `[data-testid=relative-time]`, and `090-approval-history` masks the whole first cell (`table[aria-label="Approval decisions"] tbody td:first-child`) on top of it. Collapsing the two changes nothing visible.                                                | `apps/web-e2e/visual/screens.json`                                                                                          |
-| **`113a` depends on cross-suite data.** Its query-log state needs rows other screens' AI calls create.                                                                                                                                                                                                                                | `apps/web-e2e/visual/screens.json`                                                                                          |
-| **A monospace `font-family` slipped past stylelint.** `frontend-satori-styling.mdc` forbids it, but stylelint only enforces the ban in `.scss`, so an inline component style in `libs/web/features/ai/src/lib/ai-output.ts` was never checked.                                                                                        | issue #70's closing comment                                                                                                 |
-| **The default board pack (016a) renders all zeros.** The seed closes the period without writing `period_close_snapshots` rows, so the "latest closed period" view is empty. It is the seed, not the report — switch to the current open period and the figures are real. Fixing it moves the `016a-board-pack--default--*` baselines. | `docs/architecture/phase-handoff.md`, "Known follow-ups from Phase 11"                                                      |
-| **`phase-handoff.md` says screens 87 and 16a "are not built".** They were built in Phase 11; baselines exist for both. That paragraph is stale.                                                                                                                                                                                       | `docs/architecture/phase-handoff.md`                                                                                        |
+| Loose end                                                                                                                                                                                                                                                                                                                                                                                                   | Where it is written down                                                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **38 stale-rail baselines held back** — and they are a subset of a much larger set: 513 of 788 states differ from their baselines while passing. Each of the 38 still needs its own look, because they differ _behind_ the rail as well as in it. Handle them inside the re-record pass, not separately: [2.2](#22-visual-suite-hygiene).                                                                   | `evidence/stale-rail/remaining.txt`; `npm run visual:headroom` names them every run |
+| ~~**`086-unused-expired` computes "days left" from the real date.**~~ Fixed by #86 Stage 1 ([PR #89](https://github.com/narasimhahyland/budgetflow/pull/89)): the figure now comes from the pinned clock, so it no longer falls by one a day. Masking it was the original suggestion and was never possible — the countdown is a generic numeric metric in the shared report frame, with no per-key handle. | commit `8a54717`; `evidence/visual-determinism/086-root-cause.md`                   |
+| **Phase 15 merged its frontend without an evidence pack.** There is no `evidence/phase-15/frontend`, where Phases 14 and 16 both have one. The definition of done asks for the gate summary, outcome table and visual QA report.                                                                                                                                                                            | `evidence/phase-16/frontend/` is the model to copy                                  |
+| **The README status table still shows Phases 14, 15 and 16 as backend only.** All three frontends are now merged.                                                                                                                                                                                                                                                                                           | [`README.md`](../README.md#status)                                                  |
+| **Screen 090 carries a redundant mask.** The global mask already covers `[data-testid=relative-time]`, and `090-approval-history` masks the whole first cell (`table[aria-label="Approval decisions"] tbody td:first-child`) on top of it. Collapsing the two changes nothing visible.                                                                                                                      | `apps/web-e2e/visual/screens.json`                                                  |
+| **`113a` depends on cross-suite data.** Its query-log state needs rows other screens' AI calls create.                                                                                                                                                                                                                                                                                                      | `apps/web-e2e/visual/screens.json`                                                  |
+| **A monospace `font-family` slipped past stylelint.** `frontend-satori-styling.mdc` forbids it, but stylelint only enforces the ban in `.scss`, so an inline component style in `libs/web/features/ai/src/lib/ai-output.ts` was never checked.                                                                                                                                                              | issue #70's closing comment                                                         |
+| **The default board pack (016a) renders all zeros.** The seed closes the period without writing `period_close_snapshots` rows, so the "latest closed period" view is empty. It is the seed, not the report — switch to the current open period and the figures are real. Fixing it moves the `016a-board-pack--default--*` baselines.                                                                       | `docs/architecture/phase-handoff.md`, "Known follow-ups from Phase 11"              |
+| **`phase-handoff.md` says screens 87 and 16a "are not built".** They were built in Phase 11; baselines exist for both. That paragraph is stale.                                                                                                                                                                                                                                                             | `docs/architecture/phase-handoff.md`                                                |
 
 ---
 
