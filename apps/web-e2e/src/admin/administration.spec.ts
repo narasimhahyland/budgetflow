@@ -190,8 +190,8 @@ test.describe('data retention and legal holds (111)', () => {
       await expect(page.getByTestId('provisional-note')).toContainText(
         'never deleted, whatever these settings say',
       );
-      await expect(page.getByTestId('signoff-summary')).toContainText('12 of 12');
-      await expect(page.getByTestId('automation-summary')).toContainText('4 of 12');
+      await expect(page.getByTestId('signoff-summary')).toContainText('13 of 13');
+      await expect(page.getByTestId('automation-summary')).toContainText('5 of 13');
       // Locked categories say so in words, and the accounting record is never deletable.
       await expect(page.getByTestId('signoff-ledger_journals')).toHaveText('Provisional');
       await expect(page.getByTestId('locked-ledger_journals')).toContainText('append-only');
@@ -201,6 +201,11 @@ test.describe('data retention and legal holds (111)', () => {
         'Stated policy only',
       );
       await expect(page.getByTestId('automation-notifications')).toHaveText('Applied nightly');
+      // AI conversation history is the thirteenth category, and it really deletes: it used to be a
+      // read-side filter that kept the text forever while 113a promised a window.
+      await expect(page.getByTestId('period-ai_conversations')).toBeVisible();
+      await expect(page.getByTestId('signoff-ai_conversations')).toHaveText('Provisional');
+      await expect(page.getByTestId('automation-ai_conversations')).toHaveText('Applied nightly');
     });
 
     test('can preview a run but is not offered the irreversible apply', async ({ page }, info) => {
