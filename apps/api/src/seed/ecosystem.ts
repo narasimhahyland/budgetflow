@@ -134,6 +134,8 @@ export async function seedEcosystem(_app: INestApplicationContext): Promise<void
           tokenHash: sha256Hex(secret),
           grants: c.grants,
           consentText: c.consentText,
+          // Real time on purpose: key and connection expiry are checked against Date.now() and SQL now(),
+          // so a pinned expiry would make every seeded credential lapse on one fixed real date.
           expiresAt: new Date(Date.now() + c.lifetimeDays * DAY_MS),
         });
       }

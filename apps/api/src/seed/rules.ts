@@ -23,6 +23,9 @@ class RulesSeedModule {}
 
 const T = TENANTS.acme;
 /** Fixtures are dated relative to the seed run so ages and the 30-day windows stay realistic. */
+// Real time on purpose, unlike the extended seed: exception age and the rules dashboard's 30-day
+// window are computed against Date.now(), so a real-relative seed gives the same ages on every run.
+// Seeding these from the pinned clock would put them in the real future and clamp every age to 0.
 const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000);
 
 /**
