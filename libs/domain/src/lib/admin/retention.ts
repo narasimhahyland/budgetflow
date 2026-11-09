@@ -205,6 +205,19 @@ export const RETENTION_CATALOG: readonly RetentionCategoryDefinition[] = [
     automation: 'automatic',
     periodLabel: '90 days after the person left, then personal details are anonymised.',
   },
+  {
+    category: 'ai_conversations',
+    label: 'AI conversation history',
+    covers: 'The questions people ask the assistant and the answers it gave.',
+    action: 'delete',
+    anchor: 'record_date',
+    defaultPeriodDays: 30 * DAY,
+    minimumDays: 7 * DAY,
+    locked: false,
+    financial: false,
+    automation: 'automatic',
+    periodLabel: '30 days since the last question, then deleted.',
+  },
 ];
 
 export const retentionCategory = (category: string): RetentionCategoryDefinition | undefined =>

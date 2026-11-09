@@ -1,4 +1,5 @@
 import {
+  aiConversations,
   notifications,
   people,
   productAnalyticsEvents,
@@ -125,11 +126,45 @@ const leaverHandler: RetentionHandler = {
   },
 };
 
+/**
+ * AI conversation history (113a). The window runs from the last question in a conversation, not from
+ * each turn, so a thread someone is still using is never half-deleted. Deleting the conversation
+ * takes its turns with it: `ai_conversation_turns.conversation_id` cascades.
+ *
+ * Until this handler existed the window was a read-side filter and nothing ever deleted a row, so
+ * the text was hidden rather than purged. Legal holds are matched on the asker's person, as they are
+ * everywhere else here, which is why this belongs in the sweep rather than in its own job.
+ */
+const aiConversationHandler: RetentionHandler = {
+  category: 'ai_conversations',
+  async collect(tx, cutoff) {
+    const rows = await tx
+      .select({
+        id: aiConversations.id,
+        lastAskedAt: aiConversations.lastAskedAt,
+        personId: aiConversations.personId,
+      })
+      .from(aiConversations)
+      .where(lt(aiConversations.lastAskedAt, cutoff));
+    return rows.map((r) => ({
+      id: r.id,
+      occurredAt: iso(r.lastAskedAt),
+      personId: r.personId,
+    }));
+  },
+  async apply(tx, ids) {
+    if (!ids.length) return 0;
+    await tx.delete(aiConversations).where(inArray(aiConversations.id, [...ids]));
+    return ids.length;
+  },
+};
+
 export const RETENTION_HANDLERS: readonly RetentionHandler[] = [
   notificationsHandler,
   analyticsHandler,
   webhookDeliveryHandler,
   leaverHandler,
+  aiConversationHandler,
 ];
 
 export const handlerFor = (category: string): RetentionHandler | undefined =>

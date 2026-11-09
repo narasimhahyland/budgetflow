@@ -1,0 +1,14 @@
+Gate summary (lint typecheck build) — logs in tmp/gate/20261109-073253
+  PASS secrets             2s
+  PASS lint                4s
+  PASS styles              3s
+  PASS satori             37s
+  PASS typecheck          40s
+  PASS build               2s
+  PASS openapi             1s
+  PASS db                  3s
+
+Gate summary (functional-api) — logs in tmp/gate/20261109-072859
+  PASS secrets             6s
+  PASS stack              49s
+  PASS functional-api    155s

@@ -672,6 +672,20 @@ export class RetentionService {
   }
 
   /** The periods in force now, for the categories asked for. */
+  /**
+   * The period in force for one category, as the tenant's policy row sets it, falling back to the
+   * product default when no row exists yet. `null` means never deleted.
+   *
+   * Public so that a module whose data a category covers can read the *same* number the sweep
+   * deletes by, instead of keeping a second copy of the window. The AI area does this for
+   * `ai_conversations`: one period governs both what is purged and what is listed, so the two can
+   * never disagree.
+   */
+  async effectivePeriodDays(tx: Tx, category: string): Promise<number | null> {
+    const [period] = await this.effectivePeriods(tx, [category]);
+    return period ? period.periodDays : null;
+  }
+
   private async effectivePeriods(
     tx: Tx,
     categories: readonly string[],

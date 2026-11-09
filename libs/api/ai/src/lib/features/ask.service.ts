@@ -1,4 +1,4 @@
-import { ApiProblem, DB, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, nowUtc, type RequestActor } from '@bf/api/core';
 import { aiConversations, aiConversationTurns, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   AiChannel,
@@ -15,11 +15,12 @@ import type {
   Money,
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { AiGateway } from '../ai-gateway.service';
 import { AiQueryLogService, type ScopeSummary } from '../query-log.service';
 import { AiRetrieval } from '../retrieval.service';
+import { RetentionService } from '@bf/api/admin';
 import { AiSettingsService } from '../settings.service';
 import type { Fact } from '../provider/ai-provider';
 
@@ -95,6 +96,7 @@ export class AiAskService {
   constructor(
     @Inject(DB) private readonly db: Db,
     private readonly settings: AiSettingsService,
+    private readonly retention: RetentionService,
     private readonly retrieval: AiRetrieval,
     private readonly gateway: AiGateway,
     private readonly log: AiQueryLogService,
@@ -389,7 +391,14 @@ export class AiAskService {
   }
 
   private async conversationsInTx(tx: Tx, actor: RequestActor): Promise<AiConversationList> {
-    const settings = await this.settings.settings(tx, actor.tenantId);
+    // One window governs both ends: the `ai_conversations` retention period is what the nightly
+    // sweep deletes by, so reading it here means the list can never promise history the purge has
+    // already removed. A null period means the category is never deleted, so nothing is filtered.
+    // The cutoff is computed from the API's clock rather than SQL `now()` so it holds still under a
+    // pinned clock (see libs/api/core clock.ts).
+    const periodDays = await this.retention.effectivePeriodDays(tx, 'ai_conversations');
+    const cutoff =
+      periodDays === null ? null : new Date(nowUtc().getTime() - periodDays * 86_400_000);
     const rows = await tx
       .select({
         c: aiConversations,
@@ -400,7 +409,7 @@ export class AiAskService {
         and(
           eq(aiConversations.tenantId, actor.tenantId),
           eq(aiConversations.actorSubject, actor.subject),
-          sql`${aiConversations.lastAskedAt} > now() - make_interval(days => ${settings.conversationHistoryDays})`,
+          ...(cutoff === null ? [] : [gt(aiConversations.lastAskedAt, cutoff)]),
         ),
       )
       .orderBy(desc(aiConversations.lastAskedAt), aiConversations.title, aiConversations.id);

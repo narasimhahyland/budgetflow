@@ -1,3 +1,4 @@
+import { AdminModule } from '@bf/api/admin';
 import { AuditModule } from '@bf/api/audit';
 import { BudgetsModule } from '@bf/api/budgets';
 import { Module } from '@nestjs/common';
@@ -46,7 +47,7 @@ const SERVICES = [
 
 /** AI services (also used by the seed). */
 @Module({
-  imports: [AuditModule, BudgetsModule],
+  imports: [AdminModule, AuditModule, BudgetsModule],
   providers: [provider, ...SERVICES],
   exports: [AiProvider, ...SERVICES],
 })

@@ -1,0 +1,4 @@
+  ✓  1 apps/api-e2e/src/ai/conversation-retention.spec.ts:123:7 › AI conversation retention (113a) › the category ships as a provisional default that deletes (9ms)
+  ✓  2 apps/api-e2e/src/ai/conversation-retention.spec.ts:134:7 › AI conversation retention (113a) › a conversation past the window is deleted, and one inside it is kept (155ms)
+  ✓  3 apps/api-e2e/src/ai/conversation-retention.spec.ts:193:7 › AI conversation retention (113a) › a legal hold on the asker keeps their conversation and the run says which hold (103ms)
+  3 passed (888ms)
