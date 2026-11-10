@@ -1,6 +1,6 @@
 # Phase 17 — quality pass
 
-Branch `feat/p17-quality`, against `main` at `b2141ae`. **In progress.**
+Branch `feat/p17-quality`, against `main` at `b2141ae`. **Every item done or deferred**; exploratory findings are listed for follow-up.
 
 The plan defines Phase 17 as a functional quality pass: every feature traced to a passing functional
 check, agent-driven exploratory checks, responsive and visual regression, performance, migration and
@@ -8,16 +8,16 @@ data-integrity checks. The plan also lists accessibility; **accessibility is not
 the user's decision that `AGENTS.md` governs ("Deferred: dark theme … and accessibility checks").
 Visual regression hygiene (handoff 2.2) is being done in a separate session and is not repeated here.
 
-| Item                                              | State                                                                                          | Evidence                                 |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Every built screen reached by a functional check  | Done — 112 of 112 routed components; five new journeys                                         | [`traceability.md`](traceability.md)     |
-| Migration: empty database to current              | Done — RLS enabled and forced on every tenant table                                            | `apps/api-e2e/src/db/migrations.spec.ts` |
-| Migration: previous release with data to current  | Done — 0018 to 0019, 157 tables, 1,942 rows survive                                            | same                                     |
-| Performance baseline on the seed                  | Done — all 2xx, p50 9–21 ms, p97.5 14–31 ms                                                    | [`perf/`](perf/)                         |
-| Performance on a large dataset                    | Done — 20,136 ledger lines, all 2xx; dashboard and budget-vs-actual 3–4x slower, the rest flat | [`perf/README.md`](perf/README.md)       |
-| Isolated Testcontainers runs (`API_E2E_ISOLATED`) | **Deferred** (user decision, 10 Nov 2026) — see below                                          | —                                        |
-| Exploratory checks in the browser                 | Not started                                                                                    | —                                        |
-| Data integrity                                    | Done — 77 integrity scenarios pass; rebuild check clean and audit chain valid on 20,130 lines  | [`integrity/`](integrity/)               |
+| Item                                              | State                                                                                                      | Evidence                                 |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Every built screen reached by a functional check  | Done — 112 of 112 routed components; five new journeys                                                     | [`traceability.md`](traceability.md)     |
+| Migration: empty database to current              | Done — RLS enabled and forced on every tenant table                                                        | `apps/api-e2e/src/db/migrations.spec.ts` |
+| Migration: previous release with data to current  | Done — 0018 to 0019, 157 tables, 1,942 rows survive                                                        | same                                     |
+| Performance baseline on the seed                  | Done — all 2xx, p50 9–21 ms, p97.5 14–31 ms                                                                | [`perf/`](perf/)                         |
+| Performance on a large dataset                    | Done — 20,136 ledger lines, all 2xx; dashboard and budget-vs-actual 3–4x slower, the rest flat             | [`perf/README.md`](perf/README.md)       |
+| Isolated Testcontainers runs (`API_E2E_ISOLATED`) | **Deferred** (user decision, 10 Nov 2026) — see below                                                      | —                                        |
+| Exploratory checks in the browser                 | Done — 6 charters; controls held; 7 findings (F7 medium: approval panel overstates company-wide available) | [`exploratory/`](exploratory/)           |
+| Data integrity                                    | Done — 77 integrity scenarios pass; rebuild check clean and audit chain valid on 20,130 lines              | [`integrity/`](integrity/)               |
 
 ## Design note for the large-dataset run
 
