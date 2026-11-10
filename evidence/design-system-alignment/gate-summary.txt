@@ -1,0 +1,24 @@
+scripts/gate.sh lint typecheck build — 2026-11-10T23:36:05Z — commit dbfba140
+PASS|secrets|26s
+PASS|lint|18s
+PASS|styles|7s
+PASS|satori|40s
+PASS|typecheck|8s
+PASS|build|1s
+PASS|openapi|2s
+PASS|db|1s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report
+
+scripts/gate.sh functional-api functional-e2e — 2026-11-10T13:11:05Z — commit dbfba140
+PASS|secrets|2s
+PASS|stack|60s
+PASS|functional-api|150s
+PASS|reseed-e2e|51s
+PASS|functional-e2e|241s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report
+
+scripts/gate.sh visual — 2026-11-10T23:32:57Z — commit dbfba140
+PASS|secrets|8s
+PASS|stack|63s
+PASS|visual|932s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report
