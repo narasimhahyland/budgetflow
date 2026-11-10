@@ -53,3 +53,8 @@ Existing scope scenarios re-run in the same pass (`identity/me`, `identity/role-
   page and in the shell); this page shows it, the shell does not yet.
 - Visual baselines: the new screen is not in `apps/web-e2e/visual/screens.json`, and the company
   settings screen gains one link, so its baseline changes at the next re-record.
+- Adding `/admin/security/break-glass` to `apps/web-e2e/visual/screens.json`: grant start, end and
+  "active until" times are real time by design (the expiry check depends on it), so they change every
+  run. Mask them inside a fixed-width box, as with the AI ids, because a mask hides glyphs but not
+  their width (#70). The seed creates no grants; if one is ever seeded, its times need the same
+  treatment rather than a pinned clock.
