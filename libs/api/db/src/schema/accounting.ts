@@ -12,7 +12,18 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { ccy, createdAt, day, minor, pk, tenantRef, ts, validFrom, validTo } from './_columns';
+import {
+  appNow,
+  ccy,
+  createdAt,
+  day,
+  minor,
+  pk,
+  tenantRef,
+  ts,
+  validFrom,
+  validTo,
+} from './_columns';
 import { budgetCategories, budgets } from './budgets';
 import {
   accrualStatus,
@@ -228,7 +239,7 @@ export const prepaids = pgTable(
     actualId: uuid('actual_id'),
     budgetId: uuid('budget_id').references(() => budgets.id),
     recognizedThrough: day('recognized_through'),
-    createdAt: ts('created_at').defaultNow(),
+    createdAt: ts('created_at').default(appNow),
   },
   (t) => [index('prepaids_commitment').on(t.tenantId, t.commitmentId)],
 );
@@ -267,7 +278,7 @@ export const integrityCheckRuns = pgTable(
     status: integrityCheckStatus('status').notNull().default('queued'),
     requestedBy: uuid('requested_by'),
     trigger: varchar('trigger', { length: 20 }).notNull().default('manual'),
-    requestedAt: ts('requested_at').notNull().defaultNow(),
+    requestedAt: ts('requested_at').notNull().default(appNow),
     startedAt: ts('started_at'),
     finishedAt: ts('finished_at'),
     summary: jsonb('summary'),
@@ -289,7 +300,7 @@ export const integrityFlags = pgTable(
     details: jsonb('details').notNull().default({}),
     status: integrityFlagStatus('status').notNull().default('open'),
     checkRunId: uuid('check_run_id').references(() => integrityCheckRuns.id),
-    raisedAt: ts('raised_at').notNull().defaultNow(),
+    raisedAt: ts('raised_at').notNull().default(appNow),
   },
   (t) => [index('integrity_flags_tenant').on(t.tenantId, t.kind, t.status)],
 );
@@ -378,7 +389,7 @@ export const forecastSnapshots = pgTable(
     submittedAt: ts('submitted_at'),
     acceptedAt: ts('accepted_at'),
     acceptedBy: uuid('accepted_by'),
-    updatedAt: ts('updated_at').notNull().defaultNow(),
+    updatedAt: ts('updated_at').notNull().default(appNow),
   },
   (t) => [
     index('forecast_snapshots_budget').on(t.tenantId, t.budgetId, t.asOfDate),
@@ -400,7 +411,7 @@ export const periodCloseSnapshots = pgTable(
     legalEntityId: uuid('legal_entity_id').references(() => legalEntities.id),
     balances: jsonb('balances').notNull(),
     takenBy: uuid('taken_by'),
-    takenAt: ts('taken_at').notNull().defaultNow(),
+    takenAt: ts('taken_at').notNull().default(appNow),
     /** Re-closing a reopened period takes the next version; earlier versions stay for audit. */
     version: integer('version').notNull().default(1),
     currency: ccy('currency'),

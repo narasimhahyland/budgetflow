@@ -1,5 +1,5 @@
 import { boolean, index, integer, jsonb, pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
-import { createdAt, minor, pk, tenantRef, ts, updatedAt } from './_columns';
+import { appNow, createdAt, minor, pk, tenantRef, ts, updatedAt } from './_columns';
 import { boardPackStatus } from './enums';
 import { people } from './org';
 import { tenants } from './tenancy';
@@ -75,7 +75,7 @@ export const reportScheduleRuns = pgTable(
     scheduleId: uuid('schedule_id')
       .notNull()
       .references(() => reportSchedules.id),
-    runAt: ts('run_at').notNull().defaultNow(),
+    runAt: ts('run_at').notNull().default(appNow),
     trigger: varchar('trigger', { length: 20 }).notNull().default('scheduled'),
     status: varchar('status', { length: 20 }).notNull().default('delivered'),
     deliveredCount: integer('delivered_count').notNull().default(0),
@@ -104,7 +104,7 @@ export const reportExports = pgTable(
     sizeBytes: minor('size_bytes'),
     scheduleId: uuid('schedule_id').references(() => reportSchedules.id),
     requestedByPersonId: uuid('requested_by_person_id').references(() => people.id),
-    requestedAt: ts('requested_at').notNull().defaultNow(),
+    requestedAt: ts('requested_at').notNull().default(appNow),
     expiresAt: ts('expires_at').notNull(),
   },
   (t) => [index('report_exports_tenant_requested').on(t.tenantId, t.requestedAt)],
@@ -138,7 +138,7 @@ export const boardPackGenerations = pgTable(
     failedPage: varchar('failed_page', { length: 40 }),
     error: text('error'),
     requestedByPersonId: uuid('requested_by_person_id').references(() => people.id),
-    requestedAt: ts('requested_at').notNull().defaultNow(),
+    requestedAt: ts('requested_at').notNull().default(appNow),
     completedAt: ts('completed_at'),
     expiresAt: ts('expires_at').notNull(),
   },

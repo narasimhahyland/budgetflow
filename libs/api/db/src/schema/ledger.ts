@@ -12,7 +12,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { ccy, createdAt, day, minor, pk, tenantRef, ts } from './_columns';
+import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts } from './_columns';
 import { budgets, planVersions } from './budgets';
 import { journalType, ledgerAccount, rateType } from './enums';
 import { fiscalPeriods, legalEntities } from './finance';
@@ -133,7 +133,7 @@ export const ledgerBalances = pgTable(
     budgetAmountMinor: minor('budget_amount_minor').notNull().default(0),
     reportingAmountMinor: minor('reporting_amount_minor').notNull().default(0),
     lineCount: integer('line_count').notNull().default(0),
-    updatedAt: ts('updated_at').notNull().defaultNow(),
+    updatedAt: ts('updated_at').notNull().default(appNow),
   },
   (t) => [
     primaryKey({ columns: [t.budgetId, t.fiscalPeriodId, t.bucket] }),

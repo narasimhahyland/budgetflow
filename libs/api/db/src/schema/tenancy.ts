@@ -9,7 +9,17 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { ccy, createdAt, pk, tenantRef, ts, updatedAt, validFrom, validTo } from './_columns';
+import {
+  appNow,
+  ccy,
+  createdAt,
+  pk,
+  tenantRef,
+  ts,
+  updatedAt,
+  validFrom,
+  validTo,
+} from './_columns';
 import { intercompanyMode, rateType, roleId } from './enums';
 
 /** Reference data shared by all tenants (no tenant_id, no RLS). */
@@ -130,7 +140,7 @@ export const productAnalyticsEvents = pgTable(
   {
     id: pk(),
     tenantId: tenantRef().references(() => tenants.id),
-    occurredAt: ts('occurred_at').notNull().defaultNow(),
+    occurredAt: ts('occurred_at').notNull().default(appNow),
     actorPersonId: uuid('actor_person_id'),
     name: varchar('name', { length: 100 }).notNull(),
     properties: jsonb('properties').notNull().default({}),
