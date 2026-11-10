@@ -1,6 +1,6 @@
 # Phase 17 — traceability: which built features does a functional check reach?
 
-Status: **audit in progress.** Against `main` at `b2141ae`.
+Status: **route coverage closed: all 112 routed components are now reached by a journey.** Against `main` at `b2141ae`.
 
 The plan's Phase 17 asks for "every feature traced to a passing functional check". This page records
 how that was measured, what it found, and what is being done about each gap.
@@ -37,3 +37,29 @@ by every sign-in. Of the other ten:
 
 The six untested routes are built features no functional check reaches. Closing them is Phase 17
 work: a journey per route, asserting the business outcome the screen exists for.
+
+## Component-level result, and the gaps closed
+
+Routes overstate gaps: one component can sit behind two routes (the notification settings page is at
+`/me/notifications` and at `/m/settings/notifications`, and the journey covers the first). Counted per
+**component**, 105 of 112 were reached by URL, and two more by click-through (the unmatched queue and a
+person's profile). That left five built screens no functional check reached. Each now has a journey,
+written against seeded data chosen by id and asserting the business outcome the screen exists for:
+
+| Screen                                 | Journey                             | What it proves                                                                                                                           |
+| -------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Actuals event page                     | `accounting/event-close.spec.ts`    | Finance sees the unmatched-actuals blocker with its count, and is never offered the close — the organizer closes on the event's own page |
+| Matched actuals                        | `accounting/actuals-review.spec.ts` | The Auditor sees matched lines with no undo; the Controller is offered an undo on exactly the non-reversal lines                         |
+| Mapping rules                          | `accounting/actuals-review.spec.ts` | Both see the seeded rule; only the Controller may add one                                                                                |
+| Delegations (`/approvals/delegations`) | `approvals/delegations.spec.ts`     | The domain's refusals reach the person: no self-delegation, no end before start                                                          |
+| All events by stage (`/events/all`)    | `events/events-list.spec.ts`        | Each readable event sits under its stage only; the organizer sees only what they may read                                                |
+
+All pass on desktop, tablet and mobile against the worktree stack on a fresh seed.
+
+## Found while writing them
+
+- **The delegate search shows nothing for someone outside the delegator's reach** — no "no one found"
+  message, the list just stays empty.
+- On the actuals event page the close form is offered only to someone who may both read finance's
+  reconciliation and manage the event; no seeded role is both. This is consistent rather than a
+  defect: finance reads the reasons, organizers close from the event page.
