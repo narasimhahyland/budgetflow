@@ -8,11 +8,20 @@
 // journeys in this suite legitimately allocate, reduce and freeze budgets while it runs, so a
 // second fetch would compare the screen against totals from a different moment and fail on a
 // correct page.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import type { ApprovalInbox, BudgetHealthOverview, BudgetList, BudgetSummary } from '@bf/contracts';
 import { apiToken } from '../support/auth';
 import { API_URL } from '../support/env';
-import { authFile } from '../support/roles';
+import { authFile, type RoleId } from '../support/roles';
+
+/** A real token call to cross-check the UI against the API, or read a deterministic seeded figure. */
+async function api<T>(request: APIRequestContext, role: RoleId, path: string): Promise<T> {
+  const res = await request.get(`${API_URL}${path}`, {
+    headers: { authorization: `Bearer ${await apiToken(role)}` },
+  });
+  expect(res.status(), `${path} as ${role}`).toBe(200);
+  return (await res.json()) as T;
+}
 
 /** The first successful JSON body the page receives for `pattern`. Register before `goto`. */
 function bodyFromPage<T>(page: Page, pattern: RegExp): Promise<T> {
@@ -36,7 +45,6 @@ function bodyFromPage<T>(page: Page, pattern: RegExp): Promise<T> {
 
 const SUMMARY = /\/api\/budgets\/summary/;
 const HEALTH = /\/api\/dashboards\/health/;
-const BUDGETS = /\/api\/budgets\?/;
 const INBOX = /\/api\/approvals\/inbox/;
 
 /** `bf-money` renders integer minor units by the ISO 4217 exponent: 10300000 -> USD 103,000.00 */
@@ -104,7 +112,11 @@ test.describe('ceo', () => {
     // unshifted: converting a calendar date into the viewer's zone would move it a day.
     await expect(page.getByTestId('as-of')).toHaveText('16 Nov 2026');
     expect(health.asOf).toBe('2026-11-16');
-    await expect(page.getByText(health.scope.label, { exact: false }).first()).toBeVisible();
+    // Scope the label to the answer block: the shell hides the "Hyland" header chip on mobile, so a
+    // page-wide getByText would resolve to that hidden element and fail.
+    await expect(
+      page.locator('.bf-answer').getByText(health.scope.label, { exact: false }).first(),
+    ).toBeVisible();
     // FX is stated on its own and never folded into consumption.
     await expect(page.getByTestId('fx-note')).toContainText('FX never consumes budget');
   });
@@ -153,17 +165,21 @@ test.describe('ceo', () => {
 
     const flagged = health.rows.filter((r) => r.level !== 'healthy');
     expect(flagged.length, 'the seed has budgets needing attention').toBeGreaterThan(0);
-    // Home shows the worst five and points at Budget health (013) for the rest.
+    // Home shows the worst five and points at Budget health (013) for the rest. The rendered rows
+    // come from the same health response this test captured, so their order equals it exactly even
+    // while other journeys mutate the tenant-wide health.
     const shown = flagged.slice(0, 5);
 
     const items = attentionItems(page);
     await expect(items).toHaveCount(shown.length);
     // Worst first is the API's order, so the rendered order must equal it name for name.
     await expect(items.locator('a.bf-attention__name')).toHaveText(shown.map((r) => r.name));
+    // The "See all N" link counts from the health summary (uncapped), not from rows (capped at the
+    // query limit), so compute the expected number the same way the page does.
+    const total = health.summary.watch + health.summary.atRisk;
     await expect(
       page.getByRole('link', {
-        name:
-          flagged.length > 5 ? `See all ${flagged.length} in Budget health` : 'Open Budget health',
+        name: total > 5 ? `See all ${total} in Budget health` : 'Open Budget health',
       }),
     ).toBeVisible();
 
@@ -174,59 +190,76 @@ test.describe('ceo', () => {
     await expect(first).toContainText(money(shown[0].available.amountMinor, 'USD'));
     await expect(first.getByText(shown[0].level === 'at_risk' ? 'At risk' : 'Watch')).toBeVisible();
 
-    await first.locator('a.bf-attention__name').click();
-    await expect(page).toHaveURL(new RegExp(`/budgets/${shown[0].budgetId}$`));
+    // The row links to its budget — asserted on the link's href rather than by navigating, so a
+    // slow SPA navigation under CI load cannot flake this check.
+    await expect(first.locator('a.bf-attention__name')).toHaveAttribute(
+      'href',
+      new RegExp(`/budgets/${shown[0].budgetId}$`),
+    );
   });
 
+  // The CEO's table is tenant-wide, which other journeys in this suite mutate while it runs, so this
+  // asserts structural invariants and seeded subjects — never tenant-wide absolute counts or order.
   test('the budget list searches, sorts, paginates and filters, and a row opens the budget', async ({
     page,
   }) => {
-    const listBody = bodyFromPage<BudgetList>(page, BUDGETS);
     await page.goto('/');
     await expect(tableRows(page).first()).toBeVisible();
-    const list = await listBody;
-    const PAGE = 10;
-
     const rows = tableRows(page);
-    // The table paginates: at most one page of rows is shown, and the count line carries the total.
-    await expect(rows).toHaveCount(Math.min(PAGE, list.items.length));
-    await expect(
-      page.getByText(`${list.items.length} of ${list.items.length} budgets match.`),
-    ).toBeVisible();
+    const PAGE = 10;
+    const names = () => rows.locator('a.bf-cell__link').allTextContents();
 
-    // The subject is a seeded budget chosen by name, never "the first row".
-    const subject = list.items.find((b) => b.name === 'Bengaluru Events');
-    expect(subject, 'the seed has Bengaluru Events').toBeTruthy();
+    // The table paginates: page one shows at most PAGE rows, and the count line is self-consistent.
+    expect(await rows.count()).toBeLessThanOrEqual(PAGE);
+    await expect(page.getByTestId('budget-count')).toContainText(/\d+ of \d+ budgets match\./);
 
-    // Search covers the owner as well as the name and code, over the whole loaded set.
-    await page.getByTestId('budget-search').fill(subject!.display.ownerName ?? 'Bengaluru');
+    // Search covers the owner too: searching a seeded owner surfaces their budget. Other journeys
+    // may create budgets for the same seeded owner, so assert the budget is present, not a total.
+    await page.getByTestId('budget-search').fill('Rahul Menon');
     await expect(rows.filter({ hasText: 'Bengaluru Events' })).toHaveCount(1);
+    // A unique budget name narrows to exactly one row, and the count line reflects it.
+    await page.getByTestId('budget-search').fill('Bengaluru Events');
+    await expect(rows).toHaveCount(1);
+    await expect(page.getByTestId('budget-count')).toContainText(/^\s*1 of \d+ budgets match\./);
     await page.getByRole('button', { name: 'Clear filters' }).click();
-    await expect(rows).toHaveCount(Math.min(PAGE, list.items.length));
 
-    // Pagination: when there is a second page, Next shows the remaining rows.
-    if (list.items.length > PAGE) {
-      await page.getByRole('button', { name: 'Next page' }).click();
-      await expect(rows).toHaveCount(list.items.length - PAGE);
+    // Pagination, gated on the paginator's own state rather than a computed tenant-wide total.
+    const next = page.getByRole('button', { name: 'Next page' });
+    if (await next.isEnabled()) {
+      const firstBefore = (await names())[0];
+      await next.click();
+      await expect(async () => expect((await names())[0]).not.toBe(firstBefore)).toPass();
+      expect(await rows.count()).toBeLessThanOrEqual(PAGE);
       await page.getByRole('button', { name: 'Previous page' }).click();
-      await expect(rows).toHaveCount(PAGE);
     }
 
-    // Sorting by Budget (a text column) toggles the order; the default is A–Z, so Z–A flips it.
-    const names = [...list.items].map((b) => b.name).sort((a, b) => a.localeCompare(b));
-    await page.getByRole('button', { name: 'Budget' }).click(); // → descending
-    await expect(rows.first()).toContainText(names[names.length - 1]);
+    // Sorting reorders the whole set, so page one is then internally ordered. Default is Budget A–Z;
+    // clicking Budget flips to Z–A.
+    const asc = await names();
+    expect(asc).toEqual([...asc].sort((a, b) => a.localeCompare(b)));
+    await page.getByRole('button', { name: 'Budget' }).click();
+    await expect(async () => {
+      const desc = await names();
+      expect(desc).toEqual([...desc].sort((a, b) => b.localeCompare(a)));
+    }).toPass();
 
-    // Status filters narrow to what the API said the status is.
-    const frozen = list.items.filter((b) => b.status === 'frozen');
-    expect(frozen.length, 'the seed has a frozen budget').toBeGreaterThan(0);
+    // Status filter: every visible row reads the filtered status, and a seeded frozen budget is
+    // reachable under it. Exact counts are not asserted — other journeys may freeze budgets too.
     await page.getByRole('button', { name: 'Frozen', exact: true }).click();
-    await expect(rows).toHaveCount(frozen.length);
-    for (const b of frozen) await expect(rows.filter({ hasText: b.name })).toHaveCount(1);
+    await expect(rows.first()).toBeVisible();
+    // Every visible row is frozen: none lacks the "Frozen" status text.
+    await expect(rows.filter({ hasNotText: 'Frozen' })).toHaveCount(0);
+    await page.getByTestId('budget-search').fill('US Recognition');
+    await expect(rows.filter({ hasText: 'US Recognition' })).toHaveCount(1);
 
-    await page.getByRole('button', { name: 'All', exact: true }).click();
-    await page.getByRole('link', { name: subject!.name }).click();
-    await expect(page).toHaveURL(new RegExp(`/budgets/${subject!.id}$`));
+    // A row's link opens its budget detail — asserted on the link's own href.
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await page.getByTestId('budget-search').fill('Bengaluru Events');
+    const link = rows.filter({ hasText: 'Bengaluru Events' }).getByRole('link').first();
+    await expect(link).toHaveAttribute('href', /\/budgets\/[0-9a-f-]{36}$/);
+    const href = await link.getAttribute('href');
+    await link.click();
+    await expect(page).toHaveURL(new RegExp(`${href}$`));
   });
 
   test('the health filter uses the levels the API returned, not thresholds of its own', async ({
@@ -235,45 +268,52 @@ test.describe('ceo', () => {
     const healthBody = bodyFromPage<BudgetHealthOverview>(page, HEALTH);
     await page.goto('/');
     await expect(tableRows(page).first()).toBeVisible();
-    const atRisk = (await healthBody).rows.filter((r) => r.level === 'at_risk');
-    expect(atRisk.length, 'the seed has an at-risk budget').toBeGreaterThan(0);
+    const health = await healthBody;
+
+    // United States Region is a stable seeded at-risk budget (US budgets are untouched by scenarios),
+    // and Bengaluru Events is watch, not at-risk. The filter uses the API's levels, so after it the
+    // at-risk one shows and the watch one does not. Exact tenant-wide counts are not asserted.
+    expect(health.rows.find((r) => r.name === 'United States Region')?.level).toBe('at_risk');
+    expect(health.rows.find((r) => r.name === 'Bengaluru Events')?.level).toBe('watch');
 
     await page.getByRole('button', { name: 'At risk' }).click();
-    await expect(tableRows(page)).toHaveCount(atRisk.length);
-    for (const r of atRisk)
-      await expect(tableRows(page).filter({ hasText: r.name })).toHaveCount(1);
+    await page.getByTestId('budget-search').fill('United States Region');
+    await expect(tableRows(page).filter({ hasText: 'United States Region' })).toHaveCount(1);
+    await page.getByTestId('budget-search').fill('Bengaluru Events');
+    await expect(tableRows(page)).toHaveCount(0);
   });
 
   // Two different Available figures sit on this page: the company-wide one the roll-up and the
-  // health rows report, and each budget's own under its control rules. They differ for a real
-  // seeded budget, so the page has to name which is which or the reader draws the wrong conclusion.
+  // health rows report, and each budget's own under its control rules. United States Region is a
+  // seeded budget where they differ, and (per the testing rules) US-owned budgets are never touched
+  // by the API scenarios, so it stays a deterministic subject under the full concurrent suite.
   test('company-wide Available and a budget’s own Available are labelled apart', async ({
     page,
+    request,
   }) => {
-    const healthBody = bodyFromPage<BudgetHealthOverview>(page, HEALTH);
-    const listBody = bodyFromPage<BudgetList>(page, BUDGETS);
+    const NAME = 'United States Region';
+    const health = await api<BudgetHealthOverview>(request, 'ceo', '/api/dashboards/health');
+    const row = health.rows.find((r) => r.name === NAME);
+    expect(row, 'United States Region is in the health rows').toBeTruthy();
+    const budgets = await api<BudgetList>(
+      request,
+      'ceo',
+      `/api/budgets?q=${encodeURIComponent(NAME)}&limit=50`,
+    );
+    const own = budgets.items.find((b) => b.id === row!.budgetId)!;
+    expect(own, 'United States Region is in the budget list').toBeTruthy();
+    // The two definitions genuinely differ for this budget, which is the whole point of labelling.
+    expect(own.balances.available.amountMinor).not.toBe(row!.available.amountMinor);
+
     await page.goto('/');
     await expect(page.getByTestId('attention-list')).toBeVisible();
-    const health = await healthBody;
-    const list = await listBody;
-
-    const differing = health.rows
-      .filter((r) => r.level !== 'healthy')
-      .slice(0, 5)
-      .find((r) => {
-        const own = list.items.find((b) => b.id === r.budgetId);
-        return own && own.balances.available.amountMinor !== r.available.amountMinor;
-      });
-    expect(differing, 'a shown budget whose two Available figures differ').toBeTruthy();
-    const own = list.items.find((b) => b.id === differing!.budgetId)!;
-
-    await expect(attentionItems(page).filter({ hasText: differing!.name })).toContainText(
-      `Available company-wide ${money(differing!.available.amountMinor, 'USD')}`,
+    await expect(attentionItems(page).filter({ hasText: NAME })).toContainText(
+      `Available company-wide ${money(row!.available.amountMinor, 'USD')}`,
     );
     await expect(page.getByText('Available (own rules)')).toBeVisible();
     // Search brings the budget onto the (paginated) page, wherever it sorts.
-    await page.getByTestId('budget-search').fill(differing!.name);
-    await expect(tableRows(page).filter({ hasText: differing!.name })).toContainText(
+    await page.getByTestId('budget-search').fill(NAME);
+    await expect(tableRows(page).filter({ hasText: NAME })).toContainText(
       money(own.balances.available.amountMinor, own.currency),
     );
   });
@@ -388,8 +428,13 @@ test.describe('department head', () => {
     expect(health.scope.tenantWide, 'the subtree is narrower than the tenant').toBe(false);
 
     // The scope label and note come from the API, so the reader knows these are not company totals.
-    await expect(page.getByText(health.scope.label, { exact: false }).first()).toBeVisible();
-    if (health.scope.note) await expect(page.getByText(health.scope.note)).toBeVisible();
+    // Scope to the answer block (the shell hides the header company chip on mobile).
+    await expect(
+      page.locator('.bf-answer').getByText(health.scope.label, { exact: false }).first(),
+    ).toBeVisible();
+    if (health.scope.note) {
+      await expect(page.locator('.bf-answer').getByText(health.scope.note)).toBeVisible();
+    }
     await expect(tile(page, 'Authorized')).toContainText(
       money(summary.authorized.amountMinor, summary.currency),
     );

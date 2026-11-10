@@ -1,5 +1,44 @@
 # Functional check — Home as an executive overview (Stage 1 of screen 011)
 
+## CI follow-up: concurrency-safe Home journeys (branch `fix/home-overview-concurrency-safe`)
+
+The first PR (#96) merged with the Functional job red. Root cause: three CEO Home journeys asserted
+**tenant-wide absolutes** that the rest of the suite mutates while it runs, and one had a
+**mobile-only** selector bug. The desktop-only isolation run I did before the first PR hid all of it;
+CI runs desktop + tablet + mobile against one shared stack.
+
+What was wrong and how it is now asserted:
+
+- **`budget list … paginates`** used `bodyFromPage` which captures only the _first_ `/api/budgets?`
+  page, then compared the table against that count and order. The store follows the cursor and the
+  table paginates the whole set, so with the CEO's tenant-wide list spanning pages in CI the
+  "N of N budgets match" and row-count assertions were wrong. Rewritten to read the count line from
+  the page, assert page size ≤ 10, drive pagination off the paginator's own enabled state, assert
+  each page is internally sorted, and use unique seeded subjects (Bengaluru Events, US Recognition)
+  via search — never a tenant-wide total or order.
+- **`answer line` (mobile)** used `getByText('Hyland').first()`, which on mobile resolved to the
+  shell's hidden header company chip. Scoped to the `.bf-answer` block.
+- **`needs attention` (tablet/mobile)** ended by navigating and waiting for the URL, which flaked
+  under CI load. It now asserts the worst row's link `href` instead of navigating.
+- **`health filter`** asserted an exact tenant-wide at-risk count; now asserts a stable seeded
+  at-risk budget (United States Region) is shown and a watch budget (Bengaluru Events) is not.
+- **`company-wide vs own Available`** read the own figure from the single captured page; now fetches
+  United States Region (a US budget, never touched by scenarios) from the API and asserts against it.
+
+The Visual job was also red, but on ~18 **unrelated** screens (013, 050, 055, 060, 082, 105, …) —
+pre-existing baseline drift that the separate `fix/visual-rerecord` branch re-records. None of this
+change's screens (000a, 000c) are among them; the Home baselines passed. This fix does not touch
+those screens, so the Visual job stays red on them until `fix/visual-rerecord` merges.
+
+Verified after the fix by running the **full three-viewport journey project** (desktop + tablet +
+mobile) against a freshly-seeded stack — the CI configuration — not just desktop in isolation:
+
+```text
+scripts/stack.sh reset
+npx playwright test -c apps/web-e2e/playwright.config.ts --project=desktop --project=tablet --project=mobile
+→ 584 passed, 1 flaky (role-navigation tablet, a pre-existing test, passed on retry), 0 failed
+```
+
 ## How it was run
 
 ```sh
