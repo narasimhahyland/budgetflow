@@ -41,29 +41,9 @@
   margin-top: 6px;
 }
 
-// Break glass is deliberately not an ordinary action: its own error-toned panel, away from the
-// page's action bar, with the consequences written out before the button.
-.bf-break-glass {
-  padding: 16px 20px;
-  border: 1px solid var(--mat-sys-error);
-  border-radius: var(--mat-sys-corner-large);
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
-}
-
-.bf-break-glass__title {
-  margin: 0;
-  font: var(--mat-sys-title-medium);
-}
-
-.bf-break-glass__body {
-  margin: 6px 0 12px;
-  font: var(--mat-sys-body-medium);
-}
-
-.bf-danger-button:not(:disabled) {
-  border-color: var(--mat-sys-error);
-  color: var(--mat-sys-error);
+.bf-banner__heading {
+  margin: 0 0 4px;
+  font: var(--mat-sys-title-small);
 }
 
 .bf-row-actions {

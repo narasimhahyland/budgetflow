@@ -8,9 +8,11 @@ import {
   resource,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
-import { Money } from '@bf/web/ui';
+import { BudgetStatus, LoadState, Money, type StatusView } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
@@ -21,7 +23,6 @@ import {
   sentenceCase,
   type PolicySectionKey,
 } from './labels';
-import { LoadState } from './load-state';
 import { RuleEffectTag } from './rule-tags';
 import { RulesTabs } from './rules-tabs';
 
@@ -43,18 +44,28 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
   sla: 'How long each approval step has, when reminders go out and who is told about what.',
 };
 
+/** Not allowed is a hard block (as a block rule); with approval waits for someone (as an approval). */
+const CATEGORY_LOOKS: Record<string, StatusView> = {
+  allowed: { label: 'Allowed', tone: 'success', icon: 'circle_check' },
+  allowed_with_approval: { label: 'With approval', tone: 'warning', icon: 'clock' },
+  not_allowed: { label: 'Not allowed', tone: 'important-loud', icon: 'block' },
+};
+
 /** Screens 071-076: the policy settings behind the generated rules, one section at a time. */
 @Component({
   selector: 'bf-policies-page',
   imports: [
+    BudgetStatus,
     DecimalPipe,
     LoadState,
     MatButtonModule,
+    MatIconModule,
     Money,
     RouterLink,
     RuleEffectTag,
     RulesTabs,
     SAT_BANNER_IMPORTS,
+    SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
     SatStatusTag,
   ],
@@ -85,6 +96,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
       [loading]="view.isLoading() && !view.hasValue()"
       [error]="view.error()"
       what="policy settings"
+      shape="table"
       (retry)="view.reload()"
     />
     @if (valueOf(view); as v) {
@@ -95,7 +107,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
               <h2 class="bf-card__title" id="limits-title">Spending limits</h2>
             </div>
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="Spending limits">
+              <table class="bf-split-table bf-table--stack" aria-label="Spending limits">
                 <thead>
                   <tr>
                     <th scope="col">Limit</th>
@@ -110,21 +122,22 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                   @for (l of v.spendingLimits.items; track l.id) {
                     <tr>
                       <td class="bf-cell__primary">{{ l.name }}</td>
-                      <td>{{ sentenceCase(l.appliesTo) }}</td>
-                      <td>{{ measure(l.measure) }}</td>
-                      <td>{{ l.location }}</td>
-                      <td class="bf-num">
+                      <td data-label="Applies to">{{ sentenceCase(l.appliesTo) }}</td>
+                      <td data-label="Measured">{{ measure(l.measure) }}</td>
+                      <td data-label="Location">{{ l.location }}</td>
+                      <td class="bf-num" data-label="Amount">
                         <bf-money [amountMinor]="l.amountUsdMinor" currency="USD" />
-                        @if (l.referenceLocal) {
+                        @if (l.referenceLocal && l.referenceLocal.currency !== 'USD') {
                           <span class="bf-cell__secondary">
                             <bf-money
                               [amountMinor]="l.referenceLocal.amountMinor"
                               [currency]="l.referenceLocal.currency"
                             />
+                            for reference
                           </span>
                         }
                       </td>
-                      <td><bf-rule-effect [effect]="l.outcome" /></td>
+                      <td data-label="Over the limit"><bf-rule-effect [effect]="l.outcome" /></td>
                     </tr>
                   }
                 </tbody>
@@ -137,23 +150,34 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
             </div>
             <div class="bf-card__body">
               <dl class="bf-facts">
-                <dt>Limit a year</dt>
-                <dd>
-                  <bf-money
-                    [amountMinor]="v.spendingLimits.employeeCap.annualCapUsdMinor"
-                    currency="USD"
-                  />
-                </dd>
-                <dt>Counts towards it</dt>
-                <dd>{{ codeList(v.spendingLimits.employeeCap.includedCategories) }}</dd>
-                <dt>Warn at</dt>
-                <dd>{{ v.spendingLimits.employeeCap.warnAtPct }}%</dd>
-                <dt>Block at</dt>
-                <dd>{{ v.spendingLimits.employeeCap.blockAtPct }}%</dd>
+                <div>
+                  <dt>Limit a year</dt>
+                  <dd>
+                    <bf-money
+                      [amountMinor]="v.spendingLimits.employeeCap.annualCapUsdMinor"
+                      currency="USD"
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Counts towards it</dt>
+                  <dd>{{ codeList(v.spendingLimits.employeeCap.includedCategories) }}</dd>
+                </div>
+                <div>
+                  <dt>Warn at</dt>
+                  <dd>{{ v.spendingLimits.employeeCap.warnAtPct }}%</dd>
+                </div>
+                <div>
+                  <dt>Block at</dt>
+                  <dd>{{ v.spendingLimits.employeeCap.blockAtPct }}%</dd>
+                </div>
               </dl>
             </div>
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="People closest to the yearly limit">
+              <table
+                class="bf-split-table bf-table--stack"
+                aria-label="People closest to the yearly limit"
+              >
                 <thead>
                   <tr>
                     <th scope="col">Person</th>
@@ -166,11 +190,11 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                   @for (p of v.spendingLimits.employeeCap.employeesNearestCap; track p.personId) {
                     <tr>
                       <td>{{ p.displayName }}</td>
-                      <td>{{ p.location }}</td>
-                      <td class="bf-num">
+                      <td data-label="Location">{{ p.location }}</td>
+                      <td class="bf-num" data-label="Used">
                         <bf-money [amountMinor]="p.usedMinor" currency="USD" />
                       </td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-label="Left">
                         <bf-money [amountMinor]="p.leftMinor" currency="USD" />
                       </td>
                     </tr>
@@ -186,7 +210,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
               <h2 class="bf-card__title" id="cat-title">What can be bought</h2>
             </div>
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="Category policy">
+              <table class="bf-split-table bf-table--stack" aria-label="Category policy">
                 <thead>
                   <tr>
                     <th scope="col">Category</th>
@@ -204,20 +228,31 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                         <span class="bf-cell__primary">{{ c.categoryName }}</span>
                         <span class="bf-cell__secondary">{{ c.explanation }}</span>
                       </td>
-                      <td>
-                        <sat-status-tag [status]="categoryTone(c.status)">{{
-                          categoryLabel(c.status)
-                        }}</sat-status-tag>
+                      <td class="bf-nowrap" data-label="Allowed">
+                        @let look = categoryLook(c.status);
+                        <sat-status-tag [status]="look.tone"
+                          ><mat-icon [svgIcon]="look.icon" aria-hidden="true" />{{
+                            look.label
+                          }}</sat-status-tag
+                        >
                       </td>
-                      <td>{{ codeList(c.requesterGroups) }}</td>
-                      <td class="bf-num">
+                      <td data-label="Who can ask">{{ codeList(c.requesterGroups) }}</td>
+                      <td class="bf-num" data-label="Receipt above">
                         <bf-money [amountMinor]="c.receiptAboveUsdMinor" currency="USD" />
                       </td>
-                      <td>
-                        {{ c.employeeGlCode }}
-                        <span class="bf-cell__secondary">clients {{ c.clientGlCode }}</span>
+                      <td class="bf-nowrap" data-label="GL account">
+                        <span class="bf-cell__code">{{ c.employeeGlCode }}</span>
+                        <span class="bf-cell__secondary"
+                          >Clients <span class="bf-cell__code">{{ c.clientGlCode }}</span></span
+                        >
                       </td>
-                      <td>{{ c.generatedRuleCodes.join(', ') }}</td>
+                      <td data-label="Rules">
+                        <span class="bf-codes">
+                          @for (code of c.generatedRuleCodes; track code) {
+                            <span class="bf-cell__code">{{ code }}</span>
+                          }
+                        </span>
+                      </td>
                     </tr>
                   }
                 </tbody>
@@ -235,53 +270,67 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
             </div>
             <div class="bf-card__body">
               <dl class="bf-facts">
-                <dt>Gift cap per recipient</dt>
-                <dd>
-                  <bf-money
-                    [amountMinor]="v.giftsEntertainment.giftCapPerRecipientMinor"
-                    currency="USD"
-                  />
-                </dd>
-                <dt>Gift cap a year</dt>
-                <dd>
-                  <bf-money
-                    [amountMinor]="v.giftsEntertainment.giftAnnualCapMinor"
-                    currency="USD"
-                  />
-                </dd>
-                <dt>Cash and gift cards</dt>
-                <dd>
-                  {{ v.giftsEntertainment.blockCashEquivalents ? 'Never allowed' : 'Allowed' }}
-                </dd>
-                <dt>Over the gift cap</dt>
-                <dd><bf-rule-effect [effect]="v.giftsEntertainment.giftsOutcomeAboveCap" /></dd>
-                <dt>Client entertainment per attendee</dt>
-                <dd>
-                  <bf-money
-                    [amountMinor]="v.giftsEntertainment.entertainmentCapPerAttendeeMinor"
-                    currency="USD"
-                  />
-                </dd>
-                <dt>Alcohol</dt>
-                <dd>
-                  {{
-                    v.giftsEntertainment.alcoholAllowedAtApprovedEvents
-                      ? 'Only at approved events'
-                      : 'Not allowed'
-                  }}
-                </dd>
-                <dt>Alcohol cap per attendee</dt>
-                <dd>
-                  <bf-money
-                    [amountMinor]="v.giftsEntertainment.alcoholCapPerAttendeeMinor"
-                    currency="USD"
-                  />
-                </dd>
+                <div>
+                  <dt>Gift cap per recipient</dt>
+                  <dd>
+                    <bf-money
+                      [amountMinor]="v.giftsEntertainment.giftCapPerRecipientMinor"
+                      currency="USD"
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Gift cap a year</dt>
+                  <dd>
+                    <bf-money
+                      [amountMinor]="v.giftsEntertainment.giftAnnualCapMinor"
+                      currency="USD"
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Cash and gift cards</dt>
+                  <dd>
+                    {{ v.giftsEntertainment.blockCashEquivalents ? 'Never allowed' : 'Allowed' }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Over the gift cap</dt>
+                  <dd><bf-rule-effect [effect]="v.giftsEntertainment.giftsOutcomeAboveCap" /></dd>
+                </div>
+                <div>
+                  <dt>Client entertainment per attendee</dt>
+                  <dd>
+                    <bf-money
+                      [amountMinor]="v.giftsEntertainment.entertainmentCapPerAttendeeMinor"
+                      currency="USD"
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Alcohol</dt>
+                  <dd>
+                    {{
+                      v.giftsEntertainment.alcoholAllowedAtApprovedEvents
+                        ? 'Only at approved events'
+                        : 'Not allowed'
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Alcohol cap per attendee</dt>
+                  <dd>
+                    <bf-money
+                      [amountMinor]="v.giftsEntertainment.alcoholCapPerAttendeeMinor"
+                      currency="USD"
+                    />
+                  </dd>
+                </div>
               </dl>
             </div>
             @if (v.giftsEntertainment.locationOverrides.length) {
               <div class="bf-table-scroll">
-                <table class="bf-split-table" aria-label="Gift cap by location">
+                <table class="bf-split-table bf-table--stack" aria-label="Gift cap by location">
                   <thead>
                     <tr>
                       <th scope="col">Location</th>
@@ -293,13 +342,13 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                     @for (o of v.giftsEntertainment.locationOverrides; track o.location) {
                       <tr>
                         <td>{{ o.location }}</td>
-                        <td class="bf-num">
+                        <td class="bf-num" data-label="Local cap">
                           <bf-money
                             [amountMinor]="o.localAmount.amountMinor"
                             [currency]="o.localAmount.currency"
                           />
                         </td>
-                        <td class="bf-num">
+                        <td class="bf-num" data-label="In USD">
                           <bf-money [amountMinor]="o.usdEquivalentMinor" currency="USD" />
                         </td>
                       </tr>
@@ -316,7 +365,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
               <h2 class="bf-card__title" id="loc-title">Location settings</h2>
             </div>
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="Location policy">
+              <table class="bf-split-table bf-table--stack" aria-label="Location policy">
                 <thead>
                   <tr>
                     <th scope="col">Office</th>
@@ -332,37 +381,40 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                     <tr>
                       <td>
                         <span class="bf-cell__primary">{{ l.locationName }}</span>
-                        @if (l.overriddenFields.length) {
+                        @if (l.overriddenFields.length; as n) {
                           <span class="bf-cell__secondary"
-                            >{{ l.overriddenFields.length }} setting(s) differ from the company
-                            default</span
+                            >{{ n }} {{ n === 1 ? 'setting differs' : 'settings differ' }} from the
+                            company default</span
                           >
                         }
                       </td>
-                      <td>
+                      <td data-label="Currency">
                         {{ l.localCurrency }}
                         <span class="bf-cell__secondary">plan rate {{ l.planRateToUsd }}</span>
                       </td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-label="Events per person">
                         <bf-money [amountMinor]="l.teamEventsPerPersonUsdMinor" currency="USD" />
                       </td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-label="Meals per person">
                         <bf-money [amountMinor]="l.teamMealsPerPersonUsdMinor" currency="USD" />
-                        <span class="bf-cell__secondary">
-                          <bf-money
-                            [amountMinor]="l.teamMealsLocalMinor"
-                            [currency]="l.localCurrency"
-                          />
-                        </span>
+                        @if (l.localCurrency !== 'USD') {
+                          <span class="bf-cell__secondary">
+                            <bf-money
+                              [amountMinor]="l.teamMealsLocalMinor"
+                              [currency]="l.localCurrency"
+                            />
+                            for reference
+                          </span>
+                        }
                       </td>
-                      <td>
+                      <td data-label="Alcohol">
                         {{
                           l.alcoholPolicy === 'approved_events'
                             ? 'At approved events'
                             : 'Not allowed'
                         }}
                       </td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-label="Receipt above">
                         <bf-money [amountMinor]="l.receiptAboveUsdMinor" currency="USD" />
                       </td>
                     </tr>
@@ -382,7 +434,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
             </div>
             @if (v.vendors.items.length) {
               <div class="bf-table-scroll">
-                <table class="bf-split-table" aria-label="Vendor controls">
+                <table class="bf-split-table bf-table--stack" aria-label="Vendor controls">
                   <thead>
                     <tr>
                       <th scope="col">Vendor</th>
@@ -396,10 +448,16 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                     @for (vendor of v.vendors.items; track vendor.vendorId) {
                       <tr>
                         <td class="bf-cell__primary">{{ vendor.vendorName }}</td>
-                        <td>{{ sentenceCase(vendor.status) }}</td>
-                        <td>{{ vendor.reason ?? '—' }}</td>
-                        <td class="bf-num">{{ vendor.requests90d | number }}</td>
-                        <td class="bf-num">{{ vendor.openCommitmentsCount | number }}</td>
+                        <td class="bf-nowrap" data-label="State">
+                          {{ sentenceCase(vendor.status) }}
+                        </td>
+                        <td data-label="Why">{{ vendor.reason ?? '—' }}</td>
+                        <td class="bf-num" data-label="Requests (90 days)">
+                          {{ vendor.requests90d | number }}
+                        </td>
+                        <td class="bf-num" data-label="Open commitments">
+                          {{ vendor.openCommitmentsCount | number }}
+                        </td>
                       </tr>
                     }
                   </tbody>
@@ -407,11 +465,16 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
               </div>
             } @else {
               <div class="bf-card__body">
-                <p>
-                  No vendor is marked preferred or blocked at the moment. Vendors are managed in
-                  <a routerLink="/admin/vendors">master data</a>; marking one blocked there stops
-                  new requests from using it, while commitments already made still finish.
-                </p>
+                <sat-empty-state>
+                  <h3 satEmptyStateHeadline>No vendor is preferred or blocked</h3>
+                  <p satEmptyStateDescription>
+                    Vendors are managed in master data. Marking one blocked there stops new requests
+                    from using it, while commitments already made still finish.
+                  </p>
+                  <a mat-stroked-button satEmptyStateAction routerLink="/admin/vendors"
+                    >Open vendor master data</a
+                  >
+                </sat-empty-state>
               </div>
             }
           </section>
@@ -424,40 +487,68 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
             </div>
             <div class="bf-card__body">
               <dl class="bf-facts">
-                <dt>Strict budgets</dt>
-                <dd>
-                  Nothing over what is left ({{ v.overBudget.hardModeToleranceBps }} tolerance).
-                </dd>
-                <dt>Flexible budgets</dt>
-                <dd>
-                  Up to {{ v.overBudget.softModeTolerancePct }}% over, capped at
-                  <bf-money [amountMinor]="v.overBudget.softModeCapUsdMinor" currency="USD" />.
-                </dd>
-                <dt>Parent owner can approve up to</dt>
-                <dd>
-                  <bf-money
-                    [amountMinor]="v.overBudget.parentOwnerApprovesUpToUsdMinor"
-                    currency="USD"
-                  />
-                </dd>
-                <dt>Above that</dt>
-                <dd>
-                  {{
-                    v.overBudget.financeControllerAbove
-                      ? 'The Finance Controller decides.'
-                      : 'The parent owner decides.'
-                  }}
-                </dd>
-                <dt>Before going over</dt>
-                <dd>
-                  {{
-                    v.overBudget.offerContributionFirst
-                      ? 'The requester is offered an Inter-Director Budget Contribution Request first.'
-                      : 'The request goes straight to the over-budget approval.'
-                  }}
-                </dd>
-                <dt>Reason needed</dt>
-                <dd>{{ v.overBudget.justificationRequired ? 'Yes' : 'No' }}</dd>
+                <div>
+                  <dt>Strict budgets</dt>
+                  <dd class="bf-policy-mode">
+                    <sat-status-tag status="important-loud"
+                      ><mat-icon svgIcon="block" aria-hidden="true" />Hard block</sat-status-tag
+                    >
+                    <span
+                      >Nothing over what is left ({{
+                        v.overBudget.hardModeToleranceBps / 100 | number: '1.0-2'
+                      }}% tolerance).</span
+                    >
+                  </dd>
+                </div>
+                <div>
+                  <dt>Flexible budgets</dt>
+                  <dd class="bf-policy-mode">
+                    <sat-status-tag status="warning"
+                      ><mat-icon svgIcon="critical" aria-hidden="true" />Soft
+                      warning</sat-status-tag
+                    >
+                    <span
+                      >Up to {{ v.overBudget.softModeTolerancePct }}% over, capped at
+                      <bf-money
+                        [amountMinor]="v.overBudget.softModeCapUsdMinor"
+                        currency="USD"
+                      />.</span
+                    >
+                  </dd>
+                </div>
+                <div>
+                  <dt>Parent owner can approve up to</dt>
+                  <dd>
+                    <bf-money
+                      [amountMinor]="v.overBudget.parentOwnerApprovesUpToUsdMinor"
+                      currency="USD"
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Above that</dt>
+                  <dd>
+                    {{
+                      v.overBudget.financeControllerAbove
+                        ? 'The Finance Controller decides.'
+                        : 'The parent owner decides.'
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Before going over</dt>
+                  <dd>
+                    {{
+                      v.overBudget.offerContributionFirst
+                        ? 'The requester is offered an Inter-Director Budget Contribution Request first.'
+                        : 'The request goes straight to the over-budget approval.'
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Reason needed</dt>
+                  <dd>{{ v.overBudget.justificationRequired ? 'Yes' : 'No' }}</dd>
+                </div>
               </dl>
             </div>
           </section>
@@ -470,27 +561,62 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                 Generates {{ v.freezeZero.generatedRuleCodes.join(', ') }}.
               </p>
             </div>
-            <div class="bf-card__body">
-              <dl class="bf-facts">
-                <dt>Who can freeze</dt>
-                <dd>{{ approverList(v.freezeZero.freezeAllowedRoles) }}</dd>
-                <dt>Requests already in flight when frozen</dt>
-                <dd>They wait until the freeze is lifted.</dd>
-                <dt>Who can reduce</dt>
-                <dd>{{ approverList(v.freezeZero.reduceAllowedRoles) }}</dd>
-                <dt>Money released goes to</dt>
-                <dd>{{ codeList(v.freezeZero.reduceDestinations) }}</dd>
-                <dt>Who can set to zero</dt>
-                <dd>{{ approverList(v.freezeZero.zeroAllowedRoles) }}</dd>
-                <dt>Requests already in flight when set to zero</dt>
-                <dd>They are cancelled.</dd>
-                <dt>Freeze automatically when an owner leaves</dt>
-                <dd>{{ v.freezeZero.autoFreezeOnOwnerDeparture ? 'Yes' : 'No' }}</dd>
-                <dt>Tell the parent owner at 90% used</dt>
-                <dd>{{ v.freezeZero.notifyParentAt90Pct ? 'Yes' : 'No' }}</dd>
-                <dt>Strict budgets today</dt>
-                <dd>{{ v.freezeZero.hardModeBudgetCount | number }}</dd>
-              </dl>
+            <div class="bf-card__body bf-policy-groups">
+              <section class="bf-policy-group" aria-label="Freeze">
+                <h3 class="bf-section__title"><bf-budget-status status="frozen" /></h3>
+                <dl class="bf-facts">
+                  <div>
+                    <dt>Who can freeze</dt>
+                    <dd>{{ approverList(v.freezeZero.freezeAllowedRoles) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Requests already in flight when frozen</dt>
+                    <dd>They wait until the freeze is lifted.</dd>
+                  </div>
+                  <div>
+                    <dt>Freeze automatically when an owner leaves</dt>
+                    <dd>{{ v.freezeZero.autoFreezeOnOwnerDeparture ? 'Yes' : 'No' }}</dd>
+                  </div>
+                </dl>
+              </section>
+              <section class="bf-policy-group" aria-label="Reduce">
+                <h3 class="bf-section__title"><bf-budget-status status="reduced" /></h3>
+                <dl class="bf-facts">
+                  <div>
+                    <dt>Who can reduce</dt>
+                    <dd>{{ approverList(v.freezeZero.reduceAllowedRoles) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Money released goes to</dt>
+                    <dd>{{ codeList(v.freezeZero.reduceDestinations) }}</dd>
+                  </div>
+                </dl>
+              </section>
+              <section class="bf-policy-group" aria-label="Set to zero">
+                <h3 class="bf-section__title"><bf-budget-status status="set_to_zero" /></h3>
+                <dl class="bf-facts">
+                  <div>
+                    <dt>Who can set to zero</dt>
+                    <dd>{{ approverList(v.freezeZero.zeroAllowedRoles) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Requests already in flight when set to zero</dt>
+                    <dd>They are cancelled.</dd>
+                  </div>
+                </dl>
+              </section>
+              <section class="bf-policy-group" aria-label="Alerts">
+                <dl class="bf-facts">
+                  <div>
+                    <dt>Tell the parent owner at 90% used</dt>
+                    <dd>{{ v.freezeZero.notifyParentAt90Pct ? 'Yes' : 'No' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Strict budgets today</dt>
+                    <dd>{{ v.freezeZero.hardModeBudgetCount | number }}</dd>
+                  </div>
+                </dl>
+              </section>
             </div>
           </section>
         }
@@ -504,7 +630,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
               </p>
             </div>
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="Response times">
+              <table class="bf-split-table bf-table--stack" aria-label="Response times">
                 <thead>
                   <tr>
                     <th scope="col">Step</th>
@@ -517,12 +643,12 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                   @for (s of v.slaNotifications.steps; track s.stepType) {
                     <tr>
                       <td>{{ s.label }}</td>
-                      <td class="bf-num">{{ s.slaBusinessDays }}</td>
-                      <td>
+                      <td class="bf-num" data-label="Working days">{{ s.slaBusinessDays }}</td>
+                      <td data-label="Reminders">
                         {{ s.remindAt50Pct ? 'Halfway' : '' }}
                         {{ s.remind1HourBeforeDue ? 'and an hour before it is due' : '' }}
                       </td>
-                      <td>{{ escalation(s.stepType, s.escalateTo) }}</td>
+                      <td data-label="Escalates to">{{ escalation(s.stepType, s.escalateTo) }}</td>
                     </tr>
                   }
                 </tbody>
@@ -539,7 +665,7 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
               </p>
             </div>
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="Notifications">
+              <table class="bf-split-table bf-table--stack" aria-label="Notifications">
                 <thead>
                   <tr>
                     <th scope="col">What happened</th>
@@ -553,10 +679,28 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
                   @for (e of v.slaNotifications.events; track e.eventKey) {
                     <tr>
                       <td>{{ e.label }}</td>
-                      <td>{{ codeList(e.audiences) }}</td>
-                      <td>{{ e.inApp ? 'Yes' : 'No' }}</td>
-                      <td>{{ e.email ? 'Yes' : 'No' }}</td>
-                      <td>{{ e.required ? 'No' : 'Yes' }}</td>
+                      <td data-label="Who is told">{{ codeList(e.audiences) }}</td>
+                      <td class="bf-yesno" data-label="In the app">
+                        @if (e.inApp) {
+                          <mat-icon svgIcon="check" aria-hidden="true" />Yes
+                        } @else {
+                          <mat-icon svgIcon="circle_minus" aria-hidden="true" />No
+                        }
+                      </td>
+                      <td class="bf-yesno" data-label="By email">
+                        @if (e.email) {
+                          <mat-icon svgIcon="check" aria-hidden="true" />Yes
+                        } @else {
+                          <mat-icon svgIcon="circle_minus" aria-hidden="true" />No
+                        }
+                      </td>
+                      <td class="bf-yesno" data-label="Can be turned off">
+                        @if (!e.required) {
+                          <mat-icon svgIcon="check" aria-hidden="true" />Yes
+                        } @else {
+                          <mat-icon svgIcon="circle_minus" aria-hidden="true" />No
+                        }
+                      </td>
                     </tr>
                   }
                 </tbody>
@@ -565,6 +709,42 @@ const SECTION_INTROS: Record<PolicySectionKey, string> = {
           </section>
         }
       }
+    }
+  `,
+  styles: `
+    .bf-nowrap,
+    .bf-codes {
+      white-space: nowrap;
+    }
+    .bf-codes {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    /* The tag on its own line, then the sentence as plain inline text. */
+    .bf-policy-mode {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .bf-policy-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .bf-policy-group .bf-facts {
+      padding-inline: 0;
+    }
+    .bf-yesno {
+      white-space: nowrap;
+    }
+    .bf-yesno mat-icon {
+      width: 18px;
+      height: 18px;
+      margin-inline-end: 4px;
+      vertical-align: -4px;
+      color: var(--mat-sys-on-surface-variant);
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -603,17 +783,13 @@ export class PoliciesPage {
     );
   }
 
-  protected categoryTone(status: string): 'success' | 'warning' | 'important' {
-    return status === 'allowed' ? 'success' : status === 'not_allowed' ? 'important' : 'warning';
-  }
-
-  protected categoryLabel(status: string): string {
+  protected categoryLook(status: string): StatusView {
     return (
-      {
-        allowed: 'Allowed',
-        allowed_with_approval: 'With approval',
-        not_allowed: 'Not allowed',
-      }[status] ?? status
+      CATEGORY_LOOKS[status] ?? {
+        label: sentenceCase(status),
+        tone: 'neutral',
+        icon: 'circle_minus',
+      }
     );
   }
 

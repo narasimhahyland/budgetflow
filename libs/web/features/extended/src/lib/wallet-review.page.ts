@@ -20,12 +20,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import type { WalletClaim } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, Money } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { CLAIM_STATUS_LABEL, CLAIM_STATUS_TONE } from './wallets.page';
 
 interface DecisionData {
@@ -137,77 +136,79 @@ export class ClaimDecisionDialog {
           <p satEmptyStateDescription>Submitted claims for your programmes appear here.</p>
         </sat-empty-state>
       } @else {
-        <table class="bf-split-table" aria-label="Wallet claims waiting for review">
-          <thead>
-            <tr>
-              <th>Person</th>
-              <th>Programme</th>
-              <th>Merchant</th>
-              <th class="bf-num">Amount</th>
-              <th>Date</th>
-              <th>Receipt</th>
-              <th>Decision</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of claims(); track c.id) {
-              <tr [attr.data-testid]="'review-claim-' + c.id">
-                <td>{{ c.personName }}</td>
-                <td>{{ c.programName }}</td>
-                <td>
-                  <span class="bf-cell__primary">{{ c.merchant }}</span>
-                  <span class="bf-cell__secondary">{{ c.category }}</span>
-                </td>
-                <td class="bf-num">
-                  <bf-money [amountMinor]="c.amount.amountMinor" [currency]="c.amount.currency" />
-                  @if (c.amount.currency !== c.budgetAmount.currency) {
-                    <span class="bf-cell__secondary">
-                      <bf-money
-                        [amountMinor]="c.budgetAmount.amountMinor"
-                        [currency]="c.budgetAmount.currency"
-                      />
-                      at the plan rate
-                    </span>
-                  }
-                </td>
-                <td>{{ c.claimDate | bfDate: session.timezone() }}</td>
-                <td>
-                  @if (c.documentId) {
-                    <span class="bf-cell__secondary">Attached</span>
-                  } @else {
-                    <span class="bf-review__missing">
-                      <mat-icon svgIcon="error" class="bf-review__icon" />No receipt
-                    </span>
-                  }
-                </td>
-                <td>
-                  @if (c.status === 'submitted') {
-                    <div class="bf-review__actions">
-                      <button
-                        mat-flat-button
-                        type="button"
-                        (click)="decide(c, 'approve')"
-                        [attr.data-testid]="'approve-' + c.id"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        mat-stroked-button
-                        type="button"
-                        (click)="decide(c, 'return')"
-                        [attr.data-testid]="'return-' + c.id"
-                      >
-                        Return
-                      </button>
-                    </div>
-                  } @else {
-                    <sat-status-tag [status]="tone(c)">{{ label(c) }}</sat-status-tag>
-                  }
-                </td>
+        <div class="bf-table-scroll">
+          <table class="bf-split-table" aria-label="Wallet claims waiting for review">
+            <thead>
+              <tr>
+                <th>Person</th>
+                <th>Programme</th>
+                <th>Merchant</th>
+                <th class="bf-num">Amount</th>
+                <th>Date</th>
+                <th>Receipt</th>
+                <th>Decision</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (c of claims(); track c.id) {
+                <tr [attr.data-testid]="'review-claim-' + c.id">
+                  <td>{{ c.personName }}</td>
+                  <td>{{ c.programName }}</td>
+                  <td>
+                    <span class="bf-cell__primary">{{ c.merchant }}</span>
+                    <span class="bf-cell__secondary">{{ c.category }}</span>
+                  </td>
+                  <td class="bf-num">
+                    <bf-money [amountMinor]="c.amount.amountMinor" [currency]="c.amount.currency" />
+                    @if (c.amount.currency !== c.budgetAmount.currency) {
+                      <span class="bf-cell__secondary">
+                        <bf-money
+                          [amountMinor]="c.budgetAmount.amountMinor"
+                          [currency]="c.budgetAmount.currency"
+                        />
+                        at the plan rate
+                      </span>
+                    }
+                  </td>
+                  <td>{{ c.claimDate | bfDate: session.timezone() }}</td>
+                  <td>
+                    @if (c.documentId) {
+                      <span class="bf-cell__secondary">Attached</span>
+                    } @else {
+                      <span class="bf-review__missing">
+                        <mat-icon svgIcon="error" class="bf-review__icon" />No receipt
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    @if (c.status === 'submitted') {
+                      <div class="bf-review__actions">
+                        <button
+                          mat-flat-button
+                          type="button"
+                          (click)="decide(c, 'approve')"
+                          [attr.data-testid]="'approve-' + c.id"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          mat-stroked-button
+                          type="button"
+                          (click)="decide(c, 'return')"
+                          [attr.data-testid]="'return-' + c.id"
+                        >
+                          Return
+                        </button>
+                      </div>
+                    } @else {
+                      <sat-status-tag [status]="tone(c)">{{ label(c) }}</sat-status-tag>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     }
   `,
@@ -229,12 +230,6 @@ export class ClaimDecisionDialog {
     .bf-review__icon {
       width: 16px;
       height: 16px;
-    }
-    @media (max-width: 834px) {
-      .bf-split-table {
-        display: block;
-        overflow-x: auto;
-      }
     }
   `,
   host: { class: 'bf-page-layout' },

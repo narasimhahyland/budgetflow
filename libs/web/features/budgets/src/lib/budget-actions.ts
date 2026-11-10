@@ -45,8 +45,17 @@ export class BudgetActions {
   release(budget: BudgetDetail) {
     return this.open(ReleaseDialog, { budget }, '560px');
   }
+  /** Controls and alerts open as a 480px side sheet on the right (section 11 drawer). */
   settings(budget: BudgetDetail) {
-    return this.open(SettingsDialog, { budget }, '640px');
+    const ref = this.dialog.open<SettingsDialog, unknown, boolean>(SettingsDialog, {
+      data: { budget },
+      width: '480px',
+      maxWidth: '100vw',
+      height: '100%',
+      position: { top: '0', right: '0' },
+      autoFocus: 'dialog',
+    });
+    return firstValueFrom(ref.afterClosed()).then((r) => r === true);
   }
   rollForward(budget: BudgetDetail) {
     return this.open(RollForwardDialog, { budget }, '720px');

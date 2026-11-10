@@ -1,4 +1,4 @@
-import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -12,11 +12,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { RuleVersionView } from '@bf/contracts';
+import { LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { conditionText, moneyText } from './conditions';
 import { approverList } from './labels';
-import { LoadState } from './load-state';
 import { RuleEffectTag, RuleStatusTag } from './rule-tags';
 import { RulesTabs } from './rules-tabs';
 
@@ -24,6 +24,7 @@ import { RulesTabs } from './rules-tabs';
 @Component({
   selector: 'bf-rule-detail-page',
   imports: [
+    DatePipe,
     DecimalPipe,
     LoadState,
     NgTemplateOutlet,
@@ -117,7 +118,8 @@ import { RulesTabs } from './rules-tabs';
               Draft version {{ d.version }} <bf-rule-status status="draft" />
             </h2>
             <p class="bf-card__hint">
-              Not in force yet. It would start on {{ d.validFrom }} once published.
+              Not in force yet. It would start on {{ d.validFrom | date: 'd MMM y' : 'UTC' }} once
+              published.
             </p>
           </div>
           <div class="bf-card__body">
@@ -143,7 +145,7 @@ import { RulesTabs } from './rules-tabs';
             <h2 class="bf-card__title" id="conflicts-title">Conflicts to resolve</h2>
           </div>
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="Conflicting rules">
+            <table class="bf-split-table bf-table--stack" aria-label="Conflicting rules">
               <thead>
                 <tr>
                   <th scope="col">Rule</th>
@@ -162,10 +164,12 @@ import { RulesTabs } from './rules-tabs';
                       }}</a>
                       <span class="bf-cell__secondary">{{ c.ruleName }}</span>
                     </td>
-                    <td class="bf-num">{{ c.priority }}</td>
-                    <td><bf-rule-effect [effect]="c.effect" /></td>
-                    <td><bf-rule-effect [effect]="c.winningEffect" /></td>
-                    <td>{{ c.reason }}</td>
+                    <td class="bf-num" data-label="Priority">{{ c.priority }}</td>
+                    <td data-label="Its outcome"><bf-rule-effect [effect]="c.effect" /></td>
+                    <td data-label="Outcome that wins">
+                      <bf-rule-effect [effect]="c.winningEffect" />
+                    </td>
+                    <td data-label="Why">{{ c.reason }}</td>
                   </tr>
                 }
               </tbody>
@@ -177,35 +181,57 @@ import { RulesTabs } from './rules-tabs';
 
     <ng-template #versionBody let-v>
       <dl class="bf-facts">
-        <dt>Outcome</dt>
-        <dd><bf-rule-effect [effect]="v.effect" /></dd>
-        <dt>Priority</dt>
-        <dd>{{ v.priority }}</dd>
-        <dt>Applies when</dt>
-        <dd>
-          @for (c of v.conditions.conditions; track $index) {
-            <div>{{ conditionText(c) }}</div>
-          } @empty {
-            <div>Every request in scope.</div>
-          }
-        </dd>
-        <dt>Approvers added</dt>
-        <dd>{{ approvers(v) }}</dd>
-        <dt>In force</dt>
-        <dd>
-          {{ v.validFrom }}
-          @if (v.validTo) {
-            to {{ v.validTo }}
-          } @else {
-            onwards
-          }
-        </dd>
-        <dt>What requesters are told</dt>
-        <dd>{{ v.explanation }}</dd>
-        <dt>Matches in the last 30 days</dt>
-        <dd>{{ v.matchCount30d | number }}</dd>
+        <div>
+          <dt>Outcome</dt>
+          <dd><bf-rule-effect [effect]="v.effect" /></dd>
+        </div>
+        <div>
+          <dt>Priority</dt>
+          <dd>{{ v.priority }}</dd>
+        </div>
+        <div>
+          <dt>Applies when</dt>
+          <dd>
+            @for (c of v.conditions.conditions; track $index) {
+              <span class="bf-condition">{{ conditionText(c) }}</span>
+            } @empty {
+              <span class="bf-condition">Every request in scope.</span>
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>Approvers added</dt>
+          <dd>{{ approvers(v) }}</dd>
+        </div>
+        <div>
+          <dt>In force</dt>
+          <dd class="bf-nowrap">
+            {{ v.validFrom | date: 'd MMM y' : 'UTC' }}
+            @if (v.validTo) {
+              to {{ v.validTo | date: 'd MMM y' : 'UTC' }}
+            } @else {
+              onwards
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>What requesters are told</dt>
+          <dd>{{ v.explanation }}</dd>
+        </div>
+        <div>
+          <dt>Matches in the last 30 days</dt>
+          <dd>{{ v.matchCount30d | number }}</dd>
+        </div>
       </dl>
     </ng-template>
+  `,
+  styles: `
+    .bf-condition {
+      display: block;
+    }
+    .bf-nowrap {
+      white-space: nowrap;
+    }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,

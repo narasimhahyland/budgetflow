@@ -62,7 +62,7 @@ import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
       align-items: flex-start;
       gap: 4px;
       padding: 12px;
-      border: 1px solid var(--sat-sys-warning);
+      border: 1px solid var(--sat-sys-warning-icon);
       border-radius: var(--mat-sys-corner-medium);
       background: var(--sat-sys-warning-container);
       color: var(--sat-sys-on-warning-container);

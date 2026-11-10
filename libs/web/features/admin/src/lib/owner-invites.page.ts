@@ -15,13 +15,13 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { ROLE_IDS, type OwnerInvite, type RoleId } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ReasonField } from './admin-ui';
-import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { data, errorMessage, initialsOf, injectApi, valueOf } from './api';
 import { ROLE_LABELS } from './role-labels';
 
 interface Draft {
@@ -55,6 +55,7 @@ const STATUS_LABEL: Record<string, string> = {
  */
 @Component({
   selector: 'bf-owner-invites-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DateTimePipe,
     FormsModule,
@@ -69,6 +70,7 @@ const STATUS_LABEL: Record<string, string> = {
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatAvatar,
   ],
   templateUrl: './owner-invites.page.html',
   styleUrls: ['./page.scss', './users.page.scss'],
@@ -76,6 +78,7 @@ const STATUS_LABEL: Record<string, string> = {
 })
 export class OwnerInvitesPage {
   protected readonly valueOf = valueOf;
+  protected readonly initials = initialsOf;
   protected readonly roleLabel = ROLE_LABELS;
   protected readonly roles = ROLE_IDS;
   protected readonly statusTone = STATUS_TONE;

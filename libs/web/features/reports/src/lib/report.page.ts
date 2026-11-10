@@ -1,12 +1,13 @@
-import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   resource,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -28,21 +29,21 @@ import {
   type ReportId,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { DrilldownPanel } from './drilldown-panel';
-import { LoadState } from './load-state';
 import {
   percentOf,
+  ReportBucketBars,
   ReportChart,
+  ReportKpis,
   ReportNotes,
   Reconciliation,
   ReportTable,
   ScopeNote,
   type DrillRequest,
-  type ReportKpi,
 } from './report-frame';
 
 const GROUP_BY_LABELS: Record<ReportGroupBy, string> = {
@@ -81,7 +82,6 @@ const PROSE_COLUMNS = ['commentary'];
   selector: 'bf-report-page',
   imports: [
     DateTimePipe,
-    DecimalPipe,
     DrilldownPanel,
     FormsModule,
     LoadState,
@@ -92,9 +92,10 @@ const PROSE_COLUMNS = ['commentary'];
     MatInputModule,
     MatMenuModule,
     MatSelectModule,
-    Money,
     Reconciliation,
+    ReportBucketBars,
     ReportChart,
+    ReportKpis,
     ReportNotes,
     ReportTable,
     RouterLink,
@@ -105,9 +106,9 @@ const PROSE_COLUMNS = ['commentary'];
   template: `
     <header class="bf-page__header">
       <div class="bf-page__heading">
-        <h1 class="bf-page__title">{{ report()?.name ?? 'Report' }}</h1>
+        <h1 class="bf-page__title">{{ report()?.name ?? definition()?.name ?? 'Report' }}</h1>
         <p class="bf-page__subtitle">
-          {{ report()?.question }}
+          {{ report()?.question ?? definition()?.question }}
           @if (report(); as r) {
             · In {{ r.currency }} ·
             <span data-testid="relative-time">{{
@@ -161,120 +162,124 @@ const PROSE_COLUMNS = ['commentary'];
       </sat-banner>
     }
 
-    <section class="bf-card" aria-labelledby="filters-title">
-      <div class="bf-card__header">
-        <h2 class="bf-card__title" id="filters-title">Filters</h2>
-        @if (savedViews().length) {
-          <div class="bf-views">
-            @for (view of savedViews(); track view.id) {
-              <button
-                class="bf-view"
-                type="button"
-                [class.bf-view--active]="viewId() === view.id"
-                (click)="applyView(view.id)"
-              >
-                @if (view.favourite) {
-                  <mat-icon svgIcon="star" inline />
+    <!-- The filters card appears once the first run and the catalog have answered: until then its
+         saved views, grouping and scope note are unknown, and filling them in would push the page. -->
+    @if (settled()) {
+      <section class="bf-card" aria-labelledby="filters-title">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" id="filters-title">Filters</h2>
+          @if (savedViews().length) {
+            <div class="bf-views">
+              @for (view of savedViews(); track view.id) {
+                <button
+                  class="bf-view"
+                  type="button"
+                  [class.bf-view--active]="viewId() === view.id"
+                  (click)="applyView(view.id)"
+                >
+                  @if (view.favourite) {
+                    <mat-icon svgIcon="star" inline />
+                  }
+                  {{ view.name }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <div class="bf-filters">
+          @if (groupBys().length > 1) {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Group by</mat-label>
+              <mat-select [ngModel]="shownGroupBy()" (ngModelChange)="setFilter('groupBy', $event)">
+                @for (g of groupBys(); track g) {
+                  <mat-option [value]="g">{{ label(g) }}</mat-option>
                 }
-                {{ view.name }}
-              </button>
-            }
-          </div>
-        }
-      </div>
-      <div class="bf-filters">
-        @if (groupBys().length > 1) {
+              </mat-select>
+            </mat-form-field>
+          }
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Group by</mat-label>
-            <mat-select [ngModel]="shownGroupBy()" (ngModelChange)="setFilter('groupBy', $event)">
-              @for (g of groupBys(); track g) {
-                <mat-option [value]="g">{{ label(g) }}</mat-option>
+            <mat-label>Budget status</mat-label>
+            <mat-select [ngModel]="status()" (ngModelChange)="setFilter('status', $event)">
+              <mat-option [value]="''">Any status</mat-option>
+              @for (s of statuses; track s) {
+                <mat-option [value]="s">{{ statusLabel(s) }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-        }
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Budget status</mat-label>
-          <mat-select [ngModel]="status()" (ngModelChange)="setFilter('status', $event)">
-            <mat-option [value]="''">Any status</mat-option>
-            @for (s of statuses; track s) {
-              <mat-option [value]="s">{{ statusLabel(s) }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Accounting date from</mat-label>
-          <input
-            matInput
-            type="date"
-            [ngModel]="periodFrom()"
-            (ngModelChange)="setFilter('periodFrom', $event)"
-          />
-        </mat-form-field>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Accounting date to</mat-label>
-          <input
-            matInput
-            type="date"
-            [ngModel]="periodTo()"
-            (ngModelChange)="setFilter('periodTo', $event)"
-          />
-        </mat-form-field>
-        @if (isForecastReport()) {
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Forecast snapshot</mat-label>
-            <mat-select
-              [ngModel]="forecastCycleId()"
-              (ngModelChange)="setFilter('forecastCycleId', $event)"
+            <mat-label>Accounting date from</mat-label>
+            <input
+              matInput
+              type="date"
+              [ngModel]="periodFrom()"
+              (ngModelChange)="setFilter('periodFrom', $event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Accounting date to</mat-label>
+            <input
+              matInput
+              type="date"
+              [ngModel]="periodTo()"
+              (ngModelChange)="setFilter('periodTo', $event)"
+            />
+          </mat-form-field>
+          @if (isForecastReport()) {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Forecast snapshot</mat-label>
+              <mat-select
+                [ngModel]="forecastCycleId()"
+                (ngModelChange)="setFilter('forecastCycleId', $event)"
+              >
+                <mat-option [value]="''">Latest accepted forecast</mat-option>
+                @for (c of cycles(); track c.id) {
+                  <mat-option [value]="c.id">{{ c.name }} (as of {{ c.asOfDate }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Compare with snapshot</mat-label>
+              <mat-select
+                [ngModel]="compareCycleId()"
+                (ngModelChange)="setFilter('compareCycleId', $event)"
+              >
+                <mat-option [value]="''">No comparison</mat-option>
+                @for (c of cycles(); track c.id) {
+                  <mat-option [value]="c.id">{{ c.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Method</mat-label>
+              <mat-select
+                [ngModel]="forecastMethod()"
+                (ngModelChange)="setFilter('forecastMethod', $event)"
+              >
+                <mat-option [value]="''">Any method</mat-option>
+                @for (m of methods; track m) {
+                  <mat-option [value]="m">{{ methodLabel(m) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-checkbox
+              [checked]="commentaryOnly()"
+              (change)="setFilter('commentaryRequiredOnly', $event.checked ? 'true' : '')"
+              >Commentary required only</mat-checkbox
             >
-              <mat-option [value]="''">Latest accepted forecast</mat-option>
-              @for (c of cycles(); track c.id) {
-                <mat-option [value]="c.id">{{ c.name }} (as of {{ c.asOfDate }})</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Compare with snapshot</mat-label>
-            <mat-select
-              [ngModel]="compareCycleId()"
-              (ngModelChange)="setFilter('compareCycleId', $event)"
-            >
-              <mat-option [value]="''">No comparison</mat-option>
-              @for (c of cycles(); track c.id) {
-                <mat-option [value]="c.id">{{ c.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Method</mat-label>
-            <mat-select
-              [ngModel]="forecastMethod()"
-              (ngModelChange)="setFilter('forecastMethod', $event)"
-            >
-              <mat-option [value]="''">Any method</mat-option>
-              @for (m of methods; track m) {
-                <mat-option [value]="m">{{ methodLabel(m) }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-checkbox
-            [checked]="commentaryOnly()"
-            (change)="setFilter('commentaryRequiredOnly', $event.checked ? 'true' : '')"
-            >Commentary required only</mat-checkbox
-          >
-        }
-        @if (rootBudgetId()) {
-          <button mat-stroked-button type="button" (click)="setFilter('rootBudgetId', '')">
-            <mat-icon svgIcon="clear_filter" aria-hidden="true" />Clear budget scope
-          </button>
-        }
-      </div>
-      <bf-scope-note
-        [note]="report()?.scope?.note ?? null"
-        [label]="report()?.scope?.label ?? ''"
-        [budgetIds]="report()?.scope?.budgetIds ?? 0"
-      />
-    </section>
+          }
+          @if (rootBudgetId()) {
+            <button mat-stroked-button type="button" (click)="setFilter('rootBudgetId', '')">
+              <mat-icon svgIcon="clear_filter" aria-hidden="true" />Clear budget scope
+            </button>
+          }
+        </div>
+        <bf-scope-note
+          [note]="report()?.scope?.note ?? null"
+          [label]="report()?.scope?.label ?? ''"
+          [budgetIds]="report()?.scope?.budgetIds ?? 0"
+        />
+      </section>
+    }
 
     @if (!reportId()) {
       <sat-404-error-state>
@@ -315,7 +320,9 @@ const PROSE_COLUMNS = ['commentary'];
     }
 
     <bf-load-state
-      [loading]="run.isLoading() && !run.hasValue()"
+      [loading]="(run.isLoading() && !run.hasValue()) || !settled()"
+      shape="cards"
+      [lines]="4"
       [error]="run.error()"
       [what]="whatFailed()"
       (retry)="run.reload()"
@@ -323,33 +330,15 @@ const PROSE_COLUMNS = ['commentary'];
 
     @if (report(); as r) {
       @if (r.kpis.length) {
-        <div class="bf-kpis">
-          @for (kpi of r.kpis; track kpi.key) {
-            <div class="bf-kpi" [class]="kpiClass(kpi)">
-              <p class="bf-kpi__label">{{ kpi.label }}</p>
-              <p class="bf-kpi__value">
-                @if (kpi.money) {
-                  <bf-money [amountMinor]="kpi.money.amountMinor" [currency]="kpi.money.currency" />
-                } @else if (kpi.bps !== null && kpi.bps !== undefined) {
-                  {{ percentOf(kpi.bps) | number: '1.1-1' }}%
-                } @else if (kpi.number !== null && kpi.number !== undefined) {
-                  {{ kpi.number | number }}
-                } @else {
-                  —
-                }
-              </p>
-              @if (kpi.hint) {
-                <p class="bf-kpi__delta">{{ kpi.hint }}</p>
-              }
-            </div>
-          }
-        </div>
+        <bf-report-kpis [kpis]="r.kpis" />
       }
 
       <section class="bf-card" aria-labelledby="rows-title">
         <div class="bf-card__header">
           <div>
-            <h2 class="bf-card__title" id="rows-title">By {{ label(r.groupBy).toLowerCase() }}</h2>
+            <h2 class="bf-card__title" id="rows-title" tabindex="-1">
+              By {{ label(r.groupBy).toLowerCase() }}
+            </h2>
             <p class="bf-card__hint">
               {{ r.rowCount }} row{{ r.rowCount === 1 ? '' : 's' }}. Every figure is in
               {{ r.currency }} and comes from the ledger.
@@ -397,12 +386,18 @@ const PROSE_COLUMNS = ['commentary'];
       }
 
       @if (r.series.length) {
-        <section class="bf-card" aria-labelledby="chart-title">
+        <section class="bf-card bf-chart-card" aria-labelledby="chart-title">
           <div class="bf-card__header">
-            <h2 class="bf-card__title" id="chart-title">At a glance</h2>
-            <p class="bf-card__hint">The table above is the full, accessible version of this.</p>
+            <div>
+              <h2 class="bf-card__title" id="chart-title">At a glance</h2>
+              <p class="bf-card__hint">The table above is the full, accessible version of this.</p>
+            </div>
+            <button mat-button type="button" (click)="showTable()">
+              <mat-icon svgIcon="table" aria-hidden="true" />View as table
+            </button>
           </div>
           <div class="bf-card__body">
+            <bf-report-bucket-bars [rows]="r.rows" [totals]="r.totals" [currency]="r.currency" />
             <bf-report-chart [series]="r.series" [currency]="r.currency" />
           </div>
         </section>
@@ -431,20 +426,22 @@ const PROSE_COLUMNS = ['commentary'];
       border-color: var(--mat-sys-primary);
       background: var(--mat-sys-secondary-container);
     }
-    .bf-kpi--warning {
-      border-color: var(--sat-sys-warning-icon);
-      background: var(--sat-sys-warning-container);
-      color: var(--sat-sys-on-warning-container);
+    /* The heading keeps its own row width before and after the report arrives, and the subtitle
+       keeps two lines at tablet width, so neither pushes the page when the question is filled in. */
+    .bf-page__heading {
+      flex: 1 1 32rem;
+      min-width: 0;
     }
-    .bf-kpi--error {
-      border-color: var(--sat-sys-important-icon);
-      background: var(--sat-sys-important-container);
-      color: var(--sat-sys-on-important-container);
+    @media (width < 1024px) {
+      .bf-page__subtitle {
+        min-height: 2lh;
+      }
     }
-    .bf-kpi--success {
-      border-color: var(--sat-sys-success-icon);
-      background: var(--sat-sys-success-container);
-      color: var(--sat-sys-on-success-container);
+    /* Below 600px the table carries the figures; the chart would be a second list. */
+    @media (width < 600px) {
+      .bf-chart-card {
+        display: none;
+      }
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -453,6 +450,7 @@ const PROSE_COLUMNS = ['commentary'];
 export class ReportPage {
   private readonly api = injectApi();
   private readonly route = inject(ActivatedRoute);
+  private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
   protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
@@ -521,6 +519,13 @@ export class ReportPage {
       data(this.api.runReport({ params: { reportId: params.reportId }, query: params.filters })),
   });
   protected readonly report = computed(() => valueOf(this.run));
+  /** True once the first run and the catalog have both answered (with data or an error). */
+  protected readonly settled = signal(false);
+  private readonly settle = effect(() => {
+    const run = this.run.hasValue() || !!this.run.error();
+    const catalog = this.catalog.hasValue() || !!this.catalog.error();
+    if (run && catalog) this.settled.set(true);
+  });
   /** Without a filter the server picks the report's default grouping; show the one it used. */
   protected readonly shownGroupBy = computed(
     () => this.groupBy() || (this.report()?.groupBy ?? ''),
@@ -567,8 +572,11 @@ export class ReportPage {
     return status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ');
   }
 
-  protected kpiClass(kpi: ReportKpi): string {
-    return kpi.tone && kpi.tone !== 'neutral' && kpi.tone !== 'info' ? `bf-kpi--${kpi.tone}` : '';
+  /** "View as table": the table is the chart's text alternative (section 13). */
+  protected showTable(): void {
+    const heading = this.document.getElementById('rows-title');
+    heading?.scrollIntoView({ block: 'start' });
+    heading?.focus({ preventScroll: true });
   }
 
   protected setFilter(key: string, value: string): void {

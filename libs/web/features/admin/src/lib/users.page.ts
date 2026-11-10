@@ -6,6 +6,7 @@ import {
   resource,
   signal,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,12 +16,13 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { ROLE_IDS, type AdminUser, type RoleId } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
+import { LoadState } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { PendingChange, ReasonField } from './admin-ui';
-import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { data, errorMessage, initialsOf, injectApi, valueOf } from './api';
 import { ROLE_LABELS } from './role-labels';
 
 type UserRow = AdminUser & { detail: boolean };
@@ -32,7 +34,9 @@ type UserRow = AdminUser & { detail: boolean };
  */
 @Component({
   selector: 'bf-users-page',
+  host: { class: 'bf-page-layout' },
   imports: [
+    DatePipe,
     FormsModule,
     LoadState,
     MatButtonModule,
@@ -46,6 +50,7 @@ type UserRow = AdminUser & { detail: boolean };
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatAvatar,
   ],
   templateUrl: './users.page.html',
   styleUrls: ['./page.scss', './users.page.scss'],
@@ -117,6 +122,14 @@ export class UsersPage {
   protected readonly privilegedCount = computed(
     () => this.rows().filter((u) => u.privileged).length,
   );
+
+  protected readonly initials = initialsOf;
+
+  protected statusLabel(status: string): string {
+    return status === 'active'
+      ? 'Active'
+      : status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ');
+  }
 
   protected roleNames(user: AdminUser): string {
     return user.roles.map((r) => ROLE_LABELS[r] ?? r).join(', ') || 'No role';

@@ -2,16 +2,18 @@ import { ChangeDetectionStrategy, Component, computed, resource, signal } from '
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import type { ApprovalHistoryItem } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { inject } from '@angular/core';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const DECISIONS: { value: string; label: string }[] = [
   { value: '', label: 'Every decision' },
@@ -21,12 +23,14 @@ const DECISIONS: { value: string; label: string }[] = [
   { value: 'request_changes', label: 'Changes requested' },
 ];
 
-const DECISION_LABELS: Record<string, string> = {
-  approve: 'Approved',
-  approve_partial: 'Partly approved',
-  reject: 'Rejected',
-  request_changes: 'Changes requested',
-  escalate: 'Escalated',
+type Tone = 'success' | 'important' | 'info' | 'neutral';
+// Section 5: every decision is a toned tag with its own icon, never plain text.
+const DECISION_VIEW: Record<string, { label: string; tone: Tone; icon: string }> = {
+  approve: { label: 'Approved', tone: 'success', icon: 'circle_check' },
+  approve_partial: { label: 'Partly approved', tone: 'success', icon: 'circle_check' },
+  reject: { label: 'Rejected', tone: 'important', icon: 'circle_x' },
+  request_changes: { label: 'Changes requested', tone: 'info', icon: 'note_edit' },
+  escalate: { label: 'Escalated', tone: 'info', icon: 'arrow_up' },
 };
 
 /** Screen 90: every approval decision with the approver, their authority, channel and timing. */
@@ -38,11 +42,14 @@ const DECISION_LABELS: Record<string, string> = {
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
+    SatAvatar,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -69,28 +76,54 @@ const DECISION_LABELS: Record<string, string> = {
           ></sat-banner
         >
       }
-      <section class="bf-card" aria-labelledby="summary-title">
-        <div class="bf-card__header">
-          <h2 class="bf-card__title" id="summary-title">Every decision on record</h2>
+      <section aria-labelledby="summary-title">
+        <h2 class="bf-visually-hidden" id="summary-title">Every decision on record</h2>
+        <div class="bf-kpis" data-testid="history-summary">
+          <div class="bf-kpi">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Decisions</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="check_double" aria-hidden="true" />
+            </div>
+            <p class="bf-kpi__value">{{ h.summary.totalDecisions }}</p>
+            <p class="bf-kpi__delta">Every decision on record</p>
+          </div>
+          <div class="bf-kpi">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Typical time to decide</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="clock" aria-hidden="true" />
+            </div>
+            <p class="bf-kpi__value">{{ h.summary.medianLabel }}</p>
+            <p class="bf-kpi__delta">Median, from assignment to decision</p>
+          </div>
+          <div class="bf-kpi bf-kpi--warning">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Escalated</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="arrow_up" aria-hidden="true" />
+            </div>
+            <p class="bf-kpi__value">{{ h.summary.escalationPct }}%</p>
+            <div class="bf-kpi__foot">
+              <span>Of all decisions</span
+              ><span class="bf-kpi__pct">{{ h.summary.escalationPct }}%</span>
+              <span class="bf-kpi__track"
+                ><span class="bf-kpi__fill" [style.width.%]="h.summary.escalationPct"></span
+              ></span>
+            </div>
+          </div>
+          <div class="bf-kpi bf-kpi--info">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Decided by email</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="mail" aria-hidden="true" />
+            </div>
+            <p class="bf-kpi__value">{{ h.summary.emailPct }}%</p>
+            <div class="bf-kpi__foot">
+              <span>Of all decisions</span
+              ><span class="bf-kpi__pct">{{ h.summary.emailPct }}%</span>
+              <span class="bf-kpi__track"
+                ><span class="bf-kpi__fill" [style.width.%]="h.summary.emailPct"></span
+              ></span>
+            </div>
+          </div>
         </div>
-        <dl class="bf-facts" data-testid="history-summary">
-          <div class="bf-facts__item">
-            <dt>Decisions</dt>
-            <dd>{{ h.summary.totalDecisions }}</dd>
-          </div>
-          <div class="bf-facts__item">
-            <dt>Typical time to decide</dt>
-            <dd>{{ h.summary.medianLabel }}</dd>
-          </div>
-          <div class="bf-facts__item">
-            <dt>Escalated</dt>
-            <dd>{{ h.summary.escalationPct }}%</dd>
-          </div>
-          <div class="bf-facts__item">
-            <dt>Decided by email</dt>
-            <dd>{{ h.summary.emailPct }}%</dd>
-          </div>
-        </dl>
       </section>
       <section class="bf-card" aria-labelledby="filters-title">
         <div class="bf-card__header">
@@ -131,7 +164,7 @@ const DECISION_LABELS: Record<string, string> = {
           <h2 class="bf-card__title" id="list-title">Decisions</h2>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Approval decisions">
+          <table class="bf-split-table bf-table--stack" aria-label="Approval decisions">
             <thead>
               <tr>
                 <th>Decided</th>
@@ -139,37 +172,74 @@ const DECISION_LABELS: Record<string, string> = {
                 <th class="bf-num">Amount</th>
                 <th>Decision</th>
                 <th>Approver</th>
-                <th class="bf-num">Limit at decision</th>
-                <th>Channel</th>
-                <th>Took</th>
+                <th class="bf-num bf-col--extra">Limit at decision</th>
+                <th class="bf-col--extra">Channel</th>
+                <th class="bf-col--extra">Took</th>
               </tr>
             </thead>
             <tbody>
               @for (i of rows(); track i.actionId) {
                 <tr [attr.data-testid]="'decision-' + i.ref">
-                  <td>
+                  <td data-label="Decided">
                     <span data-testid="relative-time">{{
                       i.decidedAt | bfDateTime: session.timezone()
                     }}</span>
+                    <span class="bf-cell__secondary bf-only-mid"
+                      >{{ i.channel === 'email' ? 'Email' : 'In BudgetFlow' }} ·
+                      {{ i.timeToDecideLabel }}</span
+                    >
                   </td>
-                  <td>
-                    <a [routerLink]="['/requests', i.subjectId]">{{ i.ref }}</a>
-                    <span class="bf-cell__secondary">{{ i.title }}</span>
+                  <td data-label="Request">
+                    <span class="bf-request">
+                      <a
+                        class="bf-cell__code"
+                        [routerLink]="[
+                          i.subjectType === 'contribution' ? '/contributions' : '/requests',
+                          i.subjectId,
+                        ]"
+                        >{{ i.ref }}</a
+                      >
+                      <span class="bf-cell__secondary">{{ i.title }}</span>
+                    </span>
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Amount">
                     <bf-money
                       [amountMinor]="i.reportingAmount.amountMinor"
                       [currency]="i.reportingAmount.currency"
                     />
                   </td>
-                  <td>{{ decisionLabel(i) }}</td>
-                  <td>
-                    {{ i.approverName }}
+                  <td class="bf-nowrap" data-label="Decision">
+                    @let v = decisionView(i);
+                    <sat-status-tag [status]="v.tone"
+                      ><mat-icon [svgIcon]="v.icon" aria-hidden="true" />{{
+                        v.label
+                      }}</sat-status-tag
+                    >
+                  </td>
+                  <td data-label="Approver">
+                    <span class="bf-cell__owner"
+                      ><sat-avatar
+                        size="24"
+                        [initials]="initials(i.approverName)"
+                        aria-hidden="true"
+                      />{{ i.approverName }}</span
+                    >
+                    <span class="bf-cell__secondary bf-only-mid"
+                      >Limit
+                      @if (i.doaLimit) {
+                        <bf-money
+                          [amountMinor]="i.doaLimit.amountMinor"
+                          [currency]="i.doaLimit.currency"
+                        />
+                      } @else {
+                        not applied
+                      }
+                    </span>
                     @if (i.onBehalfOfName) {
                       <span class="bf-cell__secondary">for {{ i.onBehalfOfName }}</span>
                     }
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num bf-col--extra" data-label="Limit at decision">
                     @if (i.doaLimit) {
                       <bf-money
                         [amountMinor]="i.doaLimit.amountMinor"
@@ -179,11 +249,16 @@ const DECISION_LABELS: Record<string, string> = {
                       No limit applied
                     }
                   </td>
-                  <td>{{ i.channel === 'email' ? 'Email' : 'In BudgetFlow' }}</td>
-                  <td>
+                  <td class="bf-col--extra" data-label="Channel">
+                    {{ i.channel === 'email' ? 'Email' : 'In BudgetFlow' }}
+                  </td>
+                  <td class="bf-col--extra" data-label="Took">
                     {{ i.timeToDecideLabel }}
                     @if (i.slaStatus === 'breached') {
-                      <span class="bf-cell__secondary">Later than agreed</span>
+                      <sat-status-tag status="warning"
+                        ><mat-icon svgIcon="clock" aria-hidden="true" />Later than
+                        agreed</sat-status-tag
+                      >
                     }
                   </td>
                 </tr>
@@ -199,6 +274,38 @@ const DECISION_LABELS: Record<string, string> = {
           </table>
         </div>
       </section>
+    }
+  `,
+  styles: `
+    .bf-visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .bf-nowrap {
+      white-space: nowrap;
+    }
+    .bf-only-mid {
+      display: none;
+    }
+    /* Between phone and desktop, channel and timing move under the decision date so the table
+       fits the card instead of hiding columns past its edge. */
+    @media (600px <= width < 1100px) {
+      .bf-col--extra {
+        display: none;
+      }
+      .bf-only-mid {
+        display: block;
+      }
+    }
+    .bf-request {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -230,7 +337,22 @@ export class ApprovalHistoryPage {
 
   protected readonly rows = computed(() => valueOf(this.history)?.items ?? []);
 
-  protected decisionLabel(i: ApprovalHistoryItem): string {
-    return DECISION_LABELS[i.decision] ?? i.decision;
+  protected decisionView(i: ApprovalHistoryItem): { label: string; tone: Tone; icon: string } {
+    return (
+      DECISION_VIEW[i.decision] ?? {
+        label: i.decision.replace(/_/g, ' '),
+        tone: 'neutral',
+        icon: 'circle_minus',
+      }
+    );
+  }
+
+  protected initials(name: string): string {
+    return name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w.charAt(0).toUpperCase())
+      .join('');
   }
 }

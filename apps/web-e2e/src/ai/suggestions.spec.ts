@@ -289,7 +289,7 @@ test.describe('Receipt extraction (121a)', () => {
     await expect(page.getByTestId('field-merchant')).toHaveValue('Cafe Mocha, Indiranagar');
     await expect(page.getByTestId('field-receiptDate')).toHaveValue('2026-10-18');
     // Card numbers, signatures and contact details are dropped by the extractor, never stored.
-    await expect(page.getByTestId('dropped-fields')).toContainText('cardNumber');
+    await expect(page.getByTestId('dropped-fields')).toContainText('card number');
 
     // Confirming is blocked until the person says they checked the details.
     await expect(page.getByTestId('confirm-fields')).toBeDisabled();

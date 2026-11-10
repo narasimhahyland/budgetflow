@@ -19,7 +19,7 @@ import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ActualsTabs } from './actuals-tabs';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 /** Actual-to-budget mapping rules: conditions on entity, cost center, GL, event code, vendor, card program, merchant and memo. */
 @Component({
@@ -225,7 +225,12 @@ import { LoadState } from './load-state';
         <p class="bf-empty">No mapping rules yet.</p>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="valueOf(rules)!.items" aria-label="Mapping rules">
+          <table
+            mat-table
+            class="bf-table"
+            [dataSource]="valueOf(rules)!.items"
+            aria-label="Mapping rules"
+          >
             <ng-container matColumnDef="priority">
               <th mat-header-cell *matHeaderCellDef class="bf-num">Priority</th>
               <td mat-cell *matCellDef="let r" class="bf-num">{{ r.priority }}</td>

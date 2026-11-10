@@ -82,7 +82,7 @@
         <span class="bf-muted">{{ items().length }} shown</span>
       </div>
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="items()" aria-label="Sync runs">
+        <table mat-table class="bf-table" [dataSource]="items()" aria-label="Sync runs">
           <ng-container matColumnDef="started">
             <th mat-header-cell *matHeaderCellDef>Started</th>
             <td mat-cell *matCellDef="let r">
@@ -106,18 +106,28 @@
               <span class="bf-cell__secondary">{{ directionLabel(r.direction) }}</span>
             </td>
           </ng-container>
-          <ng-container matColumnDef="records">
-            <th mat-header-cell *matHeaderCellDef>Records</th>
-            <td mat-cell *matCellDef="let r">
-              {{ r.recordsRead }} read, {{ r.recordsApplied }} applied
-              @if (r.recordsSkippedDuplicate) {
-                <span class="bf-cell__secondary"
-                  >{{ r.recordsSkippedDuplicate }} held as already seen</span
-                >
-              }
-              @if (r.recordsFailed) {
-                <span class="bf-cell__secondary bf-difference">{{ r.recordsFailed }} failed</span>
-              }
+          <ng-container matColumnDef="read">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Read</th>
+            <td mat-cell *matCellDef="let r" class="bf-num" data-testid="records-read">
+              {{ r.recordsRead | number }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="applied">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Applied</th>
+            <td mat-cell *matCellDef="let r" class="bf-num">{{ r.recordsApplied | number }}</td>
+          </ng-container>
+          <ng-container matColumnDef="held">
+            <th mat-header-cell *matHeaderCellDef class="bf-num" title="Held as already seen">
+              Held
+            </th>
+            <td mat-cell *matCellDef="let r" class="bf-num">
+              {{ r.recordsSkippedDuplicate | number }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="failed">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Failed</th>
+            <td mat-cell *matCellDef="let r" class="bf-num" [class.bf-difference]="r.recordsFailed">
+              {{ r.recordsFailed | number }}
             </td>
           </ng-container>
           <ng-container matColumnDef="status">
@@ -232,12 +242,16 @@
   </div>
 } @else {
   <section class="bf-card">
-    <sat-empty-state data-testid="sync-empty">
-      <h2 satEmptyStateHeadline>No sync runs match</h2>
-      <p satEmptyStateDescription>
-        Change the filters, or connect a system in Integrations so data starts flowing.
-      </p>
-      <a mat-stroked-button routerLink="/admin/integrations">Go to connectors</a>
-    </sat-empty-state>
+    <div class="bf-card__body">
+      <sat-empty-state data-testid="sync-empty">
+        <h2 satEmptyStateHeadline>No sync runs match</h2>
+        <p satEmptyStateDescription>
+          Change the filters, or connect a system in Integrations so data starts flowing.
+        </p>
+        <a satEmptyStateAction mat-stroked-button routerLink="/admin/integrations">
+          Go to connectors
+        </a>
+      </sat-empty-state>
+    </div>
   </section>
 }

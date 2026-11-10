@@ -14,13 +14,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import type { ProgramTemplate, UpsertProgramTemplateRequest } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { Money, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SAT_INTERACTIVE_CARD_IMPORTS } from '@hylandsoftware/satori-ui/interactive-card';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, toMajor, toMinor, valueOf } from './api';
-import { LoadState } from './load-state';
 
 interface Draft {
   id: string | null;
@@ -62,6 +63,7 @@ const toDraft = (t: ProgramTemplate | null): Draft => ({
     MatSelectModule,
     Money,
     SAT_BANNER_IMPORTS,
+    SAT_INTERACTIVE_CARD_IMPORTS,
     SAT_TAG_IMPORTS,
   ],
   styleUrl: './page.scss',
@@ -86,21 +88,15 @@ const toDraft = (t: ProgramTemplate | null): Draft => ({
       list-style: none;
     }
     .bf-tpl__item {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--mat-sys-corner-medium);
-      background: var(--mat-sys-surface-container-lowest);
-      color: var(--mat-sys-on-surface);
-      text-align: start;
-      cursor: pointer;
-    }
-    .bf-tpl__item--selected {
-      border: 2px solid var(--mat-sys-primary);
-    }
-    .bf-tpl__name {
       display: block;
-      font: var(--mat-sys-title-small);
+      width: 100%;
+      text-align: start;
+    }
+    .bf-tpl__label {
+      display: block;
+      margin: 16px 0 8px;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-large);
     }
     .bf-tpl__meta {
       display: flex;
@@ -148,20 +144,24 @@ const toDraft = (t: ProgramTemplate | null): Draft => ({
             @for (t of items(); track t.id) {
               <li>
                 <button
+                  sat-interactive-card
                   type="button"
                   class="bf-tpl__item"
-                  [class.bf-tpl__item--selected]="draft().id === t.id"
+                  [active]="draft().id === t.id"
+                  [border]="true"
                   (click)="select(t)"
                   [attr.data-testid]="'template-' + t.code"
                 >
-                  <span class="bf-tpl__name">{{ t.name }}</span>
-                  <span class="bf-card__hint">{{ t.defaults.description ?? '' }}</span>
-                  <span class="bf-tpl__meta">
-                    <span>Used by {{ t.budgetCount }} budget(s)</span>
-                    <sat-category-tag category="gray">{{
-                      t.driver === 'per_head' ? 'Per head' : 'Fixed'
-                    }}</sat-category-tag>
-                  </span>
+                  <span satInteractiveCardTitle>{{ t.name }}</span>
+                  <span satInteractiveCardSubtitle>{{ t.defaults.description ?? '' }}</span>
+                  <sat-interactive-card-content>
+                    <span class="bf-tpl__meta">
+                      <span>{{ usedBy(t.budgetCount) }}</span>
+                      <sat-category-tag category="gray">{{
+                        t.driver === 'per_head' ? 'Per head' : 'Fixed'
+                      }}</sat-category-tag>
+                    </span>
+                  </sat-interactive-card-content>
                 </button>
               </li>
             }
@@ -268,12 +268,13 @@ const toDraft = (t: ProgramTemplate | null): Draft => ({
                 </mat-select>
               </mat-form-field>
             </div>
+            <span class="bf-tpl__label" id="tpl-thresholds">Alert thresholds</span>
             <mat-button-toggle-group
               multiple
               [value]="draft().thresholds"
               (change)="patch({ thresholds: $event.value })"
               [disabled]="!canManage()"
-              aria-label="Alert thresholds"
+              aria-labelledby="tpl-thresholds"
             >
               @for (t of [50, 80, 90, 100]; track t) {
                 <mat-button-toggle [value]="t">{{ t }}%</mat-button-toggle>
@@ -288,11 +289,6 @@ const toDraft = (t: ProgramTemplate | null): Draft => ({
             @if (failure()) {
               <sat-banner variant="important"
                 ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
-              >
-            }
-            @if (saved()) {
-              <sat-banner variant="success"
-                ><sat-banner-message>{{ saved() }}</sat-banner-message></sat-banner
               >
             }
             @if (canManage()) {
@@ -333,7 +329,10 @@ export class TemplatesPage {
   protected readonly draft = signal<Draft>(toDraft(null));
   protected readonly busy = signal(false);
   protected readonly failure = signal<string | null>(null);
-  protected readonly saved = signal<string | null>(null);
+  private readonly snack = inject(MatSnackBar);
+  protected usedBy(n: number): string {
+    return n === 0 ? 'Not used yet' : n === 1 ? 'Used by 1 budget' : `Used by ${n} budgets`;
+  }
 
   constructor() {
     effect(() => {
@@ -345,11 +344,9 @@ export class TemplatesPage {
   protected select(t: ProgramTemplate): void {
     this.draft.set(toDraft(t));
     this.failure.set(null);
-    this.saved.set(null);
   }
   protected startNew(): void {
     this.draft.set({ ...toDraft(null), code: 'NEW-PROGRAM', name: 'New program' });
-    this.saved.set(null);
   }
   protected patch(p: Partial<Draft>): void {
     this.draft.update((d) => ({ ...d, ...p }));
@@ -377,7 +374,7 @@ export class TemplatesPage {
         ? await data(this.api.updateProgramTemplate({ params: { templateId: d.id }, body }))
         : await data(this.api.createProgramTemplate({ body }));
       this.draft.set(toDraft(t));
-      this.saved.set('Template saved.');
+      this.snack.open('Template saved.', undefined, { duration: 6000 });
       this.list.reload();
     } catch (e) {
       this.failure.set(errorMessage(e));

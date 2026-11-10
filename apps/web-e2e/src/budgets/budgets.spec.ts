@@ -224,7 +224,7 @@ test.describe('per-head driver', () => {
       as: 'regional-manager',
     });
     await page.goto(`/budgets/${hyd.id}/per-head`);
-    await expect(page.getByTestId('breakdown')).toContainText('contractor');
+    await expect(page.getByTestId('breakdown')).toContainText('Contractors');
     await expect(page.getByTestId('target-amount')).toContainText('USD');
     await page.getByTestId('apply-per-head').click();
     await expect(page.getByTestId('per-head-done')).toBeVisible();

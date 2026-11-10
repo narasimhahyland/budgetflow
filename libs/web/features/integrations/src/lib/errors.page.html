@@ -20,38 +20,38 @@
   >
 }
 
-<nav class="bf-tabs" aria-label="Queues">
-  <button
-    class="bf-tabs__tab"
-    type="button"
-    [class.bf-tabs__tab--active]="tab() === 'retrying'"
-    [attr.aria-current]="tab() === 'retrying' ? 'page' : null"
+<sat-navigation-tabs aria-label="Queues">
+  <a
+    satNavigationTab
+    [active]="tab() === 'retrying'"
     (click)="switchTab('retrying')"
+    (keydown.enter)="switchTab('retrying')"
+    tabindex="0"
     data-testid="tab-retrying"
   >
     Waiting for retry ({{ retrying() }})
-  </button>
-  <button
-    class="bf-tabs__tab"
-    type="button"
-    [class.bf-tabs__tab--active]="tab() === 'dead_letter'"
-    [attr.aria-current]="tab() === 'dead_letter' ? 'page' : null"
+  </a>
+  <a
+    satNavigationTab
+    [active]="tab() === 'dead_letter'"
     (click)="switchTab('dead_letter')"
+    (keydown.enter)="switchTab('dead_letter')"
+    tabindex="0"
     data-testid="tab-dead-letter"
   >
     Dead letter ({{ deadLetter() }})
-  </button>
-  <button
-    class="bf-tabs__tab"
-    type="button"
-    [class.bf-tabs__tab--active]="tab() === 'discarded'"
-    [attr.aria-current]="tab() === 'discarded' ? 'page' : null"
+  </a>
+  <a
+    satNavigationTab
+    [active]="tab() === 'discarded'"
     (click)="switchTab('discarded')"
+    (keydown.enter)="switchTab('discarded')"
+    tabindex="0"
     data-testid="tab-discarded"
   >
     Discarded
-  </button>
-</nav>
+  </a>
+</sat-navigation-tabs>
 
 <section class="bf-card bf-filters" aria-label="Filters">
   <mat-form-field appearance="outline">
@@ -178,7 +178,12 @@
         <span class="bf-muted">{{ items().length }} shown, oldest failure first</span>
       </div>
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="items()" aria-label="Failed messages">
+        <table
+          mat-table
+          class="bf-table bf-table--stack"
+          [dataSource]="items()"
+          aria-label="Failed messages"
+        >
           <ng-container matColumnDef="select">
             <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Select</span></th>
             <td mat-cell *matCellDef="let m">
@@ -194,7 +199,7 @@
           </ng-container>
           <ng-container matColumnDef="item">
             <th mat-header-cell *matHeaderCellDef>Item</th>
-            <td mat-cell *matCellDef="let m">
+            <td mat-cell *matCellDef="let m" data-label="Item">
               <span class="bf-cell__primary">{{ m.item }}</span>
               <span class="bf-cell__secondary"
                 >{{ connectorName(m) }} · {{ directionLabel(m.direction) }} · first failed
@@ -206,7 +211,7 @@
           </ng-container>
           <ng-container matColumnDef="error">
             <th mat-header-cell *matHeaderCellDef>Why</th>
-            <td mat-cell *matCellDef="let m">
+            <td mat-cell *matCellDef="let m" data-label="Why">
               <sat-status-tag [status]="errorClassTone(m.errorClass)">{{
                 errorClassLabel(m.errorClass)
               }}</sat-status-tag>
@@ -215,13 +220,13 @@
           </ng-container>
           <ng-container matColumnDef="attempts">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Attempts</th>
-            <td mat-cell *matCellDef="let m" class="bf-num">
+            <td mat-cell *matCellDef="let m" class="bf-num" data-label="Attempts">
               {{ m.attempts }} of {{ m.maxAttempts }}
             </td>
           </ng-container>
           <ng-container matColumnDef="next">
             <th mat-header-cell *matHeaderCellDef>Next</th>
-            <td mat-cell *matCellDef="let m">
+            <td mat-cell *matCellDef="let m" data-label="Next">
               @if (m.status === 'discarded') {
                 <sat-status-tag status="neutral">Discarded</sat-status-tag>
                 <span class="bf-cell__secondary">{{ m.discardReason }}</span>
@@ -317,20 +322,22 @@
   </div>
 } @else {
   <section class="bf-card">
-    <sat-empty-state data-testid="errors-empty">
-      <h2 satEmptyStateHeadline>
-        {{ tab() === 'retrying' ? 'Nothing is failing' : 'Nothing here' }}
-      </h2>
-      <p satEmptyStateDescription>
-        @if (tab() === 'retrying') {
-          No message is waiting for a retry right now.
-        } @else if (tab() === 'dead_letter') {
-          No message has used up its retries.
-        } @else {
-          Nothing has been discarded.
-        }
-      </p>
-    </sat-empty-state>
+    <div class="bf-card__body">
+      <sat-empty-state data-testid="errors-empty">
+        <h2 satEmptyStateHeadline>
+          {{ tab() === 'retrying' ? 'Nothing is failing' : 'Nothing here' }}
+        </h2>
+        <p satEmptyStateDescription>
+          @if (tab() === 'retrying') {
+            No message is waiting for a retry right now.
+          } @else if (tab() === 'dead_letter') {
+            No message has used up its retries.
+          } @else {
+            Nothing has been discarded.
+          }
+        </p>
+      </sat-empty-state>
+    </div>
   </section>
 }
 

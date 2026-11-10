@@ -7,6 +7,7 @@ import {
   resource,
   signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -20,13 +21,12 @@ import { MatTableModule } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
 import type { DigestSectionConfig, DigestTemplateView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState, type StatusView } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { channelLabel, roleLabel } from './labels';
 
 const ROLES: { id: string; label: string }[] = [
   { id: 'ceo', label: 'CEO' },
@@ -48,6 +48,7 @@ const ROLES: { id: string; label: string }[] = [
   selector: 'bf-digests-page',
   imports: [
     DateTimePipe,
+    DecimalPipe,
     FormsModule,
     LoadState,
     MatButtonModule,
@@ -60,7 +61,6 @@ const ROLES: { id: string; label: string }[] = [
     MatTableModule,
     RouterLink,
     SAT_BANNER_IMPORTS,
-    SatImportantButton,
     SAT_NAVIGATION_TABS_IMPORTS,
     SatStatusTag,
   ],
@@ -112,7 +112,12 @@ const ROLES: { id: string; label: string }[] = [
       @if (!selected()) {
         <section class="bf-card" aria-label="Digest templates" data-testid="digest-templates-table">
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="l.items" aria-label="Digest templates">
+            <table
+              mat-table
+              class="bf-table bf-table--stack"
+              [dataSource]="l.items"
+              aria-label="Digest templates"
+            >
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef>Template</th>
                 <td mat-cell *matCellDef="let t">
@@ -129,29 +134,38 @@ const ROLES: { id: string; label: string }[] = [
               </ng-container>
               <ng-container matColumnDef="audience">
                 <th mat-header-cell *matHeaderCellDef>Audience</th>
-                <td mat-cell *matCellDef="let t">
-                  {{ t.audienceRoles.join(', ') }}
+                <td mat-cell *matCellDef="let t" data-label="Audience">
+                  {{ audience(t) }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="schedule">
-                <th mat-header-cell *matHeaderCellDef>When (recipient local)</th>
-                <td mat-cell *matCellDef="let t">
+                <th mat-header-cell *matHeaderCellDef title="In each recipient's local time">
+                  Send time
+                </th>
+                <td mat-cell *matCellDef="let t" data-label="Send time">
                   {{ t.frequency === 'daily_weekdays' ? 'Weekdays' : 'Monday' }} {{ t.sendTime }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="channels">
-                <th mat-header-cell *matHeaderCellDef>Channels allowed</th>
-                <td mat-cell *matCellDef="let t">
-                  {{ t.channelsAllowed.join(', ') }}
+                <th mat-header-cell *matHeaderCellDef class="bf-digests__wide">Channels allowed</th>
+                <td
+                  mat-cell
+                  *matCellDef="let t"
+                  class="bf-digests__wide"
+                  data-label="Channels allowed"
+                >
+                  {{ channels(t) }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="recipients">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">Recipients</th>
-                <td mat-cell *matCellDef="let t" class="bf-num">{{ t.recipientCount }}</td>
+                <td mat-cell *matCellDef="let t" class="bf-num" data-label="Recipients">
+                  {{ t.recipientCount | number }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="lastSent">
-                <th mat-header-cell *matHeaderCellDef>Last sent</th>
-                <td mat-cell *matCellDef="let t">
+                <th mat-header-cell *matHeaderCellDef class="bf-digests__wide">Last sent</th>
+                <td mat-cell *matCellDef="let t" class="bf-digests__wide" data-label="Last sent">
                   @if (t.lastSentAt) {
                     <span data-testid="relative-time">{{
                       t.lastSentAt | bfDateTime: session.timezone()
@@ -163,24 +177,11 @@ const ROLES: { id: string; label: string }[] = [
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let t">
-                  <sat-status-tag
-                    [status]="
-                      t.status === 'published'
-                        ? 'success'
-                        : t.status === 'draft_changes'
-                          ? 'warning'
-                          : 'neutral'
-                    "
+                <td mat-cell *matCellDef="let t" data-label="Status">
+                  @let s = digestStatusOf(t);
+                  <sat-status-tag [status]="s.tone"
+                    ><mat-icon [svgIcon]="s.icon" aria-hidden="true" />{{ s.label }}</sat-status-tag
                   >
-                    {{
-                      t.status === 'published'
-                        ? 'Published'
-                        : t.status === 'draft_changes'
-                          ? 'Draft changes'
-                          : 'Off'
-                    }}
-                  </sat-status-tag>
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="columns"></tr>
@@ -198,9 +199,10 @@ const ROLES: { id: string; label: string }[] = [
                 <h2 class="bf-card__title" id="editor-title">{{ t.name }} · v{{ t.version }}</h2>
                 <p class="bf-card__hint">Changes apply from the next scheduled send</p>
               </div>
-              <sat-status-tag [status]="t.status === 'published' ? 'success' : 'neutral'">
-                {{ t.status }}
-              </sat-status-tag>
+              @let es = digestStatusOf(t);
+              <sat-status-tag [status]="es.tone"
+                ><mat-icon [svgIcon]="es.icon" aria-hidden="true" />{{ es.label }}</sat-status-tag
+              >
             </div>
 
             <div class="bf-form">
@@ -310,7 +312,6 @@ const ROLES: { id: string; label: string }[] = [
                 <button mat-button type="button" (click)="closeEditor()">Discard</button>
                 <button
                   mat-flat-button
-                  satImportantButton
                   type="button"
                   [disabled]="busy() || !valid()"
                   (click)="publish()"
@@ -323,7 +324,11 @@ const ROLES: { id: string; label: string }[] = [
           </section>
 
           <!-- Right: Live preview -->
-          <section class="bf-card" aria-labelledby="preview-title" data-testid="digest-preview-card">
+          <section
+            class="bf-card"
+            aria-labelledby="preview-title"
+            data-testid="digest-preview-card"
+          >
             <div class="bf-card__header">
               <div>
                 <h2 class="bf-card__title" id="preview-title">Live preview</h2>
@@ -458,6 +463,12 @@ const ROLES: { id: string; label: string }[] = [
     }
   `,
   styles: `
+    /* Tablet keeps the columns people choose by; channels and last send show in the editor. */
+    @media (600px <= width < 1024px) {
+      .bf-digests__wide {
+        display: none;
+      }
+    }
     .bf-digests__link-btn {
       border: none;
       background: transparent;
@@ -509,6 +520,23 @@ export class DigestsPage {
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
+  private readonly digestStatus: Record<DigestTemplateView['status'], StatusView> = {
+    published: { label: 'Published', tone: 'success', icon: 'circle_check' },
+    draft_changes: { label: 'Draft changes', tone: 'warning', icon: 'note_edit' },
+    off: { label: 'Off', tone: 'neutral', icon: 'circle_minus' },
+  };
+
+  protected digestStatusOf(t: DigestTemplateView): StatusView {
+    return this.digestStatus[t.status];
+  }
+
+  protected audience(t: DigestTemplateView): string {
+    return t.audienceRoles.map(roleLabel).join(', ');
+  }
+
+  protected channels(t: DigestTemplateView): string {
+    return t.channelsAllowed.map(channelLabel).join(', ');
+  }
 
   readonly templateId = input<string | undefined>(undefined);
   protected readonly columns = [
@@ -559,12 +587,12 @@ export class DigestsPage {
       return s ? { templateId: s.id } : undefined;
     },
     loader: ({ params }) =>
-      data(this.api.previewDigestTemplate({ params: { templateId: params.templateId }, query: {} })),
+      data(
+        this.api.previewDigestTemplate({ params: { templateId: params.templateId }, query: {} }),
+      ),
   });
 
-  protected readonly hasEnabledSection = computed(() =>
-    this.editSections().some((s) => s.enabled),
-  );
+  protected readonly hasEnabledSection = computed(() => this.editSections().some((s) => s.enabled));
   protected readonly valid = computed(
     () =>
       this.editName.trim().length >= 3 &&

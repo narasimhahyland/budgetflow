@@ -280,7 +280,8 @@ test.describe('running a sync (092 Sync tab, 099)', () => {
     await page.goto('/admin/integrations/sync');
     await expect(page.getByTestId('summary-runs')).not.toHaveText('0');
     const row = page.getByTestId('run-row-erpnext-gl_lines').first();
-    await expect(row).toContainText('read');
+    // Read, applied, held and failed are their own number columns.
+    await expect(row.getByTestId('records-read')).not.toHaveText('0');
     await row.click();
     await expect(page.getByTestId('run-detail')).toContainText('Repeating this run is safe');
   });

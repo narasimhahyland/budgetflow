@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,18 +16,20 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState, Money, SpendStatus } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { EventTabs } from './event-tabs';
-import { LoadState } from './load-state';
+import { label } from './labels';
 
 /** Screen 54b: the event ROI scorecard — planned against actual, side by side, never a single score. */
 @Component({
   selector: 'bf-event-scorecard-page',
   imports: [
     DateOnlyPipe,
+    DecimalPipe,
     EventTabs,
     FormsModule,
     LoadState,
@@ -38,6 +41,8 @@ import { LoadState } from './load-state';
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SatCategoryTag,
+    SatStatusTag,
     SpendStatus,
   ],
   template: `
@@ -56,10 +61,12 @@ import { LoadState } from './load-state';
             <bf-spend-status kind="event" [status]="v.status" />
           </div>
           <p class="bf-meta">
-            <span>{{ v.eventCode }}</span>
+            <span class="bf-cell__code">{{ v.eventCode }}</span>
+            <span aria-hidden="true">·</span>
             <span>{{ v.startsAt | bfDate: session.timezone() }}</span>
             @if (v.closedAt) {
-              <span>closed {{ v.closedAt | bfDate: session.timezone() }}</span>
+              <span aria-hidden="true">·</span>
+              <span>Closed {{ v.closedAt | bfDate: session.timezone() }}</span>
             }
           </p>
         </div>
@@ -86,9 +93,16 @@ import { LoadState } from './load-state';
       }
 
       <section class="bf-kpis" aria-label="Event measures">
-        <div class="bf-kpi">
-          <p class="bf-kpi__label">Cost per attendee</p>
-          <p class="bf-kpi__value" data-testid="cost-per-attendee">
+        <div class="bf-kpi" [class.bf-kpi--warning]="overPlan(v.kpis.costPerAttendeeDeltaBps)">
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Cost per attendee</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="user" aria-hidden="true" />
+          </div>
+          <p
+            class="bf-kpi__value"
+            [class.bf-kpi__value--warning]="overPlan(v.kpis.costPerAttendeeDeltaBps)"
+            data-testid="cost-per-attendee"
+          >
             @if (v.kpis.actualCostPerAttendee) {
               <bf-money
                 [amountMinor]="v.kpis.actualCostPerAttendee.amountMinor"
@@ -98,20 +112,33 @@ import { LoadState } from './load-state';
               Mark attendance to see this
             }
           </p>
-          <p class="bf-kpi__delta">
-            planned
+          @if (v.kpis.costPerAttendeeDeltaBps !== null) {
+            <p class="bf-kpi__delta">
+              <sat-status-tag
+                [status]="overPlan(v.kpis.costPerAttendeeDeltaBps) ? 'warning' : 'success'"
+                ><mat-icon
+                  [svgIcon]="v.kpis.costPerAttendeeDeltaBps > 0 ? 'trending_up' : 'trending_down'"
+                  aria-hidden="true"
+                />{{ v.kpis.costPerAttendeeDeltaBps > 0 ? '+' : ''
+                }}{{ v.kpis.costPerAttendeeDeltaBps / 100 | number: '1.0-1' }}% against
+                plan</sat-status-tag
+              >
+            </p>
+          }
+          <div class="bf-kpi__foot">
+            <span>Planned</span>
             <bf-money
+              class="bf-kpi__pct"
               [amountMinor]="v.kpis.plannedCostPerAttendee.amountMinor"
               [currency]="v.kpis.plannedCostPerAttendee.currency"
             />
-            @if (v.kpis.costPerAttendeeDeltaBps !== null) {
-              · {{ v.kpis.costPerAttendeeDeltaBps >= 0 ? '+' : ''
-              }}{{ v.kpis.costPerAttendeeDeltaBps / 100 }}% against plan
-            }
-          </p>
+          </div>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Total cost</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Total cost</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="currency_dollar" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="v.kpis.spentTotal.amountMinor"
@@ -133,14 +160,24 @@ import { LoadState } from './load-state';
           </p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Participation</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Participation</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="users" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ v.kpis.participationPct }}%</p>
-          <p class="bf-kpi__delta">
-            {{ v.kpis.attendedCount }} attended of {{ v.kpis.invitedCount }} invited
-          </p>
+          <div class="bf-kpi__foot">
+            <span>{{ v.kpis.attendedCount }} attended of {{ v.kpis.invitedCount }} invited</span>
+            <span class="bf-kpi__pct">{{ v.kpis.participationPct }}%</span>
+            <span class="bf-kpi__track"
+              ><span class="bf-kpi__fill" [style.width.%]="v.kpis.participationPct"></span
+            ></span>
+          </div>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">No-shows</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">No-shows</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="circle_x" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ v.kpis.noShowCount }}</p>
           <p class="bf-kpi__delta">
             {{ v.kpis.noShowRatePct }}% of those going · cost
@@ -151,7 +188,10 @@ import { LoadState } from './load-state';
           </p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Feedback</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Feedback</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="star" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             {{
               v.kpis.averageRating === null
@@ -167,7 +207,10 @@ import { LoadState } from './load-state';
           </p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">FX effect</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">FX effect</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="sync" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="v.kpis.fxEffect.amountMinor"
@@ -181,121 +224,132 @@ import { LoadState } from './load-state';
       <section class="bf-card" aria-label="Cost by category">
         <div class="bf-card__header"><h2 class="bf-card__title">Cost by category</h2></div>
         @if (v.costByCategory.length === 0) {
-          <p class="bf-empty">No cost lines or commitments were recorded for this event.</p>
+          <sat-empty-state>
+            <h3 satEmptyStateHeadline>No costs recorded</h3>
+            <p satEmptyStateDescription>
+              No cost lines or commitments were recorded for this event.
+            </p>
+          </sat-empty-state>
         } @else {
-          <table class="bf-split-table">
-            <caption class="bf-empty">
-              Planned against actual, in the event currency.
+          <div class="bf-table-scroll">
+            <table class="bf-split-table bf-table--stack" aria-label="Cost by category">
+              <caption>
+                Planned against actual, in the event currency.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Category</th>
+                  <th scope="col" class="bf-num">Planned</th>
+                  <th scope="col" class="bf-num">Actual</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of v.costByCategory; track row.category) {
+                  <tr>
+                    <th scope="row">{{ label(row.category) }}</th>
+                    <td class="bf-num" data-label="Planned">
+                      <bf-money
+                        [amountMinor]="row.planned.amountMinor"
+                        [currency]="row.planned.currency"
+                      />
+                    </td>
+                    <td class="bf-num" data-label="Actual">
+                      <bf-money
+                        [amountMinor]="row.actual.amountMinor"
+                        [currency]="row.actual.currency"
+                      />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section class="bf-card" aria-label="Funding and returns">
+        <div class="bf-card__header"><h2 class="bf-card__title">Funding and returns</h2></div>
+        <div class="bf-table-scroll">
+          <table class="bf-split-table bf-table--stack" aria-label="Funding and returns">
+            <caption>
+              Surplus figures come from the posted returns, not a recalculation.
             </caption>
             <thead>
               <tr>
-                <th scope="col">Category</th>
-                <th scope="col" class="bf-num">Planned</th>
-                <th scope="col" class="bf-num">Actual</th>
+                <th scope="col">Contributor</th>
+                <th scope="col">Mode</th>
+                <th scope="col" class="bf-num">Approved</th>
+                <th scope="col" class="bf-num">Actual share</th>
+                <th scope="col" class="bf-num">Surplus returned</th>
               </tr>
             </thead>
             <tbody>
-              @for (row of v.costByCategory; track row.category) {
+              @for (row of v.fundingAndReturns; track row.sourceId) {
                 <tr>
-                  <th scope="row">{{ row.category.replace('_', ' ') }}</th>
-                  <td class="bf-num">
+                  <th scope="row">
+                    <span class="bf-cell__primary">{{ row.budgetName }}</span>
+                    <span class="bf-cell__secondary">
+                      {{ row.contributionRef ?? 'Own funds' }}
+                    </span>
+                    @if (row.crossEntity) {
+                      <sat-category-tag category="orange">Intercompany</sat-category-tag>
+                    }
+                  </th>
+                  <td data-label="Mode">{{ label(row.mode) }}</td>
+                  <td class="bf-num" data-label="Approved">
                     <bf-money
-                      [amountMinor]="row.planned.amountMinor"
-                      [currency]="row.planned.currency"
+                      [amountMinor]="row.approved.amountMinor"
+                      [currency]="row.approved.currency"
                     />
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Actual share">
                     <bf-money
-                      [amountMinor]="row.actual.amountMinor"
-                      [currency]="row.actual.currency"
+                      [amountMinor]="row.actualShare.amountMinor"
+                      [currency]="row.actualShare.currency"
+                    />
+                  </td>
+                  <td class="bf-num" data-label="Surplus returned">
+                    <bf-money
+                      [amountMinor]="row.surplusReturned.amountMinor"
+                      [currency]="row.surplusReturned.currency"
                     />
                   </td>
                 </tr>
               }
             </tbody>
           </table>
-        }
-      </section>
-
-      <section class="bf-card" aria-label="Funding and returns">
-        <div class="bf-card__header"><h2 class="bf-card__title">Funding and returns</h2></div>
-        <table class="bf-split-table">
-          <caption class="bf-empty">
-            Surplus figures come from the posted returns, not a recalculation.
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Contributor</th>
-              <th scope="col">Mode</th>
-              <th scope="col" class="bf-num">Approved</th>
-              <th scope="col" class="bf-num">Actual share</th>
-              <th scope="col" class="bf-num">Surplus returned</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of v.fundingAndReturns; track row.sourceId) {
-              <tr>
-                <th scope="row">
-                  <span class="bf-cell__primary">{{ row.budgetName }}</span>
-                  <span class="bf-cell__secondary">
-                    {{ row.contributionRef ?? 'Own funds' }}
-                    @if (row.crossEntity) {
-                      · cross-entity
-                    }
-                  </span>
-                </th>
-                <td>{{ row.mode }}</td>
-                <td class="bf-num">
-                  <bf-money
-                    [amountMinor]="row.approved.amountMinor"
-                    [currency]="row.approved.currency"
-                  />
-                </td>
-                <td class="bf-num">
-                  <bf-money
-                    [amountMinor]="row.actualShare.amountMinor"
-                    [currency]="row.actualShare.currency"
-                  />
-                </td>
-                <td class="bf-num">
-                  <bf-money
-                    [amountMinor]="row.surplusReturned.amountMinor"
-                    [currency]="row.surplusReturned.currency"
-                  />
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        </div>
       </section>
 
       <section class="bf-card" aria-label="Participation by location">
         <div class="bf-card__header">
           <h2 class="bf-card__title">Participation by location</h2>
         </div>
-        <table class="bf-split-table">
-          <caption class="bf-empty">
-            Who came, per location.
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Location</th>
-              <th scope="col" class="bf-num">Invited</th>
-              <th scope="col" class="bf-num">Attended</th>
-              <th scope="col" class="bf-num">Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of v.participationByLocation; track row.locationName) {
+        <div class="bf-table-scroll">
+          <table class="bf-split-table" aria-label="Participation by location">
+            <caption>
+              Who came, per location.
+            </caption>
+            <thead>
               <tr>
-                <th scope="row">{{ row.locationName }}</th>
-                <td class="bf-num">{{ row.invited }}</td>
-                <td class="bf-num">{{ row.attended }}</td>
-                <td class="bf-num">{{ row.ratePct }}%</td>
+                <th scope="col">Location</th>
+                <th scope="col" class="bf-num">Invited</th>
+                <th scope="col" class="bf-num">Attended</th>
+                <th scope="col" class="bf-num">Rate</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (row of v.participationByLocation; track row.locationName) {
+                <tr>
+                  <th scope="row">{{ row.locationName }}</th>
+                  <td class="bf-num">{{ row.invited }}</td>
+                  <td class="bf-num">{{ row.attended }}</td>
+                  <td class="bf-num">{{ row.ratePct }}%</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section class="bf-card" aria-label="Comparison">
@@ -303,7 +357,15 @@ import { LoadState } from './load-state';
           <h2 class="bf-card__title">{{ v.comparison.label }}</h2>
         </div>
         @if (!v.comparison.enoughEvents) {
-          <p class="bf-empty">Comparison needs at least 3 similar events.</p>
+          <sat-empty-state>
+            <h3 satEmptyStateHeadline>Not enough similar events yet</h3>
+            <p satEmptyStateDescription>
+              The comparison appears once 3 similar events have closed ({{
+                v.comparison.eventCount
+              }}
+              so far).
+            </p>
+          </sat-empty-state>
         } @else {
           <dl class="bf-facts">
             <div>
@@ -355,7 +417,7 @@ import { LoadState } from './load-state';
             </button>
           </div>
         } @else {
-          <p class="bf-empty">{{ v.organizerNotes ?? 'No notes yet.' }}</p>
+          <p class="bf-section">{{ v.organizerNotes ?? 'No notes yet.' }}</p>
         }
       </section>
 
@@ -370,6 +432,11 @@ import { LoadState } from './load-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EventScorecardPage {
+  protected readonly label = label;
+  /** Any cost per attendee above plan is a soft warning (section 8). */
+  protected overPlan(deltaBps: number | null): boolean {
+    return deltaBps !== null && deltaBps > 0;
+  }
   private readonly api = injectApi();
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);

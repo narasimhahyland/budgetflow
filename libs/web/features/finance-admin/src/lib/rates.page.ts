@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatNumber } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,16 +10,16 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import type { ExchangeRate } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type RateType = ExchangeRate['rateType'];
 
@@ -38,12 +38,14 @@ const TYPE_LABEL: Record<RateType, string> = {
 /** Screens 107 and 107a: currencies, exchange-rate types, plan-rate lock and rate lookup. */
 @Component({
   selector: 'bf-rates-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DatePipe,
     FormsModule,
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     MatTableModule,
@@ -60,9 +62,6 @@ const TYPE_LABEL: Record<RateType, string> = {
       gap: 12px;
       padding: 0 20px 20px;
     }
-    .bf-compare .bf-kpi__value {
-      font: var(--mat-sys-title-large);
-    }
     .bf-context {
       display: flex;
       flex-wrap: wrap;
@@ -70,15 +69,20 @@ const TYPE_LABEL: Record<RateType, string> = {
       gap: 8px 16px;
       padding: 12px 20px;
     }
-    .bf-chip {
+    .bf-rate {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--mat-sys-corner-small);
-      background: var(--mat-sys-surface-container-low);
-      font: var(--mat-sys-label-large);
+      gap: 4px;
+    }
+    .bf-rate__lock {
+      width: 16px;
+      height: 16px;
+      color: var(--mat-sys-on-surface-variant);
+    }
+    @media (width < 600px) {
+      .bf-hide-mobile {
+        display: none;
+      }
     }
     .bf-context__note {
       margin: 0;
@@ -100,7 +104,7 @@ const TYPE_LABEL: Record<RateType, string> = {
       gap: 8px;
       padding: 16px;
       border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--mat-sys-corner-large);
+      border-radius: var(--mat-sys-corner-medium);
       background: var(--mat-sys-surface-container-lowest);
     }
     .bf-tile__head {
@@ -272,11 +276,9 @@ export class RatesPage {
   protected readonly lockYearId = signal<string | null>(null);
   protected readonly lockReason = signal('');
 
-  /** A rate without trailing zeros (at least two decimals). */
+  /** A rate with four decimals (up to six when it has them), as treasury quotes them. */
   protected rateText(value: string): string {
-    const [int, frac = ''] = value.split('.');
-    const trimmed = frac.replace(/0+$/, '');
-    return `${int}.${trimmed.padEnd(2, '0')}`;
+    return formatNumber(Number(value), 'en-US', '1.4-6');
   }
 
   protected typeName(type: RateType): string {

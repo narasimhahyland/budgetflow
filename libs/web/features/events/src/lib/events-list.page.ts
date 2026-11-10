@@ -15,11 +15,11 @@ import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { EventSummary } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState, Money, SpendStatus } from '@bf/web/ui';
+import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SAT_TABLE_WITH_ROW_STATES_IMPORTS } from '@hylandsoftware/satori-ui/table-with-row-states';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type Tab = 'upcoming' | 'in_progress' | 'reconciling' | 'closed' | 'drafts';
 const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
@@ -44,6 +44,7 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
     MatTableModule,
     Money,
     RouterLink,
+    SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
     SAT_TABLE_WITH_ROW_STATES_IMPORTS,
     SpendStatus,
@@ -72,7 +73,7 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
           (keydown.enter)="setTab(t.id)"
           tabindex="0"
         >
-          {{ t.label }} <span class="bf-chip">{{ count(t.id) }}</span>
+          {{ t.label }} <span class="bf-tab-count">{{ count(t.id) }}</span>
         </a>
       }
     </sat-navigation-tabs>
@@ -96,16 +97,39 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
       />
       @if (list.hasValue()) {
         @if (rows().length === 0) {
-          <p class="bf-empty">
-            No events here yet.
-            {{ session.can('event.manage') ? 'Create one to start funding it.' : '' }}
-          </p>
+          <sat-empty-state>
+            <h3 satEmptyStateHeadline>
+              {{ q().trim() ? 'No events match' : 'No events here yet' }}
+            </h3>
+            <p satEmptyStateDescription>
+              {{
+                q().trim()
+                  ? 'Try another name or code, or clear the search.'
+                  : session.can('event.manage')
+                    ? 'Create one to start funding it.'
+                    : 'Events you organize, attend or fund appear here.'
+              }}
+            </p>
+            @if (q().trim()) {
+              <button mat-stroked-button satEmptyStateAction type="button" (click)="q.set('')">
+                Clear search
+              </button>
+            } @else if (session.can('event.manage')) {
+              <a mat-flat-button satEmptyStateAction routerLink="/events/new">Create event</a>
+            }
+          </sat-empty-state>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table satTableWithRowStates [dataSource]="rows()" aria-label="Events">
+            <table
+              mat-table
+              satTableWithRowStates
+              class="bf-table bf-table--stack"
+              [dataSource]="rows()"
+              aria-label="Events"
+            >
               <ng-container matColumnDef="event">
                 <th mat-header-cell *matHeaderCellDef>Event</th>
-                <td mat-cell *matCellDef="let e">
+                <td mat-cell *matCellDef="let e" data-label="Event">
                   <a
                     satRowPrimaryAction
                     class="bf-cell__primary"
@@ -120,11 +144,13 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
               </ng-container>
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Date</th>
-                <td mat-cell *matCellDef="let e">{{ e.startsAt | bfDate: session.timezone() }}</td>
+                <td mat-cell *matCellDef="let e" data-label="Date">
+                  {{ e.startsAt | bfDate: session.timezone() }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="cap">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">Estimate</th>
-                <td mat-cell *matCellDef="let e" class="bf-num">
+                <td mat-cell *matCellDef="let e" class="bf-num" data-label="Estimate">
                   <bf-money
                     [amountMinor]="e.estimate.amountMinor"
                     [currency]="e.estimate.currency"
@@ -132,27 +158,31 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
                 </td>
               </ng-container>
               <ng-container matColumnDef="funded">
-                <th mat-header-cell *matHeaderCellDef>Funded</th>
-                <td mat-cell *matCellDef="let e">
-                  <span class="bf-cell__primary"
-                    ><bf-money
-                      [amountMinor]="e.funded.amountMinor"
-                      [currency]="e.funded.currency"
-                    />
-                    · {{ pct(e.funded.amountMinor, e.estimate.amountMinor) }}%</span
-                  >
-                  <span class="bf-progress"
-                    ><span
-                      class="bf-progress__fill"
-                      [class.bf-progress__fill--approved]="e.fullyFunded"
-                      [style.width.%]="pct(e.funded.amountMinor, e.estimate.amountMinor)"
-                    ></span
-                  ></span>
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Funded</th>
+                <td mat-cell *matCellDef="let e" class="bf-num" data-label="Funded">
+                  <span class="bf-cell__stack">
+                    <span class="bf-cell__primary"
+                      ><bf-money
+                        [amountMinor]="e.funded.amountMinor"
+                        [currency]="e.funded.currency"
+                      />
+                      <span class="bf-pct" [class.bf-pct--funded]="e.fullyFunded"
+                        >{{ pct(e.funded.amountMinor, e.estimate.amountMinor) }}%</span
+                      ></span
+                    >
+                    <span class="bf-progress"
+                      ><span
+                        class="bf-progress__fill"
+                        [class.bf-progress__fill--approved]="e.fullyFunded"
+                        [style.width.%]="pct(e.funded.amountMinor, e.estimate.amountMinor)"
+                      ></span
+                    ></span>
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="committed">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">Committed</th>
-                <td mat-cell *matCellDef="let e" class="bf-num">
+                <td mat-cell *matCellDef="let e" class="bf-num" data-label="Committed">
                   <bf-money
                     [amountMinor]="e.committed.amountMinor"
                     [currency]="e.committed.currency"
@@ -161,7 +191,7 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let e">
+                <td mat-cell *matCellDef="let e" data-label="Status">
                   <bf-spend-status kind="event" [status]="e.status" />
                   @if (e.pendingContributions) {
                     <span class="bf-cell__secondary"
@@ -180,6 +210,36 @@ const TABS: { id: Tab; label: string; statuses: EventSummary['status'][] }[] = [
         }
       }
     </section>
+  `,
+  styles: `
+    .bf-tab-count {
+      margin-inline-start: 4px;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-medium);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bf-cell__stack {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 160px;
+    }
+
+    .bf-pct {
+      margin-inline-start: 8px;
+      color: var(--mat-sys-on-surface-variant);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bf-pct--funded {
+      color: var(--sat-sys-on-success-container);
+    }
+
+    .bf-progress {
+      margin-top: 0;
+    }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,

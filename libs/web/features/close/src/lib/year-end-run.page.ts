@@ -15,15 +15,15 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { YearEndLine, YearEndReadinessCheck, YearEndRun } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { ordered, RUN_STATUS, YEAR_END_LINE_STATUS } from './close-format';
-import { LoadState } from './load-state';
 import { CarryDecisionDialog, ExecuteYearEndDialog } from './year-end-dialogs';
+import { CloseTag } from './close-tag';
 
 type CheckCode = YearEndReadinessCheck['code'];
 
@@ -50,6 +50,7 @@ const FIX: Partial<Record<CheckCode, { path: string; label: string }>> = {
 @Component({
   selector: 'bf-year-end-run-page',
   imports: [
+    CloseTag,
     DatePipe,
     LoadState,
     MatButtonModule,

@@ -17,14 +17,23 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { CreateBudgetRequest } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { BudgetBar, type BudgetBarSegment, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { BUDGET_TYPE_LABEL, data, errorMessage, injectApi, toMinor, valueOf } from './api';
+import {
+  BUDGET_TYPE_LABEL,
+  data,
+  errorMessage,
+  flagMatcher,
+  injectApi,
+  toMinor,
+  valueOf,
+} from './api';
 
 /** Screen 20: create a child budget (or a root funded by a plan version) with its controls. */
 @Component({
   selector: 'bf-create-budget-page',
   imports: [
+    BudgetBar,
     FormsModule,
     MatButtonModule,
     MatButtonToggleModule,
@@ -78,11 +87,8 @@ import { BUDGET_TYPE_LABEL, data, errorMessage, injectApi, toMinor, valueOf } fr
       color: var(--mat-sys-error);
     }
     .bf-lock {
+      display: block;
       margin: 0 20px 12px;
-      padding: 12px;
-      border-radius: var(--mat-sys-corner-medium);
-      background: var(--mat-sys-surface-container-low);
-      font: var(--mat-sys-body-small);
     }
     .bf-side-actions {
       display: flex;
@@ -220,22 +226,28 @@ import { BUDGET_TYPE_LABEL, data, errorMessage, injectApi, toMinor, valueOf } fr
               </mat-form-field>
             }
           </div>
-          <p class="bf-lock">
-            Budget currency: USD (fixed). Local-currency spend converts to USD at the plan rate
-            locked for the fiscal year.
-          </p>
+          <sat-banner variant="info" class="bf-lock"
+            ><sat-banner-message
+              ><strong>Budget currency: USD (fixed).</strong> Local-currency spend converts to USD
+              at the plan rate locked for the fiscal year.</sat-banner-message
+            ></sat-banner
+          >
           <div class="bf-form">
             <mat-form-field
-              ><mat-label>{{
-                parentId() ? 'Initial allocation (USD)' : 'Original amount (USD)'
-              }}</mat-label>
+              ><mat-label>{{ parentId() ? 'Initial allocation' : 'Original amount' }}</mat-label>
+              <span matTextPrefix>{{ parent()?.currency ?? 'USD' }}&nbsp;</span>
               <input
                 matInput
                 inputmode="decimal"
                 [ngModel]="amount()"
                 (ngModelChange)="amount.set($event)"
+                [errorStateMatcher]="amountError"
                 data-testid="amount"
               />
+              <mat-error
+                ><mat-icon svgIcon="error" aria-hidden="true" />More than the parent has
+                unallocated</mat-error
+              >
               @if (parent(); as p) {
                 <mat-hint
                   >Up to
@@ -317,10 +329,8 @@ import { BUDGET_TYPE_LABEL, data, errorMessage, injectApi, toMinor, valueOf } fr
                 </dd>
               </div>
               <div>
-                <dt>Deducted amount</dt>
-                <dd class="bf-bad">
-                  − <bf-money [amountMinor]="amountMinor() ?? 0" [currency]="p.currency" />
-                </dd>
+                <dt>Allocated to this budget</dt>
+                <dd>− <bf-money [amountMinor]="amountMinor() ?? 0" [currency]="p.currency" /></dd>
               </div>
               <div>
                 <dt>Available after</dt>
@@ -334,11 +344,18 @@ import { BUDGET_TYPE_LABEL, data, errorMessage, injectApi, toMinor, valueOf } fr
                 </dd>
               </div>
             </dl>
+            <bf-budget-bar
+              [label]="p.name + ' after this allocation'"
+              [segments]="parentSegments()"
+              [totalMinor]="p.balances.budgetCurrency.authorized.amountMinor"
+              [currency]="p.currency"
+              [legend]="false"
+            />
             @if (over()) {
-              <sat-banner variant="important" style="margin-top: 12px"
+              <sat-banner variant="important" [border]="true" style="margin-top: 12px"
                 ><sat-banner-message
-                  >The parent does not have that much unallocated. Lower the amount or ask for an
-                  increase.</sat-banner-message
+                  ><strong>Blocked:</strong> the parent does not have that much unallocated. Lower
+                  the amount or ask for an increase.</sat-banner-message
                 ></sat-banner
               >
             }
@@ -447,6 +464,29 @@ export class CreateBudgetPage {
   protected readonly over = computed(() => {
     const p = this.parent();
     return !!p && (this.amountMinor() ?? 0) > p.balances.allocationAvailable.amountMinor;
+  });
+  protected readonly amountError = flagMatcher(() => this.over());
+
+  /** The parent after this allocation, in section 10 bucket colours. */
+  protected readonly parentSegments = computed((): BudgetBarSegment[] => {
+    const p = this.parent();
+    if (!p) return [];
+    const c = p.balances.budgetCurrency;
+    const amount = Math.max(this.amountMinor() ?? 0, 0);
+    const available = p.balances.allocationAvailable.amountMinor;
+    return [
+      { bucket: 'allocatedOut', amountMinor: c.allocatedOut.amountMinor },
+      { bucket: 'held', amountMinor: c.held.amountMinor },
+      { bucket: 'preEncumbered', amountMinor: c.preEncumbered.amountMinor },
+      { bucket: 'encumbered', amountMinor: c.encumbered.amountMinor },
+      { bucket: 'actual', amountMinor: c.actual.amountMinor },
+      { bucket: 'thisRequest', amountMinor: amount, label: 'This allocation' },
+      {
+        bucket: 'available',
+        amountMinor: Math.max(available - amount, 0),
+        label: 'Available after',
+      },
+    ];
   });
 
   constructor() {

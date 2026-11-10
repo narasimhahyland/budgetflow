@@ -11,6 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import type { ErrorStateMatcher } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,13 +21,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { BudgetDetail, BudgetLimit, BudgetVersion } from '@bf/contracts';
-import { BudgetStatus, Money } from '@bf/web/ui';
+import { BudgetStatus, Money, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { can, data, errorMessage, injectApi, toMajor, toMinor, valueOf } from './api';
+import { can, data, errorMessage, flagMatcher, injectApi, toMajor, toMinor, valueOf } from './api';
 import { BudgetActions } from './budget-actions';
-import { LoadState } from './load-state';
 import { UsageBar } from './widgets';
 
 const TAB_STYLES = `
@@ -38,6 +38,9 @@ const TAB_STYLES = `
   .bf-total { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--mat-sys-outline-variant); font: var(--mat-sys-title-small); }
   .bf-bad { color: var(--mat-sys-error); }
   .bf-ok { color: var(--sat-sys-on-success-container); }
+  .bf-warn { color: var(--sat-sys-on-warning-container); }
+  .bf-move { display: inline-flex; align-items: center; gap: 2px; }
+  .bf-move mat-icon { width: 16px; height: 16px; }
 `;
 
 /** Children of a budget with allocate actions. */
@@ -81,6 +84,7 @@ const TAB_STYLES = `
       }
     </div>
     <bf-load-state
+      shape="table"
       [loading]="list.isLoading()"
       [error]="list.error()"
       what="child budgets"
@@ -94,7 +98,7 @@ const TAB_STYLES = `
     }
     @if (rows().length) {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="rows()" aria-label="Child budgets">
+        <table mat-table class="bf-table" [dataSource]="rows()" aria-label="Child budgets">
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Budget</th>
             <td mat-cell *matCellDef="let c">
@@ -118,8 +122,8 @@ const TAB_STYLES = `
             </td>
           </ng-container>
           <ng-container matColumnDef="used">
-            <th mat-header-cell *matHeaderCellDef>Used</th>
-            <td mat-cell *matCellDef="let c">
+            <th mat-header-cell *matHeaderCellDef class="bf-num">Used</th>
+            <td mat-cell *matCellDef="let c" class="bf-num">
               <bf-usage-bar [bps]="c.utilizationBps" [thresholds]="c.alertThresholdsPct" />
             </td>
           </ng-container>
@@ -177,22 +181,23 @@ export class ChildrenTab {
     MatButtonModule,
     MatButtonToggleModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     Money,
     SAT_BANNER_IMPORTS,
+    SAT_TAG_IMPORTS,
   ],
   styleUrl: './page.scss',
   styles:
     TAB_STYLES +
     `
-    .bf-periods { width: 100%; border-collapse: collapse; font: var(--mat-sys-body-medium); }
-    .bf-periods th, .bf-periods td { padding: 8px 12px; border-bottom: 1px solid var(--mat-sys-outline-variant); text-align: end; }
-    .bf-periods th:first-child, .bf-periods td:first-child { text-align: start; }
-    .bf-periods th { color: var(--mat-sys-on-surface-variant); font: var(--mat-sys-label-medium); }
-    .bf-closed { color: var(--mat-sys-on-surface-variant); }
+    .bf-periods td { vertical-align: middle; }
+    .bf-closed td { color: var(--mat-sys-on-surface-variant); }
+    .bf-period { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   `,
   template: `
     <bf-load-state
+      shape="table"
       [loading]="res.isLoading()"
       [error]="res.error()"
       what="phasing"
@@ -241,11 +246,11 @@ export class ChildrenTab {
         >
       </div>
       <div class="bf-table-scroll">
-        <table class="bf-periods" aria-label="Periods">
+        <table class="bf-periods bf-split-table" aria-label="Periods">
           <thead>
             <tr>
               <th scope="col">Period</th>
-              <th scope="col">
+              <th scope="col" class="bf-num">
                 {{
                   method() === 'seasonal'
                     ? 'Weight'
@@ -254,19 +259,27 @@ export class ChildrenTab {
                       : 'Allotment'
                 }}
               </th>
-              <th scope="col">Phased now</th>
-              <th scope="col">Committed</th>
-              <th scope="col">Actual</th>
+              <th scope="col" class="bf-num">Phased now</th>
+              <th scope="col" class="bf-num bf-hide-sm">Committed</th>
+              <th scope="col" class="bf-num bf-hide-sm">Actual</th>
             </tr>
           </thead>
           <tbody>
             @for (row of p.periods; track row.periodId; let i = $index) {
               <tr [class.bf-closed]="row.status !== 'open'">
                 <td>
-                  {{ row.label }}
-                  <span class="bf-card__hint">{{ row.status.replace('_', '-') }}</span>
+                  <span class="bf-period"
+                    >{{ row.label }}
+                    @if (row.status !== 'open') {
+                      <sat-status-tag status="neutral"
+                        ><mat-icon svgIcon="lock" aria-hidden="true" />{{
+                          periodLabel(row.status)
+                        }}</sat-status-tag
+                      >
+                    }
+                  </span>
                 </td>
-                <td>
+                <td class="bf-num">
                   @if (method() === 'seasonal') {
                     <mat-form-field class="bf-num-input" subscriptSizing="dynamic"
                       ><input
@@ -275,7 +288,7 @@ export class ChildrenTab {
                         min="0"
                         [ngModel]="weights()[i]"
                         (ngModelChange)="setWeight(i, $event)"
-                        [disabled]="!editable()"
+                        [disabled]="!editable() || row.status !== 'open'"
                         [attr.aria-label]="'Weight for ' + row.label"
                     /></mat-form-field>
                   } @else if (method() === 'manual') {
@@ -285,16 +298,25 @@ export class ChildrenTab {
                         inputmode="decimal"
                         [ngModel]="amounts()[i]"
                         (ngModelChange)="setAmount(i, $event)"
-                        [disabled]="!editable()"
+                        [disabled]="!editable() || row.status !== 'open'"
+                        [errorStateMatcher]="amountError(i)"
                         [attr.aria-label]="'Amount for ' + row.label"
-                    /></mat-form-field>
+                      />
+                      <mat-error><mat-icon svgIcon="error" aria-hidden="true" />Too high</mat-error>
+                    </mat-form-field>
                   } @else {
                     —
                   }
                 </td>
-                <td><bf-money [amountMinor]="row.allotmentMinor" [currency]="p.currency" /></td>
-                <td><bf-money [amountMinor]="row.committedMinor" [currency]="p.currency" /></td>
-                <td><bf-money [amountMinor]="row.actualMinor" [currency]="p.currency" /></td>
+                <td class="bf-num">
+                  <bf-money [amountMinor]="row.allotmentMinor" [currency]="p.currency" />
+                </td>
+                <td class="bf-num bf-hide-sm">
+                  <bf-money [amountMinor]="row.committedMinor" [currency]="p.currency" />
+                </td>
+                <td class="bf-num bf-hide-sm">
+                  <bf-money [amountMinor]="row.actualMinor" [currency]="p.currency" />
+                </td>
               </tr>
             }
           </tbody>
@@ -368,6 +390,23 @@ export class PhasingTab {
   }
   protected setAmount(i: number, v: string): void {
     this.amounts.update((w) => w.map((x, j) => (j === i ? v : x)));
+    this.lastEdited.set(i);
+  }
+
+  /** The period last typed into is the one that broke the total: it shows the field error. */
+  private readonly lastEdited = signal<number | null>(null);
+  private readonly matchers = new Map<number, ErrorStateMatcher>();
+  protected amountError(i: number): ErrorStateMatcher {
+    let m = this.matchers.get(i);
+    if (!m) {
+      m = flagMatcher(() => this.mismatch() > 0 && this.lastEdited() === i);
+      this.matchers.set(i, m);
+    }
+    return m;
+  }
+
+  protected periodLabel(status: string): string {
+    return PERIOD_LABEL[status] ?? status.replace(/_/g, ' ');
   }
 
   protected async save(): Promise<void> {
@@ -396,6 +435,12 @@ export class PhasingTab {
   }
 }
 
+const PERIOD_LABEL: Record<string, string> = {
+  soft_closed: 'Soft-closed',
+  closed: 'Closed',
+  locked: 'Locked',
+};
+
 /** Category, per-event and per-person limits by location. */
 @Component({
   selector: 'bf-limits-tab',
@@ -420,6 +465,7 @@ export class PhasingTab {
   `,
   template: `
     <bf-load-state
+      shape="table"
       [loading]="res.isLoading()"
       [error]="res.error()"
       what="limits"
@@ -484,7 +530,8 @@ export class PhasingTab {
             </mat-select>
           </mat-form-field>
           <mat-form-field subscriptSizing="dynamic"
-            ><mat-label>Limit (USD)</mat-label>
+            ><mat-label>Limit</mat-label>
+            <span matTextPrefix>{{ budget().currency }}&nbsp;</span>
             <input
               matInput
               inputmode="decimal"
@@ -623,22 +670,44 @@ const FIELDS: { key: string; label: string; money?: boolean }[] = [
   { key: 'name', label: 'Name' },
 ];
 
+const CONTROL_LABEL: Record<string, string> = {
+  hard: 'Hard control',
+  soft: 'Soft control',
+  track: 'Track only',
+};
+
+/** Plain-English names for the enum values a version snapshot stores. */
+const VALUE_LABEL: Record<string, string> = {
+  fixed: 'Fixed amount',
+  per_head: 'Per head',
+  even: 'Even',
+  seasonal: 'Seasonal',
+  manual: 'Manual',
+};
+
 /** Screens 30 and 31: immutable version history with the delta between two versions. */
 @Component({
   selector: 'bf-versions-tab',
-  imports: [DatePipe, LoadState, MatButtonModule, Money, SAT_BANNER_IMPORTS, SAT_TAG_IMPORTS],
+  imports: [
+    BudgetStatus,
+    DatePipe,
+    LoadState,
+    MatButtonModule,
+    Money,
+    SAT_BANNER_IMPORTS,
+    SAT_TAG_IMPORTS,
+  ],
   styleUrl: './page.scss',
   styles:
     TAB_STYLES +
     `
-    .bf-versions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 420px); gap: 16px; padding: 12px 20px 20px; align-items: start; }
+    .bf-versions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 520px); gap: 16px; padding: 12px 20px 20px; align-items: start; }
+    .bf-delta-val { text-align: end; font-variant-numeric: tabular-nums; }
     @media (max-width: 1000px) { .bf-versions { grid-template-columns: minmax(0, 1fr); } }
     .bf-timeline { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
     .bf-version { width: 100%; padding: 12px 14px; border: 1px solid var(--mat-sys-outline-variant); border-radius: var(--mat-sys-corner-medium); background: var(--mat-sys-surface-container-lowest); color: var(--mat-sys-on-surface); text-align: start; cursor: pointer; font: var(--mat-sys-body-medium); }
     .bf-version--selected { border: 2px solid var(--mat-sys-primary); }
     .bf-version__head { display: flex; justify-content: space-between; gap: 8px; font: var(--mat-sys-title-small); }
-    .bf-delta-table { width: 100%; border-collapse: collapse; font: var(--mat-sys-body-small); }
-    .bf-delta-table th, .bf-delta-table td { padding: 8px; border-bottom: 1px solid var(--mat-sys-outline-variant); text-align: start; }
     .bf-changed { background: var(--mat-sys-primary-container); }
   `,
   template: `
@@ -649,6 +718,7 @@ const FIELDS: { key: string; label: string; money?: boolean }[] = [
       ></sat-banner
     >
     <bf-load-state
+      shape="table"
       [loading]="res.isLoading()"
       [error]="res.error()"
       what="versions"
@@ -668,7 +738,7 @@ const FIELDS: { key: string; label: string; money?: boolean }[] = [
               >
                 <span class="bf-version__head">
                   <span
-                    ><sat-category-tag category="gray"
+                    ><sat-category-tag [category]="first ? 'purple' : 'gray'"
                       >v{{ v.version }}{{ first ? ' current' : '' }}</sat-category-tag
                     >
                     {{ v.reason }}</span
@@ -697,42 +767,38 @@ const FIELDS: { key: string; label: string; money?: boolean }[] = [
             <div class="bf-card__body">
               @if (from(); as f) {
                 <p class="bf-card__hint">Comparing v{{ f.version }} → v{{ t.version }}</p>
-                <table class="bf-delta-table" data-testid="version-compare">
-                  <thead>
-                    <tr>
-                      <th scope="col">Field</th>
-                      <th scope="col">v{{ f.version }}</th>
-                      <th scope="col">v{{ t.version }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (field of fields; track field.key) {
-                      <tr [class.bf-changed]="show(f, field.key) !== show(t, field.key)">
-                        <td>{{ field.label }}</td>
-                        <td>
-                          @if (field.money) {
-                            <bf-money
-                              [amountMinor]="num(f, field.key)"
-                              [currency]="budget().currency"
-                            />
-                          } @else {
-                            {{ show(f, field.key) }}
-                          }
-                        </td>
-                        <td>
-                          @if (field.money) {
-                            <bf-money
-                              [amountMinor]="num(t, field.key)"
-                              [currency]="budget().currency"
-                            />
-                          } @else {
-                            {{ show(t, field.key) }}
-                          }
-                        </td>
+                <div class="bf-table-scroll">
+                  <table class="bf-delta-table bf-split-table" data-testid="version-compare">
+                    <thead>
+                      <tr>
+                        <th scope="col">Field</th>
+                        <th scope="col" class="bf-delta-val">v{{ f.version }}</th>
+                        <th scope="col" class="bf-delta-val">v{{ t.version }}</th>
                       </tr>
-                    }
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      @for (field of fields; track field.key) {
+                        <tr [class.bf-changed]="show(f, field.key) !== show(t, field.key)">
+                          <td>{{ field.label }}</td>
+                          @for (v of [f, t]; track v.version) {
+                            <td class="bf-delta-val" [class.bf-num]="field.money">
+                              @if (field.money) {
+                                <bf-money
+                                  [amountMinor]="num(v, field.key)"
+                                  [currency]="budget().currency"
+                                />
+                              } @else if (field.key === 'status' && statusOf(v)) {
+                                <bf-budget-status [status]="statusOf(v)" />
+                              } @else {
+                                {{ show(v, field.key) }}
+                              }
+                            </td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
               } @else {
                 <p class="bf-card__hint">The first version; nothing to compare with.</p>
               }
@@ -765,6 +831,10 @@ export class VersionsTab {
   protected pick(v: BudgetVersion): void {
     this.picked.set(v.version);
   }
+  protected statusOf(v: BudgetVersion): string {
+    const s = v.snapshot['status'];
+    return typeof s === 'string' ? s : '';
+  }
   protected num(v: BudgetVersion, key: string): number {
     return Number(v.snapshot[key] ?? 0);
   }
@@ -773,11 +843,17 @@ export class VersionsTab {
     if (x === null || x === undefined) return '—';
     if (key === 'control') {
       const c = x as { mode: string; toleranceBps: number };
-      return `${c.mode}, tolerance ${c.toleranceBps / 100}%`;
+      return `${CONTROL_LABEL[c.mode] ?? c.mode}, ${c.toleranceBps / 100}% tolerance`;
     }
     if (Array.isArray(x)) return x.map((n) => `${n}%`).join(' / ');
-    return String(x).replace(/_/g, ' ');
+    return VALUE_LABEL[String(x)] ?? String(x).replace(/_/g, ' ');
   }
+}
+
+interface Movement {
+  label: string;
+  icon: string;
+  category: 'gray' | 'blue' | 'orange' | 'green' | 'purple';
 }
 
 /** Screen 89: allocations, increases, reductions and transfers in and out of the budget. */
@@ -786,6 +862,7 @@ export class VersionsTab {
   imports: [
     DatePipe,
     LoadState,
+    MatIconModule,
     MatTableModule,
     Money,
     RouterLink,
@@ -796,6 +873,7 @@ export class VersionsTab {
   styles: TAB_STYLES,
   template: `
     <bf-load-state
+      shape="table"
       [loading]="res.isLoading()"
       [error]="res.error()"
       what="allocation history"
@@ -811,7 +889,7 @@ export class VersionsTab {
     }
     @if (rows().length) {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="rows()" aria-label="Allocation history">
+        <table mat-table class="bf-table" [dataSource]="rows()" aria-label="Allocation history">
           <ng-container matColumnDef="date"
             ><th mat-header-cell *matHeaderCellDef>Date</th>
             <td mat-cell *matCellDef="let r" data-testid="relative-time">
@@ -821,17 +899,18 @@ export class VersionsTab {
           <ng-container matColumnDef="type"
             ><th mat-header-cell *matHeaderCellDef>Movement</th>
             <td mat-cell *matCellDef="let r">
-              <sat-category-tag category="gray">{{
-                label(r.journalType, r.bucket, r.direction)
-              }}</sat-category-tag>
+              @let m = movement(r.journalType, r.bucket, r.direction);
+              <sat-category-tag [category]="m.category"
+                ><mat-icon [svgIcon]="m.icon" aria-hidden="true" />{{ m.label }}</sat-category-tag
+              >
               @if (r.reversed) {
                 <span class="bf-card__hint"> reversed</span>
               }
             </td></ng-container
           >
           <ng-container matColumnDef="counterparty"
-            ><th mat-header-cell *matHeaderCellDef>With</th>
-            <td mat-cell *matCellDef="let r">
+            ><th mat-header-cell *matHeaderCellDef class="bf-hide-sm">With</th>
+            <td mat-cell *matCellDef="let r" class="bf-hide-sm">
               @for (c of r.counterparties; track c.name; let last = $last) {
                 @if (c.budgetId) {
                   <a [routerLink]="['/budgets', c.budgetId]">{{ c.name }}</a>
@@ -849,17 +928,21 @@ export class VersionsTab {
               *matCellDef="let r"
               class="bf-num"
               [class.bf-ok]="r.direction === 'in'"
-              [class.bf-bad]="r.direction === 'out'"
+              [class.bf-warn]="r.direction === 'out' && r.journalType === 'reduction'"
             >
-              {{ r.direction === 'in' ? '+' : '−'
-              }}<bf-money [amountMinor]="r.amount.amountMinor" [currency]="r.amount.currency" /></td
+              <span class="bf-move"
+                ><mat-icon
+                  [svgIcon]="r.direction === 'in' ? 'arrow_down' : 'arrow_up'"
+                  aria-hidden="true" />{{ r.direction === 'in' ? '+' : '−'
+                }}<bf-money [amountMinor]="r.amount.amountMinor" [currency]="r.amount.currency"
+              /></span></td
           ></ng-container>
           <ng-container matColumnDef="reason"
-            ><th mat-header-cell *matHeaderCellDef>Reason</th>
-            <td mat-cell *matCellDef="let r">
-              <span class="bf-cell__primary">{{ r.reason ?? '—' }}</span
+            ><th mat-header-cell *matHeaderCellDef class="bf-hide-sm">Reason</th>
+            <td mat-cell *matCellDef="let r" class="bf-hide-sm">
+              <span class="bf-cell__primary">{{ r.reason ?? 'No reason recorded' }}</span
               ><span class="bf-cell__secondary"
-                >{{ r.reasonCode ?? '' }} · {{ r.actorName ?? 'system' }}</span
+                >{{ r.reasonCode ? r.reasonCode + ' · ' : '' }}{{ r.actorName ?? 'system' }}</span
               >
             </td></ng-container
           >
@@ -881,15 +964,42 @@ export class HistoryTab {
       (await data(this.api.allocationHistory({ params: { budgetId: params.id } }))).items,
   });
   protected readonly rows = computed(() => valueOf(this.res) ?? []);
-  protected label(type: string, bucket: string, direction: string): string {
-    if (type === 'original_budget') return 'Original budget';
-    if (type === 'transfer') return direction === 'in' ? 'Transfer in' : 'Transfer out';
-    if (type === 'reduction') return bucket === 'allocated_out' ? 'Returned by child' : 'Reduction';
-    if (type === 'increase') return 'Plan increase';
-    if (type === 'reversal') return 'Reversal';
-    return bucket === 'allocated_out' ? 'Allocated to child' : 'Allocation received';
+  /** Movement type as a tag with its own icon and colour, so the kinds never look alike. */
+  protected movement(type: string, bucket: string, direction: string): Movement {
+    if (type === 'original_budget')
+      return { label: 'Original budget', icon: 'currency_dollar', category: 'gray' };
+    if (type === 'transfer')
+      return {
+        label: direction === 'in' ? 'Transfer in' : 'Transfer out',
+        icon: 'import_export',
+        category: 'blue',
+      };
+    if (type === 'reduction')
+      return {
+        label: bucket === 'allocated_out' ? 'Returned by child' : 'Reduction',
+        icon: 'trending_down',
+        category: 'orange',
+      };
+    if (type === 'increase')
+      return { label: 'Plan increase', icon: 'trending_up', category: 'green' };
+    if (type === 'reversal') return { label: 'Reversal', icon: 'restore', category: 'gray' };
+    return {
+      label: bucket === 'allocated_out' ? 'Allocated to child' : 'Allocation received',
+      icon: 'graph_org',
+      category: 'purple',
+    };
   }
 }
+
+const BUCKET_LABEL: Record<string, string> = {
+  authorized: 'Authorized',
+  allocated_out: 'Allocated out',
+  held: 'Held',
+  pre_encumbered: 'Pending (pre-encumbered)',
+  encumbered: 'Committed (encumbered)',
+  actual: 'Actual',
+  accrued: 'Accrued',
+};
 
 /** Ledger lines posted to the budget (append-only; corrections are reversals). */
 @Component({
@@ -899,6 +1009,7 @@ export class HistoryTab {
   styles: TAB_STYLES,
   template: `
     <bf-load-state
+      shape="table"
       [loading]="res.isLoading()"
       [error]="res.error()"
       what="ledger lines"
@@ -906,7 +1017,7 @@ export class HistoryTab {
     />
     @if (rows().length) {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="rows()" aria-label="Ledger lines">
+        <table mat-table class="bf-table" [dataSource]="rows()" aria-label="Ledger lines">
           <ng-container matColumnDef="date"
             ><th mat-header-cell *matHeaderCellDef>Accounting date</th>
             <td mat-cell *matCellDef="let l">{{ l.accountingDate }}</td></ng-container
@@ -914,7 +1025,7 @@ export class HistoryTab {
           <ng-container matColumnDef="account"
             ><th mat-header-cell *matHeaderCellDef>Bucket</th>
             <td mat-cell *matCellDef="let l">
-              <sat-category-tag category="gray">{{ l.account.replace('_', ' ') }}</sat-category-tag>
+              <sat-category-tag category="gray">{{ bucketLabel(l.account) }}</sat-category-tag>
             </td></ng-container
           >
           <ng-container matColumnDef="budget"
@@ -935,7 +1046,7 @@ export class HistoryTab {
           <ng-container matColumnDef="journal"
             ><th mat-header-cell *matHeaderCellDef>Journal</th>
             <td mat-cell *matCellDef="let l">
-              <code>{{ l.journalId.slice(0, 8) }}</code> line {{ l.lineNo }}
+              <span class="bf-cell__code">{{ l.journalId.slice(0, 8) }}</span> line {{ l.lineNo }}
               @if (l.reversalOfLineId) {
                 · reversal
               }
@@ -956,6 +1067,9 @@ export class LedgerTab {
   private readonly api = injectApi();
   readonly budget = input.required<BudgetDetail>();
   protected readonly columns = ['date', 'account', 'budget', 'reporting', 'journal'];
+  protected bucketLabel(account: string): string {
+    return BUCKET_LABEL[account] ?? account.replace(/_/g, ' ');
+  }
   protected readonly res = resource({
     params: () => ({ id: this.budget().id, v: this.budget().version }),
     loader: async ({ params }) =>

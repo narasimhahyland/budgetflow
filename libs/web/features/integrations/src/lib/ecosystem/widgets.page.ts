@@ -10,14 +10,13 @@ import { MatTableModule } from '@angular/material/table';
 import { WIDGET_KINDS, type WidgetKind, type WidgetView } from '@bf/contracts';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from '../api';
 import type { Tone } from '../labels';
-import { LoadState } from '../load-state';
 import { byRank, byText, ordered } from '../order';
 import { EcosystemNav } from './ecosystem-nav';
 import { WIDGET_KIND_LABELS, WIDGET_STATUS_LABELS, WIDGET_STATUS_TONES } from './labels';
+import { LoadState } from '@bf/web/ui';
 
 /** The exact form `frame-ancestors` can enforce; a wildcard would mean any page on any host. */
 const ORIGIN = /^https?:\/\/[a-z0-9.-]+(:\d{2,5})?$/i;
@@ -48,10 +47,10 @@ const ORIGIN = /^https?:\/\/[a-z0-9.-]+(:\d{2,5})?$/i;
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
-    SatImportantButton,
   ],
   templateUrl: './widgets.page.html',
   styleUrls: ['../page.scss', '../integrations.scss', './ecosystem.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WidgetsPage {

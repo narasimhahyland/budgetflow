@@ -16,11 +16,12 @@ import type { LegalEntity } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 /** Screens 6 and 102a: organization and legal-entity setup. */
 @Component({
   selector: 'bf-legal-entities-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     FormsModule,
     LoadState,
@@ -161,36 +162,47 @@ import { LoadState } from './load-state';
       />
       @if (valueOf(list); as l) {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="l.items" aria-labelledby="le-title">
+          <table
+            class="bf-table bf-table--stack"
+            mat-table
+            [dataSource]="l.items"
+            aria-labelledby="le-title"
+          >
             <ng-container matColumnDef="entity">
               <th mat-header-cell *matHeaderCellDef>Entity</th>
-              <td mat-cell *matCellDef="let e">
+              <td class="bf-cell--full" mat-cell *matCellDef="let e">
                 <span class="bf-cell__primary">{{ e.name }}</span>
                 <span class="bf-cell__secondary">{{ e.code }} · {{ e.country }}</span>
               </td>
             </ng-container>
             <ng-container matColumnDef="currency">
               <th mat-header-cell *matHeaderCellDef>Functional currency</th>
-              <td mat-cell *matCellDef="let e">{{ e.functionalCurrency }}</td>
+              <td mat-cell *matCellDef="let e" data-label="Functional currency">
+                {{ e.functionalCurrency }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="calendar">
               <th mat-header-cell *matHeaderCellDef>Fiscal calendar</th>
-              <td mat-cell *matCellDef="let e">{{ e.fiscalCalendarName }}</td>
+              <td mat-cell *matCellDef="let e" data-label="Fiscal calendar">
+                {{ e.fiscalCalendarName }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="codes">
               <th mat-header-cell *matHeaderCellDef>Tax and ERP</th>
-              <td mat-cell *matCellDef="let e">
+              <td mat-cell *matCellDef="let e" data-label="Tax and ERP">
                 <span class="bf-cell__primary">{{ e.taxJurisdiction ?? '—' }}</span>
                 <span class="bf-cell__secondary">ERP {{ e.erpCompanyCode ?? '—' }}</span>
               </td>
             </ng-container>
             <ng-container matColumnDef="cc">
               <th mat-header-cell *matHeaderCellDef class="bf-num">Cost centers</th>
-              <td mat-cell *matCellDef="let e" class="bf-num">{{ e.costCenterCount }}</td>
+              <td mat-cell *matCellDef="let e" class="bf-num" data-label="Cost centers">
+                {{ e.costCenterCount }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
-              <td mat-cell *matCellDef="let e">
+              <th mat-header-cell *matHeaderCellDef class="bf-col-actions">Actions</th>
+              <td mat-cell *matCellDef="let e" class="bf-col-actions" data-label="Actions">
                 @if (e.allowedActions.includes('master_data.manage')) {
                   <button mat-button type="button" (click)="startEdit(e)">Edit</button>
                 }

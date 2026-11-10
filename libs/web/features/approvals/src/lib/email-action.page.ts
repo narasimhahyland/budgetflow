@@ -9,13 +9,16 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { DecisionResponse } from '@bf/contracts';
-import { formatMoney } from '@bf/web/ui';
+import { Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatGhost } from '@hylandsoftware/satori-ui/ghost';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
+import { SatCategoryTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, errorStatus, injectApi, valueOf } from './api';
 
 const REASONS = [
@@ -33,10 +36,14 @@ const REASONS = [
     FormsModule,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
+    Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
+    SatCategoryTag,
+    SatGhost,
     SatImportantButton,
   ],
   template: `
@@ -48,7 +55,12 @@ const REASONS = [
         @if (!token) {
           <p class="bf-section">This link is incomplete. Open the request in BudgetFlow instead.</p>
         } @else if (preview.isLoading() && !preview.hasValue()) {
-          <p class="bf-section" aria-busy="true">Checking the link…</p>
+          <div class="bf-section bf-email__ghost" aria-busy="true" aria-label="Checking the link">
+            <sat-ghost variant="box" [height]="24" fitContainer />
+            <sat-ghost variant="box" [height]="32" fitContainer />
+            <sat-ghost variant="box" [height]="16" fitContainer />
+            <sat-ghost variant="box" [height]="56" fitContainer />
+          </div>
         } @else if (preview.error()) {
           <sat-banner variant="important" class="bf-banner"
             ><sat-banner-message>{{ message(preview.error()) }}</sat-banner-message></sat-banner
@@ -59,18 +71,37 @@ const REASONS = [
         } @else if (valueOf(preview); as p) {
           <div class="bf-section">
             <p class="bf-meta">
-              <span class="bf-chip">{{ p.ref }}</span> {{ p.title }}
+              <sat-category-tag category="gray">{{ p.ref }}</sat-category-tag> {{ p.title }}
             </p>
-            <p class="bf-kpi__value">{{ money(p.amount) }}</p>
+            <p class="bf-email__amount">
+              <bf-money [amountMinor]="p.amount.amountMinor" [currency]="p.amount.currency" />
+            </p>
             <p class="bf-cell__secondary">
               Requested by {{ p.requesterName }} · charge to {{ p.budgetName }} · approver
               {{ p.approverName }}
             </p>
             @if (p.availableBefore && p.availableAfter) {
-              <p class="bf-cell__secondary">
-                Available now {{ money(p.availableBefore) }}; after approval
-                {{ money(p.availableAfter) }}
-              </p>
+              <dl class="bf-email__figures" aria-label="Available under this budget's rules">
+                <div>
+                  <dt>Available now</dt>
+                  <dd>
+                    <bf-money
+                      [amountMinor]="p.availableBefore.amountMinor"
+                      [currency]="p.availableBefore.currency"
+                    />
+                  </dd>
+                </div>
+                <mat-icon class="bf-email__arrow" svgIcon="arrow_right" aria-hidden="true" />
+                <div>
+                  <dt>After approval</dt>
+                  <dd [class.bf-email__negative]="p.availableAfter.amountMinor < 0">
+                    <bf-money
+                      [amountMinor]="p.availableAfter.amountMinor"
+                      [currency]="p.availableAfter.currency"
+                    />
+                  </dd>
+                </div>
+              </dl>
             }
             @if (p.warning) {
               <sat-banner variant="warning"
@@ -105,7 +136,9 @@ const REASONS = [
               >
             </div>
           } @else if (p.action === 'approve') {
-            <p class="bf-section" aria-busy="true">{{ busy() ? 'Approving…' : '' }}</p>
+            <p class="bf-section bf-cell__secondary" role="status" aria-busy="true">
+              {{ busy() ? 'Recording your approval…' : '' }}
+            </p>
           } @else {
             <div class="bf-form">
               <mat-form-field appearance="outline">
@@ -119,14 +152,22 @@ const REASONS = [
               <mat-form-field appearance="outline" class="bf-form__wide">
                 <mat-label>Reason for the requester</mat-label>
                 <textarea matInput rows="3" [(ngModel)]="reason" name="reason" required></textarea>
+                <mat-error
+                  ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Say why, so
+                  the requester knows what to change.</mat-error
+                >
               </mat-form-field>
             </div>
             <div class="bf-form__actions">
+              @if (!busy() && !reason.trim()) {
+                <p class="bf-email__why" id="reject-why">Give the requester a reason to reject.</p>
+              }
               <button
-                mat-stroked-button
+                mat-flat-button
                 satImportantButton
                 type="button"
                 [disabled]="busy() || !reason.trim()"
+                [attr.aria-describedby]="!reason.trim() ? 'reject-why' : null"
                 (click)="execute()"
               >
                 Reject {{ p.ref }}
@@ -152,6 +193,57 @@ const REASONS = [
     .bf-landing__card {
       width: min(560px, 100%);
       align-self: flex-start;
+    }
+    .bf-email__ghost {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .bf-email__amount {
+      margin: 8px 0 4px;
+      color: var(--mat-sys-on-surface);
+      font: var(--mat-sys-headline-small);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .bf-email__figures {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      margin: 12px 0;
+      padding: 12px 16px;
+      border: 1px solid var(--mat-sys-outline-variant);
+      border-radius: var(--mat-sys-corner-medium);
+    }
+    .bf-email__figures dt {
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-medium);
+    }
+    .bf-email__figures dd {
+      margin: 2px 0 0;
+      font: var(--mat-sys-title-medium);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .bf-email__negative {
+      color: var(--mat-sys-error);
+    }
+    .bf-email__arrow {
+      color: var(--mat-sys-on-surface-variant);
+    }
+    .bf-email__why {
+      flex: 1 1 200px;
+      margin: 0;
+      align-self: center;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+    }
+    .bf-error-icon {
+      width: 16px;
+      height: 16px;
+      margin-inline-end: 4px;
+      vertical-align: -3px;
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -181,10 +273,6 @@ export class EmailActionPage {
     },
   });
   protected readonly state = computed(() => valueOf(this.preview)?.state);
-
-  protected money(m: { amountMinor: number; currency: string }): string {
-    return formatMoney(m.amountMinor, m.currency);
-  }
 
   protected message(e: unknown): string {
     const status = errorStatus(e);

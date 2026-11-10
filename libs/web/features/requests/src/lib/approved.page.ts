@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, resource } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { RequestSummary } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TABLE_WITH_ROW_STATES_IMPORTS } from '@hylandsoftware/satori-ui/table-with-row-states';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 interface Row {
   r: RequestSummary;
@@ -18,11 +19,15 @@ interface Row {
   receipt: 'due' | 'partly' | 'matched' | 'released';
 }
 
-const RECEIPT: Record<Row['receipt'], string> = {
-  due: 'Receipt due',
-  partly: 'Partly matched',
-  matched: 'Matched',
-  released: 'Released',
+// Section 5: a receipt still owed asks for action (warning); matched is done (success).
+const RECEIPT: Record<
+  Row['receipt'],
+  { label: string; tone: 'warning' | 'info' | 'success' | 'neutral'; icon: string }
+> = {
+  due: { label: 'Receipt due', tone: 'warning', icon: 'clock' },
+  partly: { label: 'Partly matched', tone: 'info', icon: 'trending_flat' },
+  matched: { label: 'Matched', tone: 'success', icon: 'circle_check' },
+  released: { label: 'Released', tone: 'neutral', icon: 'circle_minus' },
 };
 
 /** Screen 120: what was approved for me, how much is used (matched actuals) and what is still open. */
@@ -31,11 +36,13 @@ const RECEIPT: Record<Row['receipt'], string> = {
   imports: [
     LoadState,
     MatButtonModule,
+    MatIconModule,
     MatTableModule,
     Money,
     RouterLink,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TABLE_WITH_ROW_STATES_IMPORTS,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -57,37 +64,49 @@ const RECEIPT: Record<Row['receipt'], string> = {
     />
     @if (list.hasValue()) {
       @if (rows().length === 0) {
-        <section class="bf-card">
+        <section class="bf-card bf-empty-card">
           <sat-empty-state>
             <h2 satEmptyStateHeadline>Nothing approved yet this year</h2>
             <p satEmptyStateDescription>
               Approved requests show here with what you have used and what is still open.
             </p>
-            <a mat-stroked-button routerLink="/requests/new">Request funds</a>
+            <a satEmptyStateAction mat-stroked-button routerLink="/requests/new">Request funds</a>
           </sat-empty-state>
         </section>
       } @else {
         <div class="bf-kpis" data-testid="approved-summary">
-          <div class="bf-kpi">
-            <p class="bf-kpi__label">Approved</p>
+          <div class="bf-kpi bf-kpi--success">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Approved</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="circle_check" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">
               <bf-money [amountMinor]="totals().approved" [currency]="totals().currency" />
             </p>
           </div>
-          <div class="bf-kpi">
-            <p class="bf-kpi__label">Used (receipts matched)</p>
+          <div class="bf-kpi bf-kpi--actual">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Used (receipts matched)</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="check_double" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">
               <bf-money [amountMinor]="totals().used" [currency]="totals().currency" />
             </p>
           </div>
-          <div class="bf-kpi">
-            <p class="bf-kpi__label">Open</p>
+          <div class="bf-kpi bf-kpi--warning">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Open</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="shield_lock" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">
               <bf-money [amountMinor]="totals().open" [currency]="totals().currency" />
             </p>
           </div>
-          <div class="bf-kpi">
-            <p class="bf-kpi__label">Receipts due</p>
+          <div class="bf-kpi bf-kpi--warning">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Receipts due</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="upload" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">{{ totals().due }}</p>
           </div>
         </div>
@@ -102,7 +121,12 @@ const RECEIPT: Record<Row['receipt'], string> = {
           <ul class="bf-approved__cards" aria-label="Approved for you">
             @for (row of rows(); track row.r.id) {
               <li class="bf-approved__card">
-                <span class="bf-chip">{{ receiptLabel(row.receipt) }}</span>
+                @let card = receipt(row.receipt);
+                <sat-status-tag [status]="card.tone"
+                  ><mat-icon [svgIcon]="card.icon" aria-hidden="true" />{{
+                    card.label
+                  }}</sat-status-tag
+                >
                 <a class="bf-cell__primary" [routerLink]="['/requests', row.r.id]">{{
                   row.r.title
                 }}</a>
@@ -138,6 +162,7 @@ const RECEIPT: Record<Row['receipt'], string> = {
             <table
               mat-table
               satTableWithRowStates
+              class="bf-table"
               [dataSource]="rows()"
               aria-label="Approved for you"
             >
@@ -150,7 +175,9 @@ const RECEIPT: Record<Row['receipt'], string> = {
                     [routerLink]="['/requests', row.r.id]"
                     >{{ row.r.title }}</a
                   >
-                  <span class="bf-cell__secondary">{{ row.r.ref }} · {{ row.r.budgetName }}</span>
+                  <span class="bf-cell__secondary"
+                    ><span class="bf-cell__code">{{ row.r.ref }}</span> {{ row.r.budgetName }}</span
+                  >
                 </td>
               </ng-container>
               <ng-container matColumnDef="approved">
@@ -181,9 +208,12 @@ const RECEIPT: Record<Row['receipt'], string> = {
               <ng-container matColumnDef="receipt">
                 <th mat-header-cell *matHeaderCellDef>Receipt</th>
                 <td mat-cell *matCellDef="let row">
-                  <span class="bf-chip" [attr.data-receipt]="row.receipt">{{
-                    receiptLabel(row.receipt)
-                  }}</span>
+                  @let view = receipt(row.receipt);
+                  <sat-status-tag [status]="view.tone" [attr.data-receipt]="row.receipt"
+                    ><mat-icon [svgIcon]="view.icon" aria-hidden="true" />{{
+                      view.label
+                    }}</sat-status-tag
+                  >
                 </td>
               </ng-container>
               <ng-container matColumnDef="actions">
@@ -208,6 +238,14 @@ const RECEIPT: Record<Row['receipt'], string> = {
     }
   `,
   styles: `
+    /* Used is actual spend: section 10 draws actual in the tertiary colour. */
+    .bf-kpi--actual {
+      --bf-kpi-tone: var(--mat-sys-tertiary);
+    }
+    .bf-empty-card {
+      padding: 24px 16px;
+      overflow: visible;
+    }
     .bf-approved__cards {
       display: none;
       flex-direction: column;
@@ -303,7 +341,7 @@ export class ApprovedPage {
     };
   });
 
-  protected receiptLabel(k: Row['receipt']): string {
+  protected receipt(k: Row['receipt']) {
     return RECEIPT[k];
   }
 }

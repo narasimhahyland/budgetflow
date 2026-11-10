@@ -20,7 +20,7 @@ import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 type OrgKind = OrgUnit['kind'];
 
@@ -48,6 +48,7 @@ type ChangeKind = 'rename' | 'move' | 'manager' | 'deactivate';
 /** Screens 33-37: org hierarchy, chart, department, team and location details, effective-dated. */
 @Component({
   selector: 'bf-org-hierarchy-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DatePipe,
     FormsModule,

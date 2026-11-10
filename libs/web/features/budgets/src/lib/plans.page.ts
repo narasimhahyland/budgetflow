@@ -15,11 +15,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import type { PlanImportResult } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { Money, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type Kind = 'original' | 'current' | 'forecast';
 const FIELDS = [
@@ -96,26 +95,18 @@ type FieldKey = (typeof FIELDS)[number]['key'];
       gap: 6px;
       margin-top: 6px;
     }
-    .bf-lines {
-      width: 100%;
-      border-collapse: collapse;
-      font: var(--mat-sys-body-medium);
+    .bf-issue {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
     }
-    .bf-lines th,
-    .bf-lines td {
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--mat-sys-outline-variant);
-      text-align: end;
+    .bf-card__hint.bf-map-hint {
+      margin: 12px 0;
     }
-    .bf-lines th:first-child,
-    .bf-lines td:first-child,
-    .bf-lines th:nth-child(2),
-    .bf-lines td:nth-child(2) {
-      text-align: start;
-    }
-    .bf-lines th {
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-label-medium);
+    .bf-import-summary {
+      display: block;
+      margin: 12px 0;
     }
     .bf-bad {
       color: var(--mat-sys-error);
@@ -286,7 +277,7 @@ type FieldKey = (typeof FIELDS)[number]['key'];
             ></textarea>
           </mat-form-field>
           @if (headers().length) {
-            <p class="bf-card__hint">Map each field to a column</p>
+            <p class="bf-card__hint bf-map-hint">Map each field to a column</p>
             <div class="bf-mapping">
               @for (f of fields; track f.key) {
                 <mat-form-field subscriptSizing="dynamic"
@@ -311,32 +302,56 @@ type FieldKey = (typeof FIELDS)[number]['key'];
               <bf-money [amountMinor]="r.totalMinor" [currency]="r.currency" /> ·
               {{ r.valid ? 'ready to import' : 'fix the errors below' }}
             </p>
-            <table class="bf-lines" data-testid="import-rows">
-              <thead>
-                <tr>
-                  <th scope="col">Line</th>
-                  <th scope="col">Program</th>
-                  <th scope="col">Amount</th>
-                  <th scope="col">Existing root</th>
-                  <th scope="col">Issues</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (row of r.rows; track row.line) {
+            @if (errorRows(r.rows); as n) {
+              <sat-banner variant="important" [border]="true" class="bf-import-summary"
+                ><sat-banner-message
+                  ><strong>Fix {{ n }} {{ n === 1 ? 'row' : 'rows' }}</strong> before you create the
+                  draft version.</sat-banner-message
+                ></sat-banner
+              >
+            }
+            <div class="bf-table-scroll">
+              <table class="bf-lines bf-split-table" data-testid="import-rows">
+                <thead>
                   <tr>
-                    <td>{{ row.line }}</td>
-                    <td>{{ row.code }} · {{ row.name }}</td>
-                    <td>
-                      @if (row.amountMinor !== null) {
-                        <bf-money [amountMinor]="row.amountMinor" [currency]="r.currency" />
-                      }
-                    </td>
-                    <td>{{ row.existingBudgetId ? 'Yes' : 'New' }}</td>
-                    <td [class.bf-bad]="row.errors.length">{{ row.errors.join(' ') || 'OK' }}</td>
+                    <th scope="col" class="bf-num">Line</th>
+                    <th scope="col">Program</th>
+                    <th scope="col" class="bf-num">Amount</th>
+                    <th scope="col">Existing root</th>
+                    <th scope="col">Issues</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (row of r.rows; track row.line) {
+                    <tr [class.bf-row--important]="row.errors.length">
+                      <td class="bf-num">{{ row.line }}</td>
+                      <td>
+                        <span class="bf-cell__name"
+                          ><span class="bf-cell__code">{{ row.code }}</span
+                          >{{ row.name }}</span
+                        >
+                      </td>
+                      <td class="bf-num">
+                        @if (row.amountMinor !== null) {
+                          <bf-money [amountMinor]="row.amountMinor" [currency]="r.currency" />
+                        }
+                      </td>
+                      <td>{{ row.existingBudgetId ? 'Yes' : 'New' }}</td>
+                      <td>
+                        @if (row.errors.length) {
+                          <span class="bf-issue"
+                            ><sat-status-tag status="important">Error</sat-status-tag
+                            >{{ row.errors.join(' ') }}</span
+                          >
+                        } @else {
+                          <sat-status-tag status="success">Ready</sat-status-tag>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           }
           @if (failure()) {
             <sat-banner variant="important"
@@ -414,21 +429,23 @@ type FieldKey = (typeof FIELDS)[number]['key'];
             </div>
           </div>
           <div class="bf-table-scroll">
-            <table class="bf-lines" data-testid="version-lines">
+            <table class="bf-lines bf-split-table" data-testid="version-lines">
               <thead>
                 <tr>
                   <th scope="col">Code</th>
                   <th scope="col">Program</th>
-                  <th scope="col">Plan</th>
-                  <th scope="col">Root authorized</th>
-                  <th scope="col">Savings</th>
-                  <th scope="col">Difference</th>
+                  <th scope="col" class="bf-num">Plan</th>
+                  <th scope="col" class="bf-num">Root authorized</th>
+                  <th scope="col" class="bf-num">Savings</th>
+                  <th scope="col" class="bf-num">Difference</th>
                 </tr>
               </thead>
               <tbody>
                 @for (l of d.lines; track l.lineNo) {
                   <tr>
-                    <td>{{ l.code }}</td>
+                    <td>
+                      <span class="bf-cell__code">{{ l.code }}</span>
+                    </td>
                     <td>
                       @if (l.budgetId) {
                         <a [routerLink]="['/budgets', l.budgetId]">{{ l.name }}</a>
@@ -436,20 +453,22 @@ type FieldKey = (typeof FIELDS)[number]['key'];
                         {{ l.name }}
                       }
                     </td>
-                    <td><bf-money [amountMinor]="l.amountMinor" [currency]="d.currency" /></td>
-                    <td>
+                    <td class="bf-num">
+                      <bf-money [amountMinor]="l.amountMinor" [currency]="d.currency" />
+                    </td>
+                    <td class="bf-num">
                       @if (l.rootAuthorizedMinor !== null) {
                         <bf-money [amountMinor]="l.rootAuthorizedMinor" [currency]="d.currency" />
                       } @else {
                         not created
                       }
                     </td>
-                    <td>
+                    <td class="bf-num">
                       @if (l.savingsMinor !== null) {
                         <bf-money [amountMinor]="l.savingsMinor" [currency]="d.currency" />
                       }
                     </td>
-                    <td [class.bf-bad]="(l.differenceMinor ?? 0) !== 0">
+                    <td class="bf-num" [class.bf-bad]="(l.differenceMinor ?? 0) !== 0">
                       @if (l.differenceMinor !== null) {
                         <bf-money [amountMinor]="l.differenceMinor" [currency]="d.currency" />
                       }
@@ -518,6 +537,9 @@ export class PlansPage {
   protected readonly csv = signal('');
   protected readonly mapping = signal<Partial<Record<FieldKey, string>>>({});
   protected readonly result = signal<PlanImportResult | null>(null);
+  protected errorRows(rows: readonly { errors: readonly string[] }[]): number {
+    return rows.filter((r) => r.errors.length > 0).length;
+  }
   protected readonly busy = signal(false);
   protected readonly failure = signal<string | null>(null);
   protected readonly actionFailure = signal<string | null>(null);

@@ -24,13 +24,19 @@ import {
   type RequestSummary,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { BudgetStatus, formatMoney, MobileTabBar, Money } from '@bf/web/ui';
+import {
+  BudgetBar,
+  type BudgetBarSegment,
+  BudgetStatus,
+  formatMoney,
+  LoadState,
+  MobileTabBar,
+  Money,
+} from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 interface QueuedReceipt {
   id: string;
@@ -47,6 +53,7 @@ interface QueuedReceipt {
 @Component({
   selector: 'bf-mobile-balance-page',
   imports: [
+    BudgetBar,
     BudgetStatus,
     FormsModule,
     LoadState,
@@ -61,7 +68,6 @@ interface QueuedReceipt {
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
-    SatImportantButton,
     SatStatusTag,
   ],
   template: `
@@ -122,22 +128,15 @@ interface QueuedReceipt {
                         [amountMinor]="b.balances.budgetCurrency.authorized.amountMinor"
                         [currency]="b.balances.budgetCurrency.authorized.currency"
                       />
-                      · committed
-                      <bf-money
-                        [amountMinor]="b.balances.budgetCurrency.encumbered.amountMinor"
-                        [currency]="b.balances.budgetCurrency.encumbered.currency"
-                      />
-                      · actual
-                      <bf-money
-                        [amountMinor]="b.balances.budgetCurrency.actual.amountMinor"
-                        [currency]="b.balances.budgetCurrency.actual.currency"
-                      />
-                      · pending
-                      <bf-money
-                        [amountMinor]="b.balances.budgetCurrency.preEncumbered.amountMinor"
-                        [currency]="b.balances.budgetCurrency.preEncumbered.currency"
-                      />
+                      authorized
                     </p>
+                    <bf-budget-bar
+                      [label]="b.name + ' budget'"
+                      [segments]="segments().get(b.id) ?? []"
+                      [totalMinor]="b.balances.budgetCurrency.authorized.amountMinor"
+                      [currency]="b.balances.budgetCurrency.authorized.currency"
+                      data-testid="balance-bar"
+                    />
                     @if (b.status === 'frozen') {
                       <sat-banner variant="info">
                         <sat-banner-message>
@@ -251,7 +250,11 @@ interface QueuedReceipt {
           }
         } @else {
           <!-- Employee view -->
-          <section class="bf-card" aria-labelledby="emp-bal-title" data-testid="employee-balance-view">
+          <section
+            class="bf-card"
+            aria-labelledby="emp-bal-title"
+            data-testid="employee-balance-view"
+          >
             <div class="bf-card__header">
               <h2 class="bf-card__title" id="emp-bal-title">Budgets you can use</h2>
             </div>
@@ -285,9 +288,7 @@ interface QueuedReceipt {
         <header class="bf-page__header">
           <div class="bf-page__heading">
             <h1 class="bf-page__title">Mobile receipt capture</h1>
-            <p class="bf-page__subtitle">
-              Photograph or attach a receipt to an approved request
-            </p>
+            <p class="bf-page__subtitle">Photograph or attach a receipt to an approved request</p>
           </div>
           <div class="bf-page__actions">
             <button
@@ -362,16 +363,17 @@ interface QueuedReceipt {
               >
                 @for (r of myRequests(); track r.id) {
                   <mat-option [value]="r.id">
-                    {{ r.ref }} {{ r.title }} ({{
-                      money(r.approvedAmount ?? r.amount)
-                    }})
+                    {{ r.ref }} {{ r.title }} ({{ money(r.approvedAmount ?? r.amount) }})
                   </mat-option>
                 }
               </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Receipt amount ({{ selectedRequest()?.amount?.currency ?? 'USD' }})</mat-label>
+              <mat-label>Receipt amount</mat-label>
+              <span matTextPrefix class="bf-mobile-bal__currency"
+                >{{ selectedRequest()?.amount?.currency ?? 'USD' }}&nbsp;</span
+              >
               <input
                 matInput
                 inputmode="decimal"
@@ -416,7 +418,6 @@ interface QueuedReceipt {
             <a mat-button routerLink="/m/balance">Cancel</a>
             <button
               mat-flat-button
-              satImportantButton
               type="button"
               [disabled]="busy() || !requestId || !receiptAmount.trim() || pages().length === 0"
               (click)="uploadReceipt()"
@@ -428,7 +429,11 @@ interface QueuedReceipt {
         </section>
 
         @if (queue().length > 0) {
-          <section class="bf-card" aria-labelledby="queue-title" data-testid="offline-receipt-queue">
+          <section
+            class="bf-card"
+            aria-labelledby="queue-title"
+            data-testid="offline-receipt-queue"
+          >
             <div class="bf-card__header">
               <h2 class="bf-card__title" id="queue-title">Saved on this phone</h2>
             </div>
@@ -458,6 +463,10 @@ interface QueuedReceipt {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 12px;
+    }
+    .bf-mobile-bal__currency {
+      color: var(--mat-sys-on-surface-variant);
+      font-weight: 600;
     }
     .bf-mobile-bal__card {
       padding: 16px;
@@ -530,6 +539,35 @@ export class MobileBalancePage {
       return data(this.api.listBudgets({ query: { limit: 20 } }));
     },
   });
+  /**
+   * Section 10 buckets per budget, as the API reports them. Available is drawn only when it fits
+   * under authorized: under some control bases it is not the remainder of the other buckets.
+   */
+  protected readonly segments = computed(() => {
+    const out = new Map<string, BudgetBarSegment[]>();
+    for (const b of this.budgetItems()) {
+      const c = b.balances.budgetCurrency;
+      const buckets: BudgetBarSegment[] = [
+        {
+          bucket: 'allocatedOut',
+          amountMinor: c.allocatedOut.amountMinor,
+          label: 'Allocated to teams',
+        },
+        { bucket: 'held', amountMinor: c.held.amountMinor },
+        { bucket: 'preEncumbered', amountMinor: c.preEncumbered.amountMinor },
+        { bucket: 'encumbered', amountMinor: c.encumbered.amountMinor },
+        { bucket: 'actual', amountMinor: c.actual.amountMinor },
+      ];
+      const parts = buckets.filter((p) => p.amountMinor > 0);
+      const used = parts.reduce((n, p) => n + p.amountMinor, 0);
+      const available = b.balances.available.amountMinor;
+      if (available > 0 && used + available <= c.authorized.amountMinor)
+        parts.push({ bucket: 'available', amountMinor: available });
+      out.set(b.id, parts);
+    }
+    return out;
+  });
+
   protected readonly budgetItems = computed<BudgetDetail[]>(
     () => valueOf(this.ownedBudgets)?.items ?? [],
   );

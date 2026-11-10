@@ -17,12 +17,18 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { SessionStore } from '@bf/web/data-access';
-import { ApprovalRoute, DateOnlyPipe, formatMoney, Money, SpendStatus } from '@bf/web/ui';
+import {
+  ApprovalRoute,
+  DateOnlyPipe,
+  formatMoney,
+  LoadState,
+  Money,
+  SpendStatus,
+} from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { DocumentsPanel } from './documents-panel';
-import { LoadState } from './load-state';
 import { toMinor } from './money-input';
 
 type Choice = 'full' | 'part' | 'decline';

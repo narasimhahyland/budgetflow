@@ -2,28 +2,33 @@ import { ChangeDetectionStrategy, Component, inject, resource, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { Person } from '@bf/contracts';
-import { Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState, Money } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /** Delegations (the 62 delegated state): hand my approvals to someone for a period, capped by my own limit. */
 @Component({
   selector: 'bf-delegations-page',
   imports: [
+    DateOnlyPipe,
     FormsModule,
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
-    SpendStatus,
+    SatAvatar,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -105,7 +110,7 @@ import { LoadState } from './load-state';
         (retry)="list.reload()"
       />
       <div class="bf-table-scroll">
-        <table class="bf-split-table" aria-label="Delegations">
+        <table class="bf-split-table bf-table--stack" aria-label="Delegations">
           <thead>
             <tr>
               <th>From</th>
@@ -119,19 +124,45 @@ import { LoadState } from './load-state';
           <tbody>
             @for (d of valueOf(list)?.items ?? []; track d.id) {
               <tr>
-                <td>{{ d.delegatorName }}</td>
-                <td>{{ d.delegateName }}</td>
-                <td>{{ d.validFrom }} – {{ d.validTo }}</td>
-                <td class="bf-num">
+                <td data-label="From">
+                  <span class="bf-cell__owner"
+                    ><sat-avatar
+                      size="24"
+                      [initials]="initials(d.delegatorName)"
+                      aria-hidden="true"
+                    />{{ d.delegatorName }}</span
+                  >
+                </td>
+                <td data-label="To">
+                  <span class="bf-cell__owner"
+                    ><sat-avatar
+                      size="24"
+                      [initials]="initials(d.delegateName)"
+                      aria-hidden="true"
+                    />{{ d.delegateName }}</span
+                  >
+                </td>
+                <td data-label="Dates">
+                  {{ d.validFrom | bfDate: 'UTC' }} – {{ d.validTo | bfDate: 'UTC' }}
+                </td>
+                <td class="bf-num" data-label="Limit">
                   @if (d.limit) {
                     <bf-money [amountMinor]="d.limit.amountMinor" [currency]="d.limit.currency" />
                   } @else {
                     Delegator's limit
                   }
                 </td>
-                <td>{{ d.reason }}</td>
-                <td>
-                  <bf-spend-status kind="task" [status]="d.active ? 'pending' : 'cancelled'" />
+                <td data-label="Reason">{{ d.reason }}</td>
+                <td data-label="State">
+                  @if (d.active) {
+                    <sat-status-tag status="success"
+                      ><mat-icon svgIcon="circle_check" aria-hidden="true" />Active</sat-status-tag
+                    >
+                  } @else {
+                    <sat-status-tag status="neutral"
+                      ><mat-icon svgIcon="timer_off" aria-hidden="true" />Ended</sat-status-tag
+                    >
+                  }
                 </td>
               </tr>
             } @empty {
@@ -165,6 +196,15 @@ export class DelegationsPage {
       this.query().trim().length > 1 ? { q: this.query().trim(), limit: 8 } : undefined,
     loader: ({ params }) => data(this.api.listPeople({ query: params })),
   });
+
+  protected initials(name: string): string {
+    return name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w.charAt(0).toUpperCase())
+      .join('');
+  }
 
   protected async create(): Promise<void> {
     this.busy.set(true);

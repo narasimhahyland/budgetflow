@@ -1,4 +1,7 @@
+import { getNumberOfCurrencyDigits } from '@angular/common';
 import { inject } from '@angular/core';
+import type { AbstractControl } from '@angular/forms';
+import type { ErrorStateMatcher } from '@angular/material/core';
 import type { ApiResult, BudgetDetail, ProblemDetails } from '@bf/contracts';
 import { ApiService } from '@bf/web/data-access';
 
@@ -96,10 +99,24 @@ export async function sameTree(
 export const can = (b: BudgetDetail | undefined, action: string): boolean =>
   !!b && b.allowedActions.includes(action);
 
+/** Two initials for `sat-avatar` ("Lena Fischer" → "LF"). */
+export const initials = (name: string | null | undefined): string =>
+  (name ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+
+/** Integer minor units as a plain major-unit number for an export, by the ISO 4217 exponent. */
+export const exportAmount = (minor: number, currency: string): number =>
+  minor / 10 ** getNumberOfCurrencyDigits(currency);
+
 /** Downloads rows as CSV (Export only: no on-screen Share). */
 export function downloadCsv(name: string, rows: (string | number)[][]): void {
   const esc = (v: string | number) => {
-    const s = String(v);
+    // A text cell starting with = + - @ would run as a formula in a spreadsheet.
+    const s = typeof v === 'string' && /^[=+\-@]/.test(v) ? `'${v}` : String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const blob = new Blob([rows.map((r) => r.map(esc).join(',')).join('\n') + '\n'], {
@@ -112,3 +129,9 @@ export function downloadCsv(name: string, rows: (string | number)[][]): void {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+/** Puts a form field in Material's error state while `flag()` is true (an API-reported block). */
+export const flagMatcher = (flag: () => boolean): ErrorStateMatcher => ({
+  isErrorState: (control: AbstractControl | null) =>
+    flag() || !!(control?.invalid && control.touched),
+});

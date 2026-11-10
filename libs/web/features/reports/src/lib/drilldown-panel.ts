@@ -4,10 +4,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { ReportId } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import type { DrillRequest } from './report-frame';
 
 type Bucket = 'held' | 'pre_encumbered' | 'encumbered' | 'actual' | 'authorized' | 'allocated_out';

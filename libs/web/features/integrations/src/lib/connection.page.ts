@@ -32,7 +32,7 @@ import type {
   TestConnectionResult,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
@@ -51,9 +51,9 @@ import {
   sentence,
   type Tone,
 } from './labels';
-import { LoadState } from './load-state';
 import { byNewest, byRank, byText, ordered, rankIn } from './order';
 import { PlanImport } from './plan-import';
+import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 
 type TabId = 'overview' | 'connection' | 'mappings' | 'sync' | 'push' | 'plan' | 'logs';
 
@@ -137,9 +137,11 @@ const PUSH_STATUS_TONES: Record<PushItemView['status'], Tone> = {
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
     SatImportantButton,
+    SAT_NAVIGATION_TABS_IMPORTS,
   ],
   templateUrl: './connection.page.html',
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectionPage {

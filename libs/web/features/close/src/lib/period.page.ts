@@ -11,8 +11,10 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type {
   CloseCheck,
@@ -21,7 +23,7 @@ import type {
   ReopenRequest,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
@@ -36,7 +38,7 @@ import {
   PeriodStatusDialog,
   ReopenDecisionDialog,
 } from './close-dialogs';
-import { LoadState } from './load-state';
+import { CloseTag } from './close-tag';
 
 type Tab = 'checklist' | 'snapshots' | 'late-items';
 type Action = ClosePeriodDetail['allowedActions'][number];
@@ -49,11 +51,14 @@ type Action = ClosePeriodDetail['allowedActions'][number];
 @Component({
   selector: 'bf-close-period-page',
   imports: [
+    CloseTag,
     DatePipe,
     DateTimePipe,
     LoadState,
     MatButtonModule,
+    MatIconModule,
     MatTableModule,
+    MatTooltipModule,
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
@@ -117,6 +122,19 @@ export class ClosePeriodPage {
 
   protected periodStatus(d: ClosePeriodDetail) {
     return PERIOD_STATUS[d.period.status];
+  }
+
+  /** A closed or locked period refuses postings; its checklist is a record, not a to-do list. */
+  protected isShut(d: ClosePeriodDetail): boolean {
+    return d.period.status === 'closed' || d.period.status === 'locked';
+  }
+
+  /** Why Close period is disabled, said next to the button (frontend-angular blocked state). */
+  protected closeBlockedReason(d: ClosePeriodDetail): string {
+    const n = d.blockingReasons.length;
+    if (n)
+      return `${n} ${n === 1 ? 'check is' : 'checks are'} holding the close. Resolve or accept them first.`;
+    return 'Your role cannot close this period.';
   }
 
   protected can(d: ClosePeriodDetail, action: Action): boolean {

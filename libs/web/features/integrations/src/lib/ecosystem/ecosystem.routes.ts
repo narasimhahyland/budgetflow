@@ -20,7 +20,7 @@ export const ecosystemRoutes: Routes = [
   },
   {
     path: 'admin/integrations/assistants',
-    title: 'Connector for AI assistants',
+    title: 'AI assistants',
     data: area('Connector for AI assistants'),
     canActivate: [read],
     loadComponent: () => import('./assistants.page').then((m) => m.AssistantConnectorPage),

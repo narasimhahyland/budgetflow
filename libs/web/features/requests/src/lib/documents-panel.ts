@@ -1,15 +1,17 @@
+import { formatNumber } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DOCUMENT_CONTENT_TYPES, DOCUMENT_MAX_BYTES, type DocumentSummary } from '@bf/contracts';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SAT_UPLOAD_IMPORTS } from '@hylandsoftware/satori-ui/upload';
 import { data, errorMessage, injectApi } from './api';
 
 /** Supporting documents of a record: list, signed download, and upload (declare, PUT to the signed URL, verify). */
 @Component({
   selector: 'bf-documents-panel',
-  imports: [MatButtonModule, MatIconModule, SAT_BANNER_IMPORTS],
+  imports: [MatButtonModule, MatIconModule, SAT_BANNER_IMPORTS, SAT_UPLOAD_IMPORTS],
   template: `
     @if (failure()) {
       <sat-banner variant="important" class="bf-banner"
@@ -38,13 +40,27 @@ import { data, errorMessage, injectApi } from './api';
       }
     </ul>
     @if (canUpload()) {
-      <label class="bf-docs__upload">
-        <input type="file" [accept]="accept" (change)="pick($event)" [disabled]="busy()" />
-        <span mat-stroked-button
-          ><mat-icon svgIcon="upload" />{{ busy() ? 'Uploading…' : 'Upload a document' }}</span
+      <div class="bf-docs__upload">
+        <button
+          mat-stroked-button
+          type="button"
+          satUpload
+          [input]="docInput"
+          [disabled]="busy()"
+          (filesLoaded)="pick($event[0])"
         >
+          <mat-icon svgIcon="upload" />{{ busy() ? 'Uploading…' : 'Upload a document' }}
+        </button>
+        <input
+          #docInput
+          class="bf-docs__native"
+          type="file"
+          [accept]="accept"
+          [disabled]="busy()"
+          aria-label="Choose a document to upload"
+        />
         <span class="bf-docs__meta">PDF, PNG, JPEG, CSV or XLSX, up to 10 MB</span>
-      </label>
+      </div>
     }
   `,
   styles: `
@@ -81,23 +97,13 @@ import { data, errorMessage, injectApi } from './api';
       align-items: center;
       gap: 8px;
       padding: 8px 20px 16px;
-      cursor: pointer;
     }
-    .bf-docs__upload input {
+    .bf-docs__native {
       position: absolute;
       width: 1px;
       height: 1px;
+      overflow: hidden;
       opacity: 0;
-    }
-    .bf-docs__upload span[mat-stroked-button] {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border: 1px solid var(--mat-sys-outline);
-      border-radius: var(--mat-sys-corner-full);
-      color: var(--mat-sys-primary);
-      font: var(--mat-sys-label-large);
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,8 +122,8 @@ export class DocumentsPanel {
 
   protected size(bytes: number): string {
     return bytes >= 1_048_576
-      ? `${(bytes / 1_048_576).toFixed(1)} MB`
-      : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+      ? `${formatNumber(bytes / 1_048_576, 'en-US', '1.1-1')} MB`
+      : `${formatNumber(Math.max(1, Math.round(bytes / 1024)), 'en-US')} KB`;
   }
 
   protected async download(d: DocumentSummary): Promise<void> {
@@ -129,9 +135,7 @@ export class DocumentsPanel {
     }
   }
 
-  protected async pick(event: Event): Promise<void> {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    (event.target as HTMLInputElement).value = '';
+  protected async pick(file: File | undefined): Promise<void> {
     if (!file) return;
     this.failure.set('');
     if (!(DOCUMENT_CONTENT_TYPES as readonly string[]).includes(file.type)) {

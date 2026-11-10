@@ -3,11 +3,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /** The comparison takes today plus at most three scenarios (031a). */
 const MAX_SCENARIOS = 3;

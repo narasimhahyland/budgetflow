@@ -95,10 +95,15 @@
 // desktop and stacked on a phone, with the owner's own figure as the last card.
 .bf-method-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 12px;
   align-items: stretch;
   margin-top: 8px;
+}
+
+// Option titles at title size, not the card's headline size (section 7).
+.bf-method__title {
+  font: var(--mat-sys-title-medium);
 }
 
 .bf-method__amount {
@@ -116,9 +121,4 @@
 .bf-section__title {
   margin: 20px 0 0;
   font: var(--mat-sys-title-small);
-}
-
-.bf-danger-button:not(:disabled) {
-  background-color: var(--mat-sys-error);
-  color: var(--mat-sys-on-error);
 }

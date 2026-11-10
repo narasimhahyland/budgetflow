@@ -3,11 +3,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type Filter = 'all' | 'open' | 'paused';
 
@@ -22,6 +21,7 @@ type Filter = 'all' | 'open' | 'paused';
     Money,
     RouterLink,
     SAT_EMPTY_STATE_IMPORTS,
+    SatCategoryTag,
     SatStatusTag,
   ],
   template: `
@@ -31,7 +31,9 @@ type Filter = 'all' | 'open' | 'paused';
         <p class="bf-page__subtitle">What you can request this year</p>
       </div>
       <div class="bf-page__actions">
-        <a mat-stroked-button routerLink="/requests"><mat-icon svgIcon="upload" />Upload receipt</a>
+        <a mat-stroked-button routerLink="/requests/upload"
+          ><mat-icon svgIcon="upload" />Upload receipt</a
+        >
         <a mat-flat-button routerLink="/requests/new" [queryParams]="{ kind: 'spending' }"
           ><mat-icon svgIcon="circle_add" />Request funds</a
         >
@@ -70,15 +72,24 @@ type Filter = 'all' | 'open' | 'paused';
               <div class="bf-list__row">
                 <h2 class="bf-card__title">{{ b.name }}</h2>
                 @if (b.blockedCode === 'BUDGET_FROZEN') {
-                  <sat-status-tag status="info">Paused</sat-status-tag>
+                  <sat-status-tag status="info"
+                    ><mat-icon svgIcon="lock" aria-hidden="true" />Paused</sat-status-tag
+                  >
                 } @else if (b.blockedCode === 'BUDGET_SET_TO_ZERO') {
-                  <sat-status-tag status="important">Closed</sat-status-tag>
+                  <sat-status-tag status="important"
+                    ><mat-icon svgIcon="circle_stop" aria-hidden="true" />Closed</sat-status-tag
+                  >
                 } @else if (b.pendingCount) {
-                  <sat-status-tag status="warning">{{ b.pendingCount }} pending</sat-status-tag>
+                  <sat-status-tag status="warning"
+                    ><mat-icon svgIcon="clock" aria-hidden="true" />{{
+                      b.pendingCount
+                    }}
+                    pending</sat-status-tag
+                  >
                 }
               </div>
               @if (b.code) {
-                <span class="bf-cell__secondary">{{ b.code }}</span>
+                <sat-category-tag category="gray">{{ b.code }}</sat-category-tag>
               }
               @if (b.available) {
                 <p class="bf-my-budgets__amount">
@@ -107,11 +118,14 @@ type Filter = 'all' | 'open' | 'paused';
               }
               @if (b.blockedCode === 'BUDGET_FROZEN') {
                 <p class="bf-my-budgets__reason">
-                  <mat-icon svgIcon="lock" />Requests paused: the budget is frozen. Existing
-                  approved requests still complete.
+                  <mat-icon svgIcon="lock" aria-hidden="true" />Requests paused: the budget is
+                  frozen. Existing approved requests still complete.
                 </p>
               } @else if (b.blockedCode === 'BUDGET_SET_TO_ZERO') {
-                <p class="bf-my-budgets__reason">Requests closed: budget set to zero.</p>
+                <p class="bf-my-budgets__reason">
+                  <mat-icon svgIcon="circle_stop" aria-hidden="true" />Requests closed: budget set
+                  to zero.
+                </p>
               }
               @if (b.blockedReason) {
                 <button mat-flat-button type="button" disabled>Request</button>
@@ -154,7 +168,9 @@ type Filter = 'all' | 'open' | 'paused';
       margin: 0;
     }
     .bf-my-budgets__amount {
-      font: var(--mat-sys-title-medium);
+      font: var(--mat-sys-title-large);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
     }
     .bf-my-budgets__reason {
       display: flex;

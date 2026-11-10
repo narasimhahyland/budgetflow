@@ -24,6 +24,7 @@ import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
   `,
   styleUrl: './page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'bf-page-layout' },
 })
 export class PlaceholderPage {
   readonly pageTitle = input('');
@@ -47,6 +48,7 @@ export class PlaceholderPage {
   `,
   styleUrl: './page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'bf-page-layout' },
 })
 export class ForbiddenPage {
   private readonly denied = inject(AccessDenied);
@@ -67,5 +69,6 @@ export class ForbiddenPage {
   `,
   styleUrl: './page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'bf-page-layout' },
 })
 export class NotFoundPage {}

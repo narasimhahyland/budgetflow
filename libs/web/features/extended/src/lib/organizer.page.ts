@@ -15,12 +15,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { data, errorMessage, injectApi, valueOf } from './api';
+import { data, errorMessage, initialsOf, injectApi, valueOf } from './api';
 import { Suppressible } from './figures';
-import { LoadState } from './load-state';
 
 /** Leave a thank-you note for an organizer (122b). No money is attached to a note. */
 @Component({
@@ -89,13 +89,19 @@ export class SayThanksDialog {
     MatIconModule,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SatAvatar,
     Suppressible,
   ],
   template: `
     <header class="bf-page__header">
-      <div class="bf-page__heading">
-        <h1 class="bf-page__title">{{ organizer()?.personName ?? 'Organizer' }}</h1>
-        <p class="bf-page__subtitle">Events organised, people reached and thank-you notes</p>
+      <div class="bf-profile">
+        @if (organizer(); as o) {
+          <sat-avatar size="64" [initials]="initials(o.personName)" aria-hidden="true" />
+        }
+        <div class="bf-page__heading">
+          <h1 class="bf-page__title">{{ organizer()?.personName ?? 'Organizer' }}</h1>
+          <p class="bf-page__subtitle">Events organised, people reached and thank-you notes</p>
+        </div>
       </div>
       <div class="bf-page__actions">
         @if (organizer(); as o) {
@@ -140,16 +146,25 @@ export class SayThanksDialog {
         </sat-empty-state>
       } @else {
         <div class="bf-kpis">
-          <article class="bf-card bf-kpi" data-testid="organizer-events">
-            <h2 class="bf-kpi__title">Events organised</h2>
+          <article class="bf-kpi" data-testid="organizer-events">
+            <div class="bf-kpi__head">
+              <h2 class="bf-kpi__title">Events organised</h2>
+              <mat-icon class="bf-kpi__icon" svgIcon="calendar" aria-hidden="true" />
+            </div>
             <span class="bf-kpi__value">{{ o.eventsOrganised }}</span>
           </article>
-          <article class="bf-card bf-kpi" data-testid="organizer-reach">
-            <h2 class="bf-kpi__title">Colleagues reached</h2>
+          <article class="bf-kpi" data-testid="organizer-reach">
+            <div class="bf-kpi__head">
+              <h2 class="bf-kpi__title">Colleagues reached</h2>
+              <mat-icon class="bf-kpi__icon" svgIcon="users" aria-hidden="true" />
+            </div>
             <span class="bf-kpi__value">{{ o.colleaguesReached }}</span>
           </article>
-          <article class="bf-card bf-kpi" data-testid="organizer-feedback">
-            <h2 class="bf-kpi__title">Average feedback</h2>
+          <article class="bf-kpi" data-testid="organizer-feedback">
+            <div class="bf-kpi__head">
+              <h2 class="bf-kpi__title">Average feedback</h2>
+              <mat-icon class="bf-kpi__icon" svgIcon="thumbsup" aria-hidden="true" />
+            </div>
             <bf-suppressible
               class="bf-kpi__value"
               [figure]="o.averagePulse"
@@ -177,19 +192,22 @@ export class SayThanksDialog {
           <ul class="bf-notes">
             @for (n of o.notes; track n.id) {
               <li class="bf-note" [attr.data-testid]="'note-' + n.id">
-                <p class="bf-note__text">&ldquo;{{ n.note }}&rdquo;</p>
-                <p class="bf-cell__secondary">
-                  {{ n.authorName }} &middot;
-                  <span data-testid="relative-time">{{
-                    n.createdAt | bfDateTime: session.timezone()
-                  }}</span>
-                  @if (n.eventName) {
-                    <span> &middot; {{ n.eventName }}</span>
-                  }
-                  @if (n.hidden) {
-                    <span> &middot; Hidden from colleagues</span>
-                  }
-                </p>
+                <sat-avatar size="28" [initials]="initials(n.authorName)" aria-hidden="true" />
+                <div class="bf-note__body">
+                  <p class="bf-note__text">&ldquo;{{ n.note }}&rdquo;</p>
+                  <p class="bf-cell__secondary">
+                    {{ n.authorName }} &middot;
+                    <span data-testid="relative-time">{{
+                      n.createdAt | bfDateTime: session.timezone()
+                    }}</span>
+                    @if (n.eventName) {
+                      <span> &middot; {{ n.eventName }}</span>
+                    }
+                    @if (n.hidden) {
+                      <span> &middot; Hidden from colleagues</span>
+                    }
+                  </p>
+                </div>
               </li>
             }
           </ul>
@@ -198,25 +216,10 @@ export class SayThanksDialog {
     }
   `,
   styles: `
-    .bf-kpis {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .bf-kpi {
+    .bf-profile {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 16px;
-    }
-    .bf-kpi__title {
-      margin: 0;
-      font: var(--mat-sys-label-large);
-      color: var(--mat-sys-on-surface-variant);
-    }
-    .bf-kpi__value {
-      font: var(--mat-sys-headline-small);
+      align-items: center;
+      gap: 16px;
     }
     .bf-kpi p {
       margin: 0;
@@ -248,8 +251,14 @@ export class SayThanksDialog {
       list-style: none;
     }
     .bf-note {
-      border-inline-start: 3px solid var(--mat-sys-outline-variant);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .bf-note__body {
+      min-width: 0;
       padding-inline-start: 10px;
+      border-inline-start: 3px solid var(--mat-sys-outline-variant);
     }
     .bf-note p {
       margin: 0;
@@ -268,6 +277,7 @@ export class OrganizerPage {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
+  protected readonly initials = initialsOf;
 
   protected readonly failure = signal<string | null>(null);
   protected readonly profile = resource({

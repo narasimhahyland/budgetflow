@@ -12,12 +12,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { LeadershipSummary, SummaryStatus } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 export const SUMMARY_STATUS_LABEL: Record<SummaryStatus, string> = {
   ai_draft: 'AI draft: not reviewed',
@@ -83,12 +82,14 @@ export const SUMMARY_STATUS_TONE: Record<SummaryStatus, 'warning' | 'info' | 'su
       [loading]="summaries.isLoading() && !summaries.hasValue()"
       [error]="summaries.error()"
       what="leadership summaries"
+      shape="table"
       (retry)="summaries.reload()"
     />
 
     @if (summaries.hasValue()) {
       @if (items().length === 0) {
         <sat-empty-state data-testid="summaries-empty">
+          <mat-icon satEmptyStateIllustration svgIcon="ai" aria-hidden="true" />
           <h2 satEmptyStateHeadline>No leadership summaries yet</h2>
           <p satEmptyStateDescription>
             A summary is drafted from a closed period's snapshot, so its figures match the board

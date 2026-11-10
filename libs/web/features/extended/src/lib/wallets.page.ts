@@ -1,3 +1,4 @@
+import { DecimalPipe, getNumberOfCurrencyDigits } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,13 +22,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import type { CreateWalletClaimRequest, Wallet, WalletClaimStatus } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, Money, formatMoney } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
 
 export const CLAIM_STATUS_LABEL: Record<WalletClaimStatus, string> = {
   submitted: 'Submitted',
@@ -78,6 +78,7 @@ interface ClaimDialogData {
     MatSelectModule,
     SAT_BANNER_IMPORTS,
     SatImportantButton,
+    Money,
   ],
   template: `
     <h2 mat-dialog-title>Claim from {{ data.wallet.programName }}</h2>
@@ -103,7 +104,8 @@ interface ClaimDialogData {
         <input matInput [(ngModel)]="merchant" maxlength="160" data-testid="claim-merchant" />
       </mat-form-field>
       <mat-form-field appearance="outline" class="bf-field">
-        <mat-label>Amount in {{ data.wallet.balance.currency }}</mat-label>
+        <mat-label>Amount</mat-label>
+        <span matTextPrefix>{{ data.wallet.balance.currency }}&nbsp;</span>
         <input
           matInput
           type="number"
@@ -135,10 +137,26 @@ interface ClaimDialogData {
         ></textarea>
       </mat-form-field>
 
-      <p class="bf-claim__check" data-testid="claim-check">{{ checkLine() }}</p>
+      <p class="bf-claim__check" data-testid="claim-check">
+        @if (leftAfter() < 0) {
+          More than your allowance allows.
+        } @else {
+          <bf-money [amountMinor]="leftAfter()" [currency]="data.wallet.balance.currency" /> left
+          after this claim.
+        }
+      </p>
       @if (overBalance()) {
         <sat-banner variant="important" data-testid="claim-over-balance">
-          <sat-banner-message>{{ overBalanceMessage() }}</sat-banner-message>
+          <sat-banner-message
+            >This claim is
+            <bf-money [amountMinor]="-leftAfter()" [currency]="data.wallet.balance.currency" /> more
+            than the
+            <bf-money
+              [amountMinor]="data.wallet.balance.amountMinor"
+              [currency]="data.wallet.balance.currency"
+            />
+            left in your wallet.</sat-banner-message
+          >
         </sat-banner>
       }
       <p class="bf-cell__secondary">
@@ -183,25 +201,19 @@ export class WalletClaimDialog {
   protected readonly ref =
     inject<MatDialogRef<WalletClaimDialog, CreateWalletClaimRequest | undefined>>(MatDialogRef);
 
-  private readonly amountMinor = computed(() => Math.round((this.amount() ?? 0) * 100));
+  private readonly amountMinor = computed(() =>
+    Math.round(
+      (this.amount() ?? 0) * 10 ** getNumberOfCurrencyDigits(this.data.wallet.balance.currency),
+    ),
+  );
 
   protected readonly overBalance = computed(
     () => this.amountMinor() > this.data.wallet.balance.amountMinor,
   );
-  protected readonly overBalanceMessage = computed(() => {
-    const wallet = this.data.wallet;
-    const over = this.amountMinor() - wallet.balance.amountMinor;
-    return `This claim is ${formatMoney(over, wallet.balance.currency)} more than the ${formatMoney(
-      wallet.balance.amountMinor,
-      wallet.balance.currency,
-    )} left in your wallet.`;
-  });
-  protected readonly checkLine = computed(() => {
-    const wallet = this.data.wallet;
-    const left = wallet.balance.amountMinor - this.amountMinor();
-    if (left < 0) return 'More than your allowance allows.';
-    return `${formatMoney(left, wallet.balance.currency)} left after this claim.`;
-  });
+
+  protected readonly leftAfter = computed(
+    () => this.data.wallet.balance.amountMinor - this.amountMinor(),
+  );
 
   protected readonly canSubmit = computed(
     () =>
@@ -231,6 +243,7 @@ export class WalletClaimDialog {
 @Component({
   selector: 'bf-wallets-page',
   imports: [
+    DecimalPipe,
     DateOnlyPipe,
     LoadState,
     MatButtonModule,
@@ -291,6 +304,12 @@ export class WalletClaimDialog {
                   [currency]="w.proratedAllowance.currency"
                 />
               </p>
+              <div class="bf-wallet__use">
+                <span class="bf-wallet__track" aria-hidden="true"
+                  ><span class="bf-wallet__fill" [style.width.%]="usedPct(w)"></span
+                ></span>
+                <span class="bf-cell__secondary">{{ usedPct(w) | number: '1.0-0' }}% used</span>
+              </div>
               @if (w.proratedAllowance.amountMinor !== w.allowance.amountMinor) {
                 <p class="bf-cell__secondary">
                   Prorated from the full yearly allowance of
@@ -340,67 +359,93 @@ export class WalletClaimDialog {
         <section class="bf-card bf-section" data-testid="claim-history">
           <h2 class="bf-section__title">Your claims</h2>
           @if (claims().length === 0) {
-            <p>You have not made a claim yet.</p>
+            <sat-empty-state data-testid="claims-empty">
+              <h3 satEmptyStateHeadline>No claims yet</h3>
+              <p satEmptyStateDescription>
+                Choose Claim on one of your wallets above to be paid back for a purchase.
+              </p>
+            </sat-empty-state>
           } @else {
-            <table class="bf-split-table" aria-label="Your wallet claims">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Programme</th>
-                  <th>Merchant</th>
-                  <th class="bf-num">Amount</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (c of claims(); track c.id) {
-                  <tr [attr.data-testid]="'claim-' + c.id">
-                    <td>{{ c.claimDate | bfDate: session.timezone() }}</td>
-                    <td>{{ c.programName }}</td>
-                    <td>
-                      <span class="bf-cell__primary">{{ c.merchant }}</span>
-                      <span class="bf-cell__secondary">{{ c.category }}</span>
-                    </td>
-                    <td class="bf-num">
-                      <bf-money
-                        [amountMinor]="c.amount.amountMinor"
-                        [currency]="c.amount.currency"
-                      />
-                      @if (c.amount.currency !== c.budgetAmount.currency) {
-                        <span class="bf-cell__secondary">
-                          <bf-money
-                            [amountMinor]="c.budgetAmount.amountMinor"
-                            [currency]="c.budgetAmount.currency"
-                          />
-                          against the budget
-                        </span>
-                      }
-                    </td>
-                    <td>
-                      <sat-status-tag [status]="statusTone(c.status)">{{
-                        statusLabel(c.status)
-                      }}</sat-status-tag>
-                      @if (c.status === 'returned' && c.decisionReason) {
-                        <span class="bf-cell__secondary">{{ c.decisionReason }}</span>
-                      }
-                      @if (c.status === 'paid' && c.paidVia) {
-                        <span class="bf-cell__secondary">
-                          {{
-                            c.paidVia === 'payroll' ? 'Through payroll' : 'On your expense report'
-                          }}
-                        </span>
-                      }
-                    </td>
+            <div class="bf-table-scroll">
+              <table class="bf-split-table" aria-label="Your wallet claims">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Programme</th>
+                    <th>Merchant</th>
+                    <th class="bf-num">Amount</th>
+                    <th>Status</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (c of claims(); track c.id) {
+                    <tr [attr.data-testid]="'claim-' + c.id">
+                      <td>{{ c.claimDate | bfDate: session.timezone() }}</td>
+                      <td>{{ c.programName }}</td>
+                      <td>
+                        <span class="bf-cell__primary">{{ c.merchant }}</span>
+                        <span class="bf-cell__secondary">{{ c.category }}</span>
+                      </td>
+                      <td class="bf-num">
+                        <bf-money
+                          [amountMinor]="c.amount.amountMinor"
+                          [currency]="c.amount.currency"
+                        />
+                        @if (c.amount.currency !== c.budgetAmount.currency) {
+                          <span class="bf-cell__secondary">
+                            <bf-money
+                              [amountMinor]="c.budgetAmount.amountMinor"
+                              [currency]="c.budgetAmount.currency"
+                            />
+                            against the budget
+                          </span>
+                        }
+                      </td>
+                      <td>
+                        <sat-status-tag [status]="statusTone(c.status)">{{
+                          statusLabel(c.status)
+                        }}</sat-status-tag>
+                        @if (c.status === 'returned' && c.decisionReason) {
+                          <span class="bf-cell__secondary">{{ c.decisionReason }}</span>
+                        }
+                        @if (c.status === 'paid' && c.paidVia) {
+                          <span class="bf-cell__secondary">
+                            {{
+                              c.paidVia === 'payroll' ? 'Through payroll' : 'On your expense report'
+                            }}
+                          </span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           }
         </section>
       }
     }
   `,
   styles: `
+    .bf-wallet__use {
+      display: flex;
+      align-self: stretch;
+      align-items: center;
+      gap: 8px;
+      max-width: 360px;
+    }
+    .bf-wallet__track {
+      flex: 1;
+      height: 6px;
+      overflow: hidden;
+      border-radius: var(--mat-sys-corner-full);
+      background: var(--mat-sys-surface-container);
+    }
+    .bf-wallet__fill {
+      display: block;
+      height: 100%;
+      background: var(--sat-sys-success-icon);
+    }
     .bf-wallets {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -451,12 +496,6 @@ export class WalletClaimDialog {
     .bf-section p {
       margin: 0;
     }
-    @media (max-width: 834px) {
-      .bf-split-table {
-        display: block;
-        overflow-x: auto;
-      }
-    }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -470,6 +509,14 @@ export class WalletsPage {
   protected readonly failure = signal<string | null>(null);
   protected readonly overview = resource({ loader: () => data(this.api.getMyWallets({})) });
   protected readonly wallets = computed(() => valueOf(this.overview)?.wallets ?? []);
+
+  /** Share of the allowance already claimed, for the bar (both amounts come from the API). */
+  protected usedPct(w: Wallet): number {
+    const total = w.proratedAllowance.amountMinor;
+    return total <= 0
+      ? 0
+      : Math.min(100, Math.max(0, ((total - w.balance.amountMinor) * 100) / total));
+  }
   protected readonly claims = computed(() => valueOf(this.overview)?.claims ?? []);
 
   protected statusLabel = (s: WalletClaimStatus) => CLAIM_STATUS_LABEL[s];

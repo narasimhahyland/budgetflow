@@ -12,10 +12,15 @@
         <bf-spend-status kind="event" [status]="e.status" />
       </div>
       <p class="bf-meta">
-        <span>{{ e.eventType.replace('_', ' ') }} · {{ e.eventCode }}</span>
+        <span>{{ label(e.eventType) }}</span>
+        <span aria-hidden="true">·</span>
+        <span class="bf-cell__code">{{ e.eventCode }}</span>
+        <span aria-hidden="true">·</span>
         <span>{{ e.startsAt | bfDate: session.timezone() }}</span>
+        <span aria-hidden="true">·</span>
         <span>{{ e.locationNames.join(', ') }}</span>
-        <span>organizer {{ e.organizerName }}</span>
+        <span aria-hidden="true">·</span>
+        <span>Organizer {{ e.organizerName }}</span>
       </p>
     </div>
     <div class="bf-page__actions">
@@ -42,7 +47,8 @@
       }
       @if (can('confirm_funding')) {
         <button
-          mat-stroked-button
+          mat-flat-button
+          satImportantButton
           type="button"
           [disabled]="busy()"
           (click)="transition('confirm-funding')"
@@ -170,7 +176,7 @@
         <sat-banner variant="info" class="bf-banner"
           ><sat-banner-message
             >Cross-entity: this contribution follows the intercompany policy ({{
-              selectedCandidate()?.intercompanyMode?.replace('_', ' ')
+              label(selectedCandidate()?.intercompanyMode)
             }}).</sat-banner-message
           ></sat-banner
         >
@@ -201,7 +207,7 @@
       <div class="bf-form__actions">
         <button mat-button type="button" (click)="open(null)">Keep the event</button>
         <button
-          mat-stroked-button
+          mat-flat-button
           satImportantButton
           type="button"
           [disabled]="busy()"
@@ -215,27 +221,43 @@
 
   <div class="bf-kpis">
     <div class="bf-kpi">
-      <p class="bf-kpi__label">Estimate</p>
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Estimate</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="currency_dollar" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value">
         <bf-money [amountMinor]="e.estimate.amountMinor" [currency]="e.currency" />
       </p>
-      <p class="bf-kpi__delta">Funding cap {{ money(e.funding.ceiling) }} with tolerance</p>
+      <div class="bf-kpi__foot">
+        <span>Funding cap with tolerance</span>
+        <bf-money
+          class="bf-kpi__pct"
+          [amountMinor]="e.funding.ceiling.amountMinor"
+          [currency]="e.funding.ceiling.currency"
+        />
+      </div>
     </div>
-    <div class="bf-kpi">
-      <p class="bf-kpi__label">Funded · {{ fundedPct() }}%</p>
+    <div class="bf-kpi" [class.bf-kpi--success]="e.funding.fullyFunded" data-testid="kpi-funded">
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Funded</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="graph_radial" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value">
         <bf-money [amountMinor]="fundedMinor()" [currency]="e.currency" />
       </p>
-      <span class="bf-progress"
-        ><span
-          class="bf-progress__fill"
-          [class.bf-progress__fill--approved]="e.funding.fullyFunded"
-          [style.width.%]="fundedPct()"
-        ></span
-      ></span>
+      <div class="bf-kpi__foot">
+        <span>Of the estimate</span>
+        <span class="bf-kpi__pct">{{ fundedPct() }}%</span>
+        <span class="bf-kpi__track"
+          ><span class="bf-kpi__fill" [style.width.%]="fundedPct()"></span
+        ></span>
+      </div>
     </div>
-    <div class="bf-kpi">
-      <p class="bf-kpi__label">Approved commitments</p>
+    <div class="bf-kpi bf-kpi--warning">
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Approved commitments</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="shield_lock" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value">
         <bf-money [amountMinor]="e.funding.committed.amountMinor" [currency]="e.currency" />
       </p>
@@ -243,9 +265,12 @@
         {{ e.commitments.length }} commitment{{ e.commitments.length === 1 ? '' : 's' }}
       </p>
     </div>
-    <div class="bf-kpi">
-      <p class="bf-kpi__label">Pending requests</p>
-      <p class="bf-kpi__value bf-amount--pending">
+    <div class="bf-kpi bf-kpi--warning">
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Pending requests</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="clock" aria-hidden="true" />
+      </div>
+      <p class="bf-kpi__value bf-kpi__value--warning">
         <bf-money [amountMinor]="e.funding.pending.amountMinor" [currency]="e.currency" />
       </p>
       <p class="bf-kpi__delta">
@@ -254,84 +279,47 @@
       </p>
     </div>
     <div class="bf-kpi">
-      <p class="bf-kpi__label">Actual</p>
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Actual</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="check_double" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value">
         <bf-money [amountMinor]="e.funding.actual.amountMinor" [currency]="e.currency" />
       </p>
       <p class="bf-kpi__delta">Matched invoices</p>
     </div>
-    <div class="bf-kpi">
-      <p
-        class="bf-kpi__label"
-        matTooltip="Funding cap minus approved commitments: what the event can still commit."
-      >
-        Available under this event's rules
-      </p>
-      <p class="bf-kpi__value">
+    <div class="bf-kpi bf-kpi--success">
+      <div class="bf-kpi__head">
+        <p
+          class="bf-kpi__label"
+          matTooltip="Funding cap minus approved commitments: what the event can still commit."
+        >
+          Available under this event's rules
+        </p>
+        <mat-icon class="bf-kpi__icon" svgIcon="circle_check" aria-hidden="true" />
+      </div>
+      <p class="bf-kpi__value bf-kpi__value--success">
         <bf-money [amountMinor]="e.funding.available.amountMinor" [currency]="e.currency" />
       </p>
       <p class="bf-kpi__delta">Within the cap</p>
     </div>
   </div>
 
-  <sat-navigation-tabs class="bf-tabs" aria-label="Event sections">
-    <a
-      satNavigationTab
-      [active]="tab() === 'overview'"
-      (click)="setTab('overview')"
-      (keydown.enter)="setTab('overview')"
-      tabindex="0"
-      >Overview</a
-    >
-    <a satNavigationTab [routerLink]="['/events', e.id, 'plan']">Plan</a>
-    <a satNavigationTab [routerLink]="['/events', e.id, 'people']"
-      >People <span class="bf-chip">{{ e.participantCount }}</span></a
-    >
-    <a satNavigationTab [routerLink]="['/events', e.id, 'quotes']">Quotes</a>
-    <a satNavigationTab [routerLink]="['/events', e.id, 'feedback']">Feedback</a>
-    @if (showScorecard()) {
-      <a satNavigationTab [routerLink]="['/events', e.id, 'scorecard']">Scorecard</a>
+  <bf-event-tabs [eventId]="e.id" section="overview" [showScorecard]="showScorecard()" />
+  <sat-navigation-tabs class="bf-tabs bf-subtabs" aria-label="Overview views">
+    @for (v of views; track v.id) {
+      <a
+        satNavigationTab
+        [active]="tab() === v.id"
+        (click)="setTab(v.id)"
+        (keydown.enter)="setTab(v.id)"
+        tabindex="0"
+        >{{ v.label }}
+        @if (viewCount(e, v.id); as n) {
+          <span class="bf-tab-count">{{ n }}</span>
+        }
+      </a>
     }
-    <a
-      satNavigationTab
-      [active]="tab() === 'participants'"
-      (click)="setTab('participants')"
-      (keydown.enter)="setTab('participants')"
-      tabindex="0"
-      >Participants <span class="bf-chip">{{ e.participantCount }}</span></a
-    >
-    <a
-      satNavigationTab
-      [active]="tab() === 'funding'"
-      (click)="setTab('funding')"
-      (keydown.enter)="setTab('funding')"
-      tabindex="0"
-      >Budget and funding</a
-    >
-    <a
-      satNavigationTab
-      [active]="tab() === 'commitments'"
-      (click)="setTab('commitments')"
-      (keydown.enter)="setTab('commitments')"
-      tabindex="0"
-      >Commitments <span class="bf-chip">{{ e.commitments.length }}</span></a
-    >
-    <a
-      satNavigationTab
-      [active]="tab() === 'documents'"
-      (click)="setTab('documents')"
-      (keydown.enter)="setTab('documents')"
-      tabindex="0"
-      >Documents <span class="bf-chip">{{ e.documents.length }}</span></a
-    >
-    <a
-      satNavigationTab
-      [active]="tab() === 'activity'"
-      (click)="setTab('activity')"
-      (keydown.enter)="setTab('activity')"
-      tabindex="0"
-      >Activity</a
-    >
   </sat-navigation-tabs>
 
   @switch (tab()) {
@@ -352,67 +340,83 @@
               /></a>
             </div>
             <div class="bf-table-scroll">
-              <table mat-table [dataSource]="e.sources" aria-label="Funding sources">
+              <table
+                mat-table
+                class="bf-table bf-table--stack"
+                [dataSource]="sourceRows()"
+                aria-label="Funding sources"
+              >
                 <ng-container matColumnDef="source">
                   <th mat-header-cell *matHeaderCellDef>Source budget</th>
-                  <td mat-cell *matCellDef="let s">{{ s.originBudgetName }}</td>
+                  <td mat-cell *matCellDef="let s" data-label="Source budget">
+                    @if (s.contributionId) {
+                      <a [routerLink]="['/contributions', s.contributionId]">{{ s.budgetName }}</a>
+                    } @else {
+                      {{ s.budgetName }}
+                    }
+                  </td>
+                  <td mat-footer-cell *matFooterCellDef>Total funded</td>
                 </ng-container>
                 <ng-container matColumnDef="owner">
                   <th mat-header-cell *matHeaderCellDef>Owner</th>
-                  <td mat-cell *matCellDef="let s">{{ s.ownerName ?? '—' }}</td>
+                  <td mat-cell *matCellDef="let s" data-label="Owner">
+                    @if (s.ownerName) {
+                      <span class="bf-cell__owner"
+                        ><sat-avatar size="28" [initials]="initials(s.ownerName)" />{{
+                          s.ownerName
+                        }}</span
+                      >
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td mat-footer-cell *matFooterCellDef></td>
                 </ng-container>
                 <ng-container matColumnDef="type">
                   <th mat-header-cell *matHeaderCellDef>Type</th>
-                  <td mat-cell *matCellDef="let s">
-                    @if (s.kind === 'own') {
-                      <span class="bf-chip">Home budget</span>
+                  <td mat-cell *matCellDef="let s" data-label="Type">
+                    @if (s.own) {
+                      <sat-category-tag category="purple">Home budget</sat-category-tag>
                     } @else {
-                      Inter-Director Budget Contribution Request · {{ s.mode }}
+                      <span class="bf-cell__primary"
+                        >Inter-Director Budget Contribution Request</span
+                      >
+                      <span class="bf-cell__secondary">{{ s.ref }} · {{ label(s.mode) }}</span>
                     }
                   </td>
+                  <td mat-footer-cell *matFooterCellDef></td>
                 </ng-container>
                 <ng-container matColumnDef="amount">
                   <th mat-header-cell *matHeaderCellDef class="bf-num">Amount</th>
-                  <td mat-cell *matCellDef="let s" class="bf-num">
-                    <bf-money [amountMinor]="s.funded.amountMinor" [currency]="s.funded.currency" />
+                  <td
+                    mat-cell
+                    *matCellDef="let s"
+                    class="bf-num"
+                    [class.bf-amount--pending]="s.pending"
+                    data-label="Amount"
+                  >
+                    <bf-money [amountMinor]="s.amount.amountMinor" [currency]="s.amount.currency" />
+                  </td>
+                  <td mat-footer-cell *matFooterCellDef class="bf-num">
+                    <bf-money [amountMinor]="fundedMinor()" [currency]="e.currency" />
+                    <span class="bf-cell__secondary bf-wrap"
+                      >of the
+                      <bf-money [amountMinor]="e.estimate.amountMinor" [currency]="e.currency" />
+                      estimate</span
+                    >
                   </td>
                 </ng-container>
                 <ng-container matColumnDef="status">
                   <th mat-header-cell *matHeaderCellDef>Status</th>
-                  <td mat-cell *matCellDef="let s">
-                    <bf-spend-status
-                      kind="contribution"
-                      [status]="s.status === 'returned' ? 'settled' : 'earmarked'"
-                    />
+                  <td mat-cell *matCellDef="let s" data-label="Status">
+                    <bf-spend-status kind="contribution" [status]="s.status" />
                   </td>
+                  <td mat-footer-cell *matFooterCellDef></td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="sourceColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: sourceColumns"></tr>
+                <tr mat-footer-row *matFooterRowDef="sourceColumns"></tr>
               </table>
-            </div>
-            @for (c of e.contributions; track c.id) {
-              @if (c.status === 'pending_approval' || c.status === 'submitted') {
-                <div class="bf-list__row bf-section">
-                  <span
-                    ><a [routerLink]="['/contributions', c.id]">{{ c.ref }}</a> ·
-                    {{ c.giverBudgetName }} · {{ c.giverOwnerName }}</span
-                  >
-                  <span
-                    ><bf-money
-                      class="bf-amount--pending"
-                      [amountMinor]="c.requested.amountMinor"
-                      [currency]="c.requested.currency" />
-                    <bf-spend-status kind="contribution" [status]="c.status"
-                  /></span>
-                </div>
-              }
-            }
-            <div class="bf-list__row bf-section">
-              <strong>Total funded towards cap</strong>
-              <span
-                ><bf-money [amountMinor]="fundedMinor()" [currency]="e.currency" /> /
-                <bf-money [amountMinor]="e.estimate.amountMinor" [currency]="e.currency"
-              /></span>
             </div>
           </section>
           <section class="bf-card" aria-labelledby="split-title">
@@ -437,10 +441,13 @@
               </mat-form-field>
             </div>
             @if (splitRows().length === 0) {
-              <p class="bf-empty">Add participants to split the cost.</p>
+              <sat-empty-state>
+                <h3 satEmptyStateHeadline>No cost split yet</h3>
+                <p satEmptyStateDescription>Add participants to split the cost by location.</p>
+              </sat-empty-state>
             } @else {
               <div class="bf-table-scroll">
-                <table class="bf-split-table" aria-label="Cost split">
+                <table class="bf-split-table bf-table--stack" aria-label="Cost split">
                   <thead>
                     <tr>
                       <th>
@@ -461,14 +468,18 @@
                     @for (r of splitRows(); track r.name) {
                       <tr>
                         <td>
-                          {{ r.name }}
-                          @if (r.intercompany) {
-                            <span class="bf-chip">intercompany</span>
-                          }
+                          <span class="bf-cell__name"
+                            >{{ r.name }}
+                            @if (r.intercompany) {
+                              <sat-category-tag category="orange">Intercompany</sat-category-tag>
+                            }
+                          </span>
                         </td>
-                        <td class="bf-num">{{ r.participants }}</td>
-                        <td class="bf-num">{{ (r.shareBps / 100).toFixed(1) }}%</td>
-                        <td class="bf-num">
+                        <td class="bf-num" data-label="Participants">{{ r.participants }}</td>
+                        <td class="bf-num" data-label="Share">
+                          {{ r.shareBps / 100 | number: '1.1-1' }}%
+                        </td>
+                        <td class="bf-num" data-label="Amount">
                           <bf-money
                             [amountMinor]="r.amount.amountMinor"
                             [currency]="r.amount.currency"
@@ -553,7 +564,7 @@
               }
               <div>
                 <dt>Tolerance</dt>
-                <dd>{{ e.toleranceBps / 100 }}%</dd>
+                <dd>{{ e.toleranceBps / 100 | number: '1.0-2' }}%</dd>
               </div>
             </dl>
           </section>
@@ -575,6 +586,14 @@
         @if (e.intercompany) {
           <sat-banner variant="info" class="bf-banner"
             ><sat-banner-message>{{ e.intercompany.message }}</sat-banner-message></sat-banner
+          >
+        }
+        @if (missingCostCenters(); as n) {
+          <sat-banner variant="warning" class="bf-banner" data-testid="missing-cost-center"
+            ><sat-banner-message
+              >{{ n }} participant{{ n === 1 ? ' has' : 's have' }} no cost center, so the share
+              cannot be charged yet.</sat-banner-message
+            ></sat-banner
           >
         }
         @if (panel() === 'participants') {
@@ -606,47 +625,84 @@
         <div class="bf-table-scroll">
           <table
             mat-table
+            class="bf-table bf-table--stack"
             [dataSource]="valueOf(participantsList)?.items ?? []"
             aria-label="Participants"
           >
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
-              <td mat-cell *matCellDef="let p">
-                <span class="bf-cell__primary">{{ p.name }}</span
-                ><span class="bf-cell__secondary">{{ p.jobTitle }}</span>
-                @if (can('add_participants')) {
-                  <button mat-button type="button" (click)="removeParticipant(p.id)">Remove</button>
-                }
+              <td mat-cell *matCellDef="let p" data-label="Name">
+                <span class="bf-cell__owner">
+                  <sat-avatar size="28" [initials]="initials(p.name)" />
+                  <span class="bf-wrap">
+                    <span class="bf-cell__primary">{{ p.name }}</span>
+                    @if (p.jobTitle) {
+                      <span class="bf-cell__secondary">{{ p.jobTitle }}</span>
+                    }
+                  </span>
+                </span>
               </td>
             </ng-container>
             <ng-container matColumnDef="location">
               <th mat-header-cell *matHeaderCellDef>Location</th>
-              <td mat-cell *matCellDef="let p">{{ p.locationName ?? '—' }}</td>
+              <td mat-cell *matCellDef="let p" data-label="Location">
+                {{ p.locationName ?? '—' }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="entity">
               <th mat-header-cell *matHeaderCellDef>Employing entity</th>
-              <td mat-cell *matCellDef="let p">
-                {{ p.employingEntityName ?? '—' }}
-                @if (p.intercompany) {
-                  <span class="bf-chip">intercompany</span>
-                }
+              <td mat-cell *matCellDef="let p" data-label="Employing entity">
+                <span class="bf-cell__name"
+                  >{{ p.employingEntityName ?? '—' }}
+                  @if (p.intercompany) {
+                    <sat-category-tag category="orange">Intercompany</sat-category-tag>
+                  }
+                </span>
               </td>
             </ng-container>
             <ng-container matColumnDef="costCenter">
               <th mat-header-cell *matHeaderCellDef>Cost center</th>
-              <td mat-cell *matCellDef="let p">{{ p.costCenterCode ?? 'Missing' }}</td>
+              <td mat-cell *matCellDef="let p" data-label="Cost center">
+                @if (p.costCenterCode) {
+                  <span class="bf-cell__code">{{ p.costCenterCode }}</span>
+                } @else {
+                  <sat-status-tag status="warning">Missing</sat-status-tag>
+                }
+              </td>
             </ng-container>
             <ng-container matColumnDef="share">
               <th mat-header-cell *matHeaderCellDef class="bf-num">Cost share</th>
-              <td mat-cell *matCellDef="let p" class="bf-num">
+              <td mat-cell *matCellDef="let p" class="bf-num" data-label="Cost share">
                 <bf-money
                   [amountMinor]="p.costShare.amountMinor"
                   [currency]="p.costShare.currency"
                 />
               </td>
             </ng-container>
-            <tr mat-header-row *matHeaderRowDef="participantColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: participantColumns"></tr>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="bf-num">
+                <span class="cdk-visually-hidden">Actions</span>
+              </th>
+              <td mat-cell *matCellDef="let p" class="bf-num">
+                @if (can('add_participants')) {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    [matMenuTriggerFor]="rowMenu"
+                    [attr.aria-label]="'Actions for ' + p.name"
+                  >
+                    <mat-icon svgIcon="more_horiz" />
+                  </button>
+                  <mat-menu #rowMenu="matMenu">
+                    <button mat-menu-item type="button" (click)="removeParticipant(p.id)">
+                      Remove {{ p.name }}
+                    </button>
+                  </mat-menu>
+                }
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="participantColumns()"></tr>
+            <tr mat-row *matRowDef="let row; columns: participantColumns()"></tr>
           </table>
         </div>
       </section>
@@ -661,7 +717,7 @@
           </p>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Funding sources detail">
+          <table class="bf-split-table bf-table--stack" aria-label="Funding sources detail">
             <thead>
               <tr>
                 <th>Source</th>
@@ -676,29 +732,31 @@
               @for (s of e.sources; track s.id) {
                 <tr>
                   <td>
-                    {{ s.originBudgetName }}
+                    <span class="bf-cell__primary">{{ s.originBudgetName }}</span>
                     <span class="bf-cell__secondary"
                       >{{ s.kind === 'own' ? (s.requestRef ?? 'Own funds') : s.contributionRef }} ·
-                      {{ s.mode }}</span
+                      {{ label(s.mode) }}</span
                     >
                   </td>
-                  <td class="bf-num">{{ (s.sharePct / 100).toFixed(1) }}%</td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Share">
+                    {{ s.sharePct / 100 | number: '1.1-1' }}%
+                  </td>
+                  <td class="bf-num" data-label="Funded">
                     <bf-money [amountMinor]="s.funded.amountMinor" [currency]="s.funded.currency" />
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Committed">
                     <bf-money
                       [amountMinor]="s.consumed.amountMinor"
                       [currency]="s.consumed.currency"
                     />
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Returned">
                     <bf-money
                       [amountMinor]="s.returned.amountMinor"
                       [currency]="s.returned.currency"
                     />
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Remaining">
                     <bf-money
                       [amountMinor]="s.remaining.amountMinor"
                       [currency]="s.remaining.currency"
@@ -721,7 +779,7 @@
           </h2>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Contribution requests">
+          <table class="bf-split-table bf-table--stack" aria-label="Contribution requests">
             <thead>
               <tr>
                 <th>Request</th>
@@ -738,17 +796,17 @@
                   <td>
                     <a [routerLink]="['/contributions', c.id]">{{ c.ref }}</a>
                   </td>
-                  <td>
-                    {{ c.giverBudgetName }}
+                  <td data-label="From">
+                    <span class="bf-cell__primary">{{ c.giverBudgetName }}</span>
                     <span class="bf-cell__secondary">{{ c.giverOwnerName }}</span>
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Requested">
                     <bf-money
                       [amountMinor]="c.requested.amountMinor"
                       [currency]="c.requested.currency"
                     />
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Approved">
                     @if (c.approved) {
                       <bf-money
                         [amountMinor]="c.approved.amountMinor"
@@ -758,8 +816,10 @@
                       —
                     }
                   </td>
-                  <td>{{ c.mode }}</td>
-                  <td><bf-spend-status kind="contribution" [status]="c.status" /></td>
+                  <td data-label="Mode">{{ label(c.mode) }}</td>
+                  <td data-label="Status">
+                    <bf-spend-status kind="contribution" [status]="c.status" />
+                  </td>
                 </tr>
               } @empty {
                 <tr>
@@ -776,7 +836,7 @@
             <h2 class="bf-card__title" id="recharges-title">Intercompany recharges</h2>
           </div>
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="Recharges">
+            <table class="bf-split-table bf-table--stack" aria-label="Recharges">
               <thead>
                 <tr>
                   <th>From</th>
@@ -790,12 +850,14 @@
                 @for (r of e.recharges; track r.id) {
                   <tr>
                     <td>{{ r.fromEntityName }}</td>
-                    <td>{{ r.toEntityName }}</td>
-                    <td>{{ r.mode.replace(/_/g, ' ') }}</td>
-                    <td class="bf-num">
+                    <td data-label="To">{{ r.toEntityName }}</td>
+                    <td data-label="Mode">{{ label(r.mode) }}</td>
+                    <td class="bf-num" data-label="Total">
                       <bf-money [amountMinor]="r.total.amountMinor" [currency]="r.total.currency" />
                     </td>
-                    <td><bf-spend-status kind="recharge" [status]="r.status" /></td>
+                    <td data-label="Status">
+                      <bf-spend-status kind="recharge" [status]="r.status" />
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -844,11 +906,28 @@
             </button>
           </div>
         }
+        <bf-budget-bar
+          class="bf-section"
+          label="Event funding cap"
+          [totalMinor]="e.funding.cap.amountMinor"
+          [currency]="e.funding.cap.currency"
+          [segments]="commitmentSegments()"
+        />
         @if (e.commitments.length === 0) {
-          <p class="bf-empty">No spend committed yet.</p>
+          <sat-empty-state>
+            <h3 satEmptyStateHeadline>No spend committed yet</h3>
+            <p satEmptyStateDescription>
+              Commit spend against the event funding as quotes are accepted.
+            </p>
+          </sat-empty-state>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="e.commitments" aria-label="Commitments">
+            <table
+              mat-table
+              class="bf-table bf-table--stack"
+              [dataSource]="e.commitments"
+              aria-label="Commitments"
+            >
               <ng-container matColumnDef="description">
                 <th mat-header-cell *matHeaderCellDef>Commitment</th>
                 <td mat-cell *matCellDef="let c">
@@ -858,19 +937,19 @@
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let c">
+                <td mat-cell *matCellDef="let c" data-label="Status">
                   <bf-spend-status kind="commitment" [status]="c.status" />
                 </td>
               </ng-container>
               <ng-container matColumnDef="amount">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">Amount</th>
-                <td mat-cell *matCellDef="let c" class="bf-num">
+                <td mat-cell *matCellDef="let c" class="bf-num" data-label="Amount">
                   <bf-money [amountMinor]="c.amount.amountMinor" [currency]="c.amount.currency" />
                 </td>
               </ng-container>
               <ng-container matColumnDef="budgetAmount">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">In budget currency</th>
-                <td mat-cell *matCellDef="let c" class="bf-num">
+                <td mat-cell *matCellDef="let c" class="bf-num" data-label="In budget currency">
                   <bf-money
                     [amountMinor]="c.budgetAmount.amountMinor"
                     [currency]="c.budgetAmount.currency"
@@ -879,19 +958,22 @@
               </ng-container>
               <ng-container matColumnDef="lines">
                 <th mat-header-cell *matHeaderCellDef>Funded by</th>
-                <td mat-cell *matCellDef="let c">
-                  @for (l of c.fundingLines; track $index) {
-                    <span class="bf-cell__secondary"
-                      >{{ l.budgetName }} · {{ money(l.amount) }}</span
-                    >
-                  }
+                <td mat-cell *matCellDef="let c" data-label="Funded by">
+                  <span class="bf-lines">
+                    @for (l of c.fundingLines; track $index) {
+                      <span class="bf-lines__row"
+                        ><span>{{ l.budgetName }}</span
+                        ><bf-money
+                          [amountMinor]="l.amount.amountMinor"
+                          [currency]="l.amount.currency"
+                      /></span>
+                    }
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>
-                  <span class="bf-cell__secondary">Actions</span>
-                </th>
-                <td mat-cell *matCellDef="let c">
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Actions</th>
+                <td mat-cell *matCellDef="let c" class="bf-num">
                   @if (
                     can('commit') &&
                     (c.status === 'encumbered' || c.status === 'partially_consumed')
@@ -945,6 +1027,17 @@
                 <span class="bf-cell__secondary">“{{ a.reason }}”</span>
               }
             </li>
+          } @empty {
+            @if (activity.hasValue()) {
+              <li class="bf-timeline__empty">
+                <sat-empty-state>
+                  <h3 satEmptyStateHeadline>No activity yet</h3>
+                  <p satEmptyStateDescription>
+                    Changes to the event, its funding requests and contributions appear here.
+                  </p>
+                </sat-empty-state>
+              </li>
+            }
           }
         </ol>
       </section>

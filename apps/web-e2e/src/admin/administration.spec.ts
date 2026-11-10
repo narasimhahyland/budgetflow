@@ -168,9 +168,12 @@ test.describe('bulk owner invites as the Organization Admin (103a)', () => {
     await page.goto('/admin/users/invitations');
     const table = page.getByRole('table', { name: 'Invited budget owners' });
     await expect(table.getByRole('row', { name: /Nisha Varma/ })).toContainText('Invited');
-    await expect(table.getByRole('row', { name: /Nisha Varma/ })).toContainText(
-      'Granted only through user administration',
-    );
+    // The table says once, for every row, that the proposed role comes only from user administration.
+    await expect(
+      page.getByText(
+        'The role proposed is granted only through user administration, never by the invitation.',
+      ),
+    ).toBeVisible();
     await expect(page.getByTestId('invite-funnel')).toContainText('of 2 invited people');
   });
 });

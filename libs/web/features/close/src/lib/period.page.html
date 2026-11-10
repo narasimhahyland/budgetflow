@@ -8,13 +8,14 @@
       <a class="bf-back" routerLink="/finance/close">All periods</a>
       <div class="bf-title-row">
         <h1 class="bf-page__title">{{ d.period.label }}</h1>
-        <sat-status-tag [status]="periodStatus(d).tone">{{ periodStatus(d).text }}</sat-status-tag>
+        <bf-close-tag [tag]="periodStatus(d)" />
       </div>
       <p class="bf-page__subtitle">
-        {{ d.period.startDate | date: 'd MMM' }} – {{ d.period.endDate | date: 'd MMM y' }} ·
+        {{ d.period.startDate | date: 'd MMM' : 'UTC' }} –
+        {{ d.period.endDate | date: 'd MMM y' : 'UTC' }} ·
         {{ d.period.fiscalYearLabel }}
         @if (d.period.targetCloseDate) {
-          · target close {{ d.period.targetCloseDate | date: 'd MMM y' }}
+          · target close {{ d.period.targetCloseDate | date: 'd MMM y' : 'UTC' }}
         }
       </p>
     </div>
@@ -30,15 +31,22 @@
         </button>
       }
       @if (d.period.status === 'open' || d.period.status === 'soft_closed') {
-        <button
-          satImportantButton
-          type="button"
-          [disabled]="!can(d, 'close')"
-          (click)="close(d)"
-          data-testid="close-period"
-        >
-          Close period
-        </button>
+        <!-- A disabled button gets no pointer events, so the reason sits on its wrapper. -->
+        <span [matTooltip]="closeBlockedReason(d)" [matTooltipDisabled]="can(d, 'close')">
+          <button
+            mat-flat-button
+            satImportantButton
+            type="button"
+            [disabled]="!can(d, 'close')"
+            (click)="close(d)"
+            data-testid="close-period"
+          >
+            @if (!can(d, 'close')) {
+              <mat-icon svgIcon="lock" aria-hidden="true" />
+            }
+            Close period
+          </button>
+        </span>
       }
     </div>
   </header>
@@ -76,7 +84,17 @@
     </sat-banner>
   }
 
-  @if (d.blockingReasons.length) {
+  @if (isShut(d)) {
+    <sat-banner variant="info" data-testid="period-shut">
+      <sat-banner-message>
+        <strong
+          >{{ d.period.label }} is {{ d.period.status === 'locked' ? 'locked' : 'closed' }}.</strong
+        >
+        Postings dated in it are refused; anything that arrives later posts to the next open period
+        with a late flag. The checks below are how they stand today.
+      </sat-banner-message>
+    </sat-banner>
+  } @else if (d.blockingReasons.length) {
     <sat-banner variant="important" data-testid="close-blocked">
       <sat-banner-message>
         <strong>{{ d.period.label }} cannot close yet.</strong>
@@ -118,26 +136,36 @@
                 {{ entity.legalEntityCode }} — {{ entity.legalEntityName }}
               </h2>
               <p class="bf-card__hint">
-                {{
-                  entity.blocking
-                    ? 'This entity is holding the close.'
-                    : 'Nothing from this entity is holding the close.'
-                }}
+                @if (isShut(d)) {
+                  Checks as they stand today, for the record.
+                } @else {
+                  {{
+                    entity.blocking
+                      ? 'This entity is holding the close.'
+                      : 'Nothing from this entity is holding the close.'
+                  }}
+                }
               </p>
             </div>
-            <sat-status-tag [status]="entity.blocking ? 'important' : 'success'">{{
-              entity.blocking ? 'Blocking' : 'Ready'
-            }}</sat-status-tag>
+            @if (!isShut(d)) {
+              <sat-status-tag [status]="entity.blocking ? 'important' : 'success'"
+                ><mat-icon
+                  [svgIcon]="entity.blocking ? 'block' : 'circle_check'"
+                  aria-hidden="true"
+                />{{ entity.blocking ? 'Blocking' : 'Ready' }}</sat-status-tag
+              >
+            }
           </div>
           <div class="bf-table-scroll">
             <table
               mat-table
+              class="bf-table bf-table--stack"
               [dataSource]="checks(entity)"
               [attr.aria-label]="'Close checks for ' + entity.legalEntityName"
             >
               <ng-container matColumnDef="check">
                 <th mat-header-cell *matHeaderCellDef scope="col">Check</th>
-                <td mat-cell *matCellDef="let c">
+                <td mat-cell *matCellDef="let c" data-label="Check">
                   <span class="bf-cell__primary">{{ c.title }}</span>
                   <span class="bf-cell__secondary">{{ c.detail }}</span>
                   @if (c.acknowledgement; as a) {
@@ -151,8 +179,20 @@
               </ng-container>
               <ng-container matColumnDef="kind">
                 <th mat-header-cell *matHeaderCellDef scope="col">Kind</th>
-                <td mat-cell *matCellDef="let c">
-                  <span class="bf-chip">{{ c.kind === 'hard' ? 'Hard' : 'Soft' }}</span>
+                <td mat-cell *matCellDef="let c" data-label="Kind">
+                  <span class="bf-tag-cell">
+                    <!-- Hard check = hard block (cannot be accepted); soft check = soft warning. -->
+                    @if (c.kind === 'hard') {
+                      <sat-status-tag status="important"
+                        ><mat-icon svgIcon="block" aria-hidden="true" />Hard check</sat-status-tag
+                      >
+                    } @else {
+                      <sat-status-tag status="warning"
+                        ><mat-icon svgIcon="critical" aria-hidden="true" />Soft
+                        check</sat-status-tag
+                      >
+                    }
+                  </span>
                   <span class="bf-cell__secondary">{{
                     c.kind === 'hard' ? 'Cannot be accepted' : 'Can be accepted with a reason'
                   }}</span>
@@ -160,20 +200,16 @@
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
-                <td mat-cell *matCellDef="let c">
-                  <span class="bf-tag-cell"
-                    ><sat-status-tag [status]="checkTag(c).tone">{{
-                      checkTag(c).text
-                    }}</sat-status-tag></span
-                  >
-                  @if (c.blocking) {
+                <td mat-cell *matCellDef="let c" data-label="Status">
+                  <span class="bf-tag-cell"><bf-close-tag [tag]="checkTag(c)" /></span>
+                  @if (c.blocking && !isShut(d)) {
                     <span class="bf-cell__secondary">Holding the close</span>
                   }
                 </td>
               </ng-container>
               <ng-container matColumnDef="count">
                 <th mat-header-cell *matHeaderCellDef scope="col" class="bf-num">Items</th>
-                <td mat-cell *matCellDef="let c" class="bf-num">
+                <td mat-cell *matCellDef="let c" data-label="Items" class="bf-num">
                   {{ c.count }}
                   @if (c.amount) {
                     <span class="bf-cell__secondary">
@@ -186,7 +222,12 @@
                 <th mat-header-cell *matHeaderCellDef scope="col">
                   <span class="bf-sr">Actions</span>
                 </th>
-                <td mat-cell *matCellDef="let c" class="bf-nowrap">
+                <td
+                  mat-cell
+                  *matCellDef="let c"
+                  [attr.data-label]="canAcknowledge(d, c) ? 'Actions' : null"
+                  class="bf-nowrap"
+                >
                   @if (canAcknowledge(d, c)) {
                     <button
                       mat-stroked-button
@@ -222,28 +263,28 @@
         </ul>
       </section>
       @if (canBreakGlass(d)) {
-        <section class="bf-break-glass" aria-labelledby="break-glass-title">
-          <h2 class="bf-break-glass__title" id="break-glass-title">
-            Break glass: {{ d.period.status === 'locked' ? 'unlock' : 'reopen' }}
-            {{ d.period.label }}
-          </h2>
-          <p class="bf-break-glass__body">
+        <sat-banner variant="important" aria-labelledby="break-glass-title">
+          <sat-banner-message>
+            <h2 class="bf-banner__heading" id="break-glass-title">
+              Break glass: {{ d.period.status === 'locked' ? 'unlock' : 'reopen' }}
+              {{ d.period.label }}
+            </h2>
             @if (d.snapshots.length) {
               Reports and board packs already use this period's as-of snapshot.
             }
             Reopening is exceptional, is written to the audit log with your reason, and only takes
             effect once a different person approves it. Prefer a reversal in the next open period.
-          </p>
+          </sat-banner-message>
           <button
+            satBannerAction
             mat-stroked-button
             type="button"
-            class="bf-danger-button"
             (click)="requestBreakGlass(d)"
             data-testid="request-break-glass"
           >
             Request a break-glass {{ d.period.status === 'locked' ? 'unlock' : 'reopen' }}
           </button>
-        </section>
+        </sat-banner>
       }
     }
     @case ('snapshots') {
@@ -256,7 +297,7 @@
           </p>
         </div>
         @if (!snapshots(d).length) {
-          <sat-empty-state>
+          <sat-empty-state class="bf-card__body">
             <h3 satEmptyStateHeadline>No snapshots yet</h3>
             <p satEmptyStateDescription>
               {{ d.period.label }} has not been closed. Closing takes one snapshot per legal entity.
@@ -264,7 +305,12 @@
           </sat-empty-state>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="snapshots(d)" aria-label="As-of snapshots">
+            <table
+              mat-table
+              class="bf-table"
+              [dataSource]="snapshots(d)"
+              aria-label="As-of snapshots"
+            >
               <ng-container matColumnDef="entity">
                 <th mat-header-cell *matHeaderCellDef scope="col">Entity</th>
                 <td mat-cell *matCellDef="let s">
@@ -332,7 +378,7 @@
             (retry)="lateItems.reload()"
           />
         } @else if (!lateRows().length) {
-          <sat-empty-state>
+          <sat-empty-state class="bf-card__body">
             <h3 satEmptyStateHeadline>No late items</h3>
             <p satEmptyStateDescription>
               Nothing dated in {{ d.period.label }} has posted to a later period.
@@ -340,11 +386,13 @@
           </sat-empty-state>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="lateRows()" aria-label="Late items">
+            <table mat-table class="bf-table" [dataSource]="lateRows()" aria-label="Late items">
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef scope="col">Accounting date</th>
                 <td mat-cell *matCellDef="let l">
-                  <span class="bf-cell__primary">{{ l.accountingDate | date: 'd MMM y' }}</span>
+                  <span class="bf-cell__primary">{{
+                    l.accountingDate | date: 'd MMM y' : 'UTC'
+                  }}</span>
                   <span class="bf-cell__secondary">{{ l.journalType }}</span>
                 </td>
               </ng-container>
@@ -352,7 +400,9 @@
                 <th mat-header-cell *matHeaderCellDef scope="col">Posted to</th>
                 <td mat-cell *matCellDef="let l">
                   <span class="bf-cell__primary">{{ l.postedPeriodLabel }}</span>
-                  <sat-status-tag status="warning">Late</sat-status-tag>
+                  <sat-status-tag status="warning"
+                    ><mat-icon svgIcon="clock" aria-hidden="true" />Late</sat-status-tag
+                  >
                 </td>
               </ng-container>
               <ng-container matColumnDef="command">

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { PolicyExplanation } from '@bf/contracts';
@@ -37,6 +38,7 @@ const OUTCOMES: Record<
     FormsModule,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     RouterLink,
     SAT_BANNER_IMPORTS,
@@ -46,7 +48,10 @@ const OUTCOMES: Record<
   template: `
     <header class="bf-page__header">
       <div class="bf-page__heading">
-        <h1 class="bf-page__title">Policy assistant</h1>
+        <div class="bf-title-row">
+          <h1 class="bf-page__title">Policy assistant</h1>
+          <bf-ai-label text="AI explanations" />
+        </div>
         <p class="bf-page__subtitle">
           Why something was blocked or needs extra approval, and what you can do within policy. The
           rules engine decides; the assistant explains its decision.
@@ -73,8 +78,9 @@ const OUTCOMES: Record<
           />
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Or explain a request (optional request id)</mat-label>
+          <mat-label>Request id (optional)</mat-label>
           <input matInput [(ngModel)]="requestId" data-testid="policy-request-id" />
+          <mat-hint>To explain why a request was blocked</mat-hint>
         </mat-form-field>
       </div>
       <div class="bf-form__actions">
@@ -184,6 +190,7 @@ const OUTCOMES: Record<
       </section>
     } @else if (!asking() && !disabled() && !failure()) {
       <sat-empty-state data-testid="policy-empty">
+        <mat-icon satEmptyStateIllustration svgIcon="ai" aria-hidden="true" />
         <h2 satEmptyStateHeadline>Nothing checked yet</h2>
         <p satEmptyStateDescription>
           Ask whether something is allowed, or give a request id to see why it was blocked or needs

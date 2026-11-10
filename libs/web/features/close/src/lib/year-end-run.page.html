@@ -10,12 +10,12 @@
         <h1 class="bf-page__title">
           Year end {{ r.fiscalYearLabel }} → {{ r.targetFiscalYearLabel }}
         </h1>
-        <sat-status-tag [status]="status(r).tone">{{ status(r).text }}</sat-status-tag>
+        <bf-close-tag [tag]="status(r)" />
       </div>
       <p class="bf-page__subtitle">
         {{ r.rootBudgetName }}
         @if (r.commitmentFreezeDate) {
-          · commitments frozen from {{ r.commitmentFreezeDate | date: 'd MMM y' }}
+          · commitments frozen from {{ r.commitmentFreezeDate | date: 'd MMM y' : 'UTC' }}
         }
       </p>
     </div>
@@ -33,6 +33,7 @@
       }
       @if (canRun() && r.status !== 'completed') {
         <button
+          mat-flat-button
           satImportantButton
           type="button"
           [disabled]="busy() || !executable(r)"
@@ -183,7 +184,12 @@
       </sat-empty-state>
     } @else {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="lines(r)" aria-label="Year-end outcome per budget">
+        <table
+          mat-table
+          class="bf-table"
+          [dataSource]="lines(r)"
+          aria-label="Year-end outcome per budget"
+        >
           <ng-container matColumnDef="budget">
             <th mat-header-cell *matHeaderCellDef scope="col">Budget</th>
             <td mat-cell *matCellDef="let l">
@@ -239,11 +245,7 @@
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
             <td mat-cell *matCellDef="let l">
-              <span class="bf-tag-cell"
-                ><sat-status-tag [status]="lineStatus(l).tone">{{
-                  lineStatus(l).text
-                }}</sat-status-tag></span
-              >
+              <span class="bf-tag-cell"><bf-close-tag [tag]="lineStatus(l)" /></span>
               @if (l.blockedReason) {
                 <span class="bf-cell__secondary">{{ l.blockedReason }}</span>
               }

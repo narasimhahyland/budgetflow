@@ -7,18 +7,27 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
-import { formatMoney, Money } from '@bf/web/ui';
+import {
+  formatMoney,
+  LoadState,
+  Money,
+  SpendStatus,
+  spendStatus,
+  type StatusView,
+} from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ActualsTabs } from './actuals-tabs';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { MatIconModule } from '@angular/material/icon';
 
 /** Screens 53 and 54 (undesigned, built from the design system): event reconciliation and close with surplus returns. */
 @Component({
   selector: 'bf-event-page',
   imports: [
+    SpendStatus,
+    MatIconModule,
     ActualsTabs,
     DatePipe,
     FormsModule,
@@ -48,11 +57,7 @@ import { LoadState } from './load-state';
           <h1 class="bf-page__title">{{ r.event.name }}</h1>
           <p class="bf-page__subtitle">
             {{ r.event.eventCode }} · {{ r.event.budgetName ?? 'No event budget' }} ·
-            <sat-status-tag
-              [status]="r.event.status === 'closed' ? 'success' : 'neutral'"
-              [hideIcon]="r.event.status !== 'closed'"
-              >{{ statusText(r.event.status) }}</sat-status-tag
-            >
+            <bf-spend-status kind="event" [status]="r.event.status" />
           </p>
         </div>
         <a mat-button routerLink="/finance/actuals/events">All events</a>
@@ -69,14 +74,20 @@ import { LoadState } from './load-state';
       }
       <div class="bf-kpis">
         <div class="bf-kpi bf-kpi--success">
-          <p class="bf-kpi__label">Actual spend (plan rate)</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Actual spend (plan rate)</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="check_double" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money [amountMinor]="r.spent.amountMinor" [currency]="r.spent.currency" />
           </p>
           <p class="bf-kpi__delta">{{ r.actuals.matched }} matched lines</p>
         </div>
         <div class="bf-kpi" [class.bf-kpi--warning]="r.actuals.unmatched > 0">
-          <p class="bf-kpi__label">Unmatched actuals</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Unmatched actuals</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="report_problem" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value" data-testid="event-unmatched">{{ r.actuals.unmatched }}</p>
           <p class="bf-kpi__delta">
             <bf-money
@@ -86,7 +97,10 @@ import { LoadState } from './load-state';
           </p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">FX effect (separate)</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">FX effect (separate)</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="compare" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="r.actuals.fxEffect.amountMinor"
@@ -96,7 +110,10 @@ import { LoadState } from './load-state';
           <p class="bf-kpi__delta">Never consumes budget</p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Surplus to return</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Surplus to return</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="currency_dollar" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money [amountMinor]="r.surplus.amountMinor" [currency]="r.surplus.currency" />
           </p>
@@ -172,14 +189,19 @@ import { LoadState } from './load-state';
           <p class="bf-empty">No commitments on this event.</p>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="r.commitments" aria-label="Event commitments">
+            <table
+              mat-table
+              class="bf-table"
+              [dataSource]="r.commitments"
+              aria-label="Event commitments"
+            >
               <ng-container matColumnDef="commitment">
                 <th mat-header-cell *matHeaderCellDef>Commitment</th>
                 <td mat-cell *matCellDef="let c">
                   <span class="bf-cell__primary">{{ c.reference }} — {{ c.description }}</span>
                   <span class="bf-cell__secondary"
                     >{{ c.vendorName ?? '' }} · service end
-                    {{ c.serviceEnd ? (c.serviceEnd | date: 'd MMM y') : '—' }}</span
+                    {{ c.serviceEnd ? (c.serviceEnd | date: 'd MMM y' : 'UTC') : '—' }}</span
                   >
                 </td>
               </ng-container>
@@ -201,9 +223,7 @@ import { LoadState } from './load-state';
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
                 <td mat-cell *matCellDef="let c">
-                  <sat-status-tag status="neutral" [hideIcon]="true">{{
-                    statusText(c.status)
-                  }}</sat-status-tag>
+                  <bf-spend-status kind="commitment" [status]="c.status" />
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="commitmentColumns"></tr>
@@ -223,7 +243,7 @@ import { LoadState } from './load-state';
           <p class="bf-empty">No funding sources on this event.</p>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="r.sources" aria-label="Funding sources">
+            <table mat-table class="bf-table" [dataSource]="r.sources" aria-label="Funding sources">
               <ng-container matColumnDef="giver">
                 <th mat-header-cell *matHeaderCellDef>Source</th>
                 <td mat-cell *matCellDef="let c">
@@ -270,10 +290,9 @@ import { LoadState } from './load-state';
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
                 <td mat-cell *matCellDef="let c">
-                  <sat-status-tag
-                    [status]="c.status === 'returned' ? 'success' : 'neutral'"
-                    [hideIcon]="c.status !== 'returned'"
-                    >{{ statusText(c.status) }}</sat-status-tag
+                  @let v = contribution(c.status);
+                  <sat-status-tag [status]="v.tone"
+                    ><mat-icon [svgIcon]="v.icon" aria-hidden="true" />{{ v.label }}</sat-status-tag
                   >
                 </td>
               </ng-container>
@@ -315,8 +334,11 @@ export class EventPage {
     return formatMoney(minor, currency);
   }
 
-  protected statusText(s: string): string {
-    return s.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+  /** A contributor's line: the contribution status, or Returned once its surplus share went back. */
+  protected contribution(status: string): StatusView {
+    return status === 'returned'
+      ? { label: 'Returned', tone: 'success', icon: 'redo' }
+      : spendStatus('contribution', status);
   }
 
   protected async close(): Promise<void> {

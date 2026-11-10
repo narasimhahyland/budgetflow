@@ -1,4 +1,6 @@
 <bf-load-state
+  shape="cards"
+  [lines]="4"
   [loading]="res.isLoading() && !b()"
   [error]="res.error()"
   what="this budget"
@@ -24,7 +26,7 @@
         {{ b.display.legalEntityName ?? '—' }} · Cost center {{ b.display.costCenterCode ?? '—' }} ·
         Budget currency {{ b.currency }} (fixed USD reporting)
         @if (b.code) {
-          · <code>{{ b.code }}</code>
+          · <span class="bf-code">{{ b.code }}</span>
         }
       </p>
     </div>
@@ -118,11 +120,6 @@
   </header>
   <bf-discussion-box itemType="budget" [itemId]="b.id" />
 
-  @if (notice()) {
-    <sat-banner variant="success"
-      ><sat-banner-message>{{ notice() }}</sat-banner-message></sat-banner
-    >
-  }
   @if (failure()) {
     <sat-banner variant="important"
       ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
@@ -144,34 +141,35 @@
     >
   }
 
-  <nav class="bf-detail__tabs" role="tablist" aria-label="Budget sections">
+  <sat-navigation-tabs class="bf-detail__tabs" aria-label="Budget sections">
     @for (t of tabs; track t.key) {
-      <button
-        type="button"
-        role="tab"
-        class="bf-detail__tab"
-        [class.bf-detail__tab--active]="tab() === t.key"
-        [attr.aria-selected]="tab() === t.key"
-        (click)="setTab(t.key)"
+      <a
+        satNavigationTab
+        [active]="tab() === t.key"
+        [routerLink]="[]"
+        [queryParams]="{ tab: t.key }"
+        replaceUrl
         [attr.data-testid]="'tab-' + t.key"
-      >
-        {{ t.label }}
+        >{{ t.label }}
         @if (t.key === 'children') {
           ({{ b.childCount }})
         }
         @if (t.key === 'versions') {
           <span class="bf-detail__count">{{ b.version }}</span>
         }
-      </button>
+      </a>
     }
-  </nav>
+  </sat-navigation-tabs>
 
   @switch (tab()) {
     @case ('overview') {
       @if (bal(); as x) {
         <section class="bf-kpis bf-detail__kpis" aria-label="Key figures">
           <div class="bf-kpi">
-            <p class="bf-kpi__label">Total budget</p>
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Total budget</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="currency_dollar" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">
               <bf-money [amountMinor]="x.authorized" [currency]="b.currency" />
             </p>
@@ -180,35 +178,75 @@
                 b.parentId ? 'Allocated from ' + b.display.parentName : 'Funded by the plan version'
               }}
             </p>
+            <div class="bf-kpi__foot">
+              <span>Allocated to children</span>
+              <span class="bf-kpi__pct">{{ pct(allocatedPct()) }}</span>
+              <span class="bf-kpi__track"
+                ><span class="bf-kpi__fill" [style.width.%]="allocatedPct() / 100"></span
+              ></span>
+            </div>
           </div>
-          <div class="bf-kpi">
-            <p class="bf-kpi__label">Committed</p>
+          <div class="bf-kpi bf-kpi--warning">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Committed</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="shield_clock" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">
               <bf-money [amountMinor]="x.encumbered + x.preEncumbered" [currency]="b.currency" />
             </p>
-            <p class="bf-kpi__delta">{{ pct(committedPct()) }} · encumbered + pending requests</p>
+            <p class="bf-kpi__delta">Encumbered + pending requests</p>
+            <div class="bf-kpi__foot">
+              <span>Of the budget</span>
+              <span class="bf-kpi__pct">{{ pct(committedPct()) }}</span>
+              <span class="bf-kpi__track"
+                ><span class="bf-kpi__fill" [style.width.%]="committedPct() / 100"></span
+              ></span>
+            </div>
           </div>
-          <div class="bf-kpi">
-            <p class="bf-kpi__label">Actual spend</p>
+          <div class="bf-kpi bf-kpi--actual">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Actual spend</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="check_double" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">
               <bf-money [amountMinor]="x.actual" [currency]="b.currency" />
             </p>
-            <p class="bf-kpi__delta">{{ pct(actualPct()) }} of the budget</p>
+            <p class="bf-kpi__delta">Matched actuals in the budget currency</p>
+            <div class="bf-kpi__foot">
+              <span>Of the budget</span>
+              <span class="bf-kpi__pct">{{ pct(actualPct()) }}</span>
+              <span class="bf-kpi__track"
+                ><span class="bf-kpi__fill" [style.width.%]="actualPct() / 100"></span
+              ></span>
+            </div>
           </div>
-          <div class="bf-kpi bf-kpi--available">
-            <p class="bf-kpi__label">
-              Available under this budget’s rules <bf-available-tip [budget]="b" />
-            </p>
-            <p class="bf-kpi__value" data-testid="kpi-available">
+          <div class="bf-kpi bf-kpi--success">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Available under this budget’s rules</p>
+              <bf-available-tip [budget]="b" />
+            </div>
+            <p
+              class="bf-kpi__value"
+              [class.bf-kpi__value--success]="x.available > 0"
+              [class.bf-kpi__value--none]="x.available <= 0"
+              data-testid="kpi-available"
+            >
               <bf-money [amountMinor]="x.available" [currency]="b.currency" />
             </p>
             <p class="bf-kpi__delta">
-              {{ pct(availablePct()) }} · company-wide
+              Company-wide
               <bf-money
                 [amountMinor]="b.available.companyWide.amountMinor"
                 [currency]="b.available.companyWide.currency"
               />
             </p>
+            <div class="bf-kpi__foot">
+              <span>Of the budget</span>
+              <span class="bf-kpi__pct">{{ pct(availablePct()) }}</span>
+              <span class="bf-kpi__track"
+                ><span class="bf-kpi__fill" [style.width.%]="availablePct() / 100"></span
+              ></span>
+            </div>
           </div>
         </section>
 
@@ -307,14 +345,14 @@
                       ? 'warning'
                       : 'neutral'
                 "
-                >{{ b.control.mode }} control</sat-status-tag
+                >{{ controlLabel(b.control.mode) }}</sat-status-tag
               >
             </div>
             <div class="bf-card__body">
               <dl class="bf-def">
                 <div>
                   <dt>Counted against available</dt>
-                  <dd>{{ b.control.basis.join(', ').replaceAll('_', ' ') }}</dd>
+                  <dd>{{ basisLabel(b.control.basis) }}</dd>
                 </div>
                 <div>
                   <dt>Overrun tolerance</dt>
@@ -335,7 +373,7 @@
                 @if (b.phasingMethod) {
                   <div>
                     <dt>Phasing</dt>
-                    <dd>{{ b.phasingMethod }}</dd>
+                    <dd>{{ phasingLabel(b.phasingMethod) }}</dd>
                   </div>
                 }
               </dl>

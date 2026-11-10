@@ -13,12 +13,23 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
 import type { BudgetDetail } from '@bf/contracts';
 import { Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { balancesOf, data, errorMessage, injectApi, sameTree, toMinor, valueOf } from './api';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
+import {
+  balancesOf,
+  data,
+  errorMessage,
+  flagMatcher,
+  injectApi,
+  sameTree,
+  toMinor,
+  valueOf,
+} from './api';
 
 const COMMON = [
   FormsModule,
@@ -28,6 +39,7 @@ const COMMON = [
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
+  MatRadioModule,
   MatSelectModule,
   Money,
   SAT_BANNER_IMPORTS,
@@ -41,14 +53,26 @@ export interface AllocateDialogData {
 /** Screen 24: allocate to a child unit, checked live against the parent's available. */
 @Component({
   selector: 'bf-allocate-dialog',
-  imports: COMMON,
+  imports: [...COMMON, SatImportantButton],
   styleUrl: './dialogs.scss',
   template: `
-    <div mat-dialog-title>
-      <h2 class="bf-dialog__title">Allocate budget to child unit</h2>
-      <p class="bf-dialog__subtitle">
-        {{ p.name }} · {{ p.display.fiscalYearLabel }} · {{ p.currency }}
-      </p>
+    <div mat-dialog-title class="bf-dialog__head">
+      <span class="bf-dialog__icon"><mat-icon svgIcon="graph_org" aria-hidden="true" /></span>
+      <div>
+        <h2 class="bf-dialog__title">Allocate budget to child unit</h2>
+        <p class="bf-dialog__subtitle">
+          {{ p.name }} · {{ p.display.fiscalYearLabel }} · {{ p.currency }}
+        </p>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
     </div>
     <mat-dialog-content>
       <div class="bf-dialog__grid">
@@ -100,17 +124,24 @@ export interface AllocateDialogData {
           </mat-button-toggle-group>
           @if (method() === 'fixed') {
             <mat-form-field class="bf-field">
-              <mat-label>Amount ({{ p.currency }})</mat-label>
+              <mat-label>Amount</mat-label>
+              <span matTextPrefix>{{ p.currency }}&nbsp;</span>
               <input
                 matInput
                 inputmode="decimal"
                 [ngModel]="amount()"
                 (ngModelChange)="amount.set($event)"
+                [errorStateMatcher]="amountError"
                 data-testid="allocate-amount"
               />
               <mat-hint
                 >Up to <bf-money [amountMinor]="available" [currency]="p.currency"
               /></mat-hint>
+              <mat-error
+                ><mat-icon svgIcon="error" aria-hidden="true" />Up to
+                <bf-money [amountMinor]="available" [currency]="p.currency" /> is
+                available</mat-error
+              >
             </mat-form-field>
             <mat-form-field class="bf-field">
               <mat-label>Note to owner</mat-label>
@@ -144,32 +175,38 @@ export interface AllocateDialogData {
               </span>
             </div>
           }
-          @if (over()) {
-            <sat-banner variant="important" style="margin-top: 12px" data-testid="over-allocation"
-              ><sat-banner-message
-                >Over allocation: only
-                <bf-money [amountMinor]="available" [currency]="p.currency" /> is available. Lower
-                the amount or ask for an increase.</sat-banner-message
-              ></sat-banner
-            >
-          }
           <p class="bf-note">
             <mat-icon svgIcon="info" aria-hidden="true" />Posts an allocation journal to the ledger
             and one audit entry; the owner is notified.
           </p>
         </div>
       </div>
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
+      @if (over()) {
+        <sat-banner variant="important" [border]="true" data-testid="over-allocation"
+          ><sat-banner-message
+            ><strong>Blocked:</strong> only
+            <bf-money [amountMinor]="available" [currency]="p.currency" /> is available. Lower the
+            amount or ask for an increase.</sat-banner-message
+          ></sat-banner
+        >
+      }
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
+      @if (method() === 'fixed' && !valid()) {
+        <span class="bf-dialog__why">{{ why() }}</span>
+      }
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       @if (method() === 'fixed') {
         <button
           mat-flat-button
+          satImportantButton
           type="button"
           [disabled]="busy() || !valid()"
           (click)="submit()"
@@ -200,6 +237,7 @@ export class AllocateDialog {
   protected memo = '';
   protected readonly amountMinor = computed(() => toMinor(this.amount()));
   protected readonly over = computed(() => (this.amountMinor() ?? 0) > this.available);
+  protected readonly amountError = flagMatcher(() => this.over());
   private readonly childrenRes = resource({
     loader: async () =>
       (await data(this.api.listBudgets({ query: { parentId: this.p.id, limit: 500 } }))).items,
@@ -212,6 +250,12 @@ export class AllocateDialog {
   protected valid(): boolean {
     const a = this.amountMinor();
     return !!this.childId() && !!a && a > 0 && !this.over();
+  }
+
+  protected why(): string {
+    if (this.over()) return 'Lower the amount to continue.';
+    if (!this.childId()) return 'Choose the child unit.';
+    return 'Enter an amount to allocate.';
   }
 
   protected perHead(): void {
@@ -249,7 +293,7 @@ export interface MoneyDialogData {
 /** Screen 25: transfer to another budget of the same tree with a live before/after preview. */
 @Component({
   selector: 'bf-transfer-dialog',
-  imports: COMMON,
+  imports: [...COMMON, SatImportantButton],
   styleUrl: './dialogs.scss',
   template: `
     <div mat-dialog-title class="bf-dialog__head">
@@ -260,6 +304,15 @@ export interface MoneyDialogData {
           Move authorized budget between two budgets. Both are held in {{ b.currency }}.
         </p>
       </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
     </div>
     <mat-dialog-content>
       <div class="bf-dialog__grid">
@@ -291,14 +344,23 @@ export interface MoneyDialogData {
             </mat-select>
           </mat-form-field>
           <mat-form-field class="bf-field">
-            <mat-label>Transfer amount ({{ b.currency }})</mat-label>
+            <mat-label>Transfer amount</mat-label>
+            <span matTextPrefix>{{ b.currency }}&nbsp;</span>
             <input
               matInput
               inputmode="decimal"
               [ngModel]="amount()"
               (ngModelChange)="amount.set($event)"
+              [errorStateMatcher]="amountError"
               data-testid="transfer-amount"
             />
+            <mat-hint
+              >Up to <bf-money [amountMinor]="sourceMax" [currency]="b.currency"
+            /></mat-hint>
+            <mat-error
+              ><mat-icon svgIcon="error" aria-hidden="true" />Up to
+              <bf-money [amountMinor]="sourceMax" [currency]="b.currency" /> can move</mat-error
+            >
           </mat-form-field>
           <mat-form-field class="bf-field">
             <mat-label>Reason code</mat-label>
@@ -307,10 +369,14 @@ export interface MoneyDialogData {
                 <mat-option [value]="r.code">{{ r.code }} · {{ r.label }}</mat-option>
               }
             </mat-select>
+            <mat-error
+              ><mat-icon svgIcon="error" aria-hidden="true" />Choose a reason code</mat-error
+            >
           </mat-form-field>
           <mat-form-field class="bf-field">
             <mat-label>Reason and business justification</mat-label>
             <textarea matInput rows="2" [(ngModel)]="reason" required></textarea>
+            <mat-error><mat-icon svgIcon="error" aria-hidden="true" />Enter a reason</mat-error>
           </mat-form-field>
         </div>
         <div class="bf-panel">
@@ -333,14 +399,6 @@ export interface MoneyDialogData {
               /></span>
             </div>
           }
-          @if (over()) {
-            <sat-banner variant="important" style="margin-top: 12px" data-testid="transfer-blocked"
-              ><sat-banner-message
-                >Only <bf-money [amountMinor]="sourceMax" [currency]="b.currency" /> can move out of
-                {{ b.name }}.</sat-banner-message
-              ></sat-banner
-            >
-          }
           <p class="bf-note">
             <mat-icon svgIcon="info" aria-hidden="true" />Posts one balanced transfer journal
             through the common parent and one audit entry. The owner of both budgets (their common
@@ -348,16 +406,31 @@ export interface MoneyDialogData {
           </p>
         </div>
       </div>
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
+      @if (over()) {
+        <sat-banner variant="important" [border]="true" data-testid="transfer-blocked"
+          ><sat-banner-message
+            ><strong>Blocked:</strong> only
+            <bf-money [amountMinor]="sourceMax" [currency]="b.currency" /> can move out of
+            {{ b.name }}.</sat-banner-message
+          ></sat-banner
+        >
+      }
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
+      @if (!valid()) {
+        <span class="bf-dialog__why">{{ why() }}</span>
+      }
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
         mat-flat-button
+        satImportantButton
         type="button"
         [disabled]="busy() || !valid()"
         (click)="submit()"
@@ -389,6 +462,7 @@ export class TransferDialog {
   protected reason = '';
   protected readonly amountMinor = computed(() => toMinor(this.amount()));
   protected readonly over = computed(() => (this.amountMinor() ?? 0) > this.sourceMax);
+  protected readonly amountError = flagMatcher(() => this.over());
   private readonly treeRes = resource({ loader: () => sameTree(this.api, this.b) });
   protected readonly targets = computed(() =>
     (valueOf(this.treeRes) ?? []).filter(
@@ -414,6 +488,15 @@ export class TransferDialog {
       !!this.reasonCode &&
       this.reason.trim().length >= 3
     );
+  }
+
+  protected why(): string {
+    const a = this.amountMinor();
+    if (this.over()) return 'Lower the amount to continue.';
+    if (!this.toId()) return 'Choose the destination budget.';
+    if (!a || a <= 0) return 'Enter the amount to transfer.';
+    if (!this.reasonCode) return 'Choose a reason code.';
+    return 'Enter a reason (3 characters or more).';
   }
 
   protected async submit(): Promise<void> {
@@ -452,6 +535,15 @@ export class TransferDialog {
         <h2 class="bf-dialog__title">Request budget increase</h2>
         <p class="bf-dialog__subtitle">{{ b.name }} · version {{ b.version }} · {{ b.currency }}</p>
       </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
     </div>
     <mat-dialog-content>
       <div class="bf-dialog__grid">
@@ -463,7 +555,8 @@ export class TransferDialog {
             </p>
           </div>
           <mat-form-field class="bf-field" style="margin-top: 12px">
-            <mat-label>New authorized ({{ b.currency }})</mat-label>
+            <mat-label>New authorized</mat-label>
+            <span matTextPrefix>{{ b.currency }}&nbsp;</span>
             <input
               matInput
               inputmode="decimal"
@@ -472,24 +565,26 @@ export class TransferDialog {
               data-testid="increase-target"
             />
             @if (increase() > 0) {
-              <mat-hint
-                >Increase of <bf-money [amountMinor]="increase()" [currency]="b.currency"
+              <mat-hint class="bf-ok"
+                ><mat-icon svgIcon="trending_up" aria-hidden="true" /> Increase of
+                <bf-money [amountMinor]="increase()" [currency]="b.currency"
               /></mat-hint>
             }
           </mat-form-field>
           <p class="bf-dialog__section-title">Funded from</p>
-          <div class="bf-destinations">
-            <div class="bf-destination bf-destination--selected">
-              Parent: {{ b.display.parentName
-              }}<small>Standard route; the parent owner decides</small>
-            </div>
-            <div class="bf-destination" aria-disabled="true">
-              New money<small>Needs a plan revision by finance</small>
-            </div>
-          </div>
+          <mat-radio-group class="bf-destinations" aria-label="Funded from" value="parent">
+            <mat-radio-button value="parent" class="bf-destination bf-destination--selected"
+              >Parent: {{ b.display.parentName
+              }}<small>Standard route; the parent owner decides</small></mat-radio-button
+            >
+            <mat-radio-button value="new" class="bf-destination" [disabled]="true"
+              >New money<small>Needs a plan revision by finance</small></mat-radio-button
+            >
+          </mat-radio-group>
           <mat-form-field class="bf-field">
             <mat-label>Reason and business justification</mat-label>
             <textarea matInput rows="3" [(ngModel)]="reason" required></textarea>
+            <mat-error><mat-icon svgIcon="error" aria-hidden="true" />Enter a reason</mat-error>
           </mat-form-field>
           @if (b.thresholdsReachedPct.length) {
             <sat-banner variant="warning"
@@ -513,13 +608,22 @@ export class TransferDialog {
           </p>
         </div>
       </div>
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
+      @if (increase() <= 0 || reason.trim().length < 3) {
+        <span class="bf-dialog__why">{{
+          increase() <= 0
+            ? 'Enter a new authorized amount above the current one.'
+            : 'Enter a reason (3 characters or more).'
+        }}</span>
+      }
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
         mat-flat-button
@@ -570,7 +674,22 @@ export class IncreaseDialog {
   imports: COMMON,
   styleUrl: './dialogs.scss',
   template: `
-    <h2 mat-dialog-title>Request reserve release</h2>
+    <div mat-dialog-title class="bf-dialog__head">
+      <span class="bf-dialog__icon"><mat-icon svgIcon="shield_lock" aria-hidden="true" /></span>
+      <div>
+        <h2 class="bf-dialog__title">Request reserve release</h2>
+        <p class="bf-dialog__subtitle">{{ b.name }} · {{ b.currency }}</p>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
+    </div>
     <mat-dialog-content>
       <p class="bf-note">
         From {{ b.name }} (available
@@ -592,7 +711,8 @@ export class IncreaseDialog {
         </mat-select>
       </mat-form-field>
       <mat-form-field class="bf-field">
-        <mat-label>Amount ({{ b.currency }})</mat-label>
+        <mat-label>Amount</mat-label>
+        <span matTextPrefix>{{ b.currency }}&nbsp;</span>
         <input
           matInput
           inputmode="decimal"
@@ -604,12 +724,14 @@ export class IncreaseDialog {
         <mat-label>Justification</mat-label>
         <textarea matInput rows="3" [(ngModel)]="reason"></textarea>
       </mat-form-field>
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
