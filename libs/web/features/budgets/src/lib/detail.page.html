@@ -146,16 +146,19 @@
   }
   @if (b.status === 'frozen') {
     <sat-banner variant="info" data-testid="frozen-banner"
-      ><sat-banner-message id="frozen-reason"
-        >Frozen: new requests and allocations are blocked. Existing commitments can still
-        complete.</sat-banner-message
+      ><sat-banner-message
+        ><span id="frozen-reason"
+          >Frozen: new requests and allocations are blocked. Existing commitments can still
+          complete.</span
+        ></sat-banner-message
       ></sat-banner
     >
   } @else if (b.status === 'set_to_zero') {
     <sat-banner variant="important" data-testid="zero-banner"
-      ><sat-banner-message id="zero-reason"
-        >Set to zero: no new spending is accepted. Approved commitments can still be
-        paid.</sat-banner-message
+      ><sat-banner-message
+        ><span id="zero-reason"
+          >Set to zero: no new spending is accepted. Approved commitments can still be paid.</span
+        ></sat-banner-message
       ></sat-banner
     >
   }
