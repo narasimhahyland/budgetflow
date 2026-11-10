@@ -1,9 +1,16 @@
 import { todayUtc } from '@bf/api/core';
-import type { Tx } from '@bf/api/db';
-import { LedgerReads, toPostingBudget } from '@bf/api/ledger';
+import { tenants, type Tx } from '@bf/api/db';
+import { LedgerReads, ThresholdAlerts, toPostingBudget } from '@bf/api/ledger';
 import type { BudgetImpact } from '@bf/contracts';
-import { acceptsNewActivity, availableOf, checkSpend, type CurrencyCode } from '@bf/domain';
+import {
+  acceptsNewActivity,
+  availableOf,
+  checkSpend,
+  companyAvailable,
+  type CurrencyCode,
+} from '@bf/domain';
 import { Injectable } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
 import type { BudgetRow } from './approval-handlers';
 
 const pct = (part: number, whole: number) => (whole <= 0 ? 0 : Math.round((part * 100) / whole));
@@ -15,7 +22,10 @@ const pct = (part: number, whole: number) => (whole <= 0 ? 0 : Math.round((part 
  */
 @Injectable()
 export class BudgetImpactService {
-  constructor(private readonly reads: LedgerReads) {}
+  constructor(
+    private readonly reads: LedgerReads,
+    private readonly subtrees: ThresholdAlerts,
+  ) {}
 
   async impact(
     tx: Tx,
@@ -27,6 +37,16 @@ export class BudgetImpactService {
     const pair = (await this.reads.balances(tx, [budget.id])).get(budget.id)!;
     const b = pair.budget;
     const ccy = budget.currency as CurrencyCode;
+    // Company-wide Available is the dashboards' figure: authorized less everything held, pending,
+    // approved and spent in the budget and its whole subtree, in the reporting currency, which is
+    // the only currency a subtree of mixed-currency budgets can be summed in. It is the same
+    // calculation the budget page and the health dashboard use (explainAvailable, companyAvailable).
+    const subtree = (await this.subtrees.subtreeTotals(tx, [budget.id])).get(budget.id)!;
+    const companyWide = companyAvailable(pair.reporting.authorized, subtree);
+    const [tenant] = await tx
+      .select({ reportingCurrency: tenants.reportingCurrency })
+      .from(tenants)
+      .where(eq(tenants.id, budget.tenantId));
     const m = (amountMinor: number) => ({ amountMinor, currency: ccy });
     const available = availableOf(b, posting.control.basis);
     const consumes = opts.consumesAvailable !== false;
@@ -81,7 +101,7 @@ export class BudgetImpactService {
       thisRequest: m(thisMinor),
       availableBefore: m(before),
       availableAfter: m(after),
-      companyWideAvailable: m(b.authorized - b.pre_encumbered - b.encumbered - b.actual),
+      companyWideAvailable: { amountMinor: companyWide, currency: tenant.reportingCurrency },
       runRateMonthly: m(runRate),
       projectedYearEnd: m(projected),
       utilizationAfterPct: pct(b.authorized - after, b.authorized),

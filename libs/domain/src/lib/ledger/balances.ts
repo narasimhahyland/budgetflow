@@ -1,3 +1,4 @@
+import { formatAmount } from '../money/currency';
 import { err, ok, type Result } from '../result';
 import {
   BUDGET_BUCKETS,
@@ -102,7 +103,7 @@ export function checkAllocation(
   if (requestedMinor > available) {
     return err(
       'OVER_ALLOCATION',
-      `Only ${available} ${currency} minor units are available to allocate; ${requestedMinor} were requested.`,
+      `Only ${formatAmount(available, currency)} is available to allocate; ${formatAmount(requestedMinor, currency)} was asked for. Lower the amount or ask for an increase.`,
       {
         availableMinor: available,
         requestedMinor,

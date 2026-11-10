@@ -33,11 +33,27 @@
         <button mat-flat-button type="button" (click)="activate()">Activate</button>
       }
       @if (can(b, 'budget.request_increase')) {
+        <!-- A frozen or zeroed budget refuses increase requests; the banner below says why. -->
         <button
           mat-stroked-button
           type="button"
           (click)="run('increase')"
           data-testid="request-increase"
+          [disabled]="b.status === 'frozen' || b.status === 'set_to_zero'"
+          [attr.aria-describedby]="
+            b.status === 'frozen'
+              ? 'frozen-reason'
+              : b.status === 'set_to_zero'
+                ? 'zero-reason'
+                : null
+          "
+          [attr.title]="
+            b.status === 'frozen'
+              ? 'Increase requests are paused while the budget is frozen'
+              : b.status === 'set_to_zero'
+                ? 'Increase requests are closed: the budget is set to zero'
+                : null
+          "
         >
           <mat-icon svgIcon="trending_up" aria-hidden="true" />Request increase
         </button>
@@ -131,15 +147,18 @@
   @if (b.status === 'frozen') {
     <sat-banner variant="info" data-testid="frozen-banner"
       ><sat-banner-message
-        >Frozen: new requests and allocations are blocked. Existing commitments can still
-        complete.</sat-banner-message
+        ><span id="frozen-reason"
+          >Frozen: new requests and allocations are blocked. Existing commitments can still
+          complete.</span
+        ></sat-banner-message
       ></sat-banner
     >
   } @else if (b.status === 'set_to_zero') {
     <sat-banner variant="important" data-testid="zero-banner"
       ><sat-banner-message
-        >Set to zero: no new spending is accepted. Approved commitments can still be
-        paid.</sat-banner-message
+        ><span id="zero-reason"
+          >Set to zero: no new spending is accepted. Approved commitments can still be paid.</span
+        ></sat-banner-message
       ></sat-banner
     >
   }
