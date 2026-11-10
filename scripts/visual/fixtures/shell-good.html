@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture: shell with an inner scroller</title>
+    <style>
+      /* Like the app shell: the document never scrolls, <main> does. */
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+      }
+      .drawer {
+        position: fixed;
+        inset-block: 0;
+        left: -320px;
+        width: 300px;
+        overflow-y: auto;
+      }
+      .drawer div {
+        height: 4000px;
+      }
+      main {
+        height: 100%;
+        overflow-y: auto;
+        padding: 16px 24px;
+        box-sizing: border-box;
+      }
+      .tall {
+        height: 1800px;
+      }
+      .wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 1600px;
+      }
+      #end {
+        height: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="drawer" aria-label="Primary"><div>Navigation</div></nav>
+    <main>
+      <h1>Shell page</h1>
+      <div id="slot"></div>
+      <label>Search <input id="search" /></label>
+      <div class="wrap">
+        <table>
+          <tr>
+            <td>A wide table scrolls inside its own wrapper on purpose.</td>
+          </tr>
+        </table>
+      </div>
+      <div class="tall"></div>
+      <p id="end">End of page</p>
+    </main>
+    <script>
+      // Filtering pushes content down as a direct result of typing: not layout instability.
+      document.getElementById('search').addEventListener('input', () => {
+        const slot = document.getElementById('slot');
+        if (!slot.firstChild) {
+          const banner = document.createElement('p');
+          banner.style.height = '200px';
+          banner.textContent = 'Results filtered';
+          slot.appendChild(banner);
+        }
+      });
+    </script>
+  </body>
+</html>

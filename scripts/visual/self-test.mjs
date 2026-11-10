@@ -153,6 +153,65 @@ try {
       ),
   );
 
+  // Shell-style pages: the document never scrolls, <main> does (as in the app shell).
+  writeFileSync(
+    path.join(work, 'shell-screens.json'),
+    JSON.stringify({
+      baseURL: base,
+      screens: [
+        {
+          id: '003-shell',
+          path: '/shell-good.html',
+          states: [
+            { state: 'default', waitFor: 'h1' },
+            { state: 'typed', waitFor: 'h1', actions: [{ fill: ['#search', 'x'] }] },
+          ],
+        },
+        {
+          id: '004-clipped',
+          path: '/shell-bad.html',
+          states: [{ state: 'default', waitFor: 'h1' }],
+        },
+      ],
+    }),
+  );
+  await run('capture.mjs', [
+    '--screens',
+    'shell-screens.json',
+    '--out',
+    'capture-shell',
+    '--viewports',
+    'desktop',
+    '--themes',
+    'light',
+    '--quiet',
+  ]);
+  const shell = json(path.join(work, 'capture-shell', 'report.json'))?.results ?? [];
+  const shellPage = shell.filter((r) => r.id === '003-shell');
+  const pngHeight = (f) => (existsSync(f) ? readFileSync(f).readUInt32BE(20) : 0);
+  const fullHeight = shellPage.find((r) => r.state === 'default');
+  const height = fullHeight ? pngHeight(path.resolve(work, fullHeight.file)) : 0;
+  check(
+    "captures what the page's inner scroller hides below the fold (no blank tail)",
+    height > 1800 && height < 2600,
+    `screenshot height ${height}px`,
+  );
+  check(
+    'a table scrolling in its own wrapper, an off-canvas drawer and a shift caused by typing are not findings',
+    shellPage.length === 2 && shellPage.every((r) => r.findings.length === 0),
+    JSON.stringify(shellPage.flatMap((r) => r.findings)),
+  );
+  const clipped = shell.find((r) => r.id === '004-clipped');
+  check(
+    'detects a table clipped by its card inside the inner scroller',
+    Boolean(
+      clipped?.findings.some(
+        (f) => f.type === 'overflow' && JSON.stringify(f.detail ?? '').includes('clips'),
+      ),
+    ),
+    JSON.stringify(clipped?.findings ?? []),
+  );
+
   // light only by default (dark theme deferred); the run above proves dark still works when enabled
   const light = await run('capture.mjs', [
     '--screens',
