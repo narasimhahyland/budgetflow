@@ -47,12 +47,13 @@ async function closeOpen(): Promise<void> {
 test.describe('break-glass access (112) as the Organization Admin', () => {
   test.use({ storageState: authFile('org-admin') });
 
-  test.beforeEach(async ({}, info) => {
-    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+  test.beforeEach(async () => {
+    const project = test.info().project.name;
+    test.skip(!!desktopOnly(project), desktopOnly(project));
     await closeOpen();
   });
-  test.afterEach(async ({}, info) => {
-    if (!desktopOnly(info.project.name)) await closeOpen();
+  test.afterEach(async () => {
+    if (!desktopOnly(test.info().project.name)) await closeOpen();
   });
 
   test('reviews a request, approves it, sees the audited reads and revokes it', async ({
