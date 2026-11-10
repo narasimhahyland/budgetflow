@@ -1,0 +1,274 @@
+// Home's executive overview. Shared page pieces (.bf-card, .bf-page__*) live in ./page.scss.
+
+.bf-visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// 1. The answer line ---------------------------------------------------------------------------
+
+// The sections load independently, so the skeletons reserve about the height their content takes:
+// without it every arrival pushes the page down and the capture tool's layout-shift check fails.
+.bf-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+  min-height: 124px;
+  padding: 16px 20px;
+  border-left: 4px solid var(--mat-sys-primary);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.bf-answer__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bf-answer__line {
+  margin: 0;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-title-medium);
+}
+
+.bf-answer__context {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+// 2. KPI tiles ---------------------------------------------------------------------------------
+
+.bf-kpis {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+.bf-kpis bf-kpi-tile {
+  min-height: 196px;
+}
+
+.bf-attention__more {
+  padding: 8px 12px 12px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+// 3 and 4 side by side on a wide screen, stacked below it ---------------------------------------
+
+.bf-home__columns {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.bf-card__pad {
+  padding: 0 20px 16px;
+}
+
+.bf-count {
+  display: inline-block;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--sat-sys-warning-container);
+  color: var(--sat-sys-on-warning-container);
+  font: var(--mat-sys-label-medium);
+  text-align: center;
+}
+
+// 3. Needs attention ---------------------------------------------------------------------------
+
+.bf-attention {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bf-attention__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.bf-attention__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bf-attention__name {
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-title-small);
+  text-decoration: none;
+}
+
+.bf-attention__name:hover {
+  color: var(--mat-sys-primary);
+  text-decoration: underline;
+}
+
+.bf-attention__owner {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-attention__reasons {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+}
+
+.bf-attention__figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 4px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-attention__available {
+  color: var(--sat-sys-on-success-container);
+}
+
+// 4. Waiting on your decision -------------------------------------------------------------------
+
+.bf-waiting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: start;
+}
+
+.bf-waiting__count {
+  margin: 0;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-display-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-waiting__amount {
+  margin: 0;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+}
+
+.bf-waiting__age,
+.bf-waiting__clear {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+// 5. The budgets table as a tool ----------------------------------------------------------------
+
+.bf-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 0 20px 8px;
+}
+
+.bf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.bf-chip {
+  padding: 6px 12px;
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: var(--mat-sys-corner-full);
+  background: transparent;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+  cursor: pointer;
+}
+
+.bf-chip--on {
+  border-color: var(--mat-sys-primary);
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+.bf-cell__link {
+  display: block;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  text-decoration: none;
+}
+
+.bf-cell__link:hover {
+  color: var(--mat-sys-primary);
+  text-decoration: underline;
+}
+
+.bf-cell__available {
+  color: var(--sat-sys-on-success-container);
+}
+
+/* Budget code as a small monospace chip beside the name (design-system dense table). */
+.bf-code {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 1px 6px;
+  border-radius: var(--mat-sys-corner-extra-small);
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-small);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Owner with initials avatar, as in the design's dense table. */
+.bf-owner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bf-owner__avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  font: var(--mat-sys-label-small);
+  font-weight: 700;
+}
+
+@media (max-width: 1199px) {
+  .bf-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bf-home__columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 599px) {
+  .bf-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

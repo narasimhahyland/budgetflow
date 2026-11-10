@@ -44,10 +44,15 @@ test.describe('regional manager in Bengaluru', () => {
     )!;
     expect(india.balances.available.currency).toBe('USD');
     await page.goto('/');
+    // The Home budget table paginates; search brings the budget onto the visible page.
+    await page.getByTestId('budget-search').fill('India Region');
     const row = page.getByRole('row').filter({ hasText: 'India Region' });
     await expect(row).toContainText(money(india.balances.available.amountMinor, 'USD'));
-    await expect(row).toContainText('GMT+5:30');
-    await expect(page.getByText('Times are shown in Asia/Kolkata.')).toBeVisible();
+    // Home's one timestamp is the "Computed ..." line in the overview's context block; the budget
+    // list dropped its Created column when Home became the executive overview, so the zone label
+    // is asserted where the page still renders a timestamp.
+    await expect(page.locator('.bf-answer [data-testid=relative-time]')).toContainText('GMT+5:30');
+    await expect(page.getByText('timestamps on this page are shown in Asia/Kolkata')).toBeVisible();
     // The header chips give way to the page title on phones.
     if (testInfo.project.name !== 'mobile') {
       await expect(page.getByLabel('Reporting currency USD')).toBeVisible();
@@ -100,6 +105,8 @@ for (const w of WESTERN) {
     }, testInfo) => {
       const b = (await budgetsFor(w.role, request)).find((x) => x.id === w.budget)!;
       await page.goto('/');
+      // The Home budget table paginates; search brings the budget onto the visible page.
+      await page.getByTestId('budget-search').fill(b.name);
       const row = page.getByRole('row').filter({ hasText: b.name });
       await expect(row).toContainText(
         money(b.balances.available.amountMinor, b.balances.available.currency),
@@ -107,9 +114,14 @@ for (const w of WESTERN) {
       if (b.balances.available.currency !== 'USD') {
         await expect(row).toContainText(money(b.balances.availableReporting.amountMinor, 'USD'));
       }
-      await expect(page.getByText(`Times are shown in ${w.timezone}.`)).toBeVisible();
+      await expect(
+        page.getByText(`timestamps on this page are shown in ${w.timezone}`),
+      ).toBeVisible();
       if (testInfo.project.name !== 'mobile') {
-        await expect(row).toContainText(w.offset);
+        // See the note above: the zone label now rides on the overview's "Computed ..." timestamp.
+        await expect(page.locator('.bf-answer [data-testid=relative-time]')).toContainText(
+          w.offset,
+        );
         await expect(page.getByLabel('Fiscal year FY2026')).toBeVisible();
       }
     });

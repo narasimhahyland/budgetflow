@@ -1,0 +1,12 @@
+{
+  "request": "/api/dashboards/health",
+  "status": 403,
+  "body": {
+    "type": "urn:budgetflow:problem:forbidden",
+    "title": "Forbidden",
+    "status": 403,
+    "code": "FORBIDDEN",
+    "detail": "Budget health is for finance roles and budget owners.",
+    "instance": "/api/dashboards/health"
+  }
+}

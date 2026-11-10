@@ -1,0 +1,14 @@
+{
+  "request": "/api/approvals/inbox?tab=assigned",
+  "status": 200,
+  "body": {
+    "items": [],
+    "counts": {
+      "assigned": 0,
+      "delegated": 0,
+      "escalated": 0,
+      "completed": 0
+    },
+    "nextCursor": null
+  }
+}
