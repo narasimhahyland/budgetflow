@@ -17,6 +17,7 @@ import {
   FORBIDDEN_FILES,
   INTERNAL_PATTERNS,
   SECRET_PATTERNS,
+  findSecrets,
   mask,
 } from './secret-patterns.mjs';
 
@@ -26,7 +27,9 @@ const SKIP_DIRS = new Set(['node_modules', '.git', '.nx', '.angular', 'coverage'
 const args = process.argv.slice(2);
 const has = (flag) => args.includes(flag);
 const quiet = has('--quiet');
-const patterns = has('--no-internal') ? SECRET_PATTERNS : [...SECRET_PATTERNS, ...INTERNAL_PATTERNS];
+const patterns = has('--no-internal')
+  ? SECRET_PATTERNS
+  : [...SECRET_PATTERNS, ...INTERNAL_PATTERNS];
 
 function git(argv) {
   return execFileSync('git', argv, { encoding: 'buffer', maxBuffer: 256 * 1024 * 1024 });
@@ -57,13 +60,19 @@ function collectTargets() {
   if (has('--dir')) {
     const dir = args[args.indexOf('--dir') + 1];
     if (!dir) throw new Error('--dir needs a path');
-    return walk(dir).map((p) => ({ path: relative(process.cwd(), p), read: () => readFileSync(p) }));
+    return walk(dir).map((p) => ({
+      path: relative(process.cwd(), p),
+      read: () => readFileSync(p),
+    }));
   }
   process.chdir(git(['rev-parse', '--show-toplevel']).toString().trim());
   if (has('--all')) {
     const tracked = splitZ(git(['ls-files', '-z']));
     const untracked = splitZ(git(['ls-files', '-z', '--others', '--exclude-standard']));
-    return [...new Set([...tracked, ...untracked])].map((p) => ({ path: p, read: () => readFileSync(p) }));
+    return [...new Set([...tracked, ...untracked])].map((p) => ({
+      path: p,
+      read: () => readFileSync(p),
+    }));
   }
   if (has('--worktree')) {
     let names;
@@ -106,9 +115,8 @@ function scan(targets) {
     const lines = buf.toString('utf8').split(/\r?\n/);
     lines.forEach((text, i) => {
       if (text.includes(ALLOW_MARKER)) return;
-      for (const { id, re } of patterns) {
-        const m = re.exec(text);
-        if (m) findings.push({ path, line: i + 1, id, preview: mask(m[0]) });
+      for (const hit of findSecrets(text, patterns)) {
+        findings.push({ path, line: i + 1, id: hit.id, preview: mask(hit.match) });
       }
     });
   }
