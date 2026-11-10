@@ -384,7 +384,7 @@
               <p satEmptyStateDescription>Change the search or the filters to see more.</p>
             </sat-empty-state>
           } @else {
-            <p class="bf-card__hint bf-card__pad">
+            <p class="bf-card__hint bf-card__pad" data-testid="budget-count">
               {{ rows().length }} of {{ budgets.items().length }} budgets match.
               @if (budgets.truncated()) {
                 Showing the first {{ budgets.items().length }}; refine the search to narrow it.
