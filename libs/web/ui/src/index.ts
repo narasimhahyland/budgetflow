@@ -1,4 +1,5 @@
 export * from './lib/money';
+export * from './lib/kpi-tile';
 export * from './lib/date-time';
 export * from './lib/budget-status';
 export * from './lib/spend-status';

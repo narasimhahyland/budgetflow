@@ -1,0 +1,163 @@
+{
+  "request": "/api/dashboards/health",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-10T03:30:45.031Z",
+    "asOf": "2026-11-16",
+    "currency": "USD",
+    "scope": {
+      "tenantWide": false,
+      "label": "Europe Region and below",
+      "budgetIds": 3,
+      "note": "Showing budgets you can see."
+    },
+    "thresholds": {
+      "paceWatchBps": 11000,
+      "paceAtRiskBps": 12500,
+      "forecastWatchBps": 10000,
+      "forecastAtRiskBps": 10500,
+      "hygieneDays": 30,
+      "hygieneAtRiskMinor": 100000,
+      "unusedWatchBps": 2000,
+      "unusedDaysLeft": 90
+    },
+    "summary": {
+      "budgets": 3,
+      "healthy": 1,
+      "watch": 2,
+      "atRisk": 0
+    },
+    "matrix": [
+      {
+        "key": "70000000-0000-4000-8000-000000000004",
+        "label": "Europe Region",
+        "orgUnitId": "30000000-0000-4000-8000-000000000005",
+        "budgetId": "70000000-0000-4000-8000-000000000004",
+        "cells": {
+          "pace": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "forecast": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "controls": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "hygiene": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "unused": {
+            "watch": 2,
+            "atRisk": 0
+          }
+        }
+      }
+    ],
+    "rows": [
+      {
+        "budgetId": "70000000-0000-4000-8000-000000000004",
+        "name": "Europe Region",
+        "ownerName": "Lena Fischer",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 29,760.00 would lapse (99.2%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 3000000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 24000,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 2976000,
+          "currency": "USD"
+        },
+        "utilizationBps": 28,
+        "pacedToDateBps": 91,
+        "lastActivityAt": "2026-11-10T03:30:16.450Z"
+      },
+      {
+        "budgetId": "71000000-0000-4000-8000-000000000003",
+        "name": "Berlin Events",
+        "ownerName": "Lena Fischer",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 8,000.00 would lapse (100%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 800000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 800000,
+          "currency": "USD"
+        },
+        "utilizationBps": 0,
+        "pacedToDateBps": 0,
+        "lastActivityAt": "2026-11-10T03:30:16.016Z"
+      }
+    ],
+    "reconciliation": {
+      "source": "ledger_balances",
+      "budgetsCounted": 3,
+      "authorized": {
+        "amountMinor": 3000000,
+        "currency": "USD"
+      },
+      "held": {
+        "amountMinor": 15652,
+        "currency": "USD"
+      },
+      "preEncumbered": {
+        "amountMinor": 0,
+        "currency": "USD"
+      },
+      "encumbered": {
+        "amountMinor": 8348,
+        "currency": "USD"
+      },
+      "actual": {
+        "amountMinor": 0,
+        "currency": "USD"
+      },
+      "accrued": {
+        "amountMinor": 0,
+        "currency": "USD"
+      },
+      "available": {
+        "amountMinor": 2976000,
+        "currency": "USD"
+      },
+      "ties": true,
+      "differences": []
+    }
+  }
+}

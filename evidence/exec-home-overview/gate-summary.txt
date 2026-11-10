@@ -1,0 +1,23 @@
+PASS|secrets|5s
+PASS|lint|4s
+PASS|styles|3s
+PASS|satori|35s
+PASS|typecheck|17s
+PASS|build|1s
+PASS|openapi|1s
+PASS|db|1s
+PASS|stack|53s
+PASS|functional-api|151s
+PASS|reseed-e2e|51s
+
+# Not run to completion in this worktree, and why (see evidence/exec-home-overview/README.md):
+# functional-e2e | STOPPED after ~80 min. The desktop journey project passed 264/264 on a fresh
+#   seed (functional/journey-desktop.log); the gate's three-viewport pass was abandoned because
+#   this machine was running six BudgetFlow stacks (42 containers, load average 29) and another
+#   worktree's Playwright container had held ~140% CPU for nearly four hours. Nx buffers the task
+#   log, so the run shows no progress until it ends.
+# visual | run directly rather than through `npm run e2e:visual`: scripts/visual/pw-docker.sh
+#   forwards only BASE_URL, CI, HOME and BF_E2E_*, so inside the pinned image BF_KEYCLOAK_PORT and
+#   BF_API_PORT fall back to the defaults, which belong to a different stack on this machine. The
+#   24 baselines this change touches were recorded and then re-compared clean in the pinned image
+#   with --no-deps and BASE_URL pointing at this worktree's web port.

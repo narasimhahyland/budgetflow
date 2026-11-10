@@ -1,0 +1,44 @@
+{
+  "request": "/api/budgets/summary",
+  "status": 200,
+  "body": {
+    "scope": "tenant",
+    "fiscalYearId": null,
+    "rootId": null,
+    "currency": "USD",
+    "authorized": {
+      "amountMinor": 10300000,
+      "currency": "USD"
+    },
+    "held": {
+      "amountMinor": 330000,
+      "currency": "USD"
+    },
+    "preEncumbered": {
+      "amountMinor": 21600,
+      "currency": "USD"
+    },
+    "encumbered": {
+      "amountMinor": 750577,
+      "currency": "USD"
+    },
+    "actual": {
+      "amountMinor": 733802,
+      "currency": "USD"
+    },
+    "available": {
+      "amountMinor": 8464021,
+      "currency": "USD"
+    },
+    "utilizationBps": 1441,
+    "budgetCount": 11,
+    "byStatus": {
+      "active": 9,
+      "frozen": 1,
+      "set_to_zero": 1
+    },
+    "frozenCount": 1,
+    "setToZeroCount": 1,
+    "overThresholdCount": 1
+  }
+}

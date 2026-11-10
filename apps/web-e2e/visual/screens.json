@@ -82,6 +82,36 @@
       ]
     },
     {
+      "id": "000c-home-executive-overview",
+      "path": "/",
+      "role": "ceo",
+      "waitFor": "[data-testid=kpis]",
+      "states": [
+        {
+          "state": "executive-default"
+        },
+        {
+          "state": "finance-controller",
+          "role": "finance-controller"
+        },
+        {
+          "state": "department-head-scope",
+          "role": "department-head"
+        },
+        {
+          "state": "table-filtered",
+          "actions": [
+            {
+              "click": "role=button[name=\"At risk\"]"
+            },
+            {
+              "waitFor": "text=1 of 11 budgets match."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "000b-sign-in-pages",
       "path": "/signed-out",
       "waitFor": "role=heading[name=\"You have signed out\"]",

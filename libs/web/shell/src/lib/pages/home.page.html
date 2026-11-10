@@ -13,23 +13,321 @@
     </sat-banner-message>
   </sat-banner>
 } @else if (canSeeBudgets()) {
+  <!-- 1. The answer: where the year stands, in one sentence from the API's own figures. -->
+  <section class="bf-answer" aria-labelledby="bf-answer-title">
+    <h2 class="bf-visually-hidden" id="bf-answer-title">Where the year stands</h2>
+    @if (overviewLoading()) {
+      <div
+        class="bf-answer__loading"
+        aria-busy="true"
+        aria-label="Working out where the year stands"
+      >
+        <sat-ghost [height]="28" fitContainer />
+        <sat-ghost [height]="16" fitContainer />
+      </div>
+    } @else {
+      <p class="bf-answer__line" data-testid="answer-line">{{ answer() }}</p>
+      <p class="bf-answer__context">
+        {{ scopeLabel() }}
+        @if (fiscalYear()) {
+          · {{ fiscalYear()?.label }}
+        }
+        @if (buckets()) {
+          · reporting in {{ buckets()?.currency }}
+        }
+        · figures as of
+        <span data-testid="as-of">{{ asOf() | bfDate: 'UTC' }}</span>
+      </p>
+      @if (generatedAt()) {
+        <p class="bf-answer__context">
+          Computed
+          <span data-testid="relative-time">{{
+            generatedAt() | bfDateTime: session.timezone()
+          }}</span
+          >; timestamps on this page are shown in {{ session.timezone() }}.
+        </p>
+      }
+      @if (scopeNote()) {
+        <p class="bf-answer__context">{{ scopeNote() }}</p>
+      }
+      @if (fxNote()) {
+        <p class="bf-answer__context" data-testid="fx-note">{{ fxNote() }}</p>
+      }
+    }
+  </section>
+
+  <!-- 2. The four buckets, each with the denominator that makes it judgeable. -->
+  <section class="bf-card bf-card--padded" aria-labelledby="bf-position-title">
+    <h2 class="bf-card__title" id="bf-position-title">Budget position</h2>
+    @switch (overview.summary.state()) {
+      @case ('error') {
+        <sat-banner variant="warning">
+          <sat-banner-message>
+            We could not load the budget position.
+            {{ overview.summary.problem()?.detail ?? 'Check your connection and try again.' }}
+          </sat-banner-message>
+          <button mat-button satBannerAction type="button" (click)="retrySummary()">
+            Try again
+          </button>
+        </sat-banner>
+      }
+      @case ('ready') {
+        @if (buckets()?.authorized === 0) {
+          <sat-empty-state>
+            <h3 satEmptyStateHeadline>No budget figures yet</h3>
+            <p satEmptyStateDescription>
+              Nothing is authorized in your scope for
+              {{ fiscalYear()?.label ?? 'this fiscal year' }} yet. Figures appear here once a plan
+              version is applied.
+            </p>
+          </sat-empty-state>
+        } @else {
+          <div class="bf-kpis" data-testid="kpis">
+            <bf-kpi-tile
+              label="Authorized"
+              icon="bar_chart"
+              [amountMinor]="buckets()!.authorized"
+              [currency]="buckets()!.currency"
+              [shareBps]="10000"
+              shareOfLabel="Overall cap"
+              [delta]="controlsDelta()"
+            />
+            <bf-kpi-tile
+              label="Committed"
+              icon="clock"
+              [amountMinor]="buckets()!.committed"
+              [currency]="buckets()!.currency"
+              [shareBps]="committedBps()"
+              tone="warning"
+              shareOfLabel="Encumbered + pre-encumbered + held"
+              subTitle="Approved and pending commitments that are not yet spent, as a share of authorized."
+            />
+            <bf-kpi-tile
+              label="Actual"
+              icon="check"
+              [amountMinor]="buckets()!.actual"
+              [currency]="buckets()!.currency"
+              [shareBps]="actualBps()"
+              tone="tertiary"
+              shareOfLabel="Disbursed & matched"
+              subTitle="Money already spent, as a share of authorized."
+              [delta]="pacingDelta()"
+            />
+            <bf-kpi-tile
+              label="Available"
+              icon="currency_dollar"
+              [amountMinor]="buckets()!.available"
+              [currency]="buckets()!.currency"
+              [shareBps]="availableBps()"
+              tone="success"
+              [hero]="true"
+              shareOfLabel="Company-wide uncommitted"
+              subTitle="Authorized less held, pre-encumbered, encumbered and actual, child allocations counted once."
+            />
+          </div>
+        }
+      }
+      @default {
+        <div class="bf-kpis" aria-busy="true" aria-label="Loading the budget position">
+          <sat-ghost [height]="196" fitContainer />
+          <sat-ghost [height]="196" fitContainer />
+          <sat-ghost [height]="196" fitContainer />
+          <sat-ghost [height]="196" fitContainer />
+        </div>
+      }
+    }
+  </section>
+
+  <div class="bf-home__columns">
+    <!-- 3. What to do about it, worst first: the reasons and thresholds are the API's own. -->
+    @if (canSeeHealth() && !overview.health.absent()) {
+      <section class="bf-card" aria-labelledby="bf-attention-title">
+        <div class="bf-card__header">
+          <h2 class="bf-card__title" id="bf-attention-title">
+            Needs attention
+            @if (overview.health.state() === 'ready' && attentionCount()) {
+              <span class="bf-count">{{ attentionCount() }}</span>
+            }
+          </h2>
+          <p class="bf-card__hint">
+            Worst first, with the reason BudgetFlow found it. Thresholds are your company's
+            settings.
+          </p>
+        </div>
+        @switch (overview.health.state()) {
+          @case ('error') {
+            <div class="bf-card__pad">
+              <sat-banner variant="warning">
+                <sat-banner-message>
+                  We could not load the health checks.
+                  {{ overview.health.problem()?.detail ?? 'Check your connection and try again.' }}
+                </sat-banner-message>
+                <button mat-button satBannerAction type="button" (click)="retryHealth()">
+                  Try again
+                </button>
+              </sat-banner>
+            </div>
+          }
+          @case ('ready') {
+            @if (attentionRows().length === 0) {
+              <sat-empty-state>
+                <h3 satEmptyStateHeadline>Nothing needs attention</h3>
+                <p satEmptyStateDescription>
+                  Every budget you can see is pacing as planned, with no control or hygiene finding.
+                </p>
+              </sat-empty-state>
+            } @else {
+              <ul class="bf-attention" data-testid="attention-list">
+                @for (row of attentionRows(); track row.budgetId) {
+                  <li class="bf-attention__item">
+                    <div class="bf-attention__head">
+                      <a class="bf-attention__name" [routerLink]="['/budgets', row.budgetId]">{{
+                        row.name
+                      }}</a>
+                      <sat-status-tag [status]="levelTone(row.level)">{{
+                        levelLabel(row.level)
+                      }}</sat-status-tag>
+                    </div>
+                    <p class="bf-attention__owner">
+                      {{ row.ownerName ?? 'No owner' }} ·
+                      {{ row.utilizationBps / 100 | number: '1.0-1' }}% used,
+                      {{ row.pacedToDateBps / 100 | number: '1.0-1' }}% of the plan to date
+                    </p>
+                    <ul class="bf-attention__reasons">
+                      @for (reason of row.reasons; track reason.check) {
+                        <li>{{ reason.text }}</li>
+                      }
+                    </ul>
+                    <p class="bf-attention__figures">
+                      <span
+                        >Committed
+                        <bf-money
+                          [amountMinor]="row.committed.amountMinor"
+                          [currency]="row.committed.currency"
+                      /></span>
+                      <span
+                        >Actual
+                        <bf-money
+                          [amountMinor]="row.actual.amountMinor"
+                          [currency]="row.actual.currency"
+                      /></span>
+                      <span class="bf-attention__available"
+                        >Available company-wide
+                        <bf-money
+                          [amountMinor]="row.available.amountMinor"
+                          [currency]="row.available.currency"
+                      /></span>
+                      <span
+                        >of
+                        <bf-money
+                          [amountMinor]="row.authorized.amountMinor"
+                          [currency]="row.authorized.currency"
+                      /></span>
+                    </p>
+                  </li>
+                }
+              </ul>
+              <div class="bf-attention__more">
+                <a mat-button routerLink="/reports/health">
+                  @if (attentionHidden()) {
+                    See all {{ attentionCount() }} in Budget health
+                  } @else {
+                    Open Budget health
+                  }
+                </a>
+              </div>
+            }
+          }
+          @default {
+            <div class="bf-card__loading" aria-busy="true" aria-label="Loading the health checks">
+              <sat-ghost [height]="116" fitContainer />
+              <sat-ghost [height]="116" fitContainer />
+              <sat-ghost [height]="116" fitContainer />
+              <sat-ghost [height]="116" fitContainer />
+              <sat-ghost [height]="116" fitContainer />
+            </div>
+          }
+        }
+      </section>
+    }
+
+    <!-- 4. What waits on this person, with the age that makes it urgent. -->
+    @if (!overview.inbox.absent()) {
+      <section
+        class="bf-card bf-card--padded bf-waiting"
+        aria-labelledby="bf-waiting-title"
+        data-testid="waiting"
+      >
+        <h2 class="bf-card__title" id="bf-waiting-title">Waiting on your decision</h2>
+        @switch (overview.inbox.state()) {
+          @case ('error') {
+            <sat-banner variant="warning">
+              <sat-banner-message>
+                We could not load your approvals.
+                {{ overview.inbox.problem()?.detail ?? 'Check your connection and try again.' }}
+              </sat-banner-message>
+              <button mat-button satBannerAction type="button" (click)="retryInbox()">
+                Try again
+              </button>
+            </sat-banner>
+          }
+          @case ('ready') {
+            @if (waiting()!.count === 0) {
+              <p class="bf-waiting__clear" data-testid="waiting-count">
+                Nothing waits on you right now.
+              </p>
+            } @else {
+              <p class="bf-waiting__count" data-testid="waiting-count">{{ waiting()!.count }}</p>
+              <p class="bf-waiting__amount">{{ waitingText() }}</p>
+              @if (waiting()!.oldestAt) {
+                <p class="bf-waiting__age" data-testid="relative-time">
+                  Oldest since {{ waiting()!.oldestAt | bfDate: session.timezone() }}
+                </p>
+              }
+              @if (waiting()!.escalated) {
+                <sat-banner variant="warning">
+                  <sat-banner-message
+                    >{{ waiting()!.escalated }} escalated to you after a missed
+                    deadline.</sat-banner-message
+                  >
+                </sat-banner>
+              }
+              <a mat-flat-button routerLink="/approvals">Open approval inbox</a>
+            }
+          }
+          @default {
+            <div aria-busy="true" aria-label="Loading your approvals">
+              <sat-ghost [height]="56" fitContainer />
+            </div>
+          }
+        }
+      </section>
+    }
+  </div>
+
+  <!-- 5. The full list, demoted to a tool: search, sort, filter, open. -->
   <section class="bf-card" aria-labelledby="bf-budgets-title">
     <div class="bf-card__header">
-      <h2 class="bf-card__title" id="bf-budgets-title">Budgets you can see</h2>
+      <h2 class="bf-card__title" id="bf-budgets-title">All budgets you can see</h2>
       <p class="bf-card__hint">
-        Available in each budget's currency, with the {{ me()?.reportingCurrency }} equivalent at
-        the locked plan rate. Times are shown in {{ session.timezone() }}.
+        Amounts in each budget's own currency. Available here is each budget's own control rules,
+        which can differ from the company-wide Available above. Utilization is approved commitments
+        and actuals against authorized; pending requests are counted in Committed, not here.
       </p>
     </div>
     @switch (budgets.state()) {
       @case ('error') {
-        <sat-banner variant="warning">
-          <sat-banner-message>
-            We could not load your budgets.
-            {{ budgets.problem()?.detail ?? 'Check your connection and try again.' }}
-          </sat-banner-message>
-          <button mat-button satBannerAction type="button" (click)="retry()">Try again</button>
-        </sat-banner>
+        <div class="bf-card__pad">
+          <sat-banner variant="warning">
+            <sat-banner-message>
+              We could not load your budgets.
+              {{ budgets.problem()?.detail ?? 'Check your connection and try again.' }}
+            </sat-banner-message>
+            <button mat-button satBannerAction type="button" (click)="retryBudgets()">
+              Try again
+            </button>
+          </sat-banner>
+        </div>
       }
       @case ('ready') {
         @if (budgets.items().length === 0) {
@@ -38,50 +336,155 @@
             <p satEmptyStateDescription>Budgets you own or that are shared with you appear here.</p>
           </sat-empty-state>
         } @else {
-          <div class="bf-table-scroll">
-            <table mat-table [dataSource]="budgets.items()" aria-label="Budgets you can see">
-              <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Budget</th>
-                <td mat-cell *matCellDef="let b">
-                  <span class="bf-cell__primary">{{ b.name }}</span>
-                  @if (b.code) {
-                    <span class="bf-cell__secondary">{{ b.code }}</span>
-                  }
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let b"><bf-budget-status [status]="b.status" /></td>
-              </ng-container>
-              <ng-container matColumnDef="available">
-                <th mat-header-cell *matHeaderCellDef class="bf-num">Available</th>
-                <td mat-cell *matCellDef="let b" class="bf-num">
-                  <bf-money
-                    class="bf-cell__primary"
-                    [amountMinor]="b.balances.available.amountMinor"
-                    [currency]="b.balances.available.currency"
-                  />
-                  @if (b.balances.available.currency !== b.balances.availableReporting.currency) {
-                    <span class="bf-cell__secondary">
-                      Reporting
-                      <bf-money
-                        [amountMinor]="b.balances.availableReporting.amountMinor"
-                        [currency]="b.balances.availableReporting.currency"
-                      />
-                    </span>
-                  }
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef class="bf-col--wide">Created</th>
-                <td mat-cell *matCellDef="let b" class="bf-col--wide" data-testid="relative-time">
-                  {{ b.createdAt | bfDateTime: session.timezone() }}
-                </td>
-              </ng-container>
-              <tr mat-header-row *matHeaderRowDef="columns"></tr>
-              <tr mat-row *matRowDef="let row; columns: columns"></tr>
-            </table>
+          <div class="bf-filters">
+            <mat-form-field subscriptSizing="dynamic">
+              <mat-label>Search name, code or owner</mat-label>
+              <input
+                matInput
+                [ngModel]="q()"
+                (ngModelChange)="q.set($event)"
+                data-testid="budget-search"
+              />
+            </mat-form-field>
+            <div class="bf-chips" role="group" aria-label="Filter by status">
+              @for (f of statusFilters; track f.key) {
+                <button
+                  type="button"
+                  class="bf-chip"
+                  [class.bf-chip--on]="statusFilter() === f.key"
+                  [attr.aria-pressed]="statusFilter() === f.key"
+                  (click)="statusFilter.set(f.key)"
+                >
+                  {{ f.label }}
+                </button>
+              }
+            </div>
+            @if (healthFilterAvailable()) {
+              <div class="bf-chips" role="group" aria-label="Filter by health">
+                @for (f of healthFilters; track f.key) {
+                  <button
+                    type="button"
+                    class="bf-chip"
+                    [class.bf-chip--on]="healthFilter() === f.key"
+                    [attr.aria-pressed]="healthFilter() === f.key"
+                    (click)="healthFilter.set(f.key)"
+                  >
+                    {{ f.label }}
+                  </button>
+                }
+              </div>
+            }
+            @if (filtersApplied()) {
+              <button mat-button type="button" (click)="clearFilters()">Clear filters</button>
+            }
           </div>
+          @if (rows().length === 0) {
+            <sat-empty-state>
+              <h3 satEmptyStateHeadline>No budgets match</h3>
+              <p satEmptyStateDescription>Change the search or the filters to see more.</p>
+            </sat-empty-state>
+          } @else {
+            <p class="bf-card__hint bf-card__pad">
+              {{ rows().length }} of {{ budgets.items().length }} budgets match.
+              @if (budgets.truncated()) {
+                Showing the first {{ budgets.items().length }}; refine the search to narrow it.
+              }
+            </p>
+            <div class="bf-table-scroll">
+              <table
+                mat-table
+                satTableWithRowStates
+                [dataSource]="pageRows()"
+                matSort
+                matSortActive="name"
+                matSortDirection="asc"
+                matSortDisableClear
+                (matSortChange)="onSort($event)"
+                aria-label="All budgets you can see"
+              >
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Budget</th>
+                  <td mat-cell *matCellDef="let b">
+                    <a
+                      satRowPrimaryAction
+                      class="bf-cell__link"
+                      [routerLink]="['/budgets', b.id]"
+                      >{{ b.name }}</a
+                    >
+                    @if (b.code) {
+                      <span class="bf-code">{{ b.code }}</span>
+                    }
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="owner">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Owner</th>
+                  <td mat-cell *matCellDef="let b">
+                    <span class="bf-owner">
+                      <span class="bf-owner__avatar" aria-hidden="true">{{ initials(b) }}</span>
+                      <span>
+                        <span class="bf-cell__primary">{{
+                          b.display.ownerName ?? 'No owner'
+                        }}</span>
+                        @if (levelOf(b) && levelOf(b) !== 'healthy') {
+                          <span class="bf-cell__secondary">{{ levelLabel(levelOf(b)!) }}</span>
+                        }
+                      </span>
+                    </span>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="committed">
+                  <th mat-header-cell *matHeaderCellDef class="bf-num">Committed</th>
+                  <td mat-cell *matCellDef="let b" class="bf-num">
+                    <bf-money [amountMinor]="committedOf(b)" [currency]="b.currency" />
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="available">
+                  <th mat-header-cell *matHeaderCellDef class="bf-num">Available (own rules)</th>
+                  <td mat-cell *matCellDef="let b" class="bf-num">
+                    <bf-money
+                      class="bf-cell__available"
+                      [amountMinor]="b.balances.available.amountMinor"
+                      [currency]="b.balances.available.currency"
+                    />
+                    @if (b.balances.available.currency !== b.balances.availableReporting.currency) {
+                      <span class="bf-cell__secondary">
+                        Reporting
+                        <bf-money
+                          [amountMinor]="b.balances.availableReporting.amountMinor"
+                          [currency]="b.balances.availableReporting.currency"
+                        />
+                      </span>
+                    }
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="utilization">
+                  <th mat-header-cell *matHeaderCellDef class="bf-num">Utilization</th>
+                  <td mat-cell *matCellDef="let b" class="bf-num">
+                    {{ b.utilizationBps / 100 | number: '1.0-1' }}%
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                  <td mat-cell *matCellDef="let b"><bf-budget-status [status]="b.status" /></td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="columns"></tr>
+                <tr
+                  mat-row
+                  satRowState
+                  *matRowDef="let row; columns: columns"
+                  [attr.data-testid]="'row-' + (row.code ?? row.id)"
+                ></tr>
+              </table>
+            </div>
+            <mat-paginator
+              [length]="rows().length"
+              [pageSize]="pageSize"
+              [pageIndex]="pageIndex()"
+              hidePageSize
+              (page)="onPage($event)"
+              aria-label="Budget pages"
+            />
+          }
         }
       }
       @default {

@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2026-11-10T06:36:12.237Z",
+  "base": "http://localhost:64200",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 12,
+  "blocking": 0,
+  "warnings": 0,
+  "results": [
+    {
+      "id": "000c-home-executive-overview",
+      "state": "executive-default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--executive-default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "executive-default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--executive-default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "executive-default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--executive-default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "finance-controller",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--finance-controller--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "finance-controller",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--finance-controller--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "finance-controller",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--finance-controller--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "department-head-scope",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--department-head-scope--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "department-head-scope",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--department-head-scope--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "department-head-scope",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--department-head-scope--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "table-filtered",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--table-filtered--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "table-filtered",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--table-filtered--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "000c-home-executive-overview",
+      "state": "table-filtered",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "tmp/visual-qa/screens/000c-home-executive-overview--table-filtered--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

@@ -1,0 +1,465 @@
+{
+  "request": "/api/dashboards/health",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-10T03:30:44.879Z",
+    "asOf": "2026-11-16",
+    "currency": "USD",
+    "scope": {
+      "tenantWide": true,
+      "label": "Hyland",
+      "budgetIds": 11,
+      "note": null
+    },
+    "thresholds": {
+      "paceWatchBps": 11000,
+      "paceAtRiskBps": 12500,
+      "forecastWatchBps": 10000,
+      "forecastAtRiskBps": 10500,
+      "hygieneDays": 30,
+      "hygieneAtRiskMinor": 100000,
+      "unusedWatchBps": 2000,
+      "unusedDaysLeft": 90
+    },
+    "summary": {
+      "budgets": 11,
+      "healthy": 1,
+      "watch": 9,
+      "atRisk": 1
+    },
+    "matrix": [
+      {
+        "key": "71000000-0000-4000-8000-000000000005",
+        "label": "Central Contingency Reserve",
+        "orgUnitId": null,
+        "budgetId": "71000000-0000-4000-8000-000000000005",
+        "cells": {
+          "pace": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "forecast": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "controls": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "hygiene": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "unused": {
+            "watch": 1,
+            "atRisk": 0
+          }
+        }
+      },
+      {
+        "key": "70000000-0000-4000-8000-000000000001",
+        "label": "Employee Experience FY2026",
+        "orgUnitId": "30000000-0000-4000-8000-000000000002",
+        "budgetId": "70000000-0000-4000-8000-000000000001",
+        "cells": {
+          "pace": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "forecast": {
+            "watch": 0,
+            "atRisk": 0
+          },
+          "controls": {
+            "watch": 1,
+            "atRisk": 0
+          },
+          "hygiene": {
+            "watch": 0,
+            "atRisk": 1
+          },
+          "unused": {
+            "watch": 9,
+            "atRisk": 0
+          }
+        }
+      }
+    ],
+    "rows": [
+      {
+        "budgetId": "70000000-0000-4000-8000-000000000003",
+        "name": "United States Region",
+        "ownerName": "Jordan Smith",
+        "status": "active",
+        "level": "at_risk",
+        "reasons": [
+          {
+            "check": "hygiene",
+            "level": "at_risk",
+            "text": "1 commitment more than 30 days past service end"
+          },
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 33,200.00 would lapse (83%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 4000000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 200000,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 480000,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 3320000,
+          "currency": "USD"
+        },
+        "utilizationBps": 1700,
+        "pacedToDateBps": 1940,
+        "lastActivityAt": "2026-11-10T03:30:16.747Z"
+      },
+      {
+        "budgetId": "70000000-0000-4000-8000-000000000005",
+        "name": "Bengaluru Events",
+        "ownerName": "Rahul Menon",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 3,081.71 would lapse (25.7%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 1200000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 723240,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 168589,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 308171,
+          "currency": "USD"
+        },
+        "utilizationBps": 5121,
+        "pacedToDateBps": 8480,
+        "lastActivityAt": "2026-11-10T03:30:17.433Z"
+      },
+      {
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "name": "India Region",
+        "ownerName": "Ananya Iyer",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 18,680.21 would lapse (62.3%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 3000000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 878177,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 253802,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 1868021,
+          "currency": "USD"
+        },
+        "utilizationBps": 2653,
+        "pacedToDateBps": 3773,
+        "lastActivityAt": "2026-11-10T03:30:16.965Z"
+      },
+      {
+        "budgetId": "70000000-0000-4000-8000-000000000001",
+        "name": "Employee Experience FY2026",
+        "ownerName": "Morgan Lee",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 81,640.21 would lapse (81.6%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 10000000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 1102177,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 733802,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 8164021,
+          "currency": "USD"
+        },
+        "utilizationBps": 1484,
+        "pacedToDateBps": 2095,
+        "lastActivityAt": "2026-11-10T03:30:15.718Z"
+      },
+      {
+        "budgetId": "70000000-0000-4000-8000-000000000004",
+        "name": "Europe Region",
+        "ownerName": "Lena Fischer",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 29,760.00 would lapse (99.2%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 3000000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 24000,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 2976000,
+          "currency": "USD"
+        },
+        "utilizationBps": 28,
+        "pacedToDateBps": 91,
+        "lastActivityAt": "2026-11-10T03:30:16.450Z"
+      },
+      {
+        "budgetId": "71000000-0000-4000-8000-000000000003",
+        "name": "Berlin Events",
+        "ownerName": "Lena Fischer",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 8,000.00 would lapse (100%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 800000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 800000,
+          "currency": "USD"
+        },
+        "utilizationBps": 0,
+        "pacedToDateBps": 0,
+        "lastActivityAt": "2026-11-10T03:30:16.016Z"
+      },
+      {
+        "budgetId": "71000000-0000-4000-8000-000000000005",
+        "name": "Central Contingency Reserve",
+        "ownerName": "Priya Raman",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 3,000.00 would lapse (100%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 300000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 300000,
+          "currency": "USD"
+        },
+        "utilizationBps": 0,
+        "pacedToDateBps": 0,
+        "lastActivityAt": "2026-11-10T03:30:15.901Z"
+      },
+      {
+        "budgetId": "70000000-0000-4000-8000-000000000006",
+        "name": "Hyderabad Events",
+        "ownerName": "Ananya Iyer",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 3,678.75 would lapse (100%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 367875,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 367875,
+          "currency": "USD"
+        },
+        "utilizationBps": 0,
+        "pacedToDateBps": 0,
+        "lastActivityAt": "2026-11-10T03:30:16.111Z"
+      },
+      {
+        "budgetId": "71000000-0000-4000-8000-000000000001",
+        "name": "New York Events",
+        "ownerName": "Jordan Smith",
+        "status": "active",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 15,000.00 would lapse (100%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 1500000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 1500000,
+          "currency": "USD"
+        },
+        "utilizationBps": 0,
+        "pacedToDateBps": 0,
+        "lastActivityAt": "2026-11-10T03:30:15.929Z"
+      },
+      {
+        "budgetId": "71000000-0000-4000-8000-000000000002",
+        "name": "US Recognition",
+        "ownerName": "Jordan Smith",
+        "status": "frozen",
+        "level": "watch",
+        "reasons": [
+          {
+            "check": "controls",
+            "level": "watch",
+            "text": "Frozen"
+          },
+          {
+            "check": "unused",
+            "level": "watch",
+            "text": "USD 5,000.00 would lapse (100%)"
+          }
+        ],
+        "authorized": {
+          "amountMinor": 500000,
+          "currency": "USD"
+        },
+        "committed": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "actual": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "available": {
+          "amountMinor": 500000,
+          "currency": "USD"
+        },
+        "utilizationBps": 0,
+        "pacedToDateBps": 0,
+        "lastActivityAt": "2026-11-10T03:30:15.961Z"
+      }
+    ],
+    "reconciliation": {
+      "source": "ledger_balances",
+      "budgetsCounted": 11,
+      "authorized": {
+        "amountMinor": 10300000,
+        "currency": "USD"
+      },
+      "held": {
+        "amountMinor": 330000,
+        "currency": "USD"
+      },
+      "preEncumbered": {
+        "amountMinor": 21600,
+        "currency": "USD"
+      },
+      "encumbered": {
+        "amountMinor": 750577,
+        "currency": "USD"
+      },
+      "actual": {
+        "amountMinor": 733802,
+        "currency": "USD"
+      },
+      "accrued": {
+        "amountMinor": 39640,
+        "currency": "USD"
+      },
+      "available": {
+        "amountMinor": 8464021,
+        "currency": "USD"
+      },
+      "ties": true,
+      "differences": []
+    }
+  }
+}
