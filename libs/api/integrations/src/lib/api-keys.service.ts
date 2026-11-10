@@ -3,6 +3,8 @@ import {
   ApiProblem,
   CommandRunner,
   DB,
+  inCidrs,
+  isCidr,
   PolicyService,
   type CommandResult,
   type RequestActor,
@@ -126,6 +128,15 @@ export class ApiKeysService {
       },
       async (tx) => {
         this.policy.assert(actor, 'integration.manage', tenantOf(actor));
+        // An allow-list entry that is not an address or a CIDR range would match unpredictably, so
+        // it is refused here rather than stored.
+        const invalid = (req.allowedCidrs ?? []).filter((c) => !isCidr(c));
+        if (invalid.length)
+          throw new ApiProblem(
+            422,
+            'VALIDATION_FAILED',
+            `Allowed networks must be IP addresses or CIDR ranges; not valid: ${invalid.join(', ')}.`,
+          );
         const [owner] = await tx
           .select({ id: people.id, name: people.displayName })
           .from(people)
@@ -419,19 +430,12 @@ export class ApiKeysService {
     return row.rateLimitPerMinute - used;
   }
 
+  /**
+   * Bit-exact CIDR matching (IPv4 and IPv6). The earlier version compared whole octets only, so a
+   * /20 behaved as a /16 and admitted addresses its owner had excluded.
+   */
   private ipAllowed(clientIp: string | null, allowed: string[]): boolean {
-    if (!clientIp) return false;
-    const ip = clientIp.replace(/^::ffff:/, '');
-    return allowed.some((entry) => {
-      const [base, bits] = entry.split('/');
-      if (!bits) return base === ip;
-      const prefix = Number(bits);
-      if (prefix === 32) return base === ip;
-      const octets = Math.floor(prefix / 8);
-      return (
-        base.split('.').slice(0, octets).join('.') === ip.split('.').slice(0, octets).join('.')
-      );
-    });
+    return inCidrs(clientIp, allowed);
   }
 
   /** Every call made with a key is logged with its prefix, never the secret (101). */

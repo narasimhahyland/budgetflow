@@ -1,3 +1,4 @@
+export * from './lib/client-ip';
 export * from './lib/clock';
 export * from './lib/config';
 export * from './lib/db.module';

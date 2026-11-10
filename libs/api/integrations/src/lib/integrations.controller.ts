@@ -1,10 +1,13 @@
 import {
+  clientIpOf,
+  CONFIG,
   CurrentActor,
   IdempotencyKey,
   parseWith,
   Public,
   RequestId,
   type ApiRequest,
+  type AppConfig,
   type RequestActor,
 } from '@bf/api/core';
 import {
@@ -61,6 +64,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
   Param,
   Patch,
   Post,
@@ -93,6 +97,7 @@ const DuplicatesQuery = z.object({ status: z.enum(['open', 'resolved']).optional
 @Controller()
 export class IntegrationsController {
   constructor(
+    @Inject(CONFIG) private readonly config: AppConfig,
     private readonly connections: ConnectionsService,
     private readonly sync: SyncService,
     private readonly messages: MessagesService,
@@ -408,11 +413,11 @@ export class IntegrationsController {
     @Body() body: unknown,
   ) {
     const auth = req.headers['authorization'];
-    const forwarded = req.headers['x-forwarded-for'];
     return this.scim.provision(
       Array.isArray(auth) ? auth[0] : auth,
       parseWith(ScimUserRequest, body),
-      (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(',')[0]?.trim() ?? null,
+      // The connection's own address; X-Forwarded-For only from a trusted proxy (see client-ip.ts).
+      clientIpOf(req, this.config.TRUSTED_PROXY_CIDRS),
       requestId,
     );
   }
