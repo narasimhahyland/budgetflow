@@ -1,5 +1,5 @@
   PASS secrets             4s
-  FAIL lint  (FAIL on first run: no-empty-pattern in the new journey; fixed, re-run PASS)
+  PASS lint              (re-run; the first run failed on no-empty-pattern in the new journey, fixed)
   PASS styles              2s
   PASS satori             40s
   PASS typecheck          62s
