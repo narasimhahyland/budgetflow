@@ -1,6 +1,8 @@
 import { ImportsService } from '@bf/api/actuals';
 import {
   ApiProblem,
+  clientIpOf,
+  CONFIG,
   DB,
   IdempotencyKey,
   parseWith,
@@ -9,6 +11,7 @@ import {
   RequestId,
   header,
   type ApiRequest,
+  type AppConfig,
 } from '@bf/api/core';
 import { budgets, events, withTenant, type Db } from '@bf/api/db';
 import { LedgerReads } from '@bf/api/ledger';
@@ -36,6 +39,7 @@ import { tenantOf } from './connections.service';
 @Controller('api/public/v1')
 export class PublicApiController {
   constructor(
+    @Inject(CONFIG) private readonly config: AppConfig,
     @Inject(DB) private readonly db: Db,
     private readonly keys: ApiKeysService,
     private readonly policy: PolicyService,
@@ -201,7 +205,10 @@ export class PublicApiController {
         'Send your API key as an Authorization: Bearer header.',
       );
     }
-    const forwarded = header(req, 'x-forwarded-for')?.split(',')[0]?.trim() ?? null;
-    return this.keys.authenticate(auth.slice(7).trim(), forwarded);
+    // The connection's own address; X-Forwarded-For only from a trusted proxy (see client-ip.ts).
+    return this.keys.authenticate(
+      auth.slice(7).trim(),
+      clientIpOf(req, this.config.TRUSTED_PROXY_CIDRS),
+    );
   }
 }

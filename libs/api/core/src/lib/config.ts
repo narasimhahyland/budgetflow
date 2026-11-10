@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isCidr } from './client-ip';
 
 /** Environment, validated once at startup. Every variable is listed in infra/.env.example with a dev placeholder. */
 const EnvSchema = z.object({
@@ -29,6 +30,22 @@ const EnvSchema = z.object({
     .describe(
       'Development and test only: the instant the API treats as now, so server-computed ages and ' +
         'countdowns stay still for a visual run. Read by clock.ts. Never set it in a deployment.',
+    ),
+  TRUSTED_PROXY_CIDRS: z
+    .string()
+    .optional()
+    .transform((v) =>
+      (v ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    )
+    .refine((list) => list.every(isCidr), {
+      message: 'every entry must be an IP address or a CIDR range, separated by commas',
+    })
+    .describe(
+      'Proxies in front of the API whose X-Forwarded-For header may be believed, as addresses or ' +
+        'CIDR ranges. Empty (the default) ignores the header, so a caller cannot claim an address.',
     ),
 });
 
