@@ -88,5 +88,5 @@ showed "See all 77" on one attempt and "See all 80" on another while the journey
 that changes between attempts of the same test is nondeterminism, not a regression. The journey takes
 its expected count from the first health response the page receives, while the page can render from a
 later one, by which time journeys running in parallel have created more budgets. This change touches
-only how API keys resolve the caller's address. The journey is fixed separately, on the Phase 17
-branch.
+only how API keys resolve the caller's address. PR #97, merged to `main` after this branch was cut, already
+makes that journey concurrency-safe; this PR's CI tests the merge with `main`, so it runs the fixed journey.
