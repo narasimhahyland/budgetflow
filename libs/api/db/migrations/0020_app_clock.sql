@@ -2,9 +2,10 @@
 --
 -- Every timestamp default used to be now(), the database's wall clock, so seeded rows carried the
 -- moment the seed ran and every screen that renders them changed with the real date. app_now() is
--- real now() unless the session carries app.fixed_now, which a test stack sets (scripts/stack.sh)
--- to the same instant the API and the browser are pinned to. Production never sets it, so
--- production behaviour is unchanged.
+-- real now() unless the session carries app.fixed_now. A test stack sets it on the seed's
+-- connections only (scripts/stack.sh), to the instant the API and the browser are pinned to, so
+-- seeded rows carry the same times on every run. Production never sets it, so production
+-- behaviour is unchanged.
 --
 -- When pinned, each call advances by one millisecond from the pinned instant, so rows created one
 -- after another keep that order. A frozen instant would give them all the same timestamp, and any

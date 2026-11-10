@@ -77,35 +77,19 @@ build() {
   echo "stack: building api, worker and web bundles"
   npx nx run-many -t build -p api worker web --outputStyle=static >/dev/null
 }
-up() { build && dc up -d --build --wait && pin_db_clock; }
+up() { build && dc up -d --build --wait; }
 
-# The database's clock follows the API's. Timestamp defaults call app_now() (migration 0020), which
-# is real now() unless the session carries app.fixed_now; setting it on the database pins every new
-# session - the API's, the worker's, the seed's and the scenarios' - to the same instant as
-# FIXED_NOW. The migration runs when the API starts, so this comes after `up`; and a database
-# setting reaches only sessions opened after it, so the API and worker restart when it changes.
-pin_db_clock() {
-  local want="${BF_FIXED_NOW:-}" have
-  have=$(dc exec -T postgres sh -lc \
-    "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -At -c \"select coalesce(current_setting('app.fixed_now', true), '')\"" \
-    2>/dev/null | tr -d '[:space:]')
-  [ "$have" = "$want" ] && return 0
-  if [ -n "$want" ]; then
-    echo "stack: pinning the database clock to $want"
-    dc exec -T -e BF_FIXED_NOW="$want" postgres sh -lc \
-      "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -q -c \"alter database \\\"\$POSTGRES_DB\\\" set app.fixed_now to '\$BF_FIXED_NOW'\""
-  else
-    echo "stack: the database clock follows real time"
-    dc exec -T postgres sh -lc \
-      "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -q -c \"alter database \\\"\$POSTGRES_DB\\\" reset app.fixed_now\""
-  fi
-  dc restart api worker >/dev/null && dc up -d --wait api worker
-}
-
-# The seed's own clock. The seed creates records through the application services, which stamp
-# them from Date - so under a pinned clock the seed runs with a preload that reads FIXED_NOW instead,
-# advancing a millisecond per call (scripts/lib/pinned-clock.cjs). The few seeded values that must
-# stay on real time, because the API compares them with real time, read the preload's real clock.
+# The seed's clocks. Under FIXED_NOW, everything the seed writes is stamped at that instant, so
+# seeded rows carry the same times on every run and every real date:
+#   - JavaScript: the seed stamps records through the application services, which read Date, so it
+#     runs with a preload that reads FIXED_NOW instead, a millisecond per read
+#     (scripts/lib/pinned-clock.cjs). Values the API checks against real time read its real clock.
+#   - Postgres: timestamp defaults call app_now() (migration 0020), which follows app.fixed_now; the
+#     seed's connections carry it as a startup option (seed_db_url).
+# Only the seed is pinned. The running API and worker stay on real time for both clocks, so a record
+# they create and the times they compare it with always come from one clock. Pinning the database
+# for the API while its own Date stayed real put one request on two clocks: an audit entry stamped
+# in JavaScript looked older than the database-stamped row it was recorded against.
 seed_cmd() {
   if [ -n "${BF_SEED_CMD:-}" ]; then
     echo "$BF_SEED_CMD"
@@ -117,6 +101,11 @@ seed_cmd() {
 }
 seed() {
   export DATABASE_URL_OWNER="postgres://${BF_PG_OWNER_USER}:${BF_PG_OWNER_PASSWORD}@127.0.0.1:${BF_PG_PORT:-5432}/${BF_PG_DB}"
+  if [ -n "${BF_FIXED_NOW:-}" ]; then
+    # Every session the seed opens starts with app.fixed_now, so app_now() defaults read FIXED_NOW.
+    local pinned="${BF_FIXED_NOW//:/%3A}"
+    DATABASE_URL_OWNER="${DATABASE_URL_OWNER}?options=-c%20app.fixed_now%3D${pinned}"
+  fi
   # The worker is stopped while the seed runs, so nothing it delivers reads a half-written seed.
   # A channel delivery decides which channels it went out on from the data present at that moment:
   # slack only if the install and the person's chat link exist, push only if a subscription does.
