@@ -8,6 +8,7 @@ import {
   type CommandResult,
   type RequestActor,
   todayUtc,
+  nowUtc,
 } from '@bf/api/core';
 import {
   postSpendExceptions,
@@ -99,7 +100,7 @@ export class RulesService {
 
   /** Match counts over the last 30 days, used for "most matched" and version confidence. */
   private async matchCounts(tx: Tx, tenantId: string): Promise<Map<string, number>> {
-    const since = new Date(Date.now() - 30 * 86_400_000);
+    const since = new Date(nowUtc().getTime() - 30 * 86_400_000);
     const rows = await tx
       .select({ ruleId: ruleExecutions.ruleId, count: sql<number>`count(*)::int` })
       .from(ruleExecutions)
@@ -362,7 +363,7 @@ export class RulesService {
           and(
             eq(ruleExecutions.tenantId, actor.tenantId),
             eq(ruleExecutions.subjectType, 'request'),
-            gte(ruleExecutions.evaluatedAt, new Date(Date.now() - 28 * 86_400_000)),
+            gte(ruleExecutions.evaluatedAt, new Date(nowUtc().getTime() - 28 * 86_400_000)),
           ),
         );
 

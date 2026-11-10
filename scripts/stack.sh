@@ -77,7 +77,44 @@ build() {
   echo "stack: building api, worker and web bundles"
   npx nx run-many -t build -p api worker web --outputStyle=static >/dev/null
 }
-up() { build && dc up -d --build --wait; }
+up() { build && dc up -d --build --wait && pin_db_clock; }
+
+# The database's clock follows the API's. Timestamp defaults call app_now() (migration 0020), which
+# is real now() unless the session carries app.fixed_now; setting it on the database pins every new
+# session - the API's, the worker's, the seed's and the scenarios' - to the same instant as
+# FIXED_NOW. The migration runs when the API starts, so this comes after `up`; and a database
+# setting reaches only sessions opened after it, so the API and worker restart when it changes.
+pin_db_clock() {
+  local want="${BF_FIXED_NOW:-}" have
+  have=$(dc exec -T postgres sh -lc \
+    "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -At -c \"select coalesce(current_setting('app.fixed_now', true), '')\"" \
+    2>/dev/null | tr -d '[:space:]')
+  [ "$have" = "$want" ] && return 0
+  if [ -n "$want" ]; then
+    echo "stack: pinning the database clock to $want"
+    dc exec -T -e BF_FIXED_NOW="$want" postgres sh -lc \
+      "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -q -c \"alter database \\\"\$POSTGRES_DB\\\" set app.fixed_now to '\$BF_FIXED_NOW'\""
+  else
+    echo "stack: the database clock follows real time"
+    dc exec -T postgres sh -lc \
+      "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -q -c \"alter database \\\"\$POSTGRES_DB\\\" reset app.fixed_now\""
+  fi
+  dc restart api worker >/dev/null && dc up -d --wait api worker
+}
+
+# The seed's own clock. The seed creates records through the application services, which stamp
+# them from Date - so under a pinned clock the seed runs with a preload that reads FIXED_NOW instead,
+# advancing a millisecond per call (scripts/lib/pinned-clock.cjs). The few seeded values that must
+# stay on real time, because the API compares them with real time, read the preload's real clock.
+seed_cmd() {
+  if [ -n "${BF_SEED_CMD:-}" ]; then
+    echo "$BF_SEED_CMD"
+  elif [ -n "${BF_FIXED_NOW:-}" ]; then
+    echo "npx nx run api:build --outputStyle=static >/dev/null && BF_PINNED_CLOCK='$BF_FIXED_NOW' node --require '$root/scripts/lib/pinned-clock.cjs' dist/apps/api/seed.js"
+  else
+    echo "npx nx run api:seed --outputStyle=static"
+  fi
+}
 seed() {
   export DATABASE_URL_OWNER="postgres://${BF_PG_OWNER_USER}:${BF_PG_OWNER_PASSWORD}@127.0.0.1:${BF_PG_PORT:-5432}/${BF_PG_DB}"
   # The worker is stopped while the seed runs, so nothing it delivers reads a half-written seed.
@@ -89,7 +126,7 @@ seed() {
   # email, slack, push") and a visual state fails on one and passes on the other. Stopped, the
   # worker finds the outbox full when it starts and every delivery reads the finished seed.
   dc stop worker >/dev/null 2>&1 || true
-  eval "${BF_SEED_CMD:-npx nx run api:seed --outputStyle=static}"
+  eval "$(seed_cmd)"
   dc up -d --wait worker
   settle
 }

@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  nowUtc,
 } from '@bf/api/core';
 import {
   actualMatches,
@@ -69,7 +70,10 @@ export class ExceptionsService {
     names: Map<string, string>,
     canResolve: boolean,
   ): PostSpendExceptionItem {
-    const ageDays = Math.max(0, Math.floor((Date.now() - row.raisedAt.getTime()) / 86_400_000));
+    const ageDays = Math.max(
+      0,
+      Math.floor((nowUtc().getTime() - row.raisedAt.getTime()) / 86_400_000),
+    );
     const allowedActions: PostSpendExceptionItem['allowedActions'] = [];
     if (row.status !== 'resolved' && canResolve) allowedActions.push('resolve');
     if (row.status === 'open') allowedActions.push('explain');
