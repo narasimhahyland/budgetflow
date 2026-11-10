@@ -3,6 +3,7 @@ import { DocumentsModule } from '@bf/api/documents';
 import { Module } from '@nestjs/common';
 import { AdminController, MeAdminController } from './admin.controller';
 import { AdminSettingsService } from './admin-settings.service';
+import { BreakGlassService } from './break-glass.service';
 import { ExperienceService } from './experience.service';
 import { FeatureFlagsService } from './feature-flags.service';
 import { RetentionService } from './retention.service';
@@ -11,6 +12,7 @@ import { UserAdminService } from './user-admin.service';
 
 const SERVICES = [
   AdminSettingsService,
+  BreakGlassService,
   ExperienceService,
   FeatureFlagsService,
   RetentionService,

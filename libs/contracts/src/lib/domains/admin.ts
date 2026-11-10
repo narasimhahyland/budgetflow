@@ -858,6 +858,87 @@ export const CancelMaintenanceNoticeRequest = named(
 );
 export type CancelMaintenanceNoticeRequest = z.infer<typeof CancelMaintenanceNoticeRequest>;
 
+// Break-glass access (112) ------------------------------------------------------------------------
+
+export const BreakGlassStatus = z
+  .enum(['requested', 'active', 'expired', 'declined', 'revoked'])
+  .describe('Active and expired are derived from the approved window and the real time now.');
+export type BreakGlassStatus = z.infer<typeof BreakGlassStatus>;
+
+export const BreakGlassGrant = named(
+  'BreakGlassGrant',
+  z
+    .object({
+      id: Id,
+      requestedByName: z.string().describe('The platform operator who asked.'),
+      reason: z.string(),
+      scope: z.literal('budgets_and_ledger'),
+      scopeLabel: z.string().describe('Plain English: what the grant opens, always read-only.'),
+      requestedMinutes: z.int().min(1).max(240),
+      requestedAt: IsoDateTime,
+      status: BreakGlassStatus,
+      decidedByName: z.string().nullable(),
+      decidedAt: IsoDateTime.nullable(),
+      decisionReason: z.string().nullable(),
+      startsAt: IsoDateTime.nullable().describe('Set on approval; the window starts then.'),
+      endsAt: IsoDateTime.nullable(),
+      revokedByName: z.string().nullable(),
+      revokedAt: IsoDateTime.nullable(),
+      revokeReason: z.string().nullable(),
+      actionsTaken: z.int().min(0).describe('Audited requests made under this grant (088).'),
+      allowedActions: z
+        .array(z.enum(['approve', 'decline', 'revoke']))
+        .describe('What the signed-in person may do with this grant now.'),
+    })
+    .strict(),
+);
+export type BreakGlassGrant = z.infer<typeof BreakGlassGrant>;
+
+export const BreakGlassGrantList = named(
+  'BreakGlassGrantList',
+  z
+    .object({
+      items: z
+        .array(BreakGlassGrant)
+        .describe('Newest first. A platform operator sees only their own.'),
+      canRequest: z.boolean().describe('The signed-in person is a platform operator.'),
+      canDecide: z.boolean().describe('The signed-in person may approve, decline and revoke.'),
+      maxMinutes: z.int().describe('Longest window a request may ask for.'),
+      note: z.string(),
+    })
+    .strict(),
+);
+export type BreakGlassGrantList = z.infer<typeof BreakGlassGrantList>;
+
+export const RequestBreakGlassRequest = named(
+  'RequestBreakGlassRequest',
+  z
+    .object({
+      reason: Reason,
+      durationMinutes: z
+        .int()
+        .min(1)
+        .max(10_000)
+        .describe(
+          '15 to 240 minutes, checked server-side so an out-of-range value answers a typed problem.',
+        ),
+    })
+    .strict(),
+);
+export type RequestBreakGlassRequest = z.infer<typeof RequestBreakGlassRequest>;
+
+export const BreakGlassDecisionRequest = named(
+  'BreakGlassDecisionRequest',
+  z.object({ decision: z.enum(['approve', 'decline']), reason: Reason }).strict(),
+);
+export type BreakGlassDecisionRequest = z.infer<typeof BreakGlassDecisionRequest>;
+
+export const RevokeBreakGlassRequest = named(
+  'RevokeBreakGlassRequest',
+  z.object({ reason: Reason }).strict(),
+);
+export type RevokeBreakGlassRequest = z.infer<typeof RevokeBreakGlassRequest>;
+
 // Guided setup checklist (10a) ----------------------------------------------------------------------
 
 export const SetupChecklistItem = named(
@@ -963,6 +1044,7 @@ const HoldParams = z.object({ holdId: Id }).strict();
 const RunParams = z.object({ runId: Id }).strict();
 const MembershipParams = z.object({ membershipId: Id }).strict();
 const NoticeParams = z.object({ noticeId: Id }).strict();
+const GrantParams = z.object({ grantId: Id }).strict();
 
 export const adminEndpoints = {
   adminSettings: {
@@ -1341,5 +1423,53 @@ export const adminEndpoints = {
       .strict(),
     response: { status: 200, schema: MyActivity },
     errors: [401],
+  },
+  breakGlassGrants: {
+    operationId: 'breakGlassGrants',
+    method: 'get',
+    path: '/api/admin/break-glass',
+    summary: 'Break-glass requests and grants, with what the signed-in person may do',
+    tags: ['admin'],
+    auth: true,
+    response: { status: 200, schema: BreakGlassGrantList },
+    errors: [401, 403],
+  },
+  requestBreakGlass: {
+    operationId: 'requestBreakGlass',
+    method: 'post',
+    path: '/api/admin/break-glass',
+    summary: 'Platform operator: ask for time-limited, read-only access to budgets and the ledger',
+    tags: ['admin'],
+    auth: true,
+    idempotent: true,
+    body: RequestBreakGlassRequest,
+    response: { status: 201, schema: BreakGlassGrant },
+    errors: [401, 403, 409, 422],
+  },
+  decideBreakGlass: {
+    operationId: 'decideBreakGlass',
+    method: 'post',
+    path: '/api/admin/break-glass/{grantId}/decision',
+    summary: 'Approve or decline a break-glass request (never the requester)',
+    tags: ['admin'],
+    auth: true,
+    idempotent: true,
+    params: GrantParams,
+    body: BreakGlassDecisionRequest,
+    response: { status: 201, schema: BreakGlassGrant },
+    errors: [401, 403, 404, 409, 422],
+  },
+  revokeBreakGlass: {
+    operationId: 'revokeBreakGlass',
+    method: 'post',
+    path: '/api/admin/break-glass/{grantId}/revocation',
+    summary: 'End an active break-glass grant now',
+    tags: ['admin'],
+    auth: true,
+    idempotent: true,
+    params: GrantParams,
+    body: RevokeBreakGlassRequest,
+    response: { status: 201, schema: BreakGlassGrant },
+    errors: [401, 403, 404, 409, 422],
   },
 } as const satisfies Record<string, Endpoint>;

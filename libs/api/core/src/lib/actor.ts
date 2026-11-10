@@ -14,7 +14,7 @@ import {
 } from '@bf/api/db';
 import type { Actor, CurrencyCode, RoleId } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, gte, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte, or, sql } from 'drizzle-orm';
 import { DB } from './db.module';
 import { ApiProblem } from './problem';
 
@@ -25,6 +25,9 @@ export interface RequestActor extends Actor {
   tenantName: string;
   reportingCurrency: CurrencyCode;
   memberships: { tenantId: string; tenantName: string; roles: RoleId[] }[];
+  /** The active break-glass grant this request runs under; every request under it is audited. */
+  breakGlassGrantId?: string;
+  breakGlassUntil?: string;
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -143,17 +146,22 @@ export class ActorResolver {
                 union select b.path, b.org_unit_id from ${budgetCoOwners} c join ${budgets} b on b.id = c.budget_id where c.person_id = ${m.personId}`,
           )
         : { rows: [] as { path: string; org_unit_id: string | null }[] };
+      // Real time, never the pinned FIXED_NOW clock: a grant must end when its window really ends.
       const now = new Date();
       const glass = await tx
-        .select({ id: breakGlassGrants.id })
+        .select({ id: breakGlassGrants.id, until: breakGlassGrants.validToTs })
         .from(breakGlassGrants)
         .where(
           and(
             eq(breakGlassGrants.idpSubject, subject),
+            eq(breakGlassGrants.status, 'approved'),
+            isNull(breakGlassGrants.revokedAt),
             lte(breakGlassGrants.validFromTs, now),
             gte(breakGlassGrants.validToTs, now),
           ),
-        );
+        )
+        .orderBy(desc(breakGlassGrants.validToTs))
+        .limit(1);
       const home = [person?.locationOrgUnitId, person?.orgUnitId].filter((u): u is string =>
         Boolean(u),
       );
@@ -164,6 +172,8 @@ export class ActorResolver {
         displayName: person?.displayName,
         ownedBudgetPaths: owned.rows.map((r) => r.path),
         breakGlass: glass.length > 0,
+        breakGlassGrantId: glass[0]?.id,
+        breakGlassUntil: glass[0]?.until ?? undefined,
         homeOrgUnitIds: home,
         orgScopeUnitIds: [...new Set([...m.scopeUnits, ...ownedUnits, ...home])],
       };
@@ -176,6 +186,8 @@ export class ActorResolver {
       roles: m.roles,
       ownedBudgetPaths: extra.ownedBudgetPaths,
       breakGlass: extra.breakGlass,
+      breakGlassGrantId: extra.breakGlassGrantId,
+      breakGlassUntil: extra.breakGlassUntil?.toISOString(),
       orgScopeUnitIds: extra.orgScopeUnitIds,
       homeOrgUnitIds: extra.homeOrgUnitIds,
       displayName: extra.displayName ?? tokenName ?? subject,
