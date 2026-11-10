@@ -84,15 +84,31 @@ export interface MobileTabItem {
     </nav>
   `,
   styles: `
+    /*
+     * The bar is pinned to the bottom of the screen, also on pages shorter than the screen; the host
+     * stays in the page as a spacer of the bar's height so the last content never sits under it.
+     * Phone widths only (spec 059a); wider screens use the shell navigation.
+     */
+    :host {
+      display: block;
+      height: calc(61px + env(safe-area-inset-bottom, 0px));
+    }
+    @media (width >= 600px) {
+      :host {
+        display: none;
+      }
+    }
     .bf-mobile-tabs {
-      position: sticky;
+      position: fixed;
+      inset-inline: 0;
       bottom: 0;
       z-index: 20;
+      box-sizing: border-box;
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       background: var(--mat-sys-surface-container);
       border-top: 1px solid var(--mat-sys-outline-variant);
-      padding: 4px 8px env(safe-area-inset-bottom, 4px);
+      padding: 4px 8px max(4px, env(safe-area-inset-bottom, 0px));
     }
     .bf-mobile-tabs__link {
       display: flex;

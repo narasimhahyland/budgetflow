@@ -9,6 +9,11 @@ export default {
     'color-no-hex': true,
     'color-named': 'never',
     'function-disallowed-list': ['rgb', 'rgba', 'hsl', 'hsla'],
-    'declaration-property-value-disallowed-list': { 'font-family': ['/.*/'] },
+    'declaration-property-value-disallowed-list': {
+      'font-family': ['/.*/'],
+      // These names do not exist in Satori (only -icon, -container and on-*-container do); a
+      // declaration using one silently renders transparent.
+      '/.*/': ['/var\\(--sat-sys-(info|success|warning|important|neutral)\\)/'],
+    },
   },
 };

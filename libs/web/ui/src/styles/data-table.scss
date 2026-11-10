@@ -1,0 +1,291 @@
+// Dense data table, from section 6 of the design system reference sheet
+// (`docs/ux/screens/000-design-system.md`, `design/stitch/000-design-system/default--desktop--light.png`):
+// 52px header with uppercase labels, 48px rows with dividers, a left stripe and a tint on rows in a
+// budget-safety state (frozen info, set to zero important), right-aligned tabular money.
+//
+// Loaded once from `apps/web/src/styles.scss`, after `page-layout`. A Material table opts in with
+// class `bf-table`; a native table uses `bf-split-table`. Both get the same treatment:
+//
+//   <div class="bf-table-scroll">
+//     <table mat-table class="bf-table" [dataSource]="rows()"> … </table>
+//   </div>
+//   <div class="bf-table-scroll"><table class="bf-split-table"> … </table></div>
+//
+// Cells: `bf-num` on both the th and the td of a numeric column; `bf-cell__owner` around a
+// `sat-avatar size="24"` and the name; `bf-cell__code` for a budget or cost-centre code. Rows in a
+// control state take `bf-row--info` (frozen) or `bf-row--important` (set to zero).
+//
+// Heights, dividers and header typography of Material tables come from Material's own
+// `table-overrides` mixin, so no `.mat-*` internals are overridden (satori-lint
+// `no-ds-internals-overrides`).
+@use '@angular/material' as mat;
+
+$header-tracking: 0.06em;
+
+.bf-table {
+  width: 100%;
+
+  @include mat.table-overrides(
+    (
+      background-color: var(--mat-sys-surface-container-lowest),
+      header-container-height: 52px,
+      row-item-container-height: 48px,
+      footer-container-height: 48px,
+      row-item-outline-color: var(--mat-sys-outline-variant),
+      header-headline-color: var(--mat-sys-on-surface-variant),
+      header-headline-size: var(--mat-sys-label-medium-size),
+      header-headline-weight: 600,
+      header-headline-line-height: var(--mat-sys-label-medium-line-height),
+      header-headline-tracking: $header-tracking,
+    )
+  );
+
+  // The class is repeated so this selector carries two classes: Material's own header-cell rule
+  // paints every `th` with `--mat-table-background-color`, and a single `.bf-table thead th` loses
+  // to it. Repeating the opt-in class wins on specificity without naming a `.mat-*` internal.
+  &.bf-table thead th {
+    background: var(--mat-sys-surface-container);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}
+
+// Native tables: the same section 6 rules in plain CSS.
+.bf-split-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--mat-sys-surface-container-lowest);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  thead th {
+    box-sizing: border-box;
+    height: 52px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    background: var(--mat-sys-surface-container);
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-label-medium);
+    font-weight: 600;
+    letter-spacing: $header-tracking;
+    text-align: start;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  tbody th,
+  tbody td,
+  tfoot th,
+  tfoot td {
+    box-sizing: border-box;
+    height: 48px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    font: var(--mat-sys-body-medium);
+    text-align: start;
+  }
+
+  tbody th {
+    font-weight: 500;
+  }
+
+  tfoot th,
+  tfoot td {
+    font-weight: 600;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  caption {
+    padding: 0 16px 8px;
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-body-small);
+    text-align: start;
+  }
+}
+
+// Shared cell and row treatments, for both table kinds.
+.bf-table,
+.bf-split-table {
+  .bf-num {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  // Budget-safety row states: a 4px stripe on the leading edge plus the status tone's container
+  // tint, so frozen and set-to-zero rows are distinguishable from an active row without colour
+  // alone (the row also carries its status tag).
+  .bf-row--info > td,
+  .bf-row--info > th {
+    background: var(--sat-sys-info-container);
+  }
+
+  .bf-row--info > :first-child {
+    box-shadow: inset 4px 0 0 var(--sat-sys-info-icon);
+  }
+
+  .bf-row--important > td,
+  .bf-row--important > th {
+    background: var(--sat-sys-important-container);
+  }
+
+  .bf-row--important > :first-child {
+    box-shadow: inset 4px 0 0 var(--sat-sys-important-icon);
+  }
+
+  .bf-cell__primary:not(td) {
+    display: block;
+  }
+
+  .bf-cell__primary {
+    font: var(--mat-sys-body-medium);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bf-cell__secondary:not(td) {
+    display: block;
+  }
+
+  .bf-cell__secondary {
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-body-small);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bf-cell__name {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bf-cell__owner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .bf-cell__code {
+    padding: 2px 6px;
+    border-radius: var(--mat-sys-corner-extra-small);
+    background: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-label-small);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .bf-row--info .bf-cell__code {
+    background: var(--sat-sys-info-container);
+    color: var(--sat-sys-on-info-container);
+  }
+
+  .bf-row--important .bf-cell__code {
+    background: var(--sat-sys-important-container);
+    color: var(--sat-sys-on-important-container);
+  }
+}
+
+// A table wider than its card scrolls inside this wrapper, never the page. Below 600px the first
+// column (the row's name) stays in view while the figures scroll under it.
+.bf-table-scroll {
+  // Contains absolutely positioned visually-hidden labels (stacked headers, "Actions") so they
+  // cannot widen the page from outside the scroller.
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+
+  > table {
+    width: 100%;
+  }
+
+  @media (width < 600px) {
+    > table:not(.bf-table--stack) thead th:first-child,
+    > table:not(.bf-table--stack) tbody > tr > :first-child {
+      position: sticky;
+      inset-inline-start: 0;
+      z-index: 1;
+    }
+
+    // A sticky cell needs an opaque background; it keeps the row's state tint.
+    > table:not(.bf-table--stack) tbody > tr > :first-child {
+      background: var(--mat-sys-surface-container-lowest);
+    }
+
+    > table tbody > tr.bf-row--info > :first-child {
+      background: var(--sat-sys-info-container);
+    }
+
+    > table tbody > tr.bf-row--important > :first-child {
+      background: var(--sat-sys-important-container);
+    }
+  }
+}
+
+// Opt-in stacked layout below 600px for tables people act on row by row: every row becomes a
+// card and each cell is labelled by its `data-label` attribute.
+//
+//   <table class="bf-split-table bf-table--stack"> … <td data-label="Amount" class="bf-num">…</td>
+@media (width < 600px) {
+  .bf-table--stack {
+    // Not display: table, or the table grows to its widest flex cell and overflows the card.
+    display: block;
+
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    tbody,
+    tr,
+    td,
+    tbody th {
+      display: block;
+      width: auto;
+    }
+
+    tbody tr {
+      height: auto;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    tbody td,
+    tbody th {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 4px 12px;
+      height: auto;
+      padding: 4px 16px;
+      border: 0;
+      text-align: end;
+      white-space: normal;
+    }
+
+    tbody td[data-label]::before {
+      flex: 0 0 auto;
+      content: attr(data-label);
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-medium);
+      text-align: start;
+    }
+
+    // The row's own name (a first cell without a label) heads the card.
+    tbody tr > :first-child:not([data-label]) {
+      display: block;
+      font-weight: 500;
+      text-align: start;
+    }
+  }
+}
