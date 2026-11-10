@@ -1,0 +1,19 @@
+{
+  "ledgerCheck": {
+    "status": "clean",
+    "seconds": 3,
+    "flagsRaised": 0,
+    "budgetsChecked": 11,
+    "journalsChecked": 10065,
+    "linesChecked": 20130,
+    "unbalancedJournals": [],
+    "balanceDrifts": 0
+  },
+  "auditVerification": {
+    "valid": true,
+    "checked": 162,
+    "reason": null,
+    "verifiedAt": "2026-11-10T13:43:04.351Z",
+    "firstBrokenSeq": null
+  }
+}
