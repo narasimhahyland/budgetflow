@@ -74,3 +74,19 @@ gateway address, so a scenario cannot originate from inside and outside a `/20` 
 **Deployment note.** A deployment behind a reverse proxy must set `TRUSTED_PROXY_CIDRS` to that proxy,
 or restricted keys will see the proxy's address. The variable belongs in `infra/.env.example`, which is
 a shared surface and blocked to this session; the user is adding it.
+
+## Verification of the fix
+
+The same scenario that failed against the unfixed code passes against the fix: the spoofed header is
+refused (403 `API_KEY_IP_NOT_ALLOWED`), a direct request is judged by its own address (200), and an
+invalid entry is refused (422).
+
+[`gate-summary.txt`](gate-summary.txt), `scripts/gate.sh static functional-api functional-e2e` on
+`6e1bef38`: every static step, the stack and `functional-api` pass. **`functional-e2e` failed on one
+journey file, unrelated to this change:** `shell/home-overview.spec.ts`, three CEO tests. The page
+showed "See all 77" on one attempt and "See all 80" on another while the journey expected 50 — a count
+that changes between attempts of the same test is nondeterminism, not a regression. The journey takes
+its expected count from the first health response the page receives, while the page can render from a
+later one, by which time journeys running in parallel have created more budgets. This change touches
+only how API keys resolve the caller's address. The journey is fixed separately, on the Phase 17
+branch.
