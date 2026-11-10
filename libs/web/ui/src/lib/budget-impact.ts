@@ -267,7 +267,7 @@ export class BudgetImpactCard {
   readonly requestLabel = input('This request');
 
   protected readonly companyTooltip =
-    'Company-wide Available = authorized − pending − approved − actual (the definition on dashboards). Available under this budget’s rules also deducts earmarks and follows the budget’s control basis.';
+    'Company-wide Available is the dashboards’ figure, in the reporting currency: authorized less earmarks, pending, approved and actual of this budget and every budget below it. Available under this budget’s rules also counts money allocated to child budgets and follows the budget’s control basis.';
 
   protected readonly rulesTooltip = computed(() => {
     const i = this.impact();

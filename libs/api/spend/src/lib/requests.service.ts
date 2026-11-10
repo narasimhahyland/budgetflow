@@ -50,7 +50,9 @@ import type {
 } from '@bf/contracts';
 import {
   acceptsNewActivity,
+  availableOf,
   buildTriplet,
+  checkSpend,
   checkFundingCeiling,
   err,
   postSpendMovement,
@@ -1520,35 +1522,47 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       );
       return {
         items: rows.map((b) => {
-          const blocked = acceptsNewActivity(b.status);
+          const status = acceptsNewActivity(b.status);
           const mine = asked.filter((a) => a.b === b.id);
           const readable = this.policy.can(actor, 'budget.read', budgetResourceOf(b)).allowed;
           const bal = balances.get(b.id)!.budget;
+          const { control } = toPostingBudget(b);
+          // Exhausted: hard control would refuse even one minor unit, so a request can only fail at
+          // submit with INSUFFICIENT_AVAILABLE. Say so here instead of offering the form.
+          const exhausted = status.ok && checkSpend(bal, control, 1).outcome === 'blocked';
+          const blocked = status.ok
+            ? exhausted
+              ? {
+                  code: 'INSUFFICIENT_AVAILABLE',
+                  message:
+                    'Nothing left to request: this budget has no money available. Ask its owner for an increase.',
+                }
+              : null
+            : status.error;
+          const ownsIt = Boolean(actor.personId) && b.ownerPersonId === actor.personId;
           return {
             budgetId: b.id,
             name: b.name,
             code: b.code,
             status: b.status,
             currency: b.currency,
-            blockedCode: blocked.ok ? null : blocked.error.code,
-            blockedReason: blocked.ok ? null : blocked.error.message,
+            blockedCode: blocked?.code ?? null,
+            blockedReason: blocked?.message ?? null,
             requestedThisYear: {
               amountMinor: mine.reduce((a, m) => a + Number(m.amount), 0),
               currency: b.currency,
             },
             pendingCount: mine.filter((m) => PENDING.includes(m.status)).length,
-            approverHint: b.ownerPersonId
-              ? `${owners.get(b.ownerPersonId) ?? 'The budget owner'} approves, within delegation of authority`
-              : null,
+            // Nobody approves their own request: for the owner, routing skips them and goes up.
+            approverHint: !b.ownerPersonId
+              ? null
+              : ownsIt
+                ? 'You own this budget, so the next owner up approves your requests, within delegation of authority'
+                : `${owners.get(b.ownerPersonId) ?? 'The budget owner'} approves, within delegation of authority`,
             available: readable
               ? {
-                  amountMinor:
-                    bal.authorized -
-                    bal.allocated_out -
-                    bal.held -
-                    bal.pre_encumbered -
-                    bal.encumbered -
-                    bal.actual,
+                  // Under the budget's own rules, the figure its submit check uses.
+                  amountMinor: availableOf(bal, control.basis),
                   currency: b.currency,
                 }
               : null,

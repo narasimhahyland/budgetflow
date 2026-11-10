@@ -103,7 +103,7 @@ export const BudgetImpact = named(
       availableBefore: Money.describe("Available under this budget's rules without this request."),
       availableAfter: Money.describe("Available under this budget's rules once this is approved."),
       companyWideAvailable: Money.describe(
-        'Authorized − pre-encumbered − encumbered − actual (the company-wide definition).',
+        'The dashboards’ company-wide Available, in the reporting currency: authorized less held, pre-encumbered, encumbered and actual of the budget and every budget below it.',
       ),
       runRateMonthly: Money.describe('Committed and spent per elapsed month of the fiscal year.'),
       projectedYearEnd: Money.describe('Run rate extended to the end of the fiscal year.'),
