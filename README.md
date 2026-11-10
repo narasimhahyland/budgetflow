@@ -19,28 +19,27 @@ repository read [`AGENTS.md`](AGENTS.md) instead.
 Delivery runs as 20 gated phases. A phase is on `main` only when its evidence pack is committed under
 `evidence/phase-NN/`, so the table below is derived from the repository, not from the plan.
 
-| Phase | Scope                                              | On `main`                          |
-| ----- | -------------------------------------------------- | ---------------------------------- |
-| 1     | Architecture, domain, ledger, schema, test harness | [yes](evidence/phase-01/)          |
-| 2     | Shell, identity, tenancy, Keycloak sign-in         | [yes](evidence/phase-02/)          |
-| 3     | Org and finance master data                        | [yes](evidence/phase-03/)          |
-| 4     | Budgets: allocation, controls, versions, phasing   | [yes](evidence/phase-04/)          |
-| 5     | Events, co-funding, approvals, requests            | [yes](evidence/phase-05/)          |
-| 6     | Actuals, matching, GL tie-out, accruals            | [yes](evidence/phase-06/)          |
-| 7     | Rules engine, workflows, delegation hygiene        | [yes](evidence/phase-07/)          |
-| 8     | Channels: Slack, Teams, actionable email, phone    | [yes](evidence/phase-08/)          |
-| 9     | Event depth: quotes, checklists, surveys           | [yes](evidence/phase-09/)          |
-| 10    | Reports, dashboards, analytics                     | [yes](evidence/phase-10/)          |
-| 11    | Close, forecast, board pack                        | [yes](evidence/phase-11/)          |
-| 12    | Integrations and public API                        | [yes](evidence/phase-12/)          |
-| 13    | AI layer (suggests only, never acts)               | [yes](evidence/phase-13/)          |
-| 14    | Experience and administration                      | [backend only](evidence/phase-14/) |
-| 15    | Extended product features                          | [backend only](evidence/phase-15/) |
-| 16    | Ecosystem: BI, assistant, no-code, marketplace     | [backend only](evidence/phase-16/) |
-| 17-20 | Quality, security, evidence, final report          | not started                        |
+| Phase | Scope                                              | On `main`                 |
+| ----- | -------------------------------------------------- | ------------------------- |
+| 1     | Architecture, domain, ledger, schema, test harness | [yes](evidence/phase-01/) |
+| 2     | Shell, identity, tenancy, Keycloak sign-in         | [yes](evidence/phase-02/) |
+| 3     | Org and finance master data                        | [yes](evidence/phase-03/) |
+| 4     | Budgets: allocation, controls, versions, phasing   | [yes](evidence/phase-04/) |
+| 5     | Events, co-funding, approvals, requests            | [yes](evidence/phase-05/) |
+| 6     | Actuals, matching, GL tie-out, accruals            | [yes](evidence/phase-06/) |
+| 7     | Rules engine, workflows, delegation hygiene        | [yes](evidence/phase-07/) |
+| 8     | Channels: Slack, Teams, actionable email, phone    | [yes](evidence/phase-08/) |
+| 9     | Event depth: quotes, checklists, surveys           | [yes](evidence/phase-09/) |
+| 10    | Reports, dashboards, analytics                     | [yes](evidence/phase-10/) |
+| 11    | Close, forecast, board pack                        | [yes](evidence/phase-11/) |
+| 12    | Integrations and public API                        | [yes](evidence/phase-12/) |
+| 13    | AI layer (suggests only, never acts)               | [yes](evidence/phase-13/) |
+| 14    | Experience and administration                      | [yes](evidence/phase-14/) |
+| 15    | Extended product features                          | [yes](evidence/phase-15/) |
+| 16    | Ecosystem: BI, assistant, no-code, marketplace     | [yes](evidence/phase-16/) |
+| 17-20 | Quality, security, evidence, final report          | not started               |
 
-Phases 14, 15 and 16 merged their API, domain and database halves; their Angular screens are not on
-`main` yet. Each pack holds the gate summary, the functional outcome table, scrubbed API responses and
+Each pack holds the gate summary, the functional outcome table, scrubbed API responses and
 database proofs, and the visual QA report — [`evidence/README.md`](evidence/README.md) explains the
 layout. Screens are tracked individually in
 [`docs/ux/screen-inventory.md`](docs/ux/screen-inventory.md) (124 specified screens plus the ones

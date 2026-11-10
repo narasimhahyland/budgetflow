@@ -362,12 +362,12 @@ forecast. Also not in Phase 10: rendering an export file — an export is record
 days, and scheduled deliveries carry the headline figures and a sign-in link rather than an
 attachment.
 
-Still deferred after the Phase 11 UI: screens 87 and 16a are not built. The `forecast_snapshots`
-table exists, but nothing reads it over HTTP — `reports.ts` has no `forecast-variance` report id and
-no board-pack endpoints, and `close.ts` has no forecast-cycle records, so screen 87a has nowhere to
-write a forecast either. All three need a backend change first (a forecast report in
-`libs/api/reports`, pack pages rendered from `period_close_snapshots`, and forecast-cycle endpoints);
-the UI was not invented against a contract that does not exist.
+Screens 87 (forecast and variance), 87a (forecast cycles) and 16a (board pack) were built later in
+Phase 11, once the backend existed: `forecast-variance` is a report id in
+`libs/api/reports/src/lib/report-definitions.ts`, the board pack has its endpoints under
+`/api/reports/board-pack`, and forecast cycles have their records and endpoints in `libs/api/close`.
+All three have visual baselines. An earlier version of this paragraph said they were not built; that
+was true when it was written and stopped being true within the same phase.
 
 ## Wave 2 parallel split (P4, P5, P6)
 
