@@ -1,0 +1,12 @@
+ledger_lines|20136
+actuals|10261
+ledger_journals|10068
+actual_matches|10007
+fiscal_periods|240
+audit_events|164
+idempotency_keys|158
+product_analytics_events|118
+org_unit_closure|100
+gl_mappings|88
+rule_executions|57
+people|52
