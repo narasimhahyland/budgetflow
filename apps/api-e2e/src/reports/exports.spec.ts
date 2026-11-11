@@ -320,7 +320,9 @@ test.describe('report file exports (A1)', () => {
     );
     expect(screen.rows.length).toBeGreaterThan(0);
     const exported = await exportOf(request, 'finance-controller', 'utilization', 'pdf');
-    expect(exported.rowCount).toBe(screen.rows.length);
+    // Every row of the run, not the screen's page: rowCount is the run's total even when the
+    // screen's own list stops at its 500-row maximum.
+    expect(exported.rowCount).toBe(screen.rowCount);
     const { body } = await fileOf(request, 'finance-controller', exported.id);
     const text = body.toString('latin1');
     expect(text.startsWith('%PDF-1.4')).toBe(true);
