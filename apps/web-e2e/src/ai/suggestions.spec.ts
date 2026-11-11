@@ -246,7 +246,13 @@ test.describe('Anomaly flags (017c)', () => {
     await expectShell(page);
     await page.getByTestId('run-scan').click();
 
-    const row = page.getByRole('row', { name: /Possible split/ });
+    // The seeded pair on Bengaluru Events, by its refs: other journeys raise their own
+    // requests, and any two of them close together can be flagged as a possible split too.
+    const subject = () =>
+      page
+        .getByRole('row', { name: /Possible split/ })
+        .filter({ hasText: 'REQ-00001 and REQ-00007' });
+    const row = subject();
     await expect(row).toBeVisible();
     await row.getByRole('button', { name: 'Possible split' }).click();
 
@@ -265,7 +271,7 @@ test.describe('Anomaly flags (017c)', () => {
     await expect(page.getByText('Flag cleared with your reason.')).toBeVisible();
 
     await page.getByTestId('flag-status-resolved').click();
-    await expect(page.getByRole('row', { name: /Possible split/ })).toBeVisible();
+    await expect(subject()).toBeVisible();
   });
 });
 
