@@ -1,6 +1,6 @@
 # BudgetFlow architecture
 
-BudgetFlow Enterprise is a multi-tenant corporate budget delegation and control platform. This folder describes what exists after Phase 1 and the conventions later phases extend. Planned work is marked as planned.
+BudgetFlow Enterprise is a multi-tenant corporate budget delegation and control platform. This folder describes what exists after Phases 1-18 and the conventions each phase extended. Planned work is marked as planned.
 
 | Document                                                               | What it covers                                                                                                       |
 | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -9,7 +9,7 @@ BudgetFlow Enterprise is a multi-tenant corporate budget delegation and control 
 | [state-machines.md](state-machines.md)                                 | Budget, commitment, event, request, contribution, period, forecast and recharge lifecycles                           |
 | [authorization.md](authorization.md)                                   | The 14 roles, the action matrix behind `PolicyService.can`, scopes, DoA versus ownership                             |
 | [api-conventions.md](api-conventions.md)                               | Paths, auth, tenancy, idempotency, problem details, contracts and OpenAPI                                            |
-| [phase-handoff.md](phase-handoff.md)                                   | Where Phases 2-16 extend: modules, contracts, tables, seed hooks, owned paths                                        |
+| [phase-handoff.md](phase-handoff.md)                                   | Where Phases 2-18 extend: modules, contracts, tables, seed hooks, owned paths                                        |
 | [../adr/](../adr/)                                                     | Architecture decisions (Nov 2026 product decisions: [0006](../adr/0006-single-company-usd-reporting-export-only.md)) |
 | [../ux/screen-inventory.md](../ux/screen-inventory.md)                 | 124 specified plus review-added screens, build phase per screen, role-to-screen matrix                               |
 | [../testing/invariant-scenarios.md](../testing/invariant-scenarios.md) | Invariant-to-scenario map                                                                                            |
@@ -44,15 +44,15 @@ flowchart LR
 
 ## Monorepo and boundaries
 
-| Project                                                                  | Path                                      | Tags                                                       |
-| ------------------------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------- |
-| web, web-e2e                                                             | `apps/web`, `apps/web-e2e`                | `scope:web` / `scope:e2e`                                  |
-| api, worker, api-e2e                                                     | `apps/api`, `apps/worker`, `apps/api-e2e` | `scope:api` / `scope:e2e`                                  |
-| domain                                                                   | `libs/domain`                             | `type:domain`, `scope:shared` (no external imports at all) |
-| contracts                                                                | `libs/contracts`                          | `type:contracts`, `scope:shared` (zod only)                |
-| seed                                                                     | `libs/seed`                               | `type:data`, `scope:shared` (fixed ids and fixtures)       |
-| db                                                                       | `libs/api/db`                             | `type:db`, `scope:api`                                     |
-| api-core, api-audit, api-ledger, api-budgets, api-integrity, api-tenancy | `libs/api/<module>`                       | `type:api-module`, `scope:api`                             |
+| Project                                                            | Path                                      | Tags                                                       |
+| ------------------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------- |
+| web, web-e2e                                                       | `apps/web`, `apps/web-e2e`                | `scope:web` / `scope:e2e`                                  |
+| api, worker, api-e2e                                               | `apps/api`, `apps/worker`, `apps/api-e2e` | `scope:api` / `scope:e2e`                                  |
+| domain                                                             | `libs/domain`                             | `type:domain`, `scope:shared` (no external imports at all) |
+| contracts                                                          | `libs/contracts`                          | `type:contracts`, `scope:shared` (zod only)                |
+| seed                                                               | `libs/seed`                               | `type:data`, `scope:shared` (fixed ids and fixtures)       |
+| db                                                                 | `libs/api/db`                             | `type:db`, `scope:api`                                     |
+| api modules (24: actuals, admin, ai, approvals, audit, budgets, …) | `libs/api/<module>`                       | `type:api-module`, `scope:api`                             |
 
 `eslint.config.mjs` enforces the constraints (web never imports API code, feature libs never import each other). `libs/web/*` libraries are created in Phase 2 with tags `type:ui`, `type:data-access`, `type:feature` and `scope:web`.
 
