@@ -33,6 +33,9 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `ledger.manual_journal`  |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `ledger.reverse`         |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `period.manage`          |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `period.prepare`         |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `yearend.run`            |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `yearend.approve`        |  –  |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `fx.manage`              |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `doa.manage`             |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `doa.read`               |  –  |  –  |  T  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |
@@ -72,6 +75,13 @@ Phase 1 enforces `tenant.read`, `budget.*`, `ledger.*`, `audit.read` and `integr
 Phase 11 adds `forecast.submit` (owners forecast the budgets they own; an event funded only through contributions is finance's to forecast) and `forecast.manage` (Finance Admin opens a cycle, accepts a submission, asks an owner for commentary and closes the cycle). Reading a cycle or the forecast report needs `report.read`, so Finance Controllers, the CEO, auditors and the analyst read without being able to change anything.
 
 The board and FP&A pack (016a) is tenant-wide finance work, and `report.board_pack` is the action for it: the CEO, Finance Admin, Finance Controller, Auditor and Read-only Analyst hold it at tenant scope and nobody holds it at `owned` or `self` scope, so an owner-scoped role is refused rather than shown a subset. It exists as its own action because `report.read` cannot express that set. `report.read` is granted at `owned` scope to the four owner roles, and an `owned` grant covers a tenant resource as soon as the actor owns a budget, so `report.read` in `GET /api/me` reads as true for roles the pack refuses — which is why the sidebar entry could not be gated on it. The route guard for `/reports/board-pack` still uses `report.read`, so an owner who reaches the URL sees the 403 state rather than a dead route. Proven by `close/forecast-cycle.spec.ts` and `reports/board-pack.spec.ts`, which asserts the four owner roles get 403 and the five admitted roles get 200.
+
+Legal holds (screen 111) are read only by those who run retention or holds: any of
+`tenant.settings.manage`, `master_data.manage`, `retention.confirm` or `legal_hold.manage` (Organization
+Admin, Finance Admin, Finance Controller, Auditor). Retention policies stay readable by every member.
+Phase 18 found and closed two operator reads (event templates and headcount); a sweep scenario keeps
+every parameter-free GET endpoint closed to a platform operator without a grant
+(`apps/api-e2e/src/scope/operator-isolation.spec.ts`).
 
 ## Ownership is not authority
 

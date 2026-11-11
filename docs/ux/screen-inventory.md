@@ -2,7 +2,7 @@
 
 All 124 specified screens plus the screens added by the product and finance review, with the phase that builds each one fully working and its primary roles. Screens are designed in Stitch first and implemented only after approval (light theme only; dark theme deferred). Review-added screens are lettered within their group (`56a`). The build plan's group-to-phase mapping applies; this file is the per-screen record. Role abbreviations: [authorization.md](../architecture/authorization.md).
 
-"Stitch" marks screens with an existing design in the original Stitch project (start screens are redesigned first as Satori variants). Status for every screen: not built (Phase 1 builds the backend foundation only).
+"Stitch" marks screens with an existing design in the original Stitch project (start screens are redesigned first as Satori variants). Every screen below is built unless [`docs/handoff.md`](../handoff.md) lists it as not built (section 5). The "Status:" line at the top of each spec in `screens/` is its design status (Stitch image or spec only), not its build status.
 
 Phase 3 built screens 6, 7, 9, 22c, 33-42, 102a, 104a, 106, 106a, 106b, 106c, 107, 107a, 108 and 108a as 13 pages (`/org/*` and `/finance/*`). Screens 22c, 107 and 108 follow their proposed Stitch designs (parity notes in `evidence/phase-03/visual-qa/design-parity.md`); the others were built from the design system without a Stitch design and await design review. Specs: `docs/ux/screens/` (022c-hr-headcount-import, 033, 038, 039, 041, 042, 102a, 104a, 106a, 106b, 106c, 107-exchange-rates, 108-fiscal-calendar).
 
@@ -49,7 +49,7 @@ Specs that apply across many screens. The design system (000) and the applicatio
 | 15b | Participation and reach                                 | P10         | CEO, FA, AN, OA                          | review-added    |
 | 15c | Outcome linkage (pulse, eNPS, retention)                | P15         | CEO, OA, FA, AN; RM scoped               | review-added    |
 | 16  | Budget forecast and variance view                       | P10         | CEO, FA, FC, AN; owners scoped           |                 |
-| 16a | Board and FP&A pack                                     | P10         | CEO, FA, FC, AN                          | review-added    |
+| 16a | Board and FP&A pack                                     | P11         | CEO, FA, FC, AN                          | review-added    |
 | 16b | Under/overspend forecasts and nudges                    | P13         | Owners, FA                               | review-added    |
 | 17  | Alerts and exceptions dashboard                         | P10         | CEO, FA, FC, AN; owners scoped           | Stitch          |
 | 17a | Exceptions dashboard                                    | P10         | FA, FC, AUD                              | review-added    |
@@ -210,7 +210,7 @@ Specs that apply across many screens. The design system (000) and the applicatio
 | 85a | Commitment hygiene (aging, auto-release) | P6          | Owners, FC                          | review-added |
 | 86  | Unused and expired budget report         | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
 | 86a | Reclaim and redistribute unused budget   | P11         | FA, CEO, owners                     | review-added |
-| 87  | Forecast and variance report             | P10         | FA, FC, AUD, AN, CEO; owners scoped |              |
+| 87  | Forecast and variance report             | P11         | FA, FC, AUD, AN, CEO; owners scoped |              |
 | 87a | Forecast cycle with variance commentary  | P11         | Owners, FA                          | review-added |
 | 87b | Year-end run                             | P11         | FA, FC                              | review-added |
 | 87c | Rollover, lapse and sweep policies       | P11         | FA; FC, AUD read                    | review-added |
@@ -251,7 +251,7 @@ Specs that apply across many screens. The design system (000) and the applicatio
 | 102  | Tenant settings                                    | P2          | OA, FA, SA (system health) |              |
 | 102a | Legal entities                                     | P3          | FA, OA                     | review-added |
 | 102b | Program branding                                   | P14         | OA                         | review-added |
-| 102c | Demo environment and rules sandbox                 | P14         | OA, FA                     | review-added |
+| 102c | Demo environment and rules sandbox                 | not built   | OA, FA                     | review-added |
 | 102d | Embeddable balance and events widgets              | P16         | OA, IA                     | review-added |
 | 102e | White-label for resellers                          | Deferred    | SA, OA                     | deferred     |
 | 103  | User and role management                           | P2          | OA                         |              |
@@ -271,7 +271,7 @@ Specs that apply across many screens. The design system (000) and the applicatio
 | 109  | Notification settings                              | P14         | OA, FA, SA (system health) |              |
 | 110  | Document and attachment settings                   | P14         | OA, FA, SA (system health) |              |
 | 111  | Data-retention settings                            | P14         | OA, FA, SA (system health) |              |
-| 112  | Security settings                                  | P14         | OA, FA, SA (system health) |              |
+| 112  | Security settings                                  | P14, P18    | OA, FA, SA (system health) |              |
 | 113  | Audit and compliance settings                      | P14         | OA, FA, SA (system health) |              |
 | 113a | AI settings and query log                          | P13         | OA; FA, AUD read           | review-added |
 | 114  | System health dashboard                            | P14         | SA, OA                     |              |

@@ -62,7 +62,14 @@ RFC 9457 problem details, `content-type: application/problem+json`:
 
 Domain failures map through `domainProblem` (`libs/api/core/src/lib/problem.ts`): input-shaped codes are 422, state conflicts 409. The full code list is `PROBLEM_CODES` in `libs/contracts/src/lib/common.ts`.
 
+## Client address and exports
+
+- A caller's address is the connection's peer address; `X-Forwarded-For` is believed only when that peer is in `TRUSTED_PROXY_CIDRS`, read from the right (`libs/api/core/src/lib/client-ip.ts`). API-key and SCIM allowed networks are matched bit by bit, IPv4 and IPv6.
+- CSV a person opens in a spreadsheet neutralises formulas: a text cell starting with `=`, `+`, `-`, `@`, a tab or a carriage return gets a leading apostrophe; numbers stay numbers (`libs/api/actuals/src/lib/csv.ts`, the web `downloadCsv`).
+
 ## Phase 1 endpoints
+
+The full surface is the generated OpenAPI document (`libs/contracts/openapi/openapi.json`, served at `/api/openapi.json`); the table keeps the Phase 1 core for orientation.
 
 | Method and path                                        | Purpose                                                                       | Permission                                                                                 |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
