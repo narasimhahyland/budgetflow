@@ -1,6 +1,10 @@
-// Wave 2 core acceptance (P4 budgets + P5 events/co-funding/DoA + P6 actuals/GL): ten-step story
-// exercised as named tests. Read-only steps run on every viewport; mutating steps run once on desktop
-// and create their own data through the API (the seeded tree stays untouched).
+// Core acceptance. Two parts:
+//
+// 1. "Core acceptance scenario, end to end" (below the per-step checks): the plan's ten-step scenario
+//    as one story on desktop, through the UI as each role, with API assertions on every number. Its
+//    table of steps is next to it.
+// 2. "Wave 2 core acceptance": the earlier per-step checks. Read-only steps run on every viewport
+//    against the seed; mutating ones run once on desktop on data they create through the API.
 //
 // | Step | Outcome | Role(s) |
 // | --- | --- | --- |
@@ -184,7 +188,7 @@ test.describe('Wave 2 core acceptance', () => {
       const board = page
         .getByRole('heading', { name: new RegExp(`${event.name}: funding breakdown`) })
         .locator('xpath=ancestor::section[1]');
-      await expect(board).toContainText(usdText(90_000));
+      await expect(board).toContainText(usdText(120_000));
 
       const detail = await api<{ contributions: { id: string; status: string }[] }>(
         'budget-owner',
@@ -363,7 +367,6 @@ test.describe('Wave 2 core acceptance', () => {
 // | 9 | New requests blocked; INR card and expense files imported, matched, queue cleared; event closed with surplus by share | regional-manager, finance-controller |
 // | 10 | Audit trail, utilization by location and team with FX separate, GL tie-out | auditor, regional-manager, finance-controller |
 const UK_ENTITY = '20000000-0000-4000-8000-000000000006';
-const minor = (text: string) => Math.round(Number(text.replace(/[^0-9.-]/g, '')) * 100);
 
 interface Balances {
   balances: {
@@ -382,6 +385,11 @@ const balances = (id: string, as: Parameters<typeof api>[0] = 'finance-admin') =
     'get',
     `/api/budgets/${id}`,
   );
+/** Key states for the evidence pack, only when BF_EVIDENCE_DIR is set (never in CI). */
+const shot = async (page: Page, name: string) => {
+  const dir = process.env['BF_EVIDENCE_DIR'];
+  if (dir) await page.screenshot({ path: `${dir}/${name}.png`, fullPage: true });
+};
 /** The second finance admin is an extra seed user with no saved session: sign in fresh. */
 async function secondFinanceAdmin(browser: Browser): Promise<Page> {
   const page = await (await browser.newContext()).newPage();
@@ -434,7 +442,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     asOf2: '',
   };
 
-  test.beforeEach(({}, info) => {
+  test.beforeEach(({ browserName: _browser }, info) => {
     test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
     test.slow();
   });
@@ -498,6 +506,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     await expect(ceo).toHaveURL(/\/budgets\/[0-9a-f-]{36}/);
     s.root = ceo.url().split('/budgets/')[1]!.split(/[?#]/)[0]!;
     await expect(ceo.getByRole('heading', { level: 1, name: s.program })).toBeVisible();
+    await shot(ceo, 'step-01-program-created');
     const root = await balances(s.root);
     expect(root.balances.budgetCurrency.authorized).toEqual({
       amountMinor: 10_000_000,
@@ -508,6 +517,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     await ceo.goto('/finance/rates');
     await expect(ceo.getByTestId('plan-INR')).toContainText('83.2500 (locked)');
     await expect(ceo.getByTestId('plan-EUR')).toContainText('0.9200 (locked)');
+    await shot(ceo, 'step-01-plan-rates-locked');
     await expect(ceo.getByRole('region', { name: 'Plan-rate lock' })).toContainText(
       'FY2026 locked',
     );
@@ -594,6 +604,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     const root = await balances(s.root);
     expect(root.balances.budgetCurrency.allocatedOut.amountMinor).toBe(9_500_000);
     expect(root.balances.available.amountMinor).toBe(500_000);
+    await shot(ceo, 'step-02-children-allocated');
     await ceo.context().close();
   });
 
@@ -653,6 +664,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     await rm.getByRole('button', { name: 'Recalculate preview' }).click();
     await expect(rm.getByTestId('delta')).toContainText(usdText(90_000));
     await expect(rm.getByTestId('apply-per-head')).toHaveText(/Apply true-up/);
+    await shot(rm, 'step-03-true-up-preview');
     await rm.getByTestId('apply-per-head').click();
     await expect(rm.getByTestId('per-head-done')).toBeVisible();
     expect(await authorized(s.hyderabad)).toBe(890_000);
@@ -700,6 +712,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
       .first()
       .fill('10000');
     await expect(rm.getByText('Bengaluru · 2 participants')).toBeVisible();
+    await shot(rm, 'step-04-event-cost-split');
     await rm.getByRole('button', { name: 'Continue to funding' }).click();
     await rm.getByLabel(/Own funds from the home budget/).fill('6000');
     await rm.getByRole('button', { name: 'Review' }).click();
@@ -798,6 +811,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
       await expect(row).toContainText(usdText(r.amount.amountMinor));
       if (r.intercompany) await expect(row).toContainText('Intercompany');
     }
+    await shot(rm, 'step-05-split-by-employing-entity');
     await rm.context().close();
   });
 
@@ -806,7 +820,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
   }) => {
     const rm = await pageAs(browser, 'regional-manager');
     await rm.goto(`/events/${s.eventId}`);
-    const ask = async (budgetName: string, usdAmount: string) => {
+    const ask = async (budgetName: string) => {
       await rm.getByRole('button', { name: 'Request contribution' }).click();
       const matched = rm.waitForResponse(
         (res) =>
@@ -820,9 +834,10 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
       return rm.getByRole('option', { name: new RegExp(budgetName) });
     };
     // The UK budget is offered but disabled: HYL-UK to HYL-IN is blocked by the intercompany policy.
-    const ukOption = await ask(`United Kingdom ${s.tag}`, '1000');
+    const ukOption = await ask(`United Kingdom ${s.tag}`);
     await expect(ukOption).toContainText('Blocked by the intercompany policy.');
     await expect(ukOption).toHaveAttribute('aria-disabled', 'true');
+    await shot(rm, 'step-06-uk-blocked');
     await rm.keyboard.press('Escape');
     await rm.getByRole('button', { name: 'Cancel' }).first().click();
     const blocked = await rawApi('regional-manager', 'post', '/api/contributions', {
@@ -835,7 +850,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     expect(blocked.body.code).toBe('INTERCOMPANY_BLOCKED');
 
     const send = async (budgetName: string, usdAmount: string) => {
-      const opt = await ask(budgetName, usdAmount);
+      const opt = await ask(budgetName);
       await opt.click();
       await rm.getByLabel(/^Amount/).fill(usdAmount);
       await rm.getByLabel('Purpose').fill('Co-fund the summit');
@@ -948,6 +963,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
       .getByRole('table', { name: 'Recharge schedule' })
       .getByRole('row', { name: /At cost/ });
     await expect(row).toContainText(usdText(200_000));
+    await shot(daniel, 'step-06-recharge-schedule');
     await row.getByRole('button', { name: 'Approve recharge' }).click();
     await expect(
       daniel.getByText('Recharge approved; the due-to / due-from journal is posted'),
@@ -1016,6 +1032,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     expect(mail.Subject).toContain(`Approve ${usdText(50_000)}`);
     await ceo.goto(linkPath(mail.Text, 'Approve '));
     await expect(ceo.getByTestId('email-action-result')).toBeVisible();
+    await shot(ceo, 'step-07-email-decision');
     await expect
       .poll(async () => (await getRequest(extra.id, 'regional-manager')).status)
       .toBe('approved');
@@ -1040,6 +1057,14 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     await rm.getByLabel('Amount').fill('9000');
     await rm.getByRole('button', { name: 'Commit', exact: true }).click();
     await expect(rm.getByRole('table', { name: 'Commitments' })).toContainText(usdText(900_000));
+    const committed = await api<{
+      funding: Record<'committed' | 'actual' | 'available', { amountMinor: number }>;
+    }>('regional-manager', 'get', `/api/events/${s.eventId}`);
+    expect(committed.funding).toMatchObject({
+      committed: { amountMinor: 900_000 },
+      actual: { amountMinor: 0 },
+      available: { amountMinor: 100_000 },
+    });
     const india = await balances(s.india);
     expect(india.balances.budgetCurrency.encumbered.amountMinor).toBeGreaterThan(0);
     await rm.context().close();
@@ -1081,6 +1106,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     await expect(confirm).toBeDisabled();
     await dialog.getByTestId('confirm-text').fill(`India ${s.tag}`);
     await expect(confirm).toBeEnabled();
+    await shot(fa, 'step-08-set-to-zero-dialog');
     await confirm.click();
     await expect(fa.getByTestId('zero-banner')).toBeVisible();
 
@@ -1111,6 +1137,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     );
     await rm.getByLabel('Amount', { exact: true }).fill('100');
     await expect(rm.getByTestId('impact-blocked')).toContainText('set to zero');
+    await shot(rm, 'step-09-new-request-blocked');
     await expect(rm.getByRole('button', { name: 'Submit request' })).toBeDisabled();
     const refused = await rawApi('regional-manager', 'post', '/api/requests', {
       kind: 'spending',
@@ -1124,8 +1151,9 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     expect(refused.body.code).toBe('BUDGET_SET_TO_ZERO');
 
     await rm.goto(`/events/${s.eventId}`);
-    await expect(rm.getByTestId('event-blocked')).toContainText(
-      'Existing commitments stay visible and can complete',
+    // The reason is stated once (the domain message already says commitments can complete).
+    await expect(rm.getByTestId('event-blocked')).toHaveText(
+      /Home budget: This budget is set to zero: new requests, allocations and contributions are blocked\. Existing commitments can still complete\.\s*$/,
     );
     await rm.getByRole('button', { name: 'Start event' }).click();
     await rm.getByRole('button', { name: 'Complete event' }).click();
@@ -1186,6 +1214,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
       const byCurrency = fc.getByRole('table', { name: 'Imported lines by transaction currency' });
       await expect(byCurrency.getByRole('row', { name: /INR/ })).toContainText('83.2500');
       await expect(fc.getByText('Budget consumption uses the locked plan rate.')).toBeVisible();
+      await shot(fc, `step-09-import-${f.source.toLowerCase().replace(/ /g, '-')}`);
       await fc.getByTestId('post-import').click();
       await expect(fc.getByTestId('import-notice')).toContainText(
         `${f.unmatched} sent to the unmatched queue`,
@@ -1232,6 +1261,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     await expect(drawer.getByTestId('fx-effect')).toBeVisible();
     await drawer.getByTestId(`candidate-${cmtRef}`).click();
     await drawer.getByRole('checkbox', { name: /Final invoice/ }).check();
+    await shot(fc, 'step-09-unmatched-queue-match');
     await drawer.getByTestId('match-button').click();
     await expect(fc.getByTestId('queue-notice')).toContainText(`${exp}-2 matched`);
     expect((await lines())[`${exp}-2`]!.status).toBe('matched');
@@ -1265,12 +1295,14 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
       usdText(Math.abs(recon.actuals.fxEffect.amountMinor)),
     );
     await expect(kpi('FX effect (separate)')).toContainText('Never consumes budget');
+    await shot(fc, 'step-09-reconciliation-fx-separate');
     await fc.context().close();
 
     // Ananya closes the event; each funding source gets back its share of the USD 2,000.00 surplus.
     await rm.reload();
     await rm.getByRole('button', { name: 'Close and return surplus' }).click();
     await expect(rm.getByText(/Surplus returned:/)).toBeVisible();
+    await shot(rm, 'step-09-event-closed-surplus');
     const closed = await api<{
       event: { status: string };
       surplusReturns: { budgetId: string; budgetName: string; amount: { amountMinor: number } }[];
@@ -1281,6 +1313,18 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
       }[];
     }>('finance-controller', 'get', `/api/actuals/events/${s.eventId}/reconciliation`);
     expect(closed.event.status).toBe('closed');
+    // The closed event keeps its spend: USD 8,000.00 actual, nothing committed or available.
+    const after = await api<{
+      funding: Record<'committed' | 'actual' | 'available', { amountMinor: number }>;
+    }>('regional-manager', 'get', `/api/events/${s.eventId}`);
+    expect(after.funding).toMatchObject({
+      committed: { amountMinor: 0 },
+      actual: { amountMinor: 800_000 },
+      available: { amountMinor: 0 },
+    });
+    await expect(rm.getByText('Actual', { exact: true }).locator('xpath=../..')).toContainText(
+      usdText(800_000),
+    );
     const returned = (id: string) =>
       closed.surplusReturns
         .filter((r) => r.budgetId === id)
@@ -1326,6 +1370,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     await expect(entries.getByRole('row', { name: /Closed/ })).toBeVisible();
     await auditor.getByRole('button', { name: 'Verify chain' }).click();
     await expect(auditor.getByTestId('chain-status')).toContainText('Chain verified');
+    await shot(auditor, 'step-10-audit-trail');
     const zeroed = await api<{ items: { action: string }[] }>(
       'auditor',
       'get',
@@ -1353,6 +1398,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
         await expect(r).toContainText(usdText(row.cells['authorized']!.money!.amountMinor));
         await expect(r).toContainText(usdText(row.cells['actual']!.money!.amountMinor));
       }
+      await shot(ceo, `step-10-utilization-by-${groupBy}`);
     }
     const byLocation = await api<{
       rows: { label: string; cells: Record<string, { money?: { amountMinor: number } }> }[];
@@ -1437,6 +1483,7 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     await expect(fa.getByTestId('sign-off')).toHaveText(/Sign off Dec 2026 with explanations/);
     await fa.getByTestId('sign-off').click();
     await expect(fa.getByTestId('signed-off')).toContainText('Signed off by Priya Raman');
+    await shot(fa, 'step-10-gl-tie-out-signed-off');
     await fa.context().close();
     const tie = await api<{
       items: {

@@ -1490,6 +1490,21 @@ export class EventsService implements OnModuleInit {
     const srcs = await this.sources.list(tx, e.id);
     const f = await this.funding(tx, e, srcs);
     const m = (amountMinor: number) => ({ amountMinor, currency: e.currency });
+    // What the commitments drew from the funding sources splits into what actuals have consumed
+    // (actual) and what is still committed. Settled sources count too, so a closed event keeps
+    // its spend instead of showing its cap available again.
+    const commitments = await this.commitmentsService.listForEvent(tx, e.id);
+    const actualMinor = commitments.reduce((a, c) => {
+      if (c.consumed.currency === e.currency) return a + c.consumed.amountMinor;
+      // A commitment in another currency: its consumed share of the budget-currency amount.
+      return c.amount.amountMinor
+        ? a +
+            Math.round((c.consumed.amountMinor * c.budgetAmount.amountMinor) / c.amount.amountMinor)
+        : a;
+    }, 0);
+    const drawnMinor = srcs
+      .filter((x) => x.status !== 'cancelled')
+      .reduce((a, x) => a + x.consumedMinor, 0);
     const budgetsById = new Map(
       (srcs.length
         ? await tx
@@ -1611,9 +1626,9 @@ export class EventsService implements OnModuleInit {
         contributions: m(f.contributionsMinor),
         pending: m(f.pendingMinor),
         cap: m(f.capMinor),
-        committed: m(f.committedMinor),
-        actual: m(0),
-        available: m(Math.max(f.capMinor - f.committedMinor, 0)),
+        committed: m(Math.max(drawnMinor - actualMinor, 0)),
+        actual: m(actualMinor),
+        available: m(Math.max(f.capMinor - drawnMinor, 0)),
         gap: m(f.gapMinor),
         fullyFunded: f.fullyFunded,
         perHead: participants.length
@@ -1671,7 +1686,7 @@ export class EventsService implements OnModuleInit {
       })),
       intercompany,
       ownFundsRequest: ownReq ? { id: ownReq.id, ref: ownReq.ref, status: ownReq.status } : null,
-      commitments: await this.commitmentsService.listForEvent(tx, e.id),
+      commitments,
       recharges: await this.intercompany.views(
         tx,
         actor,

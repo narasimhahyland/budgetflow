@@ -25,7 +25,9 @@ root=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
 # from the environment, so they are never printed.
 set -- "$IMAGE" "$@"
 set -- -e PW_DOCKER=1 -e CI -e HOME=/tmp -e BASE_URL "$@"
-for name in $(env | sed -n 's/^\(BF_E2E_[A-Z0-9_]*\)=.*/\1/p'); do
+# The stack's host ports too: a worktree stack on its own ports must not fall back to the defaults,
+# which belong to another checkout's stack.
+for name in $(env | sed -n -e 's/^\(BF_E2E_[A-Z0-9_]*\)=.*/\1/p' -e 's/^\(BF_[A-Z0-9_]*_PORT\)=.*/\1/p'); do
   set -- -e "$name" "$@"
 done
 
