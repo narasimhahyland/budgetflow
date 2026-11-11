@@ -37,3 +37,15 @@ export const todayIso = (): string => new Date().toISOString().slice(0, 10);
 export function valueOf<T>(r: { hasValue(): boolean; value(): T }): T | undefined {
   return r.hasValue() ? r.value() : undefined;
 }
+
+/**
+ * Starts a browser download of a signed file URL. The store answers with
+ * `Content-Disposition: attachment`, so the page stays where it is.
+ */
+export function startDownload(doc: Document, url: string, fileName: string): void {
+  const a = doc.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.rel = 'noopener';
+  a.click();
+}

@@ -4,7 +4,7 @@
 // employee gets. Figures are cross-checked against the API so the screen can never quietly disagree
 // with the ledger.
 import { expect, request as pwRequest, test, type APIRequestContext } from '@playwright/test';
-import { SEED } from '@bf/seed';
+import { SEED, userById } from '@bf/seed';
 import { apiToken, expectShell } from '../support/auth';
 import { API_URL } from '../support/env';
 import { authFile } from '../support/roles';
@@ -148,17 +148,36 @@ test.describe('the shared report frame (80-86, 15a, 15b)', () => {
     await expect(panel.getByRole('table', { name: 'Ledger lines' })).toBeVisible();
   });
 
-  test('an export is recorded honestly: no file is promised', async ({ page }, info) => {
+  test('the Download menu saves a real CSV of the screen, with its rows', async ({
+    page,
+  }, info) => {
     test.skip(info.project.name !== 'desktop', 'mutating journey runs once, on desktop');
+    const report = await getJson<ReportResult>(
+      'finance-controller',
+      '/api/reports/unused-expired/run?limit=500',
+    );
+    expect(report.rows.length, 'the seed gives this report rows').toBeGreaterThan(0);
     await page.goto('/reports/unused-expired');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Record an export' }).click();
-    await page.getByRole('menuitem', { name: 'CSV' }).click();
+    await page.getByRole('button', { name: 'Download' }).click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('menuitem', { name: 'CSV file' }).click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(
+      /^unused-expired-\d{4}-\d{2}-\d{2}-[0-9a-f]{8}\.csv$/,
+    );
+    const file = await download.path();
+    const { readFile } = await import('node:fs/promises');
+    const lines = (await readFile(file, 'utf8')).trimEnd().split('\r\n');
+    // A header row, one line per row of the run, and the totals row when the report has one.
+    expect(lines.length).toBeGreaterThanOrEqual(1 + report.rows.length);
+    for (const row of report.rows.slice(0, 5)) expect(lines.join('\n')).toContain(row.label);
 
     const notice = page.getByTestId('report-notice');
-    await expect(notice).toContainText('CSV export recorded');
-    await expect(notice).toContainText('BudgetFlow does not produce a file yet');
+    await expect(notice).toContainText(`Downloading ${download.suggestedFilename()}`);
+    await expect(notice).toContainText(`${report.rows.length} row`);
   });
 });
 
@@ -274,10 +293,9 @@ test.describe('scheduled reports (91)', () => {
     await expectShell(page);
     await expect(page.getByRole('heading', { level: 1, name: 'Scheduled reports' })).toBeVisible();
 
-    // The screen is honest about what a delivery carries.
-    await expect(page.getByTestId('delivery-note')).toContainText(
-      'does not produce a file to download yet',
-    );
+    // The screen says what a delivery carries: files by email, figures in chat.
+    await expect(page.getByTestId('delivery-note')).toContainText('Email carries the files');
+    await expect(page.getByTestId('delivery-note')).toContainText('never a file');
 
     const weekly = page.getByTestId(`schedule-${SEED.p10.schedules.indiaUtilizationWeekly}`);
     await expect(weekly).toContainText('India utilization, weekly');
@@ -290,12 +308,16 @@ test.describe('scheduled reports (91)', () => {
       'Delivered',
     );
 
-    // The export record, with its 7-day expiry, and no download link.
+    // The seeded export predates files: it is listed with its 7-day expiry and offers no download.
     await expect(page.getByRole('heading', { level: 2, name: 'Recent exports' })).toBeVisible();
     const exports = page.getByRole('table', { name: 'Recent exports' });
-    await expect(exports).toContainText('Utilization');
-    await expect(exports).toContainText('PDF');
-    await expect(exports.getByRole('link', { name: /download/i })).toHaveCount(0);
+    const seeded = exports
+      .getByRole('row')
+      .filter({ hasText: userById('regional-manager').displayName })
+      .filter({ hasText: 'Utilization' })
+      .filter({ hasText: 'PDF' });
+    await expect(seeded).toHaveCount(1);
+    await expect(seeded.getByRole('button', { name: /^Download/ })).toHaveCount(0);
   });
 
   test('a finance admin pauses a schedule and resumes it', async ({ page }, info) => {

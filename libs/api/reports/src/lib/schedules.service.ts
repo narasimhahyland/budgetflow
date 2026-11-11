@@ -26,7 +26,10 @@ import type {
   CreateExportRequest,
   CreateScheduleRequest,
   ReportExport,
+  ReportExportDownload,
   ReportFilters,
+  ReportFormat,
+  ReportResult,
   ReportId,
   ReportSchedule,
   ScheduleChannel,
@@ -35,14 +38,23 @@ import type {
   UpdateScheduleRequest,
 } from '@bf/contracts';
 import { nextRunAt, validateCadence, type ScheduleCadence } from '@bf/domain';
+import { S3DocumentStore, type DocumentStore } from '@bf/api/documents';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, inArray } from 'drizzle-orm';
+import { createHash, randomUUID } from 'node:crypto';
+import {
+  EXPORT_CONTENT_TYPES,
+  exportFileName,
+  exportStorageKey,
+  renderReportFile,
+} from './export-files';
 import { REPORT_SPECS } from './report-definitions';
 import type { CommandContext } from './saved-views.service';
 
 export const REPORT_DELIVER_TOPIC = 'report.deliver';
 export const REPORT_SWEEP_TOPIC = 'report.schedule_sweep';
 const EXPORT_DAYS = 7;
+const DOWNLOAD_TTL = 300;
 
 type ScheduleRow = typeof reportSchedules.$inferSelect;
 type RunRow = typeof reportScheduleRuns.$inferSelect;
@@ -73,7 +85,8 @@ const toRun = (r: RunRow): ScheduleRun => ({
 /**
  * Scheduled report delivery (screen 091). A schedule runs with its owner's scope; before an
  * attachment reaches a recipient their own `report.read` scope is checked again, so delivery can
- * never widen access. Channels get headline figures and a sign-in link, never a file.
+ * never widen access. Email recipients get the rendered files attached; channels get headline
+ * figures and a sign-in link, never a file.
  */
 @Injectable()
 export class SchedulesService {
@@ -83,6 +96,7 @@ export class SchedulesService {
     private readonly policy: PolicyService,
     private readonly audit: AuditService,
     private readonly actors: ActorResolver,
+    private readonly store: S3DocumentStore,
   ) {}
 
   private tx<T>(actor: RequestActor, body: (tx: Tx) => Promise<T>): Promise<T> {
@@ -555,12 +569,17 @@ export class SchedulesService {
     });
   }
 
+  /**
+   * Renders the report run into a CSV, XLSX or PDF file and stores it under the tenant's own key.
+   * `result` was run with the requester's own filters and scope (the screen's), so the file carries
+   * exactly what the screen shows them. One audit event records the export, with the file's digest.
+   */
   createExport(
     actor: RequestActor,
     reportId: ReportId,
     body: CreateExportRequest,
     ctx: CommandContext,
-    rowCount: number,
+    result: ReportResult,
   ): Promise<CommandResult<ReportExport>> {
     return this.commands.run(
       actor,
@@ -571,20 +590,14 @@ export class SchedulesService {
         status: 201,
       },
       async (tx) => {
-        const expiresAt = new Date(Date.now() + EXPORT_DAYS * 24 * 60 * 60 * 1000);
-        const [row] = await tx
-          .insert(reportExports)
-          .values({
-            tenantId: actor.tenantId,
-            reportId,
-            format: body.format,
-            filters: body.filters,
-            rowCount,
-            status: 'ready',
-            requestedByPersonId: actor.personId,
-            expiresAt,
-          })
-          .returning();
+        const row = await writeExportFile(tx, this.store, {
+          tenantId: actor.tenantId,
+          result,
+          format: body.format,
+          filters: body.filters,
+          requestedByPersonId: actor.personId,
+          scheduleId: null,
+        });
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
@@ -593,11 +606,85 @@ export class SchedulesService {
           resourceType: 'report_export',
           resourceId: row.id,
           requestId: ctx.requestId,
-          changes: { reportId, format: body.format, filters: body.filters, rowCount },
+          changes: {
+            reportId,
+            format: body.format,
+            filters: body.filters,
+            rowCount: row.rowCount,
+            scope: result.scope.label,
+            fileName: row.fileName,
+            sizeBytes: row.sizeBytes,
+            sha256: row.sha256,
+          },
         });
-        return toExport(row, actor.displayName);
+        return toExport(row.row, actor.displayName);
       },
     );
+  }
+
+  /**
+   * A five-minute signed link to an export's file. Only the person who asked for it, or a role
+   * that sees the whole tenant, gets one; a scoped requester must still be able to read the scope.
+   * Handing out a link is audited.
+   */
+  downloadExport(
+    actor: RequestActor,
+    exportId: string,
+    requestId: string | null,
+  ): Promise<ReportExportDownload> {
+    return this.tx(actor, async (tx) => {
+      const [row] = await tx.select().from(reportExports).where(eq(reportExports.id, exportId));
+      if (!row) throw ApiProblem.notFound('export');
+      const tenantWide = this.tenantWide(actor, 'report.read');
+      const own = Boolean(row.requestedByPersonId) && row.requestedByPersonId === actor.personId;
+      if (!tenantWide) {
+        if (!own)
+          throw ApiProblem.forbidden('Only the person who exported this file can download it.');
+        const filters = row.filters as ReportFilters;
+        const stillSees = filters.rootBudgetId
+          ? this.policy.can(
+              actor,
+              'report.read',
+              await this.scopeResource(tx, actor.tenantId, filters),
+            ).allowed
+          : actor.ownedBudgetPaths.length > 0;
+        if (!stillSees)
+          throw ApiProblem.forbidden('You can no longer see the budgets this export covers.');
+      }
+      if (row.sizeBytes === null)
+        throw new ApiProblem(
+          409,
+          'REPORT_EXPORT_NO_FILE',
+          'This export was recorded before BudgetFlow produced files; export the report again.',
+        );
+      if (row.expiresAt.getTime() < Date.now())
+        throw new ApiProblem(
+          409,
+          'REPORT_EXPORT_EXPIRED',
+          'This export has expired after 7 days; export the report again.',
+        );
+      const fileName = exportFileName(row.reportId, row.requestedAt, row.id, row.format);
+      // Who fetched which file is part of the trail (screen 091): one entry per link handed out.
+      await this.audit.append(tx, {
+        tenantId: actor.tenantId,
+        actorPersonId: actor.personId,
+        actorSubject: actor.subject,
+        action: 'report.export_downloaded',
+        resourceType: 'report_export',
+        resourceId: row.id,
+        requestId,
+        changes: { reportId: row.reportId, format: row.format, fileName },
+      });
+      return {
+        url: this.store.downloadUrl(
+          exportStorageKey(row.tenantId, row.id, row.format),
+          fileName,
+          DOWNLOAD_TTL,
+        ),
+        fileName,
+        expiresAt: new Date(Date.now() + DOWNLOAD_TTL * 1000).toISOString(),
+      };
+    });
   }
 
   private async personNames(tx: Tx, ids: readonly (string | null)[]): Promise<Map<string, string>> {
@@ -625,5 +712,65 @@ function toExport(r: ExportRow, requestedByName: string | null): ReportExport {
     requestedAt: r.requestedAt.toISOString(),
     expiresAt: r.expiresAt.toISOString(),
     scheduleId: r.scheduleId,
+    fileName:
+      r.sizeBytes === null ? null : exportFileName(r.reportId, r.requestedAt, r.id, r.format),
+  };
+}
+
+/**
+ * Renders one export file, writes it to the DocumentStore under the tenant's prefix and records the
+ * export row with its size. Shared by on-screen exports and scheduled deliveries; the caller audits.
+ */
+export async function writeExportFile(
+  tx: Tx,
+  store: DocumentStore,
+  input: {
+    tenantId: string;
+    result: ReportResult;
+    format: ReportFormat;
+    filters: ReportFilters;
+    requestedByPersonId: string | null;
+    scheduleId: string | null;
+  },
+): Promise<{
+  row: ExportRow;
+  id: string;
+  rowCount: number;
+  fileName: string;
+  storageKey: string;
+  contentType: string;
+  sizeBytes: number;
+  sha256: string;
+}> {
+  const id = randomUUID();
+  const body = renderReportFile(input.result, input.format);
+  const storageKey = exportStorageKey(input.tenantId, id, input.format);
+  const contentType = EXPORT_CONTENT_TYPES[input.format];
+  await store.put(storageKey, contentType, body);
+  const [row] = await tx
+    .insert(reportExports)
+    .values({
+      id,
+      tenantId: input.tenantId,
+      reportId: input.result.reportId,
+      format: input.format,
+      filters: input.filters,
+      rowCount: input.result.rows.length,
+      status: 'ready',
+      sizeBytes: body.length,
+      scheduleId: input.scheduleId,
+      requestedByPersonId: input.requestedByPersonId,
+      expiresAt: new Date(Date.now() + EXPORT_DAYS * 24 * 60 * 60 * 1000),
+    })
+    .returning();
+  return {
+    row,
+    id,
+    rowCount: row.rowCount,
+    fileName: exportFileName(row.reportId, row.requestedAt, id, input.format),
+    storageKey,
+    contentType,
+    sizeBytes: body.length,
+    sha256: createHash('sha256').update(body).digest('hex'),
   };
 }
