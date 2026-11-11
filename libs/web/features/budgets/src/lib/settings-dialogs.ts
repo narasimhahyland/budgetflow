@@ -12,6 +12,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
@@ -41,13 +42,29 @@ type Bucket = (typeof BUCKETS)[number]['key'];
     MatCheckboxModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     SAT_BANNER_IMPORTS,
     SAT_TAG_IMPORTS,
   ],
   styleUrl: './dialogs.scss',
   template: `
-    <h2 mat-dialog-title>Controls and alerts · {{ b.name }}</h2>
+    <div mat-dialog-title class="bf-dialog__head">
+      <span class="bf-dialog__icon"><mat-icon svgIcon="shield" aria-hidden="true" /></span>
+      <div>
+        <h2 class="bf-dialog__title">Controls and alerts</h2>
+        <p class="bf-dialog__subtitle">{{ b.name }} · {{ b.currency }}</p>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
+    </div>
     <mat-dialog-content>
       <p class="bf-dialog__section-title">Owner alert thresholds</p>
       <p class="bf-note">
@@ -113,12 +130,14 @@ type Bucket = (typeof BUCKETS)[number]['key'];
         <mat-label>Reason for the change</mat-label>
         <input matInput [(ngModel)]="reason" />
       </mat-form-field>
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
@@ -196,6 +215,7 @@ export class SettingsDialog {
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     MatTableModule,
@@ -204,7 +224,22 @@ export class SettingsDialog {
   ],
   styleUrl: './dialogs.scss',
   template: `
-    <h2 mat-dialog-title>Roll forward {{ b.name }}</h2>
+    <div mat-dialog-title class="bf-dialog__head">
+      <span class="bf-dialog__icon"><mat-icon svgIcon="redo" aria-hidden="true" /></span>
+      <div>
+        <h2 class="bf-dialog__title">Roll forward</h2>
+        <p class="bf-dialog__subtitle">{{ b.name }} · into a new fiscal year</p>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
+    </div>
     <mat-dialog-content>
       <p class="bf-note">
         Clones the tree (names, owners, cost centers, controls and per-head rules) into the target
@@ -261,12 +296,14 @@ export class SettingsDialog {
           <tr mat-row *matRowDef="let row; columns: ['name', 'amount']"></tr>
         </table>
       }
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button mat-stroked-button type="button" [disabled]="busy() || !ready()" (click)="run(true)">

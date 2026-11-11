@@ -2,14 +2,18 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '@bf/web/data-access';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatHMarkLogo } from '@hylandsoftware/satori-ui/logo';
 
 /** After sign-out: the BudgetFlow and Keycloak sessions have ended; signing in asks for credentials. */
 @Component({
   selector: 'bf-signed-out-page',
-  imports: [MatButtonModule, SAT_EMPTY_STATE_IMPORTS],
+  imports: [MatButtonModule, SAT_EMPTY_STATE_IMPORTS, SatHMarkLogo],
   template: `
     <main class="bf-auth-page">
-      <p class="bf-auth-page__brand">BudgetFlow</p>
+      <div class="bf-auth-page__brand">
+        <sat-h-mark-logo class="bf-auth-page__mark" ariaLabel="Hyland" />
+        <p class="bf-auth-page__product">BudgetFlow<span>Enterprise</span></p>
+      </div>
       <section class="bf-auth-page__card">
         <sat-empty-state>
           <h1 satEmptyStateHeadline>You have signed out</h1>
@@ -35,10 +39,13 @@ export class SignedOutPage {
 /** The identity provider refused or the callback could not be completed; the user can retry. */
 @Component({
   selector: 'bf-sign-in-problem-page',
-  imports: [MatButtonModule, SAT_EMPTY_STATE_IMPORTS],
+  imports: [MatButtonModule, SAT_EMPTY_STATE_IMPORTS, SatHMarkLogo],
   template: `
     <main class="bf-auth-page">
-      <p class="bf-auth-page__brand">BudgetFlow</p>
+      <div class="bf-auth-page__brand">
+        <sat-h-mark-logo class="bf-auth-page__mark" ariaLabel="Hyland" />
+        <p class="bf-auth-page__product">BudgetFlow<span>Enterprise</span></p>
+      </div>
       <section class="bf-auth-page__card">
         <sat-401-error-state>
           <h1 satErrorStateHeadline>We could not sign you in</h1>

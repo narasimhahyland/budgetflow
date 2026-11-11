@@ -17,11 +17,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { BatchAllocationResult, BudgetDetail } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { BudgetBar, type BudgetBarSegment, LoadState, Money } from '@bf/web/ui';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, pct, toMajor, toMinor, valueOf } from './api';
-import { LoadState } from './load-state';
 
 interface GridRow {
   key: string;
@@ -38,6 +38,7 @@ interface GridRow {
 @Component({
   selector: 'bf-allocation-workspace-page',
   imports: [
+    BudgetBar,
     FormsModule,
     LoadState,
     MatButtonModule,
@@ -49,6 +50,7 @@ interface GridRow {
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatImportantButton,
   ],
   templateUrl: './allocate.page.html',
   styleUrls: ['./page.scss', './allocate.page.scss'],
@@ -182,6 +184,45 @@ export class AllocationWorkspacePage {
     () => this.parent()?.balances.allocationAvailable.amountMinor ?? 0,
   );
   protected readonly over = computed(() => this.totalChange() > this.available());
+
+  /** A row whose increase is part of a grid that allocates more than the parent has. */
+  protected exceeds(r: GridRow): boolean {
+    return this.over() && !!r.childId && (this.deltaOf(r) ?? 0) > 0;
+  }
+
+  /** The parent in section 10 buckets, with this grid's change hatched and Available after it. */
+  protected readonly barSegments = computed((): BudgetBarSegment[] => {
+    const c = this.parent()?.balances.budgetCurrency;
+    if (!c) return [];
+    const change = this.totalChange();
+    return [
+      { bucket: 'allocatedOut', amountMinor: c.allocatedOut.amountMinor },
+      { bucket: 'held', amountMinor: c.held.amountMinor },
+      {
+        bucket: 'preEncumbered',
+        amountMinor: c.preEncumbered.amountMinor,
+        label: 'Pending requests',
+      },
+      { bucket: 'encumbered', amountMinor: c.encumbered.amountMinor, label: 'Committed' },
+      { bucket: 'actual', amountMinor: c.actual.amountMinor },
+      { bucket: 'thisRequest', amountMinor: change, label: 'This change' },
+      {
+        bucket: 'available',
+        amountMinor: Math.max(this.available() - change, 0),
+        label: 'Available after',
+      },
+    ];
+  });
+
+  /** Why "Submit as one change" is disabled, shown next to it. */
+  protected readonly submitBlockedReason = computed((): string | null => {
+    if (this.busy()) return null;
+    if (this.over()) return 'Lower the amounts until the grid fits the parent available.';
+    if (this.rowErrors().size) return 'Fix the highlighted cells to submit.';
+    if (!this.changes().length) return 'Change at least one amount to submit.';
+    if (!(this.preview()?.ok ?? false)) return 'Checking the change against the parent…';
+    return null;
+  });
   protected readonly allocatedPct = computed(() => {
     const p = this.parent();
     const a = p?.balances.budgetCurrency.authorized.amountMinor ?? 0;

@@ -17,13 +17,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { VendorQuoteItem } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, Money } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { EventTabs } from './event-tabs';
-import { LoadState } from './load-state';
+import { label } from './labels';
 
 const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
   within_limit: 'Within the limit',
@@ -49,6 +50,7 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SatImportantButton,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -82,20 +84,29 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
     @if (view(); as v) {
       <section class="bf-kpis" aria-label="What the event can still spend">
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Funded</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Funded</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="graph_radial" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money [amountMinor]="v.funded.amountMinor" [currency]="v.funded.currency" />
           </p>
         </div>
-        <div class="bf-kpi">
-          <p class="bf-kpi__label">Committed</p>
+        <div class="bf-kpi bf-kpi--warning">
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Committed</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="shield_lock" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money [amountMinor]="v.committed.amountMinor" [currency]="v.committed.currency" />
           </p>
         </div>
-        <div class="bf-kpi">
-          <p class="bf-kpi__label">Available under this event's rules</p>
-          <p class="bf-kpi__value" data-testid="quotes-available">
+        <div class="bf-kpi bf-kpi--success">
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Available under this event's rules</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="circle_check" aria-hidden="true" />
+          </div>
+          <p class="bf-kpi__value bf-kpi__value--success" data-testid="quotes-available">
             <bf-money [amountMinor]="v.available.amountMinor" [currency]="v.available.currency" />
           </p>
         </div>
@@ -122,9 +133,9 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
               }
             </p>
           </div>
-          <div class="bf-table-scroll">
-            <table class="bf-split-table">
-              <caption class="bf-empty">
+          <div class="bf-table-scroll bf-quote-matrix">
+            <table class="bf-split-table" [attr.aria-label]="'Compare quotes for ' + r.title">
+              <caption>
                 Transaction currency and the budget amount at the locked plan rate, side by side.
               </caption>
               <thead>
@@ -139,13 +150,17 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
                 <tr>
                   <th scope="row">Vendor status</th>
                   @for (q of r.quotes; track q.id) {
-                    <td>{{ q.vendorStatus }}</td>
+                    <td>
+                      <sat-status-tag [status]="vendorTone(q.vendorStatus)">{{
+                        label(q.vendorStatus)
+                      }}</sat-status-tag>
+                    </td>
                   }
                 </tr>
                 <tr>
                   <th scope="row">Total</th>
                   @for (q of r.quotes; track q.id) {
-                    <td>
+                    <td class="bf-num">
                       @if (q.status === 'requested') {
                         <span class="bf-cell__secondary">Waiting for the answer</span>
                       } @else {
@@ -160,10 +175,10 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
                             [amountMinor]="q.budgetAmount.amountMinor"
                             [currency]="q.budgetAmount.currency"
                           />
-                          @if (q.isLowest) {
-                            (lowest)
-                          }
                         </span>
+                        @if (q.isLowest) {
+                          <sat-status-tag status="success">Lowest</sat-status-tag>
+                        }
                       }
                     </td>
                   }
@@ -171,7 +186,7 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
                 <tr>
                   <th scope="row">Per head</th>
                   @for (q of r.quotes; track q.id) {
-                    <td>
+                    <td class="bf-num">
                       <bf-money
                         [amountMinor]="q.perHead.amountMinor"
                         [currency]="q.perHead.currency"
@@ -200,7 +215,12 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
                     <td>
                       {{ q.validUntil ? (q.validUntil | bfDate: session.timezone()) : 'Not given' }}
                       @if (q.expired) {
-                        <span class="bf-chip">Expired</span>
+                        <sat-status-tag status="neutral"
+                          ><mat-icon
+                            svgIcon="timer_off"
+                            aria-hidden="true"
+                          />Expired</sat-status-tag
+                        >
                       }
                     </td>
                   }
@@ -215,8 +235,20 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
                   <th scope="row">Policy check</th>
                   @for (q of r.quotes; track q.id) {
                     <td>
-                      <span class="bf-cell__primary">{{ policyLabel(q.policyCheck) }}</span>
-                      <span class="bf-cell__secondary">{{ q.policyMessage }}</span>
+                      <sat-status-tag [status]="policyTone(q.policyCheck)">{{
+                        policyLabel(q.policyCheck)
+                      }}</sat-status-tag>
+                      <span class="bf-cell__secondary">
+                        @if (q.policyCheck === 'above_available') {
+                          Exceeds what is available under this event's rules by
+                          <bf-money
+                            [amountMinor]="q.exceedsAvailableByMinor"
+                            [currency]="q.budgetAmount.currency"
+                          />.
+                        } @else {
+                          {{ q.policyMessage }}
+                        }
+                      </span>
                     </td>
                   }
                 </tr>
@@ -226,9 +258,19 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
                     @for (q of r.quotes; track q.id) {
                       <td>
                         @if (q.status === 'selected') {
-                          <span class="bf-chip">Selected</span>
+                          <sat-status-tag status="success"
+                            ><mat-icon
+                              svgIcon="circle_check"
+                              aria-hidden="true"
+                            />Selected</sat-status-tag
+                          >
                         } @else if (q.status === 'declined') {
-                          <span class="bf-chip">Declined</span>
+                          <sat-status-tag status="neutral"
+                            ><mat-icon
+                              svgIcon="circle_x"
+                              aria-hidden="true"
+                            />Declined</sat-status-tag
+                          >
                         } @else if (q.status === 'requested') {
                           <span class="bf-cell__secondary">No price yet</span>
                         } @else {
@@ -242,6 +284,13 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
                           >
                             Select this quote
                           </button>
+                          @if (q.expired || q.policyCheck === 'above_available') {
+                            <span class="bf-cell__secondary">{{
+                              q.expired
+                                ? 'The quote has expired.'
+                                : 'Above what the event can still commit.'
+                            }}</span>
+                          }
                           <button mat-button type="button" [disabled]="busy()" (click)="decline(q)">
                             Decline
                           </button>
@@ -253,6 +302,91 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
               </tbody>
             </table>
           </div>
+          <ul class="bf-quote-cards" [attr.aria-label]="'Quotes for ' + r.title">
+            @for (q of r.quotes; track q.id) {
+              <li class="bf-quote-card">
+                <div class="bf-list__row">
+                  <strong>{{ q.vendorName }}</strong>
+                  <sat-status-tag [status]="vendorTone(q.vendorStatus)">{{
+                    label(q.vendorStatus)
+                  }}</sat-status-tag>
+                </div>
+                <dl class="bf-facts">
+                  <div>
+                    <dt>Total</dt>
+                    <dd>
+                      @if (q.status === 'requested') {
+                        Waiting for the answer
+                      } @else {
+                        <bf-money
+                          [amountMinor]="q.amount.amountMinor"
+                          [currency]="q.amount.currency"
+                        />
+                        @if (q.isLowest) {
+                          <sat-status-tag status="success">Lowest</sat-status-tag>
+                        }
+                      }
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Per head</dt>
+                    <dd>
+                      <bf-money
+                        [amountMinor]="q.perHead.amountMinor"
+                        [currency]="q.perHead.currency"
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Valid until</dt>
+                    <dd>
+                      {{ q.validUntil ? (q.validUntil | bfDate: session.timezone()) : 'Not given' }}
+                      @if (q.expired) {
+                        <sat-status-tag status="neutral">Expired</sat-status-tag>
+                      }
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Policy check</dt>
+                    <dd>
+                      <sat-status-tag [status]="policyTone(q.policyCheck)">{{
+                        policyLabel(q.policyCheck)
+                      }}</sat-status-tag>
+                    </dd>
+                  </div>
+                </dl>
+                @if (v.canManage) {
+                  @if (q.status === 'selected') {
+                    <sat-status-tag status="success">Selected</sat-status-tag>
+                  } @else if (q.status === 'declined') {
+                    <sat-status-tag status="neutral">Declined</sat-status-tag>
+                  } @else if (q.status !== 'requested') {
+                    <span class="bf-page__actions">
+                      <button
+                        mat-flat-button
+                        satImportantButton
+                        type="button"
+                        [disabled]="busy() || q.expired || q.policyCheck === 'above_available'"
+                        (click)="select(q)"
+                      >
+                        Select this quote
+                      </button>
+                      <button mat-button type="button" [disabled]="busy()" (click)="decline(q)">
+                        Decline
+                      </button>
+                    </span>
+                    @if (q.expired || q.policyCheck === 'above_available') {
+                      <span class="bf-cell__secondary">{{
+                        q.expired
+                          ? 'The quote has expired.'
+                          : 'Above what the event can still commit.'
+                      }}</span>
+                    }
+                  }
+                }
+              </li>
+            }
+          </ul>
           @if (selecting()?.requestId === r.id) {
             <div class="bf-form">
               <mat-form-field class="bf-form__wide">
@@ -284,6 +418,33 @@ const POLICY_LABEL: Record<VendorQuoteItem['policyCheck'], string> = {
       }
     }
   `,
+  styles: `
+    .bf-quote-cards {
+      display: none;
+      margin: 0;
+      padding: 0 20px 16px;
+      list-style: none;
+    }
+    .bf-quote-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 0;
+      border-top: 1px solid var(--mat-sys-outline-variant);
+    }
+    .bf-quote-card .bf-facts {
+      padding: 0;
+    }
+    /* Below 600px each vendor becomes a card; the side-by-side matrix needs the width. */
+    @media (width < 600px) {
+      .bf-quote-matrix {
+        display: none;
+      }
+      .bf-quote-cards {
+        display: block;
+      }
+    }
+  `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -303,6 +464,22 @@ export class EventQuotesPage {
   });
   protected readonly view = computed(() => valueOf(this.quotes));
 
+  protected readonly label = label;
+  protected vendorTone(status: string): 'success' | 'important' | 'neutral' {
+    return status === 'approved' || status === 'preferred'
+      ? 'success'
+      : status === 'blocked'
+        ? 'important'
+        : 'neutral';
+  }
+  /** Section 5/8: within the limit success, above the limit a soft warning, above available a hard block. */
+  protected policyTone(check: VendorQuoteItem['policyCheck']): 'success' | 'warning' | 'important' {
+    return check === 'above_available'
+      ? 'important'
+      : check === 'above_limit'
+        ? 'warning'
+        : 'success';
+  }
   protected policyLabel(check: VendorQuoteItem['policyCheck']): string {
     return POLICY_LABEL[check];
   }

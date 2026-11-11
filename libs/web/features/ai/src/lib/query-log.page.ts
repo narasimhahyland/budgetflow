@@ -10,16 +10,17 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AI_FEATURES, AI_OUTCOMES, type AiFeature, type AiOutcome } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { AiLabel, OUTCOME_LABELS, outcomeTone } from './ai-output';
+import { aiChannelLabel, aiFeatureLabel, fieldName, permissionLabel } from './ai-labels';
 import { AiTabs } from './ai-tabs';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /**
  * Screen 113a, Query log tab: the append-only record of who used which AI feature over which
@@ -37,6 +38,7 @@ import { LoadState } from './load-state';
     MatButtonModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatTooltipModule,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SatStatusTag,
@@ -67,7 +69,7 @@ import { LoadState } from './load-state';
           <mat-select [ngModel]="feature()" (ngModelChange)="feature.set($event)">
             <mat-option value="">All features</mat-option>
             @for (f of features; track f) {
-              <mat-option [value]="f">{{ f }}</mat-option>
+              <mat-option [value]="f">{{ featureLabel(f) }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -86,6 +88,7 @@ import { LoadState } from './load-state';
         [loading]="log.isLoading() && !log.hasValue()"
         [error]="log.error()"
         what="the AI query log"
+        shape="table"
         (retry)="log.reload()"
       />
 
@@ -99,7 +102,7 @@ import { LoadState } from './load-state';
           </sat-empty-state>
         } @else {
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="AI query log">
+            <table class="bf-split-table bf-table--stack" aria-label="AI query log">
               <thead>
                 <tr>
                   <th>Time</th>
@@ -107,50 +110,61 @@ import { LoadState } from './load-state';
                   <th>Feature</th>
                   <th>Channel</th>
                   <th>Scope applied</th>
-                  <th class="bf-num">Records used</th>
+                  <th class="bf-num">Records</th>
                   <th>Outcome</th>
                   <th>Fields sent</th>
                   <th>Model</th>
                   <th class="bf-num">Latency</th>
-                  <th>Confirmed by a person</th>
+                  <th>Person confirmed</th>
                 </tr>
               </thead>
               <tbody data-testid="log-rows">
                 @for (e of rows(); track e.id) {
                   <tr [attr.data-testid]="'log-row-' + e.id">
-                    <td>
+                    <td class="bf-nowrap">
                       <span data-testid="relative-time">{{
                         e.occurredAt | bfDateTime: session.timezone() : 'd MMM y, HH:mm'
                       }}</span>
                     </td>
-                    <td>{{ e.actorName ?? 'BudgetFlow' }}</td>
-                    <td>{{ e.feature }}</td>
-                    <td>{{ e.channel }}</td>
-                    <td>
-                      <span class="bf-cell__primary">{{ e.scope.action }}</span>
+                    <td data-label="Person">{{ e.actorName ?? 'BudgetFlow' }}</td>
+                    <td data-label="Feature">{{ featureLabel(e.feature) }}</td>
+                    <td data-label="Channel">{{ channelLabel(e.channel) }}</td>
+                    <td data-label="Scope applied">
+                      <span class="bf-cell__primary">{{ permissionLabel(e.scope.action) }}</span>
                       <span class="bf-cell__secondary"
                         >{{ e.scope.scope }} · {{ e.scope.permittedCount }} of
                         {{ e.scope.consideredCount }} permitted</span
                       >
                     </td>
-                    <td class="bf-num">{{ e.recordsUsed }}</td>
-                    <td>
+                    <td class="bf-num" data-label="Records">{{ e.recordsUsed }}</td>
+                    <td data-label="Outcome">
                       <sat-status-tag
                         [status]="tone(e.outcome)"
                         [attr.data-testid]="'outcome-' + e.outcome"
                         >{{ label(e.outcome) }}</sat-status-tag
                       >
                     </td>
-                    <td>
-                      <span class="bf-cell__secondary">{{
-                        e.sentFields.length ? e.sentFields.join(', ') : 'None'
-                      }}</span>
+                    <td class="bf-nowrap" data-label="Fields sent">
+                      @if (e.sentFields.length) {
+                        <span
+                          class="bf-fields-count"
+                          tabindex="0"
+                          [matTooltip]="fieldList(e.sentFields)"
+                          [attr.aria-label]="
+                            e.sentFields.length + ' fields: ' + fieldList(e.sentFields)
+                          "
+                          >{{ e.sentFields.length }}
+                          {{ e.sentFields.length === 1 ? 'field' : 'fields' }}</span
+                        >
+                      } @else {
+                        <span class="bf-cell__secondary">None</span>
+                      }
                     </td>
-                    <td>
+                    <td data-label="Model">
                       <span class="bf-cell__secondary">{{ e.modelId }} {{ e.modelVersion }}</span>
                     </td>
-                    <td class="bf-num">{{ e.latencyMs }} ms</td>
-                    <td>
+                    <td class="bf-num" data-label="Latency">{{ e.latencyMs }} ms</td>
+                    <td data-label="Person confirmed">
                       @if (e.appliedResourceType) {
                         <span class="bf-cell__primary">
                           {{ e.appliedResourceType }}
@@ -192,10 +206,25 @@ import { LoadState } from './load-state';
       </sat-banner-message>
     </sat-banner>
   `,
+  styles: `
+    .bf-nowrap {
+      white-space: nowrap;
+    }
+    .bf-fields-count {
+      text-decoration: underline dotted;
+      cursor: help;
+    }
+  `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QueryLogPage {
+  protected readonly featureLabel = aiFeatureLabel;
+  protected readonly channelLabel = aiChannelLabel;
+  protected readonly permissionLabel = permissionLabel;
+  protected fieldList(fields: readonly string[]): string {
+    return fields.map(fieldName).join(', ');
+  }
   private readonly api = injectApi();
   protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;

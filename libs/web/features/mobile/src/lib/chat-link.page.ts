@@ -1,17 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  resource,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, resource, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ChatAccountLinkView, ChatLinkPreview } from '@bf/contracts';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 /**
  * Screen 061e: Account-link page (`/link/chat`, outside the app shell, requires sign-in).
@@ -20,16 +13,14 @@ import { LoadState } from './load-state';
  */
 @Component({
   selector: 'bf-chat-link-page',
-  imports: [
-    LoadState,
-    MatButtonModule,
-    RouterLink,
-    SAT_BANNER_IMPORTS,
-    SatImportantButton,
-  ],
+  imports: [LoadState, MatButtonModule, RouterLink, SAT_BANNER_IMPORTS],
   template: `
     <main class="bf-landing">
-      <section class="bf-card bf-landing__card" aria-labelledby="link-title" data-testid="chat-link-card">
+      <section
+        class="bf-card bf-landing__card"
+        aria-labelledby="link-title"
+        data-testid="chat-link-card"
+      >
         <div class="bf-card__header">
           <h1 class="bf-page__title" id="link-title">BudgetFlow · Hyland</h1>
         </div>
@@ -92,7 +83,6 @@ import { LoadState } from './load-state';
               <a mat-button routerLink="/me/notifications">Cancel</a>
               <button
                 mat-flat-button
-                satImportantButton
                 type="button"
                 [disabled]="busy()"
                 (click)="connect(p)"
@@ -158,9 +148,7 @@ export class ChatLinkPage {
     this.busy.set(true);
     this.failure.set('');
     try {
-      const res = await data(
-        this.api.completeChatLink({ body: { token: p.token } }),
-      );
+      const res = await data(this.api.completeChatLink({ body: { token: p.token } }));
       this.linked.set(res);
     } catch (e) {
       this.failure.set(errorMessage(e));

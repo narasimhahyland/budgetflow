@@ -13,13 +13,7 @@
     <div class="bf-page__actions">
       <a mat-button routerLink="/marketplace">Back to the marketplace</a>
       @if (canRequest() && !requesting()) {
-        <button
-          mat-flat-button
-          satImportantButton
-          type="button"
-          (click)="startRequest()"
-          data-testid="offer-request"
-        >
+        <button mat-flat-button type="button" (click)="startRequest()" data-testid="offer-request">
           Ask for a price
         </button>
       }
@@ -203,12 +197,14 @@
           </button>
         </div>
       } @else {
-        <sat-empty-state data-testid="offer-no-events">
-          <h3 satEmptyStateHeadline>No event to book against</h3>
-          <p satEmptyStateDescription>
-            A booking request sits on an event you manage. Create or take over an event first.
-          </p>
-        </sat-empty-state>
+        <div class="bf-card__body">
+          <sat-empty-state data-testid="offer-no-events">
+            <h3 satEmptyStateHeadline>No event to book against</h3>
+            <p satEmptyStateDescription>
+              A booking request sits on an event you manage. Create or take over an event first.
+            </p>
+          </sat-empty-state>
+        </div>
       }
     </section>
   }

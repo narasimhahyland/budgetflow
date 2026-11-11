@@ -18,7 +18,7 @@ import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 type Category = (typeof REASON_CATEGORIES)[number];
 
@@ -36,6 +36,7 @@ const CATEGORY_LABEL: Record<Category, string> = {
 /** Screen 106b: reason-code taxonomy used by controls, corrections and decisions. */
 @Component({
   selector: 'bf-reason-codes-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     FormsModule,
     LoadState,
@@ -128,30 +129,35 @@ const CATEGORY_LABEL: Record<Category, string> = {
       />
       @if (valueOf(list); as l) {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="l.items" aria-labelledby="rc-title">
+          <table
+            class="bf-table bf-table--stack"
+            mat-table
+            [dataSource]="l.items"
+            aria-labelledby="rc-title"
+          >
             <ng-container matColumnDef="category">
               <th mat-header-cell *matHeaderCellDef>Used for</th>
-              <td mat-cell *matCellDef="let r">{{ labelOf(r.category) }}</td>
+              <td class="bf-cell--full" mat-cell *matCellDef="let r">{{ labelOf(r.category) }}</td>
             </ng-container>
             <ng-container matColumnDef="code">
               <th mat-header-cell *matHeaderCellDef>Code</th>
-              <td mat-cell *matCellDef="let r">{{ r.code }}</td>
+              <td mat-cell *matCellDef="let r" data-label="Code">{{ r.code }}</td>
             </ng-container>
             <ng-container matColumnDef="label">
               <th mat-header-cell *matHeaderCellDef>Label</th>
-              <td mat-cell *matCellDef="let r">{{ r.label }}</td>
+              <td mat-cell *matCellDef="let r" data-label="Label">{{ r.label }}</td>
             </ng-container>
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let r">
+              <td mat-cell *matCellDef="let r" data-label="Status">
                 <sat-status-tag [status]="r.active ? 'success' : 'neutral'">{{
                   r.active ? 'Active' : 'Retired'
                 }}</sat-status-tag>
               </td>
             </ng-container>
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
-              <td mat-cell *matCellDef="let r">
+              <th mat-header-cell *matHeaderCellDef class="bf-col-actions">Actions</th>
+              <td mat-cell *matCellDef="let r" class="bf-col-actions" data-label="Actions">
                 @if (canManage()) {
                   <button
                     mat-button

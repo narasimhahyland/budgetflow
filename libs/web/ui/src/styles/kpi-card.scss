@@ -1,0 +1,169 @@
+// KPI metric card, section 9 of the design system sheet: uppercase label with an icon, a bold
+// tabular amount, and (when the API gives a ratio) a bordered footer with a sub-label, a toned
+// percentage and a thin bar. Loaded once from `apps/web/src/styles.scss`; screens use the classes
+// directly, so their data-testids stay on the elements journeys already read.
+//
+//   <div class="bf-kpis">
+//     <div class="bf-kpi bf-kpi--success">
+//       <div class="bf-kpi__head">
+//         <p class="bf-kpi__label">Available</p>
+//         <mat-icon class="bf-kpi__icon" svgIcon="graph_radial" aria-hidden="true" />
+//       </div>
+//       <p class="bf-kpi__value" data-testid="kpi-available"><bf-money … /></p>
+//       <p class="bf-kpi__delta">Optional one-line context</p>
+//       <div class="bf-kpi__foot">
+//         <span>Of authorized</span><span class="bf-kpi__pct">22.0%</span>
+//         <span class="bf-kpi__track"><span class="bf-kpi__fill" [style.width.%]="22"></span></span>
+//       </div>
+//     </div>
+//   </div>
+//
+// Every rule is scoped under `.bf-kpi`, so components with their own section 9 styles (bf-kpi-tile)
+// are never restyled by this sheet.
+//
+// Tones (`bf-kpi--success|warning|info|important|error`) colour the icon, percentage and bar; the
+// value itself takes the tone only with `bf-kpi__value--<tone>` (section 9 tones Available alone).
+.bf-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.bf-kpi {
+  --bf-kpi-tone: var(--mat-sys-primary);
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-lowest);
+  box-shadow: var(--mat-sys-level1);
+}
+
+.bf-kpi.bf-kpi--success {
+  --bf-kpi-tone: var(--sat-sys-success-icon);
+}
+
+.bf-kpi.bf-kpi--warning {
+  --bf-kpi-tone: var(--sat-sys-warning-icon);
+}
+
+.bf-kpi.bf-kpi--info {
+  --bf-kpi-tone: var(--sat-sys-info-icon);
+}
+
+.bf-kpi.bf-kpi--important,
+.bf-kpi.bf-kpi--error {
+  --bf-kpi-tone: var(--sat-sys-important-icon);
+}
+
+// Forecast figures are projections: dashed, as the forecast outline in section 10.
+.bf-kpi.bf-kpi--forecast {
+  border-style: dashed;
+  border-color: var(--mat-sys-primary);
+}
+
+.bf-kpi .bf-kpi__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bf-kpi .bf-kpi__label,
+.bf-kpi .bf-kpi__title {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-medium);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bf-kpi .bf-kpi__icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--bf-kpi-tone);
+}
+
+.bf-kpi .bf-kpi__value {
+  margin: 4px 0 0;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-headline-small);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.bf-kpi .bf-kpi__value--success {
+  color: var(--sat-sys-on-success-container);
+}
+
+.bf-kpi .bf-kpi__value--warning {
+  color: var(--sat-sys-on-warning-container);
+}
+
+.bf-kpi .bf-kpi__value--info {
+  color: var(--sat-sys-on-info-container);
+}
+
+.bf-kpi .bf-kpi__value--important,
+.bf-kpi .bf-kpi__value--error {
+  color: var(--sat-sys-on-important-container);
+}
+
+.bf-kpi .bf-kpi__value--none {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.bf-kpi .bf-kpi__delta {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-kpi .bf-kpi__foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 8px;
+  align-items: baseline;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+// `margin-top: auto` keeps the footer on the bottom edge of a card stretched by its grid row; the
+// space above it comes from the element before it, so the two do not cancel out.
+.bf-kpi > :has(+ .bf-kpi__foot) {
+  margin-bottom: 12px;
+}
+
+.bf-kpi .bf-kpi__pct {
+  color: var(--bf-kpi-tone);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-kpi .bf-kpi__track {
+  display: block;
+  grid-column: 1 / -1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-surface-container);
+}
+
+.bf-kpi .bf-kpi__fill {
+  display: block;
+  max-width: 100%;
+  height: 100%;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--bf-kpi-tone);
+}

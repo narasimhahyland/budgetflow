@@ -15,17 +15,19 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
 import type { CommitmentHygieneItem } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { formatMoney, Money } from '@bf/web/ui';
+import { formatMoney, LoadState, Money, SpendStatus } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ActualsTabs } from './actuals-tabs';
 import { data, errorMessage, injectApi, toMinor, valueOf } from './api';
-import { LoadState } from './load-state';
+import { MatIconModule } from '@angular/material/icon';
 
 /** Screen 85a (undesigned, built from the design system): commitment aging, release prompts, release and cancellation. */
 @Component({
   selector: 'bf-commitments-page',
   imports: [
+    SpendStatus,
+    MatIconModule,
     ActualsTabs,
     DatePipe,
     FormsModule,
@@ -63,7 +65,10 @@ import { LoadState } from './load-state';
     @if (valueOf(list); as l) {
       <div class="bf-kpis">
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Open commitments</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Open commitments</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="shield_lock" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ l.totals.open }}</p>
           <p class="bf-kpi__delta">
             <bf-money
@@ -74,15 +79,21 @@ import { LoadState } from './load-state';
           </p>
         </div>
         <div class="bf-kpi bf-kpi--warning">
-          <p class="bf-kpi__label">Release prompts</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Release prompts</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="bell" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value" data-testid="prompt-count">{{ l.totals.prompts }}</p>
           <p class="bf-kpi__delta">A week past service end, not accrued</p>
         </div>
         @for (b of l.totals.byBucket; track b.bucket) {
           <div class="bf-kpi">
-            <p class="bf-kpi__label">
-              {{ b.bucket === 'current' ? 'Not yet due' : b.bucket + ' days' }}
-            </p>
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">
+                {{ b.bucket === 'current' ? 'Not yet due' : b.bucket + ' days' }}
+              </p>
+              <mat-icon class="bf-kpi__icon" svgIcon="timer" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">{{ b.count }}</p>
             <p class="bf-kpi__delta">
               <bf-money
@@ -111,7 +122,7 @@ import { LoadState } from './load-state';
         <p class="bf-empty">No open commitments.</p>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="items()" aria-label="Open commitments">
+          <table mat-table class="bf-table" [dataSource]="items()" aria-label="Open commitments">
             <ng-container matColumnDef="commitment">
               <th mat-header-cell *matHeaderCellDef>Commitment</th>
               <td mat-cell *matCellDef="let c">
@@ -126,7 +137,7 @@ import { LoadState } from './load-state';
               <th mat-header-cell *matHeaderCellDef>Service end</th>
               <td mat-cell *matCellDef="let c">
                 <span class="bf-cell__primary">{{
-                  c.serviceEnd ? (c.serviceEnd | date: 'd MMM y') : '—'
+                  c.serviceEnd ? (c.serviceEnd | date: 'd MMM y' : 'UTC') : '—'
                 }}</span>
                 <span class="bf-cell__secondary">{{
                   c.daysPast ? c.daysPast + ' days ago' : 'Not yet due'
@@ -152,35 +163,35 @@ import { LoadState } from './load-state';
               <th mat-header-cell *matHeaderCellDef>Signals</th>
               <td mat-cell *matCellDef="let c">
                 <span class="bf-chip-row">
+                  <bf-spend-status kind="commitment" [status]="c.status" />
                   @if (c.releasePrompt) {
-                    <sat-status-tag status="warning">Release suggested</sat-status-tag>
-                  }
-                  @if (c.accrued.amountMinor) {
-                    <sat-status-tag status="info"
-                      >Accrued
-                      {{ money(c.accrued.amountMinor, c.accrued.currency) }}</sat-status-tag
+                    <sat-status-tag status="warning"
+                      ><mat-icon svgIcon="bell" aria-hidden="true" />Release
+                      suggested</sat-status-tag
                     >
                   }
-                  @if (c.prepaid.amountMinor) {
-                    <sat-status-tag status="neutral" [hideIcon]="true"
-                      >Deposit
-                      {{ money(c.prepaid.amountMinor, c.prepaid.currency) }}</sat-status-tag
-                    >
-                  }
-                  @if (c.nonRefundableDeposit.amountMinor) {
-                    <sat-status-tag status="neutral" [hideIcon]="true"
-                      >Non-refundable
-                      {{
-                        money(c.nonRefundableDeposit.amountMinor, c.nonRefundableDeposit.currency)
-                      }}</sat-status-tag
-                    >
-                  }
-                  <sat-status-tag
-                    [status]="c.status === 'encumbered' ? 'neutral' : 'info'"
-                    [hideIcon]="true"
-                    >{{ statusText(c.status) }}</sat-status-tag
-                  >
                 </span>
+                <!-- Money facts are figures, not states: written out with bf-money, never inside a tag. -->
+                @if (c.accrued.amountMinor) {
+                  <span class="bf-cell__secondary"
+                    >Accrued
+                    <bf-money [amountMinor]="c.accrued.amountMinor" [currency]="c.accrued.currency"
+                  /></span>
+                }
+                @if (c.prepaid.amountMinor) {
+                  <span class="bf-cell__secondary"
+                    >Deposit
+                    <bf-money [amountMinor]="c.prepaid.amountMinor" [currency]="c.prepaid.currency"
+                  /></span>
+                }
+                @if (c.nonRefundableDeposit.amountMinor) {
+                  <span class="bf-cell__secondary"
+                    >Non-refundable
+                    <bf-money
+                      [amountMinor]="c.nonRefundableDeposit.amountMinor"
+                      [currency]="c.nonRefundableDeposit.currency"
+                  /></span>
+                }
               </td>
             </ng-container>
             <ng-container matColumnDef="actions">
@@ -287,10 +298,6 @@ export class CommitmentsPage {
 
   protected money(minor: number, currency: string): string {
     return formatMoney(minor, currency);
-  }
-
-  protected statusText(s: string): string {
-    return s.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
   }
 
   protected start(c: CommitmentHygieneItem, kind: 'release' | 'cancel'): void {

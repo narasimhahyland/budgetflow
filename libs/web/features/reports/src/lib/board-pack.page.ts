@@ -16,13 +16,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { BOARD_PACK_PAGES, type BoardPackGeneration, type BoardPackPageId } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import type { SatTagStatus } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { Reconciliation, ReportNotes, ReportTable, ScopeNote } from './report-frame';
 
 const PAGE_TITLES: Record<BoardPackPageId, string> = {
@@ -37,6 +36,13 @@ const PAGE_TITLES: Record<BoardPackPageId, string> = {
   controls_applied: 'Controls applied',
   exceptions: 'Exceptions',
   cofunding: 'Co-funding and recharges',
+};
+
+const RATE_TYPE_LABELS: Record<string, string> = {
+  plan: 'plan rate',
+  spot: 'spot rate',
+  month_end: 'month-end rate',
+  monthly_average: 'monthly average rate',
 };
 
 const GENERATION_STATUS: Record<
@@ -137,7 +143,7 @@ const POLL_LIMIT = 40;
       }
       <bf-report-notes [notes]="p.notes" />
 
-      <div class="bf-split">
+      <div class="bf-split bf-pack-split">
         <section class="bf-card" aria-labelledby="settings-title">
           <div class="bf-card__header">
             <div>
@@ -259,12 +265,20 @@ const POLL_LIMIT = 40;
             </section>
           }
 
-          <section class="bf-card" aria-labelledby="fx-title" data-testid="pack-fx-bridge">
+          <section
+            class="bf-card"
+            [class.bf-draft]="p.source.draft"
+            aria-labelledby="fx-title"
+            data-testid="pack-fx-bridge"
+          >
             <div class="bf-card__header">
               <div>
                 <h2 class="bf-card__title" id="fx-title">FX bridge</h2>
                 <p class="bf-card__hint">{{ p.fxBridge.note }}</p>
               </div>
+              @if (p.source.draft) {
+                <span class="bf-watermark">Draft</span>
+              }
             </div>
             @if (p.fxBridge.rows.length) {
               <div class="bf-table-scroll">
@@ -284,7 +298,11 @@ const POLL_LIMIT = 40;
                         <td>
                           {{ row.transactionCurrency }}
                           @if (row.planRate) {
-                            <span class="bf-cell__secondary">Plan rate {{ row.planRate }}</span>
+                            <span class="bf-cell__secondary"
+                              >Plan rate 1 {{ row.transactionCurrency }} =
+                              {{ rateOf(row.planRate) | number: '1.4-6' }}
+                              {{ row.atPlanRate.currency }}</span
+                            >
                           }
                         </td>
                         <td class="bf-num">
@@ -314,7 +332,9 @@ const POLL_LIMIT = 40;
                       </tr>
                     }
                     <tr class="bf-total">
-                      <td>Total FX effect ({{ p.fxBridge.reportingRateType }})</td>
+                      <td>
+                        Total FX effect at the {{ rateTypeLabel(p.fxBridge.reportingRateType) }}
+                      </td>
                       <td class="bf-num"></td>
                       <td class="bf-num"></td>
                       <td class="bf-num"></td>
@@ -421,7 +441,7 @@ const POLL_LIMIT = 40;
             </table>
           </div>
         } @else {
-          <sat-empty-state>
+          <sat-empty-state class="bf-card__body">
             <h3 satEmptyStateHeadline>No packs generated yet</h3>
             <p satEmptyStateDescription>
               Generate one to get a PDF and an XLSX of exactly what the preview shows.
@@ -432,6 +452,15 @@ const POLL_LIMIT = 40;
     }
   `,
   styles: `
+    /* The settings rail stays narrow so the pack preview gets the width its tables need. */
+    .bf-pack-split {
+      grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    }
+    @media (width < 1024px) {
+      .bf-pack-split {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
     .bf-settings__toggles {
       flex-direction: column;
       align-items: flex-start;
@@ -520,6 +549,15 @@ export class BoardPackPage {
 
   protected title(page: BoardPackPageId): string {
     return PAGE_TITLES[page];
+  }
+
+  /** The API sends the plan cross rate as a 12-decimal string; it is shown to six places. */
+  protected rateOf(rate: string): number {
+    return Number(rate);
+  }
+
+  protected rateTypeLabel(type: string): string {
+    return RATE_TYPE_LABELS[type] ?? `${type.replace(/_/g, ' ')} rate`;
   }
 
   protected statusOf(g: BoardPackGeneration) {

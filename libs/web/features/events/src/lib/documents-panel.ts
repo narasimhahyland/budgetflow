@@ -3,18 +3,36 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DOCUMENT_CONTENT_TYPES, DOCUMENT_MAX_BYTES, type DocumentSummary } from '@bf/contracts';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SAT_UPLOAD_FIELD_IMPORTS } from '@hylandsoftware/satori-ui/upload-field';
 import { data, errorMessage, injectApi } from './api';
 
 /** Supporting documents of a record: list, signed download, and upload (declare, PUT to the signed URL, verify). */
 @Component({
   selector: 'bf-documents-panel',
-  imports: [MatButtonModule, MatIconModule, SAT_BANNER_IMPORTS],
+  imports: [
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    SAT_BANNER_IMPORTS,
+    SAT_EMPTY_STATE_IMPORTS,
+    SAT_UPLOAD_FIELD_IMPORTS,
+  ],
   template: `
     @if (failure()) {
       <sat-banner variant="important" class="bf-banner"
         ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
       >
+    }
+    @if (documents().length === 0) {
+      <sat-empty-state>
+        <h3 satEmptyStateHeadline>No documents yet</h3>
+        <p satEmptyStateDescription>
+          Attach quotes, receipts and approval evidence so approvers and finance see them here.
+        </p>
+      </sat-empty-state>
     }
     <ul class="bf-docs" aria-label="Documents">
       @for (d of documents(); track d.id) {
@@ -33,18 +51,22 @@ import { data, errorMessage, injectApi } from './api';
             </button>
           }
         </li>
-      } @empty {
-        <li class="bf-docs__empty">No documents yet.</li>
       }
     </ul>
     @if (canUpload()) {
-      <label class="bf-docs__upload">
-        <input type="file" [accept]="accept" (change)="pick($event)" [disabled]="busy()" />
-        <span mat-stroked-button
-          ><mat-icon svgIcon="upload" />{{ busy() ? 'Uploading…' : 'Upload a document' }}</span
+      <sat-upload-field
+        class="bf-docs__field"
+        [uploadedFiles]="null"
+        (filesLoaded)="upload($event)"
+      >
+        <mat-label>{{ busy() ? 'Uploading…' : 'Upload a document' }}</mat-label>
+        <mat-icon svgIcon="upload" />
+        <input type="file" satUploadFieldInput [accept]="accept" [disabled]="busy()" />
+        <mat-hint
+          >PDF, PNG, JPEG, CSV or XLSX, up to 10 MB. Download links expire after 15
+          minutes.</mat-hint
         >
-        <span class="bf-docs__meta">PDF, PNG, JPEG, CSV or XLSX, up to 10 MB</span>
-      </label>
+      </sat-upload-field>
     }
   `,
   styles: `
@@ -71,33 +93,12 @@ import { data, errorMessage, injectApi } from './api';
       color: var(--mat-sys-on-surface-variant);
       font: var(--mat-sys-body-small);
     }
-    .bf-docs__empty {
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-body-medium);
+    .bf-docs:empty {
+      display: none;
     }
-    .bf-docs__upload {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
+    .bf-docs__field {
+      display: block;
       padding: 8px 20px 16px;
-      cursor: pointer;
-    }
-    .bf-docs__upload input {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-    }
-    .bf-docs__upload span[mat-stroked-button] {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border: 1px solid var(--mat-sys-outline);
-      border-radius: var(--mat-sys-corner-full);
-      color: var(--mat-sys-primary);
-      font: var(--mat-sys-label-large);
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -129,9 +130,8 @@ export class DocumentsPanel {
     }
   }
 
-  protected async pick(event: Event): Promise<void> {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    (event.target as HTMLInputElement).value = '';
+  protected async upload(files: File[]): Promise<void> {
+    const file = files[0];
     if (!file) return;
     this.failure.set('');
     if (!(DOCUMENT_CONTENT_TYPES as readonly string[]).includes(file.type)) {

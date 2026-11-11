@@ -15,7 +15,7 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { SyncDirection, SyncRunView, SyncStatus } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
@@ -29,7 +29,6 @@ import {
   SYNC_STATUS_TONES,
   type Tone,
 } from './labels';
-import { LoadState } from './load-state';
 import { byNewest, ordered } from './order';
 
 /** Screen 099: every sync run in and out of BudgetFlow, with the run detail beside the table. */
@@ -52,6 +51,7 @@ import { byNewest, ordered } from './order';
   ],
   templateUrl: './sync.page.html',
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SyncPage {
@@ -59,7 +59,16 @@ export class SyncPage {
   private readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
   protected readonly timezone = computed(() => this.session.timezone());
-  protected readonly columns = ['started', 'connector', 'object', 'records', 'status'];
+  protected readonly columns = [
+    'started',
+    'connector',
+    'object',
+    'read',
+    'applied',
+    'held',
+    'failed',
+    'status',
+  ];
 
   protected readonly direction = signal<SyncDirection | 'all'>('all');
   protected readonly status = signal<SyncStatus | 'all'>('all');

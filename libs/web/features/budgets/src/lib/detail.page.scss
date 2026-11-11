@@ -5,31 +5,6 @@
   gap: 8px;
 }
 
-.bf-detail__tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
-}
-
-.bf-detail__tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-title-small);
-  cursor: pointer;
-}
-
-.bf-detail__tab--active {
-  border-bottom-color: var(--mat-sys-primary);
-  color: var(--mat-sys-primary);
-}
-
 .bf-detail__count {
   padding: 0 6px;
   border-radius: var(--mat-sys-corner-full);
@@ -37,18 +12,26 @@
   font: var(--mat-sys-label-small);
 }
 
-.bf-detail__kpis {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+// Four figures: one row of four from 1024px, two by two on a tablet, one column on a phone.
+.bf-kpis.bf-detail__kpis {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.bf-kpi__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+@media (width < 1024px) {
+  .bf-kpis.bf-detail__kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.bf-kpi--available .bf-kpi__value {
-  color: var(--sat-sys-on-success-container);
+@media (width < 600px) {
+  .bf-kpis.bf-detail__kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// Actual spend takes the section 10 actual colour.
+.bf-kpi--actual {
+  --bf-kpi-tone: var(--mat-sys-tertiary);
 }
 
 .bf-detail__grid {

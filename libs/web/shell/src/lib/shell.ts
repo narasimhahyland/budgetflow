@@ -6,11 +6,14 @@ import {
   DestroyRef,
   effect,
   inject,
+  resource,
   signal,
   viewChildren,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import {
@@ -22,12 +25,21 @@ import {
   RouterOutlet,
   type ActivatedRouteSnapshot,
 } from '@angular/router';
-import { AccessDenied, AnalyticsTracker, AuthService, SessionStore } from '@bf/web/data-access';
+import type { NotificationItem } from '@bf/contracts';
+import {
+  AccessDenied,
+  AnalyticsTracker,
+  ApiService,
+  AuthService,
+  SessionStore,
+} from '@bf/web/data-access';
+import { DateTimePipe, Money } from '@bf/web/ui';
 import { SAT_APP_HEADER_IMPORTS } from '@hylandsoftware/satori-ui/app-header';
 import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SatBreadcrumbs } from '@hylandsoftware/satori-ui/breadcrumbs';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatGhost } from '@hylandsoftware/satori-ui/ghost';
+import { SatCategoryTag } from '@hylandsoftware/satori-ui/tag';
 import {
   SAT_PLATFORM_NAV_IMPORTS,
   SatPlatformNavState,
@@ -37,14 +49,24 @@ import { ROLE_LABELS, visibleNav } from './nav';
 
 type Crumb = { label: string; routerLink?: string };
 
-/** The signed-in frame: role-aware navigation, header (company, fiscal year, reporting currency), states. */
+const TONE_ICON: Record<NotificationItem['tone'], string> = {
+  neutral: 'info',
+  info: 'info',
+  warning: 'critical',
+  important: 'error',
+  success: 'circle_check',
+};
+
+/** The signed-in frame: role-aware navigation, header (company, fiscal year, notifications), states. */
 @Component({
   selector: 'bf-shell',
   imports: [
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    MatBadgeModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatIconModule,
     MatMenuModule,
     SAT_PLATFORM_NAV_IMPORTS,
@@ -52,7 +74,10 @@ type Crumb = { label: string; routerLink?: string };
     SAT_EMPTY_STATE_IMPORTS,
     SatAvatar,
     SatBreadcrumbs,
+    SatCategoryTag,
     SatGhost,
+    DateTimePipe,
+    Money,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -71,6 +96,7 @@ export class Shell {
   private readonly analytics = inject(AnalyticsTracker);
   private readonly denied = inject(AccessDenied);
   private readonly document = inject(DOCUMENT);
+  private readonly api = inject(ApiService).client;
   private readonly menuTriggers = viewChildren(MatMenuTrigger);
 
   protected readonly me = this.session.me;
@@ -89,8 +115,35 @@ export class Shell {
     );
     return me.fiscalYears.find((y) => y.startDate <= today && today <= y.endDate)?.label ?? null;
   });
+  protected readonly officeLine = computed(() =>
+    [this.me()?.tenantName, this.me()?.locationName].filter(Boolean).join(' · '),
+  );
   protected readonly crumbs = signal<Crumb[]>([]);
   protected readonly pageTitle = computed(() => this.crumbs().at(-1)?.label ?? 'Home');
+  /** On phones the breadcrumbs collapse to a back link to the parent page. */
+  protected readonly backTo = computed(() => {
+    const c = this.crumbs();
+    return c.length > 1 ? (c[c.length - 2] ?? null) : null;
+  });
+
+  /** The bell's feed: unread count, the latest items and open tasks, read again when it opens. */
+  protected readonly notificationsFeed = resource({
+    params: () => (this.session.state() === 'ready' ? { tab: 'all' as const } : undefined),
+    loader: async ({ params }) => {
+      const r = await this.api.listNotifications({ query: { ...params, periodDays: 90 } });
+      if (!r.ok) throw new Error(r.problem?.detail ?? 'Notifications could not load.');
+      return r.data;
+    },
+  });
+  protected readonly feed = computed(() =>
+    this.notificationsFeed.hasValue() ? this.notificationsFeed.value() : undefined,
+  );
+  protected readonly unread = computed(() => this.feed()?.counts.unread ?? 0);
+  protected readonly recent = computed(() => (this.feed()?.items ?? []).slice(0, 5));
+  protected readonly openTasks = computed(() => (this.feed()?.tasks ?? []).slice(0, 5));
+  protected readonly notificationsTab = signal<'all' | 'tasks'>('all');
+  protected readonly marking = signal(false);
+  protected readonly markProblem = signal<string | null>(null);
 
   constructor() {
     this.router.events
@@ -130,6 +183,33 @@ export class Shell {
     if (event.target === this.document.body) this.closeNavOnEscape();
   }
 
+  protected toneIcon(tone: NotificationItem['tone']): string {
+    return TONE_ICON[tone];
+  }
+
+  /** API links carry their query in the string; the router takes the path and the query apart. */
+  protected linkPath(link: string): string {
+    return link.split('?')[0].split('#')[0];
+  }
+
+  protected linkQuery(link: string): Record<string, string> | null {
+    const q = link.split('?')[1]?.split('#')[0];
+    return q ? Object.fromEntries(new URLSearchParams(q).entries()) : null;
+  }
+
+  protected async markAllRead(): Promise<void> {
+    this.marking.set(true);
+    this.markProblem.set(null);
+    try {
+      const r = await this.api.markNotifications({ body: { markAll: true, read: true } });
+      if (r.ok) this.notificationsFeed.reload();
+      else
+        this.markProblem.set(r.problem?.detail ?? 'They could not be marked as read. Try again.');
+    } finally {
+      this.marking.set(false);
+    }
+  }
+
   protected signOut(): void {
     void this.analytics.flush().finally(() => this.auth.signOut());
   }
@@ -160,7 +240,11 @@ export class Shell {
     }
     const title = leaf.data['pageTitle'] as string | undefined;
     if (!title) return [{ label: 'Home' }];
-    // Sections (Budgets, Finance, ...) have no page of their own, so they are not crumbs.
-    return [home, { label: title }];
+    // Sections (Budgets, Finance, ...) have no page of their own, so they are not crumbs. A route
+    // under a list page names it as `crumbParent` ({ label, routerLink }), and may resolve its own
+    // label (an event or budget name) as `crumbLabel`: Home > Events > Diwali celebration 2026.
+    const parent = leaf.data['crumbParent'] as Crumb | undefined;
+    const label = (leaf.data['crumbLabel'] as string | undefined) || title;
+    return parent ? [home, parent, { label }] : [home, { label }];
   }
 }

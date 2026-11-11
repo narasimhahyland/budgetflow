@@ -16,12 +16,33 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { AuditEvent } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState, type StatusView } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
+/**
+ * Section 5 tone and icon for an audit action key ("budget.set_to_zero"): the verb decides, so a
+ * freeze and a set to zero never look alike and an approval reads as an approval.
+ */
+const ACTION_TONES: [RegExp, StatusView['tone'], string][] = [
+  [/set_to_zero/, 'important', 'circle_stop'],
+  [/unfreeze|unfrozen/, 'neutral', 'unlocked'],
+  [/freez|frozen/, 'info', 'lock'],
+  [/reject|declin|cancel|revok/, 'important', 'circle_x'],
+  [/approv|accept|signed_off|verified/, 'success', 'circle_check'],
+  [/reduc/, 'warning', 'trending_down'],
+  [/reopen|unlock|break_glass/, 'warning', 'unlocked'],
+  [/clos|lock/, 'neutral', 'lock'],
+  [/submit|request/, 'neutral', 'send'],
+  [/creat|record|add|import/, 'neutral', 'add_note'],
+];
+
+const sentence = (s: string): string => {
+  const words = s.replace(/[._]/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
 const TYPES = ['', 'event', 'request', 'contribution', 'budget', 'recharge', 'org_unit', 'person'];
 
 /** Screen 88: the append-only, hash-chained audit trail with chain verification, filters, entry detail and export. */
@@ -38,6 +59,7 @@ const TYPES = ['', 'event', 'request', 'contribution', 'budget', 'recharge', 'or
     MatInputModule,
     MatSelectModule,
     SAT_BANNER_IMPORTS,
+    SatAvatar,
     SatStatusTag,
   ],
   template: `
@@ -45,7 +67,9 @@ const TYPES = ['', 'event', 'request', 'contribution', 'budget', 'recharge', 'or
       <div class="bf-page__heading">
         <div class="bf-title-row">
           <h1 class="bf-page__title">Audit log</h1>
-          <sat-status-tag status="success">Tamper-evident</sat-status-tag>
+          <sat-status-tag status="success"
+            ><mat-icon svgIcon="shield_secured" aria-hidden="true" />Tamper-evident</sat-status-tag
+          >
         </div>
         <p class="bf-page__subtitle">
           Append-only, hash-chained record of every change: who, what, previous and new values, and
@@ -149,22 +173,37 @@ const TYPES = ['', 'event', 'request', 'contribution', 'budget', 'recharge', 'or
                         }}</span>
                       </td>
                       <td>
-                        {{
+                        @let actor =
                           e.actorName ??
-                            (e.actorSubject === 'system:worker' ? 'BudgetFlow' : e.actorSubject)
-                        }}
+                          (e.actorSubject === 'system:worker'
+                            ? 'BudgetFlow'
+                            : (e.actorSubject ?? 'Unknown'));
+                        <span class="bf-cell__owner"
+                          ><sat-avatar
+                            size="28"
+                            [initials]="initials(actor)"
+                            aria-hidden="true"
+                          />{{ actor }}</span
+                        >
                         @if (e.onBehalfOfName) {
                           <span class="bf-cell__secondary">for {{ e.onBehalfOfName }}</span>
                         }
                       </td>
                       <td>
-                        <span class="bf-chip">{{ e.action }}</span>
+                        @let a = actionView(e.action);
+                        <span class="bf-nowrap" [title]="e.action"
+                          ><sat-status-tag [status]="a.tone"
+                            ><mat-icon [svgIcon]="a.icon" aria-hidden="true" />{{
+                              a.label
+                            }}</sat-status-tag
+                          ></span
+                        >
                       </td>
                       <td>
-                        {{ e.resourceType
+                        {{ typeLabel(e.resourceType)
                         }}<span class="bf-cell__secondary">{{ e.resourceId.slice(0, 8) }}</span>
                       </td>
-                      <td>{{ e.reason ?? '' }}</td>
+                      <td>{{ e.reason || '—' }}</td>
                       <td>
                         <code class="bf-audit__hash">{{ e.hash.slice(0, 10) }}…</code>
                       </td>
@@ -234,6 +273,9 @@ const TYPES = ['', 'event', 'request', 'contribution', 'budget', 'recharge', 'or
     </section>
   `,
   styles: `
+    .bf-nowrap {
+      white-space: nowrap;
+    }
     .bf-audit__row {
       cursor: pointer;
     }
@@ -274,6 +316,28 @@ export class AuditLogPage {
   private readonly router = inject(Router);
   protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
+
+  /** "Priya Raman" → "PR", for the actor avatar. */
+  protected initials(name: string): string {
+    return name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase();
+  }
+
+  /** Plain-English verb of an audit action, with its section 5 tone and icon. */
+  protected actionView(action: string): StatusView {
+    const verb = action.includes('.') ? action.slice(action.indexOf('.') + 1) : action;
+    const hit = ACTION_TONES.find(([re]) => re.test(verb));
+    return { label: sentence(verb), tone: hit?.[1] ?? 'neutral', icon: hit?.[2] ?? 'timeline' };
+  }
+
+  protected typeLabel(type: string): string {
+    return sentence(type);
+  }
   protected readonly types = TYPES;
   private readonly query = this.route.snapshot.queryParamMap;
   protected readonly resourceType = signal(this.query.get('type') ?? '');

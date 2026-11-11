@@ -152,3 +152,11 @@ export const sentence = (text: string): string => {
 /** A connector is degraded when it cannot do the job it was connected for. */
 export const isDegraded = (status: ConnectionStatus): boolean =>
   status === 'needs_attention' || status === 'paused';
+
+/** Two initials for `sat-avatar` ("Mei Chen" → "MC"). */
+export function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return (
+    (parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')
+  ).toUpperCase();
+}

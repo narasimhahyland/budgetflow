@@ -11,25 +11,32 @@ import type { SatTagStatus } from '@hylandsoftware/satori-ui/tag';
 export interface Tag {
   tone: SatTagStatus;
   text: string;
+  /** Satori sprite name: section 5 pairs every status with its own icon. */
+  icon: string;
 }
 
 /**
- * Period statuses. Locked and Closed are neutral with a lock in the text: the info tone stays
- * reserved for frozen budgets, as screen 108 established.
+ * Period statuses. Locked and Closed are neutral (the info tone stays reserved for frozen budgets,
+ * as screen 108 established); Closed shows the archive icon and Locked the lock, so they differ.
  */
 export const PERIOD_STATUS: Record<ClosePeriodSummary['status'], Tag> = {
-  open: { tone: 'success', text: 'Open' },
-  soft_closed: { tone: 'warning', text: 'Soft-closed' },
-  closed: { tone: 'neutral', text: 'Closed' },
-  locked: { tone: 'neutral-quiet', text: 'Locked' },
+  open: { tone: 'success', text: 'Open', icon: 'circle_check' },
+  soft_closed: { tone: 'warning', text: 'Soft-closed', icon: 'pause' },
+  closed: { tone: 'neutral', text: 'Closed', icon: 'archive' },
+  locked: { tone: 'neutral-quiet', text: 'Locked', icon: 'lock' },
 };
 
 /** A failing hard check is an error; a soft check that is not passing is a warning until accepted. */
 export function checkTag(check: CloseCheck): Tag {
-  if (check.status === 'pass') return { tone: 'success', text: 'Passed' };
-  if (check.kind === 'hard') return { tone: 'important', text: 'Failed' };
-  if (check.acknowledgement) return { tone: 'neutral', text: 'Accepted with a reason' };
-  return { tone: 'warning', text: check.status === 'fail' ? 'Not done' : 'Needs attention' };
+  if (check.status === 'pass') return { tone: 'success', text: 'Passed', icon: 'circle_check' };
+  if (check.kind === 'hard') return { tone: 'important', text: 'Failed', icon: 'error' };
+  if (check.acknowledgement)
+    return { tone: 'neutral', text: 'Accepted with a reason', icon: 'note_edit' };
+  return {
+    tone: 'warning',
+    text: check.status === 'fail' ? 'Not done' : 'Needs attention',
+    icon: 'critical',
+  };
 }
 
 export const ROLLOVER_MODE: Record<RolloverPolicy['mode'], string> = {
@@ -45,20 +52,20 @@ export const SWEEP_TARGET: Record<RolloverPolicy['sweepTo'], string> = {
 };
 
 export const YEAR_END_LINE_STATUS: Record<YearEndLineStatus, Tag> = {
-  planned: { tone: 'neutral', text: 'Planned' },
-  awaiting_approval: { tone: 'warning', text: 'Waiting for approval' },
-  approved: { tone: 'success', text: 'Approved' },
-  declined: { tone: 'neutral-quiet', text: 'Declined' },
-  blocked: { tone: 'important', text: 'Blocked' },
-  executed: { tone: 'success', text: 'Executed' },
+  planned: { tone: 'neutral', text: 'Planned', icon: 'note_edit' },
+  awaiting_approval: { tone: 'warning', text: 'Waiting for approval', icon: 'clock' },
+  approved: { tone: 'success', text: 'Approved', icon: 'circle_check' },
+  declined: { tone: 'neutral-quiet', text: 'Declined', icon: 'circle_x' },
+  blocked: { tone: 'important', text: 'Blocked', icon: 'block' },
+  executed: { tone: 'success', text: 'Executed', icon: 'check_double' },
 };
 
 export const RUN_STATUS: Record<YearEndRun['status'], Tag> = {
-  draft: { tone: 'neutral', text: 'Draft' },
-  dry_run: { tone: 'info', text: 'Dry run' },
-  running: { tone: 'warning', text: 'Running' },
-  completed: { tone: 'success', text: 'Completed' },
-  failed: { tone: 'important', text: 'Failed' },
+  draft: { tone: 'neutral', text: 'Draft', icon: 'note_edit' },
+  dry_run: { tone: 'info', text: 'Dry run', icon: 'replay' },
+  running: { tone: 'warning', text: 'Running', icon: 'progress_activity' },
+  completed: { tone: 'success', text: 'Completed', icon: 'check_double' },
+  failed: { tone: 'important', text: 'Failed', icon: 'error' },
 };
 
 /** Basis points as a percentage: 1,000 bps reads "10%". */

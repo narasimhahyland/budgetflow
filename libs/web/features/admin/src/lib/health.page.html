@@ -38,6 +38,8 @@
   [loading]="health.isLoading() && !health.hasValue()"
   [error]="health.error()"
   what="the system health"
+  shape="cards"
+  [lines]="6"
   (retry)="health.reload()"
 />
 
@@ -77,15 +79,41 @@
         <dt>Messages waiting to publish</dt>
         <dd data-testid="health-varies">{{ outboxNote(h) }}</dd>
       </div>
-      <div>
-        <dt>Services needing attention</dt>
-        <dd data-testid="health-varies">{{ attention().length }}</dd>
-      </div>
-      <div>
-        <dt>Nightly jobs that failed</dt>
-        <dd>{{ failedJobs().length }}</dd>
-      </div>
     </dl>
+    <div class="bf-kpis bf-card__body">
+      <div
+        class="bf-kpi"
+        [class.bf-kpi--warning]="attention().length > 0"
+        [class.bf-kpi--success]="attention().length === 0"
+      >
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Services needing attention</p>
+          <mat-icon
+            class="bf-kpi__icon"
+            [svgIcon]="attention().length > 0 ? 'critical' : 'circle_check'"
+            aria-hidden="true"
+          />
+        </div>
+        <p class="bf-kpi__value" data-testid="health-varies">{{ attention().length }}</p>
+        <p class="bf-kpi__delta">of {{ h.services.length }} services</p>
+      </div>
+      <div
+        class="bf-kpi"
+        [class.bf-kpi--important]="failedJobs().length > 0"
+        [class.bf-kpi--success]="failedJobs().length === 0"
+      >
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Nightly jobs that failed</p>
+          <mat-icon
+            class="bf-kpi__icon"
+            [svgIcon]="failedJobs().length > 0 ? 'error' : 'circle_check'"
+            aria-hidden="true"
+          />
+        </div>
+        <p class="bf-kpi__value">{{ failedJobs().length }}</p>
+        <p class="bf-kpi__delta">of {{ h.nightlyJobs.length }} jobs in the last run</p>
+      </div>
+    </div>
   </section>
 
   <section class="bf-card" aria-labelledby="services-title">
@@ -98,6 +126,7 @@
           <div class="bf-tile__head">
             <span class="bf-cell__primary">{{ service.name }}</span>
             <sat-status-tag
+              class="bf-tile__tag"
               [attr.data-testid]="'service-' + service.key"
               [status]="statusTone[service.status]"
               >{{ statusLabel[service.status] }}</sat-status-tag
@@ -123,26 +152,35 @@
       </sat-empty-state>
     } @else {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="h.queues" aria-label="Background job queues">
+        <table
+          class="bf-table bf-table--stack"
+          mat-table
+          [dataSource]="h.queues"
+          aria-label="Background job queues"
+        >
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Queue</th>
-            <td mat-cell *matCellDef="let q">{{ q.name }}</td>
+            <td class="bf-cell--full" mat-cell *matCellDef="let q">{{ q.name }}</td>
           </ng-container>
           <ng-container matColumnDef="waiting">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Waiting</th>
-            <td mat-cell *matCellDef="let q" class="bf-num">{{ q.waiting }}</td>
+            <td mat-cell *matCellDef="let q" class="bf-num" data-label="Waiting">
+              {{ q.waiting }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="active">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Running</th>
-            <td mat-cell *matCellDef="let q" class="bf-num">{{ q.active }}</td>
+            <td mat-cell *matCellDef="let q" class="bf-num" data-label="Running">{{ q.active }}</td>
           </ng-container>
           <ng-container matColumnDef="failed">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Failed in 24 hours</th>
-            <td mat-cell *matCellDef="let q" class="bf-num">{{ q.failedLast24h }}</td>
+            <td mat-cell *matCellDef="let q" class="bf-num" data-label="Failed in 24 hours">
+              {{ q.failedLast24h }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="oldest">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Oldest waiting</th>
-            <td mat-cell *matCellDef="let q" class="bf-num">
+            <td mat-cell *matCellDef="let q" class="bf-num" data-label="Oldest waiting">
               {{
                 q.oldestWaitingSeconds === null ? 'Nothing waiting' : q.oldestWaitingSeconds + 's'
               }}
@@ -160,18 +198,23 @@
       <h2 class="bf-card__title" id="jobs-title">Nightly jobs</h2>
     </div>
     <div class="bf-table-scroll">
-      <table mat-table [dataSource]="h.nightlyJobs" aria-label="Nightly jobs">
+      <table
+        class="bf-table bf-table--stack"
+        mat-table
+        [dataSource]="h.nightlyJobs"
+        aria-label="Nightly jobs"
+      >
         <ng-container matColumnDef="job">
           <th mat-header-cell *matHeaderCellDef>Job</th>
-          <td mat-cell *matCellDef="let j">{{ j.name }}</td>
+          <td class="bf-cell--full" mat-cell *matCellDef="let j">{{ j.name }}</td>
         </ng-container>
         <ng-container matColumnDef="schedule">
           <th mat-header-cell *matHeaderCellDef>Runs</th>
-          <td mat-cell *matCellDef="let j">{{ j.schedule }}</td>
+          <td mat-cell *matCellDef="let j" data-label="Runs">{{ j.schedule }}</td>
         </ng-container>
         <ng-container matColumnDef="lastRun">
           <th mat-header-cell *matHeaderCellDef>Last run</th>
-          <td mat-cell *matCellDef="let j">
+          <td mat-cell *matCellDef="let j" data-label="Last run">
             @if (j.lastRunAt) {
               <span class="bf-cell__primary" data-testid="relative-time">{{
                 j.lastRunAt | bfDateTime: timezone()
@@ -186,7 +229,7 @@
         </ng-container>
         <ng-container matColumnDef="result">
           <th mat-header-cell *matHeaderCellDef>Result</th>
-          <td mat-cell *matCellDef="let j">
+          <td mat-cell *matCellDef="let j" data-label="Result">
             <sat-status-tag [attr.data-testid]="'job-' + j.job" [status]="jobTone[j.status]">{{
               jobLabel[j.status]
             }}</sat-status-tag>
@@ -275,10 +318,15 @@
       </sat-empty-state>
     } @else {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="list.items" aria-label="Planned maintenance notices">
+        <table
+          class="bf-table bf-table--stack"
+          mat-table
+          [dataSource]="list.items"
+          aria-label="Planned maintenance notices"
+        >
           <ng-container matColumnDef="message">
             <th mat-header-cell *matHeaderCellDef>Notice</th>
-            <td mat-cell *matCellDef="let n">
+            <td class="bf-cell--full" mat-cell *matCellDef="let n">
               <span class="bf-cell__primary">{{ n.message }}</span>
               <span class="bf-cell__secondary">
                 Announced by {{ n.createdByName ?? 'name not recorded' }}
@@ -287,7 +335,7 @@
           </ng-container>
           <ng-container matColumnDef="window">
             <th mat-header-cell *matHeaderCellDef>When</th>
-            <td mat-cell *matCellDef="let n">
+            <td mat-cell *matCellDef="let n" data-label="When">
               <span class="bf-cell__primary" data-testid="relative-time">
                 {{ n.startsAt | bfDateTime: timezone() }} to
                 {{ n.endsAt | bfDateTime: timezone() }}
@@ -299,15 +347,15 @@
           </ng-container>
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let n">
+            <td mat-cell *matCellDef="let n" data-label="Status">
               <sat-status-tag [status]="n.status === 'scheduled' ? 'info' : 'neutral'">{{
                 n.status === 'scheduled' ? 'Scheduled' : 'Cancelled'
               }}</sat-status-tag>
             </td>
           </ng-container>
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
-            <td mat-cell *matCellDef="let n">
+            <th mat-header-cell *matHeaderCellDef class="bf-col-actions">Actions</th>
+            <td mat-cell *matCellDef="let n" class="bf-col-actions" data-label="Actions">
               @if (canManage() && n.status === 'scheduled') {
                 <button
                   mat-stroked-button

@@ -12,11 +12,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState, Money, SpendStatus } from '@bf/web/ui';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /** Screen 043: the Events landing page — what is coming up, what needs me, and is the money in place. */
 @Component({
@@ -32,6 +32,7 @@ import { LoadState } from './load-state';
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SatStatusTag,
     SpendStatus,
   ],
   template: `
@@ -72,56 +73,81 @@ import { LoadState } from './load-state';
     @if (view(); as v) {
       <section class="bf-kpis" aria-label="Event figures">
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Upcoming events (next 30 days)</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Upcoming events (next 30 days)</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="calendar" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value" data-testid="kpi-upcoming">{{ v.kpis.upcomingCount }}</p>
         </div>
-        <div class="bf-kpi">
-          <p class="bf-kpi__label">Funded for upcoming events</p>
+        <div class="bf-kpi" [class.bf-kpi--warning]="v.kpis.upcomingGap.amountMinor > 0">
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Funded for upcoming events</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="currency_dollar" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="v.kpis.upcomingFunded.amountMinor"
               [currency]="v.kpis.upcomingFunded.currency"
             />
           </p>
-          <p class="bf-kpi__delta">
-            of
+          @if (v.kpis.upcomingGap.amountMinor > 0) {
+            <p class="bf-kpi__delta">
+              <sat-status-tag status="warning"
+                >Gap
+                <bf-money
+                  [amountMinor]="v.kpis.upcomingGap.amountMinor"
+                  [currency]="v.kpis.upcomingGap.currency"
+              /></sat-status-tag>
+            </p>
+          }
+          <div class="bf-kpi__foot">
+            <span>Funding caps</span>
             <bf-money
+              class="bf-kpi__pct"
               [amountMinor]="v.kpis.upcomingCaps.amountMinor"
               [currency]="v.kpis.upcomingCaps.currency"
             />
-            in caps
-            @if (v.kpis.upcomingGap.amountMinor > 0) {
-              · gap
-              <bf-money
-                [amountMinor]="v.kpis.upcomingGap.amountMinor"
-                [currency]="v.kpis.upcomingGap.currency"
-              />
-            }
-          </p>
+          </div>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Cost per attendee, events closed</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Cost per attendee, events closed</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="user" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="v.kpis.closedActualPerAttendee.amountMinor"
               [currency]="v.kpis.closedActualPerAttendee.currency"
             />
           </p>
-          <p class="bf-kpi__delta">
-            planned
+          <div class="bf-kpi__foot">
+            <span>Planned</span>
             <bf-money
+              class="bf-kpi__pct"
               [amountMinor]="v.kpis.closedPlannedPerAttendee.amountMinor"
               [currency]="v.kpis.closedPlannedPerAttendee.currency"
             />
-          </p>
+          </div>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Participation, events closed</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Participation, events closed</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="users" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ v.kpis.closedParticipationPct }}%</p>
-          <p class="bf-kpi__delta">attended of those invited</p>
+          <div class="bf-kpi__foot">
+            <span>Attended of those invited</span>
+            <span class="bf-kpi__pct">{{ v.kpis.closedParticipationPct }}%</span>
+            <span class="bf-kpi__track"
+              ><span class="bf-kpi__fill" [style.width.%]="v.kpis.closedParticipationPct"></span
+            ></span>
+          </div>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Waiting for reconciliation</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Waiting for reconciliation</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="sync" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ v.kpis.waitingForReconciliationCount }}</p>
         </div>
       </section>
@@ -131,10 +157,12 @@ import { LoadState } from './load-state';
         <ul class="bf-list">
           @for (item of v.attention; track item.id) {
             <li class="bf-list__item bf-attention">
-              <span>
-                @if (item.tone === 'warning') {
-                  <mat-icon class="bf-attention__icon" svgIcon="exclamation" />
-                }
+              <span class="bf-attention__text">
+                <mat-icon
+                  class="bf-attention__icon bf-attention__icon--{{ item.tone }}"
+                  [svgIcon]="item.tone === 'info' ? 'info' : 'critical'"
+                  aria-hidden="true"
+                />
                 {{ item.text }}
               </span>
               <a mat-button [routerLink]="item.actionPath">{{ item.actionLabel }}</a>
@@ -151,19 +179,28 @@ import { LoadState } from './load-state';
             <p satEmptyStateDescription>
               Start from a template or create a blank event to plan the next one.
             </p>
-            <a mat-stroked-button routerLink="/events/templates">Start from a template</a>
-            <a mat-flat-button routerLink="/events/new">Create a blank event</a>
+            <a mat-stroked-button satEmptyStateAction routerLink="/events/templates"
+              >Start from a template</a
+            >
+            <a mat-flat-button satEmptyStateAction routerLink="/events/new">Create a blank event</a>
           </sat-empty-state>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="v.upcoming">
+            <table
+              mat-table
+              class="bf-table bf-table--stack"
+              [dataSource]="v.upcoming"
+              aria-label="Upcoming events"
+            >
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Date</th>
-                <td mat-cell *matCellDef="let e">{{ e.startsAt | bfDate: session.timezone() }}</td>
+                <td mat-cell *matCellDef="let e" data-label="Date">
+                  {{ e.startsAt | bfDate: session.timezone() }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="event">
                 <th mat-header-cell *matHeaderCellDef>Event</th>
-                <td mat-cell *matCellDef="let e">
+                <td mat-cell *matCellDef="let e" data-label="Event">
                   <a class="bf-cell__primary" [routerLink]="['/events', e.id]">{{ e.name }}</a>
                   <span class="bf-cell__secondary"
                     >{{ e.eventCode }} · {{ e.locationNames.join(', ') }}</span
@@ -172,45 +209,70 @@ import { LoadState } from './load-state';
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let e">
+                <td mat-cell *matCellDef="let e" data-label="Status">
                   <bf-spend-status kind="event" [status]="e.status" />
                 </td>
               </ng-container>
               <ng-container matColumnDef="rsvp">
                 <th mat-header-cell *matHeaderCellDef>RSVP</th>
-                <td mat-cell *matCellDef="let e">
-                  <span class="bf-cell__primary"
-                    >{{ e.goingCount }} going of {{ e.capacityCount }}</span
-                  >
-                  <span class="bf-progress"
-                    ><span
-                      class="bf-progress__fill bf-progress__fill--approved"
-                      [style.width.%]="share(e.goingCount, e.capacityCount)"
-                    ></span
-                  ></span>
+                <td mat-cell *matCellDef="let e" data-label="RSVP">
+                  <span class="bf-cell__stack">
+                    <span class="bf-cell__primary"
+                      >{{ e.goingCount }} going of {{ e.capacityCount }}</span
+                    >
+                    <span class="bf-progress"
+                      ><span
+                        class="bf-progress__fill"
+                        [style.width.%]="share(e.goingCount, e.capacityCount)"
+                      ></span
+                    ></span>
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="funding">
-                <th mat-header-cell *matHeaderCellDef>Funding</th>
-                <td mat-cell *matCellDef="let e">
-                  <span class="bf-cell__primary"
-                    ><bf-money
-                      [amountMinor]="e.funded.amountMinor"
-                      [currency]="e.funded.currency" />
-                    of <bf-money [amountMinor]="e.cap.amountMinor" [currency]="e.cap.currency"
-                  /></span>
-                  <span class="bf-cell__secondary">{{
-                    e.fullyFunded ? 'Fully funded' : 'Funding gap'
-                  }}</span>
+                <th mat-header-cell *matHeaderCellDef class="bf-num">Funding (of estimate)</th>
+                <td mat-cell *matCellDef="let e" class="bf-num" data-label="Funding (of estimate)">
+                  <span class="bf-cell__stack">
+                    <span class="bf-cell__primary"
+                      ><bf-money
+                        [amountMinor]="e.funded.amountMinor"
+                        [currency]="e.funded.currency" />
+                      of
+                      <bf-money
+                        [amountMinor]="e.estimate.amountMinor"
+                        [currency]="e.estimate.currency"
+                    /></span>
+                    <span class="bf-progress"
+                      ><span
+                        class="bf-progress__fill"
+                        [class.bf-progress__fill--approved]="e.fullyFunded"
+                        [style.width.%]="share(e.funded.amountMinor, e.estimate.amountMinor)"
+                      ></span
+                    ></span>
+                    <span class="bf-cell__secondary"
+                      >{{ e.fullyFunded ? 'Fully funded' : 'Funding gap'
+                      }}{{
+                        e.pendingContributions
+                          ? ' · ' +
+                            e.pendingContributions +
+                            ' contribution' +
+                            (e.pendingContributions === 1 ? '' : 's') +
+                            ' pending'
+                          : ''
+                      }}</span
+                    >
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="nextTask">
                 <th mat-header-cell *matHeaderCellDef>Next task</th>
-                <td mat-cell *matCellDef="let e">
+                <td mat-cell *matCellDef="let e" data-label="Next task">
                   @if (e.nextTaskTitle) {
                     <span class="bf-cell__primary">{{ e.nextTaskTitle }}</span>
                     @if (e.nextTaskOverdue) {
-                      <span class="bf-chip">Overdue</span>
+                      <sat-status-tag status="warning"
+                        ><mat-icon svgIcon="clock" aria-hidden="true" />Overdue</sat-status-tag
+                      >
                     }
                   } @else {
                     <span class="bf-cell__secondary">Nothing open</span>
@@ -227,7 +289,13 @@ import { LoadState } from './load-state';
       <section class="bf-card" aria-label="Recently closed events">
         <div class="bf-card__header"><h2 class="bf-card__title">Recently closed</h2></div>
         @if (v.recentlyClosed.length === 0) {
-          <p class="bf-empty">No events have closed yet.</p>
+          <sat-empty-state>
+            <h3 satEmptyStateHeadline>No events have closed yet</h3>
+            <p satEmptyStateDescription>
+              Closed events show their cost per attendee and feedback here.
+            </p>
+            <a mat-stroked-button satEmptyStateAction routerLink="/events/all">View all events</a>
+          </sat-empty-state>
         } @else {
           <ul class="bf-list">
             @for (e of v.recentlyClosed; track e.id) {
@@ -266,9 +334,39 @@ import { LoadState } from './load-state';
       gap: 8px;
     }
 
+    .bf-attention__text {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .bf-attention__icon {
-      vertical-align: text-bottom;
-      color: var(--sat-sys-warning);
+      flex: none;
+      width: 20px;
+      height: 20px;
+    }
+
+    .bf-attention__icon--warning {
+      color: var(--sat-sys-warning-icon);
+    }
+
+    .bf-attention__icon--important {
+      color: var(--sat-sys-important-icon);
+    }
+
+    .bf-attention__icon--info {
+      color: var(--sat-sys-info-icon);
+    }
+
+    .bf-cell__stack {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 160px;
+    }
+
+    .bf-progress {
+      margin-top: 0;
     }
 
     .bf-toggle--on {

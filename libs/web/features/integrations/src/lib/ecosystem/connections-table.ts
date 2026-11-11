@@ -16,6 +16,8 @@ import {
   CONNECTION_STATUS_TONES,
   TOKEN_SECRECY_NOTE,
 } from './labels';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
+import { initials } from '../labels';
 
 /**
  * The connections of one surface (092a, 092b, 092c). Three things this table must never fudge.
@@ -34,6 +36,7 @@ import {
     DecimalPipe,
     MatButtonModule,
     MatTableModule,
+    SatAvatar,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
@@ -58,7 +61,12 @@ import {
 
     @if (items().length) {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="items()" [attr.aria-labelledby]="headingId()">
+        <table
+          mat-table
+          class="bf-table bf-table--stack"
+          [dataSource]="items()"
+          [attr.aria-labelledby]="headingId()"
+        >
           <ng-container matColumnDef="label">
             <th mat-header-cell *matHeaderCellDef scope="col">Connection</th>
             <td mat-cell *matCellDef="let c">
@@ -69,12 +77,21 @@ import {
 
           <ng-container matColumnDef="person">
             <th mat-header-cell *matHeaderCellDef scope="col">Acts as</th>
-            <td mat-cell *matCellDef="let c">{{ c.personName ?? 'Someone who has left' }}</td>
+            <td mat-cell *matCellDef="let c" data-label="Acts as">
+              @if (c.personName) {
+                <span class="bf-cell__owner">
+                  <sat-avatar size="28" [initials]="initials(c.personName)" />
+                  <span>{{ c.personName }}</span>
+                </span>
+              } @else {
+                Someone who has left
+              }
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="grants">
             <th mat-header-cell *matHeaderCellDef scope="col">{{ grantsHeading() }}</th>
-            <td mat-cell *matCellDef="let c">
+            <td mat-cell *matCellDef="let c" data-label="Grants">
               <ul class="bf-chip-list">
                 @for (g of c.grants; track g) {
                   <li class="bf-chip">{{ grantLabel()(g) }}</li>
@@ -85,14 +102,14 @@ import {
 
           <ng-container matColumnDef="created">
             <th mat-header-cell *matHeaderCellDef scope="col">Made</th>
-            <td mat-cell *matCellDef="let c">
+            <td mat-cell *matCellDef="let c" data-label="Made">
               <span data-testid="relative-time">{{ c.createdAt | bfDateTime: timezone() }}</span>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="used">
             <th mat-header-cell *matHeaderCellDef scope="col">Last used</th>
-            <td mat-cell *matCellDef="let c">
+            <td mat-cell *matCellDef="let c" data-label="Last used">
               @if (c.lastUsedAt) {
                 <span class="bf-cell__primary" data-testid="relative-time">{{
                   c.lastUsedAt | bfDateTime: timezone()
@@ -108,14 +125,14 @@ import {
 
           <ng-container matColumnDef="expires">
             <th mat-header-cell *matHeaderCellDef scope="col">Expires</th>
-            <td mat-cell *matCellDef="let c">
+            <td mat-cell *matCellDef="let c" data-label="Expires">
               <span data-testid="relative-time">{{ c.expiresAt | bfDateTime: timezone() }}</span>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
-            <td mat-cell *matCellDef="let c">
+            <td mat-cell *matCellDef="let c" data-label="Status">
               <sat-status-tag
                 [status]="statusTone(c.status)"
                 [attr.data-testid]="'connection-status-' + c.id"
@@ -127,7 +144,7 @@ import {
 
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
-            <td mat-cell *matCellDef="let c">
+            <td mat-cell *matCellDef="let c" data-label="Actions">
               @if (canRevoke(c)) {
                 <button
                   mat-stroked-button
@@ -152,16 +169,19 @@ import {
         </table>
       </div>
     } @else {
-      <sat-empty-state [attr.data-testid]="testId() + '-empty'">
-        <h3 satEmptyStateHeadline>{{ emptyHeadline() }}</h3>
-        <p satEmptyStateDescription>{{ emptyDescription() }}</p>
-      </sat-empty-state>
+      <div class="bf-card__body">
+        <sat-empty-state [attr.data-testid]="testId() + '-empty'">
+          <h3 satEmptyStateHeadline>{{ emptyHeadline() }}</h3>
+          <p satEmptyStateDescription>{{ emptyDescription() }}</p>
+        </sat-empty-state>
+      </div>
     }
   `,
   styleUrls: ['../page.scss', '../integrations.scss', './ecosystem.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EcosystemConnections {
+  protected readonly initials = initials;
   readonly list = input<EcosystemConnectionList | undefined>(undefined);
   readonly heading = input('Connections');
   readonly headingId = input('connections-title');

@@ -17,13 +17,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import type { TieOut } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, formatMoney, Money } from '@bf/web/ui';
+import { DateTimePipe, formatMoney, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, todayIso, toMinor, valueOf } from './api';
 import { FileInput } from './file-input';
-import { LoadState } from './load-state';
 
 type Line = TieOut['lines'][number];
 

@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,6 +9,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -15,14 +17,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { AiConfidence, AiMatchSuggestion, AiMatchSuggestionTarget } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
-import { SatInteractiveTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const REJECT_REASONS = [
   { code: 'WRONG_EVENT', label: 'Wrong event' },
@@ -46,10 +47,12 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
 @Component({
   selector: 'bf-matching-page',
   imports: [
+    DatePipe,
     AI_OUTPUT_IMPORTS,
     FormsModule,
     LoadState,
     MatButtonModule,
+    MatChipsModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -59,7 +62,6 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SatImportantButton,
-    SatInteractiveTag,
     SatStatusTag,
   ],
   template: `
@@ -100,6 +102,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
         [loading]="suggestions.isLoading() && !suggestions.hasValue()"
         [error]="loadError()"
         what="the matching suggestions"
+        shape="table"
         (retry)="suggestions.reload()"
       />
       @if (suggestions.hasValue()) {
@@ -124,34 +127,34 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
             <h2 class="bf-card__title" id="suggestions-title">Spend lines waiting for a person</h2>
           </div>
           <div class="bf-filters">
-            @for (s of statuses; track s) {
-              <sat-status-tag
-                satInteractiveTag
-                [status]="status() === s ? 'info' : 'neutral-quiet'"
-                [hideIcon]="true"
-                role="button"
-                tabindex="0"
-                (click)="status.set(s)"
-                (keydown.enter)="status.set(s)"
-                [attr.data-testid]="'status-' + s"
-                >{{ statusLabel(s) }}</sat-status-tag
-              >
-            }
+            <mat-chip-listbox aria-label="Suggestion status">
+              @for (s of statuses; track s) {
+                <mat-chip-option
+                  [selected]="status() === s"
+                  [selectable]="status() !== s"
+                  (selectionChange)="$event.selected && status.set(s)"
+                  [attr.data-testid]="'status-' + s"
+                  >{{ statusLabel(s) }}</mat-chip-option
+                >
+              }
+            </mat-chip-listbox>
           </div>
 
           @if (rows().length === 0) {
-            <sat-empty-state data-testid="matching-empty">
-              <h2 satEmptyStateHeadline>No suggestions waiting</h2>
-              <p satEmptyStateDescription>
-                Unmatched lines without a suggestion are in the unmatched queue.
-              </p>
-              <a mat-stroked-button satEmptyStateAction routerLink="/finance/actuals/queue">
-                Open the unmatched queue
-              </a>
-            </sat-empty-state>
+            <div class="bf-card__body">
+              <sat-empty-state data-testid="matching-empty">
+                <h2 satEmptyStateHeadline>No suggestions waiting</h2>
+                <p satEmptyStateDescription>
+                  Unmatched lines without a suggestion are in the unmatched queue.
+                </p>
+                <a mat-stroked-button satEmptyStateAction routerLink="/finance/actuals/queue">
+                  Open the unmatched queue
+                </a>
+              </sat-empty-state>
+            </div>
           } @else {
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="AI matching suggestions">
+              <table class="bf-split-table bf-table--stack" aria-label="AI matching suggestions">
                 <thead>
                   <tr>
                     <th>Posted</th>
@@ -167,9 +170,9 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
                 <tbody>
                   @for (s of rows(); track s.id) {
                     <tr [attr.data-testid]="'suggestion-row-' + s.actualId">
-                      <td>{{ s.postedDate }}</td>
-                      <td>{{ s.source }}</td>
-                      <td>
+                      <td class="bf-nowrap">{{ s.postedDate | date: 'd MMM y' : 'UTC' }}</td>
+                      <td class="bf-nowrap" data-label="Source">{{ sourceLabel(s.source) }}</td>
+                      <td data-label="Merchant and memo">
                         <button
                           mat-button
                           type="button"
@@ -182,28 +185,28 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
                           <span class="bf-cell__secondary">{{ s.memo }}</span>
                         }
                       </td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-label="Transaction amount">
                         <bf-money
                           [amountMinor]="s.transactionAmount.amountMinor"
                           [currency]="s.transactionAmount.currency"
                         />
                       </td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-label="Budget amount (plan rate)">
                         <bf-money
                           [amountMinor]="s.budgetAmount.amountMinor"
                           [currency]="s.budgetAmount.currency"
                         />
                       </td>
-                      <td>
+                      <td data-label="Suggested target (AI)">
                         <span class="bf-cell__primary">{{ s.suggested.targetLabel }}</span>
                         <span class="bf-cell__secondary">{{ s.suggested.budgetName }}</span>
                       </td>
-                      <td>
+                      <td data-label="Confidence">
                         <sat-status-tag [status]="confidenceTone(s.suggested.confidence)">
                           {{ confidenceWord(s.suggested.confidence) }}
                         </sat-status-tag>
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <sat-status-tag [status]="statusTone(s.status)">{{
                           statusLabel(s.status)
                         }}</sat-status-tag>
@@ -221,7 +224,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
             <div class="bf-card__header">
               <div class="bf-title-row">
                 <h2 class="bf-card__title" id="match-detail-title">
-                  {{ lineLabel(s) }} on {{ s.postedDate }}
+                  {{ lineLabel(s) }} on {{ s.postedDate | date: 'd MMM y' : 'UTC' }}
                 </h2>
                 <bf-ai-label text="AI suggestion" />
               </div>
@@ -244,7 +247,10 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
               <div>
                 <h3 class="bf-section__title">Suggested target and the alternatives</h3>
                 <div class="bf-table-scroll">
-                  <table class="bf-split-table" aria-label="Candidate targets, best first">
+                  <table
+                    class="bf-split-table bf-table--stack"
+                    aria-label="Candidate targets, best first"
+                  >
                     <thead>
                       <tr>
                         <th>Target</th>
@@ -258,20 +264,20 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
                       @for (c of candidates(s); track c.targetId) {
                         <tr [attr.data-testid]="'candidate-' + c.targetId">
                           <td>{{ c.targetLabel }}</td>
-                          <td>{{ c.budgetName }}</td>
-                          <td>
+                          <td data-label="Budget">{{ c.budgetName }}</td>
+                          <td data-label="Confidence">
                             <sat-status-tag [status]="confidenceTone(c.confidence)">
                               {{ confidenceWord(c.confidence) }}
                             </sat-status-tag>
                           </td>
-                          <td>
+                          <td data-label="Why this target">
                             <ul class="bf-match__reasons">
                               @for (r of c.reasons; track r) {
                                 <li>{{ r }}</li>
                               }
                             </ul>
                           </td>
-                          <td>
+                          <td data-label="Choose">
                             <button
                               mat-button
                               type="button"
@@ -300,6 +306,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
               @if (s.status === 'open') {
                 <div class="bf-match__actions">
                   <button
+                    mat-flat-button
                     satImportantButton
                     type="button"
                     [disabled]="applying()"
@@ -367,6 +374,9 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
     }
   `,
   styles: `
+    .bf-nowrap {
+      white-space: nowrap;
+    }
     .bf-match {
       display: flex;
       flex-direction: column;
@@ -418,7 +428,7 @@ export class MatchingPage {
 
   /** What a person recognises the line by: the merchant, or the memo when a source sends none. */
   protected lineLabel(s: AiMatchSuggestion): string {
-    return s.merchant ?? s.memo ?? `${s.source} line`;
+    return s.merchant ?? s.memo ?? `${this.sourceLabel(s.source)} line`;
   }
 
   protected candidates(s: AiMatchSuggestion): AiMatchSuggestionTarget[] {
@@ -457,6 +467,23 @@ export class MatchingPage {
       : status.charAt(0).toUpperCase() + status.slice(1);
   }
 
+  /** Plain names for where a spend line came from, instead of the stored source key. */
+  protected sourceLabel(source: string): string {
+    return (
+      (
+        {
+          file: 'File import',
+          card: 'Card feed',
+          expense: 'Expense tool',
+          travel: 'Travel tool',
+          erp: 'ERP import',
+          ap: 'Accounts payable',
+          manual: 'Entered by hand',
+        } as Record<string, string>
+      )[source] ?? source
+    );
+  }
+
   protected statusTone(
     status: AiMatchSuggestion['status'],
   ): 'success' | 'info' | 'warning' | 'neutral' {
@@ -464,7 +491,8 @@ export class MatchingPage {
       case 'accepted':
         return 'success';
       case 'open':
-        return 'info';
+        // Waiting for a person, as Pending is everywhere else.
+        return 'warning';
       case 'stale':
         return 'warning';
       default:

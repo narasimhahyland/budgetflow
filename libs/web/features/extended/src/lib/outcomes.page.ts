@@ -1,13 +1,13 @@
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, resource } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { data, injectApi, valueOf } from './api';
 import { Suppressible } from './figures';
-import { LoadState } from './load-state';
 
 /**
  * Screen 015c: pulse, eNPS and retention against participation.
@@ -21,6 +21,7 @@ import { LoadState } from './load-state';
 @Component({
   selector: 'bf-outcomes-page',
   imports: [
+    DecimalPipe,
     DateTimePipe,
     LoadState,
     MatIconModule,
@@ -77,8 +78,11 @@ import { LoadState } from './load-state';
         </sat-empty-state>
       } @else {
         <div class="bf-kpis">
-          <article class="bf-card bf-kpi" data-testid="kpi-pulse">
-            <h2 class="bf-kpi__title">Average event pulse</h2>
+          <article class="bf-kpi" data-testid="kpi-pulse">
+            <div class="bf-kpi__head">
+              <h2 class="bf-kpi__title">Average event pulse</h2>
+              <mat-icon class="bf-kpi__icon" svgIcon="thumbsup" aria-hidden="true" />
+            </div>
             <bf-suppressible
               class="bf-kpi__value"
               [figure]="o.averagePulse"
@@ -87,8 +91,11 @@ import { LoadState } from './load-state';
               testId="pulse"
             />
           </article>
-          <article class="bf-card bf-kpi" data-testid="kpi-enps">
-            <h2 class="bf-kpi__title">eNPS</h2>
+          <article class="bf-kpi" data-testid="kpi-enps">
+            <div class="bf-kpi__head">
+              <h2 class="bf-kpi__title">eNPS</h2>
+              <mat-icon class="bf-kpi__icon" svgIcon="users" aria-hidden="true" />
+            </div>
             <bf-suppressible
               class="bf-kpi__value"
               [figure]="o.enps"
@@ -106,13 +113,19 @@ import { LoadState } from './load-state';
               >
             </p>
           </article>
-          <article class="bf-card bf-kpi" data-testid="kpi-reach">
-            <h2 class="bf-kpi__title">Reach</h2>
+          <article class="bf-kpi" data-testid="kpi-reach">
+            <div class="bf-kpi__head">
+              <h2 class="bf-kpi__title">Reach</h2>
+              <mat-icon class="bf-kpi__icon" svgIcon="graph_radial" aria-hidden="true" />
+            </div>
             @if (o.reachBps !== null) {
-              <span class="bf-kpi__value">{{ (o.reachBps / 100).toFixed(1) }}%</span>
-              <p class="bf-cell__secondary">
-                of eligible employees took part in at least one event
-              </p>
+              <span class="bf-kpi__value">{{ o.reachBps / 100 | number: '1.1-1' }}%</span>
+              <div class="bf-kpi__foot">
+                <span>of eligible employees took part in at least one event</span>
+                <span class="bf-kpi__track"
+                  ><span class="bf-kpi__fill" [style.width.%]="o.reachBps / 100"></span
+                ></span>
+              </div>
             } @else {
               <span class="bf-kpi__value bf-kpi__value--none">Not available</span>
               <p class="bf-cell__secondary">No events in this fiscal year yet</p>
@@ -122,110 +135,92 @@ import { LoadState } from './load-state';
 
         <section class="bf-card bf-section" data-testid="categories">
           <h2 class="bf-section__title">Event outcomes by category</h2>
-          <table class="bf-split-table" aria-label="Event outcomes by category">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th class="bf-num">Events</th>
-                <th class="bf-num">Attendance rate</th>
-                <th>Average pulse</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of o.categories; track row.categoryCode) {
-                <tr [attr.data-testid]="'category-' + row.categoryCode">
-                  <td>{{ row.categoryName }}</td>
-                  <td class="bf-num">{{ row.eventCount }}</td>
-                  <td class="bf-num">
-                    @if (row.attendanceRateBps !== null) {
-                      {{ (row.attendanceRateBps / 100).toFixed(0) }}%
-                    } @else {
-                      <span class="bf-cell__secondary">No invitations yet</span>
-                    }
-                  </td>
-                  <td>
-                    <bf-suppressible
-                      [figure]="row.pulse"
-                      kind="rating"
-                      noun="responses"
-                      [testId]="'category-pulse-' + row.categoryCode"
-                    />
-                  </td>
-                </tr>
-              } @empty {
+          <div class="bf-table-scroll">
+            <table class="bf-split-table" aria-label="Event outcomes by category">
+              <thead>
                 <tr>
-                  <td colspan="4">No events have been held in this fiscal year.</td>
+                  <th>Category</th>
+                  <th class="bf-num">Events</th>
+                  <th class="bf-num">Attendance rate</th>
+                  <th class="bf-num">Average pulse</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (row of o.categories; track row.categoryCode) {
+                  <tr [attr.data-testid]="'category-' + row.categoryCode">
+                    <td>{{ row.categoryName }}</td>
+                    <td class="bf-num">{{ row.eventCount }}</td>
+                    <td class="bf-num">
+                      @if (row.attendanceRateBps !== null) {
+                        {{ row.attendanceRateBps / 100 | number: '1.0-0' }}%
+                      } @else {
+                        <span class="bf-cell__secondary">No invitations yet</span>
+                      }
+                    </td>
+                    <td class="bf-num">
+                      <bf-suppressible
+                        [figure]="row.pulse"
+                        kind="rating"
+                        noun="responses"
+                        [testId]="'category-pulse-' + row.categoryCode"
+                      />
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4">No events have been held in this fiscal year.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section class="bf-card bf-section" data-testid="retention">
           <h2 class="bf-section__title">Retention by participation band</h2>
           @if (!o.retentionAvailable) {
-            <p data-testid="retention-not-available">
-              Retention cohorts span the whole company, so they are shown to roles that read people
-              company-wide. Your view covers pulse and eNPS for your region.
-            </p>
+            <sat-banner variant="info">
+              <sat-banner-message data-testid="retention-not-available">
+                Retention cohorts span the whole company, so they are shown to roles that read
+                people company-wide. Your view covers pulse and eNPS for your region.
+              </sat-banner-message>
+            </sat-banner>
           } @else {
             <p class="bf-cell__secondary">
               Still employed at the end of the fiscal year, by how many events a person attended.
               Reading down this table shows an association, not a cause.
             </p>
-            <table class="bf-split-table" aria-label="Retention by participation band">
-              <thead>
-                <tr>
-                  <th>Events attended</th>
-                  <th>Still employed</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (band of o.retentionBands; track band.band) {
-                  <tr [attr.data-testid]="'retention-' + band.band">
-                    <td>{{ band.bandLabel }}</td>
-                    <td>
-                      <bf-suppressible
-                        [figure]="band.retention"
-                        kind="percent"
-                        noun="people"
-                        [testId]="'retention-value-' + band.band"
-                      />
-                    </td>
+            <div class="bf-table-scroll">
+              <table class="bf-split-table" aria-label="Retention by participation band">
+                <thead>
+                  <tr>
+                    <th>Events attended</th>
+                    <th class="bf-num">Still employed</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (band of o.retentionBands; track band.band) {
+                    <tr [attr.data-testid]="'retention-' + band.band">
+                      <td>{{ band.bandLabel }}</td>
+                      <td class="bf-num">
+                        <bf-suppressible
+                          [figure]="band.retention"
+                          kind="percent"
+                          noun="people"
+                          [testId]="'retention-value-' + band.band"
+                        />
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           }
         </section>
       }
     }
   `,
   styles: `
-    .bf-kpis {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .bf-kpi {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 16px;
-    }
-    .bf-kpi__title {
-      margin: 0;
-      font: var(--mat-sys-label-large);
-      color: var(--mat-sys-on-surface-variant);
-    }
-    .bf-kpi__value {
-      font: var(--mat-sys-headline-small);
-    }
-    .bf-kpi__value--none {
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-title-medium);
-    }
     .bf-kpi p {
       margin: 0;
     }
@@ -242,12 +237,6 @@ import { LoadState } from './load-state';
     }
     .bf-section p {
       margin: 0;
-    }
-    @media (max-width: 834px) {
-      .bf-split-table {
-        display: block;
-        overflow-x: auto;
-      }
     }
   `,
   host: { class: 'bf-page-layout' },

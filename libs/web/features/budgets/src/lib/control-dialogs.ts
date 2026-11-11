@@ -13,13 +13,23 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import type { BudgetDetail, ControlImpact } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
-import { BudgetStatus } from '@bf/web/ui';
+import { BudgetStatus, formatMoney, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { balancesOf, data, errorMessage, injectApi, sameTree, toMinor, valueOf } from './api';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
+import {
+  balancesOf,
+  data,
+  errorMessage,
+  flagMatcher,
+  injectApi,
+  sameTree,
+  toMinor,
+  valueOf,
+} from './api';
 
 export interface BudgetDialogData {
   budget: BudgetDetail;
@@ -34,6 +44,7 @@ const COMMON = [
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
+  MatRadioModule,
   MatSelectModule,
   MatSlideToggleModule,
   Money,
@@ -65,17 +76,28 @@ function treeBudgets(budget: () => BudgetDetail) {
 /** Screen 27: freeze (and unfreeze) with cascade, reason code and the pending requests put on hold. */
 @Component({
   selector: 'bf-freeze-dialog',
-  imports: COMMON,
+  imports: [...COMMON, SatImportantButton],
   styleUrl: './dialogs.scss',
   template: `
     <div mat-dialog-title class="bf-dialog__head">
-      <span class="bf-dialog__icon"><mat-icon svgIcon="lock" aria-hidden="true" /></span>
+      <span class="bf-dialog__icon bf-dialog__icon--info"
+        ><mat-icon [svgIcon]="unfreeze ? 'unlocked' : 'lock'" aria-hidden="true"
+      /></span>
       <div>
         <h2 class="bf-dialog__title">{{ unfreeze ? 'Unfreeze' : 'Freeze' }} {{ b.name }}</h2>
         <p class="bf-dialog__subtitle">
           Owner {{ b.display.ownerName ?? '—' }} · Budget currency {{ b.currency }}
         </p>
       </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
     </div>
     <mat-dialog-content>
       @if (unfreeze) {
@@ -121,11 +143,15 @@ function treeBudgets(budget: () => BudgetDetail) {
                   <mat-option [value]="r.code">{{ r.code }} · {{ r.label }}</mat-option>
                 }
               </mat-select>
+              <mat-error
+                ><mat-icon svgIcon="error" aria-hidden="true" />Choose a reason code</mat-error
+              >
             </mat-form-field>
           }
           <mat-form-field class="bf-field">
             <mat-label>Reason and internal note</mat-label>
             <textarea matInput rows="3" [(ngModel)]="reason" required></textarea>
+            <mat-error><mat-icon svgIcon="error" aria-hidden="true" />Enter a reason</mat-error>
           </mat-form-field>
         </div>
         <div>
@@ -148,16 +174,22 @@ function treeBudgets(budget: () => BudgetDetail) {
           </p>
         </div>
       </div>
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
+      @if (!valid()) {
+        <span class="bf-dialog__why">{{ why() }}</span>
+      }
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
         mat-flat-button
+        satImportantButton
         type="button"
         [disabled]="busy() || !valid()"
         (click)="submit()"
@@ -186,6 +218,11 @@ export class FreezeDialog {
 
   protected valid(): boolean {
     return this.reason.trim().length >= 3 && (this.unfreeze || !!this.reasonCode);
+  }
+
+  protected why(): string {
+    if (!this.unfreeze && !this.reasonCode) return 'Choose a reason code to continue.';
+    return 'Enter a reason (3 characters or more) to continue.';
   }
 
   protected async submit(): Promise<void> {
@@ -280,7 +317,7 @@ abstract class ReductionDialogBase {
 /** Screen 26: reduce with floor, destination, reason code and the live impact preview. */
 @Component({
   selector: 'bf-reduce-dialog',
-  imports: COMMON,
+  imports: [...COMMON, SatImportantButton],
   styleUrl: './dialogs.scss',
   template: `
     <div mat-dialog-title class="bf-dialog__head">
@@ -294,6 +331,15 @@ abstract class ReductionDialogBase {
           {{ b.currency }}
         </p>
       </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
     </div>
     <mat-dialog-content>
       <div class="bf-dialog__grid">
@@ -344,22 +390,31 @@ abstract class ReductionDialogBase {
         </div>
         <div>
           <mat-form-field class="bf-field">
-            <mat-label>Reduce by ({{ b.currency }})</mat-label>
+            <mat-label>Reduce by</mat-label>
+            <span matTextPrefix>{{ b.currency }}&nbsp;</span>
             <input
               matInput
               inputmode="decimal"
               [ngModel]="amount()"
               (ngModelChange)="amount.set($event)"
+              [errorStateMatcher]="amountError"
               required
               data-testid="reduce-amount"
             />
             <mat-hint
               >Maximum reducible: <bf-money [amountMinor]="max" [currency]="b.currency"
             /></mat-hint>
+            <mat-error
+              ><mat-icon svgIcon="error" aria-hidden="true" />{{
+                impact()?.problem
+                  ? 'Maximum reduction is ' + maxText
+                  : 'Enter the amount to reduce by'
+              }}</mat-error
+            >
           </mat-form-field>
           <div class="bf-delta">
             <span>New authorized</span>
-            <span class="bf-delta__after"
+            <span class="bf-delta__after" [class.bf-bad]="!!impact()?.problem"
               ><bf-money
                 [amountMinor]="bal.authorized - (amountMinor() ?? 0)"
                 [currency]="b.currency"
@@ -368,42 +423,37 @@ abstract class ReductionDialogBase {
           <p class="bf-dialog__section-title" style="margin-top: 16px">
             Where does the cut money go?
           </p>
-          <div class="bf-destinations" role="radiogroup" aria-label="Destination">
+          <mat-radio-group
+            class="bf-destinations"
+            aria-label="Destination"
+            [value]="destination()"
+            (change)="destination.set($event.value)"
+          >
             @if (b.parentId) {
-              <button
-                type="button"
-                role="radio"
+              <mat-radio-button
+                value="parent"
                 class="bf-destination"
                 [class.bf-destination--selected]="destination() === 'parent'"
-                [attr.aria-checked]="destination() === 'parent'"
-                (click)="destination.set('parent')"
-              >
-                Return to parent<small
+                >Return to parent<small
                   >{{ b.display.parentName }}: increases its unallocated pool</small
-                >
-              </button>
+                ></mat-radio-button
+              >
             }
-            <button
-              type="button"
-              role="radio"
+            <mat-radio-button
+              value="savings"
               class="bf-destination"
               [class.bf-destination--selected]="destination() === 'savings'"
-              [attr.aria-checked]="destination() === 'savings'"
-              (click)="destination.set('savings')"
+              >Company savings<small
+                >Leaves the program; the plan ties out with savings</small
+              ></mat-radio-button
             >
-              Company savings<small>Leaves the program; the plan ties out with savings</small>
-            </button>
-            <button
-              type="button"
-              role="radio"
+            <mat-radio-button
+              value="reallocation"
               class="bf-destination"
               [class.bf-destination--selected]="destination() === 'reallocation'"
-              [attr.aria-checked]="destination() === 'reallocation'"
-              (click)="destination.set('reallocation')"
+              >Reallocate<small>Move it to another budget of this tree</small></mat-radio-button
             >
-              Reallocate<small>Move it to another budget of this tree</small>
-            </button>
-          </div>
+          </mat-radio-group>
           @if (destination() === 'reallocation') {
             <mat-form-field class="bf-field">
               <mat-label>Receiving budget</mat-label>
@@ -424,18 +474,18 @@ abstract class ReductionDialogBase {
                 <mat-option [value]="r.code">{{ r.code }} · {{ r.label }}</mat-option>
               }
             </mat-select>
+            <mat-error
+              ><mat-icon svgIcon="error" aria-hidden="true" />Choose a reason code</mat-error
+            >
           </mat-form-field>
           <mat-form-field class="bf-field">
             <mat-label>Reason</mat-label>
             <textarea matInput rows="2" [(ngModel)]="reason" required></textarea>
+            <mat-error><mat-icon svgIcon="error" aria-hidden="true" />Enter a reason</mat-error>
           </mat-form-field>
         </div>
       </div>
-      @if (impact()?.problem; as p) {
-        <sat-banner variant="important" data-testid="reduce-problem"
-          ><sat-banner-message>{{ p.message }}</sat-banner-message></sat-banner
-        >
-      } @else if (impact() && impact()!.pendingMinor > 0) {
+      @if (!impact()?.problem && impact() && impact()!.pendingMinor > 0) {
         <sat-banner variant="warning"
           ><sat-banner-message
             >Pending requests (<bf-money
@@ -446,20 +496,33 @@ abstract class ReductionDialogBase {
           ></sat-banner
         >
       }
-      @if (failure()) {
-        <sat-banner variant="important"
-          ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
-        >
-      }
       <p class="bf-note">
         <mat-icon svgIcon="shield" aria-hidden="true" />Existing commitments are not affected. One
         audit entry and a reduction journal are recorded.
       </p>
     </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
+      @if (impact()?.problem; as p) {
+        <sat-banner variant="important" [border]="true" data-testid="reduce-problem"
+          ><sat-banner-message
+            ><strong>Blocked:</strong> {{ p.message }}</sat-banner-message
+          ></sat-banner
+        >
+      }
+      @if (failure()) {
+        <sat-banner variant="important" [border]="true"
+          ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
+        >
+      }
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
+      @if (!canSubmit()) {
+        <span class="bf-dialog__why">{{ why() }}</span>
+      }
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
         mat-flat-button
+        satImportantButton
         type="button"
         [disabled]="busy() || !canSubmit()"
         (click)="submit()"
@@ -479,6 +542,8 @@ export class ReduceDialog extends ReductionDialogBase {
   protected readonly floor =
     this.bal.allocatedOut + this.bal.held + this.bal.encumbered + this.bal.actual;
   protected readonly max = Math.max(this.bal.authorized - this.floor, 0);
+  protected readonly maxText = formatMoney(this.max, this.b.currency);
+  protected readonly amountError = flagMatcher(() => !!this.impact()?.problem);
 
   protected previewBody() {
     const amountMinor = this.amountMinor();
@@ -495,6 +560,16 @@ export class ReduceDialog extends ReductionDialogBase {
       !!this.reasonCode &&
       this.reason.trim().length >= 3
     );
+  }
+
+  protected why(): string {
+    const a = this.amountMinor();
+    if (!a || a <= 0) return 'Enter the amount to reduce by.';
+    if (this.impact()?.problem) return 'Lower the amount to continue.';
+    if (!this.destinationReady()) return 'Choose the receiving budget.';
+    if (!this.impact() || this.impact()!.reductionMinor !== a) return 'Checking the impact…';
+    if (!this.reasonCode) return 'Choose a reason code.';
+    return 'Enter a reason (3 characters or more).';
   }
 
   protected async submit(): Promise<void> {
@@ -527,7 +602,7 @@ export class ReduceDialog extends ReductionDialogBase {
 /** Screen 28: set to zero with impact, floor, cascade, destination, reason code, typed confirmation. */
 @Component({
   selector: 'bf-zero-dialog',
-  imports: [...COMMON, BudgetStatus],
+  imports: [...COMMON, BudgetStatus, SatImportantButton],
   styleUrl: './dialogs.scss',
   template: `
     <div mat-dialog-title class="bf-dialog__head">
@@ -541,6 +616,15 @@ export class ReduceDialog extends ReductionDialogBase {
           {{ b.currency }}
         </p>
       </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="bf-dialog__close"
+        mat-dialog-close
+        aria-label="Close"
+      >
+        <mat-icon svgIcon="x_small" aria-hidden="true" />
+      </button>
     </div>
     <mat-dialog-content>
       <sat-banner variant="important"
@@ -656,10 +740,14 @@ export class ReduceDialog extends ReductionDialogBase {
                 <mat-option [value]="r.code">{{ r.code }} · {{ r.label }}</mat-option>
               }
             </mat-select>
+            <mat-error
+              ><mat-icon svgIcon="error" aria-hidden="true" />Choose a reason code</mat-error
+            >
           </mat-form-field>
           <mat-form-field class="bf-field">
             <mat-label>Reason</mat-label>
             <textarea matInput rows="3" [(ngModel)]="reason" required></textarea>
+            <mat-error><mat-icon svgIcon="error" aria-hidden="true" />Enter a reason</mat-error>
           </mat-form-field>
           <div class="bf-confirm">
             <mat-form-field class="bf-field" subscriptSizing="dynamic">
@@ -681,22 +769,29 @@ export class ReduceDialog extends ReductionDialogBase {
           </p>
         </div>
       </div>
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
       @if (impact()?.problem; as p) {
-        <sat-banner variant="important"
-          ><sat-banner-message>{{ p.message }}</sat-banner-message></sat-banner
+        <sat-banner variant="important" [border]="true"
+          ><sat-banner-message
+            ><strong>Blocked:</strong> {{ p.message }}</sat-banner-message
+          ></sat-banner
         >
       }
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
+      @if (!canSubmit()) {
+        <span class="bf-dialog__why">{{ why() }}</span>
+      }
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
         mat-flat-button
-        class="bf-danger-button"
+        satImportantButton
         type="button"
         [disabled]="busy() || !canSubmit()"
         (click)="submit()"
@@ -737,6 +832,18 @@ export class ZeroDialog extends ReductionDialogBase {
     return (
       !!i && !i.problem && this.confirmed() && !!this.reasonCode && this.reason.trim().length >= 3
     );
+  }
+
+  protected why(): string {
+    const missing = [
+      ...(this.impact()?.problem ? ['resolve the block above'] : []),
+      ...(this.reasonCode ? [] : ['choose a reason code']),
+      ...(this.reason.trim().length >= 3 ? [] : ['enter a reason']),
+      ...(this.confirmed() ? [] : [`type ${this.confirmTarget}`]),
+    ];
+    if (!this.impact() && !missing.length) return 'Checking the impact…';
+    const text = missing.join(', ');
+    return `To continue, ${text}.`;
   }
 
   protected async submit(): Promise<void> {
@@ -791,13 +898,16 @@ export interface ReasonDialogData {
       <mat-form-field class="bf-field">
         <mat-label>Reason</mat-label>
         <textarea matInput rows="2" [(ngModel)]="reason" required></textarea>
+        <mat-error><mat-icon svgIcon="error" aria-hidden="true" />Enter a reason</mat-error>
       </mat-form-field>
+    </mat-dialog-content>
+    <div class="bf-dialog__status" aria-live="polite">
       @if (failure()) {
-        <sat-banner variant="important"
+        <sat-banner variant="important" [border]="true"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
         >
       }
-    </mat-dialog-content>
+    </div>
     <mat-dialog-actions align="end" class="bf-dialog__actions">
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button

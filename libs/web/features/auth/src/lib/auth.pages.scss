@@ -9,10 +9,35 @@
   padding: 24px;
 }
 
+// The same lockup as the sign-in page: the Hyland mark beside the product name and ENTERPRISE.
 .bf-auth-page__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bf-auth-page__mark {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+}
+
+.bf-auth-page__product {
+  display: flex;
+  flex-direction: column;
   margin: 0;
   color: var(--sat-sys-primary-loud);
-  font: var(--mat-sys-headline-small);
+  font: var(--mat-sys-title-large);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.bf-auth-page__product span {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-small);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .bf-auth-page__card {
@@ -20,6 +45,6 @@
   box-sizing: border-box;
   padding: 24px;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-large);
+  border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-surface-container-lowest);
 }

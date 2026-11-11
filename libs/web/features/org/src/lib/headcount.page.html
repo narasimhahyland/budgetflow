@@ -121,15 +121,24 @@
         </p>
         <div class="bf-kpis" aria-label="File summary">
           <div class="bf-kpi">
-            <p class="bf-kpi__label">Rows read</p>
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Rows read</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="upload" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">{{ p.rowsRead | number }}</p>
           </div>
           <div class="bf-kpi">
-            <p class="bf-kpi__label">Valid lines</p>
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Valid lines</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="circle_check" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">{{ p.lineCount | number }}</p>
           </div>
           <div class="bf-kpi">
-            <p class="bf-kpi__label">Headcount</p>
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Headcount</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="users" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">{{ p.totalHeadcount | number }}</p>
             <p class="bf-kpi__delta">
               {{
@@ -140,8 +149,17 @@
             </p>
           </div>
           <div class="bf-kpi" [class.bf-kpi--error]="p.issues.length > 0">
-            <p class="bf-kpi__label">Rows with errors</p>
-            <p class="bf-kpi__value">{{ p.issues.length }}</p>
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Rows with errors</p>
+              <mat-icon
+                class="bf-kpi__icon"
+                [svgIcon]="p.issues.length > 0 ? 'error' : 'circle_check'"
+                aria-hidden="true"
+              />
+            </div>
+            <p class="bf-kpi__value" [class.bf-kpi__value--error]="p.issues.length > 0">
+              {{ p.issues.length }}
+            </p>
             <p class="bf-kpi__delta">{{ p.issues.length ? 'Fix before importing' : 'None' }}</p>
           </div>
         </div>
@@ -155,22 +173,27 @@
         <div class="bf-review__main">
           <h3 class="bf-review__title">Headcount change by location</h3>
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="p.locations" aria-label="Headcount change by location">
+            <table
+              class="bf-table bf-table--stack"
+              mat-table
+              [dataSource]="p.locations"
+              aria-label="Headcount change by location"
+            >
               <ng-container matColumnDef="location">
                 <th mat-header-cell *matHeaderCellDef>Location</th>
-                <td mat-cell *matCellDef="let r">{{ r.name }}</td>
+                <td class="bf-cell--full" mat-cell *matCellDef="let r">{{ r.name }}</td>
                 <td mat-footer-cell *matFooterCellDef>Total</td>
               </ng-container>
               <ng-container matColumnDef="entity">
                 <th mat-header-cell *matHeaderCellDef>Legal entity</th>
-                <td mat-cell *matCellDef="let r">
+                <td mat-cell *matCellDef="let r" data-label="Legal entity">
                   {{ r.legalEntityId ? (entityCode().get(r.legalEntityId) ?? '…') : '—' }}
                 </td>
                 <td mat-footer-cell *matFooterCellDef></td>
               </ng-container>
               <ng-container matColumnDef="previous">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">Previous</th>
-                <td mat-cell *matCellDef="let r" class="bf-num">
+                <td mat-cell *matCellDef="let r" class="bf-num" data-label="Previous">
                   {{ r.previousHeadcount === null ? '—' : (r.previousHeadcount | number) }}
                 </td>
                 <td mat-footer-cell *matFooterCellDef class="bf-num">
@@ -179,14 +202,16 @@
               </ng-container>
               <ng-container matColumnDef="new">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">New</th>
-                <td mat-cell *matCellDef="let r" class="bf-num">{{ r.headcount | number }}</td>
+                <td mat-cell *matCellDef="let r" class="bf-num" data-label="New">
+                  {{ r.headcount | number }}
+                </td>
                 <td mat-footer-cell *matFooterCellDef class="bf-num">
                   {{ locationTotals().next | number }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="change">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">Change</th>
-                <td mat-cell *matCellDef="let r" class="bf-num">
+                <td mat-cell *matCellDef="let r" class="bf-num" data-label="Change">
                   {{ delta(r.headcount, r.previousHeadcount) }}
                 </td>
                 <td mat-footer-cell *matFooterCellDef class="bf-num">
@@ -268,7 +293,10 @@
   } @else {
     <div class="bf-kpis" aria-label="Headcount totals">
       <div class="bf-kpi">
-        <p class="bf-kpi__label">Total</p>
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Total</p>
+          <mat-icon class="bf-kpi__icon" svgIcon="users" aria-hidden="true" />
+        </div>
         <p class="bf-kpi__value" data-testid="headcount-total">{{ s.total | number }}</p>
         <p class="bf-kpi__delta">
           {{
@@ -279,15 +307,24 @@
         </p>
       </div>
       <div class="bf-kpi">
-        <p class="bf-kpi__label">Employees</p>
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Employees</p>
+          <mat-icon class="bf-kpi__icon" svgIcon="user" aria-hidden="true" />
+        </div>
         <p class="bf-kpi__value">{{ totals().employee | number }}</p>
       </div>
       <div class="bf-kpi">
-        <p class="bf-kpi__label">Contractors</p>
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Contractors</p>
+          <mat-icon class="bf-kpi__icon" svgIcon="user" aria-hidden="true" />
+        </div>
         <p class="bf-kpi__value">{{ totals().contractor | number }}</p>
       </div>
       <div class="bf-kpi">
-        <p class="bf-kpi__label">Interns</p>
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Interns</p>
+          <mat-icon class="bf-kpi__icon" svgIcon="user" aria-hidden="true" />
+        </div>
         <p class="bf-kpi__value">{{ totals().intern | number }}</p>
       </div>
     </div>
@@ -302,35 +339,52 @@
         </div>
       </div>
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="rows()" aria-labelledby="hc-title">
+        <table
+          class="bf-table bf-table--stack"
+          mat-table
+          [dataSource]="rows()"
+          aria-labelledby="hc-title"
+        >
           <ng-container matColumnDef="unit">
             <th mat-header-cell *matHeaderCellDef>Location or team</th>
-            <td mat-cell *matCellDef="let r" [class.bf-team]="r.level === 1">
+            <td class="bf-cell--full" mat-cell *matCellDef="let r" [class.bf-team]="r.level === 1">
               <span class="bf-cell__primary">{{ r.name }}</span>
               <span class="bf-cell__secondary">{{ r.code }}</span>
             </td>
           </ng-container>
           <ng-container matColumnDef="employees">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Employees</th>
-            <td mat-cell *matCellDef="let r" class="bf-num">{{ r.byType.employee | number }}</td>
+            <td mat-cell *matCellDef="let r" class="bf-num" data-label="Employees">
+              {{ r.byType.employee | number }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="contractors">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Contractors</th>
-            <td mat-cell *matCellDef="let r" class="bf-num">{{ r.byType.contractor | number }}</td>
+            <td mat-cell *matCellDef="let r" class="bf-num" data-label="Contractors">
+              {{ r.byType.contractor | number }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="interns">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Interns</th>
-            <td mat-cell *matCellDef="let r" class="bf-num">{{ r.byType.intern | number }}</td>
+            <td mat-cell *matCellDef="let r" class="bf-num" data-label="Interns">
+              {{ r.byType.intern | number }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="total">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Total</th>
-            <td mat-cell *matCellDef="let r" class="bf-num" [attr.data-testid]="'hc-' + r.code">
+            <td
+              mat-cell
+              *matCellDef="let r"
+              class="bf-num"
+              [attr.data-testid]="'hc-' + r.code"
+              data-label="Total"
+            >
               {{ r.headcount | number }}
             </td>
           </ng-container>
           <ng-container matColumnDef="change">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Change</th>
-            <td mat-cell *matCellDef="let r" class="bf-num">
+            <td mat-cell *matCellDef="let r" class="bf-num" data-label="Change">
               {{ delta(r.headcount, r.previousHeadcount) }}
             </td>
           </ng-container>

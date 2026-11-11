@@ -13,14 +13,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import type { ProvisioningLogEntry, ScimTokenView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { IntegrationsNav } from './integrations-nav';
-import { LoadState } from './load-state';
 import { byNewest, byRank, ordered } from './order';
 import { OneTimeSecret } from './one-time-secret';
 
@@ -51,6 +50,7 @@ const OPERATION_LABELS: Record<ProvisioningLogEntry['operation'], string> = {
   ],
   templateUrl: './identity.page.html',
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IdentityPage {

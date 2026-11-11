@@ -14,12 +14,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import type { ActualLine } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ActualsTabs } from './actuals-tabs';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /** Matched actuals with the budget amount, FX effect and the correction (linked reversal) action. */
 @Component({
@@ -73,10 +72,12 @@ import { LoadState } from './load-state';
         <p class="bf-empty">No matched actuals yet.</p>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="items()" aria-label="Matched actuals">
+          <table mat-table class="bf-table" [dataSource]="items()" aria-label="Matched actuals">
             <ng-container matColumnDef="date">
               <th mat-header-cell *matHeaderCellDef>Date</th>
-              <td mat-cell *matCellDef="let a">{{ a.transactionDate | date: 'd MMM y' }}</td>
+              <td mat-cell *matCellDef="let a">
+                {{ a.transactionDate | date: 'd MMM y' : 'UTC' }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="line">
               <th mat-header-cell *matHeaderCellDef>Line</th>

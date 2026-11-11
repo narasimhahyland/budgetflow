@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { type ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -17,10 +18,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import type { CreateEventBody } from '@bf/contracts';
-import { ApprovalRoute, formatMoney, Money } from '@bf/web/ui';
+import { ApprovalRoute, formatMoney, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
 import { toMinor } from './money-input';
 
 interface CostLine {
@@ -30,6 +31,8 @@ interface CostLine {
 }
 
 const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor'];
+
+type FieldKey = 'name' | 'date' | 'location' | 'people' | 'cost' | 'budget';
 
 /** Screen 118: propose a small team event and ask for its funding in one step (draft event + submission). */
 @Component({
@@ -43,6 +46,7 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    SatImportantButton,
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
@@ -57,12 +61,14 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
         </p>
       </div>
     </header>
-    <bf-load-state
-      [loading]="requestable.isLoading() && !requestable.hasValue()"
-      [error]="requestable.error()"
-      what="the budgets you may request from"
-      (retry)="requestable.reload()"
-    />
+    <!-- Loading shows as the budget field's hint: a skeleton above the form shifted it on load. -->
+    @if (requestable.error()) {
+      <bf-load-state
+        [error]="requestable.error()"
+        what="the budgets you may request from"
+        (retry)="requestable.reload()"
+      />
+    }
     @if (errors().length && showErrors()) {
       <sat-banner #summary tabindex="-1" variant="important" data-testid="error-summary"
         ><sat-banner-message
@@ -82,7 +88,17 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
           <div class="bf-form">
             <mat-form-field appearance="outline" class="bf-form__wide">
               <mat-label>Event name</mat-label>
-              <input matInput [(ngModel)]="name" name="name" (ngModelChange)="touch()" />
+              <input
+                matInput
+                [(ngModel)]="name"
+                name="name"
+                [errorStateMatcher]="show.name"
+                (ngModelChange)="touch()"
+              />
+              <mat-error
+                ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Name the event
+                (at least 3 characters).</mat-error
+              >
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Date</mat-label>
@@ -92,16 +108,30 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
                 [min]="today"
                 [(ngModel)]="date"
                 name="date"
+                [errorStateMatcher]="show.date"
                 (ngModelChange)="touch()"
               />
+              <mat-error
+                ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Choose the
+                date of the event.</mat-error
+              >
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Location</mat-label>
-              <mat-select [(ngModel)]="locationId" name="location" (ngModelChange)="touch()">
+              <mat-select
+                [(ngModel)]="locationId"
+                name="location"
+                [errorStateMatcher]="show.location"
+                (ngModelChange)="touch()"
+              >
                 @for (l of locations(); track l.id) {
                   <mat-option [value]="l.id">{{ l.name }}</mat-option>
                 }
               </mat-select>
+              <mat-error
+                ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Choose where
+                it happens.</mat-error
+              >
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>People attending</mat-label>
@@ -111,8 +141,13 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
                 min="1"
                 [(ngModel)]="people"
                 name="people"
+                [errorStateMatcher]="show.people"
                 (ngModelChange)="touch()"
               />
+              <mat-error
+                ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Say how many
+                people attend.</mat-error
+              >
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Venue (optional)</mat-label>
@@ -146,14 +181,20 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
                 <input matInput [(ngModel)]="l.description" [name]="'desc' + i" />
               </mat-form-field>
               <mat-form-field appearance="outline">
-                <mat-label>Amount ({{ currency() }})</mat-label>
+                <mat-label>Amount</mat-label>
+                <span matTextPrefix>{{ currency() }}&nbsp;</span>
                 <input
                   matInput
                   inputmode="decimal"
                   [(ngModel)]="l.amount"
                   [name]="'amount' + i"
+                  [errorStateMatcher]="show.cost"
                   (ngModelChange)="touch()"
                 />
+                <mat-error
+                  ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Add at least
+                  one cost.</mat-error
+                >
               </mat-form-field>
               @if (lines().length > 1) {
                 <button mat-button type="button" (click)="removeLine(i)">Remove</button>
@@ -180,7 +221,12 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
           <div class="bf-form">
             <mat-form-field appearance="outline" class="bf-form__wide">
               <mat-label>Charge to budget</mat-label>
-              <mat-select [(ngModel)]="budgetId" name="budget" (ngModelChange)="touch()">
+              <mat-select
+                [(ngModel)]="budgetId"
+                name="budget"
+                [errorStateMatcher]="show.budget"
+                (ngModelChange)="touch()"
+              >
                 @for (b of budgets(); track b.budgetId) {
                   <mat-option [value]="b.budgetId" [disabled]="!!b.blockedCode"
                     >{{ b.name
@@ -188,7 +234,15 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
                   >
                 }
               </mat-select>
-              <mat-hint>The event code is created when the funding is approved.</mat-hint>
+              <mat-hint>{{
+                requestable.isLoading() && !requestable.hasValue()
+                  ? 'Loading the budgets you may request from…'
+                  : 'The event code is created when the funding is approved.'
+              }}</mat-hint>
+              <mat-error
+                ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Choose the
+                budget to charge.</mat-error
+              >
             </mat-form-field>
           </div>
         </section>
@@ -225,6 +279,7 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
       </button>
       <button
         mat-flat-button
+        satImportantButton
         type="button"
         [disabled]="busy() || blocked()"
         (click)="save(true)"
@@ -238,6 +293,12 @@ const CATEGORIES = ['venue', 'catering', 'activities', 'travel', 'gifts', 'decor
     .bf-cost-line {
       align-items: center;
       padding-bottom: 0;
+    }
+    .bf-error-icon {
+      width: 16px;
+      height: 16px;
+      margin-inline-end: 4px;
+      vertical-align: -3px;
     }
     .bf-check__hint {
       display: block;
@@ -308,6 +369,29 @@ export class EventFundingPage {
   protected readonly blocked = computed(() =>
     Boolean(this.preview.hasValue() && this.preview.value()?.blockedCode),
   );
+  /** Per-field problems, so each field shows its own error once Submit was pressed (section 7). */
+  private readonly invalid = computed((): Record<FieldKey, boolean> => {
+    this.version();
+    return {
+      name: this.name.trim().length < 3,
+      date: !this.date,
+      location: !this.locationId,
+      people: !Number(this.people) || Number(this.people) < 1,
+      cost: this.totalMinor() <= 0,
+      budget: !this.budgetId,
+    };
+  });
+  private matcher(key: FieldKey): ErrorStateMatcher {
+    return { isErrorState: () => this.showErrors() && this.invalid()[key] };
+  }
+  protected readonly show = {
+    name: this.matcher('name'),
+    date: this.matcher('date'),
+    location: this.matcher('location'),
+    people: this.matcher('people'),
+    cost: this.matcher('cost'),
+    budget: this.matcher('budget'),
+  };
   protected readonly errors = computed(() => {
     this.version();
     const e: string[] = [];

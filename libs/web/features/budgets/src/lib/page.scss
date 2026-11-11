@@ -22,6 +22,7 @@
   margin: 0;
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-headline-small);
+  font-weight: 600;
 }
 
 .bf-page__subtitle {
@@ -40,7 +41,7 @@
 .bf-card {
   overflow: hidden;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-large);
+  border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-surface-container-lowest);
 }
 
@@ -65,16 +66,23 @@
 }
 
 .bf-card__body {
-  padding: 8px 20px 20px;
+  padding: 8px 20px 24px;
 }
 
+// Tables (.bf-table, .bf-split-table, .bf-table-scroll, row states) and KPI cards (.bf-kpis,
+// .bf-kpi*) come from the global sheets in libs/web/ui/src/styles.
+
+// The scroller is the containing block of the visually hidden header labels inside it, so they
+// scroll with the table instead of widening the page.
 .bf-table-scroll {
   position: relative;
-  overflow-x: auto;
 }
 
-.bf-table-scroll table {
-  width: 100%;
+// Secondary columns that give way on a phone so the figures people act on stay in view.
+@media (width < 600px) {
+  .bf-hide-sm {
+    display: none;
+  }
 }
 
 .bf-num {
@@ -82,13 +90,17 @@
   font-variant-numeric: tabular-nums;
 }
 
-.bf-cell__primary {
+// Not on a td: display block takes a cell out of the table layout.
+.bf-cell__primary:not(td),
+.bf-cell__secondary:not(td) {
   display: block;
+}
+
+.bf-cell__primary {
   font: var(--mat-sys-body-medium);
 }
 
 .bf-cell__secondary {
-  display: block;
   color: var(--mat-sys-on-surface-variant);
   font: var(--mat-sys-body-small);
 }
@@ -119,35 +131,10 @@
   padding: 8px 20px 0;
 }
 
-.bf-kpis {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.bf-kpi {
-  padding: 16px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-large);
-  background: var(--mat-sys-surface-container-lowest);
-}
-
-.bf-kpi__label {
-  margin: 0;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-label-medium);
-}
-
-.bf-kpi__value {
-  margin: 4px 0 0;
-  font: var(--mat-sys-headline-small);
-  font-variant-numeric: tabular-nums;
-}
-
-.bf-kpi__delta {
-  margin: 2px 0 0;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-small);
+@media (width < 600px) {
+  .bf-filters mat-form-field {
+    width: 100%;
+  }
 }
 
 .bf-facts {
@@ -156,6 +143,18 @@
   gap: 12px 16px;
   margin: 0;
   padding: 8px 20px 16px;
+}
+
+// One label/value pair per grid item, so a value never lands under another label on reflow.
+.bf-facts > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bf-facts > div > dd {
+  margin: 0;
 }
 
 .bf-facts dt {
@@ -185,6 +184,18 @@
 
 .bf-row--location td {
   background: var(--mat-sys-surface-container-low);
+}
+
+// Budget or cost-centre code next to a name (section 6 code chip).
+.bf-code {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: var(--mat-sys-corner-extra-small);
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-small);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .bf-visually-hidden {

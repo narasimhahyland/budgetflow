@@ -38,3 +38,26 @@
   flex-wrap: wrap;
   gap: 8px 20px;
 }
+
+// Every area has its own table; fixed column widths keep the columns lined up from one area to
+// the next.
+.bf-flags {
+  table-layout: fixed;
+}
+
+.bf-flags__capability {
+  width: 38%;
+}
+
+.bf-flags__state {
+  width: 14%;
+}
+
+.bf-flags__rollout,
+.bf-flags__change {
+  width: 16%;
+}
+
+.bf-flags__actions {
+  width: 16%;
+}

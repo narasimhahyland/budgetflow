@@ -8,18 +8,18 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import type { HealthServiceStatus, SystemHealth } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ReasonField } from './admin-ui';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const STATUS_TONE: Record<HealthServiceStatus, 'success' | 'warning' | 'important' | 'neutral'> = {
   healthy: 'success',
@@ -55,11 +55,13 @@ const JOB_LABEL: Record<string, string> = {
  */
 @Component({
   selector: 'bf-system-health-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DateTimePipe,
     FormsModule,
     LoadState,
     MatButtonModule,
+    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatTableModule,
@@ -128,7 +130,8 @@ export class SystemHealthPage {
   protected outboxNote(value: SystemHealth): string {
     if (value.outboxUnpublished === 0) return 'Every message has been published.';
     const lag = value.outboxLagSeconds;
-    return `${value.outboxUnpublished} message(s) waiting${lag === null ? '' : `, oldest ${lag}s behind`}.`;
+    const what = value.outboxUnpublished === 1 ? 'message is' : 'messages are';
+    return `${value.outboxUnpublished} ${what} waiting${lag === null ? '' : `, the oldest ${lag} seconds behind`}.`;
   }
 
   protected async schedule(): Promise<void> {

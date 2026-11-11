@@ -17,11 +17,12 @@ import { MatTableModule } from '@angular/material/table';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 /** Screens 106 and 106a: categories, GL accounts and category-to-GL mapping per entity. */
 @Component({
   selector: 'bf-gl-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DatePipe,
     FormsModule,
@@ -154,22 +155,33 @@ import { LoadState } from './load-state';
           <p class="bf-empty">No mappings on this date for this entity.</p>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="rows()" aria-labelledby="map-title">
+            <table
+              class="bf-table bf-table--stack"
+              mat-table
+              [dataSource]="rows()"
+              aria-labelledby="map-title"
+            >
               <ng-container matColumnDef="category">
                 <th mat-header-cell *matHeaderCellDef>Category</th>
-                <td mat-cell *matCellDef="let r">{{ r.categoryName }}</td>
+                <td class="bf-cell--full" mat-cell *matCellDef="let r">{{ r.categoryName }}</td>
               </ng-container>
               <ng-container matColumnDef="employee">
                 <th mat-header-cell *matHeaderCellDef>Employee attendees</th>
-                <td mat-cell *matCellDef="let r">{{ r.employee ?? '—' }}</td>
+                <td mat-cell *matCellDef="let r" data-label="Employee attendees">
+                  {{ r.employee ?? '—' }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="client">
                 <th mat-header-cell *matHeaderCellDef>Client attendees</th>
-                <td mat-cell *matCellDef="let r">{{ r.client ?? '—' }}</td>
+                <td mat-cell *matCellDef="let r" data-label="Client attendees">
+                  {{ r.client ?? '—' }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="since">
                 <th mat-header-cell *matHeaderCellDef>Since</th>
-                <td mat-cell *matCellDef="let r">{{ r.since | date: 'd MMM y' : 'UTC' }}</td>
+                <td mat-cell *matCellDef="let r" data-label="Since">
+                  {{ r.since | date: 'd MMM y' : 'UTC' }}
+                </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="mapColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: mapColumns"></tr>
@@ -240,18 +252,25 @@ import { LoadState } from './load-state';
       />
       @if (valueOf(accounts); as a) {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="a.items" aria-labelledby="acct-title">
+          <table
+            class="bf-table bf-table--stack"
+            mat-table
+            [dataSource]="a.items"
+            aria-labelledby="acct-title"
+          >
             <ng-container matColumnDef="code">
               <th mat-header-cell *matHeaderCellDef>Code</th>
-              <td mat-cell *matCellDef="let x">{{ x.code }}</td>
+              <td class="bf-cell--full" mat-cell *matCellDef="let x">
+                <span class="bf-cell__code">{{ x.code }}</span>
+              </td>
             </ng-container>
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
-              <td mat-cell *matCellDef="let x">{{ x.name }}</td>
+              <td mat-cell *matCellDef="let x" data-label="Name">{{ x.name }}</td>
             </ng-container>
             <ng-container matColumnDef="type">
               <th mat-header-cell *matHeaderCellDef>Type</th>
-              <td mat-cell *matCellDef="let x">{{ x.accountType }}</td>
+              <td mat-cell *matCellDef="let x" data-label="Type">{{ x.accountType }}</td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="acctColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: acctColumns"></tr>

@@ -17,16 +17,17 @@ import type { ClosePeriodSummary } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
 import { CloseTabs } from './close-tabs';
 import { ordered, PERIOD_STATUS } from './close-format';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
+import { CloseTag } from './close-tag';
 
 /** Screen 80e, period list: every accounting period of a fiscal year with where its close stands. */
 @Component({
   selector: 'bf-close-periods-page',
   imports: [
+    CloseTag,
     CloseTabs,
     DatePipe,
     FormsModule,
@@ -38,7 +39,6 @@ import { LoadState } from './load-state';
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
-    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -101,7 +101,7 @@ import { LoadState } from './load-state';
         </sat-empty-state>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="rows()" aria-label="Accounting periods">
+          <table mat-table class="bf-table" [dataSource]="rows()" aria-label="Accounting periods">
             <ng-container matColumnDef="period">
               <th mat-header-cell *matHeaderCellDef>Period</th>
               <td mat-cell *matCellDef="let p">
@@ -109,18 +109,15 @@ import { LoadState } from './load-state';
                   p.label
                 }}</a>
                 <span class="bf-cell__secondary"
-                  >{{ p.startDate | date: 'd MMM' }} – {{ p.endDate | date: 'd MMM y' }}</span
+                  >{{ p.startDate | date: 'd MMM' : 'UTC' }} –
+                  {{ p.endDate | date: 'd MMM y' : 'UTC' }}</span
                 >
               </td>
             </ng-container>
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let p">
-                <span class="bf-tag-cell"
-                  ><sat-status-tag [status]="statusOf(p).tone">{{
-                    statusOf(p).text
-                  }}</sat-status-tag></span
-                >
+                <span class="bf-tag-cell"><bf-close-tag [tag]="statusOf(p)" /></span>
                 @if (p.reopenRequestPending) {
                   <span class="bf-cell__secondary">Reopen requested</span>
                 }
@@ -129,7 +126,7 @@ import { LoadState } from './load-state';
             <ng-container matColumnDef="target">
               <th mat-header-cell *matHeaderCellDef>Target close</th>
               <td mat-cell *matCellDef="let p">
-                {{ p.targetCloseDate ? (p.targetCloseDate | date: 'd MMM y') : '—' }}
+                {{ p.targetCloseDate ? (p.targetCloseDate | date: 'd MMM y' : 'UTC') : '—' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="snapshots">

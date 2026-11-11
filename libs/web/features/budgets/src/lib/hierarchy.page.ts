@@ -18,12 +18,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { BudgetDetail } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { BudgetStatus, Money } from '@bf/web/ui';
+import { BudgetStatus, Money, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { balancesOf, can, data, downloadCsv, injectApi, valueOf } from './api';
 import { BudgetActions } from './budget-actions';
-import { LoadState } from './load-state';
 import { AvailableTip, Spectrum, UsageBar } from './widgets';
 
 interface Row {

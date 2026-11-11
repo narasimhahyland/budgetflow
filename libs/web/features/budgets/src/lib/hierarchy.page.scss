@@ -27,28 +27,8 @@
   }
 }
 
-.bf-tree {
-  width: 100%;
-  border-collapse: collapse;
-  font: var(--mat-sys-body-medium);
-}
-
-.bf-tree th {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-label-medium);
-  text-align: start;
-  text-transform: uppercase;
-}
-
-.bf-tree th.bf-num {
-  text-align: end;
-}
-
+// Header, row heights, dividers and frozen / set-to-zero stripes come from .bf-split-table.
 .bf-tree td {
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
   vertical-align: middle;
 }
 
@@ -108,16 +88,12 @@
   font-weight: 600;
 }
 
-.bf-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.bf-available--info {
+  color: var(--sat-sys-on-info-container);
 }
 
-.bf-status__icon {
-  width: 16px;
-  height: 16px;
-  color: var(--mat-sys-on-surface-variant);
+.bf-available--important {
+  color: var(--sat-sys-on-important-container);
 }
 
 .bf-panel-detail {
@@ -202,4 +178,11 @@
 
 .bf-split > section {
   min-height: 240px;
+}
+
+// A fixed basis for the heading, so whether the actions wrap below it does not change when the
+// program name and company-wide figure arrive (layout shift on tablets).
+.bf-page__heading {
+  flex: 1 1 420px;
+  min-width: 0;
 }

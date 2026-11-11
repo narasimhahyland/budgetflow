@@ -1,6 +1,10 @@
 @use '@hylandsoftware/satori-ui/theme' as sat;
 @use '../../../libs/web/ui/src/styles/reset';
 @use '../../../libs/web/ui/src/styles/page-layout';
+@use '../../../libs/web/ui/src/styles/data-table';
+@use '../../../libs/web/ui/src/styles/kpi-card';
+// Chart colours only (frontend-satori-styling allows css/dataviz for charts).
+@use '@hylandsoftware/satori-tokens/css/dataviz/index' as dataviz;
 
 // Light theme only for now (dark theme deferred): color-scheme pins Satori's light-dark() tokens to light.
 html {

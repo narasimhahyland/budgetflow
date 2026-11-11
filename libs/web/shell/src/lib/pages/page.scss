@@ -1,33 +1,5 @@
-:host {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.bf-page__header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.bf-page__title {
-  margin: 0;
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-headline-small);
-}
-
-.bf-page__subtitle {
-  margin: 0;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-medium);
-}
-
-.bf-card {
-  overflow: hidden;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-large);
-  background: var(--mat-sys-surface-container-lowest);
-}
+// Home and the status pages take the shared page layout (host class `bf-page-layout`: header, title,
+// cards) and the dense-table sheet from the app's global styles; only what is particular to them is here.
 
 .bf-card--padded {
   padding: 16px 24px 24px;
@@ -41,45 +13,16 @@
   padding: 16px 24px 24px;
 }
 
-.bf-card__header {
-  padding: 16px 20px 8px;
-}
-
-.bf-card__title {
-  margin: 0;
-  font: var(--mat-sys-title-medium);
-}
-
-.bf-card__hint {
-  margin: 4px 0 0;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-small);
-}
-
 .bf-card__loading {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   padding: 16px 20px 20px;
 }
 
-.bf-table-scroll {
-  overflow-x: auto;
-}
-
-.bf-num {
-  text-align: end;
-}
-
-.bf-cell__primary {
-  display: block;
-  font: var(--mat-sys-body-medium);
-}
-
-.bf-cell__secondary {
-  display: block;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-small);
+// A status tag never wraps onto a second line (section 6 keeps rows at 48px).
+.bf-cell--status {
+  white-space: nowrap;
 }
 
 @media (max-width: 599px) {

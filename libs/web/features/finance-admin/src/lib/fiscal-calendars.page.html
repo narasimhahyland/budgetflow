@@ -1,12 +1,12 @@
 <header class="bf-page__header">
   <div class="bf-page__heading">
     <h1 class="bf-page__title">Fiscal calendar</h1>
-    <p class="bf-page__subtitle">
-      Periods control when postings are allowed. Used by
-      <span data-testid="calendar-entities">{{
-        entityCodes(valueOf(detail)?.legalEntities ?? [])
-      }}</span
-      >.
+    <p class="bf-page__subtitle">Periods control when postings are allowed.</p>
+    <p class="bf-page__subtitle bf-entities">
+      @if (valueOf(detail); as d) {
+        Used by <span data-testid="calendar-entities">{{ entityCodes(d.legalEntities) }}</span
+        >.
+      }
     </p>
   </div>
   <div class="bf-page__actions">
@@ -22,15 +22,6 @@
     }
   </div>
 </header>
-
-@if (closingHint(); as label) {
-  <sat-banner variant="warning" data-testid="closing-hint">
-    <sat-banner-message>
-      Closing {{ label }} blocks new postings dated in it. Corrections become reversals in the next
-      open period.
-    </sat-banner-message>
-  </sat-banner>
-}
 
 @if (notice()) {
   <sat-banner variant="success"
@@ -252,6 +243,14 @@
           }})
           {{ y.groupFiscalYearLabel ? '· group year ' + y.groupFiscalYearLabel : '' }}
         </p>
+        @if (closingHint(); as label) {
+          <sat-banner variant="warning" class="bf-banner" data-testid="closing-hint">
+            <sat-banner-message>
+              Closing {{ label }} blocks new postings dated in it. Corrections become reversals in
+              the next open period.
+            </sat-banner-message>
+          </sat-banner>
+        }
         @if (pendingAction(); as pa) {
           <form
             class="bf-form"
@@ -272,53 +271,82 @@
               <mat-hint>Reopening and unlocking are recorded in the audit trail.</mat-hint>
             </mat-form-field>
             <div class="bf-form__wide bf-form__actions">
-              <button mat-flat-button type="submit" [disabled]="busy() || !reason().trim()">
-                {{ labelOf(pa.action) }}
-              </button>
+              @if (pa.action === 'close' || pa.action === 'lock') {
+                <button
+                  mat-flat-button
+                  satImportantButton
+                  type="submit"
+                  [disabled]="busy() || !reason().trim()"
+                >
+                  {{ labelOf(pa.action) }}
+                </button>
+              } @else {
+                <button mat-flat-button type="submit" [disabled]="busy() || !reason().trim()">
+                  {{ labelOf(pa.action) }}
+                </button>
+              }
               <button mat-button type="button" (click)="pendingAction.set(null)">Cancel</button>
             </div>
           </form>
         }
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="y.periods" aria-label="Accounting periods">
+          <table
+            mat-table
+            class="bf-table bf-table--stack"
+            [dataSource]="y.periods"
+            aria-label="Accounting periods"
+          >
             <ng-container matColumnDef="period">
               <th mat-header-cell *matHeaderCellDef>Period</th>
-              <td mat-cell *matCellDef="let p">
-                <span class="bf-cell__primary">{{ p.label }}</span>
-                <span class="bf-cell__secondary">
-                  Period {{ p.periodNumber
-                  }}{{ p.startDate <= today && today <= p.endDate ? ' · current' : '' }}
+              <td mat-cell *matCellDef="let p" class="bf-cell--full">
+                <span class="bf-cell__name">
+                  <span class="bf-cell__primary">{{ p.label }}</span>
+                  @if (isCurrent(p)) {
+                    <sat-status-tag status="info">Current</sat-status-tag>
+                  }
                 </span>
+                <span class="bf-cell__secondary">Period {{ p.periodNumber }}</span>
               </td>
             </ng-container>
             <ng-container matColumnDef="start">
               <th mat-header-cell *matHeaderCellDef>Start</th>
-              <td mat-cell *matCellDef="let p">{{ p.startDate | date: 'd MMM y' : 'UTC' }}</td>
+              <td mat-cell *matCellDef="let p" class="bf-nowrap" data-label="Start">
+                {{ p.startDate | date: 'd MMM y' : 'UTC' }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="end">
               <th mat-header-cell *matHeaderCellDef>End</th>
-              <td mat-cell *matCellDef="let p">{{ p.endDate | date: 'd MMM y' : 'UTC' }}</td>
+              <td mat-cell *matCellDef="let p" class="bf-nowrap" data-label="End">
+                {{ p.endDate | date: 'd MMM y' : 'UTC' }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let p">
-                <sat-status-tag [status]="statusOf(p.status).tone">{{
-                  statusOf(p.status).label
-                }}</sat-status-tag>
+              <td mat-cell *matCellDef="let p" data-label="Status">
+                @let s = statusOf(p.status);
+                <sat-status-tag [status]="s.tone">
+                  @if (s.icon) {
+                    <mat-icon [svgIcon]="s.icon" aria-hidden="true" />
+                  }
+                  {{ s.label }}</sat-status-tag
+                >
               </td>
             </ng-container>
             <ng-container matColumnDef="closedBy">
               <th mat-header-cell *matHeaderCellDef>Changed by</th>
-              <td mat-cell *matCellDef="let p">{{ p.statusChangedByName ?? '—' }}</td>
+              <td mat-cell *matCellDef="let p" data-label="Changed by">
+                {{ p.statusChangedByName ?? '—' }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
-              <td mat-cell *matCellDef="let p">
+              <th mat-header-cell *matHeaderCellDef class="bf-col-actions">Actions</th>
+              <td mat-cell *matCellDef="let p" class="bf-col-actions">
                 <div class="bf-row-actions">
                   @for (a of p.allowedActions; track a) {
                     @if (a === 'close') {
                       <button
                         mat-flat-button
+                        satImportantButton
                         type="button"
                         [disabled]="busy()"
                         (click)="ask(p, a)"
@@ -342,7 +370,11 @@
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="columns"></tr>
-            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: columns"
+              [class.bf-row--current]="isCurrent(row)"
+            ></tr>
           </table>
         </div>
       }

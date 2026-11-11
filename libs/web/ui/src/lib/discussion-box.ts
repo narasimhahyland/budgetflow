@@ -125,12 +125,15 @@ export class DiscussionBox {
       body: e,
     });
     if (r.ok) {
-      this.snack.open(
-        e.following ? 'Following item' : 'Unfollowed item',
-        undefined,
-        { duration: 2500 },
-      );
+      this.snack.open(e.following ? 'Following item' : 'Unfollowed item', undefined, {
+        duration: 2500,
+      });
       this.thread.reload();
+    } else {
+      this.error.set(
+        r.problem?.detail ??
+          (e.following ? 'Could not follow this item' : 'Could not unfollow this item'),
+      );
     }
   }
 }

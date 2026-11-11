@@ -15,14 +15,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { AskAnswer, AskRequest } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatInlineChip } from '@hylandsoftware/satori-ui/inline-chip';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { aiChannelLabel } from './ai-labels';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
 import { data, errorMessage, errorStatus, injectApi, problemCode, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /**
  * Screen 011a: Ask BudgetFlow. Answers come only from records the asker may already read, every
@@ -158,9 +158,22 @@ import { LoadState } from './load-state';
             <section class="bf-card" aria-label="Answer">
               <div class="bf-card__header">
                 <h2 class="bf-card__title">{{ turn.question }}</h2>
-                <sat-status-tag [status]="turn.answer.outcome === 'answered' ? 'success' : 'info'">
-                  {{ outcomeLabel(turn.answer.outcome) }}
-                </sat-status-tag>
+                <div class="bf-answer__head-actions">
+                  <sat-status-tag
+                    [status]="turn.answer.outcome === 'answered' ? 'success' : 'info'"
+                  >
+                    {{ outcomeLabel(turn.answer.outcome) }}
+                  </sat-status-tag>
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="dismiss(turn.answer.turnId)"
+                    [attr.aria-label]="'Dismiss the answer to: ' + turn.question"
+                    data-testid="dismiss-answer"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
               <div class="bf-card__body bf-answer">
                 @switch (turn.answer.outcome) {
@@ -211,6 +224,7 @@ import { LoadState } from './load-state';
 
           @if (!turns().length && !asking() && !failure()) {
             <sat-empty-state data-testid="ask-empty">
+              <mat-icon satEmptyStateIllustration svgIcon="ai" aria-hidden="true" />
               <h2 satEmptyStateHeadline>No questions yet</h2>
               <p satEmptyStateDescription>
                 Ask about a budget, a request or an event. Answers never include records you cannot
@@ -255,10 +269,12 @@ import { LoadState } from './load-state';
                             Delete
                           </button>
                         </div>
-                        <span class="bf-cell__secondary"
-                          >{{ c.turnCount }} {{ c.turnCount === 1 ? 'question' : 'questions' }} ·
-                          {{ c.channel }}</span
-                        >
+                        <span class="bf-cell__secondary">
+                          @if (c.turnCount > 0) {
+                            {{ c.turnCount }} {{ c.turnCount === 1 ? 'question' : 'questions' }} ·
+                          }
+                          {{ channelLabel(c.channel) }}
+                        </span>
                       </li>
                     }
                   </ul>
@@ -295,6 +311,12 @@ import { LoadState } from './load-state';
     }
   `,
   styles: `
+    .bf-answer__head-actions {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
     .bf-answer {
       display: flex;
       flex-direction: column;
@@ -356,6 +378,13 @@ export class AskPage {
   protected readonly disabled = signal(false);
   protected readonly disabledDetail = signal('');
   protected readonly conversationId = signal<string | undefined>(undefined);
+  protected readonly channelLabel = aiChannelLabel;
+
+  /** Every AI output can be dismissed (ai-features); this only hides it from the page. */
+  protected dismiss(turnId: string): void {
+    this.turns.update((turns) => turns.filter((t) => t.answer.turnId !== turnId));
+  }
+
   protected readonly turns = signal<
     { question: string; answer: AskAnswer; rated: 'helpful' | 'not_helpful' | null }[]
   >([]);

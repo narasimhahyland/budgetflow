@@ -5,19 +5,23 @@ import {
   input,
   output,
   signal,
+  viewChild,
+  type ElementRef,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import {
+  MatAutocompleteModule,
+  MatAutocompleteTrigger,
+  type MatAutocompleteSelectedEvent,
+} from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
-import type {
-  CommentView,
-  DiscussionThread,
-  MentionCandidate,
-} from '@bf/contracts';
+import type { CommentView, DiscussionThread, MentionCandidate } from '@bf/contracts';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatGhost } from '@hylandsoftware/satori-ui/ghost';
@@ -33,6 +37,7 @@ import { DateTimePipe } from './date-time';
   imports: [
     DateTimePipe,
     FormsModule,
+    MatAutocompleteModule,
     MatButtonModule,
     MatFormFieldModule,
     MatIconModule,
@@ -41,6 +46,7 @@ import { DateTimePipe } from './date-time';
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SatAvatar,
     SatGhost,
   ],
   template: `
@@ -166,6 +172,7 @@ import { DateTimePipe } from './date-time';
                     </p>
                   } @else {
                     <div class="bf-disc-comment__meta">
+                      <sat-avatar size="28" [initials]="initials(c.authorName)" aria-hidden="true" />
                       <strong>{{ c.authorName }}</strong>
                       <span>({{ c.authorRole }})</span>
                       <span data-testid="relative-time">{{
@@ -238,6 +245,7 @@ import { DateTimePipe } from './date-time';
                         </p>
                       } @else {
                         <div class="bf-disc-comment__meta">
+                          <sat-avatar size="24" [initials]="initials(rep.authorName)" aria-hidden="true" />
                           <strong>{{ rep.authorName }}</strong>
                           <span>({{ rep.authorRole }})</span>
                           <span data-testid="relative-time">{{
@@ -276,48 +284,53 @@ import { DateTimePipe } from './date-time';
               <mat-form-field appearance="outline" class="bf-disc-composer__field">
                 <mat-label>Write a comment. Type @ to mention someone.</mat-label>
                 <textarea
+                  #composer
                   matInput
                   rows="3"
                   [(ngModel)]="newBody"
                   (ngModelChange)="onBodyInput($event)"
                   name="newBody"
                   data-testid="comment-input"
+                  [matAutocomplete]="mentions"
                 ></textarea>
               </mat-form-field>
-
-              @if (showMentionPicker()) {
-                <div
-                  class="bf-mention-picker"
-                  role="listbox"
-                  aria-label="Mention someone"
-                  data-testid="mention-picker"
-                >
-                  @for (cand of t.mentionCandidates; track cand.personId) {
-                    <button
-                      type="button"
-                      class="bf-mention-picker__row"
-                      [class.bf-mention-picker__row--disabled]="!cand.hasAccess"
-                      [disabled]="!cand.hasAccess"
-                      (click)="pickMention(cand)"
-                      [attr.data-testid]="'mention-' + cand.personId"
-                    >
-                      <span class="bf-mention-picker__name">{{ cand.displayName }}</span>
-                      <span class="bf-mention-picker__meta">
-                        {{ cand.roleLabel }}{{ cand.locationName ? ' · ' + cand.locationName : '' }}
-                        @if (!cand.hasAccess) {
-                          · <strong>{{ cand.noAccessReason }}</strong>
-                        }
-                      </span>
-                    </button>
-                  }
-                </div>
-              }
+              <mat-autocomplete
+                #mentions="matAutocomplete"
+                aria-label="Mention someone"
+                (optionSelected)="pickMention($event)"
+                (closed)="showMentionPicker.set(false)"
+              >
+                @if (showMentionPicker()) {
+                  <div class="bf-mention-picker" data-testid="mention-picker">
+                    @for (cand of t.mentionCandidates; track cand.personId) {
+                      <mat-option
+                        [value]="bodyWithMention(cand)"
+                        [disabled]="!cand.hasAccess"
+                        [attr.data-testid]="'mention-' + cand.personId"
+                      >
+                        <span class="bf-mention-picker__row">
+                          <sat-avatar size="24" [initials]="initials(cand.displayName)" aria-hidden="true" />
+                          <span class="bf-mention-picker__text">
+                            <span class="bf-mention-picker__name">{{ cand.displayName }}</span>
+                            <span class="bf-mention-picker__meta">
+                              {{ cand.roleLabel }}{{ cand.locationName ? ' · ' + cand.locationName : '' }}
+                              @if (!cand.hasAccess) {
+                                · <strong>{{ cand.noAccessReason }}</strong>
+                              }
+                            </span>
+                          </span>
+                        </span>
+                      </mat-option>
+                    }
+                  </div>
+                }
+              </mat-autocomplete>
 
               <div class="bf-disc-composer__actions">
                 <button
                   mat-button
                   type="button"
-                  (click)="showMentionPicker.set(!showMentionPicker())"
+                  (click)="openMentions()"
                   data-testid="toggle-mention-picker"
                 >
                   @ Mention
@@ -392,7 +405,7 @@ import { DateTimePipe } from './date-time';
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      align-items: baseline;
+      align-items: center;
       font: var(--mat-sys-body-small);
       color: var(--mat-sys-on-surface-variant);
     }
@@ -464,33 +477,14 @@ import { DateTimePipe } from './date-time';
       font: var(--mat-sys-body-small);
       color: var(--mat-sys-on-surface-variant);
     }
-    .bf-mention-picker {
-      display: flex;
-      flex-direction: column;
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--mat-sys-corner-medium);
-      background: var(--mat-sys-surface-container-lowest);
-    }
     .bf-mention-picker__row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border: none;
-      background: transparent;
-      text-align: start;
-      cursor: pointer;
-      border-bottom: 1px solid var(--mat-sys-outline-variant);
+      gap: 12px;
     }
-    .bf-mention-picker__row:hover:not(:disabled) {
-      background: var(--mat-sys-surface-container-low);
-    }
-    .bf-mention-picker__row--disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
+    .bf-mention-picker__text {
+      display: flex;
+      flex-direction: column;
     }
     .bf-mention-picker__name {
       font: var(--mat-sys-body-medium);
@@ -525,6 +519,8 @@ export class DiscussionPanel {
 
   protected readonly open = signal(false);
   protected readonly showMentionPicker = signal(false);
+  private readonly composer = viewChild<ElementRef<HTMLTextAreaElement>>('composer');
+  private readonly mentionTrigger = viewChild(MatAutocompleteTrigger);
   protected readonly mentionedIds = signal<string[]>([]);
   protected readonly replyTo = signal<CommentView | null>(null);
   protected readonly editingId = signal<string | null>(null);
@@ -556,12 +552,35 @@ export class DiscussionPanel {
     }
   }
 
-  protected pickMention(cand: MentionCandidate): void {
-    if (!cand.hasAccess) return;
-    const prefix = this.newBody.endsWith('@') ? this.newBody : `${this.newBody} @`;
-    this.newBody = `${prefix}${cand.displayName} `;
-    this.mentionedIds.set([...new Set([...this.mentionedIds(), cand.personId])]);
+  /** The comment as it reads once this person is mentioned; the autocomplete writes it back. */
+  protected bodyWithMention(cand: MentionCandidate): string {
+    const prefix = this.newBody.endsWith('@') ? this.newBody : `${this.newBody} @`.trimStart();
+    return `${prefix}${cand.displayName} `;
+  }
+
+  protected openMentions(): void {
+    this.showMentionPicker.set(true);
+    this.composer()?.nativeElement.focus();
+    // The options render on the next change detection; open the panel once they exist.
+    setTimeout(() => this.mentionTrigger()?.openPanel());
+  }
+
+  protected pickMention(event: MatAutocompleteSelectedEvent): void {
+    const cand = this.thread()?.mentionCandidates.find(
+      (c) => this.bodyWithMention(c) === event.option.value,
+    );
+    if (cand?.hasAccess) {
+      this.mentionedIds.set([...new Set([...this.mentionedIds(), cand.personId])]);
+    }
     this.showMentionPicker.set(false);
+  }
+
+  /** Initials for a person's avatar (section 6 people pattern). */
+  protected initials(name: string): string {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] ?? '';
+    const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : '';
+    return (first + last).toUpperCase();
   }
 
   protected startReply(c: CommentView): void {

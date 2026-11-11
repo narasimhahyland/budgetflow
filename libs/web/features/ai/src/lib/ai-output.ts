@@ -57,7 +57,7 @@ export class AiLabel {
   styles: `
     .bf-ai-prose {
       padding: 12px 14px;
-      border-inline-start: 3px solid var(--sat-sys-info);
+      border-inline-start: 3px solid var(--sat-sys-info-icon);
       border-radius: var(--mat-sys-corner-medium);
       background: var(--sat-sys-info-container);
       color: var(--sat-sys-on-info-container);
@@ -94,7 +94,7 @@ export class AiProse {
         BudgetFlow figures, read from the ledger{{ asOf() ? ' as of ' + asOf() : '' }}. Not written
         by the model.
       </p>
-      <table class="bf-split-table" [attr.aria-label]="label()">
+      <table class="bf-split-table bf-table--stack" [attr.aria-label]="label()">
         <thead>
           <tr>
             <th>Figure</th>
@@ -106,10 +106,10 @@ export class AiProse {
           @for (f of figures(); track f.key + f.source.id) {
             <tr [attr.data-testid]="'figure-' + f.key">
               <td>{{ f.label }}</td>
-              <td class="bf-num">
+              <td class="bf-num" data-label="Amount">
                 <bf-money [amountMinor]="f.amount.amountMinor" [currency]="f.amount.currency" />
               </td>
-              <td>
+              <td data-label="Read from">
                 <span class="bf-cell__primary">{{ f.source.label }}</span>
                 <span class="bf-cell__secondary">{{ f.source.type }}</span>
               </td>
@@ -140,15 +140,19 @@ export class AiFigures {
   imports: [MatButtonModule, RouterLink],
   template: `
     <div class="bf-ai-sources">
-      <button
-        mat-button
-        type="button"
-        (click)="open.set(!open())"
-        [attr.aria-expanded]="open()"
-        data-testid="sources-toggle"
-      >
-        {{ sources().length }} {{ sources().length === 1 ? 'record' : 'records' }} used
-      </button>
+      @if (sources().length === 0) {
+        <span class="bf-cell__secondary" data-testid="sources-none">No records were used.</span>
+      } @else {
+        <button
+          mat-button
+          type="button"
+          (click)="open.set(!open())"
+          [attr.aria-expanded]="open()"
+          data-testid="sources-toggle"
+        >
+          {{ sources().length }} {{ sources().length === 1 ? 'record' : 'records' }} used
+        </button>
+      }
       @if (open()) {
         <ul class="bf-ai-sources__list" data-testid="sources-list">
           @for (s of sources(); track s.type + s.id) {
@@ -279,7 +283,6 @@ export class AiWhy {
      * so it can never end up alone on the next line either.
      */
     .bf-ai-provenance [data-testid='ai-ids'] {
-      font-family: ui-monospace, monospace;
       white-space: nowrap;
     }
   `,
@@ -321,11 +324,17 @@ export class AiProvenanceNote {
     </div>
   `,
   styles: `
+    /* Stretch so the banner takes the card width and wraps; only the actions keep their size. */
     .bf-ai-refusal {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: stretch;
       gap: 10px;
+      min-width: 0;
+    }
+    .bf-ai-refusal > a,
+    .bf-ai-refusal > button {
+      align-self: flex-start;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -426,8 +435,13 @@ export class AiDisabled {
     .bf-ai-unavailable {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: stretch;
       gap: 10px;
+      min-width: 0;
+    }
+    .bf-ai-unavailable > a,
+    .bf-ai-unavailable > button {
+      align-self: flex-start;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

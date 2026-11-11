@@ -35,10 +35,7 @@ async function budgetsFor(role: RoleId, request: import('@playwright/test').APIR
 test.describe('regional manager in Bengaluru', () => {
   test.use({ storageState: authFile('regional-manager') });
 
-  test('India is held in USD with western grouping; times show IST', async ({
-    page,
-    request,
-  }, testInfo) => {
+  test('India is held in USD with western grouping; times show IST', async ({ page, request }) => {
     const india = (await budgetsFor('regional-manager', request)).find(
       (b) => b.id === SEED.budgets.india,
     )!;
@@ -53,10 +50,10 @@ test.describe('regional manager in Bengaluru', () => {
     // is asserted where the page still renders a timestamp.
     await expect(page.locator('.bf-answer [data-testid=relative-time]')).toContainText('GMT+5:30');
     await expect(page.getByText('timestamps on this page are shown in Asia/Kolkata')).toBeVisible();
-    // The header chips give way to the page title on phones.
-    if (testInfo.project.name !== 'mobile') {
-      await expect(page.getByLabel('Reporting currency USD')).toBeVisible();
-    }
+    // Reporting is always USD (single company), so the header has no currency chip; Home's FX line
+    // states the reporting currency instead.
+    await expect(page.getByText(/reporting are both USD|reported in USD/)).toBeVisible();
+    await expect(page.getByLabel('Reporting currency USD')).toHaveCount(0);
   });
 
   // Budgets are held in USD; an INR amount (still possible for local-currency budgets) keeps lakh grouping.

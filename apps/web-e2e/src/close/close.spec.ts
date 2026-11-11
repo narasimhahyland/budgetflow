@@ -109,6 +109,8 @@ test.describe('break-glass reopen', () => {
     await page.getByTestId('break-glass-reason-code').click();
     await page.getByRole('option').first().click();
     await page.getByTestId('break-glass-reason').fill(reason);
+    // Reopening is irreversible enough to be typed out, like set to zero.
+    await page.getByTestId('break-glass-confirmation').fill('Sep 2026');
     await page.getByTestId('confirm-break-glass').click();
     await expect(page.getByTestId('close-notice')).toContainText(
       'does not move until a different person approves it',

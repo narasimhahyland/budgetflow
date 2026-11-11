@@ -140,7 +140,12 @@
     }
     @if (tokens().length) {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="tokens()" aria-label="SCIM tokens">
+        <table
+          mat-table
+          class="bf-table bf-table--stack"
+          [dataSource]="tokens()"
+          aria-label="SCIM tokens"
+        >
           <ng-container matColumnDef="prefix">
             <th mat-header-cell *matHeaderCellDef>Token</th>
             <td mat-cell *matCellDef="let t">
@@ -152,14 +157,14 @@
           </ng-container>
           <ng-container matColumnDef="created">
             <th mat-header-cell *matHeaderCellDef>Created</th>
-            <td mat-cell *matCellDef="let t">
+            <td mat-cell *matCellDef="let t" data-label="Created">
               <span data-testid="relative-time">{{ t.createdAt | bfDateTime: timezone() }}</span>
               <span class="bf-cell__secondary">{{ t.createdByName ?? '—' }}</span>
             </td>
           </ng-container>
           <ng-container matColumnDef="used">
             <th mat-header-cell *matHeaderCellDef>Last used</th>
-            <td mat-cell *matCellDef="let t">
+            <td mat-cell *matCellDef="let t" data-label="Last used">
               @if (t.lastUsedAt) {
                 <span data-testid="relative-time">{{ t.lastUsedAt | bfDateTime: timezone() }}</span>
               } @else {
@@ -169,13 +174,13 @@
           </ng-container>
           <ng-container matColumnDef="expires">
             <th mat-header-cell *matHeaderCellDef>Expires</th>
-            <td mat-cell *matCellDef="let t">
+            <td mat-cell *matCellDef="let t" data-label="Expires">
               <span data-testid="relative-time">{{ t.expiresAt | bfDateTime: timezone() }}</span>
             </td>
           </ng-container>
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let t">
+            <td mat-cell *matCellDef="let t" data-label="Status">
               <sat-status-tag [status]="t.revokedAt ? 'neutral' : 'success'">{{
                 t.revokedAt ? 'Revoked' : 'Live'
               }}</sat-status-tag>
@@ -183,7 +188,7 @@
           </ng-container>
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Actions</th>
-            <td mat-cell *matCellDef="let t">
+            <td mat-cell *matCellDef="let t" data-label="Actions">
               @if (canManage() && !t.revokedAt) {
                 <button
                   mat-button
@@ -234,7 +239,7 @@
     }
     @if (log().length) {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="log()" aria-label="Provisioning log">
+        <table mat-table class="bf-table" [dataSource]="log()" aria-label="Provisioning log">
           <ng-container matColumnDef="at">
             <th mat-header-cell *matHeaderCellDef>When</th>
             <td mat-cell *matCellDef="let e">
@@ -272,12 +277,14 @@
         </table>
       </div>
     } @else {
-      <sat-empty-state data-testid="provisioning-empty">
-        <h2 satEmptyStateHeadline>Nothing provisioned yet</h2>
-        <p satEmptyStateDescription>
-          Operations appear here the first time the identity provider creates or changes a person.
-        </p>
-      </sat-empty-state>
+      <div class="bf-card__body">
+        <sat-empty-state data-testid="provisioning-empty">
+          <h2 satEmptyStateHeadline>Nothing provisioned yet</h2>
+          <p satEmptyStateDescription>
+            Operations appear here the first time the identity provider creates or changes a person.
+          </p>
+        </sat-empty-state>
+      </div>
     }
   </section>
 

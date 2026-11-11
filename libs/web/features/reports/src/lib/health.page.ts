@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, resource } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -9,11 +9,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HEALTH_CHECKS, type BudgetHealthRow, type HealthLevel } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { BudgetStatus, DateTimePipe, Money } from '@bf/web/ui';
+import { BudgetStatus, DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { percentOf, Reconciliation, ScopeNote } from './report-frame';
 
 type HealthCheck = BudgetHealthRow['reasons'][number]['check'];
@@ -39,6 +38,7 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
   selector: 'bf-budget-health-page',
   imports: [
     BudgetStatus,
+    DatePipe,
     DateTimePipe,
     DecimalPipe,
     FormsModule,
@@ -63,7 +63,8 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
           @if (overview(); as o) {
             In {{ o.currency }} as of
             <span data-testid="relative-time"
-              >{{ o.asOf }} · {{ o.generatedAt | bfDateTime: session.timezone() }}</span
+              >{{ o.asOf | date: 'd MMM y' : 'UTC' }} ·
+              {{ o.generatedAt | bfDateTime: session.timezone() }}</span
             >
           }
         </p>
@@ -115,20 +116,68 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
     @if (overview(); as o) {
       <div class="bf-kpis" data-testid="health-summary">
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Budgets checked</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Budgets checked</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="currency_dollar" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ o.summary.budgets | number }}</p>
         </div>
         <div class="bf-kpi bf-kpi--success">
-          <p class="bf-kpi__label">Healthy</p>
-          <p class="bf-kpi__value">{{ o.summary.healthy | number }}</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Healthy</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="circle_check" aria-hidden="true" />
+          </div>
+          <p class="bf-kpi__value bf-kpi__value--success">{{ o.summary.healthy | number }}</p>
+          <div class="bf-kpi__foot">
+            <span>Of budgets checked</span>
+            <span class="bf-kpi__pct"
+              >{{ shareOf(o.summary.healthy, o.summary.budgets) | number: '1.0-0' }}%</span
+            >
+            <span class="bf-kpi__track"
+              ><span
+                class="bf-kpi__fill"
+                [style.width.%]="shareOf(o.summary.healthy, o.summary.budgets)"
+              ></span
+            ></span>
+          </div>
         </div>
         <div class="bf-kpi bf-kpi--warning">
-          <p class="bf-kpi__label">Watch</p>
-          <p class="bf-kpi__value">{{ o.summary.watch | number }}</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Watch</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="clock" aria-hidden="true" />
+          </div>
+          <p class="bf-kpi__value bf-kpi__value--warning">{{ o.summary.watch | number }}</p>
+          <div class="bf-kpi__foot">
+            <span>Of budgets checked</span>
+            <span class="bf-kpi__pct"
+              >{{ shareOf(o.summary.watch, o.summary.budgets) | number: '1.0-0' }}%</span
+            >
+            <span class="bf-kpi__track"
+              ><span
+                class="bf-kpi__fill"
+                [style.width.%]="shareOf(o.summary.watch, o.summary.budgets)"
+              ></span
+            ></span>
+          </div>
         </div>
         <div class="bf-kpi bf-kpi--error">
-          <p class="bf-kpi__label">At risk</p>
-          <p class="bf-kpi__value">{{ o.summary.atRisk | number }}</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">At risk</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="error" aria-hidden="true" />
+          </div>
+          <p class="bf-kpi__value bf-kpi__value--error">{{ o.summary.atRisk | number }}</p>
+          <div class="bf-kpi__foot">
+            <span>Of budgets checked</span>
+            <span class="bf-kpi__pct"
+              >{{ shareOf(o.summary.atRisk, o.summary.budgets) | number: '1.0-0' }}%</span
+            >
+            <span class="bf-kpi__track"
+              ><span
+                class="bf-kpi__fill"
+                [style.width.%]="shareOf(o.summary.atRisk, o.summary.budgets)"
+              ></span
+            ></span>
+          </div>
         </div>
       </div>
 
@@ -159,14 +208,16 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
                     <td class="bf-num">
                       @let cell = row.cells[c];
                       @if (cell && (cell.watch || cell.atRisk)) {
-                        @if (cell.atRisk) {
-                          <sat-status-tag status="important"
-                            >{{ cell.atRisk }} at risk</sat-status-tag
-                          >
-                        }
-                        @if (cell.watch) {
-                          <sat-status-tag status="warning">{{ cell.watch }} watch</sat-status-tag>
-                        }
+                        <span class="bf-nowrap">
+                          @if (cell.atRisk) {
+                            <sat-status-tag status="important"
+                              >{{ cell.atRisk }} at risk</sat-status-tag
+                            >
+                          }
+                          @if (cell.watch) {
+                            <sat-status-tag status="warning">{{ cell.watch }} watch</sat-status-tag>
+                          }
+                        </span>
                       } @else {
                         <span class="bf-clear">Clear</span>
                       }
@@ -210,7 +261,11 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
               </thead>
               <tbody>
                 @for (row of o.rows; track row.budgetId) {
-                  <tr [attr.data-testid]="'health-row-' + row.budgetId">
+                  <tr
+                    [attr.data-testid]="'health-row-' + row.budgetId"
+                    [class.bf-row--info]="row.status === 'frozen'"
+                    [class.bf-row--important]="row.status === 'set_to_zero'"
+                  >
                     <td>
                       <a class="bf-cell__primary" [routerLink]="['/budgets', row.budgetId]">{{
                         row.name
@@ -221,9 +276,11 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
                       </span>
                     </td>
                     <td>
-                      <sat-status-tag [status]="levelTone(row.level)">{{
-                        levelLabel(row.level)
-                      }}</sat-status-tag>
+                      <span class="bf-nowrap"
+                        ><sat-status-tag [status]="levelTone(row.level)">{{
+                          levelLabel(row.level)
+                        }}</sat-status-tag></span
+                      >
                       <ul class="bf-reasons">
                         @for (reason of row.reasons; track reason.check) {
                           <li [class]="'bf-reason--' + reason.level">
@@ -294,20 +351,8 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
       color: var(--mat-sys-on-surface-variant);
       font: var(--mat-sys-body-small);
     }
-    .bf-kpi--success {
-      border-color: var(--sat-sys-success-icon);
-      background: var(--sat-sys-success-container);
-      color: var(--sat-sys-on-success-container);
-    }
-    .bf-kpi--warning {
-      border-color: var(--sat-sys-warning-icon);
-      background: var(--sat-sys-warning-container);
-      color: var(--sat-sys-on-warning-container);
-    }
-    .bf-kpi--error {
-      border-color: var(--sat-sys-important-icon);
-      background: var(--sat-sys-important-container);
-      color: var(--sat-sys-on-important-container);
+    .bf-nowrap {
+      white-space: nowrap;
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -348,6 +393,11 @@ export class BudgetHealthPage {
 
   protected levelLabel(level: HealthLevel): string {
     return LEVEL_LABELS[level];
+  }
+
+  /** Share of the budgets checked, for the KPI footer bar (counts, never money). */
+  protected shareOf(part: number, whole: number): number {
+    return whole > 0 ? Math.min(100, (part * 100) / whole) : 0;
   }
 
   protected levelTone(level: HealthLevel): 'success' | 'warning' | 'important' {

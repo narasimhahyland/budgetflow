@@ -5,12 +5,20 @@ import { RouterLink } from '@angular/router';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ActualsTabs } from './actuals-tabs';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState, SpendStatus } from '@bf/web/ui';
 
 /** Screen 53 (undesigned, built from the design system): events in reconciliation and what blocks their close. */
 @Component({
   selector: 'bf-events-page',
-  imports: [ActualsTabs, LoadState, MatButtonModule, MatTableModule, RouterLink, SAT_TAG_IMPORTS],
+  imports: [
+    ActualsTabs,
+    LoadState,
+    MatButtonModule,
+    MatTableModule,
+    RouterLink,
+    SAT_TAG_IMPORTS,
+    SpendStatus,
+  ],
   template: `
     <header class="bf-page__header">
       <div class="bf-page__heading">
@@ -31,7 +39,7 @@ import { LoadState } from './load-state';
         <p class="bf-empty">No events in progress or completed.</p>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="items()" aria-label="Events to reconcile">
+          <table mat-table class="bf-table" [dataSource]="items()" aria-label="Events to reconcile">
             <ng-container matColumnDef="event">
               <th mat-header-cell *matHeaderCellDef>Event</th>
               <td mat-cell *matCellDef="let e">
@@ -47,11 +55,7 @@ import { LoadState } from './load-state';
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let e">
-                <sat-status-tag
-                  [status]="e.status === 'closed' ? 'success' : 'neutral'"
-                  [hideIcon]="e.status !== 'closed'"
-                  >{{ statusText(e.status) }}</sat-status-tag
-                >
+                <bf-spend-status kind="event" [status]="e.status" />
               </td>
             </ng-container>
             <ng-container matColumnDef="unmatched">
@@ -90,8 +94,4 @@ export class EventsPage {
   protected readonly columns = ['event', 'status', 'unmatched', 'open', 'close'];
   protected readonly list = resource({ loader: () => data(this.api.listEventReconciliations({})) });
   protected readonly items = computed(() => valueOf(this.list)?.items ?? []);
-
-  protected statusText(s: string): string {
-    return s.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
-  }
 }

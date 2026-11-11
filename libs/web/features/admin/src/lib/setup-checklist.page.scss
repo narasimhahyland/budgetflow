@@ -1,11 +1,10 @@
+// Steps are rows on the one card surface, separated by dividers (no card inside a card).
 .bf-steps {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   margin: 0;
-  padding: 8px 20px 20px;
+  padding: 0 20px 8px;
   list-style: none;
-  counter-reset: bf-step;
 }
 
 .bf-step {
@@ -13,10 +12,8 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  padding: 12px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface-container-low);
+  padding: 12px 0 12px 36px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
 }
 
 .bf-step__head {
@@ -24,6 +21,21 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  margin-inline-start: -36px;
+}
+
+.bf-step__number {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-medium);
+  font-variant-numeric: tabular-nums;
 }
 
 .bf-step__text {
@@ -35,4 +47,14 @@
   margin: 0;
   color: var(--mat-sys-on-surface-variant);
   font: var(--mat-sys-body-small);
+}
+
+.bf-progress-label {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-progress-row {
+  padding-top: 0;
 }

@@ -23,11 +23,10 @@ import type {
   NotificationMatrixRow,
   NotificationPreferenceType,
 } from '@bf/contracts';
-import { DateTimePipe, MobileTabBar } from '@bf/web/ui';
+import { DateTimePipe, LoadState, MobileTabBar } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
   approvals: 'Approvals',
@@ -265,7 +264,11 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                 </div>
                 <div class="bf-settings__channel-actions">
                   @if (s.teamsLink; as link) {
-                    <sat-status-tag status="success">Linked</sat-status-tag>
+                    @if (s.teamsInstalled) {
+                      <sat-status-tag status="success">Linked</sat-status-tag>
+                    } @else {
+                      <sat-status-tag status="warning">Waiting for consent</sat-status-tag>
+                    }
                     <button
                       mat-stroked-button
                       type="button"
@@ -315,7 +318,10 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
               </div>
             </div>
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="Notification preferences matrix">
+              <table
+                class="bf-split-table bf-table--stack"
+                aria-label="Notification preferences matrix"
+              >
                 <thead>
                   <tr>
                     <th>Notification type</th>
@@ -340,7 +346,7 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                           </span>
                         }
                       </td>
-                      <td>
+                      <td data-label="In-app">
                         <mat-checkbox
                           [checked]="row.inApp"
                           [disabled]="row.required || busy()"
@@ -351,7 +357,7 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                           (change)="toggleMatrix(row.type, 'inApp', $event.checked)"
                         />
                       </td>
-                      <td>
+                      <td data-label="Email">
                         <mat-checkbox
                           [checked]="row.email"
                           [disabled]="row.required || busy()"
@@ -362,7 +368,7 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                           (change)="toggleMatrix(row.type, 'email', $event.checked)"
                         />
                       </td>
-                      <td>
+                      <td data-label="Push">
                         <mat-checkbox
                           [checked]="row.push"
                           [disabled]="busy()"
@@ -370,7 +376,7 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                           (change)="toggleMatrix(row.type, 'push', $event.checked)"
                         />
                       </td>
-                      <td>
+                      <td data-label="Slack">
                         <mat-checkbox
                           [checked]="row.slack"
                           [disabled]="!s.slackLink || busy()"
@@ -378,7 +384,7 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                           (change)="toggleMatrix(row.type, 'slack', $event.checked)"
                         />
                       </td>
-                      <td>
+                      <td data-label="Teams">
                         <mat-checkbox
                           [checked]="row.teams"
                           [disabled]="!s.teamsLink || busy()"

@@ -23,6 +23,7 @@
     margin: 0;
     color: var(--mat-sys-on-surface);
     font: var(--mat-sys-headline-small);
+    font-weight: 600;
   }
 
   .bf-page__subtitle {
@@ -41,7 +42,7 @@
   .bf-card {
     overflow: hidden;
     border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: var(--mat-sys-corner-large);
+    border-radius: var(--mat-sys-corner-medium);
     background: var(--mat-sys-surface-container-lowest);
   }
 
@@ -69,26 +70,27 @@
     padding: 8px 20px 20px;
   }
 
-  .bf-table-scroll {
-    overflow-x: auto;
-  }
-
-  .bf-table-scroll table {
-    width: 100%;
-  }
+  // .bf-table-scroll, .bf-split-table and row states live in data-table.scss.
 
   .bf-num {
     text-align: end;
     font-variant-numeric: tabular-nums;
   }
 
-  .bf-cell__primary {
+  // Not on a td: display block takes a cell out of the table layout and breaks its row.
+  .bf-cell__primary:not(td) {
     display: block;
+  }
+
+  .bf-cell__primary {
     font: var(--mat-sys-body-medium);
   }
 
-  .bf-cell__secondary {
+  .bf-cell__secondary:not(td) {
     display: block;
+  }
+
+  .bf-cell__secondary {
     color: var(--mat-sys-on-surface-variant);
     font: var(--mat-sys-body-small);
   }
@@ -119,37 +121,7 @@
     padding: 8px 20px 0;
   }
 
-  .bf-kpis {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
-  }
-
-  .bf-kpi {
-    padding: 16px;
-    border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: var(--mat-sys-corner-large);
-    background: var(--mat-sys-surface-container-lowest);
-  }
-
-  .bf-kpi__label {
-    margin: 0;
-    color: var(--mat-sys-on-surface-variant);
-    font: var(--mat-sys-label-medium);
-  }
-
-  .bf-kpi__value {
-    margin: 4px 0 0;
-    font: var(--mat-sys-title-large);
-    font-variant-numeric: tabular-nums;
-    overflow-wrap: anywhere;
-  }
-
-  .bf-kpi__delta {
-    margin: 2px 0 0;
-    color: var(--mat-sys-on-surface-variant);
-    font: var(--mat-sys-body-small);
-  }
+  // KPI cards (.bf-kpis, .bf-kpi*) live in kpi-card.scss.
 
   .bf-facts {
     display: grid;
@@ -157,6 +129,19 @@
     gap: 12px 16px;
     margin: 0;
     padding: 8px 20px 16px;
+  }
+
+  // One label/value pair per grid item: wrap each dt + dd in a div so a value can never land in
+  // the next column, under another label, when the grid reflows.
+  .bf-facts > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .bf-facts > div > dd {
+    margin: 0;
   }
 
   .bf-facts dt {
@@ -253,7 +238,7 @@
   }
 
   .bf-progress__fill--approved {
-    background: var(--sat-sys-success);
+    background: var(--sat-sys-success-icon);
   }
 
   .bf-progress__fill--pending {
@@ -420,34 +405,10 @@
   }
 
   .bf-amount--pending {
-    color: var(--sat-sys-warning);
+    color: var(--sat-sys-on-warning-container);
   }
 
   .bf-amount--approved {
-    color: var(--sat-sys-success);
-  }
-
-  .bf-split-table {
-    width: 100%;
-    border-collapse: collapse;
-    font: var(--mat-sys-body-medium);
-  }
-
-  .bf-split-table th {
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
-    color: var(--mat-sys-on-surface-variant);
-    font: var(--mat-sys-label-medium);
-    text-align: start;
-  }
-
-  .bf-split-table td {
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
-  }
-
-  .bf-split-table th.bf-num,
-  .bf-split-table td.bf-num {
-    text-align: end;
+    color: var(--sat-sys-on-success-container);
   }
 }

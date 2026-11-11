@@ -3,12 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import type { SingleSimulationResponse } from '@bf/contracts';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi } from './api';
 import { approverList } from './labels';
 import { RuleEffectTag } from './rule-tags';
@@ -31,6 +33,7 @@ const OUTCOME_TEXT: Record<string, string> = {
     MatButtonModule,
     MatCheckboxModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     RouterLink,
@@ -38,6 +41,7 @@ const OUTCOME_TEXT: Record<string, string> = {
     RulesTabs,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -62,10 +66,12 @@ const OUTCOME_TEXT: Record<string, string> = {
       <div class="bf-card__header">
         <h2 class="bf-card__title" id="form-title">The request to test</h2>
       </div>
-      <div class="bf-form">
+      <div class="bf-form bf-sim-form">
         <mat-form-field appearance="outline">
-          <mat-label>Amount (USD)</mat-label>
+          <mat-label>Amount</mat-label>
+          <span matTextPrefix>USD&nbsp;</span>
           <input matInput inputmode="decimal" [(ngModel)]="amount" name="amount" />
+          <mat-hint>In the reporting currency</mat-hint>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Spend type</mat-label>
@@ -104,6 +110,8 @@ const OUTCOME_TEXT: Record<string, string> = {
         <mat-form-field appearance="outline">
           <mat-label>Budget left</mat-label>
           <input matInput inputmode="numeric" [(ngModel)]="remaining" name="remaining" />
+          <span matTextSuffix>%</span>
+          <mat-hint>Share of the budget still available</mat-hint>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Vendor</mat-label>
@@ -142,13 +150,26 @@ const OUTCOME_TEXT: Record<string, string> = {
           <h2 class="bf-card__title" id="outcome-title">What would happen</h2>
         </div>
         <div class="bf-card__body">
-          <p class="bf-section__title">{{ outcomeText(r.effect) }}</p>
+          <sat-banner [variant]="outcomeVariant(r.effect)" class="bf-outcome">
+            <sat-banner-message>
+              <span class="bf-outcome__line">
+                @if (r.effect !== 'none') {
+                  <bf-rule-effect [effect]="r.effect" />
+                }
+                <strong>{{ outcomeText(r.effect) }}</strong>
+              </span>
+            </sat-banner-message>
+          </sat-banner>
           <p>{{ r.explanation }}</p>
           <dl class="bf-facts">
-            <dt>Decided by</dt>
-            <dd>{{ r.decisiveRuleCode ?? 'No rule' }}</dd>
-            <dt>Approvers needed</dt>
-            <dd>{{ approverList(r.requiredApprovers) }}</dd>
+            <div>
+              <dt>Decided by</dt>
+              <dd>{{ r.decisiveRuleCode ?? 'No rule' }}</dd>
+            </div>
+            <div>
+              <dt>Approvers needed</dt>
+              <dd>{{ approverList(r.requiredApprovers) }}</dd>
+            </div>
           </dl>
         </div>
       </section>
@@ -163,7 +184,7 @@ const OUTCOME_TEXT: Record<string, string> = {
         </div>
         @if (r.matches.length) {
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="Matching rules">
+            <table class="bf-split-table bf-table--stack" aria-label="Matching rules">
               <thead>
                 <tr>
                   <th scope="col">Rule</th>
@@ -180,11 +201,21 @@ const OUTCOME_TEXT: Record<string, string> = {
                       <span class="bf-cell__primary">{{ m.ruleCode }}</span>
                       <span class="bf-cell__secondary">{{ m.ruleName }}</span>
                     </td>
-                    <td class="bf-num">{{ m.priority }}</td>
-                    <td><bf-rule-effect [effect]="m.effect" /></td>
-                    <td>{{ approverList(m.approvers) }}</td>
-                    <td>
-                      {{ m.decisive ? 'Decided the outcome' : 'Also matched' }}
+                    <td class="bf-num" data-label="Priority">{{ m.priority }}</td>
+                    <td data-label="Outcome"><bf-rule-effect [effect]="m.effect" /></td>
+                    <td data-label="Approvers">{{ approverList(m.approvers) }}</td>
+                    <td class="bf-nowrap" data-label="Effect on the result">
+                      @if (m.decisive) {
+                        <sat-status-tag status="info"
+                          ><mat-icon svgIcon="check" aria-hidden="true" />Decided the
+                          outcome</sat-status-tag
+                        >
+                      } @else {
+                        <sat-status-tag status="neutral"
+                          ><mat-icon svgIcon="circle_minus" aria-hidden="true" />Also
+                          matched</sat-status-tag
+                        >
+                      }
                     </td>
                   </tr>
                 }
@@ -205,7 +236,7 @@ const OUTCOME_TEXT: Record<string, string> = {
             <h2 class="bf-card__title" id="checks-title">Conditions that were checked</h2>
           </div>
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="Conditions checked">
+            <table class="bf-split-table bf-table--stack" aria-label="Conditions checked">
               <thead>
                 <tr>
                   <th scope="col">Condition</th>
@@ -217,8 +248,16 @@ const OUTCOME_TEXT: Record<string, string> = {
                 @for (c of r.conditionChecklist; track $index) {
                   <tr>
                     <td>{{ c.label }}</td>
-                    <td>{{ c.actualValue }}</td>
-                    <td>{{ c.passed ? 'Yes' : 'No' }}</td>
+                    <td [class.bf-figure]="isFigure(c.actualValue)" data-label="This request">
+                      {{ c.actualValue }}
+                    </td>
+                    <td class="bf-nowrap" data-label="Met">
+                      @if (c.passed) {
+                        <mat-icon class="bf-met" svgIcon="check" aria-hidden="true" />Yes
+                      } @else {
+                        <mat-icon class="bf-met" svgIcon="circle_minus" aria-hidden="true" />No
+                      }
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -226,6 +265,36 @@ const OUTCOME_TEXT: Record<string, string> = {
           </div>
         </section>
       }
+    }
+  `,
+  styles: `
+    /* Room for the hints, so a hint never sits on the next field's label. */
+    .bf-sim-form {
+      row-gap: 16px;
+    }
+    .bf-outcome {
+      display: block;
+      margin-bottom: 12px;
+    }
+    .bf-outcome__line {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .bf-nowrap,
+    .bf-figure {
+      white-space: nowrap;
+    }
+    .bf-figure {
+      font-variant-numeric: tabular-nums;
+    }
+    .bf-met {
+      width: 18px;
+      height: 18px;
+      margin-inline-end: 4px;
+      vertical-align: -4px;
+      color: var(--mat-sys-on-surface-variant);
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -249,6 +318,19 @@ export class SimulatePage {
   protected alcohol = false;
   protected cash = false;
   protected includeDraft = true;
+
+  /** Hard block and hold stop the request; approval and warning let it continue with a check. */
+  protected outcomeVariant(effect: string): 'important' | 'warning' | 'success' | 'info' {
+    if (effect === 'block' || effect === 'freeze') return 'important';
+    if (effect === 'warn' || effect === 'require_approval') return 'warning';
+    if (effect === 'auto_approve') return 'success';
+    return 'info';
+  }
+
+  /** A money amount, count or percentage the API wrote out (as opposed to a category or yes/no). */
+  protected isFigure(value: string): boolean {
+    return /^(?:[A-Z]{3}\s)?-?[\d,.]+%?$/.test(value.trim());
+  }
 
   protected outcomeText(effect: string): string {
     return OUTCOME_TEXT[effect] ?? OUTCOME_TEXT['none'];

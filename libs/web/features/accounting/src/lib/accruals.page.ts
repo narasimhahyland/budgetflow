@@ -14,12 +14,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import type { Accrual } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { formatMoney, Money } from '@bf/web/ui';
+import { formatMoney, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ActualsTabs } from './actuals-tabs';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
+import { MatIconModule } from '@angular/material/icon';
 
 const STATUS: Record<
   Accrual['status'],
@@ -36,6 +36,7 @@ const STATUS: Record<
 @Component({
   selector: 'bf-accruals-page',
   imports: [
+    MatIconModule,
     ActualsTabs,
     DatePipe,
     FormsModule,
@@ -104,17 +105,26 @@ const STATUS: Record<
     </sat-banner>
     <div class="bf-kpis">
       <div class="bf-kpi bf-kpi--warning">
-        <p class="bf-kpi__label">Proposed</p>
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Proposed</p>
+          <mat-icon class="bf-kpi__icon" svgIcon="note_edit" aria-hidden="true" />
+        </div>
         <p class="bf-kpi__value">{{ count('proposed') }}</p>
         <p class="bf-kpi__delta">Waiting for approval</p>
       </div>
       <div class="bf-kpi bf-kpi--success">
-        <p class="bf-kpi__label">Posted (accrued)</p>
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Posted (accrued)</p>
+          <mat-icon class="bf-kpi__icon" svgIcon="clock" aria-hidden="true" />
+        </div>
         <p class="bf-kpi__value">{{ count('posted') }}</p>
         <p class="bf-kpi__delta">Accrued; never consumes budget</p>
       </div>
       <div class="bf-kpi">
-        <p class="bf-kpi__label">Reversed</p>
+        <div class="bf-kpi__head">
+          <p class="bf-kpi__label">Reversed</p>
+          <mat-icon class="bf-kpi__icon" svgIcon="undo" aria-hidden="true" />
+        </div>
         <p class="bf-kpi__value">{{ count('reversed') }}</p>
         <p class="bf-kpi__delta">By the actual or the next period</p>
       </div>
@@ -133,7 +143,7 @@ const STATUS: Record<
         </p>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="items()" aria-label="Accruals">
+          <table mat-table class="bf-table" [dataSource]="items()" aria-label="Accruals">
             <ng-container matColumnDef="commitment">
               <th mat-header-cell *matHeaderCellDef>Commitment</th>
               <td mat-cell *matCellDef="let a">
@@ -233,7 +243,12 @@ const STATUS: Record<
         </p>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="valueOf(prepaids)!.items" aria-label="Prepaids">
+          <table
+            mat-table
+            class="bf-table"
+            [dataSource]="valueOf(prepaids)!.items"
+            aria-label="Prepaids"
+          >
             <ng-container matColumnDef="commitment">
               <th mat-header-cell *matHeaderCellDef>Commitment</th>
               <td mat-cell *matCellDef="let p">
@@ -246,7 +261,8 @@ const STATUS: Record<
             <ng-container matColumnDef="service">
               <th mat-header-cell *matHeaderCellDef>Service period</th>
               <td mat-cell *matCellDef="let p">
-                {{ p.serviceStart | date: 'd MMM y' }} – {{ p.serviceEnd | date: 'd MMM y' }}
+                {{ p.serviceStart | date: 'd MMM y' : 'UTC' }} –
+                {{ p.serviceEnd | date: 'd MMM y' : 'UTC' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="amount">

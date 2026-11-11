@@ -160,7 +160,8 @@ test.describe('AI query log and accuracy (113a)', () => {
 
     const row = page.getByRole('row', { name: /Rahul Menon/ }).first();
     await expect(row).toContainText('Refused \u2013 out of scope');
-    await expect(row).toContainText('budget.read');
+    // The scope applied (budget.read) is shown in words.
+    await expect(row).toContainText('Read budget');
     // The question text never reaches the log; only the records and the scope do.
     await expect(page.getByRole('table', { name: 'AI query log' })).not.toContainText(
       'Europe Region',

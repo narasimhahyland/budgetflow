@@ -39,21 +39,10 @@
           "state": "notifications-open",
           "actions": [
             {
-              "click": "role=button[name=\"Notifications\"]"
+              "click": "role=button[name=/^Notifications/]"
             },
             {
-              "waitFor": "text=You are all caught up"
-            }
-          ]
-        },
-        {
-          "state": "account-menu-open",
-          "actions": [
-            {
-              "click": "button.bf-header__avatar"
-            },
-            {
-              "waitFor": "role=menuitem[name=\"Sign out\"]"
+              "waitFor": "text=View all notifications"
             }
           ]
         },
@@ -78,6 +67,17 @@
           "state": "platform-operator",
           "role": "super-admin",
           "waitFor": "text=You are signed in as a platform operator."
+        },
+        {
+          "state": "user-menu-open",
+          "actions": [
+            {
+              "click": "button.bf-header__avatar"
+            },
+            {
+              "waitFor": "role=menuitem[name=\"Sign out\"]"
+            }
+          ]
         }
       ]
     },
@@ -145,6 +145,12 @@
               "waitFor": "role=heading[name=\"No budgets match\"]"
             }
           ]
+        },
+        {
+          "state": "set-to-zero-tab",
+          "path": "/budgets/list?status=set_to_zero",
+          "role": "department-head",
+          "waitFor": "[data-testid=row-EX-EU-WELL]"
         }
       ]
     },
@@ -252,9 +258,18 @@
               "click": "[data-testid=more-actions]"
             },
             {
-              "waitFor": "[data-testid=freeze]"
+              "click": "[data-testid=settings]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Controls and alerts\"]"
             }
           ]
+        },
+        {
+          "state": "set-to-zero",
+          "path": "/budgets/71000000-0000-4000-8000-000000000004",
+          "role": "department-head",
+          "waitFor": "[data-testid=zero-banner]"
         }
       ]
     },
@@ -369,6 +384,12 @@
             },
             {
               "waitFor": "mat-dialog-container bf-money:has-text(\"USD\")"
+            },
+            {
+              "waitFor": "[data-testid=allocate-amount]"
+            },
+            {
+              "fill": ["[data-testid=allocate-amount]", "2500"]
             }
           ]
         },
@@ -636,12 +657,21 @@
               "click": "text=Manual"
             },
             {
-              "fill": ["input[aria-label^=\"Amount for\"] >> nth=-1", "9000"]
+              "fill": ["input[aria-label^=\"Amount for\"]:not([disabled]) >> nth=-1", "999999"]
             },
             {
               "waitFor": "[data-testid=phasing-error]"
             }
-          ]
+          ],
+          "path": "/budgets/70000000-0000-4000-8000-000000000004?tab=phasing",
+          "role": "department-head",
+          "waitFor": "[data-testid=save-phasing]"
+        },
+        {
+          "state": "locked",
+          "role": "regional-manager",
+          "path": "/budgets/70000000-0000-4000-8000-000000000002?tab=phasing",
+          "waitFor": "text=Locked"
         }
       ]
     },
@@ -658,12 +688,34 @@
     },
     {
       "id": "044-event-list",
+      "path": "/events/all",
       "role": "event-organizer",
-      "path": "/events",
-      "waitFor": "text=Diwali celebration 2026",
+      "waitFor": "role=table[name=\"Events\"]",
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "empty-search",
+          "actions": [
+            {
+              "fill": ["input[matInput]", "no event like this"]
+            },
+            {
+              "waitFor": "role=heading[name=\"No events match\"]"
+            }
+          ]
+        },
+        {
+          "state": "closed-tab",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Closed\")"
+            },
+            {
+              "waitFor": "role=heading[name=/event/]"
+            }
+          ]
         }
       ]
     },
@@ -675,6 +727,17 @@
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "validation",
+          "actions": [
+            {
+              "click": "role=button[name=\"Continue\"]"
+            },
+            {
+              "waitFor": "mat-error"
+            }
+          ]
         }
       ]
     },
@@ -686,6 +749,22 @@
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "funding",
+          "actions": [
+            {
+              "click": "a[satNavigationTab]:has-text(\"Budget and funding\")"
+            },
+            {
+              "waitFor": "role=heading[name=\"Funding sources and consumption\"]"
+            }
+          ]
+        },
+        {
+          "state": "closed-fully-funded",
+          "path": "/events/78000000-0000-4000-8000-000000000020",
+          "waitFor": "[data-testid=kpi-funded]"
         }
       ]
     },
@@ -846,6 +925,31 @@
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "filled",
+          "actions": [
+            {
+              "fill": ["input[name=amount]", "600"]
+            },
+            {
+              "waitFor": "bf-budget-impact"
+            },
+            {
+              "waitFor": "bf-approval-route"
+            }
+          ]
+        },
+        {
+          "state": "blocked",
+          "actions": [
+            {
+              "fill": ["input[name=amount]", "99999"]
+            },
+            {
+              "waitFor": "[data-testid=impact-blocked]"
+            }
+          ]
         }
       ]
     },
@@ -857,6 +961,11 @@
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "escalated-tab",
+          "path": "/approvals?tab=escalated",
+          "waitFor": "role=heading[name=\"Approval inbox\"]"
         }
       ]
     },
@@ -917,6 +1026,20 @@
               "scrollTop": true
             }
           ]
+        },
+        {
+          "state": "approve-part-missing-amount",
+          "actions": [
+            {
+              "waitFor": "text=Check before you decide"
+            },
+            {
+              "click": "mat-button-toggle:has-text(\"Approve part\") button"
+            },
+            {
+              "waitFor": "text=Enter the amount you approve."
+            }
+          ]
         }
       ]
     },
@@ -955,6 +1078,11 @@
         {
           "state": "link-invalid",
           "allowRequests": ["/api/approvals/email-actions/"]
+        },
+        {
+          "state": "link-incomplete",
+          "path": "/email-action",
+          "waitFor": "text=This link is incomplete"
         }
       ]
     },
@@ -1005,7 +1133,7 @@
           "state": "default"
         }
       ],
-      "mask": ["table[aria-label=\"Approval decisions\"] tbody td:first-child"]
+      "mask": ["table[aria-label=\"Approval decisions\"] [data-testid=relative-time]"]
     },
     {
       "id": "115-employee-dashboard",
@@ -1136,6 +1264,29 @@
           "state": "blocked-outcome",
           "actions": [
             {
+              "click": "role=combobox[name=\"Vendor\"]"
+            },
+            {
+              "click": "role=option[name=\"Blocked\"]"
+            },
+            {
+              "click": "role=button[name=\"See what would happen\"]"
+            },
+            {
+              "waitFor": "role=heading[name=\"What would happen\"]"
+            },
+            {
+              "waitFor": "text=This request would be blocked"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "warning-outcome",
+          "actions": [
+            {
               "click": "role=button[name=\"See what would happen\"]"
             },
             {
@@ -1156,6 +1307,17 @@
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "list",
+          "actions": [
+            {
+              "click": "mat-button-toggle:has-text(\"List\") button"
+            },
+            {
+              "waitFor": "role=table[name=\"Approval steps\"]"
+            }
+          ]
         }
       ]
     },
@@ -1288,6 +1450,20 @@
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "results",
+          "actions": [
+            {
+              "click": "role=button[name=\"Run check\"]"
+            },
+            {
+              "waitFor": "#rows-title"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
         }
       ]
     },
@@ -1330,6 +1506,17 @@
             },
             {
               "waitFor": "text=Squad celebration"
+            }
+          ]
+        },
+        {
+          "state": "edit-form",
+          "actions": [
+            {
+              "click": "role=button[name=\"New template\"]"
+            },
+            {
+              "waitFor": "role=button[name=\"Save template\"]"
             }
           ]
         }
@@ -1458,6 +1645,39 @@
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "detail",
+          "actions": [
+            {
+              "click": "[data-testid=mobile-approval-cards] button:has-text(\"REQ-00002\")"
+            },
+            {
+              "waitFor": "[data-testid=mobile-approval-detail]"
+            }
+          ]
+        },
+        {
+          "state": "reject-sheet",
+          "actions": [
+            {
+              "click": "[data-testid=mobile-approval-cards] button:has-text(\"REQ-00002\")"
+            },
+            {
+              "waitFor": "[data-testid=mobile-approval-detail]"
+            },
+            {
+              "click": "[data-testid=mobile-open-reject]"
+            },
+            {
+              "waitFor": "[data-testid=mobile-reject-sheet]"
+            }
+          ]
+        },
+        {
+          "state": "alerts",
+          "path": "/m/alerts",
+          "waitFor": "[data-testid=notifications-list]"
         }
       ]
     },
@@ -1475,6 +1695,17 @@
           "role": "event-organizer",
           "path": "/m/receipt?request=73000000-0000-4000-8000-000000000011",
           "waitFor": "[data-testid=receipt-review-card]"
+        },
+        {
+          "state": "budget-sheet",
+          "actions": [
+            {
+              "click": "[data-testid=mobile-balance-cards] article:has-text(\"Bengaluru Events\")"
+            },
+            {
+              "waitFor": "[data-testid=budget-detail-sheet]"
+            }
+          ]
         }
       ]
     },
@@ -1538,10 +1769,24 @@
       "role": "integration-admin",
       "path": "/admin/channels",
       "waitFor": "[data-testid=slack-card]",
-      "mask": ["[data-testid=slack-approvers-linked]"],
+      "mask": [
+        "[data-testid=slack-approvers-linked]",
+        "table[aria-label=\"Recent channel deliveries\"] tbody"
+      ],
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "unlinked-approvers",
+          "actions": [
+            {
+              "click": "[data-testid=filter-unlinked-approvers]"
+            },
+            {
+              "waitFor": "[data-testid=unlinked-approvers-list]"
+            }
+          ]
         }
       ]
     },
@@ -1553,6 +1798,17 @@
       "states": [
         {
           "state": "default"
+        },
+        {
+          "state": "editor",
+          "actions": [
+            {
+              "click": "[data-testid=open-digest-OWNER_WEEKLY]"
+            },
+            {
+              "waitFor": "[data-testid=digest-editor]"
+            }
+          ]
         }
       ]
     },
@@ -1899,7 +2155,8 @@
               "hover": "[data-testid=commentary-required]"
             }
           ],
-          "fullPage": false
+          "fullPage": false,
+          "allowRequests": ["/api/close/forecast-cycles/[^/]+/submissions"]
         },
         {
           "state": "forbidden",
@@ -1934,7 +2191,8 @@
         {
           "state": "forbidden-owner",
           "role": "location-manager",
-          "waitFor": "role=heading[name=\"You cannot see the board and FP&A pack\"]"
+          "waitFor": "role=heading[name=\"You cannot see the board and FP&A pack\"]",
+          "allowRequests": ["/api/reports/board-pack"]
         }
       ],
       "mask": ["[data-testid=relative-time]"]
@@ -2483,7 +2741,8 @@
             {
               "waitFor": "[data-testid=ask-empty]"
             }
-          ]
+          ],
+          "fullPage": false
         },
         {
           "state": "answer",
@@ -2503,7 +2762,8 @@
             {
               "scrollTop": true
             }
-          ]
+          ],
+          "fullPage": false
         },
         {
           "state": "refused-out-of-scope",
@@ -2520,7 +2780,8 @@
             {
               "scrollTop": true
             }
-          ]
+          ],
+          "fullPage": false
         },
         {
           "state": "action-redirect",
@@ -2537,7 +2798,8 @@
             {
               "scrollTop": true
             }
-          ]
+          ],
+          "fullPage": false
         }
       ],
       "mask": ["[data-testid=conversation-list]"]
@@ -2571,7 +2833,8 @@
             {
               "scrollTop": true
             }
-          ]
+          ],
+          "allowRequests": ["/api/ai/ask"]
         }
       ]
     },
@@ -2683,6 +2946,20 @@
               "scrollTop": true
             }
           ]
+        },
+        {
+          "state": "empty-with-action",
+          "actions": [
+            {
+              "click": "[data-testid=flag-status-resolved]"
+            },
+            {
+              "waitFor": "[data-testid=flags-empty]"
+            },
+            {
+              "waitFor": "[data-testid=flags-empty] >> role=button[name=\"Scan for flags\"]"
+            }
+          ]
         }
       ]
     },
@@ -2734,7 +3011,8 @@
             {
               "waitFor": "[data-testid=policy-empty]"
             }
-          ]
+          ],
+          "fullPage": false
         },
         {
           "state": "is-allowed",
@@ -2751,7 +3029,8 @@
             {
               "scrollTop": true
             }
-          ]
+          ],
+          "fullPage": false
         }
       ]
     },
@@ -3113,7 +3392,8 @@
       "waitFor": "[data-testid=embed-missing]",
       "states": [
         {
-          "state": "widget-removed"
+          "state": "widget-removed",
+          "allowRequests": ["/api/ecosystem/widgets/[^/]+/content"]
         }
       ]
     },
@@ -3335,6 +3615,281 @@
               "scrollTop": true
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "001-sign-in",
+      "path": "/",
+      "waitFor": "role=heading[name=\"Sign in to BudgetFlow\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "089-budgets-requests",
+      "path": "/budgets/requests",
+      "role": "regional-manager",
+      "waitFor": "role=table[name=\"Budget requests\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "023a-roll-forward-clone",
+      "path": "/budgets/70000000-0000-4000-8000-000000000001",
+      "role": "finance-admin",
+      "waitFor": "[data-testid=kpi-available]",
+      "states": [
+        {
+          "state": "dialog",
+          "actions": [
+            {
+              "click": "[data-testid=more-actions]"
+            },
+            {
+              "click": "role=menuitem[name=\"Roll forward\"]"
+            },
+            {
+              "waitFor": "role=heading[name=\"Roll forward\"]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "062-delegated-approval",
+      "role": "department-head",
+      "path": "/approvals/delegations",
+      "waitFor": "role=heading[name=\"Delegations\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "080a-actuals-import",
+      "role": "finance-admin",
+      "path": "/finance/actuals",
+      "waitFor": "role=heading[name=\"Actuals import\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "080b-unmatched-actuals",
+      "role": "finance-admin",
+      "path": "/finance/actuals/queue",
+      "waitFor": "role=heading[name=\"Unmatched actuals\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "080c-gl-tie-out",
+      "role": "finance-admin",
+      "path": "/finance/gl-tie-out",
+      "waitFor": "role=heading[name=\"GL tie-out\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "080d-accruals-prepaids",
+      "role": "finance-admin",
+      "path": "/finance/actuals/accruals",
+      "waitFor": "role=heading[name=\"Accruals and prepaids\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "085a-commitment-hygiene",
+      "role": "finance-admin",
+      "path": "/finance/actuals/commitments",
+      "waitFor": "role=heading[name=\"Commitment hygiene\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ],
+      "mask": ["table[aria-label=\"Open commitments\"] tbody"]
+    },
+    {
+      "id": "080g-matched-actuals",
+      "role": "finance-admin",
+      "path": "/finance/actuals/matched",
+      "waitFor": "role=heading[name=\"Matched actuals\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "080h-mapping-rules",
+      "role": "finance-admin",
+      "path": "/finance/actuals/rules",
+      "waitFor": "role=heading[name=\"Mapping rules\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "080i-event-reconciliation",
+      "role": "finance-admin",
+      "path": "/finance/actuals/events",
+      "waitFor": "role=heading[name=\"Event reconciliation\"]",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "107-exchange-rates",
+      "role": "finance-admin",
+      "path": "/finance/rates",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "108-fiscal-calendar",
+      "role": "finance-admin",
+      "path": "/finance/periods",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "102a-legal-entities",
+      "role": "finance-admin",
+      "path": "/finance/legal-entities",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "106a-gl-mapping",
+      "role": "finance-admin",
+      "path": "/finance/gl",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "106b-reason-codes",
+      "role": "finance-admin",
+      "path": "/finance/reason-codes",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "106c-vendors",
+      "role": "finance-admin",
+      "path": "/finance/vendors",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "104a-doa-matrix",
+      "role": "finance-admin",
+      "path": "/finance/doa",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "033-organization-hierarchy",
+      "role": "org-admin",
+      "path": "/org",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "038-people-directory",
+      "role": "org-admin",
+      "path": "/org/people",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "041-cost-centers",
+      "role": "org-admin",
+      "path": "/org/cost-centers",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "022c-hr-headcount-import",
+      "role": "org-admin",
+      "path": "/org/headcount",
+      "waitFor": "table",
+      "states": [
+        {
+          "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "042-org-import",
+      "role": "org-admin",
+      "path": "/org/import",
+      "waitFor": "role=heading[name=\"Import the org hierarchy\"]",
+      "states": [
+        {
+          "state": "default"
         }
       ]
     }

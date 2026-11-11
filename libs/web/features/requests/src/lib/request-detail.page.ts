@@ -10,7 +10,9 @@ import {
 import { formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { type ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -30,14 +32,17 @@ import {
   DecisionForm,
   DiscussionBox,
   formatMoney,
+  LoadState,
   Money,
   SpendStatus,
 } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
+import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { DocumentsPanel } from './documents-panel';
-import { LoadState } from './load-state';
 import { toMajor, toMinor } from './money-input';
 
 const KIND: Record<string, string> = {
@@ -69,12 +74,17 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
+    SatAvatar,
+    SatCategoryTag,
+    SatImportantButton,
+    SatStatusTag,
     SpendStatus,
   ],
   template: `
@@ -90,7 +100,10 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
           <div class="bf-title-row">
             <h1 class="bf-page__title">{{ r.title }}</h1>
             @if (r.myTaskId) {
-              <span class="bf-chip">Pending your approval</span>
+              <sat-status-tag status="warning"
+                ><mat-icon svgIcon="clock" aria-hidden="true" />Pending your
+                approval</sat-status-tag
+              >
             } @else {
               <bf-spend-status kind="request" [status]="r.status" />
             }
@@ -141,6 +154,11 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
           ></sat-banner
         >
       }
+      @if (r.status === 'rejected') {
+        <sat-banner variant="important"
+          ><sat-banner-message>{{ rejectedText(r) }}</sat-banner-message></sat-banner
+        >
+      }
       @if (r.status === 'cancelled' && r.cancelReason) {
         <sat-banner variant="info"
           ><sat-banner-message
@@ -176,7 +194,7 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
               </div>
               <div class="bf-facts__item">
                 <dt>Offered</dt>
-                <dd data-testid="offer-amount">
+                <dd class="bf-offer" data-testid="offer-amount">
                   <bf-money
                     [amountMinor]="offer.amount.amountMinor"
                     [currency]="offer.amount.currency"
@@ -206,6 +224,7 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
             <div class="bf-form__actions">
               <button
                 mat-flat-button
+                satImportantButton
                 type="button"
                 data-testid="accept-offer"
                 [disabled]="busy()"
@@ -224,8 +243,22 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
           </div>
           <div class="bf-form">
             <mat-form-field appearance="outline">
-              <mat-label>Amount ({{ r.amount.currency }})</mat-label>
-              <input matInput inputmode="decimal" [(ngModel)]="newAmount" name="newAmount" />
+              <mat-label>Amount</mat-label>
+              <span matTextPrefix>{{ r.amount.currency }}&nbsp;</span>
+              <input
+                matInput
+                inputmode="decimal"
+                [(ngModel)]="newAmount"
+                [errorStateMatcher]="amountMatcher"
+                name="newAmount"
+              />
+              @if (amountProblem(); as problem) {
+                <mat-error
+                  ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />{{
+                    problem
+                  }}</mat-error
+                >
+              }
             </mat-form-field>
             <mat-form-field appearance="outline" class="bf-form__wide">
               <mat-label>Justification</mat-label>
@@ -300,10 +333,16 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
                 <ol class="bf-timeline" data-testid="request-history">
                   @for (a of history(); track a.id) {
                     <li>
-                      <span class="bf-cell__primary"
-                        >{{ a.actorName ?? 'BudgetFlow'
-                        }}{{ a.onBehalfOfName ? ' for ' + a.onBehalfOfName : '' }}:
-                        {{ a.summary }}</span
+                      <span class="bf-cell__primary bf-history__who"
+                        ><sat-avatar
+                          size="24"
+                          [initials]="initials(a.actorName ?? 'BudgetFlow')"
+                          aria-hidden="true"
+                        /><span
+                          >{{ a.actorName ?? 'BudgetFlow'
+                          }}{{ a.onBehalfOfName ? ' for ' + a.onBehalfOfName : '' }}:
+                          {{ a.summary }}</span
+                        ></span
                       >
                       <span class="bf-cell__secondary"
                         ><span data-testid="relative-time">{{
@@ -311,12 +350,16 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
                         }}</span></span
                       >
                       <span class="bf-history__chips">
-                        <span class="bf-chip">{{ channelLabel(a) }}</span>
+                        <sat-category-tag category="gray"
+                          ><mat-icon [svgIcon]="channelIcon(a)" aria-hidden="true" />{{
+                            channelLabel(a)
+                          }}</sat-category-tag
+                        >
                         @if (doaLimit(a); as limit) {
-                          <span class="bf-chip"
-                            >Within DoA
+                          <sat-status-tag status="success"
+                            ><mat-icon svgIcon="shield" aria-hidden="true" />Within DoA
                             <bf-money [amountMinor]="limit.amountMinor" [currency]="limit.currency"
-                          /></span>
+                          /></sat-status-tag>
                         }
                         @if (canAudit()) {
                           <a
@@ -368,10 +411,10 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
                   </dl>
                 </section>
               }
-              @if (r.impact; as impact) {
+              @if (r.impact && !closed()) {
                 <section class="bf-card" aria-label="Budget impact">
                   <div class="bf-section">
-                    <bf-budget-impact [impact]="impact" title="Budget impact" />
+                    <bf-budget-impact [impact]="r.impact" title="Budget impact" />
                   </div>
                 </section>
               }
@@ -441,11 +484,11 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
                   }
                   <div>
                     <dt>Spend type</dt>
-                    <dd>{{ r.spendType.replace('_', ' ') }}</dd>
+                    <dd>{{ spendLabel(r.spendType) }}</dd>
                   </div>
                   <div>
                     <dt>Needed by</dt>
-                    <dd>{{ r.neededBy ?? '—' }}</dd>
+                    <dd>{{ r.neededBy ? (r.neededBy | bfDate: 'UTC') : 'Not set' }}</dd>
                   </div>
                   <div>
                     <dt>Charge to</dt>
@@ -491,11 +534,21 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
               }
             </div>
             <aside class="bf-layout__side">
-              @if (r.impact; as impact) {
+              @if (r.impact && !closed()) {
                 <section class="bf-card" aria-label="Budget impact">
                   <div class="bf-section">
-                    <bf-budget-impact [impact]="impact" title="Budget impact analysis" />
+                    <bf-budget-impact [impact]="r.impact" title="Budget impact analysis" />
                   </div>
+                </section>
+              } @else if (r.impact) {
+                <section class="bf-card" aria-labelledby="released-title">
+                  <div class="bf-card__header">
+                    <h2 class="bf-card__title" id="released-title">Budget impact</h2>
+                  </div>
+                  <p class="bf-section bf-muted">
+                    This request is {{ closedLabel(r.status) }}, so nothing is held or charged on
+                    {{ r.budgetName }} for it.
+                  </p>
                 </section>
               }
             </aside>
@@ -505,12 +558,41 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
     }
   `,
   styles: `
+    .bf-timeline .bf-history__who {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
     .bf-history__chips {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 8px;
       margin-top: 4px;
+    }
+    /* Below 1024px the status tag sits under the title, so the row height does not change
+       when the heading font finishes loading (a wrap there was a 0.36 layout shift at 834px). */
+    @media (width < 1024px) {
+      .bf-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+    }
+    .bf-muted {
+      margin: 0;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-medium);
+    }
+    .bf-offer {
+      color: var(--sat-sys-on-info-container);
+      font-weight: 600;
+    }
+    .bf-error-icon {
+      width: 16px;
+      height: 16px;
+      margin-inline-end: 4px;
+      vertical-align: -3px;
     }
     .bf-history__quote {
       margin: 8px 0 0;
@@ -599,6 +681,47 @@ export class RequestDetailPage {
 
   protected kind(k: string): string {
     return KIND[k] ?? k;
+  }
+
+  /** Final statuses: the request no longer holds or consumes budget, so no after-approval figures. */
+  protected readonly closed = computed(() =>
+    ['rejected', 'withdrawn', 'cancelled'].includes(this.r()?.status ?? ''),
+  );
+
+  protected rejectedText(r: { decisionReason?: string | null; budgetName: string }): string {
+    const reason = r.decisionReason?.trim().replace(/[.!?]+$/, '');
+    return `Rejected${reason ? ': ' + reason : ''}. Nothing was charged to ${r.budgetName}; to ask again, start a new request.`;
+  }
+
+  protected closedLabel(status: string): string {
+    return status === 'rejected' ? 'rejected' : status === 'withdrawn' ? 'withdrawn' : 'cancelled';
+  }
+
+  protected spendLabel(type: string): string {
+    const words = type.replace(/_/g, ' ');
+    return words.charAt(0).toUpperCase() + words.slice(1);
+  }
+
+  /** Shows the amount field in its error state once it has been touched and cannot be sent. */
+  protected readonly amountMatcher: ErrorStateMatcher = {
+    isErrorState: (control) => !!control?.touched && this.amountProblem() !== null,
+  };
+
+  protected initials(name: string): string {
+    return name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w.charAt(0).toUpperCase())
+      .join('');
+  }
+
+  protected channelIcon(a: ActivityEntry): string {
+    if (a.channel === 'email') return 'mail';
+    if (a.channel === 'slack') return 'slack';
+    if (a.channel === 'teams') return 'chat';
+    if (a.channel === 'mobile') return 'phone';
+    return a.actorName === 'BudgetFlow' || !a.actorName ? 'sync' : 'monitor';
   }
 
   protected setTab(t: Tab): void {

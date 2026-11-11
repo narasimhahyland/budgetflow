@@ -7,13 +7,7 @@
   </div>
   <div class="bf-page__actions">
     @if (canManage() && !connecting()) {
-      <button
-        mat-flat-button
-        satImportantButton
-        type="button"
-        (click)="startConnect()"
-        data-testid="connect-system"
-      >
+      <button mat-flat-button type="button" (click)="startConnect()" data-testid="connect-system">
         Connect a system
       </button>
     }
@@ -41,25 +35,61 @@
   </section>
 } @else if (valueOf(hub); as h) {
   <section class="bf-kpis" aria-label="Connector health">
-    <div class="bf-kpi">
-      <p class="bf-kpi__label">Connected</p>
+    <div class="bf-kpi bf-kpi--success">
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Connected</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="circle_check" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value" data-testid="health-connected">{{ h.health.connected }}</p>
+      <div class="bf-kpi__foot">
+        <span>Of {{ systems(h) }} systems</span>
+        <span class="bf-kpi__pct">{{ share(h.health.connected, h) | number: '1.0-0' }}%</span>
+        <span class="bf-kpi__track"
+          ><span class="bf-kpi__fill" [style.width.%]="share(h.health.connected, h)"></span
+        ></span>
+      </div>
     </div>
     <div class="bf-kpi" [class.bf-kpi--warning]="h.health.needsAttention > 0">
-      <p class="bf-kpi__label">Needs attention</p>
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Needs attention</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="critical" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value" data-testid="health-attention">{{ h.health.needsAttention }}</p>
+      <div class="bf-kpi__foot">
+        <span>Of {{ systems(h) }} systems</span>
+        <span class="bf-kpi__pct">{{ share(h.health.needsAttention, h) | number: '1.0-0' }}%</span>
+        <span class="bf-kpi__track"
+          ><span class="bf-kpi__fill" [style.width.%]="share(h.health.needsAttention, h)"></span
+        ></span>
+      </div>
     </div>
     <div class="bf-kpi">
-      <p class="bf-kpi__label">Not connected</p>
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Not connected</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="circle_minus" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value">{{ h.health.notConnected }}</p>
+      <div class="bf-kpi__foot">
+        <span>Of {{ systems(h) }} systems</span>
+        <span class="bf-kpi__pct">{{ share(h.health.notConnected, h) | number: '1.0-0' }}%</span>
+        <span class="bf-kpi__track"
+          ><span class="bf-kpi__fill" [style.width.%]="share(h.health.notConnected, h)"></span
+        ></span>
+      </div>
     </div>
     <div class="bf-kpi" [class.bf-kpi--warning]="h.health.retrying > 0">
-      <p class="bf-kpi__label">Waiting for retry</p>
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Waiting for retry</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="refresh" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value" data-testid="health-retrying">{{ h.health.retrying }}</p>
       <p class="bf-kpi__delta">Messages that failed and will be tried again</p>
     </div>
-    <div class="bf-kpi" [class.bf-kpi--warning]="h.health.deadLetter > 0">
-      <p class="bf-kpi__label">Dead letter</p>
+    <div class="bf-kpi" [class.bf-kpi--important]="h.health.deadLetter > 0">
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Dead letter</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="error" aria-hidden="true" />
+      </div>
       <p class="bf-kpi__value" data-testid="health-dead-letter">{{ h.health.deadLetter }}</p>
       <p class="bf-kpi__delta">Retries exhausted; someone has to decide</p>
     </div>
@@ -181,11 +211,9 @@
           {{ h.connections.length === 1 ? 'connection' : 'connections' }}</span
         >
       </div>
-      @for (group of groups(); track group.category) {
-        <h3 class="bf-card__subheading" [id]="'cat-' + group.category">
-          {{ categoryLabel(group.category) }}
-        </h3>
-        <div class="bf-tiles" [attr.aria-labelledby]="'cat-' + group.category">
+      <!-- One grid for every connection; each tile names its category. -->
+      <div class="bf-tiles">
+        @for (group of groups(); track group.category) {
           @for (c of group.items; track c.id) {
             <a
               class="bf-tile"
@@ -197,12 +225,13 @@
                 c.displayName + ', ' + statusLabel(c.status) + ', ' + modeLabel(c.mode) + ' mode'
               "
             >
+              <p class="bf-tile__category">{{ categoryLabel(group.category) }}</p>
               <h3 class="bf-tile__name">{{ c.displayName }}</h3>
               <div class="bf-tile__tags">
                 <sat-status-tag [status]="statusTone(c.status)">{{
                   statusLabel(c.status)
                 }}</sat-status-tag>
-                <sat-status-tag status="neutral">{{ modeLabel(c.mode) }}</sat-status-tag>
+                <sat-category-tag category="gray">{{ modeLabel(c.mode) }}</sat-category-tag>
               </div>
               <p class="bf-tile__facts">
                 <span
@@ -230,21 +259,25 @@
               }
             </a>
           }
-        </div>
-      }
+        }
+      </div>
     </section>
   } @else {
     <section class="bf-card">
-      <sat-empty-state data-testid="hub-empty">
-        <h2 satEmptyStateHeadline>No integrations yet</h2>
-        <p satEmptyStateDescription>
-          Connect an ERP or the HR file import first: they bring in the actuals and the headcount
-          the rest of BudgetFlow works from.
-        </p>
-        @if (canManage()) {
-          <button mat-flat-button type="button" (click)="startConnect()">Connect a system</button>
-        }
-      </sat-empty-state>
+      <div class="bf-card__body">
+        <sat-empty-state data-testid="hub-empty">
+          <h2 satEmptyStateHeadline>No integrations yet</h2>
+          <p satEmptyStateDescription>
+            Connect an ERP or the HR file import first: they bring in the actuals and the headcount
+            the rest of BudgetFlow works from.
+          </p>
+          @if (canManage()) {
+            <button satEmptyStateAction mat-flat-button type="button" (click)="startConnect()">
+              Connect a system
+            </button>
+          }
+        </sat-empty-state>
+      </div>
     </section>
   }
 

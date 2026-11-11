@@ -23,13 +23,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { LeadershipSummary, SummarySection, SummarySectionKey } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { AiDraftNote, Sources, SummaryText } from './figures';
-import { LoadState } from './load-state';
 import { SUMMARY_STATUS_LABEL, SUMMARY_STATUS_TONE } from './summary-list.page';
 
 /** Rewrite one section in the author's own words (011b). */

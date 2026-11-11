@@ -9,6 +9,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -19,14 +20,15 @@ import {
   BudgetImpactCard,
   DateTimePipe,
   DecisionForm,
+  LoadState,
   Money,
   SpendStatus,
 } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
+import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type Tab = 'assigned' | 'delegated' | 'escalated' | 'completed';
 const TABS: { id: Tab; label: string }[] = [
@@ -48,12 +50,15 @@ const TABS: { id: Tab; label: string }[] = [
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
+    SatCategoryTag,
+    SatStatusTag,
     SpendStatus,
   ],
   template: `
@@ -105,10 +110,17 @@ const TABS: { id: Tab; label: string }[] = [
                 : 'Approvals move here as they happen.'
             }}
           </p>
-          <button mat-stroked-button type="button" (click)="setTab('completed')">
+          <button
+            satEmptyStateAction
+            mat-stroked-button
+            type="button"
+            (click)="setTab('completed')"
+          >
             View completed
           </button>
-          <a mat-stroked-button routerLink="/approvals/delegations">Set up a delegate</a>
+          <a satEmptyStateAction mat-stroked-button routerLink="/approvals/delegations"
+            >Set up a delegate</a
+          >
         </sat-empty-state>
       } @else {
         <div class="bf-split">
@@ -144,7 +156,9 @@ const TABS: { id: Tab; label: string }[] = [
                           For {{ i.delegatedFromName }} ·
                         }
                         @if (i.onHold) {
-                          On hold ·
+                          <sat-status-tag status="info"
+                            ><mat-icon svgIcon="lock" aria-hidden="true" />On hold</sat-status-tag
+                          >
                         }
                         @if (i.dueAt && i.taskStatus === 'pending') {
                           <span data-testid="relative-time"
@@ -170,7 +184,7 @@ const TABS: { id: Tab; label: string }[] = [
             @if (valueOf(detail); as d) {
               <div class="bf-section">
                 <p class="bf-meta">
-                  <span class="bf-chip">{{ d.task.ref }}</span>
+                  <sat-category-tag category="gray">{{ d.task.ref }}</sat-category-tag>
                   <bf-spend-status kind="task" [status]="d.task.taskStatus" />
                   {{ d.task.kindLabel }}
                 </p>
@@ -215,7 +229,7 @@ const TABS: { id: Tab; label: string }[] = [
               }
               <div class="bf-section">
                 <sat-banner variant="info"
-                  ><sat-banner-message>{{ d.ruleReason }}</sat-banner-message></sat-banner
+                  ><sat-banner-message>Why you: {{ d.ruleReason }}</sat-banner-message></sat-banner
                 >
               </div>
               <div class="bf-section">
@@ -226,7 +240,9 @@ const TABS: { id: Tab; label: string }[] = [
                 <h3 class="bf-section__title">Purpose</h3>
                 <p>{{ d.purpose }}</p>
                 @for (doc of d.documents; track doc.id) {
-                  <p class="bf-cell__secondary">Attached: {{ doc.fileName }}</p>
+                  <p class="bf-cell__secondary bf-attachment">
+                    <mat-icon svgIcon="attach_file" aria-hidden="true" />{{ doc.fileName }}
+                  </p>
                 }
                 <a
                   mat-button
@@ -258,6 +274,18 @@ const TABS: { id: Tab; label: string }[] = [
           </section>
         </div>
       }
+    }
+  `,
+  styles: `
+    .bf-attachment {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 4px;
+    }
+    .bf-attachment mat-icon {
+      width: 16px;
+      height: 16px;
     }
   `,
   host: { class: 'bf-page-layout' },

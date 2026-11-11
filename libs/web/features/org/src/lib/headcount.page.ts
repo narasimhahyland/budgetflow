@@ -10,6 +10,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import type { HeadcountImportResult } from '@bf/contracts';
@@ -18,7 +19,7 @@ import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
 import { CsvInput } from './csv-input';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 const TEMPLATE = 'location_code,team_code,employment_type,headcount,prorated_headcount';
 
@@ -28,6 +29,7 @@ const EXAMPLE =
 /** Screen 22c: HR headcount import and refresh by location and team. */
 @Component({
   selector: 'bf-headcount-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     CsvInput,
     DatePipe,
@@ -36,6 +38,7 @@ const EXAMPLE =
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatTableModule,
     SAT_BANNER_IMPORTS,
@@ -78,9 +81,6 @@ const EXAMPLE =
     .bf-file {
       margin: 0 0 12px;
       font: var(--mat-sys-title-small);
-    }
-    .bf-kpi--error .bf-kpi__value {
-      color: var(--mat-sys-error);
     }
     .bf-review {
       display: grid;

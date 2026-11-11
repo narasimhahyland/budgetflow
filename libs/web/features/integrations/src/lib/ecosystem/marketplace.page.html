@@ -125,16 +125,20 @@
       }
     </div>
   } @else {
-    <sat-empty-state data-testid="marketplace-empty">
-      <h3 satEmptyStateHeadline>No partner offers{{ filterSummary() }}</h3>
-      <p satEmptyStateDescription>
-        Nothing matches. Widen the filters, or ask vendors for quotes on the event instead: the
-        marketplace is one way to get a price, not the only one.
-      </p>
-      @if (hasFilters()) {
-        <button mat-stroked-button type="button" (click)="clearFilters()">Clear filters</button>
-      }
-    </sat-empty-state>
+    <div class="bf-card__body">
+      <sat-empty-state data-testid="marketplace-empty">
+        <h3 satEmptyStateHeadline>No partner offers{{ filterSummary() }}</h3>
+        <p satEmptyStateDescription>
+          Nothing matches. Widen the filters, or ask vendors for quotes on the event instead: the
+          marketplace is one way to get a price, not the only one.
+        </p>
+        @if (hasFilters()) {
+          <button satEmptyStateAction mat-stroked-button type="button" (click)="clearFilters()">
+            Clear filters
+          </button>
+        }
+      </sat-empty-state>
+    </div>
   }
 </section>
 
@@ -155,7 +159,12 @@
     />
   } @else if (bookingItems().length) {
     <div class="bf-table-scroll">
-      <table mat-table [dataSource]="bookingItems()" aria-labelledby="marketplace-bookings-title">
+      <table
+        mat-table
+        class="bf-table"
+        [dataSource]="bookingItems()"
+        aria-labelledby="marketplace-bookings-title"
+      >
         <ng-container matColumnDef="offer">
           <th mat-header-cell *matHeaderCellDef scope="col">Offer</th>
           <td mat-cell *matCellDef="let b">
@@ -221,11 +230,13 @@
       </table>
     </div>
   } @else {
-    <sat-empty-state data-testid="bookings-empty">
-      <h3 satEmptyStateHeadline>No booking requests</h3>
-      <p satEmptyStateDescription>
-        Nobody has asked a partner for a price on an event you can see.
-      </p>
-    </sat-empty-state>
+    <div class="bf-card__body">
+      <sat-empty-state data-testid="bookings-empty">
+        <h3 satEmptyStateHeadline>No booking requests</h3>
+        <p satEmptyStateDescription>
+          Nobody has asked a partner for a price on an event you can see.
+        </p>
+      </sat-empty-state>
+    </div>
   }
 </section>

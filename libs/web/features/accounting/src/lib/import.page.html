@@ -157,9 +157,7 @@
         <mat-icon svgIcon="document" aria-hidden="true" />
         <strong data-testid="batch-file">{{ b.fileName }}</strong>
         <span class="bf-muted">{{ b.lineCount | number }} lines</span>
-        <sat-status-tag status="neutral" [hideIcon]="true"
-          >source {{ sourceLabel(b.source) }}</sat-status-tag
-        >
+        <sat-category-tag category="gray">Source: {{ sourceLabel(b.source) }}</sat-category-tag>
         <sat-status-tag
           [status]="b.status === 'posted' ? 'success' : 'info'"
           data-testid="batch-status"
@@ -182,14 +180,20 @@
     @if (b.summary; as s) {
       <div class="bf-kpis" data-testid="import-kpis">
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Lines read</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Lines read</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="list_bullet" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value" data-testid="kpi-read">{{ s.linesRead | number }}</p>
           <p class="bf-kpi__delta">
             {{ s.rejected ? s.rejected + ' rejected (see below)' : 'All lines valid' }}
           </p>
         </div>
         <div class="bf-kpi bf-kpi--success">
-          <p class="bf-kpi__label">Auto-matched</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Auto-matched</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="check_double" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value bf-kpi__value--success" data-testid="kpi-auto">
             {{ s.autoMatched | number }}
           </p>
@@ -198,14 +202,20 @@
           </p>
         </div>
         <div class="bf-kpi bf-kpi--info">
-          <p class="bf-kpi__label">Partially matched</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Partially matched</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="check_double" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value bf-kpi__value--info" data-testid="kpi-partial">
             {{ s.partiallyMatched | number }}
           </p>
           <p class="bf-kpi__delta">Within 1% tolerance, or part of a commitment</p>
         </div>
         <div class="bf-kpi bf-kpi--warning">
-          <p class="bf-kpi__label">Unmatched</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Unmatched</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="report_problem" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value bf-kpi__value--warning" data-testid="kpi-unmatched">
             {{ s.unmatched | number }}
           </p>
@@ -214,7 +224,10 @@
           </p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Duplicates skipped</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Duplicates skipped</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="duplicate" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value" data-testid="kpi-duplicates">
             {{ s.duplicatesSkipped | number }}
           </p>
@@ -237,6 +250,7 @@
           <div class="bf-table-scroll">
             <table
               mat-table
+              class="bf-table"
               [dataSource]="s.byCurrency"
               aria-label="Imported lines by transaction currency"
             >
@@ -343,9 +357,9 @@
                     <span class="bf-cell__primary"
                       >{{ ruleLabel(r.rule).title }}
                       @if (ruleLabel(r.rule).tag) {
-                        <sat-status-tag status="neutral" [hideIcon]="true">{{
+                        <sat-category-tag category="gray">{{
                           ruleLabel(r.rule).tag
-                        }}</sat-status-tag>
+                        }}</sat-category-tag>
                       }
                     </span>
                     <span class="bf-cell__secondary">{{ ruleLabel(r.rule).hint }}</span>
@@ -370,7 +384,7 @@
           <span class="bf-muted">Fix these in the source file and import them again.</span>
         </div>
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="b.issues" aria-label="Rejected lines">
+          <table mat-table class="bf-table" [dataSource]="b.issues" aria-label="Rejected lines">
             <ng-container matColumnDef="line">
               <th mat-header-cell *matHeaderCellDef>Line</th>
               <td mat-cell *matCellDef="let i">{{ i.line }}</td>
