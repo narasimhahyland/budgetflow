@@ -188,4 +188,54 @@ test.describe('event reconciliation and close', () => {
       'INVALID_TRANSITION',
     );
   });
+
+  test('an actual without the event code, matched to the event’s commitment, counts as the event’s spend', async ({
+    request,
+  }) => {
+    const team = await spendBudget(request);
+    const event = await createEvent(request, {
+      budgetId: team.id,
+      costCenterId: CC.bengaluru,
+      ownFundsMinor: 150_000,
+      estimateMinor: 150_000,
+    });
+    const c = await expectContract(
+      await request.post(`/api/events/${event.id}/commitments`, {
+        headers: await mutate('budget-owner'),
+        data: {
+          description: 'Airport transfers',
+          amount: { amountMinor: 100_000, currency: 'USD' },
+        },
+      }),
+      201,
+      EventCommitment,
+    );
+    const p = `T${uniq()}`;
+    // INR 8,325.00 at the locked plan rate (83.25) is USD 100.00; the line carries no event code.
+    await importAndPost(
+      request,
+      csv([`${p}-1,2026-11-05,8325.00,INR,HYL-IN,CC-IN-BLR-200,6100,,,Airport transfers,,,charge`]),
+    );
+    const taxi = await actualByRef(request, `${p}-1`);
+    await expectContract(
+      await request.post(`/api/actuals/${taxi.actual.id}/matches`, {
+        headers: await mutate('finance-controller'),
+        data: { parts: [{ commitmentId: c.id }] },
+      }),
+      201,
+      ActualDetail,
+    );
+    const r = await expectContract(
+      await request.get(`/api/actuals/events/${event.id}/reconciliation`, {
+        headers: await as('finance-controller'),
+      }),
+      200,
+      EventReconciliation,
+    );
+    expect(r.actuals).toMatchObject({
+      matched: 1,
+      unmatched: 0,
+      matchedReporting: { amountMinor: 10_000, currency: 'USD' },
+    });
+  });
 });

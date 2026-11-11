@@ -1044,4 +1044,415 @@ test.describe.serial('Core acceptance scenario, end to end', () => {
     expect(india.balances.budgetCurrency.encumbered.amountMinor).toBeGreaterThan(0);
     await rm.context().close();
   });
+
+  test('Step 8 — finance sets India to zero through the dialog', async ({ browser }) => {
+    const preview = await api<{
+      floorMinor: number;
+      reductionMinor: number;
+      childrenAllocatedMinor: number;
+    }>('finance-admin', 'post', `/api/budgets/${s.india}/controls/preview`, {
+      action: 'set_to_zero',
+      destination: 'parent',
+      cascade: false,
+    });
+    const before = await balances(s.india);
+    const rootBefore = await balances(s.root);
+    // The floor keeps what Hyderabad holds and India's own funding of the event (USD 6,000.00
+    // plus the USD 500.00 additional funds); the contributions fund the rest of the commitment.
+    expect(preview.childrenAllocatedMinor).toBe(890_000);
+    expect(preview.floorMinor).toBe(890_000 + 650_000);
+    expect(preview.reductionMinor).toBe(before.balances.available.amountMinor);
+
+    const fa = await pageAs(browser, 'finance-admin');
+    await fa.goto(`/budgets/${s.india}`);
+    await fa.getByTestId('set-to-zero').click();
+    const dialog = fa.getByRole('dialog');
+    await expect(dialog.getByRole('heading', { name: 'Set budget to zero' })).toBeVisible();
+    await expect(dialog.getByTestId('zero-floor')).toContainText(usdText(preview.floorMinor));
+    await expect(dialog.getByTestId('zero-cut')).toContainText(usdText(preview.reductionMinor));
+    await expect(dialog).toContainText(`Hyderabad per head ${s.tag}`);
+    await pick(fa, 'Destination for cut money', /Return to parent/);
+    await dialog.getByTestId('reason-code').click();
+    await fa.getByRole('option', { name: /RED-REPRIORITIZE/ }).click();
+    await dialog
+      .getByLabel('Reason', { exact: true })
+      .fill('Program reprioritized after the summit');
+    const confirm = dialog.getByTestId('confirm-zero');
+    await expect(confirm).toBeDisabled();
+    await dialog.getByTestId('confirm-text').fill(`India ${s.tag}`);
+    await expect(confirm).toBeEnabled();
+    await confirm.click();
+    await expect(fa.getByTestId('zero-banner')).toBeVisible();
+
+    const after = await balances(s.india);
+    expect(after.status).toBe('set_to_zero');
+    expect(after.balances.available.amountMinor).toBe(0);
+    expect(after.balances.budgetCurrency.authorized.amountMinor).toBe(
+      before.balances.budgetCurrency.authorized.amountMinor - preview.reductionMinor,
+    );
+    expect((await balances(s.root)).balances.available.amountMinor).toBe(
+      rootBefore.balances.available.amountMinor + preview.reductionMinor,
+    );
+    // The commitment stays encumbered.
+    expect(after.balances.budgetCurrency.encumbered.amountMinor).toBe(
+      before.balances.budgetCurrency.encumbered.amountMinor,
+    );
+    await fa.context().close();
+  });
+
+  test('Step 9 — requests blocked, commitments complete, INR files matched, event closed with surplus by share', async ({
+    browser,
+  }) => {
+    // A new request on India is refused; the event (already funded and committed) carries on.
+    const rm = await pageAs(browser, 'regional-manager');
+    await rm.goto(`/requests/new?budgetId=${s.india}`);
+    await expect(rm.getByRole('combobox', { name: 'Charge to' })).toContainText(
+      'This budget is set to zero: new requests, allocations and contributions are blocked.',
+    );
+    await rm.getByLabel('Amount', { exact: true }).fill('100');
+    await expect(rm.getByTestId('impact-blocked')).toContainText('set to zero');
+    await expect(rm.getByRole('button', { name: 'Submit request' })).toBeDisabled();
+    const refused = await rawApi('regional-manager', 'post', '/api/requests', {
+      kind: 'spending',
+      budgetId: s.india,
+      amount: usd(10_000),
+      spendType: 'team_lunch',
+      title: 'Lunch after the summit',
+      purpose: 'Team lunch after the summit',
+    });
+    expect(refused.status).toBe(409);
+    expect(refused.body.code).toBe('BUDGET_SET_TO_ZERO');
+
+    await rm.goto(`/events/${s.eventId}`);
+    await expect(rm.getByTestId('event-blocked')).toContainText(
+      'Existing commitments stay visible and can complete',
+    );
+    await rm.getByRole('button', { name: 'Start event' }).click();
+    await rm.getByRole('button', { name: 'Complete event' }).click();
+    await expect(rm.getByRole('button', { name: 'Close and return surplus' })).toBeVisible();
+
+    const event = await api<{
+      commitments: { id: string; amount: { amountMinor: number }; status: string }[];
+    }>('regional-manager', 'get', `/api/events/${s.eventId}`);
+    expect(event.commitments).toHaveLength(1);
+    const commitment = event.commitments[0]!;
+    const cmtRef = `CMT-${commitment.id.slice(-8).toUpperCase()}`;
+
+    // Finance imports the INR corporate-card file and the INR expense-report file.
+    const header =
+      'source_ref,transaction_date,amount,currency,legal_entity,cost_center,gl_account,event_code,vendor,memo,reference,original_ref,kind';
+    const card = `CARD-${s.tag}`;
+    const exp = `EXP-${s.tag}`;
+    const files = [
+      {
+        source: 'Corporate card',
+        name: `card-inr-${s.tag}.csv`,
+        lines: [
+          `${card}-1,2026-12-04,416250.00,INR,HYL-IN,CC-IN-BLR-200,6100,${s.eventCode},Lotus Convention Centre,Summit venue,,,charge`,
+        ],
+        // Part of the USD 9,000.00 commitment: partially matched by event code and cost center.
+        partial: 1,
+        unmatched: 0,
+      },
+      {
+        source: 'Expense reports',
+        name: `expenses-inr-${s.tag}.csv`,
+        lines: [
+          `${exp}-1,2026-12-05,166500.00,INR,HYL-IN,CC-IN-BLR-200,6100,${s.eventCode},Deccan Caterers,Summit catering,,,charge`,
+          `${exp}-2,2026-12-05,83250.00,INR,HYL-IN,CC-IN-BLR-200,6100,,Metro Cabs,Airport transfers for summit speakers,,,charge`,
+        ],
+        partial: 1,
+        unmatched: 1,
+      },
+    ];
+    const fc = await pageAs(browser, 'finance-controller');
+    for (const f of files) {
+      await fc.goto('/finance/actuals');
+      await fc.getByTestId('import-another').click();
+      await fc.getByTestId('import-source').click();
+      await fc.getByRole('option', { name: f.source }).click();
+      await fc.locator('input[type=file]').setInputFiles({
+        name: f.name,
+        mimeType: 'text/csv',
+        buffer: Buffer.from([header, ...f.lines].join('\n')),
+      });
+      await expect(fc.getByTestId('file-name')).toContainText(f.name);
+      await fc.getByRole('button', { name: 'Continue to column mapping' }).click();
+      await fc.getByRole('button', { name: `Review ${f.lines.length} lines` }).click();
+      await expect(fc.getByTestId('kpi-read')).toHaveText(String(f.lines.length));
+      await expect(fc.getByTestId('kpi-auto')).toHaveText('0');
+      await expect(fc.getByTestId('kpi-partial')).toHaveText(String(f.partial));
+      await expect(fc.getByTestId('kpi-unmatched')).toHaveText(String(f.unmatched));
+      const byCurrency = fc.getByRole('table', { name: 'Imported lines by transaction currency' });
+      await expect(byCurrency.getByRole('row', { name: /INR/ })).toContainText('83.2500');
+      await expect(fc.getByText('Budget consumption uses the locked plan rate.')).toBeVisible();
+      await fc.getByTestId('post-import').click();
+      await expect(fc.getByTestId('import-notice')).toContainText(
+        `${f.unmatched} sent to the unmatched queue`,
+      );
+    }
+
+    const lines = async () =>
+      Object.fromEntries(
+        (
+          await api<{
+            items: {
+              sourceRef: string;
+              status: string;
+              transaction: { amountMinor: number; currency: string };
+              reporting: { amountMinor: number; currency: string };
+              fxEffect: { amountMinor: number } | null;
+            }[];
+          }>('finance-controller', 'get', `/api/actuals?status=all&q=${s.tag}&limit=50`)
+        ).items.map((i) => [i.sourceRef, i]),
+      );
+    const l1 = await lines();
+    // INR converts at the locked plan rate (83.25 per USD): 416,250.00 → 5,000.00 and so on.
+    expect(l1[`${card}-1`]).toMatchObject({
+      status: 'matched',
+      transaction: { amountMinor: 41_625_000, currency: 'INR' },
+      reporting: { amountMinor: 500_000, currency: 'USD' },
+    });
+    expect(l1[`${exp}-1`]).toMatchObject({
+      status: 'matched',
+      reporting: { amountMinor: 200_000 },
+    });
+    expect(l1[`${exp}-2`]).toMatchObject({
+      status: 'unmatched',
+      reporting: { amountMinor: 100_000 },
+    });
+
+    // The taxi line has no event code: the controller matches it to the commitment from the
+    // unmatched queue as the final invoice, which releases what is left.
+    await fc.goto('/finance/actuals/queue');
+    await fc.getByTestId('queue-search').fill(exp);
+    await fc.getByTestId(`queue-row-${exp}-2`).click();
+    const drawer = fc.getByTestId('match-drawer');
+    await expect(drawer.getByTestId('fx-plan')).toContainText(usdText(100_000));
+    await expect(drawer.getByTestId('fx-effect')).toBeVisible();
+    await drawer.getByTestId(`candidate-${cmtRef}`).click();
+    await drawer.getByRole('checkbox', { name: /Final invoice/ }).check();
+    await drawer.getByTestId('match-button').click();
+    await expect(fc.getByTestId('queue-notice')).toContainText(`${exp}-2 matched`);
+    expect((await lines())[`${exp}-2`]!.status).toBe('matched');
+
+    // Reconciliation: USD 8,000.00 spent at the plan rate; the FX effect is reported on its own.
+    const recon = await api<{
+      actuals: {
+        matched: number;
+        unmatched: number;
+        matchedReporting: { amountMinor: number };
+        fxEffect: { amountMinor: number };
+      };
+      sources: { budgetId: string; budgetName: string; funded: { amountMinor: number } }[];
+      blockers: { code: string }[];
+      canClose: boolean;
+    }>('finance-controller', 'get', `/api/actuals/events/${s.eventId}/reconciliation`);
+    expect(recon.actuals).toMatchObject({
+      matched: 3,
+      unmatched: 0,
+      matchedReporting: { amountMinor: 800_000 },
+    });
+    expect(recon.blockers).toEqual([]);
+    expect(recon.canClose).toBe(true);
+    await fc.goto(`/finance/actuals/events/${s.eventId}`);
+    await expect(fc.getByTestId('event-unmatched')).toHaveText('0');
+    // Spend is valued at the plan rate; the difference to the actual rate is shown on its own.
+    const kpi = (label: string) => fc.getByText(label, { exact: true }).locator('xpath=../..');
+    await expect(kpi('Actual spend (plan rate)')).toContainText(usdText(800_000));
+    expect(recon.actuals.fxEffect.amountMinor).not.toBe(0);
+    await expect(kpi('FX effect (separate)')).toContainText(
+      usdText(Math.abs(recon.actuals.fxEffect.amountMinor)),
+    );
+    await expect(kpi('FX effect (separate)')).toContainText('Never consumes budget');
+    await fc.context().close();
+
+    // Ananya closes the event; each funding source gets back its share of the USD 2,000.00 surplus.
+    await rm.reload();
+    await rm.getByRole('button', { name: 'Close and return surplus' }).click();
+    await expect(rm.getByText(/Surplus returned:/)).toBeVisible();
+    const closed = await api<{
+      event: { status: string };
+      surplusReturns: { budgetId: string; budgetName: string; amount: { amountMinor: number } }[];
+      sources: {
+        budgetId: string;
+        funded: { amountMinor: number };
+        returned: { amountMinor: number };
+      }[];
+    }>('finance-controller', 'get', `/api/actuals/events/${s.eventId}/reconciliation`);
+    expect(closed.event.status).toBe('closed');
+    const returned = (id: string) =>
+      closed.surplusReturns
+        .filter((r) => r.budgetId === id)
+        .reduce((t, r) => t + r.amount.amountMinor, 0);
+    // Funded: India 6,500 (65%), US 2,000 (20%), Europe 1,500 (15%) of USD 10,000.00.
+    expect(returned(s.india)).toBe(130_000);
+    expect(returned(s.us)).toBe(40_000);
+    expect(returned(s.europe)).toBe(30_000);
+    for (const r of closed.surplusReturns)
+      await expect(rm.getByText(/Surplus returned:/)).toContainText(
+        `${r.budgetName} ${usdText(r.amount.amountMinor)}`,
+      );
+    // Earmarks are released: nothing stays held on the givers' budgets.
+    expect((await balances(s.us)).balances.budgetCurrency.held.amountMinor).toBe(0);
+    expect((await balances(s.europe)).balances.budgetCurrency.held.amountMinor).toBe(0);
+    await rm.context().close();
+  });
+
+  test('Step 10 — audit trail, utilization by location and team, and the GL tie-out', async ({
+    browser,
+  }) => {
+    // Audit: every change to the event is in the tamper-evident log, and the chain verifies.
+    const audit = await api<{ items: { action: string; seq: number }[] }>(
+      'auditor',
+      'get',
+      `/api/audit/events?resourceId=${s.eventId}&order=desc&limit=200`,
+    );
+    const actions = audit.items.map((i) => i.action);
+    for (const a of [
+      'event.created',
+      'event.submitted',
+      'event.participants_added',
+      'event.closed',
+    ])
+      expect(actions, a).toContain(a);
+    const verification = await api<{ valid: boolean }>('auditor', 'get', '/api/audit/verification');
+    expect(verification.valid).toBe(true);
+    const auditor = await pageAs(browser, 'auditor');
+    await auditor.goto(`/audit-log?resource=${s.eventId}`);
+    await expect(auditor.getByRole('heading', { level: 1, name: 'Audit log' })).toBeVisible();
+    const entries = auditor.getByRole('table', { name: 'Audit entries' });
+    await expect(entries.getByRole('row')).toHaveCount(audit.items.length + 1);
+    await expect(entries.getByRole('row', { name: /Closed/ })).toBeVisible();
+    await auditor.getByRole('button', { name: 'Verify chain' }).click();
+    await expect(auditor.getByTestId('chain-status')).toContainText('Chain verified');
+    const zeroed = await api<{ items: { action: string }[] }>(
+      'auditor',
+      'get',
+      `/api/audit/events?resourceId=${s.india}&limit=200`,
+    );
+    expect(zeroed.items.map((i) => i.action)).toContain('budget.set_to_zero');
+    await auditor.context().close();
+
+    // Utilization of the program by location and by team (nearest team or department), from the
+    // ledger at the locked plan rate: the table matches the API row for row.
+    const ceo = await pageAs(browser, 'ceo');
+    for (const groupBy of ['location', 'department'] as const) {
+      const report = await api<{
+        currency: string;
+        rows: { label: string; cells: Record<string, { money?: { amountMinor: number } }> }[];
+        reconciliation: { ties: boolean };
+      }>('ceo', 'get', `/api/reports/utilization/run?groupBy=${groupBy}&rootBudgetId=${s.root}`);
+      expect(report.currency).toBe('USD');
+      expect(report.reconciliation.ties).toBe(true);
+      expect(report.rows.length).toBeGreaterThan(0);
+      await ceo.goto(`/reports/utilization?groupBy=${groupBy}&rootBudgetId=${s.root}`);
+      const table = ceo.getByRole('table', { name: 'Utilization' });
+      for (const row of report.rows) {
+        const r = table.getByRole('row', { name: new RegExp(row.label) }).first();
+        await expect(r).toContainText(usdText(row.cells['authorized']!.money!.amountMinor));
+        await expect(r).toContainText(usdText(row.cells['actual']!.money!.amountMinor));
+      }
+    }
+    const byLocation = await api<{
+      rows: { label: string; cells: Record<string, { money?: { amountMinor: number } }> }[];
+    }>('ceo', 'get', `/api/reports/utilization/run?groupBy=location&rootBudgetId=${s.root}`);
+    expect(
+      byLocation.rows.find((r) => r.label === 'Hyderabad')?.cells['authorized']?.money?.amountMinor,
+    ).toBe(890_000);
+    await ceo.context().close();
+
+    // GL tie-out for India, December 2026. India's GL carries the full invoices on 6100 /
+    // CC-IN-BLR-200 (on a fresh seed, exactly this scenario's INR 666,000.00, USD 8,000.00 at the
+    // plan rate). BudgetFlow posts each actual pro rata on the funding budgets, so India's ledger
+    // holds its 65% and the US and Europe shares sit on their own entities, to be recharged: the
+    // difference is exactly the recharged 35%. The controller explains it; a finance admin signs off.
+    const december: {
+      sourceRef: string;
+      transaction: { amountMinor: number };
+      reporting: { amountMinor: number };
+    }[] = [];
+    for (let cursor: string | null = ''; cursor !== null; ) {
+      const page: {
+        items: {
+          sourceRef: string;
+          status: string;
+          accountingDate: string;
+          costCenterCode: string | null;
+          glAccountCode: string | null;
+          transaction: { amountMinor: number; currency: string };
+          reporting: { amountMinor: number };
+        }[];
+        nextCursor: string | null;
+      } = await api(
+        'finance-controller',
+        'get',
+        `/api/actuals?status=all&legalEntityId=${SEED.legalEntities.acmeIndia}&currency=INR&limit=200${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
+      );
+      december.push(
+        ...page.items.filter(
+          (i) =>
+            i.status === 'matched' &&
+            i.accountingDate.startsWith('2026-12') &&
+            i.costCenterCode === 'CC-IN-BLR-200' &&
+            i.glAccountCode === '6100',
+        ),
+      );
+      cursor = page.nextCursor;
+    }
+    const refs = december.map((d) => d.sourceRef);
+    for (const r of [`CARD-${s.tag}-1`, `EXP-${s.tag}-1`, `EXP-${s.tag}-2`])
+      expect(refs).toContain(r);
+    const glInr = december.reduce((t, d) => t + d.transaction.amountMinor, 0);
+    const glUsd = december.reduce((t, d) => t + d.reporting.amountMinor, 0);
+    const inr = (minor: number) => (minor / 100).toFixed(2);
+
+    const fc = await pageAs(browser, 'finance-controller');
+    await fc.goto('/finance/gl-tie-out');
+    await pick(fc, 'Period', 'Dec 2026');
+    await fc.getByRole('button', { name: 'Run tie-out' }).click();
+    await fc.getByTestId('prep-entity').click();
+    await fc.getByRole('option', { name: /HYL-IN/ }).click();
+    await fc
+      .getByTestId('csv-text')
+      .fill(`cost_center,gl_account,amount,currency\nCC-IN-BLR-200,6100,${inr(glInr)},INR`);
+    await fc.getByRole('button', { name: 'Compare with BudgetFlow' }).click();
+    await expect(fc.getByTestId('tieout-notice')).toContainText('1 difference(s) above tolerance');
+    await expect(fc.getByTestId('entity-chip-HYL-IN')).toContainText('1 difference');
+    const row = fc.getByTestId('tieout-row-6100-CC-IN-BLR-200');
+    await expect(row).toContainText(usdText(glUsd));
+    await expect(row).toContainText(usdText((glUsd * 65) / 100));
+    await fc.getByTestId('add-explanation').click();
+    await fc
+      .getByTestId('explanation')
+      .fill('US and Europe shares of the summit are recharged to HYL-US and HYL-DE.');
+    await fc.getByTestId('save-explanation').click();
+    await expect(fc.getByTestId('tieout-notice')).toContainText('Explanation added.');
+    await fc.context().close();
+
+    const fa = await pageAs(browser, 'finance-admin');
+    await fa.goto('/finance/gl-tie-out');
+    await pick(fa, 'Period', 'Dec 2026');
+    await fa.getByTestId('entity-chip-HYL-IN').click();
+    await expect(fa.getByTestId('sign-off')).toHaveText(/Sign off Dec 2026 with explanations/);
+    await fa.getByTestId('sign-off').click();
+    await expect(fa.getByTestId('signed-off')).toContainText('Signed off by Priya Raman');
+    await fa.context().close();
+    const tie = await api<{
+      items: {
+        legalEntityCode: string;
+        status: string;
+        glTotal: { amountMinor: number };
+        budgetflowTotal: { amountMinor: number };
+        difference: { amountMinor: number };
+      }[];
+    }>('finance-controller', 'get', '/api/actuals/tie-outs?month=2026-12');
+    const india = tie.items.find((t) => t.legalEntityCode === 'HYL-IN');
+    expect(india).toMatchObject({
+      status: 'signed_off',
+      glTotal: { amountMinor: glUsd },
+      budgetflowTotal: { amountMinor: (glUsd * 65) / 100 },
+    });
+    expect(Math.abs(india!.difference.amountMinor)).toBe((glUsd * 35) / 100);
+  });
 });
