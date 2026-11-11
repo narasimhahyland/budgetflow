@@ -1,6 +1,6 @@
 # Phase 18 — security review
 
-Branch `feat/p18-security`, against `main` at `c68d1dae`. **In progress.**
+Finding 1: branch `feat/p18-security` (PR #98, merged). The rest of the review: branch `feat/p18-review`, against `main` at `fe51d7a4`. Break-glass (screen 112) is in [`break-glass/`](break-glass/) on `fix/clock-stage-3` and reaches `main` with that branch.
 
 Run against the eight BudgetFlow-specific checks in `.cursor/skills/security-review-handoff/SKILL.md`.
 That skill wraps Cursor's `/review-security`, which is not available in this environment, so the
@@ -90,3 +90,101 @@ its expected count from the first health response the page receives, while the p
 later one, by which time journeys running in parallel have created more budgets. This change touches
 only how API keys resolve the caller's address. PR #97, merged to `main` after this branch was cut, already
 makes that journey concurrency-safe; this PR's CI tests the merge with `main`, so it runs the fixed journey.
+
+## The eight checks
+
+| #   | Check                                                                    | How it was checked                                                                                                                                                                                                                                                                        | Result                                                                                 |
+| --- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1   | No tokens, keys, `.env`, HAR or trace files; `.npmrc`; CI token handling | tracked-file search; `.npmrc`; every workflow: the token is checked without echo, jobs skip without it, `permissions: contents: read`, actions pinned, no `pull_request_target`                                                                                                           | clean, except **finding 6** (traces)                                                   |
+| 2   | No internal URLs, ticket keys or names                                   | search of every tracked file for internal domains, ticket prefixes and personal names                                                                                                                                                                                                     | clean (only the owner's public GitHub handle and Pages site)                           |
+| 3   | One authorization point; no endpoint skips it                            | **every authenticated GET endpoint** (187) called as the platform operator and as an employee, with real ids harvested from all-seeing roles ([`authz-probe-operator-before.tsv`](authz-probe-operator-before.tsv), [`authz-probe-employee-before.tsv`](authz-probe-employee-before.tsv)) | **findings 2 and 4**; a sweep scenario now keeps every endpoint closed to the operator |
+| 4   | Tenant isolation by RLS, not only filters                                | Phase 17 migration scenario (RLS enabled and forced on every tenant table); every database call outside `withTenant` read                                                                                                                                                                 | clean: only the scheduled sweeps list tenants, then work per tenant                    |
+| 5   | Money in minor units; no over-allocation under concurrency               | `budgets/concurrent-allocation`, `budgets/idempotency` and the over-allocation boundary scenarios (full API suite)                                                                                                                                                                        | clean                                                                                  |
+| 6   | Ledger and audit append-only; hash chain not bypassable                  | `ledger/reversal` and `audit/hash-chain` (the database refuses UPDATE, DELETE, TRUNCATE as the app role; tampering is found)                                                                                                                                                              | clean                                                                                  |
+| 7   | Input validated; no unsafe HTML; uploads limited; CSV safe               | no `innerHTML` or `bypassSecurityTrust*` anywhere; uploads: type allowlist, declared and actual size, leading bytes sniffed; every CSV writer read                                                                                                                                        | **finding 3** (CSV formulas)                                                           |
+| 8   | Hooks fail open only on internal errors; no secret logged                | `node .cursor/hooks/test-hooks.mjs` (108/108), `sh scripts/validate-harness.sh` (OK), hooks read for logging                                                                                                                                                                              | clean                                                                                  |
+| —   | Secrets in the running product (beyond the checklist)                    | every secret the API and worker read, and what happens when it is unset                                                                                                                                                                                                                   | **finding 5**                                                                          |
+
+## Finding 2 — the platform operator read two kinds of tenant data (fixed)
+
+**Severity: medium.** A platform operator without a break-glass grant holds no tenant permission, so
+every endpoint should refuse it. Of 187 authenticated GET endpoints, 26 answered 200; 24 of those
+returned nothing (scope filtering worked) and two returned data:
+
+- `GET /api/events/templates`: the company's event templates with per-attendee cost estimates and
+  tolerances. The endpoint filtered rows but never asked the policy whether the caller may read the tenant.
+- `GET /api/org/headcount`: the company's headcount (460 over 17 lines) in the snapshot summary,
+  although the operator's own scope was empty.
+
+**Fix.** Both require `tenant.read`, so the operator gets 404, as everywhere else.
+**Proof.** `apps/api-e2e/src/scope/operator-isolation.spec.ts`: a sweep calls every parameter-free GET
+endpoint in the contract registry as the operator and fails on any that answers with data, so the
+next endpoint that forgets its check is caught; plus a test per endpoint.
+
+## Finding 3 — CSV exports ran formulas (fixed)
+
+**Severity: medium.** Three exports quoted cells but did not neutralise formulas, so a cell starting
+with `=`, `+`, `-` or `@` runs when the file is opened in a spreadsheet: the tie-out export (the
+difference explanation), the accrual journal export (the commitment description, which comes from a
+request a requester typed) and the budgets list and hierarchy exports (budget names). The audit log
+and co-funding board exports already neutralised them.
+
+**Fix.** `libs/api/actuals/src/lib/csv.ts` and the web `downloadCsv`: a text cell starting with one of
+those characters, a tab or a carriage return gets a leading apostrophe; numbers, negative amounts
+included, stay numbers. **Proof.** `actuals/accruals.spec.ts` exports a description starting with
+`=HYPERLINK(` and `actuals/tieout.spec.ts` an explanation starting with `+`; both arrive as text.
+
+## Finding 4 — every member could read legal holds (fixed, user decision)
+
+**Severity: low to medium.** `GET /api/admin/retention/holds` was gated on `tenant.read`, which every
+member holds, so an employee could read which records are frozen pending a review, and why. The
+retention screen spec (111) names Organization Admin, Finance Admin, Finance Controller and Auditor.
+**Decision (user):** only they read holds. **Fix.** The endpoint accepts any of `tenant.settings.manage`,
+`master_data.manage`, `retention.confirm` or `legal_hold.manage`; no policy change. Retention policies
+stay readable by every member. **Proof.** `admin/retention.spec.ts`: the four roles read, employee,
+budget owner, analyst, CEO and integration admin get 403.
+
+Other administration reads open to every member (company settings, feature flags, retention policies,
+system health, maintenance notices, the setup checklist, finance reference data) were reviewed and
+left as built: they are the Phase 14 design (administration reads on `tenant.read`) and carry no
+financial or personal data beyond reference data members need to fill in forms.
+
+## Finding 5 — signing and encryption secrets fell back to public values (fixed, user decision)
+
+**Severity: high.** Five secrets fell back to values written in this public repository whenever they
+were not set, in any environment, at most with a log warning:
+
+| Secret                                         | What a forger gets                                                     |
+| ---------------------------------------------- | ---------------------------------------------------------------------- |
+| `CHAT_LINK_SECRET`                             | link their chat account to anyone, then approve in chat as that person |
+| `SLACK_SIGNING_SECRET`, `TEAMS_WEBHOOK_SECRET` | send webhooks that verify                                              |
+| `APPROVAL_LINK_SECRET`                         | forge one-click email approval links                                   |
+| `INTEGRATIONS_SECRET_KEY`                      | decrypt every stored integration credential from a database copy       |
+
+**Decision (user):** refuse to start. **Fix.** `secretOrDev` in `libs/api/core/src/lib/secrets.ts`:
+the configured secret (16 characters or more); the development value only outside production or with
+`BF_ALLOW_DEV_SECRETS=true`, with one warning per secret; otherwise an error naming the variable.
+The API and worker resolve all five at startup. The local stack opts in (`infra/compose.yaml`, API
+and worker). **Proof.** `apps/api-e2e/src/security/dev-secrets.spec.ts` starts the built API and worker
+bundles: production without secrets refuses and names the variable; one missing secret is enough;
+real secrets, or the opt-in, pass the check and Nest starts.
+
+**Deployment note.** A deployment sets all five to random values and never sets
+`BF_ALLOW_DEV_SECRETS`. They belong in `infra/.env.example` as empty placeholders with a comment, which
+is a shared surface blocked to this session; the user is adding them with `TRUSTED_PROXY_CIDRS`.
+
+## Finding 6 — CI uploaded traces in public artifacts (fixed, user decision)
+
+**Severity: low.** Journeys kept a trace on failure, and CI uploads the Playwright report, which embeds
+them. This repository is public, so anyone can download artifacts. The traces held short-lived tokens
+from the throwaway CI Keycloak and the placeholder test password (already public in
+`infra/.env.example`). **Decision (user):** no traces in CI by default, with an opt-in, because the first step on #82 (the
+blank-render flake) is capturing a trace. **Fix.** `apps/web-e2e/playwright.config.ts` records traces
+locally as before; in CI only when the run sets `BF_CI_TRACES=1`, and then for failing tests only.
+Screenshots and logs still upload.
+
+## Still open
+
+- `multer` bump (pre-checks, above): needs the user's approval for `package.json` and the lockfile.
+- `infra/.env.example`: `TRUSTED_PROXY_CIDRS`, the five secrets and `BF_ALLOW_DEV_SECRETS` (local
+  stack only), added by the user.
