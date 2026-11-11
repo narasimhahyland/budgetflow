@@ -24,7 +24,7 @@ Per-screen fixes are in `fixes/A-shell.md` through `fixes/H-admin.md`.
 
 ## Gates and checks
 
-All gates were run again after merging `main` (#98, #102): static, functional and visual pass (visual: 943 passed, 1 passed on retry, 047a `default` tablet). The table shows the run before that merge.
+After merging `main` again (#99, #104), seven screens whose content those PRs changed were re-recorded (102b, 066, 111, 064a, 059a, 080d, 085a) and all gates pass (visual: 943 passed, 1 passed on retry). All gates were run again after merging `main` (#98, #102): static, functional and visual pass (visual: 943 passed, 1 passed on retry, 047a `default` tablet). The table shows the run before that merge.
 
 | Check                                                                                                                                                            | Command                                                                    | Result                                                                                                                                                                                                      |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
