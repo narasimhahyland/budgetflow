@@ -1,4 +1,4 @@
-import { ApiProblem } from '@bf/api/core';
+import { ApiProblem, secretOrDev } from '@bf/api/core';
 import type { ChatApprovalCardView, ChatProvider, Money } from '@bf/contracts';
 import { formatMoney } from '@bf/api/notifications';
 import { createHmac, timingSafeEqual } from 'node:crypto';
@@ -18,18 +18,19 @@ const DEV_CHAT_LINK_SECRET = 'chat-account-link-secret-dev-only-0001';
 export function chatConfig(env: NodeJS.ProcessEnv = process.env) {
   const parsed = ChatEnv.parse(env);
   return {
-    slackSecret:
-      parsed.SLACK_SIGNING_SECRET && parsed.SLACK_SIGNING_SECRET.length >= 16
-        ? parsed.SLACK_SIGNING_SECRET
-        : DEV_SLACK_SECRET,
-    teamsSecret:
-      parsed.TEAMS_WEBHOOK_SECRET && parsed.TEAMS_WEBHOOK_SECRET.length >= 16
-        ? parsed.TEAMS_WEBHOOK_SECRET
-        : DEV_TEAMS_SECRET,
-    linkSecret:
-      parsed.CHAT_LINK_SECRET && parsed.CHAT_LINK_SECRET.length >= 16
-        ? parsed.CHAT_LINK_SECRET
-        : DEV_CHAT_LINK_SECRET,
+    slackSecret: secretOrDev(
+      'SLACK_SIGNING_SECRET',
+      parsed.SLACK_SIGNING_SECRET,
+      DEV_SLACK_SECRET,
+      env,
+    ),
+    teamsSecret: secretOrDev(
+      'TEAMS_WEBHOOK_SECRET',
+      parsed.TEAMS_WEBHOOK_SECRET,
+      DEV_TEAMS_SECRET,
+      env,
+    ),
+    linkSecret: secretOrDev('CHAT_LINK_SECRET', parsed.CHAT_LINK_SECRET, DEV_CHAT_LINK_SECRET, env),
     toleranceSeconds: parsed.CHAT_TIMESTAMP_TOLERANCE_SECONDS,
   };
 }

@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { secretOrDev } from '@bf/api/core';
+import { Injectable } from '@nestjs/common';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 
@@ -20,16 +21,13 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  */
 @Injectable()
 export class ApprovalLinks {
-  private readonly log = new Logger('ApprovalLinks');
   private readonly secret: string;
   readonly ttlHours: number;
 
   constructor() {
     const env = LinkEnv.parse(process.env);
-    if (!env.APPROVAL_LINK_SECRET) {
-      this.log.warn('APPROVAL_LINK_SECRET is not set; using the development secret');
-    }
-    this.secret = env.APPROVAL_LINK_SECRET ?? DEV_SECRET;
+    // Fails at startup in production without a real secret: the development one is public.
+    this.secret = secretOrDev('APPROVAL_LINK_SECRET', env.APPROVAL_LINK_SECRET, DEV_SECRET);
     this.ttlHours = env.APPROVAL_LINK_TTL_HOURS;
   }
 

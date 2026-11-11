@@ -18,7 +18,8 @@ const PERSONAL = new Set([
 
 /** True when a 200 body carries nothing: every list empty, every amount zero, no named records. */
 function empty(body: unknown): boolean {
-  if (Array.isArray(body)) return body.length === 0;
+  // A list is empty when every element is (a placeholder card is not a record).
+  if (Array.isArray(body)) return body.every(empty);
   if (body && typeof body === 'object') {
     const o = body as Record<string, unknown>;
     // A placeholder "nothing needs you" card is not data.

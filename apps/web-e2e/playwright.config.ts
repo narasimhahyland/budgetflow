@@ -49,7 +49,9 @@ export default defineConfig({
     timezoneId: 'UTC',
     colorScheme: 'light',
     reducedMotion: 'reduce',
-    trace: 'retain-on-failure',
+    // A trace holds the run's tokens and typed credentials. CI uploads the report as an artifact,
+    // and this repository is public, so CI records none; local runs keep them under dist/ and tmp/.
+    trace: process.env['CI'] ? 'off' : 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
   projects: [
