@@ -21,7 +21,7 @@ import {
   type WebhookEventType,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
@@ -29,7 +29,6 @@ import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { IntegrationsNav } from './integrations-nav';
 import { WEBHOOK_EVENT_LABELS, type Tone } from './labels';
-import { LoadState } from './load-state';
 import { byNewest, byRank, byText, ordered, rankIn } from './order';
 import { OneTimeSecret } from './one-time-secret';
 
@@ -82,6 +81,7 @@ const DELIVERY_STATUS_TONES: Record<WebhookDeliveryView['status'], Tone> = {
   ],
   templateUrl: './webhooks.page.html',
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WebhooksPage {

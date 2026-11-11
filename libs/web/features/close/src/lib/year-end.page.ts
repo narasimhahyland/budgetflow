@@ -16,19 +16,19 @@ import { MatTableModule } from '@angular/material/table';
 import { Router, RouterLink } from '@angular/router';
 import type { YearEndRun } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { CloseTabs } from './close-tabs';
 import { ordered, RUN_STATUS } from './close-format';
-import { LoadState } from './load-state';
+import { CloseTag } from './close-tag';
 
 /** Screen 87b, step 1: the year-end runs, and setting one up for the year that is ending. */
 @Component({
   selector: 'bf-year-end-page',
   imports: [
+    CloseTag,
     CloseTabs,
     DatePipe,
     FormsModule,
@@ -42,7 +42,6 @@ import { LoadState } from './load-state';
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
-    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -79,7 +78,7 @@ import { LoadState } from './load-state';
         </sat-empty-state>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="rows()" aria-label="Year-end runs">
+          <table mat-table class="bf-table" [dataSource]="rows()" aria-label="Year-end runs">
             <ng-container matColumnDef="years">
               <th mat-header-cell *matHeaderCellDef scope="col">Run</th>
               <td mat-cell *matCellDef="let r">
@@ -92,11 +91,7 @@ import { LoadState } from './load-state';
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
               <td mat-cell *matCellDef="let r">
-                <span class="bf-tag-cell"
-                  ><sat-status-tag [status]="status(r).tone">{{
-                    status(r).text
-                  }}</sat-status-tag></span
-                >
+                <span class="bf-tag-cell"><bf-close-tag [tag]="status(r)" /></span>
               </td>
             </ng-container>
             <ng-container matColumnDef="carry">
@@ -114,7 +109,9 @@ import { LoadState } from './load-state';
             <ng-container matColumnDef="freeze">
               <th mat-header-cell *matHeaderCellDef scope="col">Commitment freeze</th>
               <td mat-cell *matCellDef="let r">
-                {{ r.commitmentFreezeDate ? (r.commitmentFreezeDate | date: 'd MMM y') : '—' }}
+                {{
+                  r.commitmentFreezeDate ? (r.commitmentFreezeDate | date: 'd MMM y' : 'UTC') : '—'
+                }}
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="columns"></tr>

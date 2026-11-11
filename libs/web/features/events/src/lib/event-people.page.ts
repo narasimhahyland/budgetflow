@@ -20,14 +20,16 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { EventParticipant } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { EventTabs } from './event-tabs';
-import { LoadState } from './load-state';
+import { initials, label } from './labels';
 
 type Sub = 'invitations' | 'needs' | 'attendance';
 
@@ -37,6 +39,14 @@ const RSVP_LABEL: Record<string, string> = {
   cant_go: "Can't go",
   waitlisted: 'Waitlisted',
 };
+/** RSVP answers as section 5 tags: going success, no response warning, waitlisted info. */
+const RSVP_TAG: Record<string, { tone: 'success' | 'warning' | 'info' | 'neutral'; icon: string }> =
+  {
+    invited: { tone: 'warning', icon: 'clock' },
+    going: { tone: 'success', icon: 'circle_check' },
+    cant_go: { tone: 'neutral', icon: 'circle_x' },
+    waitlisted: { tone: 'info', icon: 'clock' },
+  };
 const ATTENDANCE_LABEL: Record<string, string> = {
   unknown: 'Not marked',
   attended: 'Attended',
@@ -65,7 +75,9 @@ const ATTENDANCE_LABEL: Record<string, string> = {
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
+    SatAvatar,
     SatImportantButton,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -158,7 +170,6 @@ const ATTENDANCE_LABEL: Record<string, string> = {
             <div class="bf-form__actions">
               <button
                 mat-flat-button
-                satImportantButton
                 type="button"
                 [disabled]="busy()"
                 (click)="send()"
@@ -194,21 +205,42 @@ const ATTENDANCE_LABEL: Record<string, string> = {
             >
           }
           <section class="bf-kpis" aria-label="RSVP counts">
-            <div class="bf-kpi">
-              <p class="bf-kpi__label">Going</p>
+            <div class="bf-kpi bf-kpi--success">
+              <div class="bf-kpi__head">
+                <p class="bf-kpi__label">Going</p>
+                <mat-icon class="bf-kpi__icon" svgIcon="circle_check" aria-hidden="true" />
+              </div>
               <p class="bf-kpi__value" data-testid="rsvp-going">{{ v.counts.going }}</p>
-              <p class="bf-kpi__delta">of {{ v.counts.invited }} invited</p>
+              <div class="bf-kpi__foot">
+                <span>Of {{ v.counts.invited }} invited</span>
+                <span class="bf-kpi__pct">{{ share(v.counts.going, v.counts.invited) }}%</span>
+                <span class="bf-kpi__track"
+                  ><span
+                    class="bf-kpi__fill"
+                    [style.width.%]="share(v.counts.going, v.counts.invited)"
+                  ></span
+                ></span>
+              </div>
             </div>
             <div class="bf-kpi">
-              <p class="bf-kpi__label">Can't go</p>
+              <div class="bf-kpi__head">
+                <p class="bf-kpi__label">Can't go</p>
+                <mat-icon class="bf-kpi__icon" svgIcon="circle_x" aria-hidden="true" />
+              </div>
               <p class="bf-kpi__value">{{ v.counts.cantGo }}</p>
             </div>
-            <div class="bf-kpi">
-              <p class="bf-kpi__label">Waitlisted</p>
+            <div class="bf-kpi bf-kpi--info">
+              <div class="bf-kpi__head">
+                <p class="bf-kpi__label">Waitlisted</p>
+                <mat-icon class="bf-kpi__icon" svgIcon="users" aria-hidden="true" />
+              </div>
               <p class="bf-kpi__value">{{ v.counts.waitlisted }}</p>
             </div>
-            <div class="bf-kpi">
-              <p class="bf-kpi__label">No response</p>
+            <div class="bf-kpi bf-kpi--warning">
+              <div class="bf-kpi__head">
+                <p class="bf-kpi__label">No response</p>
+                <mat-icon class="bf-kpi__icon" svgIcon="clock" aria-hidden="true" />
+              </div>
               <p class="bf-kpi__value">{{ v.counts.noResponse }}</p>
               <p class="bf-kpi__delta">
                 {{
@@ -237,30 +269,48 @@ const ATTENDANCE_LABEL: Record<string, string> = {
               </span>
             </div>
             <div class="bf-table-scroll">
-              <table mat-table [dataSource]="v.participants">
+              <table
+                mat-table
+                class="bf-table bf-table--stack"
+                [dataSource]="v.participants"
+                aria-label="RSVP tracker"
+              >
                 <ng-container matColumnDef="name">
                   <th mat-header-cell *matHeaderCellDef>Name</th>
                   <td mat-cell *matCellDef="let p">
-                    <span class="bf-cell__primary">{{ p.name }}</span>
-                    <span class="bf-cell__secondary">{{ p.locationName ?? 'No location' }}</span>
+                    <span class="bf-cell__owner">
+                      <sat-avatar size="28" [initials]="initials(p.name)" />
+                      <span>
+                        <span class="bf-cell__primary">{{ p.name }}</span>
+                        <span class="bf-cell__secondary">{{
+                          p.locationName ?? 'No location'
+                        }}</span>
+                      </span>
+                    </span>
                   </td>
                 </ng-container>
                 <ng-container matColumnDef="entity">
                   <th mat-header-cell *matHeaderCellDef>Employing entity</th>
-                  <td mat-cell *matCellDef="let p">{{ p.employingEntityName ?? '—' }}</td>
+                  <td mat-cell *matCellDef="let p" data-label="Employing entity">
+                    {{ p.employingEntityName ?? '—' }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="rsvp">
                   <th mat-header-cell *matHeaderCellDef>RSVP</th>
-                  <td mat-cell *matCellDef="let p">
-                    {{ rsvpLabel(p.rsvpStatus) }}
-                    @if (p.waitlistPosition) {
-                      <span class="bf-chip">position {{ p.waitlistPosition }}</span>
-                    }
+                  <td mat-cell *matCellDef="let p" data-label="RSVP">
+                    @let tag = rsvpTag(p.rsvpStatus);
+                    <sat-status-tag [status]="tag.tone"
+                      ><mat-icon [svgIcon]="tag.icon" aria-hidden="true" />{{
+                        rsvpLabel(p.rsvpStatus)
+                      }}{{
+                        p.waitlistPosition ? ' · position ' + p.waitlistPosition : ''
+                      }}</sat-status-tag
+                    >
                   </td>
                 </ng-container>
                 <ng-container matColumnDef="responded">
-                  <th mat-header-cell *matHeaderCellDef>Responded</th>
-                  <td mat-cell *matCellDef="let p">
+                  <th mat-header-cell *matHeaderCellDef class="bf-col--secondary">Responded</th>
+                  <td mat-cell *matCellDef="let p" class="bf-col--secondary" data-label="Responded">
                     {{
                       p.rsvpRespondedAt
                         ? (p.rsvpRespondedAt | bfDateTime: session.timezone())
@@ -270,13 +320,31 @@ const ATTENDANCE_LABEL: Record<string, string> = {
                 </ng-container>
                 <ng-container matColumnDef="needs">
                   <th mat-header-cell *matHeaderCellDef>Needs</th>
-                  <td mat-cell *matCellDef="let p">
-                    {{ p.needsSubmitted ? 'Submitted' : 'Not submitted' }}
+                  <td mat-cell *matCellDef="let p" data-label="Needs">
+                    @if (p.needsSubmitted) {
+                      <sat-status-tag status="success"
+                        ><mat-icon
+                          svgIcon="circle_check"
+                          aria-hidden="true"
+                        />Submitted</sat-status-tag
+                      >
+                    } @else {
+                      <span class="bf-cell__secondary">Not submitted</span>
+                    }
                   </td>
                 </ng-container>
                 <ng-container matColumnDef="reminders">
-                  <th mat-header-cell *matHeaderCellDef class="bf-num">Reminders</th>
-                  <td mat-cell *matCellDef="let p" class="bf-num">{{ p.remindersSentCount }}</td>
+                  <th mat-header-cell *matHeaderCellDef class="bf-num bf-col--secondary">
+                    Reminders
+                  </th>
+                  <td
+                    mat-cell
+                    *matCellDef="let p"
+                    class="bf-num bf-col--secondary"
+                    data-label="Reminders"
+                  >
+                    {{ p.remindersSentCount }}
+                  </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="rsvpColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: rsvpColumns"></tr>
@@ -318,24 +386,50 @@ const ATTENDANCE_LABEL: Record<string, string> = {
               People who said they are going can tell you about dietary, allergy and accessibility
               needs from their invitation.
             </p>
-            <button mat-stroked-button type="button" [disabled]="busy()" (click)="remind()">
+            <button
+              mat-stroked-button
+              satEmptyStateAction
+              type="button"
+              [disabled]="busy()"
+              (click)="remind()"
+            >
               Remind people who are going
             </button>
           </sat-empty-state>
         } @else {
           <section class="bf-kpis" aria-label="Needs counts">
             <div class="bf-kpi">
-              <p class="bf-kpi__label">Answered</p>
+              <div class="bf-kpi__head">
+                <p class="bf-kpi__label">Answered</p>
+                <mat-icon class="bf-kpi__icon" svgIcon="note_edit" aria-hidden="true" />
+              </div>
               <p class="bf-kpi__value" data-testid="needs-answered">{{ n.answeredCount }}</p>
-              <p class="bf-kpi__delta">of {{ n.goingCount }} going</p>
+              <div class="bf-kpi__foot">
+                <span>Of {{ n.goingCount }} going</span>
+                <span class="bf-kpi__pct">{{ share(n.answeredCount, n.goingCount) }}%</span>
+                <span class="bf-kpi__track"
+                  ><span
+                    class="bf-kpi__fill"
+                    [style.width.%]="share(n.answeredCount, n.goingCount)"
+                  ></span
+                ></span>
+              </div>
             </div>
-            <div class="bf-kpi">
-              <p class="bf-kpi__label">Severe allergies</p>
-              <p class="bf-kpi__value">{{ n.severeAllergyCount }}</p>
+            <div class="bf-kpi" [class.bf-kpi--important]="n.severeAllergyCount > 0">
+              <div class="bf-kpi__head">
+                <p class="bf-kpi__label">Severe allergies</p>
+                <mat-icon class="bf-kpi__icon" svgIcon="critical" aria-hidden="true" />
+              </div>
+              <p class="bf-kpi__value" [class.bf-kpi__value--important]="n.severeAllergyCount > 0">
+                {{ n.severeAllergyCount }}
+              </p>
               <p class="bf-kpi__delta">need separate preparation</p>
             </div>
             <div class="bf-kpi">
-              <p class="bf-kpi__label">Photo consent</p>
+              <div class="bf-kpi__head">
+                <p class="bf-kpi__label">Photo consent</p>
+                <mat-icon class="bf-kpi__icon" svgIcon="image" aria-hidden="true" />
+              </div>
               <p class="bf-kpi__value">{{ n.photoConsentYes }} yes</p>
               <p class="bf-kpi__delta">{{ n.photoConsentNo }} asked not to be in photos</p>
             </div>
@@ -345,19 +439,19 @@ const ATTENDANCE_LABEL: Record<string, string> = {
             <dl class="bf-facts">
               @for (entry of entries(n.dietaryCounts); track entry[0]) {
                 <div>
-                  <dt>{{ entry[0].replace('_', ' ') }}</dt>
+                  <dt>{{ label(entry[0]) }}</dt>
                   <dd>{{ entry[1] }}</dd>
                 </div>
               }
               @for (entry of entries(n.allergyCounts); track entry[0]) {
                 <div>
-                  <dt>Allergy: {{ entry[0].replace('_', ' ') }}</dt>
+                  <dt>Allergy: {{ label(entry[0]) }}</dt>
                   <dd>{{ entry[1] }}</dd>
                 </div>
               }
               @for (entry of entries(n.accessibilityCounts); track entry[0]) {
                 <div>
-                  <dt>{{ entry[0].replace(['_'].join(''), ' ') }}</dt>
+                  <dt>{{ label(entry[0]) }}</dt>
                   <dd>{{ entry[1] }}</dd>
                 </div>
               }
@@ -390,7 +484,12 @@ const ATTENDANCE_LABEL: Record<string, string> = {
                 </span>
               </div>
               <div class="bf-table-scroll">
-                <table mat-table [dataSource]="n.individuals">
+                <table
+                  mat-table
+                  class="bf-table bf-table--stack"
+                  [dataSource]="n.individuals"
+                  aria-label="Individual answers"
+                >
                   <ng-container matColumnDef="name">
                     <th mat-header-cell *matHeaderCellDef>Name</th>
                     <td mat-cell *matCellDef="let i">
@@ -401,22 +500,24 @@ const ATTENDANCE_LABEL: Record<string, string> = {
                   <ng-container matColumnDef="dietary">
                     <th mat-header-cell *matHeaderCellDef>Dietary</th>
                     <td mat-cell *matCellDef="let i">
-                      {{ (i.dietaryOther ?? i.dietaryPreference).replace('_', ' ') }}
+                      {{ i.dietaryOther ?? label(i.dietaryPreference) }}
                     </td>
                   </ng-container>
                   <ng-container matColumnDef="allergies">
                     <th mat-header-cell *matHeaderCellDef>Allergies</th>
                     <td mat-cell *matCellDef="let i">
-                      {{ i.allergies.length ? i.allergies.join(', ') : 'None' }}
+                      {{ i.allergies.length ? labels(i.allergies) : 'None' }}
                       @if (i.severeAllergy) {
-                        <span class="bf-chip">Severe</span>
+                        <sat-status-tag status="important"
+                          ><mat-icon svgIcon="critical" aria-hidden="true" />Severe</sat-status-tag
+                        >
                       }
                     </td>
                   </ng-container>
                   <ng-container matColumnDef="accessibility">
                     <th mat-header-cell *matHeaderCellDef>Accessibility</th>
                     <td mat-cell *matCellDef="let i">
-                      {{ i.accessibility.length ? i.accessibility.join(', ') : 'None' }}
+                      {{ i.accessibility.length ? labels(i.accessibility) : 'None' }}
                     </td>
                   </ng-container>
                   <ng-container matColumnDef="photos">
@@ -430,7 +531,7 @@ const ATTENDANCE_LABEL: Record<string, string> = {
                 </table>
               </div>
               @if (exported()) {
-                <p class="bf-empty" data-testid="needs-export">
+                <p class="bf-section bf-cell__secondary" data-testid="needs-export">
                   Prepared {{ exported()!.fileName }}
                   {{ exported()!.audited ? '(this export was audited)' : '' }}
                 </p>
@@ -510,9 +611,9 @@ const ATTENDANCE_LABEL: Record<string, string> = {
               />
             </p>
           </div>
-          <div class="bf-kpi">
+          <div class="bf-kpi" [class.bf-kpi--warning]="a.perHeadLimit?.exceeded">
             <p class="bf-kpi__label">Per attendee actual</p>
-            <p class="bf-kpi__value">
+            <p class="bf-kpi__value" [class.bf-kpi__value--warning]="a.perHeadLimit?.exceeded">
               <bf-money
                 [amountMinor]="a.perHeadActual.amountMinor"
                 [currency]="a.perHeadActual.currency"
@@ -537,49 +638,59 @@ const ATTENDANCE_LABEL: Record<string, string> = {
               Cost split, planned and {{ a.attendanceFinal ? 'after attendance' : 'if RSVPs hold' }}
             </h2>
           </div>
-          <table class="bf-split-table">
-            <caption class="bf-empty">
-              A contributor's share can only grow up to what its owner approved.
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Funding source</th>
-                <th scope="col" class="bf-num">Planned</th>
-                <th scope="col" class="bf-num">After</th>
-                <th scope="col" class="bf-num">Change</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (s of a.shares; track s.sourceId) {
+          <div class="bf-table-scroll">
+            <table class="bf-split-table bf-table--stack" aria-label="Cost split before and after">
+              <caption>
+                A contributor's share can only grow up to what its owner approved.
+              </caption>
+              <thead>
                 <tr>
-                  <th scope="row">
-                    <span class="bf-cell__primary">{{ s.budgetName }}</span>
-                    <span class="bf-cell__secondary"
-                      >{{ s.locationName }}
-                      @if (s.contributionRef) {
-                        · {{ s.contributionRef }}
-                      }
-                    </span>
-                  </th>
-                  <td class="bf-num">
-                    {{ s.plannedHeadcount }} ·
-                    <bf-money
-                      [amountMinor]="s.plannedAmount.amountMinor"
-                      [currency]="s.plannedAmount.currency"
-                    />
-                  </td>
-                  <td class="bf-num">
-                    {{ s.actualHeadcount }} ·
-                    <bf-money
-                      [amountMinor]="s.actualAmount.amountMinor"
-                      [currency]="s.actualAmount.currency"
-                    />
-                  </td>
-                  <td class="bf-num">{{ s.deltaMinor >= 0 ? '+' : '' }}{{ s.deltaMinor / 100 }}</td>
+                  <th scope="col">Funding source</th>
+                  <th scope="col" class="bf-num">Planned attendees</th>
+                  <th scope="col" class="bf-num">Planned amount</th>
+                  <th scope="col" class="bf-num">Attendees after</th>
+                  <th scope="col" class="bf-num">Amount after</th>
+                  <th scope="col" class="bf-num">Change</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (s of a.shares; track s.sourceId) {
+                  <tr>
+                    <th scope="row">
+                      <span class="bf-cell__primary">{{ s.budgetName }}</span>
+                      <span class="bf-cell__secondary"
+                        >{{ s.locationName }}
+                        @if (s.contributionRef) {
+                          · {{ s.contributionRef }}
+                        }
+                      </span>
+                    </th>
+                    <td class="bf-num" data-label="Planned attendees">{{ s.plannedHeadcount }}</td>
+                    <td class="bf-num" data-label="Planned amount">
+                      <bf-money
+                        [amountMinor]="s.plannedAmount.amountMinor"
+                        [currency]="s.plannedAmount.currency"
+                      />
+                    </td>
+                    <td class="bf-num" data-label="Attendees after">{{ s.actualHeadcount }}</td>
+                    <td class="bf-num" data-label="Amount after">
+                      <bf-money
+                        [amountMinor]="s.actualAmount.amountMinor"
+                        [currency]="s.actualAmount.currency"
+                      />
+                    </td>
+                    <td class="bf-num" data-label="Change">
+                      {{ s.deltaMinor > 0 ? '+' : ''
+                      }}<bf-money
+                        [amountMinor]="s.deltaMinor"
+                        [currency]="s.actualAmount.currency"
+                      />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
           @if (a.canManage && !a.locked) {
             <div class="bf-form">
               <mat-form-field class="bf-form__wide">
@@ -642,7 +753,12 @@ const ATTENDANCE_LABEL: Record<string, string> = {
             }
           </div>
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="a.participants">
+            <table
+              mat-table
+              class="bf-table bf-table--stack"
+              [dataSource]="a.participants"
+              aria-label="Mark attendance"
+            >
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef>Name</th>
                 <td mat-cell *matCellDef="let p">
@@ -652,11 +768,13 @@ const ATTENDANCE_LABEL: Record<string, string> = {
               </ng-container>
               <ng-container matColumnDef="rsvp">
                 <th mat-header-cell *matHeaderCellDef>RSVP</th>
-                <td mat-cell *matCellDef="let p">{{ rsvpLabel(p.rsvpStatus) }}</td>
+                <td mat-cell *matCellDef="let p" data-label="RSVP">
+                  {{ rsvpLabel(p.rsvpStatus) }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="attendance">
                 <th mat-header-cell *matHeaderCellDef>Attendance</th>
-                <td mat-cell *matCellDef="let p">
+                <td mat-cell *matCellDef="let p" data-label="Attendance">
                   @if (a.canManage && !a.attendanceFinal && !a.locked) {
                     <mat-form-field subscriptSizing="dynamic">
                       <mat-label>Attendance for {{ p.name }}</mat-label>
@@ -680,6 +798,14 @@ const ATTENDANCE_LABEL: Record<string, string> = {
             </table>
           </div>
         </section>
+      }
+    }
+  `,
+  styles: `
+    /* At tablet width the tracker keeps who, where and their answers; dates and counts drop. */
+    @media (600px <= width < 900px) {
+      .bf-col--secondary {
+        display: none;
       }
     }
   `,
@@ -726,6 +852,20 @@ export class EventPeoplePage {
   protected readonly needsView = computed(() => valueOf(this.needs));
   protected readonly att = computed(() => valueOf(this.attendance));
 
+  protected readonly label = label;
+  protected readonly initials = initials;
+  protected labels(codes: readonly string[]): string {
+    return codes.map((c) => label(c)).join(', ');
+  }
+  protected share(part: number, whole: number): number {
+    return whole > 0 ? Math.min(100, Math.round((part * 100) / whole)) : 0;
+  }
+  protected rsvpTag(status: string): {
+    tone: 'success' | 'warning' | 'info' | 'neutral';
+    icon: string;
+  } {
+    return RSVP_TAG[status] ?? { tone: 'neutral', icon: 'circle_minus' };
+  }
   protected rsvpLabel(status: string): string {
     return RSVP_LABEL[status] ?? status;
   }

@@ -1,29 +1,7 @@
 // Accounting additions ---------------------------------------------------------------------------
 
-.bf-kpi--success {
-  border-color: var(--sat-sys-success-icon);
-}
-
-.bf-kpi--info {
-  border-color: var(--sat-sys-info-icon);
-}
-
-.bf-kpi--warning {
-  border-color: var(--sat-sys-warning-icon);
-  background: var(--sat-sys-warning-container);
-}
-
-.bf-kpi__value--success {
-  color: var(--sat-sys-success-icon);
-}
-
-.bf-kpi__value--info {
-  color: var(--sat-sys-info-icon);
-}
-
-.bf-kpi__value--warning {
-  color: var(--sat-sys-on-warning-container);
-}
+// KPI tones come from the shared kpi-card.scss: the card stays white, the icon, value and
+// percentage take the tone (section 9).
 
 .bf-two-col {
   display: grid;
@@ -107,10 +85,6 @@
 
 .bf-sr-pad {
   padding-inline: 0;
-}
-
-.bf-kpis {
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
 // Absolutely positioned labels (bf-sr) inside a table stay within its scroll container.

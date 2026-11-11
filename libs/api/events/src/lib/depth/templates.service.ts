@@ -131,6 +131,14 @@ export class EventTemplatesService {
     actor: RequestActor,
     scope: 'company' | 'personal' | 'all' = 'all',
   ): Promise<EventTemplateList> {
+    // Templates carry per-attendee cost estimates: tenant data, so a member's read. A platform operator
+    // without a break-glass grant is refused (not found), as everywhere else.
+    this.support.policy.assert(
+      actor,
+      'tenant.read',
+      { kind: 'tenant', tenantId: actor.tenantId },
+      'tenant',
+    );
     return this.support.read(actor, async (tx) => {
       const maintainsCompany = this.support.policy.can(actor, 'master_data.manage', {
         kind: 'tenant',

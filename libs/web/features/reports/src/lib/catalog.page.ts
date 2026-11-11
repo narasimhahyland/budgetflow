@@ -11,12 +11,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import type { ReportCatalog, SavedReportView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SAT_INTERACTIVE_CARD_IMPORTS } from '@hylandsoftware/satori-ui/interactive-card';
+import { SatCategoryTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { ScopeNote } from './report-frame';
 
 type ReportGroup = ReportCatalog['reports'][number]['group'];
@@ -43,7 +43,8 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
-    SatStatusTag,
+    SAT_INTERACTIVE_CARD_IMPORTS,
+    SatCategoryTag,
     ScopeNote,
   ],
   template: `
@@ -97,19 +98,31 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
 
       <div class="bf-kpis">
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Reports you can open</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Reports you can open</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="bar_chart" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ c.reports.length }}</p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Saved views</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Saved views</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="bookmark" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ c.savedViews.length }}</p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Active schedules</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Active schedules</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="calendar" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">{{ c.activeSchedules }}</p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Recent exports</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Recent exports</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="download" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value" data-testid="recent-exports">{{ c.recentExports }}</p>
         </div>
       </div>
@@ -129,7 +142,9 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
                   <span class="bf-view-row__name">
                     {{ view.name }}
                     @if (view.favourite) {
-                      <sat-status-tag status="info">Favourite</sat-status-tag>
+                      <sat-category-tag category="yellow"
+                        ><mat-icon svgIcon="star" aria-hidden="true" />Favourite</sat-category-tag
+                      >
                     }
                   </span>
                   <span class="bf-cell__secondary">
@@ -163,13 +178,15 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
             @for (report of group.reports; track report.reportId) {
               <li>
                 <a
+                  sat-interactive-card
                   class="bf-report"
                   [attr.data-testid]="'report-card-' + report.reportId"
                   [routerLink]="['/reports', report.reportId]"
                 >
-                  <span class="bf-report__name">{{ report.name }}</span>
-                  <span class="bf-report__question">{{ report.question }}</span>
-                  <span class="bf-report__meta">Screen {{ report.screen }}</span>
+                  <span satInteractiveCardTitle>{{ report.name }}</span>
+                  <sat-interactive-card-content>
+                    <p class="bf-report__question">{{ report.question }}</p>
+                  </sat-interactive-card-content>
                 </a>
               </li>
             }
@@ -193,34 +210,12 @@ const GROUP_ORDER: ReportGroup[] = ['budgets', 'comparisons', 'events', 'fairnes
       list-style: none;
     }
     .bf-report {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
       height: 100%;
-      padding: 16px;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--mat-sys-corner-large);
-      background: var(--mat-sys-surface-container-lowest);
-      color: var(--mat-sys-on-surface);
-      text-decoration: none;
-    }
-    .bf-report:hover,
-    .bf-report:focus-visible {
-      border-color: var(--mat-sys-primary);
-      background: var(--mat-sys-surface-container-low);
-    }
-    .bf-report__name {
-      font: var(--mat-sys-title-small);
     }
     .bf-report__question {
+      margin: 0;
       color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-body-small);
-    }
-    .bf-report__meta {
-      margin-top: auto;
-      padding-top: 8px;
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-label-small);
+      font: var(--mat-sys-body-medium);
     }
     .bf-saved-views {
       margin: 0;

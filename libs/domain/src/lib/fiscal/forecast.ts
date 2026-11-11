@@ -185,7 +185,7 @@ export function checkForecastSubmission(
   if (input.submit && needed && commentary.length < COMMENTARY_MIN_LENGTH)
     return err(
       'FORECAST_COMMENTARY_REQUIRED',
-      `Explain the variance of ${Math.abs(variance.varianceMinor)} minor units (${(Math.abs(variance.varianceBps) / 100).toFixed(1)}%) in at least ${COMMENTARY_MIN_LENGTH} characters before submitting.`,
+      `Explain the ${(Math.abs(variance.varianceBps) / 100).toFixed(1)}% variance from the authorized budget in at least ${COMMENTARY_MIN_LENGTH} characters before submitting.`,
       {
         varianceMinor: Math.abs(variance.varianceMinor),
         varianceBps: Math.abs(variance.varianceBps),

@@ -1,18 +1,19 @@
 /*
  * BudgetFlow sign-in theme. Keycloak renders these pages outside the Angular app, so the Satori token CSS
- * is not available here: the values below mirror the Satori light palette (primary, primary-loud, page
- * background, surface, outline, error) and the app's fonts fall back to system sans-serif when absent.
+ * cannot be loaded here (documented exception to the tokens-only rule). Each value below is the exact
+ * Satori light value of the token named beside it; change them only together with Satori.
  */
 :root {
-  --bf-primary: #5654ac;
-  --bf-primary-loud: #322f86;
-  --bf-on-primary: #ffffff;
-  --bf-page: #f4f3f7;
-  --bf-surface: #ffffff;
-  --bf-outline: #c9c5d4;
-  --bf-on-surface: #1b1b21;
-  --bf-on-surface-variant: #47464f;
-  --bf-error: #b02b36;
+  --bf-primary: #5654ac; /* --mat-sys-primary */
+  --bf-primary-loud: #322f86; /* --sat-sys-primary-loud */
+  --bf-on-primary: #ffffff; /* --mat-sys-on-primary */
+  --bf-page: #f4f3f7; /* --mat-sys-surface-container-low */
+  --bf-surface: #ffffff; /* --mat-sys-surface-container-lowest */
+  --bf-surface-container: #eeedf1; /* --mat-sys-surface-container */
+  --bf-outline: #c8c5d3; /* --mat-sys-outline-variant */
+  --bf-on-surface: #1a1c1e; /* --mat-sys-on-surface */
+  --bf-on-surface-variant: #474551; /* --mat-sys-on-surface-variant */
+  --bf-error: #b02b36; /* --mat-sys-error */
   --keycloak-card-top-color: var(--bf-primary);
   --pf-v5-global--primary-color--100: var(--bf-primary);
   --pf-v5-global--primary-color--200: var(--bf-primary-loud);
@@ -109,7 +110,7 @@
 
 .bf-login__panel .pf-v5-c-login__main {
   border: 1px solid var(--bf-outline);
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: none;
   background: var(--bf-surface);
   overflow: hidden;
@@ -127,6 +128,161 @@
 .bf-login__panel .pf-v5-c-button.pf-m-primary,
 .bf-login__panel .pf-v5-c-button.pf-m-secondary {
   border-radius: 999px;
+}
+
+/* The tenant label sits above the title, not beside it. */
+.bf-login__panel .pf-v5-c-login__main-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.bf-login__hint {
+  margin: 8px 0 0;
+  color: var(--bf-on-surface-variant);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Tenant label above the title (design 001). */
+.bf-login__tenant {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: var(--bf-surface-container);
+  color: var(--bf-on-surface-variant);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Single sign-on first, as the filled primary pill; the password form follows an OR divider. */
+.bf-login__sso #kc-social-providers .pf-v5-c-login__main-body {
+  padding: 0;
+}
+
+.bf-login__sso .bf-login__sso-button.pf-v5-c-button {
+  --pf-v5-c-button--after--BorderWidth: 0;
+  /* Keycloak puts a space-between utility (with !important) on provider buttons. */
+  justify-content: center !important;
+  gap: 10px;
+  min-height: 44px;
+  background: var(--bf-primary);
+  color: var(--bf-on-primary);
+  font-weight: 600;
+}
+
+.bf-login__sso .bf-login__sso-button.pf-v5-c-button:hover,
+.bf-login__sso .bf-login__sso-button.pf-v5-c-button:focus-visible {
+  background: var(--bf-primary-loud);
+  color: var(--bf-on-primary);
+}
+
+.bf-login__sso .bf-login__sso-button .pf-v5-u-m-auto {
+  margin: 0 !important;
+}
+
+/* Keycloak tints provider icons blue with a CSS filter; this one follows the button text instead. */
+#kc-social-providers svg.bf-login__sso-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  filter: none;
+}
+
+.bf-login__or {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 0 16px;
+  color: var(--bf-on-surface-variant);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.bf-login__or::before,
+.bf-login__or::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--bf-outline);
+}
+
+/* With single sign-on as the primary action, the password submit is the outlined pill. */
+.bf-login__sso ~ #kc-form #kc-login.pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--m-primary--BackgroundColor: transparent;
+  --pf-v5-c-button--m-primary--Color: var(--bf-primary);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--bf-page);
+  --pf-v5-c-button--m-primary--hover--Color: var(--bf-primary-loud);
+  --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--bf-page);
+  --pf-v5-c-button--m-primary--focus--Color: var(--bf-primary-loud);
+  box-shadow: inset 0 0 0 1px var(--bf-primary);
+}
+
+/* Outlined fields (section 7): 1px outline-variant on every side, 4px corners, a 2px primary focus. */
+.bf-login__panel .pf-v5-c-form-control {
+  --pf-v5-c-form-control--before--BorderTopColor: var(--bf-outline);
+  --pf-v5-c-form-control--before--BorderRightColor: var(--bf-outline);
+  --pf-v5-c-form-control--before--BorderBottomColor: var(--bf-outline);
+  --pf-v5-c-form-control--before--BorderLeftColor: var(--bf-outline);
+  --pf-v5-c-form-control--after--BorderBottomColor: transparent;
+  --pf-v5-c-form-control--hover--after--BorderBottomColor: transparent;
+  --pf-v5-c-form-control--focus--after--BorderBottomColor: transparent;
+  border-radius: 4px;
+}
+
+.bf-login__panel .pf-v5-c-form-control::before,
+.bf-login__panel .pf-v5-c-form-control::after {
+  border-radius: 4px;
+}
+
+.bf-login__panel .pf-v5-c-form-control:focus-within {
+  outline: 2px solid var(--bf-primary);
+  outline-offset: -1px;
+}
+
+/* The field draws the focus ring, so the input inside it does not draw a second, default one. */
+.bf-login__panel .pf-v5-c-form-control > input:focus,
+.bf-login__panel .pf-v5-c-form-control > input:focus-visible {
+  outline: 0;
+}
+
+/* The password field and its show/hide button read as one outlined field. */
+.bf-login__panel .pf-v5-c-input-group {
+  border: 1px solid var(--bf-outline);
+  border-radius: 4px;
+}
+
+.bf-login__panel .pf-v5-c-input-group:focus-within {
+  outline: 2px solid var(--bf-primary);
+  outline-offset: -1px;
+}
+
+.bf-login__panel .pf-v5-c-input-group .pf-v5-c-form-control {
+  --pf-v5-c-form-control--before--BorderTopColor: transparent;
+  --pf-v5-c-form-control--before--BorderRightColor: transparent;
+  --pf-v5-c-form-control--before--BorderBottomColor: transparent;
+  --pf-v5-c-form-control--before--BorderLeftColor: transparent;
+}
+
+.bf-login__panel .pf-v5-c-input-group .pf-v5-c-form-control:focus-within {
+  outline: 0;
+}
+
+.bf-login__panel .pf-v5-c-input-group .pf-v5-c-button.pf-m-control {
+  --pf-v5-c-button--after--BorderColor: transparent;
+  --pf-v5-c-button--m-control--after--BorderTopColor: transparent;
+  --pf-v5-c-button--m-control--after--BorderRightColor: transparent;
+  --pf-v5-c-button--m-control--after--BorderBottomColor: transparent;
+  --pf-v5-c-button--m-control--after--BorderLeftColor: transparent;
+  border-radius: 0 4px 4px 0;
+  background: transparent;
+}
+
+.bf-login__access {
+  margin: 16px 0 24px;
+  color: var(--bf-on-surface-variant);
+  font-size: 14px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {

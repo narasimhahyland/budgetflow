@@ -17,17 +17,17 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { type MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import type { AiFeature, AiFeatureState, AiSettings, AiSettingsView } from '@bf/contracts';
-import { formatMoney } from '@bf/web/ui';
+import { SessionStore } from '@bf/web/data-access';
+import { DateTimePipe, formatMoney, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { fieldName, withoutScreenIds } from './ai-labels';
 import { AiLabel } from './ai-output';
 import { AiTabs } from './ai-tabs';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /**
  * The turn-on dialog of 113a. It shows the exact field names the feature would send to the model,
@@ -36,15 +36,17 @@ import { LoadState } from './load-state';
  */
 @Component({
   selector: 'bf-ai-turn-on-dialog',
-  imports: [MatButtonModule, MatDialogModule, SatImportantButton],
+  imports: [MatButtonModule, MatDialogModule],
   template: `
     <h2 mat-dialog-title>Turn on {{ feature.title }}?</h2>
     <mat-dialog-content>
-      <p>It appears on: {{ feature.appearsOn }}.</p>
+      <p>It appears on: {{ appearsOn() }}.</p>
       <h3 class="bf-dialog__title">What this feature sends to the model</h3>
       <ul class="bf-dialog__list" data-testid="data-sent">
         @for (field of feature.dataSent; track field) {
-          <li>{{ field }}</li>
+          <li>
+            {{ fieldName(field) }} <code class="bf-field-key">{{ field }}</code>
+          </li>
         }
         @if (feature.dataSent.length === 0) {
           <li>Nothing: this feature sends no record fields to the model.</li>
@@ -65,7 +67,7 @@ import { LoadState } from './load-state';
     </mat-dialog-content>
     <mat-dialog-actions>
       <button mat-button type="button" (click)="close(false)">Cancel</button>
-      <button satImportantButton type="button" (click)="close(true)" data-testid="confirm-turn-on">
+      <button mat-flat-button type="button" (click)="close(true)" data-testid="confirm-turn-on">
         Turn on
       </button>
     </mat-dialog-actions>
@@ -80,12 +82,21 @@ import { LoadState } from './load-state';
       padding-inline-start: 20px;
       font: var(--mat-sys-body-medium);
     }
+    .bf-field-key {
+      padding: 0 4px;
+      border-radius: var(--mat-sys-corner-extra-small);
+      background: var(--mat-sys-surface-container-high);
+      color: var(--mat-sys-on-surface-variant);
+      font-size: var(--mat-sys-label-small-size);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiTurnOnDialog {
   private readonly ref = inject<MatDialogRef<AiTurnOnDialog, boolean>>(MatDialogRef);
   protected readonly feature = inject<AiFeatureState>(MAT_DIALOG_DATA);
+  protected readonly fieldName = fieldName;
+  protected readonly appearsOn = () => withoutScreenIds(this.feature.appearsOn);
   protected close(confirmed: boolean): void {
     this.ref.close(confirmed);
   }
@@ -128,6 +139,7 @@ export class AiTurnOffDialog {
 @Component({
   selector: 'bf-ai-settings-page',
   imports: [
+    DateTimePipe,
     AiLabel,
     AiTabs,
     FormsModule,
@@ -161,6 +173,7 @@ export class AiTurnOffDialog {
       [loading]="view.isLoading() && !view.hasValue()"
       [error]="view.error()"
       what="AI settings"
+      shape="form"
       (retry)="view.reload()"
     />
 
@@ -196,7 +209,7 @@ export class AiTurnOffDialog {
           <h2 class="bf-card__title" id="features-title">Features</h2>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="AI features and their switches">
+          <table class="bf-split-table bf-table--stack" aria-label="AI features and their switches">
             <thead>
               <tr>
                 <th>Feature</th>
@@ -212,10 +225,12 @@ export class AiTurnOffDialog {
                 <tr [attr.data-testid]="'feature-row-' + f.feature">
                   <td>
                     <span class="bf-cell__primary">{{ f.title }}</span>
-                    <span class="bf-cell__secondary">{{ f.flagKey }}</span>
+                    <span class="bf-cell__secondary"
+                      ><code class="bf-cell__code">{{ f.flagKey }}</code></span
+                    >
                   </td>
-                  <td>{{ f.appearsOn }}</td>
-                  <td>
+                  <td data-label="Where it appears">{{ withoutScreenIds(f.appearsOn) }}</td>
+                  <td data-label="Status">
                     @if (f.pendingFinanceConfirmation) {
                       <sat-status-tag status="warning" [attr.data-testid]="'status-' + f.feature"
                         >Waiting for Finance Admin confirmation</sat-status-tag
@@ -228,7 +243,7 @@ export class AiTurnOffDialog {
                       >
                     }
                   </td>
-                  <td>
+                  <td data-label="Data sent to the model">
                     <button
                       mat-button
                       type="button"
@@ -240,27 +255,27 @@ export class AiTurnOffDialog {
                     @if (expanded() === f.feature) {
                       <ul class="bf-fields" [attr.data-testid]="'fields-' + f.feature">
                         @for (field of f.dataSent; track field) {
-                          <li>{{ field }}</li>
+                          <li>{{ fieldName(field) }}</li>
                         }
                       </ul>
                     }
                   </td>
-                  <td>
+                  <td data-label="Last changed">
                     @if (f.lastChangedAt) {
                       <span class="bf-cell__primary">{{ f.lastChangedByName ?? 'Someone' }}</span>
                       <span class="bf-cell__secondary" data-testid="relative-time">{{
-                        f.lastChangedAt
+                        f.lastChangedAt | bfDateTime: session.timezone()
                       }}</span>
                     } @else {
                       <span class="bf-cell__secondary">Never changed</span>
                     }
                   </td>
-                  <td>
+                  <td data-label="Switch">
                     @if (v.canManage) {
                       <mat-slide-toggle
                         [checked]="f.enabled"
                         [disabled]="busy() || (!f.enabled && !v.provider.configured)"
-                        (change)="toggle(f, $event.checked)"
+                        (change)="toggle(f, $event)"
                         [attr.aria-label]="(f.enabled ? 'Turn off ' : 'Turn on ') + f.title"
                         [attr.data-testid]="'switch-' + f.feature"
                       >
@@ -421,6 +436,9 @@ export class AiTurnOffDialog {
 })
 export class AiSettingsPage {
   private readonly api = injectApi();
+  protected readonly session = inject(SessionStore);
+  protected readonly fieldName = fieldName;
+  protected readonly withoutScreenIds = withoutScreenIds;
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
   protected readonly valueOf = valueOf;
@@ -480,14 +498,16 @@ export class AiSettingsPage {
     this.edits.update((e) => ({ ...e, ...change }));
   }
 
-  protected async toggle(feature: AiFeatureState, enabled: boolean): Promise<void> {
+  protected async toggle(feature: AiFeatureState, change: MatSlideToggleChange): Promise<void> {
+    const enabled = change.checked;
+    // The switch moves as soon as it is clicked. Put it straight back: it only changes once the
+    // person confirms and the server says so, so the row never shows a feature as on while the
+    // confirmation is still open (the [checked] binding alone does not undo a click).
+    change.source.checked = !enabled;
     const dialog = this.dialog.open<AiTurnOnDialog | AiTurnOffDialog, AiFeatureState, boolean>(
       enabled ? AiTurnOnDialog : AiTurnOffDialog,
       { data: feature, width: '560px' },
     );
-    // The toggle moves as soon as it is clicked; re-reading the server state puts it back, so the
-    // row never shows a feature as on while the confirmation is still open.
-    this.view.reload();
     const confirmed = await new Promise<boolean | undefined>((resolve) =>
       dialog.afterClosed().subscribe(resolve),
     );

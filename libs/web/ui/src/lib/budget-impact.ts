@@ -3,10 +3,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import type { BudgetImpact as Impact } from '@bf/contracts';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { BudgetBar, type BudgetBarSegment } from './budget-bar';
 import { formatMoney, Money } from './money';
-
-const pct = (part: number, whole: number) =>
-  whole <= 0 ? 0 : Math.max(0, Math.min(100, (part * 100) / whole));
 
 /**
  * The budget-impact card (approval inbox, request details, request form, co-funding decision): what the
@@ -16,7 +14,7 @@ const pct = (part: number, whole: number) =>
  */
 @Component({
   selector: 'bf-budget-impact',
-  imports: [Money, MatIconModule, MatTooltipModule, SAT_BANNER_IMPORTS],
+  imports: [BudgetBar, Money, MatIconModule, MatTooltipModule, SAT_BANNER_IMPORTS],
   template: `
     @let i = impact();
     <section class="bf-impact" [attr.aria-label]="title()">
@@ -69,39 +67,12 @@ const pct = (part: number, whole: number) =>
           <sat-banner-message>{{ i.warning }}</sat-banner-message>
         </sat-banner>
       }
-      <div class="bf-impact__bar" role="img" [attr.aria-label]="barLabel()">
-        <span class="bf-impact__seg bf-impact__seg--actual" [style.width.%]="bars().actual"></span>
-        <span
-          class="bf-impact__seg bf-impact__seg--encumbered"
-          [style.width.%]="bars().encumbered"
-        ></span>
-        <span class="bf-impact__seg bf-impact__seg--held" [style.width.%]="bars().held"></span>
-        <span
-          class="bf-impact__seg bf-impact__seg--pending"
-          [style.width.%]="bars().pending"
-        ></span>
-      </div>
-      <ul class="bf-impact__legend">
-        <li>
-          <span class="bf-impact__dot bf-impact__seg--actual"></span>Actual
-          <bf-money [amountMinor]="i.actual.amountMinor" [currency]="i.actual.currency" />
-        </li>
-        <li>
-          <span class="bf-impact__dot bf-impact__seg--encumbered"></span>Approved
-          <bf-money
-            [amountMinor]="i.approvedCommitments.amountMinor"
-            [currency]="i.approvedCommitments.currency"
-          />
-        </li>
-        <li>
-          <span class="bf-impact__dot bf-impact__seg--held"></span>Earmarked
-          <bf-money [amountMinor]="i.held.amountMinor" [currency]="i.held.currency" />
-        </li>
-        <li>
-          <span class="bf-impact__dot bf-impact__seg--pending"></span>Pending
-          <bf-money [amountMinor]="i.pending.amountMinor" [currency]="i.pending.currency" />
-        </li>
-      </ul>
+      <bf-budget-bar
+        [label]="title() + ', ' + i.budgetName"
+        [segments]="segments()"
+        [totalMinor]="i.authorized.amountMinor"
+        [currency]="i.authorized.currency"
+      />
       <dl class="bf-impact__facts">
         <div>
           <dt>
@@ -187,7 +158,7 @@ const pct = (part: number, whole: number) =>
       font: var(--mat-sys-title-medium);
     }
     .bf-impact__value--pending {
-      color: var(--sat-sys-warning);
+      color: var(--sat-sys-on-warning-container);
     }
     .bf-impact__value--negative {
       color: var(--mat-sys-error);
@@ -197,49 +168,6 @@ const pct = (part: number, whole: number) =>
       height: 16px;
       cursor: help;
       color: var(--mat-sys-on-surface-variant);
-    }
-    .bf-impact__bar {
-      display: flex;
-      height: 10px;
-      border-radius: var(--mat-sys-corner-full);
-      overflow: hidden;
-      background: var(--mat-sys-surface-container-high);
-    }
-    .bf-impact__seg {
-      display: block;
-      height: 100%;
-    }
-    .bf-impact__seg--actual {
-      background: var(--mat-sys-on-surface-variant);
-    }
-    .bf-impact__seg--encumbered {
-      background: var(--mat-sys-primary);
-    }
-    .bf-impact__seg--held {
-      background: var(--mat-sys-tertiary);
-    }
-    .bf-impact__seg--pending {
-      background: var(--sat-sys-warning);
-    }
-    .bf-impact__legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 16px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-body-small);
-    }
-    .bf-impact__legend li {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .bf-impact__dot {
-      width: 8px;
-      height: 8px;
-      border-radius: var(--mat-sys-corner-full);
     }
     .bf-impact__facts {
       display: grid;
@@ -267,27 +195,35 @@ export class BudgetImpactCard {
   readonly requestLabel = input('This request');
 
   protected readonly companyTooltip =
-    'Company-wide Available = authorized − pending − approved − actual (the definition on dashboards). Available under this budget’s rules also deducts earmarks and follows the budget’s control basis.';
+    'Company-wide Available is the dashboards’ figure, in the reporting currency: authorized less earmarks, pending, approved and actual of this budget and every budget below it. Available under this budget’s rules also counts money allocated to child budgets and follows the budget’s control basis.';
 
   protected readonly rulesTooltip = computed(() => {
     const i = this.impact();
     return `Authorized ${formatMoney(i.authorized.amountMinor, i.authorized.currency)} minus what this budget's ${i.controlMode} control counts: earmarks, pending, approved and actual spend.`;
   });
 
-  protected readonly bars = computed(() => {
+  /**
+   * Section 10 buckets, as the API reports them. `pending` already includes this request while it is
+   * pending; a request that is not yet pending (a form being filled in) is drawn as its own hatched
+   * segment. Available after approval is drawn only when it fits under authorized, since under some
+   * control bases it is not the remainder of the other buckets.
+   */
+  protected readonly segments = computed<BudgetBarSegment[]>(() => {
     const i = this.impact();
-    const a = Math.max(i.authorized.amountMinor, 1);
-    const pendingOthers = Math.max(i.pending.amountMinor, i.thisRequest.amountMinor);
-    return {
-      actual: pct(i.actual.amountMinor, a),
-      encumbered: pct(i.approvedCommitments.amountMinor, a),
-      held: pct(i.held.amountMinor, a),
-      pending: pct(pendingOthers, a),
-    };
-  });
-
-  protected readonly barLabel = computed(() => {
-    const i = this.impact();
-    return `${i.utilizationAfterPct}% of ${formatMoney(i.authorized.amountMinor, i.authorized.currency)} used after approval`;
+    const request = Math.max(i.thisRequest.amountMinor, 0);
+    const included = i.pending.amountMinor >= request;
+    const parts: BudgetBarSegment[] = [
+      { bucket: 'actual', amountMinor: i.actual.amountMinor },
+      { bucket: 'encumbered', amountMinor: i.approvedCommitments.amountMinor, label: 'Approved' },
+      { bucket: 'held', amountMinor: i.held.amountMinor, label: 'Earmarked' },
+      { bucket: 'preEncumbered', amountMinor: i.pending.amountMinor, label: 'Pending' },
+    ];
+    if (!included)
+      parts.push({ bucket: 'thisRequest', amountMinor: request, label: this.requestLabel() });
+    const used = parts.reduce((n, p) => n + Math.max(p.amountMinor, 0), 0);
+    const after = i.availableAfter.amountMinor;
+    if (after > 0 && used + after <= i.authorized.amountMinor)
+      parts.push({ bucket: 'available', amountMinor: after, label: 'Available after approval' });
+    return parts;
   });
 }

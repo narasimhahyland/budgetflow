@@ -15,13 +15,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { ROLE_IDS, type FeatureFlag, type RoleId } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { PendingChange, ReasonField } from './admin-ui';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { ROLE_LABELS } from './role-labels';
 
 const AREA_LABEL: Record<FeatureFlag['area'], string> = {
@@ -61,6 +61,7 @@ const DECISION_LABEL: Record<Decision, string> = {
  */
 @Component({
   selector: 'bf-feature-flags-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DateTimePipe,
     FormsModule,
@@ -76,6 +77,7 @@ const DECISION_LABEL: Record<Decision, string> = {
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatImportantButton,
   ],
   templateUrl: './feature-flags.page.html',
   styleUrls: ['./page.scss', './feature-flags.page.scss'],

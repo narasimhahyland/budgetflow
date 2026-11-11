@@ -152,7 +152,11 @@
     </header>
     <main class="${properties.kcLoginMain!}">
       <div class="${properties.kcLoginMainHeader!}">
+        <p class="bf-login__tenant">Hyland</p>
         <h1 class="${properties.kcLoginMainTitle!}" id="kc-page-title"><#nested "header"></h1>
+        <#if pageId == "login-otp">
+          <p class="bf-login__hint">Open your authenticator app and enter the 6-digit code for BudgetFlow.</p>
+        </#if>
         <#if realm.internationalizationEnabled  && locale.supported?size gt 1>
         <div class="${properties.kcLoginMainHeaderUtilities!}">
           <div class="${properties.kcInputClass!}">
@@ -238,6 +242,15 @@
             </div>
         </#if>
 
+        <#-- BudgetFlow (design 001): single sign-on comes first as the primary action, then the password form. -->
+        <#assign ssoFirst = pageId == "login" && (social.providers)?? && social.providers?has_content>
+        <#if ssoFirst>
+            <div class="bf-login__sso">
+                <#nested "socialProviders">
+            </div>
+            <div class="bf-login__or" role="separator"><span>or</span></div>
+        </#if>
+
         <#nested "form">
 
         <#if auth?has_content && auth.showTryAnotherWayLink()>
@@ -251,7 +264,9 @@
         </#if>
 
           <div class="${properties.kcLoginMainFooter!}">
-              <#nested "socialProviders">
+              <#if !ssoFirst>
+                  <#nested "socialProviders">
+              </#if>
 
               <#if displayInfo>
                   <div id="kc-info" class="${properties.kcLoginMainFooterBand!} ${properties.kcFormClass}">
@@ -266,6 +281,9 @@
         <div class="${properties.kcLoginMainFooter!}">
             <@loginFooter.content/>
         </div>
+        <#if pageId == "login">
+          <p class="bf-login__access">Need access? Ask your BudgetFlow administrator.</p>
+        </#if>
     </main>
   </div>
 </div>

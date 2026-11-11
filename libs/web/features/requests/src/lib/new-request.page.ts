@@ -9,14 +9,18 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { CreateRequestBody } from '@bf/contracts';
-import { ApprovalRoute, BudgetImpactCard } from '@bf/web/ui';
+import { ApprovalRoute, BudgetImpactCard, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatGhost } from '@hylandsoftware/satori-ui/ghost';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
+import { SatCategoryTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { toMinor } from './money-input';
 
@@ -42,12 +46,17 @@ const SPEND_TYPES = [
     ApprovalRoute,
     BudgetImpactCard,
     FormsModule,
+    LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     RouterLink,
     SAT_BANNER_IMPORTS,
+    SAT_EMPTY_STATE_IMPORTS,
+    SatCategoryTag,
+    SatGhost,
     SatImportantButton,
   ],
   template: `
@@ -70,12 +79,25 @@ const SPEND_TYPES = [
           <h2 class="bf-card__title" id="form-title">What it is for</h2>
         </div>
         @if (event(); as e) {
-          <p class="bf-section">
-            <span class="bf-chip">Event</span>
-            <a [routerLink]="['/events', e.id]">{{ e.name }}</a> · charged to
-            {{ e.homeBudgetName }}. To share the cost with another director's budget, use Request
-            contribution on the event.
+          <p class="bf-section bf-event-line">
+            <sat-category-tag category="purple"
+              ><mat-icon svgIcon="calendar" aria-hidden="true" />Event</sat-category-tag
+            >
+            <span
+              ><a [routerLink]="['/events', e.id]">{{ e.name }}</a> · charged to
+              {{ e.homeBudgetName }}. To share the cost with another director's budget, send an
+              Inter-Director Budget Contribution Request from the event (Request
+              contribution).</span
+            >
           </p>
+        }
+        @if (kind() !== 'additional_fund' && requestable.error()) {
+          <!-- Loading shows as the Charge to hint, so the form does not shift when budgets arrive. -->
+          <bf-load-state
+            [error]="requestable.error()"
+            what="the budgets you can charge"
+            (retry)="requestable.reload()"
+          />
         }
         <div class="bf-form">
           @if (kind() !== 'additional_fund') {
@@ -93,6 +115,13 @@ const SPEND_TYPES = [
                   >
                 }
               </mat-select>
+              @if (requestable.isLoading() && !requestable.hasValue()) {
+                <mat-hint>Loading the budgets you can charge…</mat-hint>
+              }
+              <mat-error
+                ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Choose the
+                budget to charge.</mat-error
+              >
             </mat-form-field>
             <mat-form-field appearance="outline" class="bf-form__wide">
               <mat-label>Title</mat-label>
@@ -103,6 +132,10 @@ const SPEND_TYPES = [
                 name="title"
                 required
               />
+              <mat-error
+                ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Give the
+                request a title.</mat-error
+              >
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Spend type</mat-label>
@@ -119,6 +152,7 @@ const SPEND_TYPES = [
           }
           <mat-form-field appearance="outline">
             <mat-label>Amount</mat-label>
+            <span matTextPrefix>{{ currency() }}&nbsp;</span>
             <input
               matInput
               inputmode="decimal"
@@ -127,6 +161,10 @@ const SPEND_TYPES = [
               name="amount"
               required
             />
+            <mat-error
+              ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Enter the amount
+              you need.</mat-error
+            >
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Currency</mat-label>
@@ -165,14 +203,23 @@ const SPEND_TYPES = [
               required
             ></textarea>
             <mat-hint>Attach quotes or receipts on the request once it is saved.</mat-hint>
+            <mat-error
+              ><mat-icon class="bf-error-icon" svgIcon="error" aria-hidden="true" />Say what the
+              money is for.</mat-error
+            >
           </mat-form-field>
         </div>
         <div class="bf-form__actions">
+          @let why = missing();
+          @if (why) {
+            <p class="bf-why" id="request-why">{{ why }}</p>
+          }
           <a mat-button routerLink="/requests">Cancel</a>
           <button
             mat-stroked-button
             type="button"
             [disabled]="busy() || !valid()"
+            [attr.aria-describedby]="why ? 'request-why' : null"
             (click)="save(false)"
           >
             Save draft
@@ -182,9 +229,10 @@ const SPEND_TYPES = [
             satImportantButton
             type="button"
             [disabled]="busy() || !valid() || !!preview.value()?.blockedReason"
+            [attr.aria-describedby]="why ? 'request-why' : null"
             (click)="save(true)"
           >
-            Submit request
+            {{ kind() === 'over_budget' ? 'Submit over-budget request' : 'Submit request' }}
           </button>
         </div>
       </section>
@@ -193,10 +241,19 @@ const SPEND_TYPES = [
           <div class="bf-section">
             @if (valueOf(preview); as p) {
               <bf-budget-impact [impact]="p.impact" title="Budget impact" />
+            } @else if (preview.isLoading()) {
+              <div class="bf-impact-ghost" aria-busy="true" aria-label="Loading the budget impact">
+                <sat-ghost variant="box" [height]="72" fitContainer />
+                <sat-ghost variant="box" [height]="12" fitContainer />
+                <sat-ghost variant="box" [height]="40" fitContainer />
+              </div>
             } @else {
-              <p class="bf-cell__secondary">
-                Choose a budget and an amount to see the impact and who approves.
-              </p>
+              <sat-empty-state>
+                <h3 satEmptyStateHeadline>Budget impact</h3>
+                <p satEmptyStateDescription>
+                  Choose a budget and an amount to see the impact and who approves.
+                </p>
+              </sat-empty-state>
             }
           </div>
         </section>
@@ -214,6 +271,33 @@ const SPEND_TYPES = [
         }
       </aside>
     </div>
+  `,
+  styles: `
+    .bf-event-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+    .bf-error-icon {
+      width: 16px;
+      height: 16px;
+      margin-inline-end: 4px;
+      vertical-align: -3px;
+    }
+    .bf-why {
+      flex: 1 1 240px;
+      margin: 0;
+      align-self: center;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+    }
+    .bf-impact-ghost {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -280,6 +364,21 @@ export class NewRequestPage {
 
   protected currencyOf(budgetId: string): string {
     return this.budgets().find((b) => b.budgetId === budgetId)?.currency ?? 'USD';
+  }
+
+  /** What is still missing, written next to the disabled Save and Submit buttons (section 4). */
+  protected missing(): string | null {
+    if (this.busy()) return null;
+    const gaps: string[] = [];
+    if (this.kind() !== 'additional_fund' && !this.effectiveBudget()) gaps.push('a budget');
+    if (this.kind() !== 'additional_fund' && this.titleText().trim().length < 3)
+      gaps.push('a title');
+    if ((this.amountMinor() ?? 0) <= 0) gaps.push('an amount');
+    if (this.purpose().trim().length < 3) gaps.push('a justification');
+    if (gaps.length)
+      return `Add ${gaps.join(', ').replace(/, ([^,]*)$/, ' and $1')} to save or submit.`;
+    const blocked = this.preview.value()?.blockedReason;
+    return blocked ? `Submitting is blocked: ${blocked}` : null;
   }
 
   protected valid(): boolean {

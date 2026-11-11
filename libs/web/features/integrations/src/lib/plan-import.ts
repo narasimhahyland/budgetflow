@@ -155,7 +155,7 @@ import { sentence } from './labels';
 
         @if (lines().length) {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="lines()" aria-label="Plan differences">
+            <table mat-table class="bf-table" [dataSource]="lines()" aria-label="Plan differences">
               <ng-container matColumnDef="level">
                 <th mat-header-cell *matHeaderCellDef>Planning level</th>
                 <td mat-cell *matCellDef="let l">
@@ -235,10 +235,12 @@ import { sentence } from './labels';
             </table>
           </div>
         } @else {
-          <sat-empty-state>
-            <h2 satEmptyStateHeadline>Nothing to compare</h2>
-            <p satEmptyStateDescription>The version holds no levels that map to a root budget.</p>
-          </sat-empty-state>
+          <div class="bf-card__body">
+            <sat-empty-state>
+              <h2 satEmptyStateHeadline>Nothing to compare</h2>
+              <p satEmptyStateDescription>The version holds no levels that map to a root budget.</p>
+            </sat-empty-state>
+          </div>
         }
 
         <p class="bf-card__body bf-note" data-testid="plan-next-step">

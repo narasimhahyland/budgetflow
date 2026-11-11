@@ -67,3 +67,18 @@ export function isCurrencyCode(value: string): value is CurrencyCode {
 export function exponentOf(currency: CurrencyCode): number {
   return CURRENCY_EXPONENTS[currency];
 }
+
+/**
+ * An amount for a plain-English message: `USD 11,869.75`, `JPY 1,500`, `KWD 0.125`. Integer
+ * arithmetic only (no floating point), grouping in thousands. Screens format money with the Angular
+ * formatters; this is for API problem details, which people read too.
+ */
+export function formatAmount(amountMinor: number, currency: string): string {
+  const exp = isCurrencyCode(currency) ? exponentOf(currency) : 2;
+  const digits = Math.abs(Math.trunc(amountMinor))
+    .toString()
+    .padStart(exp + 1, '0');
+  const whole = digits.slice(0, digits.length - exp).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const fraction = exp > 0 ? `.${digits.slice(digits.length - exp)}` : '';
+  return `${currency} ${amountMinor < 0 ? '-' : ''}${whole}${fraction}`;
+}

@@ -20,9 +20,17 @@ const shim = path.join(hooksDir, 'node.sh');
 // Fake credentials are assembled at runtime so this file never contains a literal token.
 const fake = {
   github: ['gh', 'p_', 'A1b2'.repeat(9)].join(''),
+  githubOauth: ['gh', 'o_', 'c7Dq'.repeat(9)].join(''),
+  githubServer: ['gh', 's_', 'm4Rt'.repeat(9)].join(''),
   githubPat: ['github', '_pat_', 'x'.repeat(22), '_', 'Y'.repeat(59)].join(''),
   npm: ['np', 'm_', 'Z9'.repeat(18)].join(''),
+  // A random-looking base64 run with enough distinct characters to clear the entropy thresholds.
+  base64: 'aG7kQp2WzXr9TvB4yNmJ8sLd3CfHq6Ue1ZoKi5Rb0AnPwYxVtSgM'.repeat(2),
 };
+fake.bedrock = ['AB', 'SK', fake.base64.slice(0, 100)].join('');
+fake.awsAccessKey = ['AK', 'IA', 'Q7ZT4MWB2XKD9VLR'].join('');
+fake.awsSessionKey = ['AS', 'IA', 'J3HN8PCY5GVF6QTM'].join('');
+fake.anthropic = ['sk', '-ant-', 'api03-', fake.base64.replace(/[+/]/g, 'x').slice(0, 95)].join('');
 
 // The sandbox must not live under an OS temp dir: the guards deliberately allow deletes there.
 mkdirSync(path.join(projectRoot, 'tmp'), { recursive: true });
@@ -256,6 +264,41 @@ expect(
   read(path.join(repo, 'node_modules', 'pkg', 'fixture.js'), fake.npm),
   'allow',
 );
+
+// --- secret patterns, through beforeReadFile --------------------------------
+// One case per pattern, both ways: a synthetic key is a finding, the dev-only placeholders and
+// env references that infra/.env.example and infra/compose.yaml really contain are not.
+const envExample = path.join(repo, 'infra', '.env.example');
+const secretCases = [
+  ['aws-bedrock-api-key', `BF_AWS_BEARER_TOKEN_BEDROCK=${fake.bedrock}`],
+  ['aws access key id', `AWS_ACCESS_KEY_ID=${fake.awsAccessKey}`],
+  ['aws session key id', `AWS_ACCESS_KEY_ID=${fake.awsSessionKey}`],
+  ['anthropic-api-key', `ANTHROPIC_API_KEY=${fake.anthropic}`],
+  ['github oauth token', `GITHUB_TOKEN=${fake.githubOauth}`],
+  ['github server token', `GITHUB_TOKEN=${fake.githubServer}`],
+  ['github fine-grained pat', `GITHUB_TOKEN=${fake.githubPat}`],
+  ['high-entropy secret value', `BF_INTEGRATIONS_SECRET_KEY=${fake.base64.slice(0, 44)}`],
+  ['high-entropy token value', `BF_SERVICE_TOKEN="${fake.base64.slice(7, 47)}"`],
+];
+for (const [name, line] of secretCases)
+  expect(`read deny: ${name}`, read(envExample, `# header\n${line}\n`), 'deny');
+
+const placeholderCases = [
+  ['dev-only password', 'BF_PG_OWNER_PASSWORD=bf-owner-dev-only'],
+  ['dev-only minio password', 'BF_MINIO_ROOT_PASSWORD=minio-dev-only'],
+  ['dev-only keycloak secret', 'BF_KC_API_CLIENT_SECRET=api-client-dev-only'],
+  ['long dev-only secret key', 'BF_INTEGRATIONS_SECRET_KEY=integration-secrets-dev-only-0001'],
+  ['long dev-only hmac secret', 'BF_APPROVAL_LINK_SECRET=approval-links-dev-only-0001'],
+  ['dev-only totp secret', 'BF_E2E_TOTP_SECRET=bf-totp-dev-only-001'],
+  ['env reference as the value', 'AWS_BEARER_TOKEN_BEDROCK: ${BF_AWS_BEARER_TOKEN_BEDROCK:-}'],
+  ['documented placeholder value', 'ANTHROPIC_API_KEY=<your-key-here>'],
+  [
+    'key-named variable holding a url',
+    'KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/budgetflow/protocol/openid-connect/certs',
+  ],
+];
+for (const [name, line] of placeholderCases)
+  expect(`read allow: ${name}`, read(envExample, `# header\n${line}\n`), 'allow');
 
 // --- preToolUse -------------------------------------------------------------
 const tool = (tool_name, tool_input) =>

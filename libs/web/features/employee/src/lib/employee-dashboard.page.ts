@@ -3,12 +3,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState, Money, SpendStatus } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /** Screen 115 (with 116 available budgets and 120 approved allocations): what I can still request, my requests, tasks and events. */
 @Component({
@@ -61,16 +60,25 @@ import { LoadState } from './load-state';
           <div class="bf-employee__cards">
             @for (b of valueOf(budgets)?.items ?? []; track b.budgetId) {
               <article class="bf-kpi" [attr.aria-label]="b.name">
-                <div class="bf-list__row">
-                  <strong>{{ b.name }}</strong>
+                <div class="bf-kpi__head">
+                  <strong class="bf-employee__name">{{ b.name }}</strong>
                   @if (b.blockedCode === 'BUDGET_FROZEN') {
-                    <sat-status-tag status="info">Frozen</sat-status-tag>
+                    <sat-status-tag status="info"
+                      ><mat-icon svgIcon="lock" aria-hidden="true" />Frozen</sat-status-tag
+                    >
                   } @else if (b.blockedCode === 'BUDGET_SET_TO_ZERO') {
-                    <sat-status-tag status="important">Set to zero</sat-status-tag>
+                    <sat-status-tag status="important"
+                      ><mat-icon svgIcon="circle_stop" aria-hidden="true" />Set to
+                      zero</sat-status-tag
+                    >
+                  } @else if (b.approverHint) {
+                    <sat-status-tag status="neutral"
+                      ><mat-icon svgIcon="clock" aria-hidden="true" />Needs approval</sat-status-tag
+                    >
                   } @else {
-                    <sat-status-tag status="neutral" [hideIcon]="true">{{
-                      b.approverHint ? 'Needs approval' : 'Open'
-                    }}</sat-status-tag>
+                    <sat-status-tag status="success"
+                      ><mat-icon svgIcon="circle_check" aria-hidden="true" />Open</sat-status-tag
+                    >
                   }
                 </div>
                 @if (b.blockedReason) {
@@ -101,14 +109,19 @@ import { LoadState } from './load-state';
                 @if (b.approverHint) {
                   <p class="bf-kpi__delta">{{ b.approverHint }}</p>
                 }
-                <a
-                  mat-button
-                  [routerLink]="['/requests/new']"
-                  [queryParams]="{ kind: 'spending', budgetId: b.budgetId }"
-                  [class.bf-disabled]="!!b.blockedReason"
-                  [attr.aria-disabled]="!!b.blockedReason"
-                  >Request from this budget</a
-                >
+                @if (b.blockedReason) {
+                  <button mat-button type="button" disabled class="bf-employee__action">
+                    Request from this budget
+                  </button>
+                } @else {
+                  <a
+                    mat-button
+                    class="bf-employee__action"
+                    [routerLink]="['/requests/new']"
+                    [queryParams]="{ kind: 'spending', budgetId: b.budgetId }"
+                    >Request from this budget</a
+                  >
+                }
               </article>
             }
           </div>
@@ -130,7 +143,17 @@ import { LoadState } from './load-state';
         />
         @if (requests.hasValue()) {
           @if (myRequests().length === 0) {
-            <p class="bf-empty">You have no requests yet.</p>
+            <sat-empty-state class="bf-employee__empty">
+              <h3 satEmptyStateHeadline>You have no requests yet</h3>
+              <p satEmptyStateDescription>Ask for money from one of the budgets above.</p>
+              <a
+                satEmptyStateAction
+                mat-stroked-button
+                routerLink="/requests/new"
+                [queryParams]="{ kind: 'spending' }"
+                >Start a request</a
+              >
+            </sat-empty-state>
           } @else {
             <div class="bf-table-scroll">
               <table class="bf-split-table" aria-label="My requests">
@@ -147,7 +170,9 @@ import { LoadState } from './load-state';
                     <tr>
                       <td>
                         <span class="bf-cell__primary">{{ r.title }}</span
-                        ><span class="bf-cell__secondary">{{ r.ref }}</span>
+                        ><span class="bf-cell__secondary"
+                          ><span class="bf-cell__code">{{ r.ref }}</span></span
+                        >
                       </td>
                       <td class="bf-num">
                         <bf-money
@@ -221,14 +246,17 @@ import { LoadState } from './load-state';
       gap: 12px;
       margin-top: 8px;
     }
-    .bf-employee__cards .bf-kpi {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .bf-employee__empty {
+      display: block;
+      padding: 0 16px 24px;
     }
-    .bf-disabled {
-      pointer-events: none;
-      opacity: 0.5;
+    .bf-employee__name {
+      color: var(--mat-sys-on-surface);
+      font: var(--mat-sys-title-small);
+    }
+    .bf-employee__action {
+      align-self: flex-start;
+      margin-top: auto;
     }
   `,
   host: { class: 'bf-page-layout' },

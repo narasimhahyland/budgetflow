@@ -203,6 +203,7 @@ export class AcknowledgeCheckDialog {
     <mat-dialog-actions align="end" class="bf-dialog__actions">
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
+        mat-flat-button
         satImportantButton
         type="button"
         [disabled]="busy() || !ready()"
@@ -354,6 +355,7 @@ export class PeriodStatusDialog {
     MatInputModule,
     MatSelectModule,
     SAT_BANNER_IMPORTS,
+    SatImportantButton,
   ],
   styleUrl: './dialogs.scss',
   template: `
@@ -402,6 +404,16 @@ export class PeriodStatusDialog {
         ></textarea>
         <mat-hint>At least 20 characters. The approver reads this.</mat-hint>
       </mat-form-field>
+      <mat-form-field class="bf-field">
+        <mat-label>Type {{ d.periodLabel }} to confirm</mat-label>
+        <input
+          matInput
+          [ngModel]="confirmation()"
+          (ngModelChange)="confirmation.set($event)"
+          data-testid="break-glass-confirmation"
+        />
+        <mat-hint>The period name must match exactly.</mat-hint>
+      </mat-form-field>
       @if (failure()) {
         <sat-banner variant="important"
           ><sat-banner-message>{{ failure() }}</sat-banner-message></sat-banner
@@ -412,8 +424,8 @@ export class PeriodStatusDialog {
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
         mat-flat-button
+        satImportantButton
         type="button"
-        class="bf-danger-button"
         [disabled]="busy() || !ready()"
         (click)="submit()"
         data-testid="confirm-break-glass"
@@ -436,10 +448,14 @@ export class BreakGlassDialog {
   protected readonly codes = computed(() => valueOf(this.codesRes) ?? []);
   protected readonly reasonCode = signal('');
   protected readonly reason = signal('');
+  protected readonly confirmation = signal('');
   protected readonly busy = signal(false);
   protected readonly failure = signal<string | null>(null);
   protected readonly ready = computed(
-    () => this.reasonCode().length > 0 && this.reason().trim().length >= 20,
+    () =>
+      this.reasonCode().length > 0 &&
+      this.reason().trim().length >= 20 &&
+      this.confirmation().trim() === this.d.periodLabel,
   );
 
   protected async submit(): Promise<void> {

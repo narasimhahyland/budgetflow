@@ -59,10 +59,18 @@
         </p>
       </div>
     </div>
-    <div class="bf-bar" aria-hidden="true">
-      <span class="bf-bar__fill" [style.width.%]="allocatedPct() / 100"></span>
-    </div>
-    <p class="bf-card__hint">{{ pct(allocatedPct()) }} allocated after these changes</p>
+    <bf-budget-bar
+      class="bf-summary__bar"
+      [label]="p.name + ' after these changes'"
+      [segments]="barSegments()"
+      [totalMinor]="p.balances.budgetCurrency.authorized.amountMinor"
+      [currency]="p.currency"
+    />
+    <p class="bf-card__hint" [class.bf-bad]="over()">
+      {{ pct(allocatedPct()) }} allocated after these changes{{
+        over() ? ' — more than the parent has' : ''
+      }}
+    </p>
   </section>
 
   @if (p.status === 'frozen' || p.status === 'set_to_zero') {
@@ -94,7 +102,7 @@
         >
       }
       <div class="bf-table-scroll" #grid (paste)="onPaste($event)">
-        <table class="bf-grid" aria-label="Child budgets and new amounts">
+        <table class="bf-grid bf-split-table" aria-label="Child budgets and new amounts">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -110,7 +118,7 @@
           <tbody>
             @for (r of rows(); track r.key; let i = $index) {
               <tr
-                [class.bf-grid__error]="rowErrors().has(r.key)"
+                [class.bf-row--important]="rowErrors().has(r.key) || exceeds(r)"
                 [attr.data-testid]="'grid-row-' + i"
               >
                 <td>{{ i + 1 }}</td>
@@ -172,12 +180,21 @@
                     <span class="bf-cell-error">{{ err }}</span>
                   }
                 </td>
-                <td class="bf-num" [class.bf-good]="r.childId && (deltaOf(r) ?? 0) > 0">
+                <td
+                  class="bf-num"
+                  [class.bf-good]="r.childId && (deltaOf(r) ?? 0) > 0 && !exceeds(r)"
+                  [class.bf-bad]="exceeds(r)"
+                >
                   @if (!r.childId) {
                     Draft, nothing allocated
                   } @else if ((deltaOf(r) ?? 0) !== 0) {
                     {{ (deltaOf(r) ?? 0) > 0 ? '+' : ''
                     }}<bf-money [amountMinor]="deltaOf(r) ?? 0" [currency]="p.currency" />
+                    @if (exceeds(r)) {
+                      <sat-status-tag status="important" class="bf-exceeds"
+                        >Exceeds parent available</sat-status-tag
+                      >
+                    }
                   } @else {
                     —
                   }
@@ -248,10 +265,10 @@
           </div>
         </dl>
         @if (over()) {
-          <sat-banner variant="important" data-testid="grid-blocked"
+          <sat-banner variant="important" [border]="true" data-testid="grid-blocked"
             ><sat-banner-message
-              >Over allocation: the grid allocates more than {{ p.name }} has available. Nothing
-              posts until it fits.</sat-banner-message
+              ><strong>Blocked:</strong> over allocation: the grid allocates more than
+              {{ p.name }} has available. Nothing posts until it fits.</sat-banner-message
             ></sat-banner
           >
         } @else if (preview(); as pv) {
@@ -286,10 +303,14 @@
             ><sat-banner-message>{{ done() }}</sat-banner-message></sat-banner
           >
         }
+        @if (submitBlockedReason(); as why) {
+          <p class="bf-card__hint bf-why">{{ why }}</p>
+        }
         <div class="bf-impact__actions">
           <button mat-button type="button" (click)="discard()" [disabled]="busy()">Discard</button>
           <button
             mat-flat-button
+            satImportantButton
             type="button"
             (click)="submit()"
             [disabled]="

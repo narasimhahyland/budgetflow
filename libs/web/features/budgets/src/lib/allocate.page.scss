@@ -12,18 +12,8 @@
   gap: 16px;
 }
 
-.bf-bar {
-  height: 10px;
+.bf-summary__bar {
   margin: 16px 0 6px;
-  overflow: hidden;
-  border-radius: var(--mat-sys-corner-full);
-  background: var(--sat-sys-success-container);
-}
-
-.bf-bar__fill {
-  display: block;
-  height: 100%;
-  background: var(--mat-sys-primary);
 }
 
 .bf-good {
@@ -61,33 +51,23 @@
   margin: 0 16px 12px;
 }
 
-.bf-grid {
-  width: 100%;
-  border-collapse: collapse;
-  font: var(--mat-sys-body-medium);
-}
-
-.bf-grid th,
+// Header, row height and row states come from .bf-split-table (data-table.scss).
 .bf-grid td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
-  text-align: start;
   vertical-align: middle;
 }
 
-.bf-grid th {
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-label-medium);
-  text-transform: uppercase;
-}
-
-.bf-grid th.bf-num,
 .bf-grid td.bf-num {
   text-align: end;
 }
 
-.bf-grid__error {
-  background: var(--mat-sys-error-container);
+.bf-exceeds {
+  display: block;
+  margin-top: 4px;
+}
+
+.bf-why {
+  margin: 12px 0 0;
+  text-align: end;
 }
 
 .bf-cell-input {

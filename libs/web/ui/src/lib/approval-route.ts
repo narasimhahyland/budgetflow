@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import type { ApprovalRouteView } from '@bf/contracts';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { Money } from './money';
 import { SpendStatus } from './spend-status';
 
@@ -22,7 +23,7 @@ const SKIP: Record<string, string> = {
 /** The approval route as an ordered list: each step's approver, why they hold it, their DoA limit and state. */
 @Component({
   selector: 'bf-approval-route',
-  imports: [Money, SpendStatus],
+  imports: [Money, SatAvatar, SpendStatus],
   template: `
     @let r = route();
     <ol class="bf-route" aria-label="Approval route">
@@ -35,7 +36,10 @@ const SKIP: Record<string, string> = {
           <span class="bf-route__marker" aria-hidden="true">{{ s.stepNo }}</span>
           <div class="bf-route__body">
             <div class="bf-route__line">
-              <span class="bf-route__name">{{ s.personName }}</span>
+              <span class="bf-route__who">
+                <sat-avatar size="24" [initials]="initials(s.personName)" aria-hidden="true" />
+                <span class="bf-route__name">{{ s.personName }}</span>
+              </span>
               <bf-spend-status kind="task" [status]="s.status" />
             </div>
             <span class="bf-route__meta">
@@ -117,6 +121,11 @@ const SKIP: Record<string, string> = {
       align-items: center;
       justify-content: space-between;
     }
+    .bf-route__who {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
     .bf-route__name {
       font: var(--mat-sys-title-small);
     }
@@ -139,6 +148,14 @@ const SKIP: Record<string, string> = {
 })
 export class ApprovalRoute {
   readonly route = input.required<ApprovalRouteView>();
+  /** Initials for the approver's avatar (section 6 people pattern). */
+  protected initials(name: string): string {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] ?? '';
+    const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : '';
+    return (first + last).toUpperCase();
+  }
+
   protected resolver(r: string): string {
     return RESOLVER[r] ?? r;
   }

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture: shell page with a clipped table</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        height: 100%;
+        overflow-y: auto;
+        padding: 16px 24px;
+        box-sizing: border-box;
+      }
+      /* A card that hides what does not fit: the table's last columns cannot be reached. */
+      .card {
+        max-width: 480px;
+        overflow: hidden;
+      }
+      table {
+        width: 1200px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Clipped table</h1>
+      <section class="card">
+        <table>
+          <tr>
+            <td>Budget</td>
+            <td>Available</td>
+          </tr>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

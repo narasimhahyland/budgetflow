@@ -1,7 +1,9 @@
 <header class="bf-page__header">
   <div class="bf-page__heading">
     <h1 class="bf-page__title">Organization</h1>
-    <p class="bf-page__subtitle">Hyland's hierarchy as of the date you pick. {{ scopeText() }}</p>
+    <p class="bf-page__subtitle">Hyland's hierarchy as of the date you pick.</p>
+    <!-- Its own line, there from the first paint: filling it in after load moves nothing. -->
+    <p class="bf-page__subtitle bf-scope">{{ scopeText() }}</p>
   </div>
   <div class="bf-page__actions">
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bf-asof">
@@ -39,7 +41,7 @@
       [loading]="units.isLoading() && !units.hasValue()"
       [error]="units.error()"
       what="the organization"
-      [lines]="8"
+      [lines]="12"
       (retry)="units.reload()"
     />
     @if (units.hasValue()) {
@@ -342,36 +344,43 @@
         <h3 class="bf-card__title">History</h3>
       </div>
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="d.versions" aria-label="Unit history">
+        <table
+          class="bf-table bf-table--stack"
+          mat-table
+          [dataSource]="d.versions"
+          aria-label="Unit history"
+        >
           <ng-container matColumnDef="from">
             <th mat-header-cell *matHeaderCellDef>From</th>
-            <td mat-cell *matCellDef="let v">{{ v.validFrom | date: 'd MMM y' : 'UTC' }}</td>
+            <td class="bf-cell--full" mat-cell *matCellDef="let v">
+              {{ v.validFrom | date: 'd MMM y' : 'UTC' }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="to">
             <th mat-header-cell *matHeaderCellDef>To</th>
-            <td mat-cell *matCellDef="let v">
+            <td mat-cell *matCellDef="let v" data-label="To">
               {{ v.validTo ? (v.validTo | date: 'd MMM y' : 'UTC') : 'Open' }}
             </td>
           </ng-container>
           <ng-container matColumnDef="change">
             <th mat-header-cell *matHeaderCellDef>Change</th>
-            <td mat-cell *matCellDef="let v">{{ v.changeKind }}</td>
+            <td mat-cell *matCellDef="let v" data-label="Change">{{ v.changeKind }}</td>
           </ng-container>
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Name</th>
-            <td mat-cell *matCellDef="let v">{{ v.name }}</td>
+            <td mat-cell *matCellDef="let v" data-label="Name">{{ v.name }}</td>
           </ng-container>
           <ng-container matColumnDef="parent">
             <th mat-header-cell *matHeaderCellDef>Parent</th>
-            <td mat-cell *matCellDef="let v">{{ v.parentName ?? '—' }}</td>
+            <td mat-cell *matCellDef="let v" data-label="Parent">{{ v.parentName ?? '—' }}</td>
           </ng-container>
           <ng-container matColumnDef="manager">
             <th mat-header-cell *matHeaderCellDef>Manager</th>
-            <td mat-cell *matCellDef="let v">{{ v.managerName ?? '—' }}</td>
+            <td mat-cell *matCellDef="let v" data-label="Manager">{{ v.managerName ?? '—' }}</td>
           </ng-container>
           <ng-container matColumnDef="reason">
             <th mat-header-cell *matHeaderCellDef>Reason</th>
-            <td mat-cell *matCellDef="let v">{{ v.reason ?? '—' }}</td>
+            <td mat-cell *matCellDef="let v" data-label="Reason">{{ v.reason ?? '—' }}</td>
           </ng-container>
           <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: historyColumns"></tr>

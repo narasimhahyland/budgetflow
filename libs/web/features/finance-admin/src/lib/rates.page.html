@@ -7,7 +7,12 @@
     </p>
   </div>
   @if (canManage() && !adding()) {
-    <button mat-flat-button type="button" (click)="adding.set(true); failure.set(null)">
+    <button
+      mat-flat-button
+      class="bf-hide-mobile"
+      type="button"
+      (click)="adding.set(true); failure.set(null)"
+    >
       Add rate
     </button>
   }
@@ -25,8 +30,10 @@
 }
 
 <section class="bf-card bf-context" aria-label="Currencies">
-  <span class="bf-chip">Reporting currency {{ reporting() }} (fixed)</span>
-  <span class="bf-chip">Budget currency {{ reporting() }} (all budgets)</span>
+  <sat-category-tag category="gray">Reporting currency {{ reporting() }} (fixed)</sat-category-tag>
+  <sat-category-tag category="gray"
+    >Budget currency {{ reporting() }} (all budgets)</sat-category-tag
+  >
   @if (currentYear(); as fy) {
     <p class="bf-context__note" data-testid="plan-rate-state">
       {{
@@ -43,9 +50,14 @@
   <div class="bf-tile">
     <div class="bf-tile__head">
       Plan rate
-      <sat-status-tag [status]="currentYear()?.planRatesLockedAt ? 'info' : 'warning'">
-        {{ currentYear()?.planRatesLockedAt ? 'Locked for ' + currentYear()?.label : 'Not locked' }}
-      </sat-status-tag>
+      @if (currentYear()?.planRatesLockedAt) {
+        <sat-status-tag status="neutral"
+          ><mat-icon svgIcon="lock" aria-hidden="true" />Locked for
+          {{ currentYear()?.label }}</sat-status-tag
+        >
+      } @else {
+        <sat-status-tag status="warning">Not locked</sat-status-tag>
+      }
     </div>
     <p class="bf-tile__body">
       Converts transactions to budget {{ reporting() }}. Budget control always uses it.
@@ -180,11 +192,19 @@
     <p class="bf-empty">No rates for the current fiscal year yet.</p>
   } @else {
     <div class="bf-table-scroll">
-      <table mat-table [dataSource]="matrix()" aria-labelledby="matrix-title">
+      <table
+        class="bf-table bf-table--stack"
+        mat-table
+        [dataSource]="matrix()"
+        aria-labelledby="matrix-title"
+      >
         <ng-container matColumnDef="currency">
           <th mat-header-cell *matHeaderCellDef>Currency</th>
-          <td mat-cell *matCellDef="let r">
-            <span class="bf-cell__primary">{{ r.currency.code }} — {{ r.currency.name }}</span>
+          <td class="bf-cell--full" mat-cell *matCellDef="let r">
+            <span class="bf-cell__name">
+              <span class="bf-cell__code">{{ r.currency.code }}</span>
+              <span class="bf-cell__primary">{{ r.currency.name }}</span>
+            </span>
           </td>
         </ng-container>
         <ng-container matColumnDef="plan">
@@ -198,7 +218,15 @@
             [attr.data-testid]="'plan-' + r.currency.code"
           >
             @if (r.plan) {
-              {{ rateText(r.plan.rate) }}{{ r.plan.locked ? ' (locked)' : '' }}
+              <span class="bf-rate">
+                {{ rateText(r.plan.rate) }}
+                @if (r.plan.locked) {
+                  <mat-icon class="bf-rate__lock" svgIcon="lock" aria-hidden="true" /><span
+                    class="bf-sr"
+                    >(locked)</span
+                  >
+                }
+              </span>
             } @else {
               —
             }
@@ -230,11 +258,13 @@
         </ng-container>
         <ng-container matColumnDef="source">
           <th mat-header-cell *matHeaderCellDef>Source</th>
-          <td mat-cell *matCellDef="let r">{{ r.plan?.source ?? r.monthEnd?.source ?? '—' }}</td>
+          <td mat-cell *matCellDef="let r" data-label="Source">
+            {{ r.plan?.source ?? r.monthEnd?.source ?? '—' }}
+          </td>
         </ng-container>
         <ng-container matColumnDef="updated">
           <th mat-header-cell *matHeaderCellDef>Updated</th>
-          <td mat-cell *matCellDef="let r">
+          <td mat-cell *matCellDef="let r" data-label="Updated">
             {{ r.updated ? (r.updated | date: 'd MMM y' : 'UTC') : '—' }}
           </td>
         </ng-container>
@@ -301,7 +331,10 @@
   </div>
   <div class="bf-compare">
     <div class="bf-kpi" data-testid="lookup-plan">
-      <p class="bf-kpi__label">Plan rate valuation</p>
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">Plan rate valuation</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="lock" aria-hidden="true" />
+      </div>
       @switch (planLookup.status()) {
         @case ('error') {
           <p class="bf-kpi__delta">No rate: {{ planLookup.error()?.message }}</p>
@@ -334,7 +367,10 @@
       }
     </div>
     <div class="bf-kpi" data-testid="lookup-other">
-      <p class="bf-kpi__label">{{ typeName(compareType()) }} valuation</p>
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">{{ typeName(compareType()) }} valuation</p>
+        <mat-icon class="bf-kpi__icon" svgIcon="currency_dollar" aria-hidden="true" />
+      </div>
       @switch (otherLookup.status()) {
         @case ('error') {
           <p class="bf-kpi__delta">No rate: {{ otherLookup.error()?.message }}</p>
@@ -361,9 +397,28 @@
         }
       }
     </div>
-    <div class="bf-kpi" data-testid="lookup-fx-effect">
-      <p class="bf-kpi__label">FX effect (reported separately)</p>
-      <p class="bf-kpi__value">
+    @let fx = fxEffect();
+    <div
+      class="bf-kpi"
+      data-testid="lookup-fx-effect"
+      [class.bf-kpi--important]="fx !== null && fx < 0"
+      [class.bf-kpi--success]="fx !== null && fx > 0"
+    >
+      <div class="bf-kpi__head">
+        <p class="bf-kpi__label">FX effect (reported separately)</p>
+        <mat-icon
+          class="bf-kpi__icon"
+          [svgIcon]="
+            fx === null || fx === 0 ? 'trending_flat' : fx < 0 ? 'trending_down' : 'trending_up'
+          "
+          aria-hidden="true"
+        />
+      </div>
+      <p
+        class="bf-kpi__value"
+        [class.bf-kpi__value--important]="fx !== null && fx < 0"
+        [class.bf-kpi__value--success]="fx !== null && fx > 0"
+      >
         @if (fxEffect() !== null) {
           <bf-money [amountMinor]="fxEffect()!" [currency]="reporting()" />
         } @else {
@@ -394,16 +449,21 @@
   @if (valueOf(groupCalendar); as g) {
     <div class="bf-filters bf-lock-row">
       @for (y of g.fiscalYears; track y.id) {
-        <sat-status-tag [status]="y.planRatesLockedAt ? 'info' : 'warning'">
-          {{ y.label }}
-          {{
-            y.planRatesLockedAt
-              ? 'locked ' + (y.planRatesLockedAt | date: 'd MMM y')
-              : 'open for planning'
-          }}
-        </sat-status-tag>
+        @if (y.planRatesLockedAt) {
+          <sat-status-tag status="neutral"
+            ><mat-icon svgIcon="lock" aria-hidden="true" />{{ y.label }} locked
+            {{ y.planRatesLockedAt | date: 'd MMM y' }}</sat-status-tag
+          >
+        } @else {
+          <sat-status-tag status="warning">{{ y.label }} open for planning</sat-status-tag>
+        }
         @if (canManage() && !y.planRatesLockedAt) {
-          <button mat-button type="button" (click)="lockYearId.set(y.id); lockReason.set('')">
+          <button
+            mat-button
+            class="bf-hide-mobile"
+            type="button"
+            (click)="lockYearId.set(y.id); lockReason.set('')"
+          >
             Lock {{ y.label }}
           </button>
         }
@@ -466,38 +526,55 @@
       <p class="bf-empty">No rates match these filters.</p>
     } @else {
       <div class="bf-table-scroll">
-        <table mat-table [dataSource]="r.items" aria-labelledby="rates-title">
+        <table
+          class="bf-table bf-table--stack"
+          mat-table
+          [dataSource]="r.items"
+          aria-labelledby="rates-title"
+        >
           <ng-container matColumnDef="type">
             <th mat-header-cell *matHeaderCellDef>Type</th>
-            <td mat-cell *matCellDef="let x">{{ typeName(x.rateType) }}</td>
+            <td class="bf-cell--full" mat-cell *matCellDef="let x">{{ typeName(x.rateType) }}</td>
           </ng-container>
           <ng-container matColumnDef="pair">
             <th mat-header-cell *matHeaderCellDef>Pair</th>
-            <td mat-cell *matCellDef="let x">{{ x.baseCurrency }}/{{ x.quoteCurrency }}</td>
+            <td mat-cell *matCellDef="let x" data-label="Pair">
+              <span class="bf-cell__code">{{ x.baseCurrency }}/{{ x.quoteCurrency }}</span>
+            </td>
           </ng-container>
           <ng-container matColumnDef="rate">
             <th mat-header-cell *matHeaderCellDef class="bf-num">Rate</th>
-            <td mat-cell *matCellDef="let x" class="bf-num">{{ rateText(x.rate) }}</td>
+            <td mat-cell *matCellDef="let x" class="bf-num" data-label="Rate">
+              {{ rateText(x.rate) }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>Effective</th>
-            <td mat-cell *matCellDef="let x">{{ x.effectiveDate | date: 'd MMM y' : 'UTC' }}</td>
+            <td mat-cell *matCellDef="let x" data-label="Effective">
+              {{ x.effectiveDate | date: 'd MMM y' : 'UTC' }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="year">
             <th mat-header-cell *matHeaderCellDef>Fiscal year</th>
-            <td mat-cell *matCellDef="let x">{{ x.fiscalYearLabel ?? '—' }}</td>
+            <td mat-cell *matCellDef="let x" data-label="Fiscal year">
+              {{ x.fiscalYearLabel ?? '—' }}
+            </td>
           </ng-container>
           <ng-container matColumnDef="source">
             <th mat-header-cell *matHeaderCellDef>Source</th>
-            <td mat-cell *matCellDef="let x">{{ x.source }}</td>
+            <td mat-cell *matCellDef="let x" data-label="Source">{{ x.source }}</td>
           </ng-container>
           <ng-container matColumnDef="locked">
             <th mat-header-cell *matHeaderCellDef>Lock</th>
-            <td mat-cell *matCellDef="let x">
+            <td mat-cell *matCellDef="let x" data-label="Lock">
               @if (x.rateType === 'plan') {
-                <sat-status-tag [status]="x.locked ? 'info' : 'warning'">{{
-                  x.locked ? 'Locked' : 'Not locked'
-                }}</sat-status-tag>
+                @if (x.locked) {
+                  <sat-status-tag status="neutral"
+                    ><mat-icon svgIcon="lock" aria-hidden="true" />Locked</sat-status-tag
+                  >
+                } @else {
+                  <sat-status-tag status="warning">Not locked</sat-status-tag>
+                }
               }
             </td>
           </ng-container>

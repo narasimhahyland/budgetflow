@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -29,13 +30,12 @@ import type {
   RecognitionAwardType,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const AWARD_STATUS_LABEL: Record<RecognitionAwardStatus, string> = {
   pending_approval: 'Waiting for approval',
@@ -80,6 +80,7 @@ interface GiveDialogData {
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatRadioModule,
     MatSelectModule,
@@ -127,7 +128,8 @@ interface GiveDialogData {
                   <span class="bf-cell__secondary">Needs your manager's approval</span>
                 }
                 @if (t.fundingFrozen) {
-                  <span class="bf-cell__secondary">
+                  <span class="bf-cell__secondary bf-paused">
+                    <mat-icon class="bf-paused__icon" svgIcon="lock" aria-hidden="true" />
                     Paused: {{ t.fundingBudgetName }} is frozen. Thank-you notes still work.
                   </span>
                 }
@@ -183,6 +185,16 @@ interface GiveDialogData {
     </mat-dialog-actions>
   `,
   styles: `
+    .bf-paused {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .bf-paused__icon {
+      flex: none;
+      width: 16px;
+      height: 16px;
+    }
     .bf-field {
       width: 100%;
       margin-top: 12px;
@@ -245,6 +257,7 @@ export class GiveRecognitionDialog {
   selector: 'bf-recognition-page',
   imports: [
     DateTimePipe,
+    DecimalPipe,
     LoadState,
     MatButtonModule,
     MatDialogModule,
@@ -293,15 +306,36 @@ export class GiveRecognitionDialog {
       @if (allowances().length) {
         <section class="bf-card bf-section" data-testid="allowances">
           <h2 class="bf-section__title">Your recognition allowance</h2>
-          @for (a of allowances(); track a.id) {
-            <p [attr.data-testid]="'allowance-' + a.id">
-              {{ a.periodKey }}:
-              <bf-money [amountMinor]="a.remaining.amountMinor" [currency]="a.remaining.currency" />
-              left of
-              <bf-money [amountMinor]="a.granted.amountMinor" [currency]="a.granted.currency" />
-              from {{ a.fundingBudgetName }}.
-            </p>
-          }
+          <div class="bf-kpis">
+            @for (a of allowances(); track a.id) {
+              <div class="bf-kpi bf-kpi--success" [attr.data-testid]="'allowance-' + a.id">
+                <div class="bf-kpi__head">
+                  <p class="bf-kpi__label">Left for {{ a.periodKey }}</p>
+                  <mat-icon class="bf-kpi__icon" svgIcon="thumbsup" aria-hidden="true" />
+                </div>
+                <p class="bf-kpi__value bf-kpi__value--success">
+                  <bf-money
+                    [amountMinor]="a.remaining.amountMinor"
+                    [currency]="a.remaining.currency"
+                  />
+                </p>
+                <div class="bf-kpi__foot">
+                  <span
+                    >left of
+                    <bf-money
+                      [amountMinor]="a.granted.amountMinor"
+                      [currency]="a.granted.currency"
+                    />
+                    from {{ a.fundingBudgetName }}</span
+                  >
+                  <span class="bf-kpi__pct">{{ usedPct(a) | number: '1.0-0' }}% used</span>
+                  <span class="bf-kpi__track"
+                    ><span class="bf-kpi__fill" [style.width.%]="usedPct(a)"></span
+                  ></span>
+                </div>
+              </div>
+            }
+          </div>
           <p class="bf-cell__secondary">
             Your allowance is one approved commitment on the Recognition budget. Each award you give
             draws on it; unused allowance is released at the end of the quarter.
@@ -498,6 +532,17 @@ export class RecognitionPage {
 
   protected readonly awards = computed(() => valueOf(this.feed)?.items ?? []);
   protected readonly allowances = computed(() => valueOf(this.feed)?.allowances ?? []);
+
+  /** Share of the allowance already given, for the bar (both amounts come from the API). */
+  protected usedPct(a: {
+    granted: { amountMinor: number };
+    remaining: { amountMinor: number };
+  }): number {
+    const granted = a.granted.amountMinor;
+    return granted <= 0
+      ? 0
+      : Math.min(100, Math.max(0, ((granted - a.remaining.amountMinor) * 100) / granted));
+  }
   protected readonly awardTypes = computed(() => valueOf(this.feed)?.awardTypes ?? []);
   protected readonly frozenTypes = computed(() =>
     this.awardTypes()

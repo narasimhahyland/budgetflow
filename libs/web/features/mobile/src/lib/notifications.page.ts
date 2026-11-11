@@ -15,13 +15,13 @@ import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { NotificationArea, NotificationItem, TaskItem } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, MobileTabBar, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, MobileTabBar, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { channelLabel } from './labels';
 
 type Tab = 'all' | 'tasks' | 'mentions' | 'following';
 const TABS: { id: Tab; label: string }[] = [
@@ -59,6 +59,7 @@ const AREAS: { id: NotificationArea; label: string }[] = [
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
+    SatCategoryTag,
     SatStatusTag,
   ],
   template: `
@@ -140,12 +141,7 @@ const AREAS: { id: NotificationArea; label: string }[] = [
           Last {{ periodDays() }} days
         </button>
         @if (areaFilter() || unreadOnly() || periodDays() !== 90) {
-          <button
-            mat-button
-            type="button"
-            (click)="clearFilters()"
-            data-testid="clear-filters"
-          >
+          <button mat-button type="button" (click)="clearFilters()" data-testid="clear-filters">
             Clear filters
           </button>
         }
@@ -153,13 +149,28 @@ const AREAS: { id: NotificationArea; label: string }[] = [
     }
 
     @if (selectedIds().size > 0 && tab() !== 'tasks') {
-      <div class="bf-notif__selection" role="region" aria-label="Bulk actions" data-testid="selection-bar">
+      <div
+        class="bf-notif__selection"
+        role="region"
+        aria-label="Bulk actions"
+        data-testid="selection-bar"
+      >
         <span>{{ selectedIds().size }} selected</span>
         <div class="bf-notif__selection-actions">
-          <button mat-stroked-button type="button" (click)="markSelected(true)" data-testid="bulk-mark-read">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="markSelected(true)"
+            data-testid="bulk-mark-read"
+          >
             Mark as read
           </button>
-          <button mat-stroked-button type="button" (click)="markSelected(false)" data-testid="bulk-mark-unread">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="markSelected(false)"
+            data-testid="bulk-mark-unread"
+          >
             Mark as unread
           </button>
           <button mat-button type="button" (click)="clearSelection()">Clear</button>
@@ -188,7 +199,9 @@ const AREAS: { id: NotificationArea; label: string }[] = [
             <p satEmptyStateDescription>
               Tasks close themselves as soon as you approve, upload a receipt or submit commentary.
             </p>
-            <a mat-stroked-button routerLink="/me/notifications">Notification settings</a>
+            <a satEmptyStateAction mat-stroked-button routerLink="/me/notifications">
+              Notification settings
+            </a>
           </sat-empty-state>
         } @else {
           <section class="bf-card" aria-label="Open tasks">
@@ -199,7 +212,13 @@ const AREAS: { id: NotificationArea; label: string }[] = [
               </span>
             </div>
             <div class="bf-table-scroll">
-              <table mat-table [dataSource]="tasks()" aria-label="Open tasks" data-testid="tasks-table">
+              <table
+                mat-table
+                class="bf-table bf-table--stack"
+                [dataSource]="tasks()"
+                aria-label="Open tasks"
+                data-testid="tasks-table"
+              >
                 <ng-container matColumnDef="task">
                   <th mat-header-cell *matHeaderCellDef>Task</th>
                   <td mat-cell *matCellDef="let t">
@@ -209,9 +228,12 @@ const AREAS: { id: NotificationArea; label: string }[] = [
                 </ng-container>
                 <ng-container matColumnDef="amount">
                   <th mat-header-cell *matHeaderCellDef class="bf-num">Amount</th>
-                  <td mat-cell *matCellDef="let t" class="bf-num">
+                  <td mat-cell *matCellDef="let t" class="bf-num" data-label="Amount">
                     @if (t.amount) {
-                      <bf-money [amountMinor]="t.amount.amountMinor" [currency]="t.amount.currency" />
+                      <bf-money
+                        [amountMinor]="t.amount.amountMinor"
+                        [currency]="t.amount.currency"
+                      />
                     } @else {
                       —
                     }
@@ -219,7 +241,7 @@ const AREAS: { id: NotificationArea; label: string }[] = [
                 </ng-container>
                 <ng-container matColumnDef="due">
                   <th mat-header-cell *matHeaderCellDef>Due</th>
-                  <td mat-cell *matCellDef="let t">
+                  <td mat-cell *matCellDef="let t" data-label="Due">
                     @if (t.overdue) {
                       <sat-status-tag status="warning">Overdue</sat-status-tag>
                     } @else if (t.dueToday) {
@@ -235,7 +257,7 @@ const AREAS: { id: NotificationArea; label: string }[] = [
                 </ng-container>
                 <ng-container matColumnDef="action">
                   <th mat-header-cell *matHeaderCellDef>Action</th>
-                  <td mat-cell *matCellDef="let t">
+                  <td mat-cell *matCellDef="let t" data-label="Action">
                     <a
                       mat-stroked-button
                       [routerLink]="parsePath(t.actionLink)"
@@ -266,7 +288,7 @@ const AREAS: { id: NotificationArea; label: string }[] = [
             <sat-empty-state>
               <h2 satEmptyStateHeadline>Nothing matches these filters</h2>
               <p satEmptyStateDescription>Clear the active filters to see all notifications.</p>
-              <button mat-stroked-button type="button" (click)="clearFilters()">
+              <button satEmptyStateAction mat-stroked-button type="button" (click)="clearFilters()">
                 Clear filters
               </button>
             </sat-empty-state>
@@ -276,7 +298,9 @@ const AREAS: { id: NotificationArea; label: string }[] = [
               <p satEmptyStateDescription>
                 Approvals, budget alerts and discussion mentions will appear here.
               </p>
-              <a mat-stroked-button routerLink="/me/notifications">Notification settings</a>
+              <a satEmptyStateAction mat-stroked-button routerLink="/me/notifications">
+                Notification settings
+              </a>
             </sat-empty-state>
           }
         } @else {
@@ -302,14 +326,14 @@ const AREAS: { id: NotificationArea; label: string }[] = [
                   <div class="bf-notif__main">
                     <div class="bf-notif__title-line">
                       <strong>{{ n.title }}</strong>
-                      <sat-status-tag [status]="tagStatus(n.tone)">{{ n.area }}</sat-status-tag>
+                      <sat-category-tag category="gray">{{ areaLabel(n.area) }}</sat-category-tag>
                     </div>
                     <p class="bf-notif__detail">{{ n.detail }}</p>
                     <div class="bf-notif__meta">
                       <span data-testid="relative-time">{{
                         n.createdAt | bfDateTime: session.timezone()
                       }}</span>
-                      <span>· Delivered via {{ n.channelsDelivered.join(', ').replaceAll('_', '-') }}</span>
+                      <span>· Delivered via {{ delivered(n) }}</span>
                       @if (!n.available && n.itemType) {
                         <span>· <strong>No longer available</strong></span>
                       }
@@ -344,10 +368,7 @@ const AREAS: { id: NotificationArea; label: string }[] = [
     }
 
     @if (isMobileRoute()) {
-      <bf-mobile-tab-bar
-        [approvalCount]="counts().tasks"
-        [alertCount]="counts().unread"
-      />
+      <bf-mobile-tab-bar [approvalCount]="counts().tasks" [alertCount]="counts().unread" />
     }
   `,
   styles: `
@@ -477,9 +498,7 @@ export class NotificationsPage {
     loader: ({ params }) => data(this.api.listNotifications({ query: params })),
   });
 
-  protected readonly items = computed<NotificationItem[]>(
-    () => valueOf(this.feed)?.items ?? [],
-  );
+  protected readonly items = computed<NotificationItem[]>(() => valueOf(this.feed)?.items ?? []);
   protected readonly tasks = computed<TaskItem[]>(() => valueOf(this.feed)?.tasks ?? []);
   protected readonly counts = computed(
     () =>
@@ -527,10 +546,13 @@ export class NotificationsPage {
     this.selectedIds.set(new Set());
   }
 
-  protected tagStatus(
-    tone: NotificationItem['tone'],
-  ): 'neutral' | 'info' | 'warning' | 'important' | 'success' {
-    return tone;
+  /** The area a notification belongs to is a category, not a status. */
+  protected areaLabel(area: NotificationArea): string {
+    return AREAS.find((a) => a.id === area)?.label ?? area;
+  }
+
+  protected delivered(n: NotificationItem): string {
+    return n.channelsDelivered.map(channelLabel).join(', ');
   }
 
   protected parsePath(link: string): string {

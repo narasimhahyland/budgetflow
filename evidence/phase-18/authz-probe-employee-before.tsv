@@ -1,0 +1,187 @@
+200	adminSettings	/api/admin/settings
+200	budgetSummary	/api/budgets/summary
+200	eventActivity	/api/events/{eventId}/activity
+200	featureFlagHistory	/api/admin/features/history
+200	featureFlags	/api/admin/features
+200	getAiAccuracy	/api/ai/accuracy
+200	getAiSettings	/api/ai/settings
+200	getApprovalInbox	/api/approvals/inbox
+200	getAssistantConnector	/api/ecosystem/assistants
+200	getAutomationConnector	/api/ecosystem/automations
+200	getBiConnector	/api/ecosystem/bi
+200	getCofundingBoard	/api/events/cofunding-board
+200	getDigestTemplate	/api/digests/templates/{templateId}
+200	getEvent	/api/events/{eventId}
+200	getEventAttendance	/api/events/{eventId}/attendance
+200	getEventFeedback	/api/events/{eventId}/feedback
+200	getEventInvitations	/api/events/{eventId}/invitations
+200	getEventNeeds	/api/events/{eventId}/needs
+200	getEventPlan	/api/events/{eventId}/plan
+200	getEventQuotes	/api/events/{eventId}/quotes
+200	getEventScorecard	/api/events/{eventId}/scorecard
+200	getEventsDashboard	/api/events/dashboard
+200	getHeadcount	/api/org/headcount
+200	getMyWallets	/api/wallets
+200	getNotificationSettings	/api/me/notification-settings
+200	getOrganizerRecognition	/api/recognition/organizers/{personId}
+200	getParticipationLeaderboard	/api/insights/participation-leaderboard
+200	getPerson	/api/org/people/{personId}
+200	getRecognitionFeed	/api/recognition
+200	legalHolds	/api/admin/retention/holds
+200	listAiConversations	/api/ai/conversations
+200	listAiOutlook	/api/ai/outlook
+200	listApprovalHistory	/api/approvals/history
+200	listAssistantConnections	/api/ecosystem/assistants/connections
+200	listAutomations	/api/ecosystem/automations/connections
+200	listBiConnections	/api/ecosystem/bi/connections
+200	listBookings	/api/marketplace/bookings
+200	listBudgets	/api/budgets
+200	listCategories	/api/finance/categories
+200	listChangeRequests	/api/budget-requests
+200	listChannelDeliveries	/api/channels/deliveries
+200	listContributions	/api/contributions
+200	listCostCenters	/api/org/cost-centers
+200	listCurrencies	/api/finance/currencies
+200	listDelegations	/api/approvals/delegations
+200	listDigestTemplates	/api/digests/templates
+200	listEventParticipants	/api/events/{eventId}/participants
+200	listEventTemplates	/api/events/templates
+200	listEvents	/api/events
+200	listExchangeRates	/api/finance/exchange-rates
+200	listFiscalCalendars	/api/finance/fiscal-calendars
+200	listFollowedItems	/api/me/following
+200	listGlAccounts	/api/finance/gl-accounts
+200	listGlMappings	/api/finance/gl-mappings
+200	listLegalEntities	/api/finance/legal-entities
+200	listNotifications	/api/notifications
+200	listOrgUnits	/api/org/units
+200	listPeople	/api/org/people
+200	listProgramTemplates	/api/program-templates
+200	listReasonCodes	/api/finance/reason-codes
+200	listRecharges	/api/recharges
+200	listReportSchedules	/api/reports/schedules
+200	listRequests	/api/requests
+200	listVendors	/api/finance/vendors
+200	listWalletClaims	/api/wallets/claims
+200	listWalletPrograms	/api/wallets/programs
+200	listWidgets	/api/ecosystem/widgets
+200	maintenanceNotices	/api/admin/maintenance-notices
+200	me	/api/me
+200	myActivity	/api/me/activity
+200	myFeatures	/api/me/features
+200	previewDigestTemplate	/api/digests/templates/{templateId}/preview
+200	requestableBudgets	/api/requests/requestable-budgets
+200	retentionPolicies	/api/admin/retention/policies
+200	retentionRuns	/api/admin/retention/runs
+200	setupChecklist	/api/admin/setup-checklist
+200	systemHealth	/api/admin/health
+400	candidateGivingBudgets	/api/contributions/candidate-budgets
+400	compareScenarios	/api/scenarios/compare
+400	downloadBoardPack	/api/reports/board-pack/generations/{generationId}/download	(no real id)
+400	drillDownReport	/api/reports/{reportId}/drilldown	(no real id)
+400	getChatApprovalCard	/api/channels/{provider}/cards/{taskId}	(no real id)
+400	getDiscussion	/api/discussions/{itemType}/{itemId}	(no real id)
+400	listDocuments	/api/documents
+400	lookupDoa	/api/finance/doa/lookup
+400	lookupExchangeRate	/api/finance/exchange-rates/lookup
+400	planTieOut	/api/plan-versions/tie-out
+400	previewChatLink	/api/channels/link-preview
+400	previewRoute	/api/requests/route-preview
+400	runReport	/api/reports/{reportId}/run	(no real id)
+403	adminUser	/api/admin/users/{membershipId}
+403	adminUsers	/api/admin/users
+403	compareRuleVersions	/api/rules/{ruleId}/diff
+403	exportTieOut	/api/actuals/tie-outs/{tieOutId}/export	(no real id)
+403	getActual	/api/actuals/{actualId}
+403	getActualsImport	/api/actuals/imports/{batchId}
+403	getAdminChannels	/api/admin/channels
+403	getApiKeyUsage	/api/integrations/api-keys/{keyId}/usage	(no real id)
+403	getBoardPack	/api/reports/board-pack
+403	getBoardPackGeneration	/api/reports/board-pack/generations/{generationId}	(no real id)
+403	getBudgetHealth	/api/dashboards/health
+403	getClosePeriod	/api/close/periods/{periodId}	(no real id)
+403	getDoaMatrix	/api/finance/doa
+403	getDoaMatrixAdmin	/api/rules/doa-admin
+403	getEventReconciliation	/api/actuals/events/{eventId}/reconciliation
+403	getForecastCycle	/api/close/forecast-cycles/{cycleId}	(no real id)
+403	getIdentityIntegration	/api/integrations/identity
+403	getIntegrationConnection	/api/integrations/connections/{connectionId}	(no real id)
+403	getIntegrationsHub	/api/integrations
+403	getLeadershipSummary	/api/insights/summaries/{summaryId}	(no real id)
+403	getLedgerCheck	/api/integrity/ledger-checks/{checkId}	(no real id)
+403	getOffer	/api/marketplace/offers/{offerId}	(no real id)
+403	getOutcomeLinkage	/api/insights/outcomes
+403	getPlanVersion	/api/plan-versions/{planVersionId}
+403	getPolicyConfigs	/api/rules/policies
+403	getReportCatalog	/api/reports
+403	getRule	/api/rules/{ruleId}
+403	getRulesDashboard	/api/rules/dashboard
+403	getSyncRun	/api/integrations/sync-runs/{runId}	(no real id)
+403	getTemplatesAndThresholds	/api/rules/templates-thresholds
+403	getTieOut	/api/actuals/tie-outs/{tieOutId}	(no real id)
+403	getTieOutLine	/api/actuals/tie-outs/{tieOutId}/lines/{lineId}	(no real id)
+403	getUtilization	/api/utilization
+403	getYearEndRun	/api/close/year-end-runs/{runId}	(no real id)
+403	listAccruals	/api/actuals/accruals
+403	listActuals	/api/actuals
+403	listActualsImports	/api/actuals/imports
+403	listAiQueryLog	/api/ai/query-log
+403	listAnomalyFlags	/api/ai/anomaly-flags
+403	listApiKeys	/api/integrations/api-keys
+403	listAuditEvents	/api/audit/events
+403	listBoardPackGenerations	/api/reports/board-pack/generations
+403	listClosePeriods	/api/close/periods
+403	listCommitmentHygiene	/api/actuals/commitments
+403	listCrossSourceDuplicates	/api/integrations/duplicates
+403	listEventReconciliations	/api/actuals/events
+403	listForecastCycles	/api/close/forecast-cycles
+403	listHeadcountSnapshots	/api/org/headcount/snapshots
+403	listIntegrationMessages	/api/integrations/messages
+403	listIntegrationPushes	/api/integrations/pushes
+403	listIntercompanyPolicies	/api/intercompany-policies
+403	listLateItems	/api/close/periods/{periodId}/late-items	(no real id)
+403	listLeadershipSummaries	/api/insights/summaries
+403	listMappingRules	/api/actuals/mapping-rules
+403	listMatchSuggestions	/api/ai/matching-suggestions
+403	listOffers	/api/marketplace/offers
+403	listPartners	/api/ecosystem/marketplace/partners
+403	listPeriodSnapshots	/api/close/periods/{periodId}/snapshots	(no real id)
+403	listPlanVersions	/api/plan-versions
+403	listPostSpendExceptions	/api/rules/exceptions
+403	listPrepaids	/api/actuals/prepaids
+403	listReportExports	/api/reports/exports
+403	listRolloverPolicies	/api/close/rollover-policies
+403	listRules	/api/rules
+403	listSavedViews	/api/reports/views
+403	listScheduleRuns	/api/reports/schedules/{scheduleId}/runs
+403	listSyncRuns	/api/integrations/sync-runs
+403	listTieOuts	/api/actuals/tie-outs
+403	listWebhookDeliveries	/api/integrations/webhook-deliveries
+403	listWebhookEndpoints	/api/integrations/webhook-endpoints
+403	listWorkflowRoutes	/api/rules/routing
+403	listYearEndRuns	/api/close/year-end-runs
+403	ownerInvites	/api/admin/owner-invites
+403	verifyAuditChain	/api/audit/verification
+404	allocationHistory	/api/budgets/{budgetId}/allocation-history
+404	budgetLedger	/api/budgets/{budgetId}/ledger
+404	budgetVersions	/api/budgets/{budgetId}/versions
+404	downloadDocument	/api/documents/{documentId}/download	(no real id)
+404	getAiConversation	/api/ai/conversations/{conversationId}	(no real id)
+404	getApprovalTask	/api/approvals/tasks/{taskId}
+404	getBudget	/api/budgets/{budgetId}
+404	getBudgetLimits	/api/budgets/{budgetId}/limits
+404	getBudgetOutlook	/api/ai/outlook/{budgetId}
+404	getContribution	/api/contributions/{contributionId}
+404	getEmployeeInvitation	/api/invitations/{invitationId}	(no real id)
+404	getEmployeeSurvey	/api/surveys/{surveyId}	(no real id)
+404	getEventTemplate	/api/events/templates/{templateId}
+404	getFiscalCalendar	/api/finance/fiscal-calendars/{calendarId}	(no real id)
+404	getJournal	/api/ledger/journals/{journalId}
+404	getOrgUnit	/api/org/units/{orgUnitId}
+404	getPhasing	/api/budgets/{budgetId}/phasing
+404	getRequest	/api/requests/{requestId}
+404	getScenario	/api/scenarios/{scenarioId}	(no real id)
+404	getScenarioImpact	/api/scenarios/{scenarioId}/impact	(no real id)
+404	getWidgetContent	/api/ecosystem/widgets/{widgetId}/content	(no real id)
+404	listScenarios	/api/scenarios
+404	retentionRun	/api/admin/retention/runs/{runId}	(no real id)

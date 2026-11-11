@@ -15,7 +15,7 @@ import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ForecastCycleDetail, ForecastSubmission } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
@@ -34,7 +34,7 @@ import {
   METHOD_LABELS,
   PROGRESS_SEGMENTS,
 } from './forecast-format';
-import { LoadState } from './load-state';
+import { CloseTag } from './close-tag';
 
 /**
  * Screen 87a, cycle monitor and owner submission. Every action on this page comes from the API's
@@ -47,6 +47,7 @@ import { LoadState } from './load-state';
 @Component({
   selector: 'bf-forecast-cycle-page',
   imports: [
+    CloseTag,
     DatePipe,
     DecimalPipe,
     LoadState,
@@ -67,15 +68,14 @@ import { LoadState } from './load-state';
         <div class="bf-title-row">
           <h1 class="bf-page__title">{{ cycle()?.name ?? 'Forecast cycle' }}</h1>
           @if (cycle(); as c) {
-            <sat-status-tag [status]="cycleStatus(c.status).tone">{{
-              cycleStatus(c.status).text
-            }}</sat-status-tag>
+            <bf-close-tag [tag]="cycleStatus(c.status)" />
           }
         </div>
         @if (cycle(); as c) {
           <p class="bf-page__subtitle">
-            As of {{ c.asOfDate | date: 'd MMM y' }} · due {{ c.dueDate | date: 'd MMM y' }} ·
-            {{ c.scopeLabel }} · figures in {{ c.currency }}
+            As of {{ c.asOfDate | date: 'd MMM y' : 'UTC' }} · due
+            {{ c.dueDate | date: 'd MMM y' : 'UTC' }} · {{ c.scopeLabel }} · figures in
+            {{ c.currency }}
           </p>
         }
       </div>
@@ -136,8 +136,8 @@ import { LoadState } from './load-state';
               >{{ d.cycle.progress.overdue }}
               {{ d.cycle.progress.overdue === 1 ? 'line is' : 'lines are' }} overdue.</strong
             >
-            They were due on {{ d.cycle.dueDate | date: 'd MMM y' }}. Closing the cycle fills them
-            with the system run-rate forecast.
+            They were due on {{ d.cycle.dueDate | date: 'd MMM y' : 'UTC' }}. Closing the cycle
+            fills them with the system run-rate forecast.
           </sat-banner-message>
         </sat-banner>
       }
@@ -153,7 +153,10 @@ import { LoadState } from './load-state';
 
       <div class="bf-kpis">
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Authorized</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Authorized</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="currency_dollar" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="d.totals.authorized.amountMinor"
@@ -162,7 +165,10 @@ import { LoadState } from './load-state';
           </p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Actual to date</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Actual to date</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="check_double" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="d.totals.actualToDate.amountMinor"
@@ -171,7 +177,10 @@ import { LoadState } from './load-state';
           </p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Committed</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Committed</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="shield_lock" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="d.totals.committed.amountMinor"
@@ -180,7 +189,10 @@ import { LoadState } from './load-state';
           </p>
         </div>
         <div class="bf-kpi bf-kpi--forecast">
-          <p class="bf-kpi__label">Forecast at year end</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Forecast at year end</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="trending_up" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="d.totals.forecast.amountMinor"
@@ -190,7 +202,10 @@ import { LoadState } from './load-state';
           <p class="bf-kpi__delta">A projection. Never posted, never consumes budget.</p>
         </div>
         <div class="bf-kpi">
-          <p class="bf-kpi__label">Variance against authorized</p>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Variance against authorized</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="compare" aria-hidden="true" />
+          </div>
           <p class="bf-kpi__value">
             <bf-money
               [amountMinor]="d.totals.variance.amountMinor"
@@ -263,7 +278,12 @@ import { LoadState } from './load-state';
         </div>
         @if (d.submissions.length) {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="d.submissions" aria-label="Forecast lines">
+            <table
+              mat-table
+              class="bf-table"
+              [dataSource]="d.submissions"
+              aria-label="Forecast lines"
+            >
               <ng-container matColumnDef="line">
                 <th mat-header-cell *matHeaderCellDef>Budget or event</th>
                 <td mat-cell *matCellDef="let s">
@@ -319,18 +339,18 @@ import { LoadState } from './load-state';
                     [currency]="s.variance.currency"
                   />
                   <span class="bf-cell__secondary" [attr.data-testid]="'direction-' + lineKey(s)">
-                    {{ percent(s.varianceBps) }} {{ direction(s) }}
+                    @if (s.authorized.amountMinor > 0) {
+                      {{ percent(s.varianceBps) }} {{ direction(s) }}
+                    } @else {
+                      {{ direction(s) }}, nothing authorized
+                    }
                   </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
                 <td mat-cell *matCellDef="let s">
-                  <span class="bf-tag-cell"
-                    ><sat-status-tag [status]="lineStatus(s).tone">{{
-                      lineStatus(s).text
-                    }}</sat-status-tag></span
-                  >
+                  <span class="bf-tag-cell"><bf-close-tag [tag]="lineStatus(s)" /></span>
                   @if (s.systemGenerated) {
                     <span class="bf-tag-cell"
                       ><sat-status-tag status="neutral">System</sat-status-tag></span
@@ -358,7 +378,7 @@ import { LoadState } from './load-state';
                     }
                     @if (can('accept') && s.status === 'submitted') {
                       <button
-                        mat-stroked-button
+                        mat-button
                         type="button"
                         [disabled]="busy()"
                         (click)="accept(s)"
@@ -369,7 +389,7 @@ import { LoadState } from './load-state';
                     }
                     @if (can('request_commentary') && s.status === 'submitted') {
                       <button
-                        mat-stroked-button
+                        mat-button
                         type="button"
                         [disabled]="busy()"
                         (click)="askForCommentary(s)"
@@ -418,19 +438,33 @@ import { LoadState } from './load-state';
       border-radius: var(--mat-sys-corner-extra-small);
     }
     .bf-progress__fill--accepted {
-      background: var(--sat-sys-success);
+      background: var(--sat-sys-success-icon);
     }
     .bf-progress__fill--submitted {
       background: var(--mat-sys-primary);
     }
     .bf-progress__fill--commentaryRequired {
-      background: var(--sat-sys-warning);
+      background: var(--sat-sys-warning-icon);
+    }
+    .bf-progress {
+      background: var(--mat-sys-surface-container);
+    }
+    /* Five figures of up to "USD 103,000.00" at the section 9 size: bf-money never wraps. */
+    .bf-kpis {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+    /* Row actions stay on one line: the primary action outlined, the others as text buttons. */
+    .bf-row-actions {
+      flex-wrap: nowrap;
+      gap: 4px;
     }
     .bf-progress__fill--draft {
       background: var(--mat-sys-secondary-container);
+      box-shadow: inset 0 0 0 1px var(--mat-sys-primary);
     }
+    /* Not started must still be visible against the track, as a segment and as a swatch. */
     .bf-progress__fill--notStarted {
-      background: var(--mat-sys-surface-container-high);
+      background: var(--mat-sys-outline-variant);
     }
     /* A forecast is a projection: hatched, so it never reads like committed or actual money. */
     .bf-cell--forecast {

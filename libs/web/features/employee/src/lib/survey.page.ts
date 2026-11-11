@@ -17,7 +17,7 @@ import { RouterLink } from '@angular/router';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 /** Screen 54a for the attendee: the anonymous post-event survey. */
 @Component({

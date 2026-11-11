@@ -145,6 +145,9 @@ services:
       DOCUMENT_STORE_SECRET_KEY: ${BF_MINIO_ROOT_PASSWORD:?}
       WEB_BASE_URL: http://localhost:${BF_WEB_PORT:-4200}
       APPROVAL_LINK_SECRET: ${BF_APPROVAL_LINK_SECRET:-}
+      # Local stack only: lets signing and encryption secrets that are not set fall back to the
+      # public development values. Never set it in a deployment (libs/api/core secrets.ts).
+      BF_ALLOW_DEV_SECRETS: ${BF_ALLOW_DEV_SECRETS:-true}
       # Phase 12: connectors and webhook deliveries only reach these hosts.
       INTEGRATIONS_MOCK_BASE_URL: http://mock-providers:4010
       INTEGRATIONS_ALLOWED_HOSTS: mock-providers,localhost,127.0.0.1
@@ -184,6 +187,7 @@ services:
       SMTP_URL: smtp://mailpit:1025
       WEB_BASE_URL: http://localhost:${BF_WEB_PORT:-4200}
       APPROVAL_LINK_SECRET: ${BF_APPROVAL_LINK_SECRET:-}
+      BF_ALLOW_DEV_SECRETS: ${BF_ALLOW_DEV_SECRETS:-true}
       # Wall-clock sweeps are off in this stack: a suite freezes the browser clock and asserts exact
       # rendered state, so a sweep firing mid-run changes what the next assertion sees. Scenarios
       # drive the same work through its API instead. Set a cron here to watch one run on a schedule.

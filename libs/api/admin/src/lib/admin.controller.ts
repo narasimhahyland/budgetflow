@@ -7,12 +7,15 @@ import {
 } from '@bf/api/core';
 import {
   AdminDecisionRequest,
+  BreakGlassDecisionRequest,
   CancelMaintenanceNoticeRequest,
   CreateMaintenanceNoticeRequest,
   CreateOwnerInvitesRequest,
   GrantRoleRequest,
   LegalHoldDecisionRequest,
   PlaceLegalHoldRequest,
+  RequestBreakGlassRequest,
+  RevokeBreakGlassRequest,
   RevokeRoleRequest,
   StartRetentionRunRequest,
   SwitchFeatureFlagRequest,
@@ -26,6 +29,7 @@ import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, Res } from '@
 import { z } from 'zod';
 import type { CommandContext } from './admin-reads';
 import { AdminSettingsService } from './admin-settings.service';
+import { BreakGlassService } from './break-glass.service';
 import { ExperienceService } from './experience.service';
 import { FeatureFlagsService } from './feature-flags.service';
 import { RetentionService } from './retention.service';
@@ -81,6 +85,7 @@ export class AdminController {
     private readonly users: UserAdminService,
     private readonly health: SystemHealthService,
     private readonly experience: ExperienceService,
+    private readonly breakGlass: BreakGlassService,
   ) {}
 
   // Settings ------------------------------------------------------------------------------------
@@ -157,6 +162,71 @@ export class AdminController {
       await this.settings.updateSecurity(
         actor,
         parseWith(UpdateSecuritySettingsRequest, body),
+        ctx(key, rid),
+      ),
+    );
+  }
+
+  // Break-glass access (112) --------------------------------------------------------------------
+
+  @Get('break-glass')
+  listBreakGlass(@CurrentActor() actor: RequestActor) {
+    return this.breakGlass.list(actor);
+  }
+
+  @Post('break-glass')
+  async requestBreakGlass(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.breakGlass.request(
+        actor,
+        parseWith(RequestBreakGlassRequest, body),
+        ctx(key, rid),
+      ),
+    );
+  }
+
+  @Post('break-glass/:grantId/decision')
+  async decideBreakGlass(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Param('grantId') grantId: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.breakGlass.decide(
+        actor,
+        id(grantId),
+        parseWith(BreakGlassDecisionRequest, body),
+        ctx(key, rid),
+      ),
+    );
+  }
+
+  @Post('break-glass/:grantId/revocation')
+  async revokeBreakGlass(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Param('grantId') grantId: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.breakGlass.revoke(
+        actor,
+        id(grantId),
+        parseWith(RevokeBreakGlassRequest, body),
         ctx(key, rid),
       ),
     );

@@ -10,23 +10,24 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import type { PostSpendExceptionItem } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money, type StatusView } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { RulesTabs } from './rules-tabs';
 
-const STATUS_TONES: Record<string, 'warning' | 'info' | 'success'> = {
-  open: 'warning',
-  explained: 'info',
-  resolved: 'success',
+// Open waits for a person (warning, as Pending everywhere), explained is noted, settled is done.
+const STATE_LOOKS: Record<string, StatusView> = {
+  open: { label: 'Open', tone: 'warning', icon: 'clock' },
+  explained: { label: 'Explained', tone: 'info', icon: 'note_edit' },
+  resolved: { label: 'Settled', tone: 'success', icon: 'check_double' },
 };
 
 const RESOLUTIONS = [
@@ -46,10 +47,12 @@ const RESOLUTIONS = [
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     Money,
     RulesTabs,
+    SatAvatar,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
@@ -80,6 +83,7 @@ const RESOLUTIONS = [
       [loading]="list.isLoading() && !list.hasValue()"
       [error]="list.error()"
       what="post-spend exceptions"
+      shape="table"
       (retry)="list.reload()"
     />
     @if (valueOf(list); as v) {
@@ -107,7 +111,7 @@ const RESOLUTIONS = [
         </div>
         @if (rows().length) {
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="Post-spend exceptions">
+            <table class="bf-split-table bf-table--stack" aria-label="Post-spend exceptions">
               <thead>
                 <tr>
                   <th scope="col">What happened</th>
@@ -126,20 +130,32 @@ const RESOLUTIONS = [
                       <span class="bf-cell__primary">{{ e.typeLabel }}</span>
                       <span class="bf-cell__secondary">{{ e.summary }}</span>
                     </td>
-                    <td>
-                      {{ e.budgetName }}
-                      <span class="bf-cell__secondary">{{ e.location }} · {{ e.personName }}</span>
+                    <td data-label="Budget">
+                      <span class="bf-cell__primary">{{ e.budgetName }}</span>
+                      <span class="bf-cell__secondary bf-person">
+                        <sat-avatar size="18" [initials]="initials(e.personName)" />
+                        {{ e.personName }} · {{ e.location }}
+                      </span>
                     </td>
-                    <td class="bf-num">
+                    <td class="bf-num" data-label="Amount">
                       <bf-money
                         [amountMinor]="e.reportingAmount.amountMinor"
                         [currency]="e.reportingAmount.currency"
                       />
                     </td>
-                    <td>{{ e.ruleCode }} v{{ e.ruleVersion }}</td>
-                    <td class="bf-num">{{ e.ageDays }} days</td>
-                    <td>
-                      <sat-status-tag [status]="tone(e.status)">{{ stateLabel(e) }}</sat-status-tag>
+                    <td data-label="Rule">
+                      <span class="bf-cell__code">{{ e.ruleCode }} v{{ e.ruleVersion }}</span>
+                    </td>
+                    <td class="bf-num" data-label="Age">
+                      {{ e.ageDays }} {{ e.ageDays === 1 ? 'day' : 'days' }}
+                    </td>
+                    <td class="bf-nowrap" data-label="State">
+                      @let look = stateLook(e.status);
+                      <sat-status-tag [status]="look.tone"
+                        ><mat-icon [svgIcon]="look.icon" aria-hidden="true" />{{
+                          look.label
+                        }}</sat-status-tag
+                      >
                     </td>
                     <td>
                       @if (e.allowedActions.includes('resolve')) {
@@ -167,7 +183,8 @@ const RESOLUTIONS = [
                           }
                           @if (resolution === 'ask_repayment') {
                             <mat-form-field appearance="outline">
-                              <mat-label>Repayment (USD)</mat-label>
+                              <mat-label>Repayment</mat-label>
+                              <span matTextPrefix>USD&nbsp;</span>
                               <input
                                 matInput
                                 inputmode="decimal"
@@ -216,6 +233,17 @@ const RESOLUTIONS = [
       </section>
     }
   `,
+  styles: `
+    .bf-nowrap,
+    .bf-split-table td.bf-num {
+      white-space: nowrap;
+    }
+    .bf-person {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -251,12 +279,17 @@ export class ExceptionsPage {
     return counts[state as keyof typeof counts] ?? 0;
   }
 
-  protected tone(status: string): 'warning' | 'info' | 'success' {
-    return STATUS_TONES[status] ?? 'warning';
+  protected stateLook(status: string): StatusView {
+    return STATE_LOOKS[status] ?? STATE_LOOKS['open'];
   }
 
-  protected stateLabel(e: PostSpendExceptionItem): string {
-    return e.status === 'resolved' ? 'Settled' : e.status === 'explained' ? 'Explained' : 'Open';
+  protected initials(name: string): string {
+    return name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p.charAt(0).toUpperCase())
+      .join('');
   }
 
   protected async resolve(exceptionId: string): Promise<void> {

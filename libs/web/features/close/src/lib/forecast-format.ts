@@ -15,16 +15,16 @@ export const METHOD_LABELS: Record<ForecastMethod, string> = {
  * "Superseded" is quiet because a later cycle already replaced it.
  */
 export const FORECAST_STATUS: Record<ForecastStatus, Tag> = {
-  draft: { tone: 'neutral', text: 'Draft' },
-  submitted: { tone: 'info', text: 'Submitted' },
-  commentary_required: { tone: 'warning', text: 'Commentary required' },
-  accepted: { tone: 'success', text: 'Accepted' },
-  superseded: { tone: 'neutral-quiet', text: 'Superseded' },
+  draft: { tone: 'neutral', text: 'Draft', icon: 'note_edit' },
+  submitted: { tone: 'neutral', text: 'Submitted', icon: 'send' },
+  commentary_required: { tone: 'warning', text: 'Commentary required', icon: 'comment' },
+  accepted: { tone: 'success', text: 'Accepted', icon: 'circle_check' },
+  superseded: { tone: 'neutral-quiet', text: 'Superseded', icon: 'restore' },
 };
 
 export const CYCLE_STATUS: Record<ForecastCycle['status'], Tag> = {
-  open: { tone: 'success', text: 'Open' },
-  closed: { tone: 'neutral', text: 'Closed' },
+  open: { tone: 'success', text: 'Open', icon: 'circle_check' },
+  closed: { tone: 'neutral', text: 'Closed', icon: 'archive' },
 };
 
 /** The direction the API wrote out, so the reader never has to work it out from a sign or a colour. */

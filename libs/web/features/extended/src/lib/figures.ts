@@ -1,3 +1,4 @@
+import { formatNumber } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,11 +20,11 @@ export function formatSuppressible(figure: SuppressibleFigure, kind: FigureKind)
   if (value === null) return '';
   switch (kind) {
     case 'rating':
-      return `${(value / 1000).toFixed(1)} of 5`;
+      return `${formatNumber(value / 1000, 'en-US', '1.1-1')} of 5`;
     case 'enps':
       return `${value > 0 ? '+' : ''}${Math.round(value / 10)}`;
     case 'percent':
-      return `${(value / 10).toFixed(1)}%`;
+      return `${formatNumber(value / 10, 'en-US', '1.1-1')}%`;
   }
 }
 
@@ -123,9 +124,9 @@ export function formatSummaryFigure(figure: SummaryFigure): string {
   if (n === null) return '';
   switch (figure.unit) {
     case 'percent_bps':
-      return `${(n / 100).toFixed(1)}%`;
+      return `${formatNumber(n / 100, 'en-US', '1.1-1')}%`;
     case 'rating_milli':
-      return `${(n / 1000).toFixed(1)} of 5`;
+      return `${formatNumber(n / 1000, 'en-US', '1.1-1')} of 5`;
     default:
       return String(n);
   }
@@ -300,7 +301,6 @@ export class Sources {
       gap: 8px;
     }
     .bf-ai-note [data-testid='ai-ids'] {
-      font-family: ui-monospace, monospace;
       white-space: nowrap;
     }
   `,

@@ -17,10 +17,11 @@
   background: var(--mat-sys-surface-container-low);
 }
 
+// Name and tag stay on one row in every tile; a long name wraps beside the tag.
 .bf-tile__head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-wrap: nowrap;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
 }
@@ -42,4 +43,13 @@
 .bf-inline-form .bf-form,
 .bf-inline-form .bf-form__actions {
   padding: 0;
+}
+
+.bf-tile__head > :first-child {
+  min-width: 0;
+}
+
+.bf-tile__tag {
+  flex: none;
+  white-space: nowrap;
 }

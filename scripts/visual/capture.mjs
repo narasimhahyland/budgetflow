@@ -71,6 +71,8 @@ for (const screen of screens) {
 }
 
 /** Runs inside the page once it is ready: horizontal overflow, interpolation leftovers, layout shift. */
+const MAX_CAPTURE_HEIGHT = 12000;
+
 function pageChecks() {
   const doc = document.documentElement;
   const vw = doc.clientWidth;
@@ -92,6 +94,47 @@ function pageChecks() {
       if (offenders.length >= 5) break;
     }
   }
+  // The shell scrolls an inner container, so the document itself never overflows: a page-sized
+  // vertical scroller that is wider than its box is a page that scrolls sideways. A card that clips
+  // a table (overflow hidden, no horizontal scroller in between) hides columns with no way to reach
+  // them. Both count as horizontal overflow.
+  const pageScrollers = [...document.querySelectorAll('body *')].filter((el) => {
+    const cs = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    // On screen, page-sized and a vertical scroller (the shell's <main>, an open dialog's content):
+    // an off-canvas navigation drawer is not the page, and a tall table wrapper that scrolls
+    // sideways on purpose (overflow-x: auto computes overflow-y to auto too) is not either.
+    return (
+      /(auto|scroll)/.test(cs.overflowY) &&
+      (el.matches('main, [role="main"]') || el.scrollHeight > el.clientHeight + 1) &&
+      el.clientHeight >= window.innerHeight * 0.5 &&
+      r.width >= vw * 0.5 &&
+      r.right > 0 &&
+      r.left < vw
+    );
+  });
+  let innerOverflowPx = 0;
+  for (const el of pageScrollers) {
+    const px = el.scrollWidth - el.clientWidth;
+    if (px > innerOverflowPx) {
+      innerOverflowPx = px;
+      if (px > 1) offenders.push(`${describe(el)} scrolls sideways by ${px}px`);
+    }
+  }
+  for (const el of document.querySelectorAll('body *')) {
+    if (offenders.length >= 8) break;
+    const cs = getComputedStyle(el);
+    const table = el.querySelector('table');
+    if (!table || !/(hidden|clip)/.test(cs.overflowX) || !el.getClientRects().length) continue;
+    if (el.scrollWidth <= el.clientWidth + 1) continue;
+    let scroller = false;
+    for (let p = table.parentElement; p && p !== el; p = p.parentElement)
+      if (/(auto|scroll)/.test(getComputedStyle(p).overflowX)) scroller = true;
+    if (!scroller) {
+      innerOverflowPx = Math.max(innerOverflowPx, el.scrollWidth - el.clientWidth);
+      offenders.push(`${describe(el)} clips ${el.scrollWidth - el.clientWidth}px of a table`);
+    }
+  }
   const interpolation = new Set();
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
@@ -107,11 +150,51 @@ function pageChecks() {
     if (/\{\{|\}\}/.test(t)) interpolation.add(t.slice(0, 60));
   }
   return {
-    overflowPx,
+    overflowPx: Math.max(overflowPx, innerOverflowPx),
     offenders,
     interpolation: [...interpolation].slice(0, 10),
     cls: window.__bfCls ?? 0,
   };
+}
+
+/**
+ * Grows the viewport until the page-sized inner scroller (the shell's content box, an open
+ * dialog's content) shows everything, so a full-page shot covers what is below the fold. The
+ * document itself never scrolls, so `fullPage` alone stops at the first screen.
+ */
+async function growToContent(page) {
+  for (let i = 0; i < 4; i++) {
+    // Measure a settled page: requests done and no loading skeleton left, or the height would
+    // depend on how far the page had loaded.
+    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => undefined);
+    await page
+      .waitForFunction(() => !document.querySelector('[aria-busy="true"]'), undefined, {
+        timeout: 5000,
+      })
+      .catch(() => undefined);
+    const extra = await page.evaluate(() => {
+      let max = 0;
+      for (const el of document.querySelectorAll('body *')) {
+        const cs = getComputedStyle(el);
+        if (!/(auto|scroll)/.test(cs.overflowY) || el.clientHeight < window.innerHeight * 0.5)
+          continue;
+        // Only the on-screen page scroller: an off-canvas drawer would add a blank tail.
+        const r = el.getBoundingClientRect();
+        if (r.width < window.innerWidth * 0.5 || r.right <= 0 || r.left >= window.innerWidth)
+          continue;
+        max = Math.max(max, el.scrollHeight - el.clientHeight);
+      }
+      return max;
+    });
+    if (extra <= 1) return;
+    const { width, height } = page.viewportSize();
+    const next = Math.min(height + extra, MAX_CAPTURE_HEIGHT);
+    if (next === height) return;
+    await page.setViewportSize({ width, height: next });
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+  }
 }
 
 async function runJob(browser, job) {
@@ -156,9 +239,14 @@ async function runJob(browser, job) {
           localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
       } catch {}
       window.__bfCls = 0;
+      // CLS leaves out shifts within 500 ms of user input. Playwright's scripted input does not
+      // set hadRecentInput, so each click, fill, select and key press stamps this instead.
+      window.__bfLastInput = -Infinity;
       try {
         new PerformanceObserver((l) => {
-          for (const e of l.getEntries()) if (!e.hadRecentInput) window.__bfCls += e.value;
+          for (const e of l.getEntries())
+            if (!e.hadRecentInput && e.startTime - window.__bfLastInput > 500)
+              window.__bfCls += e.value;
         }).observe({ type: 'layout-shift', buffered: true });
       } catch {}
       // Set before first paint so the theme switch itself never registers as a layout shift.
@@ -204,7 +292,13 @@ async function runJob(browser, job) {
     });
     const waitFor = state.waitFor ?? screen.waitFor;
     if (waitFor) await page.locator(waitFor).first().waitFor({ state: 'visible', timeout: 15000 });
+    const markInput = () =>
+      page.evaluate(() => {
+        window.__bfLastInput = performance.now();
+      });
     for (const action of state.actions ?? []) {
+      const input = action.click || action.fill || action.select || action.press;
+      if (input) await markInput();
       if (action.click) await page.locator(action.click).first().click();
       else if (action.fill) await page.locator(action.fill[0]).first().fill(String(action.fill[1]));
       else if (action.select)
@@ -218,6 +312,7 @@ async function runJob(browser, job) {
           for (const el of document.querySelectorAll('*')) el.scrollTop = 0;
           window.scrollTo(0, 0);
         });
+      if (input) await markInput();
     }
     await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     await page.evaluate(() =>
@@ -249,6 +344,7 @@ async function runJob(browser, job) {
     const mask = [...(config.mask ?? []), ...(screen.mask ?? []), ...(state.mask ?? [])].map((s) =>
       page.locator(s),
     );
+    if (state.fullPage ?? true) await growToContent(page);
     await page.screenshot({
       path: file,
       fullPage: state.fullPage ?? true,

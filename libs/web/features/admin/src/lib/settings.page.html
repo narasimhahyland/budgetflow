@@ -23,6 +23,8 @@
   [loading]="settings.isLoading() && !settings.hasValue()"
   [error]="settings.error()"
   what="the company settings"
+  shape="cards"
+  [lines]="4"
   (retry)="settings.reload()"
 />
 
@@ -73,7 +75,7 @@
               (ngModelChange)="tagline.set($event)"
             />
           </mat-form-field>
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Accent colour</mat-label>
             <input
               matInput
@@ -153,10 +155,15 @@
       }
     </div>
     <div class="bf-table-scroll">
-      <table mat-table [dataSource]="s.notifications.defaults" aria-label="Notification defaults">
+      <table
+        mat-table
+        class="bf-table bf-table--stack"
+        [dataSource]="s.notifications.defaults"
+        aria-label="Notification defaults"
+      >
         <ng-container matColumnDef="type">
           <th mat-header-cell *matHeaderCellDef>Message</th>
-          <td mat-cell *matCellDef="let d">
+          <td mat-cell *matCellDef="let d" class="bf-cell--full">
             <span class="bf-cell__primary">{{ d.name }}</span>
             @if (d.required) {
               <sat-status-tag status="info">Always sent</sat-status-tag>
@@ -165,11 +172,13 @@
         </ng-container>
         <ng-container matColumnDef="audience">
           <th mat-header-cell *matHeaderCellDef>Who gets it</th>
-          <td mat-cell *matCellDef="let d">{{ audienceLabel[d.audience] ?? d.audience }}</td>
+          <td mat-cell *matCellDef="let d" data-label="Who gets it">
+            {{ audienceLabel[d.audience] ?? d.audience }}
+          </td>
         </ng-container>
         <ng-container matColumnDef="channels">
           <th mat-header-cell *matHeaderCellDef>Channels</th>
-          <td mat-cell *matCellDef="let d">
+          <td mat-cell *matCellDef="let d" data-label="Channels">
             @if (editing() === 'notifications') {
               <mat-form-field appearance="outline" class="bf-channel-field">
                 <mat-label>Channels</mat-label>
@@ -186,10 +195,13 @@
                 </mat-select>
               </mat-form-field>
             } @else {
-              {{ d.channels.length === 0 ? 'Nowhere' : '' }}
-              @for (c of d.channels; track c) {
-                <span class="bf-chip">{{ channelLabel[c] }}</span>
-              }
+              <span class="bf-tags">
+                @for (c of d.channels; track c) {
+                  <sat-category-tag category="gray">{{ channelLabel[c] }}</sat-category-tag>
+                } @empty {
+                  Nowhere
+                }
+              </span>
             }
           </td>
         </ng-container>
@@ -294,25 +306,34 @@
       }
     </div>
     <div class="bf-table-scroll">
-      <table mat-table [dataSource]="s.documents.kinds" aria-label="Upload rules per document kind">
+      <table
+        mat-table
+        class="bf-table bf-table--stack"
+        [dataSource]="s.documents.kinds"
+        aria-label="Upload rules per document kind"
+      >
         <ng-container matColumnDef="kind">
           <th mat-header-cell *matHeaderCellDef>Document</th>
-          <td mat-cell *matCellDef="let k">
+          <td mat-cell *matCellDef="let k" class="bf-cell--full">
             <span class="bf-cell__primary">{{ k.name }}</span>
             <span class="bf-cell__secondary">{{ k.usedOn }}</span>
           </td>
         </ng-container>
         <ng-container matColumnDef="types">
           <th mat-header-cell *matHeaderCellDef>File types</th>
-          <td mat-cell *matCellDef="let k">{{ k.allowedContentTypes.join(', ') }}</td>
+          <td mat-cell *matCellDef="let k" data-label="File types">
+            {{ fileTypes(k.allowedContentTypes) }}
+          </td>
         </ng-container>
         <ng-container matColumnDef="size">
-          <th mat-header-cell *matHeaderCellDef>Largest file</th>
-          <td mat-cell *matCellDef="let k">{{ megabytes(k.maxBytes) }}</td>
+          <th mat-header-cell *matHeaderCellDef class="bf-num">Largest file</th>
+          <td mat-cell *matCellDef="let k" class="bf-num" data-label="Largest file">
+            {{ k.maxBytes / 1000000 | number: '1.0-1' }} MB
+          </td>
         </ng-container>
         <ng-container matColumnDef="download">
           <th mat-header-cell *matHeaderCellDef>Downloads</th>
-          <td mat-cell *matCellDef="let k">
+          <td mat-cell *matCellDef="let k" data-label="Downloads">
             @if (editing() === 'documents') {
               <mat-checkbox
                 [checked]="k.downloadAllowed"
@@ -367,47 +388,57 @@
         </button>
       }
     </div>
-    <dl class="bf-facts">
-      <div>
-        <dt>Identity provider</dt>
-        <dd>
-          {{ s.security.identityProviderName }}
-          <sat-status-tag [status]="s.security.singleSignOnConnected ? 'success' : 'warning'">{{
-            s.security.singleSignOnConnected ? 'Connected' : 'Not connected'
-          }}</sat-status-tag>
-        </dd>
-      </div>
-      <div>
-        <dt>Multi-factor authentication</dt>
-        <dd>{{ s.security.multiFactorPolicy }}</dd>
-      </div>
-      <div>
-        <dt>Signed out after idle</dt>
-        <dd data-testid="idle-timeout">{{ s.security.idleTimeoutMinutes }} minutes</dd>
-      </div>
-      <div>
-        <dt>Longest session</dt>
-        <dd>{{ s.security.maxSessionHours }} hours</dd>
-      </div>
-      <div>
-        <dt>Local accounts</dt>
-        <dd>
-          {{
-            s.security.localAccountsForServiceUsersOnly
-              ? 'Service and test users only'
-              : 'Allowed for people as well'
-          }}
-        </dd>
-      </div>
-      <div>
-        <dt>Biometric unlock on mobile</dt>
-        <dd>{{ s.security.biometricUnlockAllowed ? 'Allowed' : 'Not allowed' }}</dd>
-      </div>
-    </dl>
+    @if (editing() !== 'security') {
+      <dl class="bf-facts">
+        <div>
+          <dt>Identity provider</dt>
+          <dd>
+            {{ s.security.identityProviderName }}
+            <sat-status-tag [status]="s.security.singleSignOnConnected ? 'success' : 'warning'">{{
+              s.security.singleSignOnConnected ? 'Connected' : 'Not connected'
+            }}</sat-status-tag>
+          </dd>
+        </div>
+        <div>
+          <dt>Multi-factor authentication</dt>
+          <dd>{{ s.security.multiFactorPolicy }}</dd>
+        </div>
+        <div>
+          <dt>Signed out after idle</dt>
+          <dd data-testid="idle-timeout">{{ s.security.idleTimeoutMinutes }} minutes</dd>
+        </div>
+        <div>
+          <dt>Longest session</dt>
+          <dd>{{ s.security.maxSessionHours }} hours</dd>
+        </div>
+        <div>
+          <dt>Local accounts</dt>
+          <dd>
+            {{
+              s.security.localAccountsForServiceUsersOnly
+                ? 'Service and test users only'
+                : 'Allowed for people as well'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Biometric unlock on mobile</dt>
+          <dd>{{ s.security.biometricUnlockAllowed ? 'Allowed' : 'Not allowed' }}</dd>
+        </div>
+      </dl>
+    }
     <div class="bf-card__body">
       <sat-banner variant="info">
         <sat-banner-message>{{ s.security.breakGlassNote }}</sat-banner-message>
       </sat-banner>
+      <div class="bf-form__actions bf-form__actions--flush">
+        <a
+          mat-stroked-button
+          routerLink="/admin/security/break-glass"
+          data-testid="open-break-glass"
+          >Break-glass access</a
+        >
+      </div>
     </div>
     @if (editing() === 'security') {
       <form class="bf-inline-form bf-inline-form--padded" (ngSubmit)="saveSecurity()">

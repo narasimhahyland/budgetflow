@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,17 +7,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import {
   NOTIFICATION_CHANNELS,
   type DocumentKindSettings,
   type NotificationChannel,
   type QuietHoursSettings,
 } from '@bf/contracts';
+import { LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ReasonField } from './admin-ui';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const CHANNEL_LABEL: Record<string, string> = {
   in_app: 'In-app',
@@ -44,9 +46,25 @@ type Section = 'branding' | 'notifications' | 'documents' | 'security';
  * The page drives every editing control from that list rather than guessing from role names, so it
  * never offers a form the API would refuse.
  */
+const FILE_TYPE_LABEL: Record<string, string> = {
+  'application/pdf': 'PDF',
+  'image/png': 'PNG',
+  'image/jpeg': 'JPEG',
+  'image/heic': 'HEIC',
+  'image/webp': 'WebP',
+  'text/csv': 'CSV',
+  'application/vnd.ms-excel': 'Excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel',
+  'application/msword': 'Word',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word',
+  'text/plain': 'Text',
+};
+
 @Component({
   selector: 'bf-admin-settings-page',
+  host: { class: 'bf-page-layout' },
   imports: [
+    DecimalPipe,
     FormsModule,
     LoadState,
     MatButtonModule,
@@ -56,6 +74,7 @@ type Section = 'branding' | 'notifications' | 'documents' | 'security';
     MatSelectModule,
     MatTableModule,
     ReasonField,
+    RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_TAG_IMPORTS,
   ],
@@ -156,8 +175,11 @@ export class AdminSettingsPage {
     );
   }
 
-  protected megabytes(bytes: number): string {
-    return `${Math.round(bytes / 100_000) / 10} MB`;
+  /** Content types in plain English (PDF, PNG, Excel), as people know the files. */
+  protected fileTypes(types: readonly string[]): string {
+    return [
+      ...new Set(types.map((t) => FILE_TYPE_LABEL[t] ?? t.split('/').pop()?.toUpperCase() ?? t)),
+    ].join(', ');
   }
 
   protected async saveBranding(): Promise<void> {

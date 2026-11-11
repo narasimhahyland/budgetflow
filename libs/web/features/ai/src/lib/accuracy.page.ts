@@ -12,14 +12,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import type { AiEvaluationResult } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { AiLabel } from './ai-output';
+import { aiFeatureLabel } from './ai-labels';
 import { AiTabs } from './ai-tabs';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const METRIC_LABELS: Record<string, string> = {
   cites_only_permitted_records: 'Cites only records the asker may read',
@@ -93,6 +93,7 @@ const KIND_LABELS: Record<string, string> = {
       [loading]="accuracy.isLoading() && !accuracy.hasValue()"
       [error]="accuracy.error()"
       what="the AI accuracy results"
+      shape="table"
       (retry)="accuracy.reload()"
     />
 
@@ -125,7 +126,7 @@ const KIND_LABELS: Record<string, string> = {
           </sat-empty-state>
         } @else {
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="AI evaluation results">
+            <table class="bf-split-table bf-table--stack" aria-label="AI evaluation results">
               <thead>
                 <tr>
                   <th>Feature</th>
@@ -145,23 +146,23 @@ const KIND_LABELS: Record<string, string> = {
                     [class.bf-accuracy__row--failed]="!r.passed"
                     [attr.data-testid]="'accuracy-row-' + r.feature + '-' + r.metric"
                   >
-                    <td>{{ r.feature }}</td>
-                    <td>{{ metric(r) }}</td>
-                    <td>{{ kind(r) }}</td>
-                    <td class="bf-num">{{ ratio(r.thresholdBps) }}</td>
-                    <td class="bf-num">{{ ratio(r.resultBps) }}</td>
-                    <td class="bf-num">{{ r.cases }}</td>
-                    <td>
+                    <td>{{ featureLabel(r.feature) }}</td>
+                    <td data-label="Metric">{{ metric(r) }}</td>
+                    <td data-label="Kind">{{ kind(r) }}</td>
+                    <td class="bf-num" data-label="Threshold">{{ ratio(r.thresholdBps) }}</td>
+                    <td class="bf-num" data-label="Result">{{ ratio(r.resultBps) }}</td>
+                    <td class="bf-num" data-label="Cases">{{ r.cases }}</td>
+                    <td data-label="Outcome">
                       <sat-status-tag [status]="r.passed ? 'success' : 'important'">
                         {{ r.passed ? 'Pass' : 'Below threshold' }}
                       </sat-status-tag>
                     </td>
-                    <td>
+                    <td data-label="Failed cases">
                       <span class="bf-cell__secondary">{{
                         r.failures.length ? r.failures.join(', ') : 'None'
                       }}</span>
                     </td>
-                    <td>
+                    <td data-label="Run">
                       <span class="bf-cell__primary">{{ r.provider }}</span>
                       <span class="bf-cell__secondary">
                         {{ r.modelId }} {{ r.modelVersion }} ·
@@ -192,6 +193,7 @@ export class AccuracyPage {
   private readonly snack = inject(MatSnackBar);
   private readonly route = inject(ActivatedRoute);
   protected readonly session = inject(SessionStore);
+  protected readonly featureLabel = aiFeatureLabel;
   protected readonly valueOf = valueOf;
   protected readonly running = signal(false);
 

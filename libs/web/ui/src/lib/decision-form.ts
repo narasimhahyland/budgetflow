@@ -1,5 +1,16 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { getNumberOfCurrencyDigits } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -20,6 +31,8 @@ const LABEL: Record<DecisionRequest['decision'], string> = {
   request_changes: 'Request changes',
   escalate: 'Escalate',
 };
+let nextId = 0;
+
 const REASONS = [
   { code: 'REJ-BUDGET', label: 'Insufficient budget' },
   { code: 'REJ-POLICY', label: 'Outside policy' },
@@ -52,6 +65,8 @@ const REASONS = [
         <mat-button-toggle-group
           [value]="decision()"
           (change)="decision.set($event.value)"
+          [vertical]="narrow()"
+          [class.bf-decision__toggles--vertical]="narrow()"
           aria-label="Decision"
           hideSingleSelectionIndicator
         >
@@ -68,10 +83,12 @@ const REASONS = [
         }
         @if (decision() === 'approve_partial') {
           <mat-form-field appearance="outline">
-            <mat-label>Approved amount ({{ t.task.amount.currency }})</mat-label>
+            <mat-label>Approved amount</mat-label>
+            <span matTextPrefix>{{ t.task.amount.currency }}&nbsp;</span>
             <input
               matInput
               inputmode="decimal"
+              required
               [ngModel]="partial()"
               (ngModelChange)="partial.set($event)"
               name="partial"
@@ -79,6 +96,10 @@ const REASONS = [
             <mat-hint
               >Less than {{ money(t.task.amount)
               }}{{ t.doa.limit ? ', within ' + money(t.doa.limit) : '' }}</mat-hint
+            >
+            <mat-error
+              ><mat-icon svgIcon="error" aria-hidden="true" />Enter the amount you
+              approve.</mat-error
             >
           </mat-form-field>
         }
@@ -90,12 +111,17 @@ const REASONS = [
             <mat-select
               [ngModel]="reasonCode()"
               (ngModelChange)="reasonCode.set($event)"
+              [required]="decision() === 'approve_partial'"
               name="reasonCode"
             >
               @for (r of reasons; track r.code) {
                 <mat-option [value]="r.code">{{ r.code }} · {{ r.label }}</mat-option>
               }
             </mat-select>
+            <mat-error
+              ><mat-icon svgIcon="error" aria-hidden="true" />Choose a reason code for a partial
+              approval.</mat-error
+            >
           </mat-form-field>
         }
         <mat-form-field appearance="outline">
@@ -103,10 +129,15 @@ const REASONS = [
           <textarea
             matInput
             rows="3"
+            [required]="decision() === 'request_changes'"
             [ngModel]="comment()"
             (ngModelChange)="comment.set($event)"
             name="comment"
           ></textarea>
+          <mat-error
+            ><mat-icon svgIcon="error" aria-hidden="true" />Tell the requester what to
+            change.</mat-error
+          >
         </mat-form-field>
         @if (decision() === 'approve' || decision() === 'approve_partial') {
           <mat-checkbox
@@ -116,29 +147,6 @@ const REASONS = [
             >I have no conflict of interest</mat-checkbox
           >
         }
-        <div class="bf-decision__actions">
-          <ng-content />
-          @if (decision() === 'reject') {
-            <button
-              mat-stroked-button
-              satImportantButton
-              type="button"
-              [disabled]="!valid() || busy()"
-              (click)="submit()"
-            >
-              Reject
-            </button>
-          } @else {
-            <button
-              mat-flat-button
-              type="button"
-              [disabled]="!valid() || busy()"
-              (click)="submit()"
-            >
-              {{ primaryLabel() }}
-            </button>
-          }
-        </div>
       </div>
       <aside class="bf-decision__checks" aria-label="Check before you decide">
         <h4 class="bf-decision__title">Check before you decide</h4>
@@ -169,41 +177,98 @@ const REASONS = [
           Your decision is audited with the limit used and your attestation.
         </p>
       </aside>
+      <div class="bf-decision__actions">
+        @let why = blockedReason();
+        @if (why) {
+          <p class="bf-decision__why" [id]="whyId">{{ why }}</p>
+        }
+        <ng-content />
+        @if (
+          decision() === 'approve' || decision() === 'approve_partial' || decision() === 'reject'
+        ) {
+          <button
+            mat-flat-button
+            satImportantButton
+            type="button"
+            [disabled]="!valid() || busy()"
+            [attr.aria-describedby]="why ? whyId : null"
+            (click)="submit()"
+          >
+            {{ primaryLabel() }}
+          </button>
+        } @else {
+          <button
+            mat-flat-button
+            type="button"
+            [disabled]="!valid() || busy()"
+            [attr.aria-describedby]="why ? whyId : null"
+            (click)="submit()"
+          >
+            {{ primaryLabel() }}
+          </button>
+        }
+      </div>
     </div>
   `,
   styles: `
-    .bf-decision {
-      display: grid;
-      grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr);
-      gap: 16px;
-    }
     :host {
       display: block;
       container-type: inline-size;
     }
+    .bf-decision {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr);
+      grid-template-areas:
+        'form checks'
+        'actions actions';
+      gap: 16px;
+    }
     @container (width < 760px) {
       .bf-decision {
         grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+          'form'
+          'checks'
+          'actions';
       }
     }
     .bf-decision__form {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      grid-area: form;
       min-width: 0;
     }
     .bf-decision__form mat-button-toggle-group {
-      flex-wrap: wrap;
       align-self: flex-start;
       max-width: 100%;
+    }
+    .bf-decision__form .bf-decision__toggles--vertical {
+      align-self: stretch;
+    }
+    .bf-decision__form mat-error mat-icon {
+      width: 16px;
+      height: 16px;
+      margin-inline-end: 4px;
+      vertical-align: -3px;
     }
     .bf-decision__actions {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       justify-content: flex-end;
       gap: 8px;
+      grid-area: actions;
+    }
+    .bf-decision__why {
+      flex: 1 1 240px;
+      margin: 0;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+      text-align: end;
     }
     .bf-decision__checks {
+      grid-area: checks;
       padding: 12px 16px;
       border-radius: var(--mat-sys-corner-medium);
       background: var(--mat-sys-surface-container-low);
@@ -226,7 +291,7 @@ const REASONS = [
       flex: none;
       width: 18px;
       height: 18px;
-      color: var(--sat-sys-success);
+      color: var(--sat-sys-success-icon);
     }
     .bf-decision__fail mat-icon {
       color: var(--mat-sys-error);
@@ -253,6 +318,14 @@ export class DecisionForm {
   protected readonly reasonCode = signal('');
   protected readonly comment = signal('');
   protected readonly attested = signal(false);
+  protected readonly whyId = `bf-decision-why-${nextId++}`;
+  /** Below 600px the decisions stack: a wrapped toggle row reads as one broken pill. */
+  protected readonly narrow = toSignal(
+    inject(BreakpointObserver)
+      .observe('(width < 600px)')
+      .pipe(map((s) => s.matches)),
+    { initialValue: false },
+  );
 
   constructor() {
     queueMicrotask(() => {
@@ -299,9 +372,32 @@ export class DecisionForm {
   protected readonly primaryLabel = computed(() => {
     const t = this.task().task;
     if (this.decision() === 'approve') return `Approve ${this.money(t.amount)}`;
-    if (this.decision() === 'approve_partial')
-      return `Approve ${this.money({ amountMinor: this.partialMinor() ?? 0, currency: t.amount.currency })}`;
+    if (this.decision() === 'approve_partial') {
+      const minor = this.partialMinor();
+      return minor === null
+        ? LABEL.approve_partial
+        : `Approve ${this.money({ amountMinor: minor, currency: t.amount.currency })}`;
+    }
     return LABEL[this.decision()];
+  });
+
+  /** Why the confirm button is disabled, in plain English beside it (section 4). */
+  protected readonly blockedReason = computed(() => {
+    if (this.valid() || this.busy()) return null;
+    switch (this.decision()) {
+      case 'approve':
+        return 'Confirm you have no conflict of interest to approve.';
+      case 'approve_partial':
+        if ((this.partialMinor() ?? 0) <= 0) return 'Enter the amount you approve.';
+        if (!this.reasonCode()) return 'Choose a reason code for a partial approval.';
+        return 'Confirm you have no conflict of interest to approve.';
+      case 'reject':
+        return 'Give a reason code or a comment so the requester knows why.';
+      case 'request_changes':
+        return 'Tell the requester what to change.';
+      default:
+        return null;
+    }
   });
 
   protected submit(): void {

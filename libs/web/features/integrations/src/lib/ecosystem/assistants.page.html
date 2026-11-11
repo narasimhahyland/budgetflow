@@ -11,7 +11,6 @@
     @if (canConnect() && usable() && !connecting()) {
       <button
         mat-flat-button
-        satImportantButton
         type="button"
         (click)="startConnect()"
         data-testid="assistant-connect"
@@ -104,7 +103,9 @@
     <div class="bf-kpi">
       <p class="bf-kpi__label">Status</p>
       <p class="bf-kpi__value" data-testid="assistant-status">
-        {{ usable() ? 'On' : 'Not working' }}
+        <sat-status-tag [status]="usable() ? 'success' : 'important'">{{
+          usable() ? 'On' : 'Not working'
+        }}</sat-status-tag>
       </p>
       <p class="bf-kpi__delta">
         Connector {{ c.enabled ? 'on' : 'off' }}, AI switch {{ c.aiFeatureEnabled ? 'on' : 'off' }}
@@ -193,7 +194,7 @@
           <div class="bf-switch-row__text">
             <h3 class="bf-switch-row__title">
               {{ t.title }}
-              <sat-status-tag status="info">Read-only</sat-status-tag>
+              <sat-category-tag category="gray">Read-only</sat-category-tag>
               @if (!t.enabled) {
                 <sat-status-tag status="neutral">Off</sat-status-tag>
               }

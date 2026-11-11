@@ -9,7 +9,17 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { ccy, createdAt, pk, tenantRef, ts, updatedAt, validFrom, validTo } from './_columns';
+import {
+  appNow,
+  ccy,
+  createdAt,
+  pk,
+  tenantRef,
+  ts,
+  updatedAt,
+  validFrom,
+  validTo,
+} from './_columns';
 import { intercompanyMode, rateType, roleId } from './enums';
 
 /** Reference data shared by all tenants (no tenant_id, no RLS). */
@@ -114,14 +124,35 @@ export const breakGlassGrants = pgTable(
   {
     id: pk(),
     tenantId: tenantRef().references(() => tenants.id),
+    /** The platform operator who asked (their identity-provider subject). */
     idpSubject: varchar('idp_subject', { length: 255 }).notNull(),
     reason: text('reason').notNull(),
+    /** The Organization Admin who approved. Never the requester. */
     grantedBy: uuid('granted_by'),
-    validFromTs: ts('valid_from').notNull(),
-    validToTs: ts('valid_to').notNull(),
+    /**
+     * `requested`, `approved`, `declined` or `revoked`. Active and expired are derived: an approved
+     * grant is active while now is inside its window and expired after it.
+     */
+    status: varchar('status', { length: 20 }).notNull().default('requested'),
+    /** What the grant opens. Only `budgets_and_ledger` exists: read-only, see BREAK_GLASS_READS. */
+    scope: varchar('scope', { length: 40 }).notNull().default('budgets_and_ledger'),
+    /** How long the operator asked for, at most 240 minutes; the window starts on approval. */
+    requestedMinutes: integer('requested_minutes').notNull().default(60),
+    requestedByName: text('requested_by_name'),
+    decidedAt: ts('decided_at'),
+    decisionReason: text('decision_reason'),
+    revokedBy: uuid('revoked_by'),
+    revokedAt: ts('revoked_at'),
+    revokeReason: text('revoke_reason'),
+    /** Set on approval; empty while a request waits or after a decline. */
+    validFromTs: ts('valid_from'),
+    validToTs: ts('valid_to'),
     createdAt: createdAt(),
   },
-  (t) => [index('break_glass_tenant').on(t.tenantId, t.idpSubject)],
+  (t) => [
+    index('break_glass_tenant').on(t.tenantId, t.idpSubject),
+    index('break_glass_status').on(t.tenantId, t.status),
+  ],
 );
 
 /** Product analytics (activation, time to approve, auto-match rate); separate from the audit trail. */
@@ -130,7 +161,7 @@ export const productAnalyticsEvents = pgTable(
   {
     id: pk(),
     tenantId: tenantRef().references(() => tenants.id),
-    occurredAt: ts('occurred_at').notNull().defaultNow(),
+    occurredAt: ts('occurred_at').notNull().default(appNow),
     actorPersonId: uuid('actor_person_id'),
     name: varchar('name', { length: 100 }).notNull(),
     properties: jsonb('properties').notNull().default({}),

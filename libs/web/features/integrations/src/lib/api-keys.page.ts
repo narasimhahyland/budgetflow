@@ -16,7 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { API_KEY_SCOPES, type ApiKeyScope, type ApiKeyView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
@@ -24,9 +24,10 @@ import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { IntegrationsNav } from './integrations-nav';
 import { SCOPE_LABELS, type Tone } from './labels';
-import { LoadState } from './load-state';
 import { byRank, byText, ordered, rankIn } from './order';
 import { OneTimeSecret } from './one-time-secret';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
+import { initials } from './labels';
 
 const KEY_STATUS_LABELS: Record<ApiKeyView['status'], string> = {
   active: 'Active',
@@ -57,6 +58,7 @@ const KEY_STATUS_TONES: Record<ApiKeyView['status'], Tone> = {
     MatInputModule,
     MatSelectModule,
     MatTableModule,
+    SatAvatar,
     OneTimeSecret,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
@@ -65,9 +67,11 @@ const KEY_STATUS_TONES: Record<ApiKeyView['status'], Tone> = {
   ],
   templateUrl: './api-keys.page.html',
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApiKeysPage {
+  protected readonly initials = initials;
   private readonly api = injectApi();
   private readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;

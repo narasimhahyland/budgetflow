@@ -9,6 +9,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -18,16 +19,30 @@ import type { RolloverPolicy } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SatCategoryTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { CloseTabs } from './close-tabs';
 import { ordered, percentOfBps, ROLLOVER_MODE, SWEEP_TARGET } from './close-format';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 /**
  * Screen 87c: the rules that decide what happens to unused money at year end, and which budget
  * follows which rule. Policies move no money: the year-end run (87b) applies them.
  */
+
+const MODE_CATEGORY: Record<RolloverPolicy['mode'], 'gray' | 'blue' | 'teal' | 'purple'> = {
+  lapse: 'gray',
+  carry_full: 'teal',
+  carry_capped: 'blue',
+  carry_with_approval: 'purple',
+};
+
+const MODE_ICON: Record<RolloverPolicy['mode'], string> = {
+  lapse: 'timer_off',
+  carry_full: 'redo',
+  carry_capped: 'redo',
+  carry_with_approval: 'clock',
+};
 @Component({
   selector: 'bf-rollover-policies-page',
   imports: [
@@ -41,8 +56,9 @@ import { LoadState } from './load-state';
     MatTableModule,
     RouterLink,
     SAT_BANNER_IMPORTS,
+    MatIconModule,
     SAT_EMPTY_STATE_IMPORTS,
-    SatStatusTag,
+    SatCategoryTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -97,21 +113,26 @@ import { LoadState } from './load-state';
         </sat-empty-state>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="rows()" aria-label="Rollover policies">
+          <table mat-table class="bf-table" [dataSource]="rows()" aria-label="Rollover policies">
             <ng-container matColumnDef="code">
               <th mat-header-cell *matHeaderCellDef scope="col">Policy</th>
               <td mat-cell *matCellDef="let p">
-                <span class="bf-cell__primary">{{ p.code }}</span>
-                <span class="bf-cell__secondary">{{ p.name }}</span>
+                <span class="bf-cell__name"
+                  ><span class="bf-cell__code">{{ p.code }}</span
+                  >{{ p.name }}</span
+                >
               </td>
             </ng-container>
             <ng-container matColumnDef="mode">
               <th mat-header-cell *matHeaderCellDef scope="col">Mode</th>
               <td mat-cell *matCellDef="let p">
+                <!-- A mode is a kind of policy, not a state: a category tag, never a status tone. -->
                 <span class="bf-tag-cell"
-                  ><sat-status-tag [status]="p.mode === 'lapse' ? 'neutral' : 'info'">{{
-                    mode(p)
-                  }}</sat-status-tag></span
+                  ><sat-category-tag [category]="modeCategory(p)"
+                    ><mat-icon [svgIcon]="modeIcon(p)" aria-hidden="true" />{{
+                      mode(p)
+                    }}</sat-category-tag
+                  ></span
                 >
               </td>
             </ng-container>
@@ -270,6 +291,14 @@ export class RolloverPoliciesPage {
 
   protected mode(p: RolloverPolicy): string {
     return ROLLOVER_MODE[p.mode];
+  }
+
+  protected modeCategory(p: RolloverPolicy): 'gray' | 'blue' | 'teal' | 'purple' {
+    return MODE_CATEGORY[p.mode];
+  }
+
+  protected modeIcon(p: RolloverPolicy): string {
+    return MODE_ICON[p.mode];
   }
 
   protected sweep(p: RolloverPolicy): string {

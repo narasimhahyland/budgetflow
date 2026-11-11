@@ -21,13 +21,12 @@ import {
   type OfferView,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from '../api';
 import type { Tone } from '../labels';
-import { LoadState } from '../load-state';
 import { byText, ordered } from '../order';
 import { BOOKING_STATUS_LABELS, BOOKING_STATUS_TONES, MARKETPLACE_CATEGORY_LABELS } from './labels';
 
@@ -55,6 +54,7 @@ import { BOOKING_STATUS_LABELS, BOOKING_STATUS_TONES, MARKETPLACE_CATEGORY_LABEL
   ],
   templateUrl: './marketplace.page.html',
   styleUrls: ['../page.scss', '../integrations.scss', './ecosystem.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MarketplacePage {

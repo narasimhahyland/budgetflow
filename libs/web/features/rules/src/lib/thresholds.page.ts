@@ -1,11 +1,10 @@
 import { ChangeDetectionStrategy, Component, resource } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { data, injectApi, valueOf } from './api';
 import { approverList } from './labels';
-import { LoadState } from './load-state';
 import { RuleEffectTag } from './rule-tags';
 import { RulesTabs } from './rules-tabs';
 
@@ -39,6 +38,7 @@ import { RulesTabs } from './rules-tabs';
       [loading]="view.isLoading() && !view.hasValue()"
       [error]="view.error()"
       what="thresholds and templates"
+      shape="table"
       (retry)="view.reload()"
     />
     @if (valueOf(view); as v) {
@@ -53,7 +53,15 @@ import { RulesTabs } from './rules-tabs';
             </p>
           </div>
           <div class="bf-table-scroll">
-            <table class="bf-split-table" [attr.aria-label]="family.label + ' bands'">
+            <table
+              class="bf-split-table bf-bands bf-table--stack"
+              [attr.aria-label]="family.label + ' bands'"
+            >
+              <colgroup>
+                <col class="bf-bands__amount" />
+                <col class="bf-bands__amount" />
+                <col />
+              </colgroup>
               <thead>
                 <tr>
                   <th scope="col" class="bf-num">From</th>
@@ -67,14 +75,14 @@ import { RulesTabs } from './rules-tabs';
                     <td class="bf-num">
                       <bf-money [amountMinor]="b.minMinor" currency="USD" />
                     </td>
-                    <td class="bf-num">
+                    <td class="bf-num" data-label="Up to">
                       @if (b.maxMinor !== null) {
                         <bf-money [amountMinor]="b.maxMinor" currency="USD" />
                       } @else {
                         No upper limit
                       }
                     </td>
-                    <td>{{ approverList(b.approvers) }}</td>
+                    <td data-label="Who has to approve">{{ approverList(b.approvers) }}</td>
                   </tr>
                 }
               </tbody>
@@ -91,7 +99,7 @@ import { RulesTabs } from './rules-tabs';
           </p>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Policy templates">
+          <table class="bf-split-table bf-table--stack" aria-label="Policy templates">
             <thead>
               <tr>
                 <th scope="col">Template</th>
@@ -105,17 +113,45 @@ import { RulesTabs } from './rules-tabs';
                 <tr>
                   <td>
                     <span class="bf-cell__primary">{{ t.name }}</span>
-                    <span class="bf-cell__secondary">{{ t.code }}</span>
+                    <span class="bf-cell__secondary"
+                      ><span class="bf-cell__code">{{ t.code }}</span></span
+                    >
                   </td>
-                  <td>{{ t.description }}</td>
-                  <td><bf-rule-effect [effect]="t.defaultEffect" /></td>
-                  <td>{{ t.usedByRuleCodes.join(', ') || 'Not used yet' }}</td>
+                  <td data-label="What it does">{{ t.description }}</td>
+                  <td data-label="Default outcome">
+                    <bf-rule-effect [effect]="t.defaultEffect" />
+                  </td>
+                  <td data-label="Used by">
+                    <span class="bf-codes">
+                      @for (code of t.usedByRuleCodes; track code) {
+                        <span class="bf-cell__code">{{ code }}</span>
+                      } @empty {
+                        Not used yet
+                      }
+                    </span>
+                  </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
       </section>
+    }
+  `,
+  styles: `
+    /* Every band table uses the same column widths so the bands line up from table to table. */
+    @media (width >= 600px) {
+      .bf-bands {
+        table-layout: fixed;
+      }
+      .bf-bands__amount {
+        width: 11rem;
+      }
+    }
+    .bf-codes {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
     }
   `,
   host: { class: 'bf-page-layout' },

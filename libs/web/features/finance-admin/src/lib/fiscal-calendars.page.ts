@@ -11,6 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
@@ -18,9 +19,10 @@ import { RouterLink } from '@angular/router';
 import type { CalendarDefinition, FiscalPeriod } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
+import { LoadState } from '@bf/web/ui';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type PeriodAction = FiscalPeriod['allowedActions'][number];
 type CalendarType = CalendarDefinition['type'];
@@ -34,12 +36,13 @@ const ACTION_LABEL: Record<PeriodAction, string> = {
 };
 const STATUS: Record<
   FiscalPeriod['status'],
-  { label: string; tone: 'success' | 'warning' | 'neutral' | 'info' }
+  { label: string; tone: 'success' | 'warning' | 'neutral'; icon?: string }
 > = {
   open: { label: 'Open', tone: 'success' },
   soft_closed: { label: 'Soft-closed', tone: 'warning' },
-  closed: { label: 'Closed', tone: 'neutral' },
-  locked: { label: 'Locked', tone: 'info' },
+  closed: { label: 'Closed', tone: 'neutral', icon: 'archive' },
+  // Neutral with a lock: the info tone is reserved for frozen budgets.
+  locked: { label: 'Locked', tone: 'neutral', icon: 'lock' },
 };
 const TYPE_LABEL: Record<CalendarType, string> = {
   calendar_year: 'Calendar year (Jan-Dec)',
@@ -68,22 +71,31 @@ const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 /** Screens 7, 108 and 108a: fiscal calendars, variants and period statuses. */
 @Component({
   selector: 'bf-fiscal-calendars-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DatePipe,
     FormsModule,
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     MatTableModule,
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatImportantButton,
   ],
   templateUrl: './fiscal-calendars.page.html',
   styleUrl: './page.scss',
   styles: `
+    .bf-entities {
+      min-height: 1lh;
+    }
+    .bf-row--current td {
+      background: var(--mat-sys-surface-container-low);
+    }
     .bf-years {
       display: flex;
       flex-wrap: wrap;
@@ -201,6 +213,11 @@ export class FiscalCalendarsPage {
   protected readonly canManage = computed(() => this.session.can('period.manage'));
   protected readonly canAudit = computed(() => this.session.can('audit.read'));
   protected readonly today = new Date().toISOString().slice(0, 10);
+
+  /** The period today falls in (highlighted, as the section 6 active row). */
+  protected isCurrent(p: FiscalPeriod): boolean {
+    return p.startDate <= this.today && this.today <= p.endDate;
+  }
 
   /** The next period a close would affect in the chosen year, for the warning banner. */
   protected readonly closingHint = computed(() => {

@@ -1,4 +1,5 @@
 import type { ConditionLeaf, Money } from '@bf/contracts';
+import { formatMoney } from '@bf/web/ui';
 
 const FACT_LABELS: Record<string, string> = {
   amount_reporting_minor: 'Amount',
@@ -36,12 +37,11 @@ const MONEY_FACTS = new Set([
 ]);
 
 export const moneyText = (m: Money | null | undefined): string =>
-  m
-    ? `${m.currency} ${(m.amountMinor / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-    : '—';
+  m ? formatMoney(m.amountMinor, m.currency) : '—';
 
-const usd = (minor: number) =>
-  `USD ${(minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+// Money facts are evaluated in the reporting currency (USD for this tenant); the condition carries
+// minor units only, so the code is fixed here rather than read from the rule.
+const usd = (minor: number) => formatMoney(minor, 'USD');
 
 export function factValueText(fact: string, value: unknown): string {
   if (value === null || value === undefined) return 'not set';

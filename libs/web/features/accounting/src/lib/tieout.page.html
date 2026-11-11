@@ -165,6 +165,7 @@
       <div class="bf-table-scroll">
         <table
           mat-table
+          class="bf-table"
           [dataSource]="r.lines"
           [attr.aria-label]="'Tie-out ' + r.legalEntityCode + ' ' + r.period.label"
         >
@@ -288,7 +289,7 @@
             </h3>
             @for (x of d.ledgerLines; track x.lineId) {
               <p class="bf-chip-row">
-                <span>{{ x.accountingDate | date: 'd MMM' }}</span>
+                <span>{{ x.accountingDate | date: 'd MMM' : 'UTC' }}</span>
                 <span>{{ x.sourceRef ?? 'Adjustment' }} {{ x.merchant ?? '' }}</span>
                 <bf-money
                   [amountMinor]="x.transaction.amountMinor"

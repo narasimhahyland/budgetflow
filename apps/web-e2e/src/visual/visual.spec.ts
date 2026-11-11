@@ -3,7 +3,7 @@
 // Data comes from the deterministic e2e seed (scripts/stack.sh reset); the clock is frozen; animations are off.
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { MEASURING_HEADROOM } from '../support/visual-allowance';
 
 // A headroom run (`npm run visual:headroom`) compares the same states with no allowance at all, so
@@ -53,6 +53,46 @@ const VIEWPORTS = {
   mobile: { width: 412, height: 915 },
 };
 
+/**
+ * Grows the viewport until the page-sized inner scroller (the shell's content box, an open dialog's
+ * content) shows everything. The document itself never scrolls, so `fullPage` alone would stop at
+ * the first screen and nothing below the fold would ever be compared.
+ */
+async function growToContent(page: Page): Promise<void> {
+  for (let i = 0; i < 4; i++) {
+    // Measure a settled page: requests done and no loading skeleton left, or the height would
+    // depend on how far the page had loaded.
+    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => undefined);
+    await page
+      .waitForFunction(() => !document.querySelector('[aria-busy="true"]'), undefined, {
+        timeout: 5000,
+      })
+      .catch(() => undefined);
+    const extra = await page.evaluate(() => {
+      let max = 0;
+      for (const el of document.querySelectorAll('body *')) {
+        const cs = getComputedStyle(el);
+        if (!/(auto|scroll)/.test(cs.overflowY) || el.clientHeight < window.innerHeight * 0.5)
+          continue;
+        // Only the on-screen page scroller: an off-canvas drawer would add a blank tail.
+        const r = el.getBoundingClientRect();
+        if (r.width < window.innerWidth * 0.5 || r.right <= 0 || r.left >= window.innerWidth)
+          continue;
+        max = Math.max(max, el.scrollHeight - el.clientHeight);
+      }
+      return max;
+    });
+    const size = page.viewportSize();
+    if (extra <= 1 || !size) return;
+    const height = Math.min(size.height + extra, 12000);
+    if (height === size.height) return;
+    await page.setViewportSize({ width: size.width, height });
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+  }
+}
+
 for (const screen of config.screens) {
   for (const state of screen.states) {
     const role = state.role ?? screen.role;
@@ -80,6 +120,7 @@ for (const screen of config.screens) {
               });
           }
           await page.evaluate(() => document.fonts.ready);
+          if (state.fullPage ?? true) await growToContent(page);
           const mask = [...(config.mask ?? []), ...(screen.mask ?? []), ...(state.mask ?? [])].map(
             (s) => page.locator(s),
           );

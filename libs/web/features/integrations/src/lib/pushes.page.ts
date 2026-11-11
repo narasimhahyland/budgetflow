@@ -11,15 +11,15 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { PushItemView, PushKind } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
 import { IntegrationsNav } from './integrations-nav';
 import { type Tone } from './labels';
-import { LoadState } from './load-state';
 import { byNewest, byRank, byText, ordered, rankIn } from './order';
+import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 
 const STATUS_LABELS: Record<PushItemView['status'], string> = {
   pending: 'Waiting to be sent',
@@ -49,6 +49,7 @@ const STATUS_TONES: Record<PushItemView['status'], Tone> = {
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
+    SAT_NAVIGATION_TABS_IMPORTS,
   ],
   template: `
     <header class="bf-page__header">
@@ -62,28 +63,28 @@ const STATUS_TONES: Record<PushItemView['status'], Tone> = {
 
     <bf-integrations-nav />
 
-    <nav class="bf-tabs" aria-label="Push kinds">
-      <button
-        class="bf-tabs__tab"
-        type="button"
-        [class.bf-tabs__tab--active]="kind() === 'event_code'"
-        [attr.aria-current]="kind() === 'event_code' ? 'page' : null"
+    <sat-navigation-tabs aria-label="Push kinds">
+      <a
+        satNavigationTab
+        [active]="kind() === 'event_code'"
         (click)="kind.set('event_code')"
+        (keydown.enter)="kind.set('event_code')"
+        tabindex="0"
         data-testid="tab-event-codes"
       >
         Event codes
-      </button>
-      <button
-        class="bf-tabs__tab"
-        type="button"
-        [class.bf-tabs__tab--active]="kind() === 'card_limit'"
-        [attr.aria-current]="kind() === 'card_limit' ? 'page' : null"
+      </a>
+      <a
+        satNavigationTab
+        [active]="kind() === 'card_limit'"
         (click)="kind.set('card_limit')"
+        (keydown.enter)="kind.set('card_limit')"
+        tabindex="0"
         data-testid="tab-card-limits"
       >
         Card limits
-      </button>
-    </nav>
+      </a>
+    </sat-navigation-tabs>
 
     @if (kind() === 'card_limit') {
       @if (cardLimitPushEnabled()) {
@@ -135,7 +136,7 @@ const STATUS_TONES: Record<PushItemView['status'], Tone> = {
           <span class="bf-muted">{{ items().length }} shown</span>
         </div>
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="items()" aria-label="Pushed items">
+          <table mat-table class="bf-table" [dataSource]="items()" aria-label="Pushed items">
             <ng-container matColumnDef="reference">
               <th mat-header-cell *matHeaderCellDef>Reference</th>
               <td mat-cell *matCellDef="let p">
@@ -192,20 +193,22 @@ const STATUS_TONES: Record<PushItemView['status'], Tone> = {
       </section>
     } @else {
       <section class="bf-card">
-        <sat-empty-state data-testid="pushes-empty">
-          <h2 satEmptyStateHeadline>
-            {{ kind() === 'event_code' ? 'No event codes pushed' : 'No card limits pushed' }}
-          </h2>
-          <p satEmptyStateDescription>
-            @if (kind() === 'event_code') {
-              Event codes are pushed from an approved event, so spend made against them comes back
-              matched.
-            } @else {
-              Card limits are created when a commitment paid by card is approved, and only while
-              card-limit push is on.
-            }
-          </p>
-        </sat-empty-state>
+        <div class="bf-card__body">
+          <sat-empty-state data-testid="pushes-empty">
+            <h2 satEmptyStateHeadline>
+              {{ kind() === 'event_code' ? 'No event codes pushed' : 'No card limits pushed' }}
+            </h2>
+            <p satEmptyStateDescription>
+              @if (kind() === 'event_code') {
+                Event codes are pushed from an approved event, so spend made against them comes back
+                matched.
+              } @else {
+                Card limits are created when a commitment paid by card is approved, and only while
+                card-limit push is on.
+              }
+            </p>
+          </sat-empty-state>
+        </div>
       </section>
     }
 
@@ -215,6 +218,7 @@ const STATUS_TONES: Record<PushItemView['status'], Tone> = {
     </p>
   `,
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PushesPage {

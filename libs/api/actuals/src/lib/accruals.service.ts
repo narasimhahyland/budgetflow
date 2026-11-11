@@ -42,6 +42,7 @@ import {
 } from './actuals-reads';
 import { CommitmentRelief } from './commitment-relief';
 import { MatchEngine } from './match-engine';
+import { csvCell } from './csv';
 
 type AccrualRow = typeof accruals.$inferSelect;
 type PrepaidRow = typeof prepaids.$inferSelect;
@@ -364,10 +365,6 @@ export class AccrualsService {
           .leftJoin(glAccounts, eq(glAccounts.id, commitments.glAccountId))
           .where(and(eq(accruals.status, 'posted'), isNull(accruals.exportedAt)))
           .orderBy(asc(accruals.createdAt));
-        const esc = (v: string | number | null) => {
-          const s = v === null ? '' : String(v);
-          return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-        };
         const header =
           'legal_entity,period,accrual_date,reference,description,cost_center,debit_account,credit_account,amount,currency,auto_reverse';
         const lines = rows.map(({ a, c, le, cc, gl, period }) =>
@@ -384,7 +381,7 @@ export class AccrualsService {
             a.currency,
             'yes',
           ]
-            .map(esc)
+            .map(csvCell)
             .join(','),
         );
         if (rows.length)

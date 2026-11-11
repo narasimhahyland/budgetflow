@@ -8,11 +8,11 @@ import { Router, RouterLink } from '@angular/router';
 import type { ForecastCycle } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
 import { CYCLE_STATUS } from './forecast-format';
 import { NewForecastCycleDialog } from './forecast-dialogs';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
+import { CloseTag } from './close-tag';
 
 /**
  * Screen 87a, cycle list: every reforecast round with how far it has got. Opening a cycle needs
@@ -22,6 +22,7 @@ import { LoadState } from './load-state';
 @Component({
   selector: 'bf-forecast-cycles-page',
   imports: [
+    CloseTag,
     DatePipe,
     LoadState,
     MatButtonModule,
@@ -29,7 +30,6 @@ import { LoadState } from './load-state';
     MatTableModule,
     RouterLink,
     SAT_EMPTY_STATE_IMPORTS,
-    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -78,7 +78,7 @@ import { LoadState } from './load-state';
         </sat-empty-state>
       } @else {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="rows()" aria-label="Forecast cycles">
+          <table mat-table class="bf-table" [dataSource]="rows()" aria-label="Forecast cycles">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Cycle</th>
               <td mat-cell *matCellDef="let c">
@@ -93,20 +93,16 @@ import { LoadState } from './load-state';
             </ng-container>
             <ng-container matColumnDef="asOf">
               <th mat-header-cell *matHeaderCellDef>As of</th>
-              <td mat-cell *matCellDef="let c">{{ c.asOfDate | date: 'd MMM y' }}</td>
+              <td mat-cell *matCellDef="let c">{{ c.asOfDate | date: 'd MMM y' : 'UTC' }}</td>
             </ng-container>
             <ng-container matColumnDef="due">
               <th mat-header-cell *matHeaderCellDef>Due</th>
-              <td mat-cell *matCellDef="let c">{{ c.dueDate | date: 'd MMM y' }}</td>
+              <td mat-cell *matCellDef="let c">{{ c.dueDate | date: 'd MMM y' : 'UTC' }}</td>
             </ng-container>
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let c">
-                <span class="bf-tag-cell"
-                  ><sat-status-tag [status]="statusOf(c).tone">{{
-                    statusOf(c).text
-                  }}</sat-status-tag></span
-                >
+                <span class="bf-tag-cell"><bf-close-tag [tag]="statusOf(c)" /></span>
               </td>
             </ng-container>
             <ng-container matColumnDef="progress">

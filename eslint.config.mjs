@@ -110,4 +110,24 @@ export default [
       ],
     },
   },
+  {
+    // Inline component styles are invisible to stylelint, so the same token rules are enforced here.
+    files: ['libs/web/**/*.ts', 'apps/web/src/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...['TemplateElement[value.raw', 'Literal[value'].flatMap((node) => [
+          {
+            selector: `${node}=/var\\(--sat-sys-(info|success|warning|important|neutral)\\)/]`,
+            message:
+              'This --sat-sys-* token does not exist. Use the -icon variant for fills and borders, or on-*-container for text.',
+          },
+          {
+            selector: `${node}=/font-family\\s*:/]`,
+            message: 'Do not declare font-family; Satori already loads the app fonts.',
+          },
+        ]),
+      ],
+    },
+  },
 ];

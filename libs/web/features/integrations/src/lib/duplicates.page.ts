@@ -14,14 +14,14 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { DuplicateGroupView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { byNewest, byRank, ordered } from './order';
+import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 
 type Resolution = 'kept_one' | 'kept_both';
 
@@ -45,9 +45,11 @@ type Resolution = 'kept_one' | 'kept_both';
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
     SatImportantButton,
+    SAT_NAVIGATION_TABS_IMPORTS,
   ],
   templateUrl: './duplicates.page.html',
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DuplicatesPage {

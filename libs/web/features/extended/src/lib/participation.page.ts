@@ -1,3 +1,4 @@
+import { formatNumber } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,15 +9,17 @@ import {
 } from '@angular/core';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
+import { map } from 'rxjs';
 import type { ParticipationRankRow } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type Period = 'month' | 'quarter' | 'year';
 
@@ -35,7 +38,8 @@ type Period = 'month' | 'quarter' | 'year';
     LoadState,
     MatButtonToggleModule,
     MatIconModule,
-    MatTabsModule,
+    RouterLink,
+    SAT_NAVIGATION_TABS_IMPORTS,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SatStatusTag,
@@ -79,17 +83,34 @@ type Period = 'month' | 'quarter' | 'year';
         >.
       </p>
 
-      <mat-tab-group>
-        <mat-tab label="Offices">
-          <ng-template matTabContent>
-            @if (b.locations.length === 0) {
-              <sat-empty-state data-testid="locations-empty">
-                <h2 satEmptyStateHeadline>Turnout appears once organizers mark attendance</h2>
-                <p satEmptyStateDescription>
-                  Nobody has been marked as attending an event in this period yet.
-                </p>
-              </sat-empty-state>
-            } @else {
+      <sat-navigation-tabs aria-label="Turnout">
+        <a
+          satNavigationTab
+          [routerLink]="[]"
+          [queryParams]="{ tab: 'offices' }"
+          [active]="tab() === 'offices'"
+          >Offices</a
+        >
+        <a
+          satNavigationTab
+          [routerLink]="[]"
+          [queryParams]="{ tab: 'teams' }"
+          [active]="tab() === 'teams'"
+          >Teams</a
+        >
+      </sat-navigation-tabs>
+
+      <section class="bf-card">
+        @if (tab() === 'offices') {
+          @if (b.locations.length === 0) {
+            <sat-empty-state data-testid="locations-empty">
+              <h2 satEmptyStateHeadline>Turnout appears once organizers mark attendance</h2>
+              <p satEmptyStateDescription>
+                Nobody has been marked as attending an event in this period yet.
+              </p>
+            </sat-empty-state>
+          } @else {
+            <div class="bf-table-scroll">
               <table class="bf-split-table" aria-label="Turnout by office">
                 <thead>
                   <tr>
@@ -128,19 +149,18 @@ type Period = 'month' | 'quarter' | 'year';
                   }
                 </tbody>
               </table>
-            }
-          </ng-template>
-        </mat-tab>
-        <mat-tab label="Teams">
-          <ng-template matTabContent>
-            @if (b.teams.length === 0) {
-              <sat-empty-state data-testid="teams-empty">
-                <h2 satEmptyStateHeadline>No team turnout yet</h2>
-                <p satEmptyStateDescription>
-                  Teams appear here once their people are marked as attending events.
-                </p>
-              </sat-empty-state>
-            } @else {
+            </div>
+          }
+        } @else {
+          @if (b.teams.length === 0) {
+            <sat-empty-state data-testid="teams-empty">
+              <h2 satEmptyStateHeadline>No team turnout yet</h2>
+              <p satEmptyStateDescription>
+                Teams appear here once their people are marked as attending events.
+              </p>
+            </sat-empty-state>
+          } @else {
+            <div class="bf-table-scroll">
               <table class="bf-split-table" aria-label="Turnout by team">
                 <thead>
                   <tr>
@@ -179,26 +199,13 @@ type Period = 'month' | 'quarter' | 'year';
                   }
                 </tbody>
               </table>
-            }
-          </ng-template>
-        </mat-tab>
-      </mat-tab-group>
+            </div>
+          }
+        }
+      </section>
     }
   `,
-  styles: `
-    mat-tab-group {
-      margin-top: 12px;
-    }
-    .bf-split-table {
-      margin-top: 12px;
-    }
-    @media (max-width: 834px) {
-      .bf-split-table {
-        display: block;
-        overflow-x: auto;
-      }
-    }
-  `,
+  styles: ``,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -206,6 +213,12 @@ export class ParticipationPage {
   private readonly api = injectApi();
   protected readonly session = inject(SessionStore);
   protected readonly period = signal<Period>('quarter');
+  private readonly route = inject(ActivatedRoute);
+  /** Offices or teams, from `?tab=` so the view survives a reload and can be linked. */
+  protected readonly tab = toSignal(
+    this.route.queryParamMap.pipe(map((p) => (p.get('tab') === 'teams' ? 'teams' : 'offices'))),
+    { initialValue: 'offices' as const },
+  );
 
   protected readonly leaderboard = resource({
     params: () => ({ period: this.period() }),
@@ -215,5 +228,5 @@ export class ParticipationPage {
   protected readonly board = computed(() => valueOf(this.leaderboard));
 
   protected turnout = (row: ParticipationRankRow): string =>
-    row.turnoutBps === null ? '' : `${(row.turnoutBps / 100).toFixed(1)}%`;
+    row.turnoutBps === null ? '' : `${formatNumber(row.turnoutBps / 100, 'en-US', '1.1-1')}%`;
 }

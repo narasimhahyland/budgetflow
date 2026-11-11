@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,36 +8,39 @@ import {
   signal,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money, type StatusView } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { approverLabel, spendTypeLabel } from './labels';
-import { LoadState } from './load-state';
 import { RulesTabs } from './rules-tabs';
 
-const MARKER_TONES: Record<string, 'neutral-quiet' | 'success' | 'warning' | 'important'> = {
-  unchanged: 'neutral-quiet',
-  added: 'success',
-  changed: 'warning',
-  removed: 'important',
+const MARKER_LOOKS: Record<string, StatusView> = {
+  unchanged: { label: 'No change', tone: 'neutral', icon: 'circle_minus' },
+  added: { label: 'New', tone: 'success', icon: 'circle_check' },
+  changed: { label: 'Changed', tone: 'warning', icon: 'note_edit' },
+  removed: { label: 'Removed', tone: 'important', icon: 'circle_x' },
 };
 
-const MARKER_LABELS: Record<string, string> = {
-  unchanged: 'No change',
-  added: 'New',
-  changed: 'Changed',
-  removed: 'Removed',
+const VERSION_LOOKS: Record<string, StatusView> = {
+  draft: { label: 'Draft', tone: 'neutral', icon: 'note_edit' },
+  awaiting_approval: { label: 'Waiting for approval', tone: 'warning', icon: 'clock' },
+  active: { label: 'In force', tone: 'success', icon: 'circle_check' },
+  scheduled: { label: 'Starts later', tone: 'info', icon: 'calendar' },
+  superseded: { label: 'Replaced', tone: 'neutral', icon: 'restore' },
 };
 
 /** Screen 070a: approval limits by role and spend type, with the version waiting for approval. */
 @Component({
   selector: 'bf-doa-admin-page',
   imports: [
+    DatePipe,
     DecimalPipe,
     LoadState,
     MatButtonModule,
+    MatIconModule,
     Money,
     RulesTabs,
     SAT_BANNER_IMPORTS,
@@ -76,6 +79,7 @@ const MARKER_LABELS: Record<string, string> = {
       [loading]="view.isLoading() && !view.hasValue()"
       [error]="view.error()"
       what="approval limits"
+      shape="table"
       (retry)="view.reload()"
     />
     @if (valueOf(view); as v) {
@@ -93,26 +97,40 @@ const MARKER_LABELS: Record<string, string> = {
         >
       }
 
-      <dl class="bf-kpis">
+      <div class="bf-kpis">
         <div class="bf-kpi">
-          <dt class="bf-kpi__label">Version shown</dt>
-          <dd class="bf-kpi__value">v{{ v.selectedVersion.version }}</dd>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Version shown</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="note_edit" aria-hidden="true" />
+          </div>
+          <p class="bf-kpi__value">v{{ v.selectedVersion.version }}</p>
+          <p class="bf-kpi__delta">{{ versionLook(v.selectedVersion.status).label }}</p>
         </div>
-        <div class="bf-kpi">
-          <dt class="bf-kpi__label">In force today</dt>
-          <dd class="bf-kpi__value">
+        <div class="bf-kpi bf-kpi--success">
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">In force today</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="circle_check" aria-hidden="true" />
+          </div>
+          <p class="bf-kpi__value">
             {{ v.activeVersion ? 'v' + v.activeVersion.version : 'None' }}
-          </dd>
+          </p>
+        </div>
+        <div class="bf-kpi bf-kpi--warning">
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Approvals in flight</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="clock" aria-hidden="true" />
+          </div>
+          <p class="bf-kpi__value">{{ v.impact.openTasksAffected | number }}</p>
+          <p class="bf-kpi__delta">Re-checked against the new limits</p>
         </div>
         <div class="bf-kpi">
-          <dt class="bf-kpi__label">Approvals in flight</dt>
-          <dd class="bf-kpi__value">{{ v.impact.openTasksAffected | number }}</dd>
+          <div class="bf-kpi__head">
+            <p class="bf-kpi__label">Delegations in place</p>
+            <mat-icon class="bf-kpi__icon" svgIcon="users" aria-hidden="true" />
+          </div>
+          <p class="bf-kpi__value">{{ v.impact.delegationsAffected | number }}</p>
         </div>
-        <div class="bf-kpi">
-          <dt class="bf-kpi__label">Delegations in place</dt>
-          <dd class="bf-kpi__value">{{ v.impact.delegationsAffected | number }}</dd>
-        </div>
-      </dl>
+      </div>
 
       <section class="bf-card" aria-labelledby="limits-title">
         <div class="bf-card__header">
@@ -120,12 +138,12 @@ const MARKER_LABELS: Record<string, string> = {
             Limits in version {{ v.selectedVersion.version }}
           </h2>
           <p class="bf-card__hint">
-            Starts {{ v.selectedVersion.validFrom }}. The most specific row wins: a named person
-            beats a role, an exact spend type beats any spend type.
+            Starts {{ v.selectedVersion.validFrom | date: 'd MMM y' : 'UTC' }}. The most specific
+            row wins: a named person beats a role, an exact spend type beats any spend type.
           </p>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Approval limits">
+          <table class="bf-split-table bf-table--stack" aria-label="Approval limits">
             <thead>
               <tr>
                 <th scope="col">Who</th>
@@ -140,9 +158,15 @@ const MARKER_LABELS: Record<string, string> = {
               @for (row of v.rows; track $index) {
                 <tr>
                   <td>{{ who(row) }}</td>
-                  <td>{{ spendType(row.spendType) }}</td>
-                  <td>{{ row.legalEntityCode ?? 'Any entity' }}</td>
-                  <td class="bf-num">
+                  <td data-label="Spend type">{{ spendType(row.spendType) }}</td>
+                  <td data-label="Legal entity">
+                    @if (row.legalEntityCode) {
+                      <span class="bf-cell__code">{{ row.legalEntityCode }}</span>
+                    } @else {
+                      Any entity
+                    }
+                  </td>
+                  <td class="bf-num" data-label="Limit">
                     @if (row.changeMarker === 'removed') {
                       No authority
                     } @else {
@@ -152,7 +176,7 @@ const MARKER_LABELS: Record<string, string> = {
                       />
                     }
                   </td>
-                  <td class="bf-num">
+                  <td class="bf-num" data-label="Was">
                     @if (row.previousLimitMinor !== null && row.previousLimitMinor !== undefined) {
                       <bf-money
                         [amountMinor]="row.previousLimitMinor"
@@ -162,10 +186,13 @@ const MARKER_LABELS: Record<string, string> = {
                       —
                     }
                   </td>
-                  <td>
-                    <sat-status-tag [status]="tone(row.changeMarker)">{{
-                      markerLabel(row.changeMarker)
-                    }}</sat-status-tag>
+                  <td class="bf-nowrap" data-label="Change">
+                    @let mark = markerLook(row);
+                    <sat-status-tag [status]="mark.tone"
+                      ><mat-icon [svgIcon]="mark.icon" aria-hidden="true" />{{
+                        mark.label
+                      }}</sat-status-tag
+                    >
                   </td>
                 </tr>
               }
@@ -179,7 +206,7 @@ const MARKER_LABELS: Record<string, string> = {
           <h2 class="bf-card__title" id="versions-title">Versions</h2>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Approval limit versions">
+          <table class="bf-split-table bf-table--stack" aria-label="Approval limit versions">
             <thead>
               <tr>
                 <th scope="col">Version</th>
@@ -193,23 +220,43 @@ const MARKER_LABELS: Record<string, string> = {
                 <tr>
                   <td>
                     <button
+                      mat-button
                       type="button"
-                      class="bf-list__item"
-                      [disabled]="ver.id === shown()"
+                      [disabled]="ver.id === (shown() ?? v.selectedVersion.id)"
+                      [attr.aria-label]="'Show version ' + ver.version"
                       (click)="show(ver.id)"
                     >
                       v{{ ver.version }}
                     </button>
                   </td>
-                  <td>{{ versionStatus(ver.status) }}</td>
-                  <td>{{ ver.validFrom }}{{ ver.validTo ? ' to ' + ver.validTo : ' onwards' }}</td>
-                  <td>{{ ver.approvedByName ?? 'Not approved yet' }}</td>
+                  <td class="bf-nowrap" data-label="Status">
+                    @let look = versionLook(ver.status);
+                    <sat-status-tag [status]="look.tone"
+                      ><mat-icon [svgIcon]="look.icon" aria-hidden="true" />{{
+                        look.label
+                      }}</sat-status-tag
+                    >
+                  </td>
+                  <td class="bf-nowrap" data-label="In force">
+                    {{ ver.validFrom | date: 'd MMM y' : 'UTC' }}
+                    @if (ver.validTo) {
+                      to {{ ver.validTo | date: 'd MMM y' : 'UTC' }}
+                    } @else {
+                      onwards
+                    }
+                  </td>
+                  <td data-label="Approved by">{{ ver.approvedByName ?? 'Not approved yet' }}</td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
       </section>
+    }
+  `,
+  styles: `
+    .bf-nowrap {
+      white-space: nowrap;
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -244,28 +291,32 @@ export class DoaAdminPage {
 
   protected readonly spendType = spendTypeLabel;
 
-  protected versionStatus(status: string): string {
-    return (
-      {
-        draft: 'Draft',
-        awaiting_approval: 'Waiting for approval',
-        active: 'In force',
-        scheduled: 'Starts later',
-        superseded: 'Replaced',
-      }[status] ?? status
-    );
+  /** Waiting for approval is pending (warning, clock); in force is approved (success). */
+  protected versionLook(status: string): StatusView {
+    return VERSION_LOOKS[status] ?? { label: status, tone: 'neutral', icon: 'circle_minus' };
   }
 
   protected who(row: { personName?: string | null; role: string | null }): string {
     return row.personName ?? (row.role ? approverLabel(row.role) : 'Anyone');
   }
 
-  protected tone(marker?: string): 'neutral-quiet' | 'success' | 'warning' | 'important' {
-    return MARKER_TONES[marker ?? 'unchanged'] ?? 'neutral-quiet';
-  }
-
-  protected markerLabel(marker?: string): string {
-    return MARKER_LABELS[marker ?? 'unchanged'] ?? 'No change';
+  /** A changed limit says which way it moved; a lower limit is the one that can block approvals. */
+  protected markerLook(row: {
+    changeMarker?: string;
+    limit: { amountMinor: number };
+    previousLimitMinor?: number | null;
+  }): StatusView {
+    const marker = row.changeMarker ?? 'unchanged';
+    if (
+      marker === 'changed' &&
+      row.previousLimitMinor !== null &&
+      row.previousLimitMinor !== undefined
+    ) {
+      return row.limit.amountMinor < row.previousLimitMinor
+        ? { label: 'Lowered', tone: 'warning', icon: 'trending_down' }
+        : { label: 'Raised', tone: 'info', icon: 'trending_up' };
+    }
+    return MARKER_LOOKS[marker] ?? MARKER_LOOKS['unchanged'];
   }
 
   protected async approve(): Promise<void> {

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import type { BudgetDetail } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { BudgetBar, type BudgetBarSegment, Money } from '@bf/web/ui';
 import { SAT_RICH_TOOLTIP_IMPORTS } from '@hylandsoftware/satori-ui/rich-tooltip';
 import { balancesOf, pct } from './api';
 
@@ -71,127 +71,49 @@ export class UsageBar {
   });
 }
 
-interface Segment {
-  key: string;
-  label: string;
-  minor: number;
-  className: string;
-}
-
-/** Stacked bar of where the authorized amount sits: children, held, pending, committed, actual, available. */
+/**
+ * Where the authorized amount sits, in the section 10 bucket colours (the shared budget bar):
+ * allocated out, held, pending, committed, actual, accrued and available. Available is the API's
+ * figure under this budget's rules; it is drawn only when it fits under authorized, since under a
+ * soft or track control basis it is not the remainder of the other buckets.
+ */
 @Component({
   selector: 'bf-spectrum',
-  imports: [Money],
-  template: `
-    <div class="bf-spectrum__bar" role="img" [attr.aria-label]="summary()">
-      @for (s of segments(); track s.key) {
-        @if (s.minor > 0) {
-          <span
-            class="bf-spectrum__seg"
-            [class]="s.className"
-            [style.flex-grow]="s.minor"
-            [attr.data-segment]="s.key"
-          ></span>
-        }
-      }
-    </div>
-    <ul class="bf-spectrum__legend">
-      @for (s of segments(); track s.key) {
-        <li>
-          <span class="bf-spectrum__dot" [class]="s.className"></span>
-          <span class="bf-spectrum__label">{{ s.label }}</span>
-          <bf-money [amountMinor]="s.minor" [currency]="currency()" />
-        </li>
-      }
-    </ul>
-  `,
+  imports: [BudgetBar],
+  template: `<bf-budget-bar
+    [label]="budget().name + ' budget'"
+    [segments]="segments()"
+    [totalMinor]="total()"
+    [currency]="budget().currency"
+  />`,
   styles: `
     :host {
       display: block;
-    }
-    .bf-spectrum__bar {
-      display: flex;
-      height: 14px;
-      overflow: hidden;
-      border-radius: var(--mat-sys-corner-full);
-      background: var(--mat-sys-surface-container-highest);
-    }
-    .bf-spectrum__seg {
-      min-width: 3px;
-    }
-    .bf-spectrum__legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 20px;
-      margin: 12px 0 0;
-      padding: 0;
-      list-style: none;
-      font: var(--mat-sys-body-small);
-    }
-    .bf-spectrum__legend li {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .bf-spectrum__label {
-      color: var(--mat-sys-on-surface-variant);
-    }
-    .bf-spectrum__dot {
-      width: 10px;
-      height: 10px;
-      border-radius: var(--mat-sys-corner-extra-small);
-    }
-    .children {
-      background: var(--mat-sys-primary-container);
-    }
-    .held {
-      background: var(--mat-sys-outline);
-    }
-    .pending {
-      background: var(--mat-sys-secondary);
-    }
-    .encumbered {
-      background: var(--mat-sys-primary);
-    }
-    .actual {
-      background: var(--mat-sys-tertiary);
-    }
-    .available {
-      background: var(--sat-sys-success-icon);
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Spectrum {
   readonly budget = input.required<BudgetDetail>();
-  protected readonly currency = computed(() => this.budget().currency);
-  protected readonly segments = computed((): Segment[] => {
+  protected readonly total = computed(() => balancesOf(this.budget()).authorized);
+  protected readonly segments = computed((): BudgetBarSegment[] => {
     const b = balancesOf(this.budget());
-    return [
-      {
-        key: 'children',
-        label: 'Allocated to children',
-        minor: b.allocatedOut,
-        className: 'children',
-      },
-      { key: 'held', label: 'Held', minor: b.held, className: 'held' },
-      { key: 'pending', label: 'Pending requests', minor: b.preEncumbered, className: 'pending' },
-      { key: 'encumbered', label: 'Encumbered', minor: b.encumbered, className: 'encumbered' },
-      { key: 'actual', label: 'Actual', minor: b.actual, className: 'actual' },
-      {
-        key: 'available',
-        label: 'Available',
-        minor: Math.max(b.available, 0),
-        className: 'available',
-      },
+    const parts: BudgetBarSegment[] = [
+      { bucket: 'allocatedOut', amountMinor: b.allocatedOut, label: 'Allocated to children' },
+      { bucket: 'held', amountMinor: b.held },
+      { bucket: 'preEncumbered', amountMinor: b.preEncumbered, label: 'Pending requests' },
+      { bucket: 'encumbered', amountMinor: b.encumbered, label: 'Committed' },
+      { bucket: 'actual', amountMinor: b.actual },
     ];
+    let used = parts.reduce((n, p) => n + Math.max(p.amountMinor, 0), 0);
+    if (b.accrued > 0 && used + b.accrued <= b.authorized) {
+      parts.push({ bucket: 'accrued', amountMinor: b.accrued });
+      used += b.accrued;
+    }
+    if (b.available > 0 && used + b.available <= b.authorized)
+      parts.push({ bucket: 'available', amountMinor: b.available });
+    return parts;
   });
-  protected readonly summary = computed(() =>
-    this.segments()
-      .filter((s) => s.minor > 0)
-      .map((s) => s.label)
-      .join(', '),
-  );
 }
 
 const REASON_TEXT: Record<string, string> = {

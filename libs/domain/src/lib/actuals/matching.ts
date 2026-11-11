@@ -126,7 +126,7 @@ export function checkMatchable(input: {
   if (input.requestedMinor <= 0 || input.requestedMinor > left) {
     return err(
       'ACTUAL_ALREADY_MATCHED',
-      `Only ${left} minor units of this actual are left to match.`,
+      'That is more than is left to match on this actual. Lower the amount.',
       { unmatchedMinor: left, requestedMinor: input.requestedMinor },
     );
   }

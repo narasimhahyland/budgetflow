@@ -78,7 +78,7 @@ const CHANGE_LABELS: Record<string, string> = {
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="bf-form__actions">
+      <div class="bf-form__actions bf-backtest__actions">
         <button mat-flat-button type="button" [disabled]="busy()" (click)="run()">Run check</button>
       </div>
     </section>
@@ -116,7 +116,10 @@ const CHANGE_LABELS: Record<string, string> = {
         </div>
         @if (r.items.length) {
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="Past requests under the draft rule">
+            <table
+              class="bf-split-table bf-table--stack"
+              aria-label="Past requests under the draft rule"
+            >
               <thead>
                 <tr>
                   <th scope="col">Request</th>
@@ -134,19 +137,19 @@ const CHANGE_LABELS: Record<string, string> = {
                       <span class="bf-cell__primary">{{ i.ref }}</span>
                       <span class="bf-cell__secondary">{{ i.title }}</span>
                     </td>
-                    <td>
+                    <td data-label="Budget">
                       {{ i.budgetName }}
                       <span class="bf-cell__secondary">{{ i.location }}</span>
                     </td>
-                    <td class="bf-num">
+                    <td class="bf-num" data-label="Amount">
                       <bf-money
                         [amountMinor]="i.amount.amountMinor"
                         [currency]="i.amount.currency"
                       />
                     </td>
-                    <td>{{ i.activeOutcome }}</td>
-                    <td>{{ i.draftOutcome }}</td>
-                    <td>
+                    <td data-label="Decided then">{{ i.activeOutcome }}</td>
+                    <td data-label="Would be decided">{{ i.draftOutcome }}</td>
+                    <td data-label="Change">
                       <sat-status-tag [status]="tone(i.changeKind)">{{
                         changeLabel(i.changeKind)
                       }}</sat-status-tag>
@@ -165,6 +168,11 @@ const CHANGE_LABELS: Record<string, string> = {
           </sat-empty-state>
         }
       </section>
+    }
+  `,
+  styles: `
+    .bf-backtest__actions {
+      padding-top: 16px;
     }
   `,
   host: { class: 'bf-page-layout' },

@@ -7,13 +7,7 @@
   </div>
   <div class="bf-page__actions">
     @if (canConnect() && enabled() && !connecting()) {
-      <button
-        mat-flat-button
-        satImportantButton
-        type="button"
-        (click)="startConnect()"
-        data-testid="bi-connect"
-      >
+      <button mat-flat-button type="button" (click)="startConnect()" data-testid="bi-connect">
         Connect a BI tool
       </button>
     }
@@ -74,12 +68,23 @@
   <section class="bf-kpis" aria-label="BI connector usage">
     <div class="bf-kpi">
       <p class="bf-kpi__label">Status</p>
-      <p class="bf-kpi__value" data-testid="bi-status">{{ c.enabled ? 'On' : 'Off' }}</p>
+      <p class="bf-kpi__value" data-testid="bi-status">
+        <sat-status-tag [status]="c.enabled ? 'success' : 'neutral'">{{
+          c.enabled ? 'On' : 'Off'
+        }}</sat-status-tag>
+      </p>
     </div>
     <div class="bf-kpi">
       <p class="bf-kpi__label">Datasets offered</p>
       <p class="bf-kpi__value" data-testid="bi-datasets-on">{{ enabledDatasets().length }}</p>
-      <p class="bf-kpi__delta">of {{ c.datasets.length }} available</p>
+      @let offered = c.datasets.length ? (enabledDatasets().length * 100) / c.datasets.length : 0;
+      <div class="bf-kpi__foot">
+        <span>Of {{ c.datasets.length }} available</span>
+        <span class="bf-kpi__pct">{{ offered | number: '1.0-0' }}%</span>
+        <span class="bf-kpi__track"
+          ><span class="bf-kpi__fill" [style.width.%]="offered"></span
+        ></span>
+      </div>
     </div>
     <div class="bf-kpi">
       <p class="bf-kpi__label">Connections active</p>

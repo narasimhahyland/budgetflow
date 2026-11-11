@@ -1,0 +1,11 @@
+[1/63] apps/api-e2e/src/admin/break-glass.spec.ts:46:5 › without a grant the platform operator cannot even see a budget
+[2/63] apps/api-e2e/src/admin/break-glass.spec.ts:57:5 › a request longer than four hours is refused with a typed problem
+[3/63] apps/api-e2e/src/admin/break-glass.spec.ts:68:5 › only the platform operator can ask for access
+[4/63] apps/api-e2e/src/admin/break-glass.spec.ts:80:5 › the operator asks; nothing opens while the request waits
+[5/63] apps/api-e2e/src/admin/break-glass.spec.ts:137:5 › the requester and read-only roles cannot decide it
+[6/63] apps/api-e2e/src/admin/break-glass.spec.ts:156:5 › an Organization Admin approves; budgets and the ledger open read-only
+[7/63] apps/api-e2e/src/admin/break-glass.spec.ts:224:5 › every request under the grant is audited against it
+[8/63] apps/api-e2e/src/admin/break-glass.spec.ts:262:5 › revoking ends access at once, and only an active grant can be revoked
+[9/63] apps/api-e2e/src/admin/break-glass.spec.ts:288:5 › a declined request opens nothing
+[62/63] apps/api-e2e/src/scope/director-isolation.spec.ts:146:7 › role scope from the authorization matrix › roles without budget visibility get not found, including the platform operator without break-glass
+  63 passed (2.4s)

@@ -17,11 +17,10 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { DiscussionItemType, FollowedItemView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { BudgetStatus, DateTimePipe, LoadState, SpendStatus } from '@bf/web/ui';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SatCategoryTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /**
  * Screen 060a: Following page (`/me/following`).
@@ -31,6 +30,7 @@ import { LoadState } from './load-state';
 @Component({
   selector: 'bf-following-page',
   imports: [
+    BudgetStatus,
     DateTimePipe,
     FormsModule,
     LoadState,
@@ -42,7 +42,8 @@ import { LoadState } from './load-state';
     MatTableModule,
     RouterLink,
     SAT_EMPTY_STATE_IMPORTS,
-    SatStatusTag,
+    SatCategoryTag,
+    SpendStatus,
   ],
   template: `
     <header class="bf-page__header">
@@ -96,21 +97,27 @@ import { LoadState } from './load-state';
           <p satEmptyStateDescription>
             Use the Follow button on any budget, event or request to watch its activity.
           </p>
-          <a mat-stroked-button routerLink="/budgets">Browse budgets</a>
+          <a satEmptyStateAction mat-stroked-button routerLink="/budgets">Browse budgets</a>
         </sat-empty-state>
       } @else {
         <section class="bf-card" aria-label="Followed items">
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="items()" aria-label="Followed items" data-testid="following-table">
+            <table
+              mat-table
+              class="bf-table bf-table--stack"
+              [dataSource]="items()"
+              aria-label="Followed items"
+              data-testid="following-table"
+            >
               <ng-container matColumnDef="type">
                 <th mat-header-cell *matHeaderCellDef>Type</th>
-                <td mat-cell *matCellDef="let i">
-                  <span class="bf-chip">{{ i.itemType }}</span>
+                <td mat-cell *matCellDef="let i" data-label="Type">
+                  <sat-category-tag category="gray">{{ typeOf(i) }}</sat-category-tag>
                 </td>
               </ng-container>
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef>Item</th>
-                <td mat-cell *matCellDef="let i">
+                <td mat-cell *matCellDef="let i" data-label="Item">
                   <a [routerLink]="i.link" class="bf-cell__primary">{{ i.name }}</a>
                   @if (i.source === 'owner') {
                     <span class="bf-cell__secondary">Following (owner)</span>
@@ -119,13 +126,17 @@ import { LoadState } from './load-state';
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let i">
-                  <sat-status-tag status="neutral">{{ i.status.replaceAll('_', ' ') }}</sat-status-tag>
+                <td mat-cell *matCellDef="let i" data-label="Status">
+                  @if (i.itemType === 'budget') {
+                    <bf-budget-status [status]="i.status" />
+                  } @else {
+                    <bf-spend-status [kind]="i.itemType" [status]="i.status" />
+                  }
                 </td>
               </ng-container>
               <ng-container matColumnDef="activity">
                 <th mat-header-cell *matHeaderCellDef>Last activity</th>
-                <td mat-cell *matCellDef="let i">
+                <td mat-cell *matCellDef="let i" data-label="Last activity">
                   <span class="bf-cell__primary">{{ i.lastActivitySummary }}</span>
                   <span class="bf-cell__secondary" data-testid="relative-time">{{
                     i.lastActivityAt | bfDateTime: session.timezone()
@@ -134,13 +145,13 @@ import { LoadState } from './load-state';
               </ng-container>
               <ng-container matColumnDef="level">
                 <th mat-header-cell *matHeaderCellDef>Notification level</th>
-                <td mat-cell *matCellDef="let i">
+                <td mat-cell *matCellDef="let i" data-label="Notification level">
                   {{ i.level === 'money_decisions' ? 'Money and decisions only' : 'All activity' }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Action</th>
-                <td mat-cell *matCellDef="let i">
+                <td mat-cell *matCellDef="let i" data-label="Action">
                   <button
                     mat-button
                     type="button"
@@ -174,6 +185,15 @@ import { LoadState } from './load-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowingPage {
+  private readonly typeLabel: Record<DiscussionItemType, string> = {
+    budget: 'Budget',
+    event: 'Event',
+    request: 'Request',
+  };
+
+  protected typeOf(i: FollowedItemView): string {
+    return this.typeLabel[i.itemType];
+  }
   private readonly api = injectApi();
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
@@ -191,9 +211,7 @@ export class FollowingPage {
     loader: ({ params }) => data(this.api.listFollowedItems({ query: params })),
   });
 
-  protected readonly items = computed<FollowedItemView[]>(
-    () => valueOf(this.list)?.items ?? [],
-  );
+  protected readonly items = computed<FollowedItemView[]>(() => valueOf(this.list)?.items ?? []);
 
   protected setTypeFilter(val: string): void {
     this.typeFilter.set(val === 'all' ? undefined : (val as DiscussionItemType));

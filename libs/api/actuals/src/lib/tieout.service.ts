@@ -36,6 +36,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import { ActualsReads, decimalOf, tenantOf, todayUtc, type CommandContext } from './actuals-reads';
 import { ActualsDtos } from './dto';
+import { csvCell } from './csv';
 
 type RunRow = typeof glTieoutRuns.$inferSelect;
 
@@ -425,8 +426,6 @@ export class TieOutService {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       this.policy.assert(actor, 'actuals.read', tenantOf(actor));
       const t = await this.dto(tx, actor, await this.run(tx, id));
-      const esc = (v: string | null) =>
-        v === null ? '' : /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
       const rows = t.lines.map((l) =>
         [
           t.legalEntityCode,
@@ -440,7 +439,7 @@ export class TieOutService {
           l.withinTolerance ? 'tied' : 'difference',
           l.explanation,
         ]
-          .map(esc)
+          .map(csvCell)
           .join(','),
       );
       return {

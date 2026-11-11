@@ -9,18 +9,19 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import type { LegalHold, LegalHoldScopeKind, RetentionPolicy, RetentionRun } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { PendingChange, ReasonField } from './admin-ui';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const ACTION_LABEL: Record<string, string> = {
   delete: 'Deleted',
@@ -34,6 +35,14 @@ const SCOPE_LABEL: Record<string, string> = {
   event: 'An event',
   budget: 'A budget',
   date_range: 'A range of dates',
+} satisfies Record<LegalHoldScopeKind, string>;
+
+/** The label of the reference a hold is placed on, by what it covers. */
+const REF_LABEL: Record<string, string> = {
+  person: 'Person reference',
+  event: 'Event reference',
+  budget: 'Budget reference',
+  date_range: 'Range of dates',
 } satisfies Record<LegalHoldScopeKind, string>;
 
 type PolicyRow = RetentionPolicy & { detail: boolean };
@@ -62,12 +71,14 @@ const HOLD_DECISION_LABEL: Record<HoldDecision, string> = {
  */
 @Component({
   selector: 'bf-retention-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DateTimePipe,
     FormsModule,
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     MatTableModule,
@@ -76,6 +87,7 @@ const HOLD_DECISION_LABEL: Record<HoldDecision, string> = {
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatImportantButton,
   ],
   templateUrl: './retention.page.html',
   styleUrls: ['./page.scss', './retention.page.scss'],
@@ -85,6 +97,7 @@ export class RetentionPage {
   protected readonly valueOf = valueOf;
   protected readonly actionLabel = ACTION_LABEL;
   protected readonly scopeLabel = SCOPE_LABEL;
+  protected readonly refLabel = REF_LABEL;
   protected readonly scopeKinds = Object.keys(SCOPE_LABEL) as LegalHoldScopeKind[];
   protected readonly holdDecisionLabel = HOLD_DECISION_LABEL;
   protected readonly policyColumns = [

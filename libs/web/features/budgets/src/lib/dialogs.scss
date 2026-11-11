@@ -1,7 +1,24 @@
+@use '@angular/material' as mat;
+
+// Room above the header so the icon tile clears the dialog's 28px corner (Material's own token,
+// inherited by the title element inside this component).
+:host {
+  @include mat.dialog-overrides(
+    (
+      headline-padding: 24px 24px 12px,
+    )
+  );
+}
+
 .bf-dialog__head {
   display: flex;
   align-items: flex-start;
   gap: 12px;
+}
+
+.bf-dialog__close {
+  flex: none;
+  margin: -8px -8px 0 auto;
 }
 
 .bf-dialog__icon {
@@ -15,6 +32,11 @@
   color: var(--mat-sys-on-primary-container);
 }
 
+.bf-dialog__icon--info {
+  background: var(--sat-sys-info-container);
+  color: var(--sat-sys-info-icon);
+}
+
 .bf-dialog__icon--danger {
   background: var(--mat-sys-error-container);
   color: var(--mat-sys-on-error-container);
@@ -22,7 +44,9 @@
 
 .bf-dialog__title {
   margin: 0;
+  color: var(--mat-sys-on-surface);
   font: var(--mat-sys-headline-small);
+  font-weight: 600;
 }
 
 .bf-dialog__subtitle {
@@ -119,11 +143,18 @@
   margin-bottom: 12px;
 }
 
+@media (width < 600px) {
+  .bf-destinations {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .bf-destination {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 12px;
+  box-sizing: border-box;
+  padding: 4px 12px 8px 4px;
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-surface-container-lowest);
@@ -134,6 +165,7 @@
 }
 
 .bf-destination small {
+  display: block;
   color: var(--mat-sys-on-surface-variant);
   font: var(--mat-sys-body-small);
 }
@@ -216,7 +248,22 @@
   gap: 8px;
 }
 
-.bf-danger-button:not(:disabled) {
-  background-color: var(--mat-sys-error);
-  color: var(--mat-sys-on-error);
+// Block and warning banners sit between the scrolling content and the actions, so the reason an
+// action is blocked is always on screen next to the disabled button (1440x900 and 412px alike).
+.bf-dialog__status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 24px 0;
+}
+
+.bf-dialog__status:empty {
+  display: none;
+}
+
+// Why the confirm button is disabled, at the start of the action row.
+.bf-dialog__why {
+  margin-inline-end: auto;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
 }

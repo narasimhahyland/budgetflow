@@ -71,6 +71,17 @@
         Scheduled syncs keep failing until it is fixed, so BudgetFlow is working from data that
         stops at the last successful run.
       </sat-banner-message>
+      @if (tab() !== 'connection') {
+        <button
+          mat-button
+          satBannerAction
+          type="button"
+          (click)="tab.set('connection')"
+          data-testid="fix-connection"
+        >
+          Fix connection
+        </button>
+      }
     </sat-banner>
   } @else if (d.summary.status === 'paused') {
     <sat-banner variant="info" data-testid="connector-paused">
@@ -91,7 +102,7 @@
           <p class="bf-card__hint">Read what happens before you confirm.</p>
         </div>
       </div>
-      <ul class="bf-card__body">
+      <ul class="bf-impact-list">
         <li>Every schedule on this connector stops. Nothing new arrives or is sent.</li>
         <li>Event codes and card limits waiting to be pushed are not sent.</li>
         <li>
@@ -132,20 +143,20 @@
     </section>
   }
 
-  <nav class="bf-tabs" aria-label="Connector sections">
+  <sat-navigation-tabs aria-label="Connector sections">
     @for (t of tabs(); track t.id) {
-      <button
-        class="bf-tabs__tab"
-        type="button"
-        [class.bf-tabs__tab--active]="tab() === t.id"
-        [attr.aria-current]="tab() === t.id ? 'page' : null"
+      <a
+        satNavigationTab
+        [active]="tab() === t.id"
         (click)="tab.set(t.id)"
+        (keydown.enter)="tab.set(t.id)"
+        tabindex="0"
         [attr.data-testid]="'tab-' + t.id"
       >
         {{ t.label }}
-      </button>
+      </a>
     }
-  </nav>
+  </sat-navigation-tabs>
 
   @switch (tab()) {
     @case ('overview') {
@@ -203,7 +214,7 @@
             <dt>Mode</dt>
             <dd>{{ modeLabel(d.summary.mode) }}</dd>
           </div>
-          <div>
+          <div class="bf-facts__wide">
             <dt>Inbound callback path</dt>
             <dd>
               @if (d.inboundWebhookPath) {
@@ -248,7 +259,7 @@
             <dt>Account or tenant id</dt>
             <dd>{{ d.accountRef ?? '—' }}</dd>
           </div>
-          <div>
+          <div class="bf-facts__wide">
             <dt>Credential</dt>
             <dd data-testid="credential-state">
               @if (d.credential.secretRef) {
@@ -389,18 +400,25 @@
         }
         @if (mappings().length) {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="mappings()" aria-label="Mappings">
+            <table
+              mat-table
+              class="bf-table bf-table--stack"
+              [dataSource]="mappings()"
+              aria-label="Mappings"
+            >
               <ng-container matColumnDef="kind">
                 <th mat-header-cell *matHeaderCellDef>Kind</th>
                 <td mat-cell *matCellDef="let m">{{ kindLabel(m.kind) }}</td>
               </ng-container>
               <ng-container matColumnDef="external">
                 <th mat-header-cell *matHeaderCellDef>At the provider</th>
-                <td mat-cell *matCellDef="let m">{{ m.externalValue }}</td>
+                <td mat-cell *matCellDef="let m" data-label="At the provider">
+                  {{ m.externalValue }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="internal">
                 <th mat-header-cell *matHeaderCellDef>In BudgetFlow</th>
-                <td mat-cell *matCellDef="let m">
+                <td mat-cell *matCellDef="let m" data-label="In BudgetFlow">
                   @if (canManage()) {
                     <div class="bf-cell-field">
                       <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -420,7 +438,7 @@
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let m">
+                <td mat-cell *matCellDef="let m" data-label="Status">
                   @if (!m.internalValue && !m.internalId) {
                     <sat-status-tag status="warning">Not mapped</sat-status-tag>
                   } @else if (m.approved) {
@@ -448,12 +466,14 @@
             </div>
           }
         } @else {
-          <sat-empty-state>
-            <h2 satEmptyStateHeadline>No mappings yet</h2>
-            <p satEmptyStateDescription>
-              Mappings appear as the connector reads values it does not recognise.
-            </p>
-          </sat-empty-state>
+          <div class="bf-card__body">
+            <sat-empty-state>
+              <h2 satEmptyStateHeadline>No mappings yet</h2>
+              <p satEmptyStateDescription>
+                Mappings appear as the connector reads values it does not recognise.
+              </p>
+            </sat-empty-state>
+          </div>
         }
       </section>
     }
@@ -471,7 +491,7 @@
         </div>
         @if (schedules().length) {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="schedules()" aria-label="Schedules">
+            <table mat-table class="bf-table" [dataSource]="schedules()" aria-label="Schedules">
               <ng-container matColumnDef="object">
                 <th mat-header-cell *matHeaderCellDef>Object</th>
                 <td mat-cell *matCellDef="let s">
@@ -601,7 +621,7 @@
           <bf-load-state [error]="pushes.error()" what="the pushes" (retry)="pushes.reload()" />
         } @else if (pushItems().length) {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="pushItems()" aria-label="Pushed items">
+            <table mat-table class="bf-table" [dataSource]="pushItems()" aria-label="Pushed items">
               <ng-container matColumnDef="reference">
                 <th mat-header-cell *matHeaderCellDef>Reference</th>
                 <td mat-cell *matCellDef="let p">
@@ -637,12 +657,14 @@
             </table>
           </div>
         } @else {
-          <sat-empty-state>
-            <h2 satEmptyStateHeadline>Nothing pushed to this connector</h2>
-            <p satEmptyStateDescription>
-              Event codes and card limits appear here once they are sent.
-            </p>
-          </sat-empty-state>
+          <div class="bf-card__body">
+            <sat-empty-state>
+              <h2 satEmptyStateHeadline>Nothing pushed to this connector</h2>
+              <p satEmptyStateDescription>
+                Event codes and card limits appear here once they are sent.
+              </p>
+            </sat-empty-state>
+          </div>
         }
       </section>
     }
@@ -666,7 +688,7 @@
           <bf-load-state [error]="runs.error()" what="the runs" (retry)="runs.reload()" />
         } @else if (runItems().length) {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="runItems()" aria-label="Sync runs">
+            <table mat-table class="bf-table" [dataSource]="runItems()" aria-label="Sync runs">
               <ng-container matColumnDef="started">
                 <th mat-header-cell *matHeaderCellDef>Started</th>
                 <td mat-cell *matCellDef="let r">
@@ -706,10 +728,12 @@
             </table>
           </div>
         } @else {
-          <sat-empty-state>
-            <h2 satEmptyStateHeadline>No runs yet</h2>
-            <p satEmptyStateDescription>Runs appear here once a schedule fires or you run one.</p>
-          </sat-empty-state>
+          <div class="bf-card__body">
+            <sat-empty-state>
+              <h2 satEmptyStateHeadline>No runs yet</h2>
+              <p satEmptyStateDescription>Runs appear here once a schedule fires or you run one.</p>
+            </sat-empty-state>
+          </div>
         }
       </section>
     }

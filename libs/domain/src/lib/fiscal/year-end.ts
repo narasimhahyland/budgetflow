@@ -110,7 +110,7 @@ export function decideCarry(
   if (approved > outcome.carryMinor) {
     return err(
       'LIMIT_EXCEEDED',
-      `At most ${outcome.carryMinor} minor units were requested; approve that or less.`,
+      'That is more than was requested to carry forward; approve the requested amount or less.',
       { requestedMinor: outcome.carryMinor },
     );
   }

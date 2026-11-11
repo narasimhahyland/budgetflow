@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -7,17 +8,18 @@ import {
   signal,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { BudgetOutlook } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatInteractiveTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /** `OutlookCategory` is exported from the contract as a schema only, so the union lives here. */
 type OutlookCategory = BudgetOutlook['category'];
@@ -46,15 +48,17 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
 @Component({
   selector: 'bf-outlook-page',
   imports: [
+    DatePipe,
     AI_OUTPUT_IMPORTS,
     LoadState,
     MatButtonModule,
+    MatChipsModule,
+    MatCheckboxModule,
     MatIconModule,
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
-    SatInteractiveTag,
     SatStatusTag,
   ],
   template: `
@@ -95,6 +99,7 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
         [loading]="outlook.isLoading() && !outlook.hasValue()"
         [error]="loadError()"
         what="the spending outlook"
+        shape="table"
         (retry)="outlook.reload()"
       />
       @if (outlook.hasValue()) {
@@ -148,29 +153,22 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
             </div>
           </div>
           <div class="bf-filters">
-            @for (c of categories; track c.value) {
-              <sat-status-tag
-                satInteractiveTag
-                [status]="category() === c.value ? 'info' : 'neutral-quiet'"
-                [hideIcon]="true"
-                role="button"
-                tabindex="0"
-                (click)="category.set(c.value)"
-                (keydown.enter)="category.set(c.value)"
-                [attr.data-testid]="'filter-' + (c.value || 'all')"
-                >{{ c.label }}</sat-status-tag
-              >
-            }
-            <sat-status-tag
-              satInteractiveTag
-              [status]="ownedOnly() ? 'info' : 'neutral-quiet'"
-              [hideIcon]="true"
-              role="button"
-              tabindex="0"
-              (click)="ownedOnly.set(!ownedOnly())"
-              (keydown.enter)="ownedOnly.set(!ownedOnly())"
+            <mat-chip-listbox aria-label="Kind of budget">
+              @for (c of categories; track c.value) {
+                <mat-chip-option
+                  [selected]="category() === c.value"
+                  [selectable]="category() !== c.value"
+                  (selectionChange)="$event.selected && category.set(c.value)"
+                  [attr.data-testid]="'filter-' + (c.value || 'all')"
+                  >{{ c.label }}</mat-chip-option
+                >
+              }
+            </mat-chip-listbox>
+            <mat-checkbox
+              [checked]="ownedOnly()"
+              (change)="ownedOnly.set($event.checked)"
               data-testid="filter-owned"
-              >Only budgets I own</sat-status-tag
+              >Only budgets I own</mat-checkbox
             >
           </div>
 
@@ -183,7 +181,7 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
             </sat-empty-state>
           } @else {
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="Spending outlook by budget">
+              <table class="bf-split-table bf-table--stack" aria-label="Spending outlook by budget">
                 <thead>
                   <tr>
                     <th>Budget</th>
@@ -202,6 +200,7 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
                       <td>
                         <button
                           mat-button
+                          class="bf-outlook__budget"
                           type="button"
                           (click)="select(o)"
                           [attr.data-testid]="'open-outlook-' + o.budgetId"
@@ -209,20 +208,24 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
                           {{ o.budgetName }}
                         </button>
                       </td>
-                      <td>{{ o.ownerName ?? 'Unassigned' }}</td>
-                      <td class="bf-num">
+                      <td data-label="Owner">{{ o.ownerName ?? 'Unassigned' }}</td>
+                      <td class="bf-num" data-label="Authorized">
                         <bf-money
                           [amountMinor]="o.authorized.amountMinor"
                           [currency]="o.authorized.currency"
                         />
                       </td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-label="Actual and committed to date">
                         <bf-money
                           [amountMinor]="o.toDate.amountMinor"
                           [currency]="o.toDate.currency"
                         />
                       </td>
-                      <td class="bf-num bf-outlook__projection" data-testid="ai-projection">
+                      <td
+                        class="bf-num bf-outlook__projection"
+                        data-testid="ai-projection"
+                        data-label="Year-end outlook (AI)"
+                      >
                         @if (o.likely) {
                           <bf-money
                             [amountMinor]="o.likely.amountMinor"
@@ -249,14 +252,14 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
                           <span class="bf-cell__secondary">Not enough history</span>
                         }
                       </td>
-                      <td class="bf-num" data-testid="ai-projection">
+                      <td class="bf-num" data-testid="ai-projection" data-label="Gap to authorized">
                         @if (o.gap) {
                           <bf-money [amountMinor]="o.gap.amountMinor" [currency]="o.gap.currency" />
                         } @else {
                           <span class="bf-cell__secondary">—</span>
                         }
                       </td>
-                      <td>
+                      <td class="bf-nowrap" data-label="Outlook">
                         <sat-status-tag [status]="categoryTone(o.category)">
                           {{ categoryLabel(o.category) }}
                         </sat-status-tag>
@@ -264,11 +267,12 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
                           <span class="bf-cell__secondary">{{ o.confidence }} confidence</span>
                         }
                       </td>
-                      <td>
+                      <td class="bf-nowrap" data-label="Nudge">
                         @if (o.nudge) {
                           @if (o.nudge.snoozedUntil) {
                             <sat-status-tag status="neutral"
-                              >Snoozed until {{ o.nudge.snoozedUntil }}</sat-status-tag
+                              >Snoozed until
+                              {{ o.nudge.snoozedUntil | date: 'd MMM y' : 'UTC' }}</sat-status-tag
                             >
                           } @else {
                             <sat-status-tag status="warning">Nudge raised</sat-status-tag>
@@ -390,23 +394,31 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
     }
     .bf-outlook__range {
       padding: 12px 14px;
-      border: 1px dashed var(--sat-sys-info);
+      border: 1px dashed var(--sat-sys-info-icon);
       border-radius: var(--mat-sys-corner-medium);
     }
+    /* Plain inline text: a flex gap would put a space before the comma after each amount. */
     .bf-outlook__range-text {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 4px;
       margin: 0;
       font: var(--mat-sys-body-medium);
+    }
+    .bf-outlook__budget {
+      justify-content: flex-start;
+      text-align: start;
+    }
+    .bf-nowrap {
+      white-space: nowrap;
+    }
+    /* Numeric cells do not wrap; the range sentence under the figure may. */
+    .bf-outlook__projection .bf-cell__secondary {
+      white-space: normal;
     }
     .bf-outlook__nudge {
       display: flex;
       flex-direction: column;
       gap: 10px;
       padding: 14px;
-      border: 1px solid var(--sat-sys-warning);
+      border: 1px solid var(--sat-sys-warning-icon);
       border-radius: var(--mat-sys-corner-large);
       background: var(--sat-sys-warning-container);
       color: var(--sat-sys-on-warning-container);

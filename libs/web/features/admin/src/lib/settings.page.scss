@@ -39,3 +39,13 @@
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-label-small);
 }
+
+.bf-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.bf-form__actions--flush {
+  padding: 12px 0 0;
+}

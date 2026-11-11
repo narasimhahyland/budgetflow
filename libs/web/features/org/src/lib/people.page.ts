@@ -7,10 +7,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import type { Person } from '@bf/contracts';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_TABLE_WITH_ROW_STATES_IMPORTS } from '@hylandsoftware/satori-ui/table-with-row-states';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
+import { data, initialsOf, injectApi, valueOf } from './api';
 
 const TYPE_LABEL: Record<Person['employmentType'], string> = {
   employee: 'Employee',
@@ -21,7 +22,9 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
 /** Screen 38: employee directory, filtered by the caller's org scope. */
 @Component({
   selector: 'bf-people-page',
+  host: { class: 'bf-page-layout' },
   imports: [
+    SatAvatar,
     FormsModule,
     LoadState,
     MatButtonModule,
@@ -68,6 +71,8 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
         [loading]="page.isLoading() && !page.hasValue()"
         [error]="page.error()"
         what="the people directory"
+        shape="table"
+        [lines]="10"
         (retry)="page.reload()"
       />
       @if (valueOf(page); as p) {
@@ -75,47 +80,61 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
           <p class="bf-empty">Nobody matches. Clear the search or pick another unit.</p>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table satTableWithRowStates [dataSource]="p.items" aria-label="People">
+            <table
+              class="bf-table bf-table--stack"
+              mat-table
+              satTableWithRowStates
+              [dataSource]="p.items"
+              aria-label="People"
+            >
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let r">
-                  <a
-                    satRowPrimaryAction
-                    [routerLink]="['/org/people', r.id]"
-                    class="bf-cell__primary"
-                    >{{ r.displayName }}</a
-                  >
-                  <span class="bf-cell__secondary">{{ r.jobTitle }}</span>
+                <td class="bf-cell--full" mat-cell *matCellDef="let r">
+                  <span class="bf-cell__owner">
+                    <sat-avatar size="28" [initials]="initials(r.displayName)" aria-hidden="true" />
+                    <span>
+                      <a
+                        satRowPrimaryAction
+                        [routerLink]="['/org/people', r.id]"
+                        class="bf-cell__primary"
+                        >{{ r.displayName }}</a
+                      >
+                      <span class="bf-cell__secondary">{{ r.jobTitle }}</span>
+                    </span>
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="location">
                 <th mat-header-cell *matHeaderCellDef>Location and team</th>
-                <td mat-cell *matCellDef="let r">
+                <td mat-cell *matCellDef="let r" data-label="Location and team">
                   <span class="bf-cell__primary">{{ r.locationName ?? '—' }}</span>
                   <span class="bf-cell__secondary">{{ r.orgUnitName ?? '' }}</span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="entity">
                 <th mat-header-cell *matHeaderCellDef>Entity and cost center</th>
-                <td mat-cell *matCellDef="let r">
-                  <span class="bf-cell__primary">{{ r.employingEntityCode ?? '—' }}</span>
-                  <span class="bf-cell__secondary">{{ r.costCenterCode ?? '' }}</span>
+                <td mat-cell *matCellDef="let r" data-label="Entity and cost center">
+                  <span class="bf-cell__name">
+                    <span class="bf-cell__code">{{ r.employingEntityCode ?? '—' }}</span>
+                    @if (r.costCenterCode) {
+                      <span class="bf-cell__code">{{ r.costCenterCode }}</span>
+                    }
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="type">
                 <th mat-header-cell *matHeaderCellDef>Type</th>
-                <td mat-cell *matCellDef="let r">
-                  <sat-status-tag
-                    [status]="r.employmentType === 'employee' ? 'neutral' : 'info'"
-                    [hideIcon]="true"
-                  >
+                <td mat-cell *matCellDef="let r" data-label="Type">
+                  <sat-category-tag [category]="r.employmentType === 'employee' ? 'gray' : 'blue'">
                     {{ typeName(r.employmentType) }}
-                  </sat-status-tag>
+                  </sat-category-tag>
                 </td>
               </ng-container>
               <ng-container matColumnDef="manager">
                 <th mat-header-cell *matHeaderCellDef>Manager</th>
-                <td mat-cell *matCellDef="let r">{{ r.managerName ?? '—' }}</td>
+                <td mat-cell *matCellDef="let r" data-label="Manager">
+                  {{ r.managerName ?? '—' }}
+                </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="columns"></tr>
               <tr mat-row satRowState *matRowDef="let row; columns: columns"></tr>
@@ -137,6 +156,7 @@ const TYPE_LABEL: Record<Person['employmentType'], string> = {
 })
 export class PeoplePage {
   protected readonly valueOf = valueOf;
+  protected readonly initials = initialsOf;
   private readonly api = injectApi();
   protected readonly columns = ['name', 'location', 'entity', 'type', 'manager'];
   protected readonly q = signal('');

@@ -74,6 +74,8 @@
     [loading]="list.isLoading() && !list.hasValue()"
     [error]="list.error()"
     what="the people in this tenant"
+    shape="table"
+    [lines]="10"
     (retry)="list.reload()"
   />
 
@@ -88,15 +90,26 @@
       </sat-empty-state>
     } @else {
       <div class="bf-table-scroll">
-        <table mat-table multiTemplateDataRows [dataSource]="rows()" aria-label="People and roles">
+        <table
+          mat-table
+          class="bf-table bf-table--stack"
+          multiTemplateDataRows
+          [dataSource]="rows()"
+          aria-label="People and roles"
+        >
           <ng-container matColumnDef="person">
             <th mat-header-cell *matHeaderCellDef>Person</th>
-            <td mat-cell *matCellDef="let u">
+            <td mat-cell *matCellDef="let u" class="bf-cell--full">
               @if (u.personId) {
-                <span class="bf-cell__primary">{{ u.displayName }}</span>
-                <span class="bf-cell__secondary">{{ u.email ?? 'No work email' }}</span>
-                <span class="bf-cell__secondary">
-                  {{ u.jobTitle ?? 'No job title' }} · {{ u.locationName ?? 'No location' }}
+                <span class="bf-cell__owner">
+                  <sat-avatar size="28" [initials]="initials(u.displayName)" aria-hidden="true" />
+                  <span>
+                    <span class="bf-cell__primary">{{ u.displayName }}</span>
+                    <span class="bf-cell__secondary">{{ u.email ?? 'No work email' }}</span>
+                    <span class="bf-cell__secondary">
+                      {{ u.jobTitle ?? 'No job title' }} · {{ u.locationName ?? 'No location' }}
+                    </span>
+                  </span>
                 </span>
               } @else {
                 <span class="bf-cell__primary">Account without a person record</span>
@@ -108,13 +121,19 @@
           </ng-container>
           <ng-container matColumnDef="roles">
             <th mat-header-cell *matHeaderCellDef>Roles</th>
-            <td mat-cell *matCellDef="let u">
-              <span [attr.data-testid]="'roles-' + u.membershipId">{{ roleNames(u) }}</span>
+            <td mat-cell *matCellDef="let u" data-label="Roles">
+              <span class="bf-role-tags" [attr.data-testid]="'roles-' + u.membershipId">
+                @for (r of u.roles; track r) {
+                  <sat-category-tag category="gray">{{ roleLabel[r] ?? r }}</sat-category-tag>
+                } @empty {
+                  <span class="bf-cell__secondary">No role</span>
+                }
+              </span>
             </td>
           </ng-container>
           <ng-container matColumnDef="review">
             <th mat-header-cell *matHeaderCellDef>Access review</th>
-            <td mat-cell *matCellDef="let u">
+            <td mat-cell *matCellDef="let u" data-label="Access review">
               @if (u.privileged) {
                 <sat-status-tag status="info">Privileged</sat-status-tag>
               } @else {
@@ -124,9 +143,9 @@
           </ng-container>
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let u">
+            <td mat-cell *matCellDef="let u" data-label="Status">
               <sat-status-tag [status]="u.status === 'active' ? 'success' : 'neutral'">{{
-                u.status === 'active' ? 'Active' : u.status
+                statusLabel(u.status)
               }}</sat-status-tag>
               @if (u.anonymised) {
                 <span class="bf-cell__secondary">
@@ -141,8 +160,8 @@
             </td>
           </ng-container>
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
-            <td mat-cell *matCellDef="let u">
+            <th mat-header-cell *matHeaderCellDef class="bf-col-actions">Actions</th>
+            <td mat-cell *matCellDef="let u" class="bf-col-actions">
               @if (canManage()) {
                 <button
                   mat-stroked-button
@@ -157,7 +176,7 @@
           </ng-container>
 
           <ng-container matColumnDef="detail">
-            <td mat-cell *matCellDef="let u" [attr.colspan]="columns.length">
+            <td mat-cell *matCellDef="let u" class="bf-cell--full" [attr.colspan]="columns.length">
               @for (change of u.pendingRoleChanges; track change.id) {
                 <bf-pending-change
                   [change]="change"
@@ -213,7 +232,8 @@
                         <li class="bf-grants__item">
                           <span class="bf-cell__primary">{{ roleLabel[g.role] ?? g.role }}</span>
                           <span class="bf-cell__secondary">
-                            {{ g.scopeOrgUnitName ?? 'Company-wide' }} · from {{ g.validFrom }}
+                            {{ g.scopeOrgUnitName ?? 'Company-wide' }} · from
+                            {{ g.validFrom | date: 'd MMM y' : 'UTC' }}
                           </span>
                           <button
                             mat-button

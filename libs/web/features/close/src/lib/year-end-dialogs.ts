@@ -237,6 +237,7 @@ export class CarryDecisionDialog {
     <mat-dialog-actions align="end" class="bf-dialog__actions">
       <button mat-button type="button" mat-dialog-close>Cancel</button>
       <button
+        mat-flat-button
         satImportantButton
         type="button"
         [disabled]="busy() || !ready()"

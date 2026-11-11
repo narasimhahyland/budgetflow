@@ -16,17 +16,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import type { EventChecklistTask } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe } from '@bf/web/ui';
+import { DateOnlyPipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
+import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { EventTabs } from './event-tabs';
-import { LoadState } from './load-state';
+import { initials } from './labels';
 
 type Sub = 'checklist' | 'agenda';
 const SECTIONS = [
@@ -50,11 +51,13 @@ const SECTIONS = [
     MatInputModule,
     MatSelectModule,
     MatSlideToggleModule,
-    MatTooltipModule,
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
+    SatAvatar,
+    SatCategoryTag,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -119,13 +122,21 @@ const SECTIONS = [
             <h2 class="bf-card__title" data-testid="plan-progress">
               {{ v.doneTasks }} of {{ v.totalTasks }} tasks done
               @if (v.overdueTasks > 0) {
-                · {{ v.overdueTasks }} overdue
+                · <span class="bf-overdue">{{ v.overdueTasks }} overdue</span>
               }
             </h2>
             @if (v.templateName) {
               <p class="bf-card__hint">From the {{ v.templateName }} template</p>
             }
           </div>
+          @if (v.totalTasks > 0) {
+            <span class="bf-plan__track" aria-hidden="true"
+              ><span
+                class="bf-plan__fill"
+                [style.width.%]="(v.doneTasks * 100) / v.totalTasks"
+              ></span
+            ></span>
+          }
 
           @if (v.tasks.length === 0) {
             <sat-empty-state>
@@ -142,18 +153,26 @@ const SECTIONS = [
                   <ul class="bf-list">
                     @for (t of tasksIn(v.tasks, section.id); track t.id) {
                       <li class="bf-task">
-                        <mat-checkbox
-                          [checked]="t.status === 'done'"
-                          [disabled]="v.readOnly || t.isSystem || busy()"
-                          [matTooltip]="
-                            t.isSystem ? 'Completes when the work it links to is done' : ''
-                          "
-                          (change)="toggle(t)"
-                          >{{ t.title }}</mat-checkbox
-                        >
+                        <span class="bf-task__main">
+                          <mat-checkbox
+                            [checked]="t.status === 'done'"
+                            [disabled]="v.readOnly || t.isSystem || busy()"
+                            (change)="toggle(t)"
+                            >{{ t.title }}</mat-checkbox
+                          >
+                          @if (t.isSystem) {
+                            <span class="bf-cell__secondary bf-task__why"
+                              >Completes when the work it links to is done.</span
+                            >
+                          }
+                        </span>
                         <span class="bf-task__meta">
                           @if (t.assigneeName) {
-                            <span class="bf-chip">{{ t.assigneeName }}</span>
+                            <span class="bf-cell__owner"
+                              ><sat-avatar size="28" [initials]="initials(t.assigneeName)" />{{
+                                t.assigneeName
+                              }}</span
+                            >
                           }
                           @if (t.dueDate) {
                             <span class="bf-cell__secondary"
@@ -161,10 +180,15 @@ const SECTIONS = [
                             >
                           }
                           @if (t.overdue) {
-                            <span class="bf-chip bf-chip--warning">Overdue</span>
+                            <sat-status-tag status="warning"
+                              ><mat-icon
+                                svgIcon="clock"
+                                aria-hidden="true"
+                              />Overdue</sat-status-tag
+                            >
                           }
                           @if (t.linkedLabel) {
-                            <span class="bf-chip">{{ t.linkedLabel }}</span>
+                            <sat-category-tag category="blue">{{ t.linkedLabel }}</sat-category-tag>
                           }
                         </span>
                       </li>
@@ -219,11 +243,8 @@ const SECTIONS = [
               @for (item of v.agenda; track item.id) {
                 <li>
                   <span class="bf-cell__primary"
-                    >{{ item.startTime }}
-                    @if (item.endTime) {
-                      <span>–{{ item.endTime }}</span>
-                    }
-                    · {{ item.title }}</span
+                    >{{ item.startTime }}{{ item.endTime ? '–' + item.endTime : '' }} ·
+                    {{ item.title }}</span
                   >
                   <span class="bf-cell__secondary">
                     {{ item.locationRoom ?? 'No room given' }}
@@ -286,15 +307,48 @@ const SECTIONS = [
       gap: 8px;
     }
 
-    .bf-chip--warning {
-      background: var(--sat-sys-warning-container);
+    .bf-task__main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .bf-task__why {
+      padding-inline-start: 40px;
+    }
+
+    .bf-cell__owner {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bf-overdue {
       color: var(--sat-sys-on-warning-container);
+    }
+
+    .bf-plan__track {
+      display: block;
+      height: 6px;
+      margin: 0 20px 8px;
+      overflow: hidden;
+      border-radius: var(--mat-sys-corner-full);
+      background: var(--mat-sys-surface-container);
+    }
+
+    .bf-plan__fill {
+      display: block;
+      height: 100%;
+      border-radius: var(--mat-sys-corner-full);
+      background: var(--mat-sys-primary);
     }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EventPlanPage {
+  protected readonly initials = initials;
   private readonly api = injectApi();
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
