@@ -1,0 +1,227 @@
+000b	Chart table alternatives and keyboard-first grid	P14	visual only
+001	Login	P2	journey only
+002	Single sign-on login	P2	journey only
+003	MFA verification	P2	journey only
+004	Forgot password	P2	journey only
+005	First-time organization setup	P2	NONE
+006	Organization and legal-entity setup	P3	NONE
+007	Fiscal year and currency setup	P3	NONE
+008	Role and permission setup	P2	NONE
+009	Initial organization hierarchy import	P3	NONE
+010	Setup completion dashboard	P2	NONE
+010a	Guided setup checklist with sample data	P14	both
+011	Executive dashboard	P10	NONE
+011a	AI assistant panel (plain-language questions)	P13	both
+011b	Auto-drafted leadership summary and variance commentary	P15	both
+012	Finance controller dashboard	P10	NONE
+013	Budget health overview	P10	visual only
+014	Organization-wide budget hierarchy	P4	NONE
+015	Budget utilization analytics	P10	NONE
+015a	Fairness view: spend per head by location	P10	visual only
+015b	Participation and reach	P10	visual only
+015c	Outcome linkage (pulse, eNPS, retention)	P15	both
+016	Budget forecast and variance view	P10	NONE
+016a	Board and FP&A pack	P10	both
+016b	Under/overspend forecasts and nudges	P13	both
+017	Alerts and exceptions dashboard	P10	NONE
+017a	Exceptions dashboard	P10	NONE
+017b	Red-flag analytics	P15	NONE
+017c	Anomaly flags (split, duplicate, unusual cost per head)	P13	both
+018	Pending approvals dashboard	P10	NONE
+018a	Approval performance (cycle time, bottlenecks)	P10	NONE
+018b	Product analytics dashboard	P10	NONE
+019	Budget list	P4	visual only
+020	Create budget	P4	visual only
+020a	Budget-plan spreadsheet import with column mapping	P4	visual only
+020b	Program templates	P4	visual only
+021	Budget details	P4	visual only
+022	Budget allocation workspace	P4	visual only
+022a	Per-head driver allocation	P4	visual only
+022b	Allocation grid with paste from Excel	P4	visual only
+022c	HR headcount import and refresh	P3	NONE
+022d	Suggested allocations	P13	both
+023	Hierarchical budget tree	P4	visual only
+023a	Roll forward or clone last year's tree	P4	NONE
+024	Allocate budget to child unit	P4	visual only
+025	Transfer budget	P4	visual only
+026	Reduce budget	P4	visual only
+027	Freeze budget	P4	visual only
+028	Set budget to zero	P4	visual only
+029	Revise budget	P4	visual only
+029a	Contingency reserve release	P4	visual only
+030	Budget version history	P4	visual only
+031	Budget comparison view	P4	visual only
+031a	What-if reallocation scenarios	P15	both
+032	Budget calendar and fiscal-period view	P4	visual only
+032a	Period phasing editor	P4	visual only
+033	Organization hierarchy	P3	NONE
+034	Organization chart	P3	NONE
+035	Department details	P3	NONE
+036	Team details	P3	NONE
+037	Location management	P3	NONE
+038	Employee directory	P3	NONE
+039	Employee profile	P3	NONE
+040	Reporting relationship management	P3	NONE
+041	Cost-center management	P3	NONE
+042	Organization import and synchronization	P3	NONE
+043	Events dashboard	P9	visual only
+043a	Holiday and festival overlay calendar	P15	NONE
+044	Event list	P5	visual only
+044a	Date and activity polls, idea board	P15	NONE
+045	Create event	P5	visual only
+045a	Event templates, recurring events, clone	P9	visual only
+045b	Event planning copilot	P15	NONE
+046	Event details	P5	visual only
+046a	Live co-funding board	P5	visual only
+046b	Checklist, tasks and agenda	P9	visual only
+047	Add locations and participants	P5	visual only
+047a	Invitations and RSVP	P9	visual only
+047b	Attendee needs (dietary, accessibility, travel, photo consent)	P9	visual only
+047c	QR or mobile check-in	P15	NONE
+047d	Remote and hybrid participation	P15	NONE
+047e	Attendance and per-head recalculation	P9	visual only
+048	Event budget request	P5	NONE
+049	Cross-location cost allocation	P5	visual only
+050	Event approval workflow	P5	visual only
+051	Event expense and commitment tracking	P5	visual only
+051a	Vendor quotes: request, compare, select	P9	visual only
+052	Event supporting documents	P5	visual only
+053	Event budget reconciliation	P6	NONE
+053a	Intercompany recharge schedule	P5	visual only
+054	Close event	P6	NONE
+054a	Post-event survey and photo gallery	P9	visual only
+054b	Event ROI scorecard	P9	visual only
+055	My requests	P5	visual only
+056	Create budget request	P5	visual only
+056a	Inter-Director Budget Contribution Request ("Co-funding request")	P5	visual only
+057	Create additional-fund request	P5	visual only
+058	Create over-budget request	P5	visual only
+059	Approval inbox	P5	visual only
+059a	Mobile web approvals (installable app)	P8	both
+059b	Mobile balance check and camera receipts	P8	both
+059c	Notification channels and push settings	P8	both
+060	Request details	P5	visual only
+060a	Comments, mentions, follow and watch	P8	both
+061	Approval decision screen	P5	visual only
+061a	Actionable approval email	P5	visual only
+061b	Slack approval card	P8	both
+061c	Microsoft Teams approval card	P8	both
+061d	Slack and Teams: balance check, quick request and alerts	P8	both
+061e	Slack and Teams app setup and account linking	P8	both
+061f	Slack and Teams: ask BudgetFlow (plain-language questions)	P13	both
+062	Delegated approval screen	P7	NONE
+063	Escalated approval screen	P7	NONE
+064	Request history	P5	both
+064a	Role-based digest templates	P8	both
+065	Rejected request and resubmission	P7	both
+066	Rules dashboard	P7	visual only
+067	Rule list	P7	visual only
+068	Create rule	P7	visual only
+069	Rule builder	P7	visual only
+069a	Policy assistant ("why was this blocked?")	P13	both
+070	Approval routing configuration	P7	visual only
+070a	Delegation-of-authority matrix admin	P7	visual only
+071	Spending-limit configuration	P7	visual only
+071a	Policy templates and threshold table	P7	visual only
+072	Category-policy configuration	P7	visual only
+072a	Gifts, entertainment and alcohol policy	P7	visual only
+073	Location-policy configuration	P7	visual only
+073a	Vendor controls	P7	visual only
+074	Over-budget policy	P7	visual only
+074a	Post-spend exception queue	P7	visual only
+075	Freeze and zero-budget policy	P7	visual only
+076	Notification and escalation policy	P7	visual only
+077	Rule simulation and testing	P7	visual only
+078	Rule version history	P7	visual only
+079	Reports dashboard	P10	visual only
+080	Budget versus actual report	P10	visual only
+080a	Actuals import	P6	NONE
+080b	Unmatched actuals queue	P6	NONE
+080c	GL tie-out and monthly sign-off	P6	NONE
+080d	Accrual proposals	P6	NONE
+080e	Period close and lock	P11	visual only
+080f	Transaction matching review (AI)	P13	both
+080g	Tax-aware consumption (GST/VAT recovery)	P11	NONE
+080h	Employee benefit ledger and thresholds	P11	NONE
+080i	Withholding tax on commitments	P15	NONE
+081	Allocation report	P10	visual only
+082	Utilization report	P10	visual only
+083	Location comparison report	P10	visual only
+084	Department comparison report	P10	visual only
+085	Event spending report	P10	visual only
+085a	Commitment hygiene (aging, auto-release)	P6	NONE
+086	Unused and expired budget report	P10	visual only
+086a	Reclaim and redistribute unused budget	P11	NONE
+087	Forecast and variance report	P10	both
+087a	Forecast cycle with variance commentary	P11	visual only
+087b	Year-end run	P11	visual only
+087c	Rollover, lapse and sweep policies	P11	visual only
+088	Audit log	P5	visual only
+088a	One-click evidence pack	P10	NONE
+089	Allocation history	P4	visual only
+090	Approval history	P7	visual only
+091	Export and scheduled reports	P10	visual only
+092	Integrations dashboard	P12	both
+092a	BI connector	P16	both
+092b	No-code connectors	P16	both
+092c	Connector for AI assistants (Model Context Protocol)	P16	both
+092d	Partner marketplace	P16	both
+093	HR system integration	P12	both
+094	ERP integration	P12	NONE
+094a	Planning integration (Adaptive Planning)	P12	both
+094b	Finance and payroll exports	P12	NONE
+095	Expense-management integration	P12	NONE
+096	Corporate-card integration	P12	visual only
+097	Calendar integration	P12	NONE
+098	Identity and SSO integration	P12	both
+099	Data synchronization status	P12	both
+099a	Cross-source duplicate review	P12	visual only
+099b	Event-code and card-limit push	P12	visual only
+100	Integration error and retry screen	P12	both
+101	API key and webhook management	P12	both
+101a	Public API docs and sandbox	P12	NONE
+102	Tenant settings	P2	NONE
+102a	Legal entities	P3	journey only
+102b	Program branding	P14	both
+102c	Demo environment and rules sandbox	P14	journey only
+102d	Embeddable balance and events widgets	P16	both
+102e	White-label for resellers	Deferred	deferred
+103	User and role management	P2	both
+103a	Bulk owner invites	P14	both
+104	Permission matrix	P2	NONE
+104a	Delegation-of-authority matrix (seeded, read-only)	P3	journey only
+105	Feature flags	P14	both
+105a	Plans and entitlements	Deferred	deferred
+106	Categories and custom fields	P3	NONE
+106a	GL accounts and category-to-GL mapping	P3	journey only
+106b	Reason-code taxonomy	P3	journey only
+106c	Vendor master	P3	journey only
+107	Currency and exchange-rate settings	P3	journey only
+107a	Exchange-rate types and plan-rate lock	P3	journey only
+108	Fiscal-period settings	P3	journey only
+108a	Fiscal calendar variants (4-4-5, 52/53-week)	P3	journey only
+109	Notification settings	P14	journey only
+110	Document and attachment settings	P14	journey only
+111	Data-retention settings	P14	both
+112	Security settings	P14	journey only
+113	Audit and compliance settings	P14	NONE
+113a	AI settings and query log	P13	both
+114	System health dashboard	P14	both
+115	Employee dashboard	P5	both
+115a	Native iOS and Android layouts	deferred	deferred
+116	Available budgets	P5	visual only
+116a	"Your team's budget" card	P14	NONE
+117	Submit spending request	P5	NONE
+117a	Hand-off of approved spend to a prefilled expense	P12	NONE
+118	Request event funding	P5	both
+119	View request status	P5	NONE
+120	View approved allocations	P5	both
+120a	Recognition awards	P15	both
+120b	Wellbeing and learning wallets	P15	both
+121	Upload receipt or document	P5	both
+121a	Receipt and quote extraction	P13	both
+122	Personal activity history	P14	both
+122a	Gamified participation	P15	both
+122b	Organizer recognition	P15	both
+123	Notifications and tasks	P8	both
+124	Profile and preferences	P2	NONE

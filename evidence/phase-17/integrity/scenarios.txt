@@ -1,0 +1,78 @@
+[1/77] apps/api-e2e/src/actuals/fx-plan-rate.spec.ts:21:7 › actuals in local currency at the locked plan rate › INR and EUR actuals consume budget at the plan rate; the FX effect is posted separately and never consumes budget
+[2/77] apps/api-e2e/src/actuals/fx-plan-rate.spec.ts:106:7 › actuals in local currency at the locked plan rate › three INR invoices against a USD commitment relieve exactly what the commitment encumbered (no FX drift)
+[3/77] apps/api-e2e/src/actuals/import-auto-match.spec.ts:34:7 › actuals import with auto-match › upload converts at the plan rate, proposes matches, skips duplicates and rejects invalid lines; posting fills the queue with the rest
+[4/77] apps/api-e2e/src/actuals/import-auto-match.spec.ts:205:7 › actuals import with auto-match › the same file cannot be imported twice and a line already imported in another file is skipped
+[5/77] apps/api-e2e/src/actuals/import-auto-match.spec.ts:238:7 › actuals import with auto-match › only finance can import; auditors read the queue; employees see nothing
+[6/77] apps/api-e2e/src/actuals/ledger-rebuild.spec.ts:39:7 › ledger rebuild after actuals and accounting postings › every Phase 6 posting kind leaves the ledger rebuildable and balanced
+[7/77] apps/api-e2e/src/actuals/queue-matching.spec.ts:21:7 › unmatched queue and manual matching › a queued actual is split across a commitment and a budget, matched once, and a correction reverses it back to the queue
+[8/77] apps/api-e2e/src/actuals/queue-matching.spec.ts:133:7 › unmatched queue and manual matching › a partial match keeps the line in the queue; not budget-relevant lines leave it; cross-source duplicates need confirmation
+[9/77] apps/api-e2e/src/actuals/refunds-reversals.spec.ts:20:7 › refunds, credit notes and reversals › credit notes and refunds reduce the actual on the original budget; the commitment stays consumed
+[10/77] apps/api-e2e/src/actuals/refunds-reversals.spec.ts:62:7 › refunds, credit notes and reversals › a source reversal reverses the original match with linked journals and restores the commitment
+[11/77] apps/api-e2e/src/audit/hash-chain.spec.ts:26:7 › audit trail › one event per successful mutation with actor and changes; none for a rejected command
+[12/77] apps/api-e2e/src/audit/hash-chain.spec.ts:53:7 › audit trail › the tenant's chain verifies, and only audit roles may read it
+[13/77] apps/api-e2e/src/audit/hash-chain.spec.ts:68:7 › audit trail › the database rejects UPDATE and DELETE on audit rows for the application role
+[14/77] apps/api-e2e/src/audit/hash-chain.spec.ts:75:7 › audit trail › exactly one event per successful mutation across command types, none for rejections or replays
+[15/77] apps/api-e2e/src/audit/hash-chain.spec.ts:146:7 › audit trail › deleting the newest event fails verification against the chain head
+[16/77] apps/api-e2e/src/audit/hash-chain.spec.ts:191:7 › audit trail › tampering with one stored event breaks verification at that event
+[17/77] apps/api-e2e/src/budgets/p4-plan-baseline.spec.ts:13:7 › Phase 4 plan baseline › a root without a plan line is rejected; new money needs Finance Admin and CEO; approved plan lines are immutable
+[18/77] apps/api-e2e/src/budgets/p4-plan-baseline.spec.ts:150:7 › Phase 4 plan baseline › contingency reserve is a root; release is the cross-root move
+[19/77] apps/api-e2e/src/budgets/p4-plan-baseline.spec.ts:201:7 › Phase 4 plan baseline › scenario roots are created through plan revisions
+[20/77] apps/api-e2e/src/budgets/planning.spec.ts:80:7 › plan versions and the root tie-out › applying a version creates roots, a revision adjusts them, and roots always tie out
+[21/77] apps/api-e2e/src/budgets/planning.spec.ts:196:7 › plan versions and the root tie-out › spreadsheet import maps columns, reports row errors, and accepts tab-separated paste
+[22/77] apps/api-e2e/src/budgets/planning.spec.ts:282:7 › plan versions and the root tie-out › roll forward clones the tree into the next year under its plan version
+[23/77] apps/api-e2e/src/budgets/planning.spec.ts:334:7 › budget rules: phasing, limits, settings, alerts › phasing splits authorized over the fiscal periods and manual amounts must add up
+[24/77] apps/api-e2e/src/budgets/planning.spec.ts:381:7 › budget rules: phasing, limits, settings, alerts › limits by location and category feed the spend check; only the parent owner sets them
+[25/77] apps/api-e2e/src/budgets/planning.spec.ts:446:7 › budget rules: phasing, limits, settings, alerts › settings use optimistic concurrency; owners tune thresholds, the parent owner governs the control mode
+[26/77] apps/api-e2e/src/budgets/planning.spec.ts:514:7 › budget rules: phasing, limits, settings, alerts › crossing an owner alert threshold publishes budget.threshold_crossed
+[27/77] apps/api-e2e/src/budgets/planning.spec.ts:554:7 › budget rules: phasing, limits, settings, alerts › a parent's owner is alerted when spend in a child crosses the parent's threshold
+[28/77] apps/api-e2e/src/budgets/planning.spec.ts:583:7 › Available, roll-ups and scope › company-wide Available counts child allocations once; the budget explains its own rules
+[29/77] apps/api-e2e/src/budgets/planning.spec.ts:629:7 › Available, roll-ups and scope › company-wide Available subtracts held money; parent utilization rolls up child spend once
+[30/77] apps/api-e2e/src/budgets/planning.spec.ts:671:7 › Available, roll-ups and scope › owners see their subtree only, in lists, roll-ups and controls
+[31/77] apps/api-e2e/src/budgets/planning.spec.ts:715:7 › Available, roll-ups and scope › the ledger rebuild equals cached balances after every Phase 4 posting
+[32/77] apps/api-e2e/src/close/closed-period-database.spec.ts:26:7 › the database refuses postings into a closed or locked period › a ledger journal cannot be inserted into a closed period
+[33/77] apps/api-e2e/src/close/closed-period-database.spec.ts:34:7 › the database refuses postings into a closed or locked period › a ledger journal cannot be inserted into a locked period either
+[34/77] apps/api-e2e/src/close/closed-period-database.spec.ts:42:7 › the database refuses postings into a closed or locked period › a ledger line cannot be inserted into a closed period even under an open journal
+[35/77] apps/api-e2e/src/close/closed-period-database.spec.ts:60:7 › the database refuses postings into a closed or locked period › ledger rows are append-only, so a correction can only be a reversal
+[36/77] apps/api-e2e/src/close/closed-period-database.spec.ts:71:7 › the database refuses postings into a closed or locked period › audit events and close snapshots are append-only
+[37/77] apps/api-e2e/src/close/closed-period-database.spec.ts:84:7 › the database refuses postings into a closed or locked period › close acknowledgements and commitment carries are append-only evidence
+[38/77] apps/api-e2e/src/close/closed-period-database.spec.ts:97:7 › the database refuses postings into a closed or locked period › the Phase 11 tables enforce tenant isolation
+[39/77] apps/api-e2e/src/close/period-close.spec.ts:21:7 › period close checklist and sign-off › the checklist refuses a close while a hard check fails and takes snapshots when it passes
+[40/77] apps/api-e2e/src/close/period-close.spec.ts:102:7 › period close checklist and sign-off › a soft check is acknowledged with a reason and stops blocking the close
+[41/77] apps/api-e2e/src/close/period-close.spec.ts:138:7 › period close checklist and sign-off › reopening is break-glass: two different people, audited, and the re-close takes version 2
+[42/77] apps/api-e2e/src/close/period-close.spec.ts:272:7 › period close checklist and sign-off › every status change and acknowledgement lands in the audit log with its reason
+[43/77] apps/api-e2e/src/close/period-close.spec.ts:302:7 › period close checklist and sign-off › a period list is readable by finance and refused to an employee
+[44/77] apps/api-e2e/src/ledger/available.spec.ts:47:7 › available amount per control basis › every consuming bucket reduces available; accrued does not
+[45/77] apps/api-e2e/src/ledger/available.spec.ts:75:7 › available amount per control basis › a control basis that excludes held and pre-encumbered leaves them out of available
+[46/77] apps/api-e2e/src/ledger/available.spec.ts:97:7 › available amount per control basis › hard mode rejects a posting that would make available negative; track mode records it
+[47/77] apps/api-e2e/src/ledger/available.spec.ts:130:7 › available amount per control basis › manual journals cannot touch hierarchy buckets and must balance
+[48/77] apps/api-e2e/src/ledger/available.spec.ts:174:7 › available amount per control basis › a manual journal cannot drive a bucket below zero, so it never creates allocation headroom
+[49/77] apps/api-e2e/src/ledger/available.spec.ts:225:7 › available amount per control basis › a manual journal cannot move amounts between budgets, directly or through a counter account
+[50/77] apps/api-e2e/src/ledger/available.spec.ts:281:7 › available amount per control basis › only finance admins post manual journals
+[51/77] apps/api-e2e/src/ledger/closed-period.spec.ts:13:7 › accounting periods › an allocation dated in a closed period lands in the next open period, flagged late
+[52/77] apps/api-e2e/src/ledger/closed-period.spec.ts:35:7 › accounting periods › locked and soft-closed dates also move to the next open period for ordinary postings
+[53/77] apps/api-e2e/src/ledger/closed-period.spec.ts:74:7 › accounting periods › finance reversals may post into a soft-closed period
+[54/77] apps/api-e2e/src/ledger/closed-period.spec.ts:96:7 › accounting periods › the database refuses a ledger insert into a closed period
+[55/77] apps/api-e2e/src/ledger/fiscal-period.spec.ts:23:7 › accounting dates within the fiscal year › an FY2026 allocation dated outside FY2026 is rejected; the last day of the year passes
+[56/77] apps/api-e2e/src/ledger/fiscal-period.spec.ts:62:7 › accounting dates within the fiscal year › a root budget with an original amount dated outside its fiscal year is not created
+[57/77] apps/api-e2e/src/ledger/fiscal-period.spec.ts:88:7 › accounting dates within the fiscal year › manual journals and reversals post within the fiscal year of their budgets
+[58/77] apps/api-e2e/src/ledger/fx-triplet.spec.ts:13:7 › currency triplet at the locked plan rate › USD 300.00 to an INR child: INR 24,975.00 at 83.25, reporting USD 300.00, rate stored on each line
+[59/77] apps/api-e2e/src/ledger/fx-triplet.spec.ts:45:7 › currency triplet at the locked plan rate › minor-unit exponents for JPY (0 decimals) and KWD (3 decimals); allocations credit the child rounding down
+[60/77] apps/api-e2e/src/ledger/fx-triplet.spec.ts:64:7 › currency triplet at the locked plan rate › half-even rounding at the line outside the hierarchy (JPY 1.5 → 2, JPY 4.5 → 4)
+[61/77] apps/api-e2e/src/ledger/journal.spec.ts:23:7 › journals › a journal balanced in INR posts with a reporting rounding line to FX variance
+[62/77] apps/api-e2e/src/ledger/journal.spec.ts:121:7 › journals › a manual line worth less than one minor unit of its budget currency is rejected
+[63/77] apps/api-e2e/src/ledger/journal.spec.ts:147:7 › journals › the database refuses lines appended to a committed journal, even balanced ones
+[64/77] apps/api-e2e/src/ledger/journal.spec.ts:193:7 › journals › a reversal and a downstream allocation racing for the same money never both succeed
+[65/77] apps/api-e2e/src/ledger/journal.spec.ts:222:7 › journals › ten parallel reversals of one journal with different keys post exactly one
+[66/77] apps/api-e2e/src/ledger/journal.spec.ts:247:7 › journals › an idempotency key is bound to its actor and operation
+[67/77] apps/api-e2e/src/ledger/journal.spec.ts:287:7 › journals › another director cannot read a journal in someone else's subtree or learn whether a journal exists
+[68/77] apps/api-e2e/src/ledger/rebuild-check.spec.ts:42:7 › ledger rebuild check (worker job) › after allocations across currencies, rebuilt balances equal cached ones and the hierarchy reconciles
+[69/77] apps/api-e2e/src/ledger/rebuild-check.spec.ts:70:7 › ledger rebuild check (worker job) › roles without the integrity permission cannot run or read checks
+[70/77] apps/api-e2e/src/ledger/rebuild-check.spec.ts:91:7 › ledger rebuild check (worker job) › injected drift in cached balances is detected and flagged, never repaired
+[71/77] apps/api-e2e/src/ledger/rebuild-check.spec.ts:132:7 › ledger rebuild check (worker job) › seeded ledger corruption is flagged: negative bucket, over-allocation, wrong triplet, hierarchy
+[72/77] apps/api-e2e/src/ledger/reversal.spec.ts:14:7 › reversals instead of edits › a reversal exactly negates the original, links both ways and restores balances
+[73/77] apps/api-e2e/src/ledger/reversal.spec.ts:66:7 › reversals instead of edits › a journal is reversed once, and a reversal is never reversed
+[74/77] apps/api-e2e/src/ledger/reversal.spec.ts:99:7 › reversals instead of edits › a reversal that would leave a child with more allocated out than it holds is refused
+[75/77] apps/api-e2e/src/ledger/reversal.spec.ts:121:7 › reversals instead of edits › reversals need a reason and the reversal permission
+[76/77] apps/api-e2e/src/ledger/reversal.spec.ts:154:7 › reversals instead of edits › the database rejects UPDATE, DELETE and TRUNCATE on ledger rows for the application role
+[77/77] apps/api-e2e/src/ledger/reversal.spec.ts:176:7 › reversals instead of edits › the database rejects an unbalanced journal at commit even when written directly
+  77 passed (46.7s)
