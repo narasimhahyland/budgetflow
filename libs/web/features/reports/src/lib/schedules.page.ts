@@ -440,7 +440,7 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
                 <th>Status</th>
                 <th>Requested by</th>
                 <th>Expires</th>
-                <th><span class="bf-visually-hidden">File</span></th>
+                <th>File</th>
               </tr>
             </thead>
             <tbody>
