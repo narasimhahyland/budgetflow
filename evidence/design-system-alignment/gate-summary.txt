@@ -1,3 +1,25 @@
+After merging origin/main (#98, #102) at 1093dff1:
+Gate summary (lint typecheck build) — logs in tmp/gate/20261111-053538
+  PASS secrets             2s
+  PASS lint                7s
+  PASS styles              1s
+  PASS satori             37s
+  PASS typecheck          18s
+  PASS build              15s
+  PASS openapi             1s
+  PASS db                  1s
+
+scripts/gate.sh functional-api functional-e2e visual — 2026-11-11T00:33:10Z — commit 1093dff1
+PASS|secrets|1s
+PASS|stack|68s
+PASS|functional-api|161s
+PASS|reseed-e2e|51s
+PASS|functional-e2e|263s
+PASS|reseed-visual|54s
+PASS|visual|952s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report
+
+Before the merge:
 scripts/gate.sh lint typecheck build — 2026-11-10T23:36:05Z — commit dbfba140
 PASS|secrets|26s
 PASS|lint|18s

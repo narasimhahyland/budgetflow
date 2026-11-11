@@ -24,6 +24,8 @@ Per-screen fixes are in `fixes/A-shell.md` through `fixes/H-admin.md`.
 
 ## Gates and checks
 
+All gates were run again after merging `main` (#98, #102): static, functional and visual pass (visual: 943 passed, 1 passed on retry, 047a `default` tablet). The table shows the run before that merge.
+
 | Check                                                                                                                                                            | Command                                                                    | Result                                                                                                                                                                                                      |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Static                                                                                                                                                           | `scripts/gate.sh static`                                                   | PASS: secrets, lint, styles, satori (sdsc), typecheck, build, openapi, db ([`gate-summary.txt`](gate-summary.txt))                                                                                          |
