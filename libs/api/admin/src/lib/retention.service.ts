@@ -35,6 +35,7 @@ import {
   retentionCategory,
   retentionCutoff,
   retentionScopeKey,
+  type Action,
   type LegalHold,
   type RetentionCategoryDefinition,
 } from '@bf/domain';
@@ -45,6 +46,14 @@ import { handlerFor } from './retention-engine';
 
 type PolicyRow = typeof retentionPolicies.$inferSelect;
 type HoldRow = typeof legalHolds.$inferSelect;
+
+/** Actions whose holders may read legal holds: those who run retention, master data or holds. */
+const HOLD_READERS: readonly Action[] = [
+  'tenant.settings.manage',
+  'master_data.manage',
+  'retention.confirm',
+  'legal_hold.manage',
+];
 type ChangeRow = typeof adminChangeRequests.$inferSelect;
 type RunRow = typeof retentionRuns.$inferSelect;
 type RunItemRow = typeof retentionRunItems.$inferSelect;
@@ -411,7 +420,9 @@ export class RetentionService {
 
   listHolds(actor: RequestActor, query: { status?: string }): Promise<LegalHoldList> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
-      assertTenant(this.policy, actor, 'tenant.read');
+      // Which records are frozen pending a review, and why, is sensitive: only the people who run
+      // retention or holds read it (Organization Admin, Finance Admin, Finance Controller, Auditor).
+      assertAnyTenant(this.policy, actor, HOLD_READERS);
       const rows = await tx
         .select()
         .from(legalHolds)

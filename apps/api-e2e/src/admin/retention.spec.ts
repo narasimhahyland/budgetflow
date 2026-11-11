@@ -453,6 +453,33 @@ test.describe('legal holds beat retention', () => {
     expect(rewrite, 'a run report cannot be rewritten').toMatch(/append-only|permission denied/);
   });
 
+  test('legal holds are read only by the people who run retention or holds (Phase 18)', async ({
+    request,
+  }) => {
+    // Which records are frozen pending a review, and why, is sensitive.
+    for (const role of ['org-admin', 'finance-admin', 'finance-controller', 'auditor'] as const)
+      expect(
+        (
+          await request.get('/api/admin/retention/holds', { headers: await as(role, {}, HYLAND) })
+        ).status(),
+        role,
+      ).toBe(200);
+    for (const role of ['employee', 'budget-owner', 'analyst', 'ceo', 'integration-admin'] as const)
+      await expectProblem(
+        await request.get('/api/admin/retention/holds', { headers: await as(role, {}, HYLAND) }),
+        403,
+        'FORBIDDEN',
+      );
+    // Retention policies themselves stay readable by every member.
+    expect(
+      (
+        await request.get('/api/admin/retention/policies', {
+          headers: await as('employee', {}, HYLAND),
+        })
+      ).status(),
+    ).toBe(200);
+  });
+
   test("the seeded hold over Hyland's event is active and visible to the auditor", async ({
     request,
   }) => {
