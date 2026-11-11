@@ -76,12 +76,12 @@ export type LoadShape = 'lines' | 'table' | 'cards' | 'form';
       </sat-403-error-state>
     } @else if (status() === 404) {
       <sat-404-error-state>
-        <h2 satErrorStateHeadline>{{ what() }} not found</h2>
+        <h2 satErrorStateHeadline>We could not find {{ what() }}</h2>
         <p satErrorStateDescription>It does not exist or is outside what you can see.</p>
       </sat-404-error-state>
     } @else if (error()) {
       <sat-500-error-state>
-        <h2 satErrorStateHeadline>{{ what() }} could not load</h2>
+        <h2 satErrorStateHeadline>We could not load {{ what() }}</h2>
         <p satErrorStateDescription>{{ message() }}</p>
         <button mat-stroked-button satErrorStateAction type="button" (click)="retry.emit()">
           Try again

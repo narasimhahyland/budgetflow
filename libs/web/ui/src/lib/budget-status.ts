@@ -28,6 +28,7 @@ const STATUS: Record<string, StatusView> = {
   active: { label: 'Active', tone: 'success', icon: 'circle_check' },
   partially_allocated: { label: 'Partially allocated', tone: 'info', icon: 'graph_radial' },
   fully_allocated: { label: 'Fully allocated', tone: 'neutral', icon: 'graph_radial' },
+  // Budget-safety rule: frozen is a lock in the info tone, everywhere it appears.
   frozen: { label: 'Frozen', tone: 'info', icon: 'lock' },
   reduced: { label: 'Reduced', tone: 'warning', icon: 'trending_down' },
   set_to_zero: { label: 'Set to zero', tone: 'important', icon: 'circle_stop' },

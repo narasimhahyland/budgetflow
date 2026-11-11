@@ -7689,7 +7689,7 @@
             "$ref": "#/components/schemas/Money"
           },
           "companyWideAvailable": {
-            "description": "Authorized − pre-encumbered − encumbered − actual (the company-wide definition).",
+            "description": "The dashboards’ company-wide Available, in the reporting currency: authorized less held, pre-encumbered, encumbered and actual of the budget and every budget below it.",
             "$ref": "#/components/schemas/Money"
           },
           "runRateMonthly": {

@@ -1,0 +1,8 @@
+[15/50] [desktop] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:16:7 › blocked budgets say why (F5) › a frozen budget shows Request increase disabled with the reason
+[16/50] [desktop] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:51:7 › error states read as sentences (F8) › a budget that does not exist says so plainly
+[27/50] [tablet] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:16:7 › blocked budgets say why (F5) › a frozen budget shows Request increase disabled with the reason
+[28/50] [tablet] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:51:7 › error states read as sentences (F8) › a budget that does not exist says so plainly
+[39/50] [mobile] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:16:7 › blocked budgets say why (F5) › a frozen budget shows Request increase disabled with the reason
+[40/50] [mobile] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:51:7 › error states read as sentences (F8) › a budget that does not exist says so plainly
+  10 skipped
+  40 passed (27.4s)
