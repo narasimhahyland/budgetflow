@@ -8,6 +8,7 @@ import {
   CloseEventResponse,
   CommitmentHygieneItem,
   EventCommitment,
+  EventDetail,
   EventReconciliation,
 } from '@bf/contracts';
 import { as, mutate } from '../support/auth';
@@ -165,6 +166,18 @@ test.describe('event reconciliation and close', () => {
       [giver.id, 27_500],
     ]);
     await expectProblem(await close(), 409, 'INVALID_TRANSITION');
+    // The closed event keeps its spend: the venue invoice's USD 900.00 is actual, nothing is still
+    // committed and nothing is available again.
+    const detail = await expectContract(
+      await request.get(`/api/events/${event.id}`, { headers: await as('budget-owner') }),
+      200,
+      EventDetail,
+    );
+    expect(detail.funding).toMatchObject({
+      actual: { amountMinor: 90_000 },
+      committed: { amountMinor: 0 },
+      available: { amountMinor: 0 },
+    });
     expect((await runLedgerCheck(request)).status).toBe('clean');
   });
 
