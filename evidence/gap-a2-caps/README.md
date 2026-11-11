@@ -50,7 +50,11 @@ department head (approver), finance admin (policy). The outcomes are in
 - Screens: [`screens/request-policy-check.png`](screens/request-policy-check.png) and
   [`screens/employees-nearest-cap.png`](screens/employees-nearest-cap.png).
 - Invariants: rows 99–101 in [`docs/testing/invariant-scenarios.md`](../../docs/testing/invariant-scenarios.md).
-- Gates: [`gate-summary.txt`](gate-summary.txt).
+- Gates: [`gate-summary.txt`](gate-summary.txt). `scripts/gate.sh all` passed every mode at commit
+  `b2e987d9`. The visual suite reported 941 passed and 3 flaky; the flaky screens (021 set-to-zero
+  mobile, 024 allocate mobile, 087c rollover desktop) are untouched by this change and passed on
+  retry. On a loaded machine, `security/dev-secrets.spec.ts` once timed out in an earlier run. It
+  passed 18/18 alone and passes in this run.
 
 ## Behaviour changes to review
 
