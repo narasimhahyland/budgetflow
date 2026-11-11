@@ -98,9 +98,12 @@ export const can = (b: BudgetDetail | undefined, action: string): boolean =>
 
 /** Downloads rows as CSV (Export only: no on-screen Share). */
 export function downloadCsv(name: string, rows: (string | number)[][]): void {
+  // A text cell starting with = + - @ (or a tab or carriage return) gets an apostrophe so a
+  // spreadsheet shows it as text instead of running it (CSV formula injection); numbers stay numbers.
   const esc = (v: string | number) => {
-    const s = String(v);
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    const raw = String(v);
+    const s = /^-?\d+(\.\d+)?$/.test(raw) || !/^[=+\-@\t\r]/.test(raw) ? raw : `'${raw}`;
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const blob = new Blob([rows.map((r) => r.map(esc).join(',')).join('\n') + '\n'], {
     type: 'text/csv',

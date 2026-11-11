@@ -64,13 +64,22 @@ export class HeadcountService {
   ) {}
 
   summary(actor: RequestActor, asOf = todayUtc()): Promise<HeadcountSummary> {
+    // Every member reads headcount for what they can see; a platform operator without a
+    // break-glass grant holds no tenant permission, so the tenant is not found.
+    this.policy.assert(
+      actor,
+      'tenant.read',
+      { kind: 'tenant', tenantId: actor.tenantId },
+      'tenant',
+    );
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       const view = await this.reads.view(tx, actor, asOf);
       const snap = await this.latest(tx, asOf);
       if (!snap) return { scope: view.scope, snapshot: null, total: 0, locations: [] };
       const prev = await this.previous(tx, snap);
       const units = await this.structure(tx, view.units, snap.asOfDate);
-      const current = this.byUnit(await this.lines(tx, snap.id), units);
+      const snapLines = await this.lines(tx, snap.id);
+      const current = this.byUnit(snapLines, units);
       const before = prev ? this.byUnit(await this.lines(tx, prev.id), units) : null;
       const summarize = (id: string, t: Tally) => {
         const u = units.get(id)!;
@@ -102,10 +111,21 @@ export class HeadcountService {
             .sort((a, b) => a.name.localeCompare(b.name)),
         }))
         .sort((a, b) => a.name.localeCompare(b.name));
+      const total = locations.reduce((s, l) => s + l.headcount, 0);
+      const snapshot = await this.snapshotSummary(tx, snap);
+      // The snapshot's company-wide totals are tenant-wide information (the snapshot list itself is
+      // tenant-wide only), so a scoped reader gets the totals of what they can see.
+      const tenantWide = this.reads.tenantWide(actor, 'org.read');
       return {
         scope: view.scope,
-        snapshot: await this.snapshotSummary(tx, snap),
-        total: locations.reduce((s, l) => s + l.headcount, 0),
+        snapshot: tenantWide
+          ? snapshot
+          : {
+              ...snapshot,
+              lineCount: snapLines.filter((l) => view.canSee(l.orgUnitId)).length,
+              totalHeadcount: total,
+            },
+        total,
         locations,
       };
     });
