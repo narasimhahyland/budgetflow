@@ -368,7 +368,8 @@ export class RulesService {
         );
 
       const weeks = [3, 2, 1, 0].map((weeksAgo) => {
-        const end = Date.now() - weeksAgo * 7 * 86_400_000;
+        // The API clock, like the window above and the seeded evaluation times it buckets.
+        const end = nowUtc().getTime() - weeksAgo * 7 * 86_400_000;
         const start = end - 7 * 86_400_000;
         const inWeek = executions.filter((e) => {
           const t = e.evaluatedAt.getTime();
