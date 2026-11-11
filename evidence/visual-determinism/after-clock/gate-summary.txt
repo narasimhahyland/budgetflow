@@ -1,0 +1,15 @@
+Gate summary (lint typecheck build functional-api functional-e2e visual) — logs in tmp/gate/20261111-132331
+  PASS secrets             8s
+  PASS lint                4s
+  PASS styles              4s
+  PASS satori             38s
+  PASS typecheck           4s
+  PASS build               1s
+  PASS openapi             1s
+  PASS db                  0s
+  PASS stack              59s
+  PASS functional-api    177s
+  PASS reseed-e2e         50s
+  PASS functional-e2e    291s
+  PASS reseed-visual      53s
+  PASS visual            917s
