@@ -1,0 +1,19 @@
+{
+  "request": "POST /api/reports/unused-expired/exports",
+  "status": 201,
+  "body": {
+    "id": "27d659cb-ed04-48e8-9ae7-8c1bfbd0f1e2",
+    "reportId": "unused-expired",
+    "reportName": "Unused and expired budget",
+    "format": "csv",
+    "filters": {},
+    "rowCount": 11,
+    "status": "ready",
+    "sizeBytes": 869,
+    "requestedByName": "Priya Raman",
+    "requestedAt": "2026-11-11T13:19:32.412Z",
+    "expiresAt": "2026-11-18T13:19:32.430Z",
+    "scheduleId": null,
+    "fileName": "unused-expired-2026-11-11-27d659cb.csv"
+  }
+}

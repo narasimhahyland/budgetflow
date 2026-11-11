@@ -6,7 +6,6 @@ import {
   memberships,
   outboxMessages,
   people,
-  reportExports,
   reportScheduleRuns,
   reportSchedules,
   tenants,
@@ -14,21 +13,29 @@ import {
   type Db,
   type Tx,
 } from '@bf/api/db';
-import { formatMoney, noticeEmail, NotificationsService } from '@bf/api/notifications';
-import type { ReportFilters, ReportResult, ScheduleChannel } from '@bf/contracts';
+import { S3DocumentStore } from '@bf/api/documents';
+import {
+  formatMoney,
+  noticeEmail,
+  NotificationsService,
+  type EmailAttachment,
+} from '@bf/api/notifications';
+import type { ReportFilters, ReportFormat, ReportResult, ScheduleChannel } from '@bf/contracts';
 import { nextRunAt, type ScheduleCadence } from '@bf/domain';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, asc, eq, isNotNull, lte, sql } from 'drizzle-orm';
+import { EXPORT_ROW_LIMIT } from './export-files';
 import { ReportsService } from './reports.service';
-import { REPORT_DELIVER_TOPIC, type ReportDeliverJob } from './schedules.service';
+import { REPORT_DELIVER_TOPIC, writeExportFile, type ReportDeliverJob } from './schedules.service';
 
 type ScheduleRow = typeof reportSchedules.$inferSelect;
 
 /**
  * Worker side of scheduled report delivery (screen 091). Renders the report with the schedule
  * owner's scope, then re-checks every email recipient against their own `report.read` scope and
- * skips the ones who could not see the same data in BudgetFlow. Channel posts carry headline
- * figures and a sign-in link, never a file. Email and chat reuse the Phase 8 delivery paths.
+ * skips the ones who could not see the same data in BudgetFlow. Each format is rendered once per run
+ * into the DocumentStore and attached to every email that passed the check. Channel posts carry
+ * headline figures and a sign-in link, never a file. Email and chat reuse the Phase 8 delivery paths.
  */
 @Injectable()
 export class ReportDeliveryService {
@@ -41,6 +48,7 @@ export class ReportDeliveryService {
     private readonly actors: ActorResolver,
     private readonly notifications: NotificationsService,
     private readonly audit: AuditService,
+    private readonly store: S3DocumentStore,
   ) {}
 
   /** Queues every schedule that is due; the queued run is delivered by `deliver`. */
@@ -115,6 +123,7 @@ export class ReportDeliveryService {
           owner,
           schedule.reportId as ReportResult['reportId'],
           filters,
+          EXPORT_ROW_LIMIT,
         );
       } catch (e) {
         await this.finish(tx, schedule, job, {
@@ -131,40 +140,68 @@ export class ReportDeliveryService {
 
       const scopeResource = await this.resource(tx, job.tenantId, filters);
       const skipped: { personId: string; name: string; reason: string }[] = [];
-      const exportIds: string[] = [];
-      let delivered = 0;
-
+      const allowedPeople: (typeof people.$inferSelect)[] = [];
       for (const personId of schedule.recipientPersonIds) {
         const recipient = await this.actorFor(tx, job.tenantId, personId);
         const [person] = await tx.select().from(people).where(eq(people.id, personId));
         if (!person) continue;
         const allowed =
           recipient !== null && this.policy.can(recipient, 'report.read', scopeResource).allowed;
-        if (!allowed) {
+        if (allowed) allowedPeople.push(person);
+        else
           skipped.push({
             personId,
             name: person.displayName,
             reason: `${person.displayName} cannot see this report's scope`,
           });
-          continue;
-        }
-        for (const format of schedule.formats) {
-          const [exp] = await tx
-            .insert(reportExports)
-            .values({
-              tenantId: job.tenantId,
+      }
+
+      // One file per format, rendered from the owner's run and attached to every recipient who
+      // passed the check above. Nobody to send to means no file is produced.
+      const exportIds: string[] = [];
+      const attachments: EmailAttachment[] = [];
+      if (allowedPeople.length)
+        for (const format of schedule.formats as ReportFormat[]) {
+          const file = await writeExportFile(tx, this.store, {
+            tenantId: job.tenantId,
+            result,
+            format,
+            filters,
+            requestedByPersonId: schedule.ownerPersonId,
+            scheduleId: schedule.id,
+          });
+          exportIds.push(file.id);
+          attachments.push({
+            storageKey: file.storageKey,
+            fileName: file.fileName,
+            contentType: file.contentType,
+          });
+          await this.audit.append(tx, {
+            tenantId: job.tenantId,
+            actorPersonId: schedule.ownerPersonId,
+            actorSubject: 'system:worker',
+            action: 'report.exported',
+            resourceType: 'report_export',
+            resourceId: file.id,
+            changes: {
               reportId: schedule.reportId,
               format,
               filters,
-              rowCount: result.rowCount,
-              status: 'ready',
+              rowCount: file.rowCount,
+              scope: result.scope.label,
+              fileName: file.fileName,
+              sizeBytes: file.sizeBytes,
+              sha256: file.sha256,
               scheduleId: schedule.id,
-              requestedByPersonId: schedule.ownerPersonId,
-              expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            })
-            .returning();
-          exportIds.push(exp.id);
+              runId: job.runId,
+              recipients: allowedPeople.map((p) => p.id),
+            },
+          });
         }
+
+      let delivered = 0;
+      for (const person of allowedPeople) {
+        const personId = person.id;
         await this.notifications.queueEmail(
           tx,
           job.tenantId,
@@ -183,6 +220,7 @@ export class ReportDeliveryService {
           }),
           'report.scheduled_delivery',
           { subjectType: 'report_schedule', subjectId: schedule.id, subjectRef: schedule.name },
+          attachments,
         );
         delivered += 1;
       }

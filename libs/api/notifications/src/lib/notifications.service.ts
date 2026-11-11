@@ -29,7 +29,18 @@ export interface EmailPayload {
   subjectType?: string | null;
   subjectId?: string | null;
   subjectRef?: string | null;
+  /** Files to attach, by DocumentStore reference: the outbox never carries the bytes. */
+  attachments?: EmailAttachment[];
 }
+
+export interface EmailAttachment {
+  storageKey: string;
+  fileName: string;
+  contentType: string;
+}
+
+/** Reads an attachment's bytes; the worker passes the DocumentStore. */
+export type AttachmentLoader = (storageKey: string) => Promise<Buffer>;
 
 export interface Recipient {
   personId: string;
@@ -69,6 +80,7 @@ export class NotificationsService {
     email: RenderedEmail,
     kind: string,
     meta?: { subjectType?: string | null; subjectId?: string | null; subjectRef?: string | null },
+    attachments: readonly EmailAttachment[] = [],
   ): Promise<void> {
     const payload: EmailPayload = {
       tenantId,
@@ -82,19 +94,34 @@ export class NotificationsService {
       subjectType: meta?.subjectType ?? null,
       subjectId: meta?.subjectId ?? null,
       subjectRef: meta?.subjectRef ?? null,
+      ...(attachments.length ? { attachments: [...attachments] } : {}),
     };
     await tx.insert(outboxMessages).values({ tenantId, topic: EMAIL_TOPIC, payload });
   }
 
-  /** Worker side: deliver one queued email through SMTP (Mailpit locally). */
-  async deliver(payload: EmailPayload): Promise<void> {
+  /**
+   * Worker side: deliver one queued email through SMTP (Mailpit locally). Attachments are read with
+   * `load`; an email that carries attachments but cannot read them fails, so the job retries and
+   * then dead-letters instead of sending a message without its file.
+   */
+  async deliver(payload: EmailPayload, load?: AttachmentLoader): Promise<void> {
     const cfg = mailConfig();
+    const refs = payload.attachments ?? [];
+    if (refs.length && !load) throw new Error('email has attachments but no attachment loader');
+    const files = [];
+    for (const a of refs)
+      files.push({
+        fileName: a.fileName,
+        contentType: a.contentType,
+        body: await load!(a.storageKey),
+      });
     await sendSmtp(cfg.SMTP_URL, {
       from: cfg.MAIL_FROM,
       to: `${payload.toName.replace(/[<>"]/g, '')} <${payload.to}>`,
       subject: payload.subject,
       text: payload.text,
       html: payload.html,
+      attachments: files,
     });
     this.log.log(`email sent (${payload.kind})`);
   }

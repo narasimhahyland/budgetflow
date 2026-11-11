@@ -6,6 +6,7 @@ import { DB } from '@bf/api/core';
 import { WebhooksService } from '@bf/api/integrations';
 import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
 import { LEDGER_CHECK_TOPIC, RebuildService } from '@bf/api/integrity';
+import { S3DocumentStore } from '@bf/api/documents';
 import { EMAIL_TOPIC, NotificationsService, type EmailPayload } from '@bf/api/notifications';
 import {
   BOARD_PACK_TOPIC,
@@ -66,6 +67,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly boardPacks: BoardPackService,
     private readonly webhooks: WebhooksService,
     private readonly retention: RetentionService,
+    private readonly documents: S3DocumentStore,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -111,7 +113,9 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     }
     const fast = { batchSize: 10, pollingIntervalSeconds: 0.5, burstWhenBatchFull: true } as const;
     await boss.work<EmailPayload>(EMAIL_TOPIC, fast, async (jobs) => {
-      for (const job of jobs) await this.notifications.deliver(job.data);
+      // Attachments (scheduled report files) are read from the DocumentStore at send time.
+      for (const job of jobs)
+        await this.notifications.deliver(job.data, (key) => this.documents.read(key));
     });
     await boss.work<{ tenantId: string; budgetId: string; unfitRequestIds?: string[] }>(
       BUDGET_CONTROL_TOPIC,
