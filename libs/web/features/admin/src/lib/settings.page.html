@@ -431,6 +431,14 @@
       <sat-banner variant="info">
         <sat-banner-message>{{ s.security.breakGlassNote }}</sat-banner-message>
       </sat-banner>
+      <div class="bf-form__actions bf-form__actions--flush">
+        <a
+          mat-stroked-button
+          routerLink="/admin/security/break-glass"
+          data-testid="open-break-glass"
+          >Break-glass access</a
+        >
+      </div>
     </div>
     @if (editing() === 'security') {
       <form class="bf-inline-form bf-inline-form--padded" (ngSubmit)="saveSecurity()">

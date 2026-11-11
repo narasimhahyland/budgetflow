@@ -78,8 +78,34 @@ build() {
   npx nx run-many -t build -p api worker web --outputStyle=static >/dev/null
 }
 up() { build && dc up -d --build --wait; }
+
+# The seed's clocks. Under FIXED_NOW, everything the seed writes is stamped at that instant, so
+# seeded rows carry the same times on every run and every real date:
+#   - JavaScript: the seed stamps records through the application services, which read Date, so it
+#     runs with a preload that reads FIXED_NOW instead, a millisecond per read
+#     (scripts/lib/pinned-clock.cjs). Values the API checks against real time read its real clock.
+#   - Postgres: timestamp defaults call app_now() (migration 0020), which follows app.fixed_now; the
+#     seed's connections carry it as a startup option (seed_db_url).
+# Only the seed is pinned. The running API and worker stay on real time for both clocks, so a record
+# they create and the times they compare it with always come from one clock. Pinning the database
+# for the API while its own Date stayed real put one request on two clocks: an audit entry stamped
+# in JavaScript looked older than the database-stamped row it was recorded against.
+seed_cmd() {
+  if [ -n "${BF_SEED_CMD:-}" ]; then
+    echo "$BF_SEED_CMD"
+  elif [ -n "${BF_FIXED_NOW:-}" ]; then
+    echo "npx nx run api:build --outputStyle=static >/dev/null && BF_PINNED_CLOCK='$BF_FIXED_NOW' node --require '$root/scripts/lib/pinned-clock.cjs' dist/apps/api/seed.js"
+  else
+    echo "npx nx run api:seed --outputStyle=static"
+  fi
+}
 seed() {
   export DATABASE_URL_OWNER="postgres://${BF_PG_OWNER_USER}:${BF_PG_OWNER_PASSWORD}@127.0.0.1:${BF_PG_PORT:-5432}/${BF_PG_DB}"
+  if [ -n "${BF_FIXED_NOW:-}" ]; then
+    # Every session the seed opens starts with app.fixed_now, so app_now() defaults read FIXED_NOW.
+    local pinned="${BF_FIXED_NOW//:/%3A}"
+    DATABASE_URL_OWNER="${DATABASE_URL_OWNER}?options=-c%20app.fixed_now%3D${pinned}"
+  fi
   # The worker is stopped while the seed runs, so nothing it delivers reads a half-written seed.
   # A channel delivery decides which channels it went out on from the data present at that moment:
   # slack only if the install and the person's chat link exist, push only if a subscription does.
@@ -89,7 +115,7 @@ seed() {
   # email, slack, push") and a visual state fails on one and passes on the other. Stopped, the
   # worker finds the outbox full when it starts and every delivery reads the finished seed.
   dc stop worker >/dev/null 2>&1 || true
-  eval "${BF_SEED_CMD:-npx nx run api:seed --outputStyle=static}"
+  eval "$(seed_cmd)"
   dc up -d --wait worker
   settle
 }

@@ -21,6 +21,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  nowUtc,
 } from '@bf/api/core';
 import { DocumentsService } from '@bf/api/documents';
 import {
@@ -1429,7 +1430,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
           : 'Approver',
         offeredAt: offeredAt.toISOString(),
         expiresAt: expiresAt.toISOString(),
-        expired: expiresAt.getTime() < Date.now(),
+        expired: expiresAt.getTime() < nowUtc().getTime(),
         comment: r.decisionReason,
       };
     }

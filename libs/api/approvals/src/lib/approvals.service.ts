@@ -7,6 +7,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  nowUtc,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import {
@@ -204,7 +205,7 @@ export class ApprovalsService {
         assigneePersonId: step.personId,
         resolver: step.resolver,
         status: 'pending',
-        dueAt: new Date(Date.now() + SLA_HOURS * 3600_000),
+        dueAt: new Date(nowUtc().getTime() + SLA_HOURS * 3600_000),
         escalatedFromTaskId: escalatedFrom,
         reason: step.reason,
         doaLimitMinor: step.limitMinor,

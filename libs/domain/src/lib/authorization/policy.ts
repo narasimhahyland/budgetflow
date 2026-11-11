@@ -82,8 +82,27 @@ export const ACTIONS = [
   'flags.confirm_finance',
   'retention.confirm',
   'legal_hold.manage',
+  /**
+   * Break-glass (112). The platform operator requests time-limited read access to a tenant's
+   * financial data; an Organization Admin decides and may revoke; finance and audit read the
+   * history. The access a grant opens is BREAK_GLASS_READS below, never more.
+   */
+  'break_glass.request',
+  'break_glass.decide',
+  'break_glass.read',
 ] as const;
 export type Action = (typeof ACTIONS)[number];
+
+/**
+ * What an approved, unexpired, unrevoked break-glass grant lets the platform operator do: read
+ * budgets and the ledger, and the tenant facts needed to read them (screen 112, "read-only; budgets
+ * and ledger"). Nothing that changes data, approves or moves money is ever on this list, and nothing
+ * outside it is reachable under a grant - not people, not the audit log, not actuals.
+ */
+export const BREAK_GLASS_READS: readonly Action[] = ['tenant.read', 'budget.read', 'ledger.read'];
+
+/** Actions the platform operator may take without a grant: asking for one. */
+const OPERATOR_ACTIONS: readonly Action[] = ['break_glass.request'];
 
 /**
  * Scope of a grant: `tenant` = every resource in the tenant; `owned` = budget subtrees the actor owns
@@ -115,9 +134,11 @@ const OWNER: Grants = {
 
 export const ROLE_GRANTS: Record<RoleId, Grants> = {
   // Platform operator: no tenant financial data without an audited break-glass grant.
-  'super-admin': {},
+  'super-admin': { 'break_glass.request': 'tenant' },
   'org-admin': {
     'tenant.read': 'tenant',
+    'break_glass.decide': 'tenant',
+    'break_glass.read': 'tenant',
     'tenant.settings.manage': 'tenant',
     'org.manage': 'tenant',
     'org.read': 'tenant',
@@ -143,6 +164,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'rules.read': 'tenant',
   },
   'finance-admin': {
+    'break_glass.read': 'tenant',
     ...OWNER,
     'budget.read': 'tenant',
     'budget.create_root': 'tenant',
@@ -228,6 +250,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
   employee: { 'tenant.read': 'tenant', 'org.read': 'self', 'request.create': 'self' },
   auditor: {
     'tenant.read': 'tenant',
+    'break_glass.read': 'tenant',
     'budget.read': 'tenant',
     'ledger.read': 'tenant',
     'actuals.read': 'tenant',
@@ -350,11 +373,34 @@ function bestScope(actor: Actor, action: Action): Scope | null {
 export function can(actor: Actor, action: Action, resource: Resource): Decision {
   if (resource.tenantId !== actor.tenantId)
     return { allowed: false, visible: false, reason: 'other tenant' };
-  if (actor.roles.includes('super-admin') && !actor.breakGlass && actor.roles.length === 1) {
+  // The platform operator holds no tenant role. Without a grant it may only ask for one; with an
+  // approved grant it may read exactly BREAK_GLASS_READS, at tenant scope, and nothing else.
+  if (
+    actor.roles.includes('super-admin') &&
+    actor.roles.length === 1 &&
+    !OPERATOR_ACTIONS.includes(action)
+  ) {
+    if (!actor.breakGlass)
+      return {
+        allowed: false,
+        visible: false,
+        reason: 'platform operators need a break-glass grant',
+      };
+    const reads = BREAK_GLASS_READS.includes(action);
+    // Seeing a resource follows its own read action: budgets via budget.read, people and org units
+    // via org.read - which a grant does not open, so they stay invisible under one.
+    const seeAction: Action =
+      resource.kind === 'budget'
+        ? 'budget.read'
+        : resource.kind === 'org-unit' || resource.kind === 'person'
+          ? 'org.read'
+          : 'tenant.read';
     return {
-      allowed: false,
-      visible: false,
-      reason: 'platform operators need a break-glass grant',
+      allowed: reads,
+      visible: BREAK_GLASS_READS.includes(seeAction),
+      reason: reads
+        ? `${action} under a break-glass grant (read-only)`
+        : 'a break-glass grant is read-only',
     };
   }
   const readAction: Action =

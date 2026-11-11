@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import {
   NOTIFICATION_CHANNELS,
   type DocumentKindSettings,
@@ -73,6 +74,7 @@ const FILE_TYPE_LABEL: Record<string, string> = {
     MatSelectModule,
     MatTableModule,
     ReasonField,
+    RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_TAG_IMPORTS,
   ],

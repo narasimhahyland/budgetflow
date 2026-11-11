@@ -9,7 +9,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { budgets } from './budgets';
-import { ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
+import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
 import { people } from './org';
 import { tenants } from './tenancy';
 
@@ -28,7 +28,7 @@ export const aiQueryLog = pgTable(
   {
     id: pk(),
     tenantId: tenantRef().references(() => tenants.id),
-    occurredAt: ts('occurred_at').notNull().defaultNow(),
+    occurredAt: ts('occurred_at').notNull().default(appNow),
     feature: text('feature').notNull(),
     channel: text('channel').notNull(),
     actorPersonId: uuid('actor_person_id').references(() => people.id),
@@ -105,8 +105,8 @@ export const aiConversations = pgTable(
     actorSubject: text('actor_subject').notNull(),
     title: text('title').notNull(),
     channel: text('channel').notNull(),
-    startedAt: ts('started_at').notNull().defaultNow(),
-    lastAskedAt: ts('last_asked_at').notNull().defaultNow(),
+    startedAt: ts('started_at').notNull().default(appNow),
+    lastAskedAt: ts('last_asked_at').notNull().default(appNow),
   },
   (t) => [index('ai_conversations_person').on(t.tenantId, t.actorSubject, t.lastAskedAt)],
 );
@@ -120,7 +120,7 @@ export const aiConversationTurns = pgTable(
       .notNull()
       .references(() => aiConversations.id, { onDelete: 'cascade' }),
     actorSubject: text('actor_subject').notNull(),
-    askedAt: ts('asked_at').notNull().defaultNow(),
+    askedAt: ts('asked_at').notNull().default(appNow),
     question: text('question').notNull(),
     answer: text('answer'),
     outcome: text('outcome').notNull(),
@@ -184,7 +184,7 @@ export const aiEvaluationRuns = pgTable(
     provider: text('provider').notNull(),
     modelId: text('model_id').notNull(),
     modelVersion: text('model_version').notNull(),
-    runAt: ts('run_at').notNull().defaultNow(),
+    runAt: ts('run_at').notNull().default(appNow),
   },
   (t) => [index('ai_evaluation_runs_feature').on(t.tenantId, t.feature, t.metric, t.runAt)],
 );

@@ -1,5 +1,5 @@
 import { index, integer, pgTable, text, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
-import { ccy, createdAt, day, minor, pk, tenantRef, ts } from './_columns';
+import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts } from './_columns';
 import { budgets, rolloverPolicies } from './budgets';
 import { closeCheckCode, reopenAction, reopenRequestStatus, yearEndLineStatus } from './enums';
 import { fiscalPeriods, legalEntities } from './finance';
@@ -27,7 +27,7 @@ export const periodCloseAcknowledgements = pgTable(
     reasonCode: varchar('reason_code', { length: 50 }).notNull(),
     reason: text('reason').notNull(),
     acknowledgedBy: uuid('acknowledged_by'),
-    acknowledgedAt: ts('acknowledged_at').notNull().defaultNow(),
+    acknowledgedAt: ts('acknowledged_at').notNull().default(appNow),
     /**
      * Which close attempt this acknowledgement belongs to (the snapshot version it would be taken
      * with). Reopening a period starts the next attempt, so a re-close is judged on fresh evidence
@@ -58,7 +58,7 @@ export const periodReopenRequests = pgTable(
     reasonCode: varchar('reason_code', { length: 50 }).notNull(),
     reason: text('reason').notNull(),
     requestedBy: uuid('requested_by'),
-    requestedAt: ts('requested_at').notNull().defaultNow(),
+    requestedAt: ts('requested_at').notNull().default(appNow),
     status: reopenRequestStatus('status').notNull().default('pending'),
     decidedBy: uuid('decided_by'),
     decidedAt: ts('decided_at'),

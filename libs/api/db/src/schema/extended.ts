@@ -9,7 +9,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
+import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
 import { budgets } from './budgets';
 import { documents } from './documents';
 import { fiscalPeriods, fiscalYears, legalEntities } from './finance';
@@ -43,7 +43,7 @@ export const scenarios = pgTable(
      * The ledger moment the author last recalculated against. Promotion is refused when the ledger
      * moved since, so a scenario can never apply a plan that was true an hour ago.
      */
-    baselineAt: ts('baseline_at').notNull().defaultNow(),
+    baselineAt: ts('baseline_at').notNull().default(appNow),
     /** Ledger journals in the tenant when the baseline was taken; a change means the baseline is stale. */
     baselineJournalCount: integer('baseline_journal_count').notNull().default(0),
     createdByPersonId: uuid('created_by_person_id').references(() => people.id),

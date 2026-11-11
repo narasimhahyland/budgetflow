@@ -18,6 +18,7 @@ import {
 } from '@bf/seed';
 import { Module, type INestApplicationContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { realNow } from './real-clock';
 
 @Module({ imports: [CoreModule] })
 class IntegrationsSeedModule {}
@@ -102,9 +103,10 @@ export async function seedIntegrations(_app: INestApplicationContext): Promise<v
           ownerPersonId: admin.personId,
           allowedCidrs: [],
           rateLimitPerMinute: P12_API_KEY.rateLimitPerMinute,
-          // Real time on purpose: key and connection expiry are checked against Date.now() and SQL now(),
+          // Real time on purpose, even under the pinned seed clock: key and connection expiry are
+          // checked against Date.now() and SQL now(),
           // so a pinned expiry would make every seeded credential lapse on one fixed real date.
-          expiresAt: new Date(Date.now() + P12_API_KEY.expiresInDays * DAY_MS),
+          expiresAt: new Date(realNow() + P12_API_KEY.expiresInDays * DAY_MS),
           createdBy: admin.personId,
         })
         .onConflictDoNothing();
