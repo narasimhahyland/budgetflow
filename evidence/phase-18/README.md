@@ -183,6 +183,14 @@ blank-render flake) is capturing a trace. **Fix.** `apps/web-e2e/playwright.conf
 locally as before; in CI only when the run sets `BF_CI_TRACES=1`, and then for failing tests only.
 Screenshots and logs still upload.
 
+## Verification of the review
+
+[`gate-summary-review.txt`](gate-summary-review.txt): `scripts/gate.sh static functional-api functional-e2e`
+on this branch merged with `main` (real-date fix and break-glass), fresh seed: every step passes,
+including the full API suite (with the new operator sweep, startup secret check and legal-hold
+scenarios) and every journey. Visual was not run: the project-wide re-record is in progress, and
+this change moves no baseline.
+
 ## Still open
 
 - `multer` bump (pre-checks, above): needs the user's approval for `package.json` and the lockfile.
