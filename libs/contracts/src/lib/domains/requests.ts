@@ -4,6 +4,7 @@ import type { Endpoint } from '../endpoint';
 import { named } from '../registry';
 import { ActivityEntry, ApprovalRouteView, BudgetImpact } from './approvals';
 import { DocumentSummary } from './documents';
+import { FactKey, RuleEffect } from './rules';
 
 export const REQUEST_KINDS = [
   'budget',
@@ -134,6 +135,42 @@ export const CounterOfferView = named(
 );
 export type CounterOfferView = z.infer<typeof CounterOfferView>;
 
+export const PolicyCheckView = named(
+  'PolicyCheckView',
+  z
+    .object({
+      stage: z.enum(['submit', 'approve']).describe('When the rules engine made this decision.'),
+      effect: z.union([RuleEffect, z.literal('none')]),
+      outcomeLabel: z.string().describe('The decision in plain English.'),
+      explanation: z
+        .string()
+        .describe('Why: the decisive rule’s explanation, or why no rule applied.'),
+      evaluatedAt: IsoDateTime,
+      matches: z.array(
+        z
+          .object({
+            ruleCode: z.string(),
+            ruleName: z.string(),
+            version: z.int(),
+            effect: RuleEffect,
+            explanation: z.string(),
+            decisive: z.boolean(),
+          })
+          .strict(),
+      ),
+      facts: z
+        .array(z.object({ fact: FactKey, label: z.string(), value: z.string() }).strict())
+        .describe('The cap and policy facts the rules read, formatted for display.'),
+      capPersonName: z
+        .string()
+        .nullable()
+        .describe('The recipient nearest the employee or gift cap, when a cap applies.'),
+    })
+    .strict()
+    .describe('The latest rules-engine decision on the request, with rule versions and facts.'),
+);
+export type PolicyCheckView = z.infer<typeof PolicyCheckView>;
+
 export const RequestDetail = named(
   'RequestDetail',
   RequestSummary.extend({
@@ -153,6 +190,12 @@ export const RequestDetail = named(
       z.enum(['submit', 'withdraw', 'resubmit', 'accept_offer', 'decide', 'upload']),
     ),
     myTaskId: Id.nullable().describe('The viewer’s pending approval task, if any.'),
+    benefitRecipients: z
+      .array(z.object({ personId: Id, displayName: z.string() }).strict())
+      .describe('Employees who receive the benefit; their annual caps apply.'),
+    nonEmployeeCount: z.int().nullable(),
+    alcoholAmount: Money.nullable(),
+    policyCheck: PolicyCheckView.nullable(),
   }).strict(),
 );
 export type RequestDetail = z.infer<typeof RequestDetail>;
@@ -174,6 +217,22 @@ export const CreateRequestBody = named(
       purpose: z.string().trim().min(3).max(4000),
       category: z.string().trim().max(50).optional(),
       neededBy: IsoDate.optional(),
+      benefitRecipientIds: z
+        .array(Id)
+        .max(200)
+        .optional()
+        .describe(
+          'Employees who receive the benefit (gifts, meals, events). Their annual caps apply; the amount is split evenly between them and any non-employees.',
+        ),
+      nonEmployeeCount: z
+        .int()
+        .min(0)
+        .max(10000)
+        .optional()
+        .describe('People outside the company who share the benefit (clients, guests).'),
+      alcoholAmount: Money.optional().describe(
+        'The part of the amount spent on alcohol, in the request currency.',
+      ),
       submit: z.boolean().optional().describe('Submit now (default) or save a draft.'),
     })
     .strict(),

@@ -95,6 +95,12 @@ export const requests = pgTable(
     counterOfferedBy: uuid('counter_offered_by').references(() => people.id),
     counterOfferedAt: ts('counter_offered_at'),
     counterOfferExpiresAt: ts('counter_offer_expires_at'),
+    /** Employees who receive the benefit; their annual employee and gift caps apply (gap A2). */
+    benefitRecipientIds: uuid('benefit_recipient_ids').array(),
+    /** People outside the company sharing the benefit; their shares count against no cap. */
+    nonEmployeeCount: integer('non_employee_count'),
+    /** The part of the amount spent on alcohol, in the request currency. */
+    alcoholAmountMinor: minor('alcohol_amount_minor'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

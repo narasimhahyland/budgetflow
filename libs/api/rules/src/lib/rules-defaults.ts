@@ -278,22 +278,8 @@ export const DEFAULT_POLICY_CONFIGS: Omit<PolicyConfigsBundle, 'allowedActions'>
       includedCategories: ['employee_events', 'team_lunch', 'wellbeing'],
       warnAtPct: 80,
       blockAtPct: 100,
-      employeesNearestCap: [
-        {
-          personId: '40000000-0000-4000-8000-000000000010',
-          displayName: 'Aarav Nair',
-          location: 'Bengaluru',
-          usedMinor: 26_400,
-          leftMinor: 3_600,
-        },
-        {
-          personId: '40000000-0000-4000-8000-000000000011',
-          displayName: 'Kavya Shah',
-          location: 'Hyderabad',
-          usedMinor: 24_500,
-          leftMinor: 5_500,
-        },
-      ],
+      // Computed from the ledger on every read (cap-usage.ts); never stored or seeded.
+      employeesNearestCap: [],
     },
   },
   categories: [

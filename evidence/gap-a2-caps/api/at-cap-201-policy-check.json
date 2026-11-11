@@ -1,0 +1,67 @@
+{
+  "status": 201,
+  "policyCheck": {
+    "stage": "submit",
+    "effect": "warn",
+    "outcomeLabel": "Allowed with a warning",
+    "explanation": "A recipient has used 80% or more of their annual employee benefit cap with this request. It can go ahead; later requests for them may be blocked.",
+    "evaluatedAt": "2026-11-11T13:00:42.879Z",
+    "matches": [
+      {
+        "ruleCode": "R-32",
+        "ruleName": "Employee benefit nearing the annual cap",
+        "version": 1,
+        "effect": "warn",
+        "explanation": "A recipient has used 80% or more of their annual employee benefit cap with this request. It can go ahead; later requests for them may be blocked.",
+        "decisive": true
+      },
+      {
+        "ruleCode": "R-22",
+        "ruleName": "Receipts above the limit",
+        "version": 1,
+        "effect": "warn",
+        "explanation": "Spend above USD 25.00 needs an itemised receipt. Finance checks for the receipt after the spend lands.",
+        "decisive": false
+      }
+    ],
+    "facts": [
+      {
+        "fact": "amount_reporting_minor",
+        "label": "Amount (reporting currency)",
+        "value": "USD 300.00"
+      },
+      {
+        "fact": "employee_ytd_benefit_minor",
+        "label": "Employee benefit this year",
+        "value": "USD 300.00"
+      },
+      {
+        "fact": "employee_cap_remaining_minor",
+        "label": "Employee annual cap left",
+        "value": "USD 0.00"
+      },
+      {
+        "fact": "employee_cap_used_pct",
+        "label": "Employee annual cap used",
+        "value": "100%"
+      },
+      {
+        "fact": "is_intercompany",
+        "label": "Crosses legal entities",
+        "value": "no"
+      },
+      {
+        "fact": "requester_recent_total_minor",
+        "label": "Requester total in the last 30 days",
+        "value": "USD 300.00"
+      }
+    ],
+    "capPersonName": "Evidence Recipient"
+  },
+  "benefitRecipients": [
+    {
+      "personId": "c8c0a239-20a9-4793-a52d-37e4e0d0e6d7",
+      "displayName": "Evidence Recipient"
+    }
+  ]
+}

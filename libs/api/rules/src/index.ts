@@ -7,3 +7,4 @@ export * from './lib/workflow-test.service';
 export * from './lib/doa-admin.service';
 export * from './lib/exceptions.service';
 export * from './lib/rules.module';
+export * from './lib/cap-usage';
