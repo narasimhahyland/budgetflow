@@ -32,7 +32,7 @@ import { SessionStore } from '@bf/web/data-access';
 import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { data, errorMessage, injectApi, valueOf } from './api';
+import { data, errorMessage, injectApi, startDownload, valueOf } from './api';
 import { DrilldownPanel } from './drilldown-panel';
 import {
   percentOf,
@@ -61,6 +61,12 @@ const GROUP_BY_LABELS: Record<ReportGroupBy, string> = {
 
 const isReportId = (value: string | null): value is ReportId =>
   (REPORT_IDS as readonly string[]).includes(value ?? '');
+
+const FORMAT_LABELS: Record<ReportFormat, string> = {
+  csv: 'CSV file',
+  xlsx: 'Excel workbook (XLSX)',
+  pdf: 'PDF document',
+};
 
 const METHOD_LABELS: Record<ForecastMethod, string> = {
   run_rate: 'Run-rate',
@@ -133,14 +139,14 @@ const PROSE_COLUMNS = ['commentary'];
           mat-stroked-button
           type="button"
           [matMenuTriggerFor]="exportMenu"
-          [disabled]="!report()"
+          [disabled]="!report() || busy()"
         >
-          <mat-icon svgIcon="download" />Record an export
+          <mat-icon svgIcon="download" />Download
         </button>
         <mat-menu #exportMenu="matMenu">
           @for (format of formats(); track format) {
-            <button mat-menu-item type="button" (click)="recordExport(format)">
-              {{ format.toUpperCase() }}
+            <button mat-menu-item type="button" (click)="download(format)">
+              {{ formatLabel(format) }}
             </button>
           }
         </mat-menu>
@@ -150,9 +156,8 @@ const PROSE_COLUMNS = ['commentary'];
     @if (notice(); as text) {
       <sat-banner variant="success" data-testid="report-notice">
         <sat-banner-message>
-          <strong>{{ text }}</strong> Exports are recorded for audit and expire after 7 days.
-          BudgetFlow does not produce a file yet — the figures stay on this screen and in
-          <a routerLink="/reports/schedules">scheduled reports</a>.
+          <strong>{{ text }}</strong> The file carries the filters and scope on this screen. It
+          stays in <a routerLink="/reports/schedules">recent exports</a> for 7 days.
         </sat-banner-message>
       </sat-banner>
     }
@@ -422,6 +427,12 @@ const PROSE_COLUMNS = ['commentary'];
       cursor: pointer;
       font: var(--mat-sys-label-large);
     }
+    /* The favourite star sits at the label's size; unsized, the SVG fills the whole card. */
+    .bf-view mat-icon {
+      width: 18px;
+      height: 18px;
+      flex: none;
+    }
     .bf-view--active {
       border-color: var(--mat-sys-primary);
       background: var(--mat-sys-secondary-container);
@@ -625,18 +636,30 @@ export class ReportPage {
     });
   }
 
-  protected async recordExport(format: ReportFormat): Promise<void> {
+  protected formatLabel(format: ReportFormat): string {
+    return FORMAT_LABELS[format];
+  }
+
+  /**
+   * Renders the file on the server with these filters and the viewer's own scope, then fetches its
+   * five-minute signed link and starts the download straight away.
+   */
+  protected async download(format: ReportFormat): Promise<void> {
     const reportId = this.reportId();
     if (!reportId) return;
     await this.act(async () => {
-      const record = await data(
+      const exported = await data(
         this.api.createReportExport({
           params: { reportId },
           body: { format, filters: this.filters() },
         }),
       );
+      const link = await data(
+        this.api.getReportExportDownload({ params: { exportId: exported.id } }),
+      );
+      startDownload(this.document, link.url, link.fileName);
       this.notice.set(
-        `${record.format.toUpperCase()} export recorded for ${record.rowCount} rows.`,
+        `Downloading ${link.fileName} (${exported.rowCount} ${exported.rowCount === 1 ? 'row' : 'rows'}).`,
       );
     });
   }

@@ -1,0 +1,134 @@
+{
+  "generatedAt": "2026-11-11T12:09:28.598Z",
+  "base": "http://localhost:34300",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 15,
+  "blocking": 0,
+  "warnings": 0,
+  "results": [
+    {
+      "id": "082-utilization-report",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/082-utilization-report--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "082-utilization-report",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/082-utilization-report--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "082-utilization-report",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/082-utilization-report--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "082-utilization-report",
+      "state": "drilldown",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/082-utilization-report--drilldown--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "082-utilization-report",
+      "state": "drilldown",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/082-utilization-report--drilldown--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "082-utilization-report",
+      "state": "drilldown",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/082-utilization-report--drilldown--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080-budget-vs-actual",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/080-budget-vs-actual--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080-budget-vs-actual",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/080-budget-vs-actual--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080-budget-vs-actual",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/080-budget-vs-actual--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "086-unused-expired",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/086-unused-expired--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "086-unused-expired",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/086-unused-expired--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "086-unused-expired",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/086-unused-expired--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "091-scheduled-exports",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/091-scheduled-exports--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "091-scheduled-exports",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/091-scheduled-exports--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "091-scheduled-exports",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-a1-report-exports/visual-qa/iter-1/screens/091-scheduled-exports--default--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

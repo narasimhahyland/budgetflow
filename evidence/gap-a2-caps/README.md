@@ -49,7 +49,7 @@ department head (approver), finance admin (policy). The outcomes are in
   [`api/one-unit-above-409-problem.json`](api/one-unit-above-409-problem.json).
 - Screens: [`screens/request-policy-check.png`](screens/request-policy-check.png) and
   [`screens/employees-nearest-cap.png`](screens/employees-nearest-cap.png).
-- Invariants: rows 99–101 in [`docs/testing/invariant-scenarios.md`](../../docs/testing/invariant-scenarios.md).
+- Invariants: rows 100–102 in [`docs/testing/invariant-scenarios.md`](../../docs/testing/invariant-scenarios.md).
 - Gates: [`gate-summary.txt`](gate-summary.txt). `scripts/gate.sh all` passed every mode at commit
   `b2e987d9`. The visual suite reported 941 passed and 3 flaky; the flaky screens (021 set-to-zero
   mobile, 024 allocate mobile, 087c rollover desktop) are untouched by this change and passed on

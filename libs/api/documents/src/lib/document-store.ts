@@ -22,6 +22,8 @@ export interface DocumentStore {
   downloadUrl(key: string, fileName: string, expiresSeconds: number): string;
   head(key: string): Promise<ObjectHead | null>;
   readStart(key: string, bytes: number): Promise<Buffer>;
+  /** Reads a whole object the server wrote (for example a report file attached to an email). */
+  read(key: string): Promise<Buffer>;
   /** Writes an object the server generated itself (a rendered report or pack). */
   put(key: string, contentType: string, body: Buffer): Promise<void>;
   remove(key: string): Promise<void>;
@@ -180,6 +182,12 @@ export class S3DocumentStore implements DocumentStore {
     });
     if (!res.ok) throw new Error(`GET failed: HTTP ${res.status}`);
     return Buffer.from(await res.arrayBuffer()).subarray(0, bytes);
+  }
+
+  async read(key: string): Promise<Buffer> {
+    const res = await fetch(this.presign('GET', this.cfg.DOCUMENT_STORE_ENDPOINT, key, 60));
+    if (!res.ok) throw new Error(`GET ${key} failed: HTTP ${res.status}`);
+    return Buffer.from(await res.arrayBuffer());
   }
 
   async remove(key: string): Promise<void> {

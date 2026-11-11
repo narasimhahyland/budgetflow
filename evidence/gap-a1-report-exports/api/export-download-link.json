@@ -1,0 +1,9 @@
+{
+  "request": "GET /api/reports/exports/27d659cb-ed04-48e8-9ae7-8c1bfbd0f1e2/download",
+  "status": 200,
+  "body": {
+    "url": "http://localhost:39100/budgetflow-documents/tenants/10000000-0000-4000-8000-000000000001/report-exports/27d659cb-ed04-48e8-9ae7-8c1bfbd0f1e2.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=<redacted>&X-Amz-Date=20261111T131932Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22unused-expired-2026-11-11-27d659cb.csv%22&X-Amz-Signature=<redacted>",
+    "fileName": "unused-expired-2026-11-11-27d659cb.csv",
+    "expiresAt": "2026-11-11T13:24:32.442Z"
+  }
+}
