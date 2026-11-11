@@ -669,9 +669,15 @@ export class PlansPage {
     this.actionFailure.set(null);
     this.notice.set(null);
     try {
-      if (kind === 'approve')
-        await data(this.api.approvePlanVersion({ params: { planVersionId: id } }));
-      else {
+      if (kind === 'approve') {
+        // New money needs two sign-offs (a finance admin and the CEO); the first leaves it a draft.
+        const v = await data(this.api.approvePlanVersion({ params: { planVersionId: id } }));
+        this.notice.set(
+          v.status === 'approved'
+            ? `Approved: "${v.label}" can now fund root budgets.`
+            : `Your approval of "${v.label}" is recorded. It needs one more sign-off (a finance admin and the CEO) before it is approved.`,
+        );
+      } else {
         const r = await data(this.api.applyPlanVersion({ params: { planVersionId: id } }));
         this.notice.set(
           `Applied: ${r.createdBudgetIds.length} root(s) created, ${r.adjustedBudgetIds.length} adjusted.`,
