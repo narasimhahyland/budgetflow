@@ -6,6 +6,7 @@ import {
   resource,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -19,6 +20,7 @@ import {
   SCHEDULE_FREQUENCIES,
   type ReportFormat,
   type ReportId,
+  type ReportExport,
   type ReportSchedule,
   type ScheduleFrequency,
   type ScheduleRun,
@@ -28,7 +30,7 @@ import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
-import { data, errorMessage, injectApi, valueOf } from './api';
+import { data, errorMessage, injectApi, startDownload, valueOf } from './api';
 
 const FREQUENCY_LABELS: Record<ScheduleFrequency, string> = {
   daily_weekdays: 'Every weekday',
@@ -93,9 +95,9 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
 
     <sat-banner variant="info" data-testid="delivery-note">
       <sat-banner-message>
-        <strong>Deliveries carry figures, not files.</strong> Email and chat deliveries carry the
-        headline figures and a sign-in link. BudgetFlow records the export for audit and expires it
-        after 7 days, but does not produce a file to download yet.
+        <strong>Email carries the files; chat carries figures.</strong> Each email recipient gets
+        the report in the chosen formats, rendered with the schedule owner's scope after their own
+        access is checked. Chat posts carry the headline figures and a sign-in link, never a file.
       </sat-banner-message>
     </sat-banner>
 
@@ -415,7 +417,8 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
         <div>
           <h2 class="bf-card__title" id="exports-title">Recent exports</h2>
           <p class="bf-card__hint">
-            Every export is recorded for audit and expires after 7 days. No file is produced yet.
+            Every export is audited and its file expires after 7 days. Download links last five
+            minutes and are made when you ask.
           </p>
         </div>
       </div>
@@ -437,6 +440,7 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
                 <th>Status</th>
                 <th>Requested by</th>
                 <th>Expires</th>
+                <th>File</th>
               </tr>
             </thead>
             <tbody>
@@ -458,10 +462,25 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
                       item.expiresAt | bfDateTime: session.timezone()
                     }}</span>
                   </td>
+                  <td>
+                    @if (item.status === 'ready' && item.fileName) {
+                      <button
+                        mat-button
+                        type="button"
+                        [disabled]="busy()"
+                        [attr.aria-label]="'Download ' + item.fileName"
+                        (click)="downloadExport(item)"
+                      >
+                        <mat-icon svgIcon="download" aria-hidden="true" />Download
+                      </button>
+                    } @else if (item.status === 'ready') {
+                      <span class="bf-cell__secondary">Recorded without a file</span>
+                    }
+                  </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="6" class="bf-empty">Nobody has exported a report recently.</td>
+                  <td colspan="7" class="bf-empty">Nobody has exported a report recently.</td>
                 </tr>
               }
             </tbody>
@@ -502,6 +521,7 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
 })
 export class ReportSchedulesPage {
   private readonly api = injectApi();
+  private readonly document = inject(DOCUMENT);
   protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
   protected readonly allFormats = REPORT_FORMATS;
@@ -589,6 +609,21 @@ export class ReportSchedulesPage {
         return 'important';
       default:
         return 'info';
+    }
+  }
+
+  /** The signed link lasts five minutes, so it is fetched when the reader asks for the file. */
+  protected async downloadExport(item: ReportExport): Promise<void> {
+    this.busy.set(true);
+    this.failure.set(null);
+    try {
+      const link = await data(this.api.getReportExportDownload({ params: { exportId: item.id } }));
+      startDownload(this.document, link.url, link.fileName);
+    } catch (e) {
+      this.failure.set(errorMessage(e));
+      this.exports.reload();
+    } finally {
+      this.busy.set(false);
     }
   }
 

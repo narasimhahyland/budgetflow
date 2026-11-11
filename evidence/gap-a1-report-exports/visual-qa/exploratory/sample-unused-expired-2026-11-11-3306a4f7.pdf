@@ -1,0 +1,57 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 3273 >>
+stream
+BT /F1 7.5 Tf 36 552 Td (Unused and expired budget) Tj ET
+BT /F1 7.5 Tf 36 542 Td (Which budgets will end the year with money unused?) Tj ET
+BT /F1 7.5 Tf 36 532 Td () Tj ET
+BT /F1 7.5 Tf 36 522 Td (Scope: Hyland) Tj ET
+BT /F1 7.5 Tf 36 512 Td (Reporting currency: USD) Tj ET
+BT /F1 7.5 Tf 36 502 Td (Generated at: 2026-11-11T12:13:06.502Z) Tj ET
+BT /F1 7.5 Tf 36 492 Td (Rows: 11) Tj ET
+BT /F1 7.5 Tf 36 482 Td (Filter fiscalYearId: 22000000-0000-4000-8000-012026000000) Tj ET
+BT /F1 7.5 Tf 36 472 Td (Reconciles to the ledger: yes) Tj ET
+BT /F1 7.5 Tf 36 462 Td () Tj ET
+BT /F1 7.5 Tf 36 452 Td (Budget                       Owner         Available \(USD\)  Forecast unused at year end \(USD\)  Share of authorized \(%\)  Days left  Method) Tj ET
+BT /F1 7.5 Tf 36 442 Td (---------------------------  ------------  ---------------  ---------------------------------  -----------------------  ---------  --------) Tj ET
+BT /F1 7.5 Tf 36 432 Td (Europe Region                Lena Fischer        21,760.00                          21,760.00                   98.91%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 422 Td (New York Events              Jordan Smith        15,000.00                          15,000.00                  100.00%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 412 Td (United States Region         Jordan Smith        13,200.00                          13,200.00                   66.00%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 402 Td (India Region                 Ananya Iyer         11,919.75                          11,919.75                   83.23%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 392 Td (Berlin Events                Lena Fischer         8,000.00                           8,000.00                  100.00%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 382 Td (US Recognition               Jordan Smith         5,000.00                           5,000.00                  100.00%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 372 Td (Hyderabad Events             Ananya Iyer          3,678.75                           3,678.75                  100.00%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 362 Td (Bengaluru Events             Rahul Menon          3,081.71                           3,081.71                   25.68%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 352 Td (Central Contingency Reserve  Priya Raman          3,000.00                           3,000.00                  100.00%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 342 Td (Employee Experience FY2026   Morgan Lee               0.00                               0.00                    0.00%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 332 Td (Europe Wellbeing             Lena Fischer             0.00                               0.00                    0.00%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 322 Td (---------------------------  ------------  ---------------  ---------------------------------  -----------------------  ---------  --------) Tj ET
+BT /F1 7.5 Tf 36 312 Td (Total                                            84,640.21                          84,640.21                   82.17%         45  Run-rate) Tj ET
+BT /F1 7.5 Tf 36 24 Td (Unused and expired budget - Hyland - generated 2026-11-11T12:13:06.502Z - page 1 of 1) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000003566 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+3661
+%%EOF

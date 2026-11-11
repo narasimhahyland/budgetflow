@@ -24,6 +24,7 @@ import {
   type ReportCatalog,
   type ReportDrilldown,
   type ReportExport,
+  type ReportExportDownload,
   type ReportResult,
   type ReportSchedule,
   type SavedReportView,
@@ -43,6 +44,7 @@ import {
 } from '@nestjs/common';
 import { z } from 'zod';
 import { BoardPackService } from './board-pack.service';
+import { EXPORT_ROW_LIMIT } from './export-files';
 import { HealthService } from './health.service';
 import { ReportsService } from './reports.service';
 import { SavedViewsService } from './saved-views.service';
@@ -197,6 +199,15 @@ export class ReportsController {
     return this.schedules.listExports(actor);
   }
 
+  @Get('reports/exports/:exportId/download')
+  downloadExport(
+    @CurrentActor() actor: RequestActor,
+    @Param('exportId') rawId: string,
+    @RequestId() requestId: string | null,
+  ): Promise<ReportExportDownload> {
+    return this.schedules.downloadExport(actor, parseWith(Uuid, rawId), requestId);
+  }
+
   // 016a Board and FP&A pack. Declared before the `:reportId` routes so "board-pack" is never
   // read as a report id.
   @Get('reports/board-pack')
@@ -301,13 +312,14 @@ export class ReportsController {
   ): Promise<ReportExport> {
     const reportId = parseWith(ReportId, rawId);
     const request = parseWith(CreateExportRequest, body);
-    const result = await this.reports.run(actor, reportId, request.filters, 500);
+    // The same run the screen makes, with the requester's own scope, and every row of it.
+    const result = await this.reports.run(actor, reportId, request.filters, EXPORT_ROW_LIMIT);
     const r = await this.schedules.createExport(
       actor,
       reportId,
       request,
       { idempotencyKey, requestId },
-      result.rowCount,
+      result,
     );
     if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
     return r.body;

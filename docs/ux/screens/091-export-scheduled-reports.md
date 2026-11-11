@@ -44,7 +44,7 @@ Schedule dialog:
 - Channel note: "Channels receive headline figures and a link, never a file."
 - Buttons: Cancel, Save schedule.
 
-Exports tab: report, format, rows, requested by, requested at, status (Queued, Running, Ready, Failed, Expired), size, Download (links valid 7 days).
+Exports tab: report, format, rows, requested by, requested at, status (Queued, Running, Ready, Failed, Expired), size, Download (the file is kept 7 days; each download link is signed when asked for and lasts five minutes).
 
 ## Data and permissions
 

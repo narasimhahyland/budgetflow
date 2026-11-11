@@ -32,6 +32,12 @@ SoD and access reviews, and the handoff's section 5) are not repeated here.
 
 A1, A2 and A3 touch different files and can run in parallel; A4 closes after the others report.
 
+**A1 is done.** Exports render the screen's own run (filters and scope) into CSV, XLSX or PDF in the
+`DocumentStore` under `tenants/<id>/report-exports/`, download through a five-minute signed link,
+neutralise CSV formulas, audit each export and each link, and scheduled emails carry the files to
+recipients who can see the scope. Proof: `apps/api-e2e/src/reports/exports.spec.ts` (invariant 99)
+and the report-frame download journey; evidence in `evidence/gap-a1-report-exports/`.
+
 **A3 done.** All ten steps run as one story through the UI with API assertions
 (`Core acceptance scenario, end to end` in `wave-2-core.spec.ts`), passing from a fresh seed. It
 found and fixed two event-money defects (reconciliation missed actuals matched to the event's

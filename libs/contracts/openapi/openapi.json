@@ -34592,6 +34592,8 @@
               "FORECAST_CYCLE_ALREADY_OPEN",
               "FORECAST_NOT_IN_SCOPE",
               "BOARD_PACK_NOT_READY",
+              "REPORT_EXPORT_NO_FILE",
+              "REPORT_EXPORT_EXPIRED",
               "BOARD_PACK_NO_SNAPSHOT",
               "AI_FEATURE_DISABLED",
               "AI_PROVIDER_NOT_CONFIGURED",
@@ -37411,6 +37413,20 @@
                 "type": "null"
               }
             ]
+          },
+          "fileName": {
+            "description": "Name of the rendered file in the DocumentStore; null for an export recorded before files were produced.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sha256": {
+            "description": "SHA-256 of the rendered file, so a recipient can check what they received.",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -37428,7 +37444,31 @@
           "scheduleId"
         ],
         "additionalProperties": false,
-        "description": "Download links expire after 7 days."
+        "description": "One export of a report run, rendered with the filters and scope of the person who asked for it. The file expires after 7 days."
+      },
+      "ReportExportDownload": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "url",
+          "fileName",
+          "expiresAt"
+        ],
+        "additionalProperties": false,
+        "description": "A short-lived signed URL (5 minutes) for one rendered export file."
       },
       "ReportExportList": {
         "type": "object",
@@ -80081,7 +80121,7 @@
     "/api/reports/{reportId}/exports": {
       "post": {
         "operationId": "createReportExport",
-        "summary": "Export a report run (CSV, XLSX or PDF)",
+        "summary": "Export a report run to a CSV, XLSX or PDF file, with the viewer's filters and scope",
         "tags": [
           "reports"
         ],
@@ -80254,6 +80294,95 @@
             }
           },
           "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/exports/{exportId}/download": {
+      "get": {
+        "operationId": "getReportExportDownload",
+        "summary": "A short-lived signed link to the rendered export file",
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportExportDownload"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {
