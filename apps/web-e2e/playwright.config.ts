@@ -49,7 +49,10 @@ export default defineConfig({
     timezoneId: 'UTC',
     colorScheme: 'light',
     reducedMotion: 'reduce',
-    trace: 'retain-on-failure',
+    // A trace holds the run's tokens and typed credentials. CI uploads the report as an artifact and
+    // this repository is public, so CI records none unless a run sets BF_CI_TRACES=1 (for example to
+    // diagnose #82); then failing tests keep theirs. Local runs keep them under dist/ and tmp/.
+    trace: process.env['CI'] && process.env['BF_CI_TRACES'] !== '1' ? 'off' : 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
   projects: [

@@ -10,3 +10,4 @@ export * from './lib/auth';
 export * from './lib/policy.service';
 export * from './lib/command';
 export * from './lib/core.module';
+export * from './lib/secrets';

@@ -1,0 +1,13 @@
+scripts/gate.sh static functional-api functional-e2e on 11abc9d1 (feat/p18-review merged with main at cbf489f7), fresh seed
+  PASS secrets             1s
+  PASS lint                8s
+  PASS styles              2s
+  PASS satori             39s
+  PASS typecheck          67s
+  PASS build              23s
+  PASS openapi             2s
+  PASS db                  4s
+  PASS stack              69s
+  PASS functional-api    182s
+  PASS reseed-e2e         51s
+  PASS functional-e2e    271s

@@ -25,7 +25,8 @@ test.describe('accruals', () => {
       amountMinor: 80_000,
       serviceStart: '2026-10-20',
       serviceEnd: '2026-10-22',
-      description: 'Workshop facilitation',
+      // Starts with a formula: the export must carry it as text (CSV formula injection, Phase 18).
+      description: '=HYPERLINK("https://example.test","Workshop facilitation")',
     });
     await createCommitment(request, {
       budgetId: budget.id,
@@ -94,6 +95,11 @@ test.describe('accruals', () => {
     expect(file.content.split('\n')[0]).toContain('debit_account,credit_account');
     expect(file.content).toContain(`CMT-${c.id.slice(-8).toUpperCase()}`);
     expect(file.content).toContain('800.00,USD');
+    // The description is neutralised: an apostrophe makes the spreadsheet show it as text.
+    expect(file.content).toContain(
+      `"'=HYPERLINK(""https://example.test"",""Workshop facilitation"")"`,
+    );
+    expect(file.content).not.toMatch(/(^|,)=HYPERLINK/m);
     const exported = await expectContract(
       await request.get('/api/actuals/accruals?status=posted', {
         headers: await as('finance-controller'),

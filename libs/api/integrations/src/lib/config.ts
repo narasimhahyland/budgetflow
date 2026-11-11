@@ -1,3 +1,4 @@
+import { secretOrDev } from '@bf/api/core';
 import { z } from 'zod';
 
 /**
@@ -14,7 +15,7 @@ const Env = z.object({
   INTEGRATIONS_HTTP_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(5_000),
 });
 
-/** Dev-only fallback so the local stack starts without extra setup. Never used with real data. */
+/** Dev-only fallback, public in this repository: used only where secretOrDev allows it. */
 const DEV_SECRET_KEY = 'integration-secrets-dev-only-0001';
 
 export const MAX_RETRY_ATTEMPTS = 8;
@@ -42,7 +43,7 @@ export function integrationsConfig(env: NodeJS.ProcessEnv = process.env): Integr
     allowedHosts: parsed.INTEGRATIONS_ALLOWED_HOSTS.split(',')
       .map((h) => h.trim().toLowerCase())
       .filter(Boolean),
-    secretKey: key && key.length >= 16 ? key : DEV_SECRET_KEY,
+    secretKey: secretOrDev('INTEGRATIONS_SECRET_KEY', key, DEV_SECRET_KEY, env),
     webhookToleranceSeconds: parsed.INTEGRATIONS_WEBHOOK_TOLERANCE_SECONDS,
     httpTimeoutMs: parsed.INTEGRATIONS_HTTP_TIMEOUT_MS,
   };

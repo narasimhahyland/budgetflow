@@ -150,7 +150,8 @@ test.describe('GL tie-out and monthly sign-off', () => {
           headers: await mutate('finance-controller'),
           data: {
             explanation:
-              'Train tickets posted in the ERP; BudgetFlow line is in the unmatched queue.',
+              // Starts with a formula character: the export must carry it as text (Phase 18).
+              '+Train tickets posted in the ERP; BudgetFlow line is in the unmatched queue.',
           },
         },
       ),
@@ -230,7 +231,7 @@ test.describe('GL tie-out and monthly sign-off', () => {
       FileExport,
     );
     expect(file.content).toContain(
-      `${e.code},Nov 2026,6140,${e.ccCode},350.00,100.00,250.00,USD,difference,Train tickets posted`,
+      `${e.code},Nov 2026,6140,${e.ccCode},350.00,100.00,250.00,USD,difference,'+Train tickets posted`,
     );
   });
 
