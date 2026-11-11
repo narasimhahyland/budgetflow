@@ -1,0 +1,628 @@
+✓    1 apps/api-e2e/src/actuals/accruals.spec.ts:19:7 › accruals › a proposal is approved, exported, and auto-reversed when the actual arrives (consumed once) 
+✓    2 apps/api-e2e/src/actuals/accruals.spec.ts:143:7 › accruals › an unreversed accrual reverses automatically when its reversal period starts; rejected proposals post nothing 
+✓    3 apps/api-e2e/src/actuals/event-close.spec.ts:33:7 › event reconciliation and close › close is blocked by unmatched actuals and unaccrued commitments; matching spans the funding budgets and closing returns each source’s surplus 
+✓    4 apps/api-e2e/src/actuals/event-close.spec.ts:171:7 › event reconciliation and close › an event still in progress cannot close 
+✓    5 apps/api-e2e/src/actuals/fx-plan-rate.spec.ts:21:7 › actuals in local currency at the locked plan rate › INR and EUR actuals consume budget at the plan rate; the FX effect is posted separately and never consumes budget 
+✓    6 apps/api-e2e/src/actuals/fx-plan-rate.spec.ts:106:7 › actuals in local currency at the locked plan rate › three INR invoices against a USD commitment relieve exactly what the commitment encumbered (no FX drift) 
+✓    7 apps/api-e2e/src/actuals/import-auto-match.spec.ts:34:7 › actuals import with auto-match › upload converts at the plan rate, proposes matches, skips duplicates and rejects invalid lines; posting fills the queue with the rest 
+✓    8 apps/api-e2e/src/actuals/import-auto-match.spec.ts:205:7 › actuals import with auto-match › the same file cannot be imported twice and a line already imported in another file is skipped 
+✓    9 apps/api-e2e/src/actuals/import-auto-match.spec.ts:238:7 › actuals import with auto-match › only finance can import; auditors read the queue; employees see nothing 
+✓   10 apps/api-e2e/src/actuals/ledger-rebuild.spec.ts:39:7 › ledger rebuild after actuals and accounting postings › every Phase 6 posting kind leaves the ledger rebuildable and balanced 
+✓   11 apps/api-e2e/src/actuals/over-tolerance.spec.ts:20:7 › over tolerance needs an over-budget request › an actual above commitment + tolerance waits in the queue until an over-budget request is approved within DoA 
+✓   12 apps/api-e2e/src/actuals/over-tolerance.spec.ts:156:7 › over tolerance needs an over-budget request › a direct charge beyond a hard-mode budget’s available is blocked until approved; a rejection needs a reason 
+✓   13 apps/api-e2e/src/actuals/prepaids-hygiene.spec.ts:26:7 › prepaids and commitment hygiene › a venue deposit is consumed across its service days, not when paid 
+✓   14 apps/api-e2e/src/actuals/prepaids-hygiene.spec.ts:103:7 › prepaids and commitment hygiene › aging and release prompts; release relieves the rest; cancellation consumes at least the non-refundable deposit 
+✓   15 apps/api-e2e/src/actuals/queue-matching.spec.ts:21:7 › unmatched queue and manual matching › a queued actual is split across a commitment and a budget, matched once, and a correction reverses it back to the queue 
+✓   16 apps/api-e2e/src/actuals/queue-matching.spec.ts:133:7 › unmatched queue and manual matching › a partial match keeps the line in the queue; not budget-relevant lines leave it; cross-source duplicates need confirmation 
+✓   17 apps/api-e2e/src/actuals/refunds-reversals.spec.ts:20:7 › refunds, credit notes and reversals › credit notes and refunds reduce the actual on the original budget; the commitment stays consumed 
+✓   18 apps/api-e2e/src/actuals/refunds-reversals.spec.ts:62:7 › refunds, credit notes and reversals › a source reversal reverses the original match with linked journals and restores the commitment 
+✓   19 apps/api-e2e/src/actuals/tieout.spec.ts:59:7 › GL tie-out and monthly sign-off › differences above tolerance block sign-off until explained; sign-off is by someone else and locks the month 
+✓   20 apps/api-e2e/src/actuals/tieout.spec.ts:238:7 › GL tie-out and monthly sign-off › the preparer cannot sign off; auditors read but cannot prepare 
+✓   21 apps/api-e2e/src/actuals/utilization-thresholds.spec.ts:53:7 › actuals feed utilization and owner alerts › direct charges crossing 50% and 80% publish budget.threshold_crossed once each 
+✓   22 apps/api-e2e/src/actuals/utilization-thresholds.spec.ts:69:7 › actuals feed utilization and owner alerts › an actual matched within its commitment leaves utilization and alerts unchanged 
+✓   23 apps/api-e2e/src/admin/break-glass.spec.ts:46:5 › without a grant the platform operator cannot even see a budget 
+✓   24 apps/api-e2e/src/admin/break-glass.spec.ts:57:5 › a request longer than four hours is refused with a typed problem 
+✓   25 apps/api-e2e/src/admin/break-glass.spec.ts:68:5 › only the platform operator can ask for access 
+✓   26 apps/api-e2e/src/admin/break-glass.spec.ts:80:5 › the operator asks; nothing opens while the request waits 
+✓   27 apps/api-e2e/src/admin/break-glass.spec.ts:137:5 › the requester and read-only roles cannot decide it 
+✓   28 apps/api-e2e/src/admin/break-glass.spec.ts:156:5 › an Organization Admin approves; budgets and the ledger open read-only 
+✓   29 apps/api-e2e/src/admin/break-glass.spec.ts:224:5 › every request under the grant is audited against it 
+✓   30 apps/api-e2e/src/admin/break-glass.spec.ts:262:5 › revoking ends access at once, and only an active grant can be revoked 
+✓   31 apps/api-e2e/src/admin/break-glass.spec.ts:288:5 › a declined request opens nothing 
+✓   32 apps/api-e2e/src/admin/feature-flags.spec.ts:24:7 › feature flags › a flag that is on never grants an action the policy refuses 
+✓   33 apps/api-e2e/src/admin/feature-flags.spec.ts:92:7 › feature flags › a capability that is off refuses the request even for someone who may do it 
+✓   34 apps/api-e2e/src/admin/feature-flags.spec.ts:114:7 › feature flags › a money-affecting flag waits for a Finance Controller who is not the requester 
+✓   35 apps/api-e2e/src/admin/feature-flags.spec.ts:213:7 › feature flags › a pilot reveals the capability only to the chosen locations 
+✓   36 apps/api-e2e/src/admin/feature-flags.spec.ts:252:7 › feature flags › a capability that needs a connected system cannot be switched on without it 
+✓   37 apps/api-e2e/src/admin/feature-flags.spec.ts:301:7 › feature flags › flags and their history come back in a deterministic order 
+✓   38 apps/api-e2e/src/admin/feature-flags.spec.ts:318:7 › feature flags › an unknown flag answers 404 and a reader cannot switch anything 
+✓   39 apps/api-e2e/src/admin/retention.spec.ts:51:7 › retention settings › accounting records and the audit trail can never be given a period 
+✓   40 apps/api-e2e/src/admin/retention.spec.ts:82:7 › retention settings › every period ships as a provisional default pending finance and legal sign-off 
+✓   41 apps/api-e2e/src/admin/retention.spec.ts:98:7 › retention settings › a period below the statutory minimum is refused 
+✓   42 apps/api-e2e/src/admin/retention.spec.ts:112:7 › retention settings › shortening a financial category waits for a Finance Controller 
+✓   43 apps/api-e2e/src/admin/retention.spec.ts:168:7 › legal holds beat retention › a run that would purge a held record leaves it untouched and records why 
+✓   44 apps/api-e2e/src/admin/retention.spec.ts:350:7 › legal holds beat retention › a hold needs two different people before it holds anything 
+✓   45 apps/api-e2e/src/admin/retention.spec.ts:401:7 › legal holds beat retention › a hold scope has to say what it covers 
+✓   46 apps/api-e2e/src/admin/retention.spec.ts:432:7 › legal holds beat retention › run reports are append-only and listed newest first 
+✓   47 apps/api-e2e/src/admin/retention.spec.ts:456:7 › legal holds beat retention › legal holds are read only by the people who run retention or holds (Phase 18) 
+✓   48 apps/api-e2e/src/admin/retention.spec.ts:483:7 › legal holds beat retention › the seeded hold over Hyland's event is active and visible to the auditor 
+✓   49 apps/api-e2e/src/admin/role-administration.spec.ts:29:7 › role administration › nobody can give themselves a role 
+✓   50 apps/api-e2e/src/admin/role-administration.spec.ts:50:7 › role administration › the platform-operator role is never granted inside a tenant 
+✓   51 apps/api-e2e/src/admin/role-administration.spec.ts:62:7 › role administration › a role grant never carries an approval limit 
+✓   52 apps/api-e2e/src/admin/role-administration.spec.ts:80:7 › role administration › an administrator without financial authority cannot hand any out 
+✓   53 apps/api-e2e/src/admin/role-administration.spec.ts:181:7 › role administration › a role that adds no financial authority applies straight away 
+✓   54 apps/api-e2e/src/admin/role-administration.spec.ts:220:7 › role administration › only user administration can read or change people 
+✓   55 apps/api-e2e/src/admin/role-administration.spec.ts:242:7 › role administration › the people list is ordered by name then membership id 
+✓   56 apps/api-e2e/src/admin/settings-and-experience.spec.ts:26:7 › company settings › every section reads back with what the signed-in person may change 
+✓   57 apps/api-e2e/src/admin/settings-and-experience.spec.ts:59:7 › company settings › a required notification cannot be taken off In-app or Email 
+✓   58 apps/api-e2e/src/admin/settings-and-experience.spec.ts:125:7 › company settings › upload rules only take file types from the safe list and sizes up to 25 MB 
+✓   59 apps/api-e2e/src/admin/settings-and-experience.spec.ts:213:7 › company settings › session limits are checked on the server, not only in the form 
+✓   60 apps/api-e2e/src/admin/settings-and-experience.spec.ts:273:7 › company settings › branding takes a hex accent colour and a program name, and nobody else may change it 
+✓   61 apps/api-e2e/src/admin/settings-and-experience.spec.ts:344:7 › system health and maintenance notices › health reports services, queues and nightly jobs without any financial data 
+✓   62 apps/api-e2e/src/admin/settings-and-experience.spec.ts:371:7 › system health and maintenance notices › a maintenance notice is announced ahead of time and can be cancelled 
+✓   63 apps/api-e2e/src/admin/settings-and-experience.spec.ts:449:7 › guided setup and personal activity › the setup checklist is computed from the data that exists 
+✓   64 apps/api-e2e/src/admin/settings-and-experience.spec.ts:466:7 › guided setup and personal activity › my activity is my own and nobody can ask for someone else 
+✓   65 apps/api-e2e/src/ai/conversation-retention.spec.ts:123:7 › AI conversation retention (113a) › the category ships as a provisional default that deletes 
+✓   66 apps/api-e2e/src/ai/conversation-retention.spec.ts:134:7 › AI conversation retention (113a) › a conversation past the window is deleted, and one inside it is kept 
+✓   67 apps/api-e2e/src/ai/conversation-retention.spec.ts:193:7 › AI conversation retention (113a) › a legal hold on the asker keeps their conversation and the run says which hold 
+✓   68 apps/api-e2e/src/ai/guardrails.spec.ts:25:5 › an answer containing a figure the ledger did not produce is discarded 
+✓   69 apps/api-e2e/src/ai/guardrails.spec.ts:42:5 › model output that fails its schema is discarded 
+✓   70 apps/api-e2e/src/ai/guardrails.spec.ts:55:5 › a discarded answer is still recorded, so an auditor sees that the guard fired 
+✓   71 apps/api-e2e/src/ai/guardrails.spec.ts:76:5 › asking the assistant to approve a request refuses and leaves the request untouched 
+✓   72 apps/api-e2e/src/ai/guardrails.spec.ts:110:5 › asking the assistant to move money refuses and no budget balance changes 
+✓   73 apps/api-e2e/src/ai/guardrails.spec.ts:125:5 › the AI query log is append-only in the database 
+✓   74 apps/api-e2e/src/ai/guardrails.spec.ts:147:5 › a feature that is switched off is refused on the next request 
+✓   75 apps/api-e2e/src/ai/scoped-retrieval.spec.ts:19:5 › an owner is answered from the ledger read models, with every figure traceable to a budget 
+✓   76 apps/api-e2e/src/ai/scoped-retrieval.spec.ts:63:5 › a scoped owner asking about another subtree is refused and gets no figures from it 
+✓   77 apps/api-e2e/src/ai/scoped-retrieval.spec.ts:89:5 › the same question with a context chip the asker may not read surfaces nothing 
+✓   78 apps/api-e2e/src/ai/scoped-retrieval.spec.ts:104:5 › another tenant never appears in an answer or in its query-log row 
+✓   79 apps/api-e2e/src/ai/scoped-retrieval.spec.ts:142:5 › the query log records the scope that was applied, the records used and the fields sent, and never the question 
+✓   80 apps/api-e2e/src/ai/settings-and-accuracy.spec.ts:10:5 › a finance-affecting feature turned on by the Org Admin stays off until Finance confirms 
+✓   81 apps/api-e2e/src/ai/settings-and-accuracy.spec.ts:54:5 › the turn-on dialog can show exactly what a feature sends, and never a credential field 
+✓   82 apps/api-e2e/src/ai/settings-and-accuracy.spec.ts:79:5 › an employee cannot read the AI query log; an auditor can 
+✓   83 apps/api-e2e/src/ai/settings-and-accuracy.spec.ts:86:5 › every AI feature meets its published accuracy threshold against the fake provider 
+✓   84 apps/api-e2e/src/ai/settings-and-accuracy.spec.ts:120:5 › the accuracy view is readable by finance and ordered deterministically 
+✓   85 apps/api-e2e/src/ai/settings-and-accuracy.spec.ts:142:5 › AI settings are validated and audited 
+✓   86 apps/api-e2e/src/ai/suggestion-decisions.spec.ts:20:5 › running the ranker produces a suggestion and matches nothing 
+✓   87 apps/api-e2e/src/ai/suggestion-decisions.spec.ts:34:5 › the ranker is deterministic: the same line gives the same suggestion twice 
+✓   88 apps/api-e2e/src/ai/suggestion-decisions.spec.ts:46:5 › applying a suggestion as someone without actuals.manage is refused and nothing changes 
+✓   89 apps/api-e2e/src/ai/suggestion-decisions.spec.ts:65:5 › recording an acceptance before the match command ran is refused 
+✓   90 apps/api-e2e/src/ai/suggestion-decisions.spec.ts:84:5 › a reviewer applies the suggestion through the normal match command, and the acceptance is audited 
+✓   91 apps/api-e2e/src/ai/suggestion-decisions.spec.ts:139:5 › rejecting a suggestion needs a reason, because the reasons feed the evaluation set 
+✓   92 apps/api-e2e/src/ai/suggestions-are-drafts.spec.ts:20:5 › a suggested split totals the amount exactly, stays within the parent, and saves nothing 
+✓   93 apps/api-e2e/src/ai/suggestions-are-drafts.spec.ts:73:5 › asking for a split of more than the parent has is refused 
+✓   94 apps/api-e2e/src/ai/suggestions-are-drafts.spec.ts:95:5 › an employee cannot ask for a split of a budget they may not allocate from 
+✓   95 apps/api-e2e/src/ai/suggestions-are-drafts.spec.ts:105:5 › the spending outlook reports a range, cites the budget and changes no balance 
+✓   96 apps/api-e2e/src/ai/suggestions-are-drafts.spec.ts:174:5 › anomaly flags are advisory: they cite records, carry evidence and decide nothing 
+✓   97 apps/api-e2e/src/ai/suggestions-are-drafts.spec.ts:216:5 › receipt extraction prefills values without saving them, and drops card details 
+✓   98 apps/api-e2e/src/ai/suggestions-are-drafts.spec.ts:248:5 › a low-confidence field is left empty rather than guessed 
+✓   99 apps/api-e2e/src/approvals/doa-routing.spec.ts:20:7 › approval routing by hierarchy and delegation of authority › requester skipped, owner within limit approves; exactly at the limit adds finance review; one cent above escalates 
+✓  100 apps/api-e2e/src/approvals/doa-routing.spec.ts:126:7 › approval routing by hierarchy and delegation of authority › an approver can escalate to the next authority up the hierarchy 
+✓  101 apps/api-e2e/src/approvals/doa-routing.spec.ts:154:7 › approval routing by hierarchy and delegation of authority › leaving less than 10% of the budget adds a finance review even for a small amount 
+✓  102 apps/api-e2e/src/approvals/email-links.spec.ts:27:7 › actionable approval email links › approve from email once; the second use and the sibling reject link change nothing 
+✓  103 apps/api-e2e/src/approvals/email-links.spec.ts:89:7 › actionable approval email links › reject from email needs a reason; tampered and expired links are refused 
+✓  104 apps/api-e2e/src/approvals/hygiene.spec.ts:59:7 › approval hygiene › an attendee and a co-organizer are skipped as approvers of the event’s funding and contributions 
+✓  105 apps/api-e2e/src/approvals/hygiene.spec.ts:132:7 › approval hygiene › a requester cannot approve their own request, even as a delegate 
+✓  106 apps/api-e2e/src/approvals/hygiene.spec.ts:153:7 › approval hygiene › a delegate acts within the lower of both limits and only between the delegation dates 
+✓  107 apps/api-e2e/src/audit/budget-commands.spec.ts:34:7 › one audit entry per budget command › allocation, grid, per-head, transfer, controls, requests and decisions each write one entry 
+✓  108 apps/api-e2e/src/audit/budget-commands.spec.ts:156:7 › one audit entry per budget command › approving a contingency release writes one entry 
+✓  109 apps/api-e2e/src/audit/hash-chain.spec.ts:26:7 › audit trail › one event per successful mutation with actor and changes; none for a rejected command 
+✓  110 apps/api-e2e/src/audit/hash-chain.spec.ts:53:7 › audit trail › the tenant's chain verifies, and only audit roles may read it 
+✓  111 apps/api-e2e/src/audit/hash-chain.spec.ts:68:7 › audit trail › the database rejects UPDATE and DELETE on audit rows for the application role 
+✓  112 apps/api-e2e/src/audit/hash-chain.spec.ts:75:7 › audit trail › exactly one event per successful mutation across command types, none for rejections or replays 
+✓  113 apps/api-e2e/src/audit/hash-chain.spec.ts:146:7 › audit trail › deleting the newest event fails verification against the chain head 
+✓  114 apps/api-e2e/src/audit/hash-chain.spec.ts:191:7 › audit trail › tampering with one stored event breaks verification at that event 
+✓  115 apps/api-e2e/src/budgets/concurrent-allocation.spec.ts:5:5 › 20 parallel allocations of 100.00 against 1,000.00 available: exactly 10 succeed 
+✓  116 apps/api-e2e/src/budgets/concurrent-controls.spec.ts:40:7 › concurrent controls and drivers › parallel freeze, unfreeze, set to zero and restore: one success, one event and one audit entry each 
+✓  117 apps/api-e2e/src/budgets/concurrent-controls.spec.ts:83:7 › concurrent controls and drivers › parallel reductions that each fit once: one succeeds, the rest are below the floor 
+✓  118 apps/api-e2e/src/budgets/concurrent-controls.spec.ts:110:7 › concurrent controls and drivers › parallel per-head set and true-up allocate the driver amount once 
+✓  119 apps/api-e2e/src/budgets/concurrent-controls.spec.ts:175:7 › concurrent controls and drivers › a cascade set to zero skips a child that is already at zero 
+✓  120 apps/api-e2e/src/budgets/controls.spec.ts:26:7 › freeze › a frozen budget blocks new requests and allocations while commitments complete 
+✓  121 apps/api-e2e/src/budgets/controls.spec.ts:88:7 › freeze › cascade freezes every budget below; an owner cannot freeze the budget they own 
+✓  122 apps/api-e2e/src/budgets/controls.spec.ts:127:7 › freeze › a reason code from the list is required 
+✓  123 apps/api-e2e/src/budgets/controls.spec.ts:141:7 › reduce › the floor counts allocated out, held, encumbered and actual but not pending requests 
+✓  124 apps/api-e2e/src/budgets/controls.spec.ts:223:7 › reduce › cut money to savings leaves the tree through the root; reallocation moves it to another subtree 
+✓  125 apps/api-e2e/src/budgets/controls.spec.ts:303:7 › set to zero › floors at what children keep and commitments, cancels pending requests and blocks new ones 
+✓  126 apps/api-e2e/src/budgets/controls.spec.ts:394:7 › set to zero › a replayed set to zero posts once 
+✓  127 apps/api-e2e/src/budgets/controls.spec.ts:428:7 › set to zero › a root budget can only send cut money to savings 
+✓  128 apps/api-e2e/src/budgets/idempotency.spec.ts:10:7 › idempotent allocation › the same key twice returns the same journal and posts once 
+✓  129 apps/api-e2e/src/budgets/idempotency.spec.ts:45:7 › idempotent allocation › ten parallel requests with one key produce one journal 
+✓  130 apps/api-e2e/src/budgets/idempotency.spec.ts:65:7 › idempotent allocation › reusing a key for a different request is refused 
+✓  131 apps/api-e2e/src/budgets/idempotency.spec.ts:86:7 › idempotent allocation › a rejected command does not consume its key: the retry runs again 
+✓  132 apps/api-e2e/src/budgets/over-allocation.spec.ts:18:7 › allocation against parent available › allocating exactly the available amount passes; one minor unit more is rejected with the remaining amount 
+✓  133 apps/api-e2e/src/budgets/over-allocation.spec.ts:61:7 › allocation against parent available › cross-currency allocations are checked in the parent currency at the locked plan rate 
+✓  134 apps/api-e2e/src/budgets/over-allocation.spec.ts:88:7 › allocation against parent available › an exhausted parent cannot fund a child with amounts worth less than one parent minor unit 
+✓  135 apps/api-e2e/src/budgets/over-allocation.spec.ts:122:7 › allocation against parent available › repeated small child-currency allocations never give the child more than the parent gave up 
+✓  136 apps/api-e2e/src/budgets/over-allocation.spec.ts:152:7 › allocation against parent available › a parent-currency allocation to a coarser child currency credits the child rounding down 
+✓  137 apps/api-e2e/src/budgets/over-allocation.spec.ts:180:7 › allocation against parent available › allocation amounts must be positive whole minor units in a supported currency 
+✓  138 apps/api-e2e/src/budgets/over-allocation.spec.ts:207:7 › allocation against parent available › allocation in the parent currency converts once for the child (USD 300.00 → EUR 276.00) 
+✓  139 apps/api-e2e/src/budgets/over-allocation.spec.ts:220:7 › allocation against parent available › money only flows to direct children, in the parent or child currency 
+✓  140 apps/api-e2e/src/budgets/over-allocation.spec.ts:243:7 › allocation against parent available › a role that can read but not allocate is refused; a role that cannot read sees nothing 
+✓  141 apps/api-e2e/src/budgets/p4-plan-baseline.spec.ts:13:7 › Phase 4 plan baseline › a root without a plan line is rejected; new money needs Finance Admin and CEO; approved plan lines are immutable 
+✓  142 apps/api-e2e/src/budgets/p4-plan-baseline.spec.ts:150:7 › Phase 4 plan baseline › contingency reserve is a root; release is the cross-root move 
+✓  143 apps/api-e2e/src/budgets/p4-plan-baseline.spec.ts:201:7 › Phase 4 plan baseline › scenario roots are created through plan revisions 
+✓  144 apps/api-e2e/src/budgets/per-head-grid.spec.ts:37:7 › per-head driver › rate x eligible prorated headcount; contractors excluded; prorating optional 
+✓  145 apps/api-e2e/src/budgets/per-head-grid.spec.ts:86:7 › per-head driver › allocates the driver amount, then trues up after the headcount refresh (up and down) 
+✓  146 apps/api-e2e/src/budgets/per-head-grid.spec.ts:132:7 › per-head driver › a driver amount above the parent is a hard block; a unit without headcount is explained 
+✓  147 apps/api-e2e/src/budgets/per-head-grid.spec.ts:165:7 › allocation grid › preview, then every line posts as one change; a bad grid posts nothing 
+✓  148 apps/api-e2e/src/budgets/per-head-grid.spec.ts:244:7 › allocation grid › parallel grids never allocate more than the parent holds 
+✓  149 apps/api-e2e/src/budgets/per-head-grid.spec.ts:263:7 › allocation grid › a pasted row without an owner is saved as an unfunded Draft until an owner is set 
+✓  150 apps/api-e2e/src/budgets/planning.spec.ts:80:7 › plan versions and the root tie-out › applying a version creates roots, a revision adjusts them, and roots always tie out 
+✓  151 apps/api-e2e/src/budgets/planning.spec.ts:196:7 › plan versions and the root tie-out › spreadsheet import maps columns, reports row errors, and accepts tab-separated paste 
+✓  152 apps/api-e2e/src/budgets/planning.spec.ts:282:7 › plan versions and the root tie-out › roll forward clones the tree into the next year under its plan version 
+✓  153 apps/api-e2e/src/budgets/planning.spec.ts:334:7 › budget rules: phasing, limits, settings, alerts › phasing splits authorized over the fiscal periods and manual amounts must add up 
+✓  154 apps/api-e2e/src/budgets/planning.spec.ts:381:7 › budget rules: phasing, limits, settings, alerts › limits by location and category feed the spend check; only the parent owner sets them 
+✓  155 apps/api-e2e/src/budgets/planning.spec.ts:446:7 › budget rules: phasing, limits, settings, alerts › settings use optimistic concurrency; owners tune thresholds, the parent owner governs the control mode 
+✓  156 apps/api-e2e/src/budgets/planning.spec.ts:514:7 › budget rules: phasing, limits, settings, alerts › crossing an owner alert threshold publishes budget.threshold_crossed 
+✓  157 apps/api-e2e/src/budgets/planning.spec.ts:554:7 › budget rules: phasing, limits, settings, alerts › a parent's owner is alerted when spend in a child crosses the parent's threshold 
+✓  158 apps/api-e2e/src/budgets/planning.spec.ts:583:7 › Available, roll-ups and scope › company-wide Available counts child allocations once; the budget explains its own rules 
+✓  159 apps/api-e2e/src/budgets/planning.spec.ts:629:7 › Available, roll-ups and scope › company-wide Available subtracts held money; parent utilization rolls up child spend once 
+✓  160 apps/api-e2e/src/budgets/planning.spec.ts:671:7 › Available, roll-ups and scope › owners see their subtree only, in lists, roll-ups and controls 
+✓  161 apps/api-e2e/src/budgets/planning.spec.ts:715:7 › Available, roll-ups and scope › the ledger rebuild equals cached balances after every Phase 4 posting 
+✓  162 apps/api-e2e/src/budgets/transfers-requests.spec.ts:26:7 › transfers › between siblings the parent is untouched; between cousins money moves through their ancestors 
+✓  163 apps/api-e2e/src/budgets/transfers-requests.spec.ts:101:7 › transfers › pending requests reduce what can be transferred; the owner of both siblings or of their parent may transfer 
+✓  164 apps/api-e2e/src/budgets/transfers-requests.spec.ts:158:7 › increase requests › the child owner asks, the parent owner approves part of it, and the money allocates once 
+✓  165 apps/api-e2e/src/budgets/transfers-requests.spec.ts:240:7 › increase requests › a root budget grows through the plan, and a rejected request posts nothing 
+✓  166 apps/api-e2e/src/budgets/transfers-requests.spec.ts:285:7 › contingency reserve › a release moves reserve money only once approved by someone else 
+✓  167 apps/api-e2e/src/channels/chat-commands.spec.ts:24:7 › chat commands, workspace setup and account linking › a balance check answers only with budgets the asker may see 
+✓  168 apps/api-e2e/src/channels/chat-commands.spec.ts:37:7 › chat commands, workspace setup and account linking › a quick request from chat pre-encumbers like any other request, and a frozen budget refuses it 
+✓  169 apps/api-e2e/src/channels/chat-commands.spec.ts:90:7 › chat commands, workspace setup and account linking › linking a chat account needs an exact verified-email match 
+✓  170 apps/api-e2e/src/channels/chat-commands.spec.ts:152:7 › chat commands, workspace setup and account linking › the Integration Admin console shows installations, links and the delivery log 
+✓  171 apps/api-e2e/src/channels/chat-commands.spec.ts:194:7 › chat commands, workspace setup and account linking › the App Home lists what the asker is waiting on and what they asked for 
+✓  172 apps/api-e2e/src/channels/chat-commands.spec.ts:208:7 › chat commands, workspace setup and account linking › the "Last 24h" delivery summary counts the last 24 hours and nothing older 
+✓  173 apps/api-e2e/src/channels/chat-webhooks.spec.ts:55:7 › signed Slack and Teams approval callbacks › a signed Slack callback approves through the approval engine and is audited as slack 
+✓  174 apps/api-e2e/src/channels/chat-webhooks.spec.ts:112:7 › signed Slack and Teams approval callbacks › a signed Teams callback approves and rejecting from a card needs a reason code and reason 
+✓  175 apps/api-e2e/src/channels/chat-webhooks.spec.ts:182:7 › signed Slack and Teams approval callbacks › a callback outside the 5-minute replay window or with a broken signature changes nothing 
+✓  176 apps/api-e2e/src/channels/chat-webhooks.spec.ts:255:7 › signed Slack and Teams approval callbacks › a chat account nobody linked is prompted to connect instead of deciding 
+✓  177 apps/api-e2e/src/channels/chat-webhooks.spec.ts:284:7 › signed Slack and Teams approval callbacks › a linked person who does not hold the task cannot decide it from chat 
+✓  178 apps/api-e2e/src/channels/chat-webhooks.spec.ts:357:7 › signed Slack and Teams approval callbacks › an amount above the chat single-click threshold sends the approver to BudgetFlow 
+✓  179 apps/api-e2e/src/channels/chat-webhooks.spec.ts:397:7 › signed Slack and Teams approval callbacks › Slack retrying the same interaction decides once 
+✓  180 apps/api-e2e/src/channels/discussions.spec.ts:22:7 › discussion, mentions and follow › a mention only reaches people who can already read the item 
+✓  181 apps/api-e2e/src/channels/discussions.spec.ts:96:7 › discussion, mentions and follow › the author may edit for 15 minutes; after that the comment is frozen 
+✓  182 apps/api-e2e/src/channels/discussions.spec.ts:156:7 › discussion, mentions and follow › removing a comment leaves a tombstone and keeps the text in the audit log 
+✓  183 apps/api-e2e/src/channels/discussions.spec.ts:201:7 › discussion, mentions and follow › read-only roles read the discussion but cannot post 
+✓  184 apps/api-e2e/src/channels/discussions.spec.ts:229:7 › discussion, mentions and follow › following a request puts it on the Following list and unfollowing takes it off 
+✓  185 apps/api-e2e/src/channels/discussions.spec.ts:284:7 › discussion, mentions and follow › a director cannot read the discussion of another director’s request 
+✓  186 apps/api-e2e/src/channels/notifications.spec.ts:34:7 › notifications, preferences and push devices › the feed separates notifications from the tasks that still need a decision 
+✓  187 apps/api-e2e/src/channels/notifications.spec.ts:75:7 › notifications, preferences and push devices › required alerts cannot be switched off and quiet hours may only be extended 
+✓  188 apps/api-e2e/src/channels/notifications.spec.ts:131:7 › notifications, preferences and push devices › registering and removing a push device is audited 
+✓  189 apps/api-e2e/src/channels/notifications.spec.ts:174:7 › notifications, preferences and push devices › a decision taken on the phone is audited as the mobile channel 
+✓  190 apps/api-e2e/src/channels/notifications.spec.ts:203:7 › role-based digest templates › a digest renders inside the recipient’s own scope and publishing bumps the version 
+✓  191 apps/api-e2e/src/channels/notifications.spec.ts:259:7 › role-based digest templates › only people who may manage notifications can change a digest template 
+✓  192 apps/api-e2e/src/close/board-pack-snapshot.spec.ts:13:7 › board pack from a close snapshot (16a) › a pack of a period the product closed reads that close snapshot and ties to it 
+✓  193 apps/api-e2e/src/close/closed-period-database.spec.ts:26:7 › the database refuses postings into a closed or locked period › a ledger journal cannot be inserted into a closed period 
+✓  194 apps/api-e2e/src/close/closed-period-database.spec.ts:34:7 › the database refuses postings into a closed or locked period › a ledger journal cannot be inserted into a locked period either 
+✓  195 apps/api-e2e/src/close/closed-period-database.spec.ts:42:7 › the database refuses postings into a closed or locked period › a ledger line cannot be inserted into a closed period even under an open journal 
+✓  196 apps/api-e2e/src/close/closed-period-database.spec.ts:60:7 › the database refuses postings into a closed or locked period › ledger rows are append-only, so a correction can only be a reversal 
+✓  197 apps/api-e2e/src/close/closed-period-database.spec.ts:71:7 › the database refuses postings into a closed or locked period › audit events and close snapshots are append-only 
+✓  198 apps/api-e2e/src/close/closed-period-database.spec.ts:84:7 › the database refuses postings into a closed or locked period › close acknowledgements and commitment carries are append-only evidence 
+✓  199 apps/api-e2e/src/close/closed-period-database.spec.ts:97:7 › the database refuses postings into a closed or locked period › the Phase 11 tables enforce tenant isolation 
+✓  200 apps/api-e2e/src/close/forecast-cycle.spec.ts:108:7 › forecast cycle › a variance above the cycle threshold is refused without commentary and accepted with it 
+✓  201 apps/api-e2e/src/close/forecast-cycle.spec.ts:153:7 › forecast cycle › a variance exactly on the threshold needs commentary, one minor unit inside it does not 
+✓  202 apps/api-e2e/src/close/forecast-cycle.spec.ts:187:7 › forecast cycle › a forecast posts nothing: the ledger and the budget balances are unchanged 
+✓  203 apps/api-e2e/src/close/forecast-cycle.spec.ts:228:7 › forecast cycle › the system methods are computed from the ledger and offered with their explanation 
+✓  204 apps/api-e2e/src/close/forecast-cycle.spec.ts:265:7 › forecast cycle › an owner may forecast their own budget and not another owner’s 
+✓  205 apps/api-e2e/src/close/forecast-cycle.spec.ts:319:7 › forecast cycle › only finance decides, and an accepted forecast is the owner’s last word 
+✓  206 apps/api-e2e/src/close/forecast-cycle.spec.ts:392:7 › forecast cycle › closing a cycle accepts what was submitted, fills the gaps with System run-rate and locks the snapshot 
+✓  207 apps/api-e2e/src/close/forecast-cycle.spec.ts:473:7 › forecast cycle › a replayed submission is stored once and answered from the first result 
+✓  208 apps/api-e2e/src/close/forecast-cycle.spec.ts:503:7 › forecast cycle › cycle lines come back in a total order, the same way every time 
+✓  209 apps/api-e2e/src/close/forecast-cycle.spec.ts:527:7 › forecast cycle › an auditor reads a cycle and cannot change it 
+✓  210 apps/api-e2e/src/close/period-close.spec.ts:21:7 › period close checklist and sign-off › the checklist refuses a close while a hard check fails and takes snapshots when it passes 
+✓  211 apps/api-e2e/src/close/period-close.spec.ts:102:7 › period close checklist and sign-off › a soft check is acknowledged with a reason and stops blocking the close 
+✓  212 apps/api-e2e/src/close/period-close.spec.ts:138:7 › period close checklist and sign-off › reopening is break-glass: two different people, audited, and the re-close takes version 2 
+✓  213 apps/api-e2e/src/close/period-close.spec.ts:272:7 › period close checklist and sign-off › every status change and acknowledgement lands in the audit log with its reason 
+✓  214 apps/api-e2e/src/close/period-close.spec.ts:302:7 › period close checklist and sign-off › a period list is readable by finance and refused to an employee 
+✓  215 apps/api-e2e/src/close/year-end.spec.ts:92:7 › fiscal year-end run › a dry run splits what every budget has into carry and lapse and posts nothing 
+✓  216 apps/api-e2e/src/close/year-end.spec.ts:154:7 › fiscal year-end run › execution carries and lapses without minting money and both years stay rebuildable 
+✓  217 apps/api-e2e/src/close/year-end.spec.ts:239:7 › fiscal year-end run › a carry that needs approval waits for the Finance Controller and can be approved in part 
+✓  218 apps/api-e2e/src/close/year-end.spec.ts:330:7 › fiscal year-end run › a budget without a rollover policy blocks its line instead of guessing 
+✓  219 apps/api-e2e/src/close/year-end.spec.ts:360:7 › fiscal year-end run › a target year whose plan rates are not locked blocks the run until they are locked 
+✓  220 apps/api-e2e/src/close/year-end.spec.ts:431:7 › fiscal year-end run › an open commitment carries into the new year with its funding and keeps its amount 
+✓  221 apps/api-e2e/src/close/year-end.spec.ts:590:7 › fiscal year-end run › only a Finance Admin starts a year-end run 
+✓  222 apps/api-e2e/src/contributions/intercompany.spec.ts:30:7 › intercompany policy on contributions › block, recharge with markup and recharge at cost with tax approval; close waits for the recharge 
+✓  223 apps/api-e2e/src/contributions/partial-approval.spec.ts:23:7 › Inter-Director Budget Contribution Request decisions › full, partial and declined contributions with attribution, earmarks and one audit entry each 
+✓  224 apps/api-e2e/src/contributions/partial-approval.spec.ts:214:7 › Inter-Director Budget Contribution Request decisions › only the giving director decides; others are refused and nobody else sees the giving budget 
+✓  225 apps/api-e2e/src/db/rls-policies.spec.ts:11:7 › row-level security as the application role › every table with tenant_id has RLS enabled, forced and a tenant_isolation policy 
+✓  226 apps/api-e2e/src/db/rls-policies.spec.ts:30:7 › row-level security as the application role › the application role is not a superuser and has no BYPASSRLS 
+✓  227 apps/api-e2e/src/db/rls-policies.spec.ts:40:7 › row-level security as the application role › tenant A cannot select, insert, update or delete tenant B rows 
+✓  228 apps/api-e2e/src/db/rls-policies.spec.ts:68:7 › row-level security as the application role › without a tenant context nothing is visible 
+✓  229 apps/api-e2e/src/db/rls-policies.spec.ts:79:7 › row-level security as the application role › the forecast cycle and board pack tables isolate tenants 
+✓  230 apps/api-e2e/src/documents/upload.spec.ts:18:7 › documents on the DocumentStore › declare, upload, verify and download; wrong type, size and owner are refused 
+✓  231 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:28:7 › the connector › publishes only read-only tools and names what it cannot do 
+✓  232 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:44:7 › the connector › an assistant app the company has not allowed cannot connect 
+✓  233 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:60:7 › the connector › connecting records the consent text the person agreed to 
+✓  234 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:78:7 › tool calls › the tool list offers only what the company and the connection both allow 
+✓  235 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:102:7 › tool calls › a budget in another tenant answers with the neutral not-found wording, not a denial 
+✓  236 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:128:7 › tool calls › an employee sees nothing an owner sees, through the same tool 
+✓  237 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:145:7 › tool calls › an owner sees their own subtree and not a budget belonging to someone else 
+✓  238 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:162:7 › tool calls › records carry only the allowed field names, never an email address 
+✓  239 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:179:7 › tool calls › every call writes one AI query log row with the scope it applied 
+✓  240 apps/api-e2e/src/ecosystem/assistant-connector.spec.ts:206:7 › tool calls › there is no tool that decides anything, and the surface refuses an invented one 
+✓  241 apps/api-e2e/src/ecosystem/automations.spec.ts:19:7 › platforms and connecting › Zapier is allowed and the other platforms are not 
+✓  242 apps/api-e2e/src/ecosystem/automations.spec.ts:37:7 › platforms and connecting › connecting a platform the company has not allowed is refused 
+✓  243 apps/api-e2e/src/ecosystem/automations.spec.ts:55:7 › what an automation may do › it reads a balance its person may read and nothing from another tenant 
+✓  244 apps/api-e2e/src/ecosystem/automations.spec.ts:78:7 › what an automation may do › an action the connection was not granted is refused 
+✓  245 apps/api-e2e/src/ecosystem/automations.spec.ts:96:7 › what an automation may do › a draft it creates stays a draft, is labelled, and writes one audit entry 
+✓  246 apps/api-e2e/src/ecosystem/automations.spec.ts:145:7 › what an automation may do › the same idempotency key creates one draft, not two 
+✓  247 apps/api-e2e/src/ecosystem/automations.spec.ts:176:7 › what an automation may do › a revoked automation stops working at once 
+✓  248 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:12:7 › the connector and its datasets › the Integration Admin sees the datasets and their field reference 
+✓  249 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:30:7 › the connector and its datasets › the switch is per tenant: Globex sees the connector off while Hyland has it on 
+✓  250 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:47:7 › the connector and its datasets › connecting needs report access, and only to datasets the company offers 
+✓  251 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:72:7 › the feed › a connection reads the budgets its person may read and nothing from another tenant 
+✓  252 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:93:7 › the feed › rows come back in a stable order and carry the app definitions of every bucket 
+✓  253 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:123:7 › the feed › a dataset the connection was not granted is refused even though the company offers it 
+✓  254 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:134:7 › the feed › the ninth refresh in a day is refused 
+✓  255 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:148:7 › the feed › a revoked connection stops reading, and a made-up token is never valid 
+✓  256 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:176:7 › who may see and revoke connections › a person sees their own; the Integration Admin sees and can revoke everyone 
+✓  257 apps/api-e2e/src/ecosystem/bi-connector.spec.ts:207:7 › who may see and revoke connections › a person cannot revoke someone else without integration access 
+✓  258 apps/api-e2e/src/ecosystem/marketplace.spec.ts:31:7 › partners › a partner without an approved vendor cannot be enabled 
+✓  259 apps/api-e2e/src/ecosystem/marketplace.spec.ts:52:7 › partners › a blocked vendor cannot be the one behind a partner 
+✓  260 apps/api-e2e/src/ecosystem/marketplace.spec.ts:71:7 › partners › only an Integration Admin changes a partner 
+✓  261 apps/api-e2e/src/ecosystem/marketplace.spec.ts:84:7 › browsing › offers come from enabled partners only, in a stable order 
+✓  262 apps/api-e2e/src/ecosystem/marketplace.spec.ts:105:7 › browsing › filters narrow by city, category and the number of people 
+✓  263 apps/api-e2e/src/ecosystem/marketplace.spec.ts:131:7 › browsing › the marketplace of another tenant is empty, not someone else s catalogue 
+✓  264 apps/api-e2e/src/ecosystem/marketplace.spec.ts:151:7 › booking › a booking request waits for the partner and is never a commitment 
+✓  265 apps/api-e2e/src/ecosystem/marketplace.spec.ts:191:7 › booking › a group the offer cannot take is refused before the partner hears about it 
+✓  266 apps/api-e2e/src/ecosystem/marketplace.spec.ts:219:7 › booking › the partner answer becomes a quote on the booking, with no money moved 
+✓  267 apps/api-e2e/src/ecosystem/widgets.spec.ts:34:7 › configuring widgets › a widget lists its exact sites and the frame policy built from them 
+✓  268 apps/api-e2e/src/ecosystem/widgets.spec.ts:53:7 › configuring widgets › a wildcard site is refused: it would let any page frame the widget 
+✓  269 apps/api-e2e/src/ecosystem/widgets.spec.ts:74:7 › configuring widgets › an employee cannot configure widgets 
+✓  270 apps/api-e2e/src/ecosystem/widgets.spec.ts:93:7 › what a viewer gets › the viewer comes from their token, and the host site must be on the list 
+✓  271 apps/api-e2e/src/ecosystem/widgets.spec.ts:118:7 › what a viewer gets › a copied snippet cannot name a tenant, a person or a budget 
+✓  272 apps/api-e2e/src/ecosystem/widgets.spec.ts:137:7 › what a viewer gets › a widget belonging to another tenant does not exist 
+✓  273 apps/api-e2e/src/ecosystem/widgets.spec.ts:148:7 › what a viewer gets › hiding amounts removes the figures, not just the formatting 
+✓  274 apps/api-e2e/src/ecosystem/widgets.spec.ts:171:7 › what a viewer gets › a paused widget renders nothing, and the blocked sites are reported back to the admin 
+✓  275 apps/api-e2e/src/events/event-depth.spec.ts:45:7 › event templates, recurring series and clone (45a) › a personal template is private, a company template needs master data rights, and a series creates one draft event per occurrence 
+✓  276 apps/api-e2e/src/events/event-depth.spec.ts:126:7 › event templates, recurring series and clone (45a) › a dry-run series previews its occurrences without creating anything, and creating makes a draft event each 
+✓  277 apps/api-e2e/src/events/event-depth.spec.ts:177:7 › event templates, recurring series and clone (45a) › a series refuses dates in a closed accounting period 
+✓  278 apps/api-e2e/src/events/event-depth.spec.ts:219:7 › event templates, recurring series and clone (45a) › cloning copies the plan and never the money 
+✓  279 apps/api-e2e/src/events/event-depth.spec.ts:257:7 › invitations, capacity and the waitlist (47a) › a Going answer beyond capacity waits, and a place that frees up promotes the first in line 
+✓  280 apps/api-e2e/src/events/event-depth.spec.ts:357:7 › attendee needs privacy and the caterer export (47b) › organizers see individual answers, others see counts only, and a name export is audited 
+✓  281 apps/api-e2e/src/events/event-depth.spec.ts:457:7 › attendance and the per-head cost split (47e) › applying the attendance split re-posts the commitment funding lines and keeps the ledger balanced 
+✓  282 apps/api-e2e/src/events/event-depth.spec.ts:568:7 › attendance and the per-head cost split (47e) › keeping the planned split records the reason instead of moving money 
+✓  283 apps/api-e2e/src/events/event-depth.spec.ts:594:7 › vendor quotes (51a) › only Approved or Preferred vendors can be selected, a quote above available is refused, and selecting creates the commitment 
+✓  284 apps/api-e2e/src/events/event-depth.spec.ts:705:7 › post-event survey and ROI scorecard (54a, 54b) › survey results stay hidden until five people have answered, and the scorecard reports what the ledger holds 
+✓  285 apps/api-e2e/src/events/event-depth.spec.ts:743:7 › post-event survey and ROI scorecard (54a, 54b) › a fresh survey keeps results back below the five-response threshold 
+✓  286 apps/api-e2e/src/events/event-depth.spec.ts:810:7 › events dashboard (043) › the dashboard answers what is coming up and what needs the organizer 
+✓  287 apps/api-e2e/src/events/event-depth.spec.ts:823:7 › events dashboard (043) › an employee cannot open the organizer dashboard data for events they do not take part in 
+✓  288 apps/api-e2e/src/events/funding-cap.spec.ts:32:7 › event funding cap, consumption order and surplus return › cap, pro-rata commitments, exact release and surplus returned by share at close 
+✓  289 apps/api-e2e/src/events/funding-cap.spec.ts:184:7 › event funding cap, consumption order and surplus return › an event cannot be committed against before its budget is approved 
+✓  290 apps/api-e2e/src/events/scope.spec.ts:19:7 › Phase 5 scope › an employee requests only from their own location’s budget and never sees its totals 
+✓  291 apps/api-e2e/src/events/scope.spec.ts:56:7 › Phase 5 scope › events are visible to organizers, participants, funders and finance only 
+✓  292 apps/api-e2e/src/events/scope.spec.ts:96:7 › Phase 5 scope › the co-funding board shows contributors’ amounts, never their balances 
+✓  293 apps/api-e2e/src/events/scope.spec.ts:131:7 › Phase 5 scope › Director A does not see Director B’s requests; the seeded event detail stays consistent 
+✓  294 apps/api-e2e/src/extended/narratives.spec.ts:51:7 › drafted leadership summaries stay subordinate to a person › a draft quotes only figures BudgetFlow produced, each with its source 
+✓  295 apps/api-e2e/src/extended/narratives.spec.ts:75:7 › drafted leadership summaries stay subordinate to a person › approval is refused until the author has read every section 
+✓  296 apps/api-e2e/src/extended/narratives.spec.ts:117:7 › drafted leadership summaries stay subordinate to a person › an open-period draft is labelled and can never be approved 
+✓  297 apps/api-e2e/src/extended/narratives.spec.ts:142:7 › drafted leadership summaries stay subordinate to a person › regenerating a section takes its review with it 
+✓  298 apps/api-e2e/src/extended/narratives.spec.ts:163:7 › drafted leadership summaries stay subordinate to a person › a read-only analyst reads summaries but cannot draft or approve one 
+✓  299 apps/api-e2e/src/extended/narratives.spec.ts:179:7 › variance commentary belongs to the owner who signs it › an unexplained variance leaves a placeholder that blocks submission 
+✓  300 apps/api-e2e/src/extended/narratives.spec.ts:239:7 › variance commentary belongs to the owner who signs it › a text with an [Explain] note is always refused, whoever typed it 
+✓  301 apps/api-e2e/src/extended/narratives.spec.ts:264:7 › variance commentary belongs to the owner who signs it › an employee cannot draft commentary on a budget they do not forecast 
+✓  302 apps/api-e2e/src/extended/outcomes.spec.ts:15:7 › outcome linkage never exposes an individual › figures come with their group size and the thresholds that were applied 
+✓  303 apps/api-e2e/src/extended/outcomes.spec.ts:35:7 › outcome linkage never exposes an individual › retention is reported per cohort with its size, and suppressed under ten people 
+✓  304 apps/api-e2e/src/extended/outcomes.spec.ts:48:7 › outcome linkage never exposes an individual › the response carries no person, response or employment record of any kind 
+✓  305 apps/api-e2e/src/extended/outcomes.spec.ts:61:7 › outcome linkage never exposes an individual › a regional manager sees pulse and eNPS but no retention 
+✓  306 apps/api-e2e/src/extended/outcomes.spec.ts:72:7 › outcome linkage never exposes an individual › an employee cannot read the outcomes view at all 
+✓  307 apps/api-e2e/src/extended/outcomes.spec.ts:79:7 › participation rankings reward turnout, never spending › offices and teams are ranked by turnout and small groups are not ranked 
+✓  308 apps/api-e2e/src/extended/outcomes.spec.ts:102:7 › participation rankings reward turnout, never spending › no money appears anywhere in the ranking 
+✓  309 apps/api-e2e/src/extended/outcomes.spec.ts:112:7 › participation rankings reward turnout, never spending › turnout is ordered deterministically, highest first then by name 
+✓  310 apps/api-e2e/src/extended/recognition.spec.ts:106:7 › thank-you notes carry no money › a thank-you note needs no budget, no allowance and no approval 
+✓  311 apps/api-e2e/src/extended/recognition.spec.ts:123:7 › thank-you notes carry no money › an organizer thank-you note is recorded on their profile and stays wordless 
+✓  312 apps/api-e2e/src/extended/recognition.spec.ts:153:7 › thank-you notes carry no money › nobody thanks themselves 
+✓  313 apps/api-e2e/src/extended/recognition.spec.ts:169:7 › monetary awards are spend on a Recognition budget › setting up an award type and an allowance moves no money at all 
+✓  314 apps/api-e2e/src/extended/recognition.spec.ts:186:7 › monetary awards are spend on a Recognition budget › a manager award encumbers the budget and redemption becomes an actual 
+✓  315 apps/api-e2e/src/extended/recognition.spec.ts:237:7 › monetary awards are spend on a Recognition budget › a peer award waits for a second person before it encumbers 
+✓  316 apps/api-e2e/src/extended/recognition.spec.ts:289:7 › monetary awards are spend on a Recognition budget › cancelling a waiting award releases its pre-encumbrance in full 
+✓  317 apps/api-e2e/src/extended/recognition.spec.ts:320:7 › monetary awards are spend on a Recognition budget › a manager with no allowance cannot give a monetary award 
+✓  318 apps/api-e2e/src/extended/recognition.spec.ts:333:7 › monetary awards are spend on a Recognition budget › an award one minor unit above the remaining allowance is refused 
+✓  319 apps/api-e2e/src/extended/recognition.spec.ts:363:7 › monetary awards are spend on a Recognition budget › a frozen Recognition budget stops monetary awards but not thank-you notes 
+✓  320 apps/api-e2e/src/extended/recognition.spec.ts:402:7 › monetary awards are spend on a Recognition budget › nobody recognises themselves 
+✓  321 apps/api-e2e/src/extended/recognition.spec.ts:418:7 › monetary awards are spend on a Recognition budget › recognition is private by default and only the recipient redeems it 
+✓  322 apps/api-e2e/src/extended/recognition.spec.ts:435:7 › monetary awards are spend on a Recognition budget › an employee cannot invent an award type that pays them 
+✓  323 apps/api-e2e/src/extended/scenarios.spec.ts:22:7 › what-if scenarios never touch real money › modelling a reduction, a freeze and a set-to-zero leaves every bucket and status untouched 
+✓  324 apps/api-e2e/src/extended/scenarios.spec.ts:67:7 › what-if scenarios never touch real money › a reduction below the floor comes back blocked with the real floor, and still posts nothing 
+✓  325 apps/api-e2e/src/extended/scenarios.spec.ts:106:7 › what-if scenarios never touch real money › promotion applies the real control commands, each with its own audit entry 
+✓  326 apps/api-e2e/src/extended/scenarios.spec.ts:159:7 › what-if scenarios never touch real money › promotion is refused for a user who cannot change the budget by hand, and applies nothing 
+✓  327 apps/api-e2e/src/extended/scenarios.spec.ts:198:7 › what-if scenarios never touch real money › a scenario is private to its author and collaborators until it is promoted 
+✓  328 apps/api-e2e/src/extended/scenarios.spec.ts:223:7 › what-if scenarios never touch real money › a stale baseline refuses promotion until the author recalculates 
+✓  329 apps/api-e2e/src/extended/scenarios.spec.ts:261:7 › what-if scenarios never touch real money › comparing scenarios reads today and each scenario without posting 
+✓  330 apps/api-e2e/src/extended/scenarios.spec.ts:291:7 › what-if scenarios never touch real money › an archived scenario is read-only 
+✓  331 apps/api-e2e/src/extended/scenarios.spec.ts:309:7 › what-if scenarios never touch real money › an employee cannot create a scenario at all 
+✓  332 apps/api-e2e/src/extended/scenarios.spec.ts:317:7 › what-if scenarios never touch real money › the impact endpoint reports the same floor the real reduce command enforces 
+✓  333 apps/api-e2e/src/extended/wallets.spec.ts:86:7 › wallet claims move through the ledger like any other spend › submit pre-encumbers, approve encumbers and payment becomes an actual 
+✓  334 apps/api-e2e/src/extended/wallets.spec.ts:144:7 › wallet claims move through the ledger like any other spend › a returned claim releases the pre-encumbrance in full 
+✓  335 apps/api-e2e/src/extended/wallets.spec.ts:172:7 › wallet claims move through the ledger like any other spend › a claim one minor unit over the wallet balance is refused and posts nothing 
+✓  336 apps/api-e2e/src/extended/wallets.spec.ts:188:7 › wallet claims move through the ledger like any other spend › a claim that fits the wallet but not the budget is refused by the budget 
+✓  337 apps/api-e2e/src/extended/wallets.spec.ts:206:7 › wallet claims move through the ledger like any other spend › a frozen programme budget refuses new claims by name and keeps submitted ones 
+✓  338 apps/api-e2e/src/extended/wallets.spec.ts:240:7 › wallet claims move through the ledger like any other spend › a claim needs its receipt and an allowed category 
+✓  339 apps/api-e2e/src/extended/wallets.spec.ts:258:7 › wallet claims move through the ledger like any other spend › nobody reviews their own claim, and an outsider sees none of them 
+✓  340 apps/api-e2e/src/extended/wallets.spec.ts:283:7 › wallet claims move through the ledger like any other spend › an employee sees only their own wallets 
+✓  341 apps/api-e2e/src/finance/doa.spec.ts:23:7 › delegation-of-authority matrix › finance roles and auditors read the active matrix; others cannot 
+✓  342 apps/api-e2e/src/finance/doa.spec.ts:52:7 › delegation-of-authority matrix › exactly at the limit passes; one minor unit above escalates 
+✓  343 apps/api-e2e/src/finance/doa.spec.ts:67:7 › delegation-of-authority matrix › amounts in INR convert at the locked FY2026 plan rate before the check 
+✓  344 apps/api-e2e/src/finance/doa.spec.ts:84:7 › delegation-of-authority matrix › the most specific row wins: person, then spend type, then entity, then wildcards 
+✓  345 apps/api-e2e/src/finance/doa.spec.ts:153:7 › delegation-of-authority matrix › owning a budget does not grant approval authority 
+✓  346 apps/api-e2e/src/finance/fiscal-calendars.spec.ts:33:7 › fiscal calendar engine › calendar and non-calendar years 
+✓  347 apps/api-e2e/src/finance/fiscal-calendars.spec.ts:77:7 › fiscal calendar engine › 4-4-5 ending the last Saturday of December has 52 and 53-week years 
+✓  348 apps/api-e2e/src/finance/fiscal-calendars.spec.ts:105:7 › fiscal calendar engine › 5-4-4, 4-5-4, 13-period and the nearest-weekday method 
+✓  349 apps/api-e2e/src/finance/fiscal-calendars.spec.ts:140:7 › fiscal calendar engine › seeded Hyland calendars: entities, variants and group-year mapping 
+✓  350 apps/api-e2e/src/finance/fiscal-calendars.spec.ts:228:7 › period status changes › creating a calendar generates its years and maps them to the group year 
+✓  351 apps/api-e2e/src/finance/fiscal-calendars.spec.ts:264:7 › period status changes › periods close and lock in order; reopening and unlocking need a reason and go newest first 
+✓  352 apps/api-e2e/src/finance/fx-rates.spec.ts:30:7 › exchange-rate lookup by type and date › a transaction in INR converts to USD at the locked plan rate, and differently at spot 
+✓  353 apps/api-e2e/src/finance/fx-rates.spec.ts:64:7 › exchange-rate lookup by type and date › month-end, monthly average and cross rates 
+✓  354 apps/api-e2e/src/finance/fx-rates.spec.ts:84:7 › exchange-rate lookup by type and date › a missing rate is a clear 422, never a silent fallback 
+✓  355 apps/api-e2e/src/finance/fx-rates.spec.ts:108:7 › exchange-rate lookup by type and date › currencies and rates are readable by every member; the reporting currency is USD 
+✓  356 apps/api-e2e/src/finance/fx-rates.spec.ts:138:7 › plan-rate lock › plan rates can be added while a fiscal year is open for planning, then lock and never change 
+✓  357 apps/api-e2e/src/finance/fx-rates.spec.ts:233:7 › plan-rate lock › dated rates: spot is added, duplicates and invalid dates are refused, and only finance may write 
+✓  358 apps/api-e2e/src/finance/master-data.spec.ts:24:7 › legal entities › the four Hyland entities carry functional currency, calendar, tax and ERP codes 
+✓  359 apps/api-e2e/src/finance/master-data.spec.ts:51:7 › legal entities › finance admins add and rename entities; duplicates and other roles are refused 
+✓  360 apps/api-e2e/src/finance/master-data.spec.ts:132:7 › GL accounts and categories › every entity has the seeded chart of expense accounts; categories are the 11 seeded ones 
+✓  361 apps/api-e2e/src/finance/master-data.spec.ts:171:7 › reason codes › the taxonomy covers controls and corrections; codes can be added, retired and reinstated 
+✓  362 apps/api-e2e/src/finance/master-data.spec.ts:245:7 › vendor master › approved, preferred and blocked vendors; finance adds and blocks vendors 
+✓  363 apps/api-e2e/src/health/health.spec.ts:6:7 › health, readiness and the API contract › liveness and readiness report the database and Keycloak as up 
+✓  364 apps/api-e2e/src/health/health.spec.ts:12:7 › health, readiness and the API contract › the generated OpenAPI 3.1 document is served and lists the Phase 1 endpoints 
+✓  365 apps/api-e2e/src/health/health.spec.ts:29:7 › health, readiness and the API contract › protected endpoints refuse requests without a valid Keycloak token 
+✓  366 apps/api-e2e/src/identity/analytics.spec.ts:45:7 › product analytics events › a batch is stored once per event id, for the caller and their tenant 
+✓  367 apps/api-e2e/src/identity/analytics.spec.ts:106:7 › product analytics events › client times more than a day old or in the future are replaced by server time 
+✓  368 apps/api-e2e/src/identity/analytics.spec.ts:129:7 › product analytics events › server-only, unknown, personal or oversized events are rejected 
+✓  369 apps/api-e2e/src/identity/analytics.spec.ts:159:7 › product analytics events › anonymous callers, platform operators and other tenants are refused 
+✓  370 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › super-admin belongs to Hyland with the permissions of the role 
+✓  371 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › org-admin belongs to Hyland with the permissions of the role 
+✓  372 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › ceo belongs to Hyland with the permissions of the role 
+✓  373 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › finance-admin belongs to Hyland with the permissions of the role 
+✓  374 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › finance-controller belongs to Hyland with the permissions of the role 
+✓  375 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › budget-owner belongs to Hyland with the permissions of the role 
+✓  376 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › department-head belongs to Hyland with the permissions of the role 
+✓  377 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › regional-manager belongs to Hyland with the permissions of the role 
+✓  378 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › location-manager belongs to Hyland with the permissions of the role 
+✓  379 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › event-organizer belongs to Hyland with the permissions of the role 
+✓  380 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › employee belongs to Hyland with the permissions of the role 
+✓  381 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › auditor belongs to Hyland with the permissions of the role 
+✓  382 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › integration-admin belongs to Hyland with the permissions of the role 
+✓  383 apps/api-e2e/src/identity/me.spec.ts:65:9 › current user per role › analyst belongs to Hyland with the permissions of the role 
+✓  384 apps/api-e2e/src/identity/me.spec.ts:95:7 › sign-in settings and tokens › the sign-in settings are public and name the realm and the web client 
+✓  385 apps/api-e2e/src/identity/me.spec.ts:106:7 › sign-in settings and tokens › requests without a token or with a tampered token are refused 
+✓  386 apps/api-e2e/src/identity/me.spec.ts:127:7 › sign-in settings and tokens › an MFA-enrolled user gets no token without the authenticator code 
+✓  387 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › super-admin lists exactly its seeded budgets 
+✓  388 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › org-admin lists exactly its seeded budgets 
+✓  389 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › ceo lists exactly its seeded budgets 
+✓  390 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › finance-admin lists exactly its seeded budgets 
+✓  391 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › finance-controller lists exactly its seeded budgets 
+✓  392 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › budget-owner lists exactly its seeded budgets 
+✓  393 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › department-head lists exactly its seeded budgets 
+✓  394 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › regional-manager lists exactly its seeded budgets 
+✓  395 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › location-manager lists exactly its seeded budgets 
+✓  396 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › event-organizer lists exactly its seeded budgets 
+✓  397 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › employee lists exactly its seeded budgets 
+✓  398 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › auditor lists exactly its seeded budgets 
+✓  399 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › integration-admin lists exactly its seeded budgets 
+✓  400 apps/api-e2e/src/identity/role-scope.spec.ts:33:9 › budget visibility by role › analyst lists exactly its seeded budgets 
+✓  401 apps/api-e2e/src/identity/role-scope.spec.ts:47:7 › budget visibility by role › a budget outside the role is not found, and one in scope opens 
+✓  402 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › super-admin cannot read the audit trail 
+✓  403 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › org-admin cannot read the audit trail 
+✓  404 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › ceo reads the audit trail 
+✓  405 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › finance-admin reads the audit trail 
+✓  406 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › finance-controller reads the audit trail 
+✓  407 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › budget-owner cannot read the audit trail 
+✓  408 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › department-head cannot read the audit trail 
+✓  409 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › regional-manager cannot read the audit trail 
+✓  410 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › location-manager cannot read the audit trail 
+✓  411 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › event-organizer cannot read the audit trail 
+✓  412 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › employee cannot read the audit trail 
+✓  413 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › auditor reads the audit trail 
+✓  414 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › integration-admin cannot read the audit trail 
+✓  415 apps/api-e2e/src/identity/role-scope.spec.ts:68:9 › audit trail and changes by role › analyst cannot read the audit trail 
+✓  416 apps/api-e2e/src/identity/role-scope.spec.ts:75:7 › audit trail and changes by role › read-only and unrelated roles cannot allocate from a budget 
+✓  417 apps/api-e2e/src/identity/tenant-isolation.spec.ts:14:7 › isolation from the scenario-only second tenant › each user resolves only to their own tenant; forged tenant headers are refused 
+✓  418 apps/api-e2e/src/identity/tenant-isolation.spec.ts:39:7 › isolation from the scenario-only second tenant › neither tenant's admin lists or audits the other's data 
+✓  419 apps/api-e2e/src/identity/tenant-isolation.spec.ts:69:7 › isolation from the scenario-only second tenant › the database hides other tenants’ memberships and role grants (RLS) 
+✓  420 apps/api-e2e/src/integrations/api-key-network.spec.ts:39:7 › API key allowed networks › a key restricted to a network is refused when the caller only claims that network 
+✓  421 apps/api-e2e/src/integrations/api-key-network.spec.ts:63:7 › API key allowed networks › a key whose networks include the caller works without any forwarding header 
+✓  422 apps/api-e2e/src/integrations/api-key-network.spec.ts:75:7 › API key allowed networks › an allowed-network entry that is not an address or a CIDR range is refused 
+✓  423 apps/api-e2e/src/integrations/connectors.spec.ts:24:7 › the connector hub and detail frame › the Integration Admin sees connected systems, what can still be added, and may manage 
+✓  424 apps/api-e2e/src/integrations/connectors.spec.ts:40:7 › the connector hub and detail frame › a Finance Admin reads the hub but cannot manage it 
+✓  425 apps/api-e2e/src/integrations/connectors.spec.ts:56:7 › the connector hub and detail frame › an employee cannot see the integrations area at all 
+✓  426 apps/api-e2e/src/integrations/connectors.spec.ts:64:7 › the connector hub and detail frame › the detail frame never returns the credential, only when and by whom it was set 
+✓  427 apps/api-e2e/src/integrations/connectors.spec.ts:80:7 › the connector hub and detail frame › test connection reports what the provider said, and a refusal flags the connection 
+✓  428 apps/api-e2e/src/integrations/connectors.spec.ts:112:7 › synchronisation feeds the actuals review, never the ledger › ERP GL lines arrive as a review batch, and a second run of the same window applies nothing 
+✓  429 apps/api-e2e/src/integrations/connectors.spec.ts:155:7 › synchronisation feeds the actuals review, never the ledger › card transactions enter as their own source and show up in the run list 
+✓  430 apps/api-e2e/src/integrations/connectors.spec.ts:180:7 › synchronisation feeds the actuals review, never the ledger › a value without a mapping is held back and listed in the retry queue, not guessed 
+✓  431 apps/api-e2e/src/integrations/connectors.spec.ts:209:7 › synchronisation feeds the actuals review, never the ledger › a provider that refuses the credentials fails the run and flags the connection 
+✓  432 apps/api-e2e/src/integrations/connectors.spec.ts:250:7 › synchronisation feeds the actuals review, never the ledger › a connector refuses an object it does not exchange 
+✓  433 apps/api-e2e/src/integrations/duplicates-and-pushes.spec.ts:24:7 › cross-source duplicates › the same spend from two sources is held, then one line is kept as the record 
+✓  434 apps/api-e2e/src/integrations/duplicates-and-pushes.spec.ts:114:7 › cross-source duplicates › keeping one line needs to say which one stays 
+✓  435 apps/api-e2e/src/integrations/duplicates-and-pushes.spec.ts:134:7 › cross-source duplicates › a budget owner cannot resolve duplicates 
+✓  436 apps/api-e2e/src/integrations/duplicates-and-pushes.spec.ts:147:7 › event-code and card-limit pushes › card-limit push is off by default and refuses to create a limit 
+✓  437 apps/api-e2e/src/integrations/duplicates-and-pushes.spec.ts:171:7 › event-code and card-limit pushes › an event code is pushed once, and pushing it again returns the same item 
+✓  438 apps/api-e2e/src/integrations/duplicates-and-pushes.spec.ts:211:7 › event-code and card-limit pushes › a connector that does not accept card limits refuses the push 
+✓  439 apps/api-e2e/src/integrations/identity-scim.spec.ts:31:7 › SCIM tokens › a token is shown once and only its prefix appears afterwards 
+✓  440 apps/api-e2e/src/integrations/identity-scim.spec.ts:47:7 › SCIM tokens › only an Integration Admin may generate a token 
+✓  441 apps/api-e2e/src/integrations/identity-scim.spec.ts:58:7 › SCIM tokens › a revoked token fails with 401 
+✓  442 apps/api-e2e/src/integrations/identity-scim.spec.ts:73:7 › SCIM tokens › a public API key cannot be used as a SCIM token 
+✓  443 apps/api-e2e/src/integrations/identity-scim.spec.ts:96:7 › provisioning › a joiner is created, updated and then deactivated without anything being deleted 
+✓  444 apps/api-e2e/src/integrations/identity-scim.spec.ts:144:7 › provisioning › deactivating somebody BudgetFlow has never seen answers 404 
+✓  445 apps/api-e2e/src/integrations/identity-scim.spec.ts:156:7 › provisioning › the SCIM endpoint needs a bearer token 
+✓  446 apps/api-e2e/src/integrations/inbound-webhooks.spec.ts:31:7 › inbound provider webhooks › a correctly signed callback is accepted and runs the same sync a schedule would 
+✓  447 apps/api-e2e/src/integrations/inbound-webhooks.spec.ts:44:7 › inbound provider webhooks › a forged signature is rejected before anything is read 
+✓  448 apps/api-e2e/src/integrations/inbound-webhooks.spec.ts:58:7 › inbound provider webhooks › a call with no signature is rejected 
+✓  449 apps/api-e2e/src/integrations/inbound-webhooks.spec.ts:69:7 › inbound provider webhooks › a body changed after signing is rejected 
+✓  450 apps/api-e2e/src/integrations/inbound-webhooks.spec.ts:82:7 › inbound provider webhooks › a replayed call from outside the five-minute window is rejected 
+✓  451 apps/api-e2e/src/integrations/inbound-webhooks.spec.ts:94:7 › inbound provider webhooks › the same provider event delivered twice is applied once 
+✓  452 apps/api-e2e/src/integrations/inbound-webhooks.spec.ts:117:7 › inbound provider webhooks › a callback aimed at another tenant finds nothing 
+✓  453 apps/api-e2e/src/integrations/ledger-path.spec.ts:16:5 › a connector run leaves the ledger untouched until the batch is posted 
+✓  454 apps/api-e2e/src/integrations/ledger-path.spec.ts:73:5 › a connector cannot post to the ledger itself: there is no such endpoint on a connection 
+✓  455 apps/api-e2e/src/integrations/ledger-path.spec.ts:83:5 › budget balances only change through the posting path 
+✓  456 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:56:7 › webhook endpoints › the signing secret is shown once and the list explains how to verify a delivery 
+✓  457 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:73:7 › webhook endpoints › an address that is not allowed is refused 
+✓  458 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:84:7 › webhook endpoints › at least one event is required 
+✓  459 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:97:7 › deliveries › a test ping arrives with a signature the receiver can verify 
+✓  460 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:118:7 › deliveries › a failing receiver is recorded with a retry time and can be redelivered 
+✓  461 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:165:7 › deliveries › rotating the secret signs with both until receivers switch over 
+✓  462 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:188:7 › deliveries › an endpoint can be removed and stops receiving 
+✓  463 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:202:7 › deliveries › a Finance Admin reads endpoints but cannot change them 
+✓  464 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:232:7 › domain events reach subscribed endpoints › freezing a budget is published through the Phase 8 outbox and delivered signed 
+✓  465 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:247:7 › domain events reach subscribed endpoints › an endpoint receives events from after it was registered, never the backlog before it 
+✓  466 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:291:7 › the delivery log holds one row per event › a delivered event leaves exactly one row, in a terminal state 
+✓  467 apps/api-e2e/src/integrations/outbound-webhooks.spec.ts:315:7 › the delivery log holds one row per event › a delivery the receiver rejects leaves one row, failed, with the reason 
+✓  468 apps/api-e2e/src/integrations/public-api.spec.ts:46:7 › issuing and revoking keys › a key is shown once, lists only its prefix afterwards, and names its service owner 
+✓  469 apps/api-e2e/src/integrations/public-api.spec.ts:64:7 › issuing and revoking keys › there is no scope that can approve, apply controls or move money 
+✓  470 apps/api-e2e/src/integrations/public-api.spec.ts:80:7 › issuing and revoking keys › a revoked key fails immediately 
+✓  471 apps/api-e2e/src/integrations/public-api.spec.ts:97:7 › issuing and revoking keys › revoking needs the key name typed exactly 
+✓  472 apps/api-e2e/src/integrations/public-api.spec.ts:109:7 › issuing and revoking keys › rotation issues a new key while the old one keeps working 
+✓  473 apps/api-e2e/src/integrations/public-api.spec.ts:134:7 › calling the public API › a key reads budgets within its scope and sees its own limits 
+✓  474 apps/api-e2e/src/integrations/public-api.spec.ts:174:7 › calling the public API › a key without the scope is refused 
+✓  475 apps/api-e2e/src/integrations/public-api.spec.ts:183:7 › calling the public API › a request without a key, and a made-up key, are both refused 
+✓  476 apps/api-e2e/src/integrations/public-api.spec.ts:192:7 › calling the public API › a key cannot reach another tenant's data, however it asks 
+✓  477 apps/api-e2e/src/integrations/public-api.spec.ts:219:7 › calling the public API › the rate limit holds and the key reports what is left 
+✓  478 apps/api-e2e/src/integrations/public-api.spec.ts:233:7 › calling the public API › calls made with a key are logged with its prefix 
+✓  479 apps/api-e2e/src/integrations/public-api.spec.ts:249:7 › the public API can feed the review queue but never the ledger › an import lands in review with its batch, and the same lines are not counted twice 
+✓  480 apps/api-e2e/src/integrations/public-api.spec.ts:292:7 › the public API can feed the review queue but never the ledger › a key with actuals.write cannot read budgets 
+✓  481 apps/api-e2e/src/integrations/retries-and-planning.spec.ts:21:7 › failures, retries and the dead letter › a provider outage is retryable and scheduled with a backoff 
+✓  482 apps/api-e2e/src/integrations/retries-and-planning.spec.ts:62:7 › failures, retries and the dead letter › a discarded item keeps its reason and cannot be retried afterwards 
+✓  483 apps/api-e2e/src/integrations/retries-and-planning.spec.ts:106:7 › failures, retries and the dead letter › a Finance Admin reads the queue but cannot act on it 
+✓  484 apps/api-e2e/src/integrations/retries-and-planning.spec.ts:128:7 › planning import preview › the preview shows differences, flags new money and blocks a decrease below the floor 
+✓  485 apps/api-e2e/src/integrations/retries-and-planning.spec.ts:181:7 › planning import preview › an Integration Admin alone cannot preview a plan import: it needs root budget authority (budget.create_root) 
+✓  486 apps/api-e2e/src/ledger/available.spec.ts:47:7 › available amount per control basis › every consuming bucket reduces available; accrued does not 
+✓  487 apps/api-e2e/src/ledger/available.spec.ts:75:7 › available amount per control basis › a control basis that excludes held and pre-encumbered leaves them out of available 
+✓  488 apps/api-e2e/src/ledger/available.spec.ts:97:7 › available amount per control basis › hard mode rejects a posting that would make available negative; track mode records it 
+✓  489 apps/api-e2e/src/ledger/available.spec.ts:130:7 › available amount per control basis › manual journals cannot touch hierarchy buckets and must balance 
+✓  490 apps/api-e2e/src/ledger/available.spec.ts:174:7 › available amount per control basis › a manual journal cannot drive a bucket below zero, so it never creates allocation headroom 
+✓  491 apps/api-e2e/src/ledger/available.spec.ts:225:7 › available amount per control basis › a manual journal cannot move amounts between budgets, directly or through a counter account 
+✓  492 apps/api-e2e/src/ledger/available.spec.ts:281:7 › available amount per control basis › only finance admins post manual journals 
+✓  493 apps/api-e2e/src/ledger/closed-period.spec.ts:13:7 › accounting periods › an allocation dated in a closed period lands in the next open period, flagged late 
+✓  494 apps/api-e2e/src/ledger/closed-period.spec.ts:35:7 › accounting periods › locked and soft-closed dates also move to the next open period for ordinary postings 
+✓  495 apps/api-e2e/src/ledger/closed-period.spec.ts:74:7 › accounting periods › finance reversals may post into a soft-closed period 
+✓  496 apps/api-e2e/src/ledger/closed-period.spec.ts:96:7 › accounting periods › the database refuses a ledger insert into a closed period 
+✓  497 apps/api-e2e/src/ledger/fiscal-period.spec.ts:23:7 › accounting dates within the fiscal year › an FY2026 allocation dated outside FY2026 is rejected; the last day of the year passes 
+✓  498 apps/api-e2e/src/ledger/fiscal-period.spec.ts:62:7 › accounting dates within the fiscal year › a root budget with an original amount dated outside its fiscal year is not created 
+✓  499 apps/api-e2e/src/ledger/fiscal-period.spec.ts:88:7 › accounting dates within the fiscal year › manual journals and reversals post within the fiscal year of their budgets 
+✓  500 apps/api-e2e/src/ledger/fx-triplet.spec.ts:13:7 › currency triplet at the locked plan rate › USD 300.00 to an INR child: INR 24,975.00 at 83.25, reporting USD 300.00, rate stored on each line 
+✓  501 apps/api-e2e/src/ledger/fx-triplet.spec.ts:45:7 › currency triplet at the locked plan rate › minor-unit exponents for JPY (0 decimals) and KWD (3 decimals); allocations credit the child rounding down 
+✓  502 apps/api-e2e/src/ledger/fx-triplet.spec.ts:64:7 › currency triplet at the locked plan rate › half-even rounding at the line outside the hierarchy (JPY 1.5 → 2, JPY 4.5 → 4) 
+✓  503 apps/api-e2e/src/ledger/journal.spec.ts:23:7 › journals › a journal balanced in INR posts with a reporting rounding line to FX variance 
+✓  504 apps/api-e2e/src/ledger/journal.spec.ts:121:7 › journals › a manual line worth less than one minor unit of its budget currency is rejected 
+✓  505 apps/api-e2e/src/ledger/journal.spec.ts:147:7 › journals › the database refuses lines appended to a committed journal, even balanced ones 
+✓  506 apps/api-e2e/src/ledger/journal.spec.ts:193:7 › journals › a reversal and a downstream allocation racing for the same money never both succeed 
+✓  507 apps/api-e2e/src/ledger/journal.spec.ts:222:7 › journals › ten parallel reversals of one journal with different keys post exactly one 
+✓  508 apps/api-e2e/src/ledger/journal.spec.ts:247:7 › journals › an idempotency key is bound to its actor and operation 
+✓  509 apps/api-e2e/src/ledger/journal.spec.ts:287:7 › journals › another director cannot read a journal in someone else's subtree or learn whether a journal exists 
+✓  510 apps/api-e2e/src/ledger/original-budget.spec.ts:9:7 › original budget posts a balanced journal against the approved plan version › the CEO creates a root budget: authorized and available equal the original amount 
+✓  511 apps/api-e2e/src/ledger/original-budget.spec.ts:52:7 › original budget posts a balanced journal against the approved plan version › a root budget needs an approved plan version of the same fiscal year 
+✓  512 apps/api-e2e/src/ledger/original-budget.spec.ts:77:7 › original budget posts a balanced journal against the approved plan version › invalid money is rejected at the boundary with field paths 
+✓  513 apps/api-e2e/src/ledger/original-budget.spec.ts:121:7 › original budget posts a balanced journal against the approved plan version › only roles allowed to create root budgets can do so 
+✓  514 apps/api-e2e/src/ledger/original-budget.spec.ts:139:7 › original budget posts a balanced journal against the approved plan version › mutations require an Idempotency-Key header 
+✓  515 apps/api-e2e/src/ledger/rebuild-check.spec.ts:42:7 › ledger rebuild check (worker job) › after allocations across currencies, rebuilt balances equal cached ones and the hierarchy reconciles 
+✓  516 apps/api-e2e/src/ledger/rebuild-check.spec.ts:70:7 › ledger rebuild check (worker job) › roles without the integrity permission cannot run or read checks 
+✓  517 apps/api-e2e/src/ledger/rebuild-check.spec.ts:91:7 › ledger rebuild check (worker job) › injected drift in cached balances is detected and flagged, never repaired 
+✓  518 apps/api-e2e/src/ledger/rebuild-check.spec.ts:132:7 › ledger rebuild check (worker job) › seeded ledger corruption is flagged: negative bucket, over-allocation, wrong triplet, hierarchy 
+✓  519 apps/api-e2e/src/ledger/reversal.spec.ts:14:7 › reversals instead of edits › a reversal exactly negates the original, links both ways and restores balances 
+✓  520 apps/api-e2e/src/ledger/reversal.spec.ts:66:7 › reversals instead of edits › a journal is reversed once, and a reversal is never reversed 
+✓  521 apps/api-e2e/src/ledger/reversal.spec.ts:99:7 › reversals instead of edits › a reversal that would leave a child with more allocated out than it holds is refused 
+✓  522 apps/api-e2e/src/ledger/reversal.spec.ts:121:7 › reversals instead of edits › reversals need a reason and the reversal permission 
+✓  523 apps/api-e2e/src/ledger/reversal.spec.ts:154:7 › reversals instead of edits › the database rejects UPDATE, DELETE and TRUNCATE on ledger rows for the application role 
+✓  524 apps/api-e2e/src/ledger/reversal.spec.ts:176:7 › reversals instead of edits › the database rejects an unbalanced journal at commit even when written directly 
+✓  525 apps/api-e2e/src/org/effective-dating.spec.ts:46:7 › effective-dated org hierarchy › create, rename, move and deactivate read back correctly as of each date 
+✓  526 apps/api-e2e/src/org/effective-dating.spec.ts:168:7 › effective-dated org hierarchy › hierarchy rules: parent kinds, cycles and duplicate codes 
+✓  527 apps/api-e2e/src/org/effective-dating.spec.ts:223:7 › effective-dated org hierarchy › an idempotent replay creates the unit once 
+✓  528 apps/api-e2e/src/org/effective-dating.spec.ts:248:7 › effective-dated org hierarchy › cost centers deactivate from a date and read back as of it 
+✓  529 apps/api-e2e/src/org/effective-dating.spec.ts:302:7 › effective-dated org hierarchy › a reporting-line change closes the current line the day before 
+✓  530 apps/api-e2e/src/org/effective-dating.spec.ts:331:7 › effective-dated org hierarchy › reporting loops are refused 
+✓  531 apps/api-e2e/src/org/effective-dating.spec.ts:362:7 › effective-dated org hierarchy › category-to-GL mappings are effective-dated per entity and attendee type 
+✓  532 apps/api-e2e/src/org/imports.spec.ts:34:7 › HR headcount import › a dry run reports every bad line and saves nothing 
+✓  533 apps/api-e2e/src/org/imports.spec.ts:93:7 › HR headcount import › applying a file refreshes counts by location and team against the previous snapshot 
+✓  534 apps/api-e2e/src/org/imports.spec.ts:174:7 › org hierarchy import › a dry run plans creates, renames and moves; applying them takes effect from the date 
+✓  535 apps/api-e2e/src/org/imports.spec.ts:242:7 › org hierarchy import › invalid files import nothing and name each problem 
+✓  536 apps/api-e2e/src/org/scope-visibility.spec.ts:28:7 › org scope visibility › tenant-wide roles see the whole Hyland hierarchy, parents before children 
+✓  537 apps/api-e2e/src/org/scope-visibility.spec.ts:62:7 › org scope visibility › the India regional manager sees the India subtree only 
+✓  538 apps/api-e2e/src/org/scope-visibility.spec.ts:83:7 › org scope visibility › the US budget owner sees the US subtree; the Europe department head sees Europe 
+✓  539 apps/api-e2e/src/org/scope-visibility.spec.ts:94:7 › org scope visibility › an employee sees only their own location and team, and their colleagues there 
+✓  540 apps/api-e2e/src/org/scope-visibility.spec.ts:127:7 › org scope visibility › the people directory filters by scope, subtree and search 
+✓  541 apps/api-e2e/src/org/scope-visibility.spec.ts:167:7 › org scope visibility › headcount follows the same scope 
+✓  542 apps/api-e2e/src/org/scope-visibility.spec.ts:194:7 › org scope visibility › only org admins change the hierarchy; others are refused before anything is written 
+✓  543 apps/api-e2e/src/quality/exploratory-findings.spec.ts:56:5 › F2: an over-allocation explains itself in formatted amounts, never minor units 
+✓  544 apps/api-e2e/src/quality/exploratory-findings.spec.ts:75:5 › F7: the approval card's company-wide Available counts the children's spending 
+✓  545 apps/api-e2e/src/quality/exploratory-findings.spec.ts:100:5 › F1: an owner is told the next owner up approves their requests 
+✓  546 apps/api-e2e/src/quality/exploratory-findings.spec.ts:119:5 › F3: a hard-mode budget with nothing left is marked before anyone fills a form 
+✓  547 apps/api-e2e/src/reports/board-pack.spec.ts:42:7 › board and FP&A pack › a closed-period pack reconciles to the ledger and carries all eleven pages 
+✓  548 apps/api-e2e/src/reports/board-pack.spec.ts:100:7 › board and FP&A pack › the FX bridge explains the gap and is never part of spend or variance 
+✓  549 apps/api-e2e/src/reports/board-pack.spec.ts:153:7 › board and FP&A pack › an open-period pack is a draft and says so on every page 
+✓  550 apps/api-e2e/src/reports/board-pack.spec.ts:166:7 › board and FP&A pack › a page with no data keeps its place and carries a statement 
+✓  551 apps/api-e2e/src/reports/board-pack.spec.ts:194:7 › board and FP&A pack › only the pages asked for are rendered, in the order asked for 
+✓  552 apps/api-e2e/src/reports/board-pack.spec.ts:199:7 › board and FP&A pack › generation runs in the worker and lands in the DocumentStore behind a short-lived link 
+✓  553 apps/api-e2e/src/reports/board-pack.spec.ts:282:7 › board and FP&A pack › a replayed generation request queues one pack 
+✓  554 apps/api-e2e/src/reports/board-pack.spec.ts:314:7 › board and FP&A pack › the pack admits finance, the CEO, auditors and the analyst; owner roles are refused 
+✓  555 apps/api-e2e/src/reports/board-pack.spec.ts:332:7 › board and FP&A pack › report.board_pack in GET /api/me names exactly the roles the pack admits 
+✓  556 apps/api-e2e/src/reports/forecast-variance.spec.ts:123:7 › forecast and variance report › the report is in the catalog, scoped to owners as well as finance 
+✓  557 apps/api-e2e/src/reports/forecast-variance.spec.ts:136:7 › forecast and variance report › accepted forecasts are reported against the ledger, and only the ledger columns reconcile 
+✓  558 apps/api-e2e/src/reports/forecast-variance.spec.ts:209:7 › forecast and variance report › a budget with no accepted forecast falls back to the system run-rate and the report says so 
+✓  559 apps/api-e2e/src/reports/forecast-variance.spec.ts:260:7 › forecast and variance report › comparing with an earlier cycle adds the previous forecast and the change 
+✓  560 apps/api-e2e/src/reports/forecast-variance.spec.ts:294:7 › forecast and variance report › "commentary required only" narrows the rows and says the figures are a part of the ledger 
+✓  561 apps/api-e2e/src/reports/forecast-variance.spec.ts:346:7 › forecast and variance report › tied rows come back in the same order every time 
+✓  562 apps/api-e2e/src/reports/forecast-variance.spec.ts:365:7 › forecast and variance report › an owner sees only their own subtree; an auditor reads the whole tenant 
+✓  563 apps/api-e2e/src/reports/health.spec.ts:48:7 › budget health checks › a budget spending far ahead of its year is At risk, and says why 
+✓  564 apps/api-e2e/src/reports/health.spec.ts:72:7 › budget health checks › a frozen budget is on Watch for controls and keeps its own status 
+✓  565 apps/api-e2e/src/reports/health.spec.ts:102:7 › budget health checks › an untouched budget late in the year is on Watch for money that would lapse 
+✓  566 apps/api-e2e/src/reports/health.spec.ts:131:7 › budget health checks › filtering by level returns only budgets at that level 
+✓  567 apps/api-e2e/src/reports/reconciliation.spec.ts:46:7 › reported figures reconcile to the ledger › utilization totals equal the ledger buckets, with child allocations counted once 
+✓  568 apps/api-e2e/src/reports/reconciliation.spec.ts:101:7 › reported figures reconcile to the ledger › every report over the same scope reports the same ledger totals 
+✓  569 apps/api-e2e/src/reports/reconciliation.spec.ts:139:7 › reported figures reconcile to the ledger › the allocation report ties each parent to its children and shows the unallocated room 
+✓  570 apps/api-e2e/src/reports/reconciliation.spec.ts:165:7 › reported figures reconcile to the ledger › a drill-down returns the ledger lines the figure was built from 
+✓  571 apps/api-e2e/src/reports/reconciliation.spec.ts:194:7 › reported figures reconcile to the ledger › FX never consumes budget: a non-USD child reports at its locked plan rate only 
+✓  572 apps/api-e2e/src/reports/schedules.spec.ts:24:7 › saved views and scheduled report delivery › a saved view stores filters only and can be listed and deleted 
+✓  573 apps/api-e2e/src/reports/schedules.spec.ts:59:7 › saved views and scheduled report delivery › creating a schedule is idempotent and writes exactly one audit entry 
+✓  574 apps/api-e2e/src/reports/schedules.spec.ts:114:7 › saved views and scheduled report delivery › a recipient who cannot see the scope is marked and never silently included 
+✓  575 apps/api-e2e/src/reports/schedules.spec.ts:153:7 › saved views and scheduled report delivery › a schedule needs a recipient or channel, and only allowed channels 
+✓  576 apps/api-e2e/src/reports/schedules.spec.ts:207:7 › saved views and scheduled report delivery › an owner schedules their own subtree and nothing wider 
+✓  577 apps/api-e2e/src/reports/schedules.spec.ts:244:7 › saved views and scheduled report delivery › pausing and running a schedule is audited; a run now is queued for the worker 
+✓  578 apps/api-e2e/src/reports/schedules.spec.ts:344:7 › saved views and scheduled report delivery › an export records what was exported and is audited 
+✓  579 apps/api-e2e/src/reports/schedules.spec.ts:367:7 › saved views and scheduled report delivery › the seeded schedules of screen 091 are there, with their filters and channels 
+✓  580 apps/api-e2e/src/reports/scope.spec.ts:14:7 › report scope per role › finance roles, the CEO, auditors and the analyst all report tenant-wide 
+✓  581 apps/api-e2e/src/reports/scope.spec.ts:33:7 › report scope per role › an owner sees their own subtree only, and the figures are their subtree alone 
+✓  582 apps/api-e2e/src/reports/scope.spec.ts:90:7 › report scope per role › an owner cannot widen the scope to a budget outside their subtree 
+✓  583 apps/api-e2e/src/reports/scope.spec.ts:108:7 › report scope per role › employees and organizers have no reports 
+✓  584 apps/api-e2e/src/reports/scope.spec.ts:117:7 › report scope per role › the catalog hides the company-wide reports from a scoped owner 
+✓  585 apps/api-e2e/src/reports/scope.spec.ts:143:7 › report scope per role › figures never cross a tenant boundary 
+✓  586 apps/api-e2e/src/reports/scope.spec.ts:171:7 › report scope per role › the health overview is scoped the same way and reconciles to the ledger 
+✓  587 apps/api-e2e/src/requests/commitment-relief.spec.ts:21:7 › commitment relief in a non-budget currency › a partial approval of an INR request leaves no rounding behind on the USD budget 
+✓  588 apps/api-e2e/src/requests/controls.spec.ts:35:7 › budget controls on waiting requests › set to zero cancels waiting requests and contributions, releases them and keeps approved commitments 
+✓  589 apps/api-e2e/src/requests/controls.spec.ts:122:7 › budget controls on waiting requests › freeze holds waiting requests (no decision) and unfreezing releases them 
+✓  590 apps/api-e2e/src/requests/controls.spec.ts:153:7 › budget controls on waiting requests › a reduction keeps waiting requests decidable 
+✓  591 apps/api-e2e/src/requests/controls.spec.ts:169:7 › budget controls on waiting requests › a reduction below the waiting requests returns the newest that no longer fit 
+✓  592 apps/api-e2e/src/requests/thresholds.spec.ts:10:5 › approving a request past an alert threshold emails the budget owner once 
+✓  593 apps/api-e2e/src/rules/rules-engine.spec.ts:25:7 › rules engine › the strictest matching rule decides the outcome and says why in plain English 
+✓  594 apps/api-e2e/src/rules/rules-engine.spec.ts:87:7 › rules engine › simulation writes nothing: the dashboard counts are unchanged afterwards 
+✓  595 apps/api-e2e/src/rules/rules-engine.spec.ts:108:7 › rules engine › a draft that contradicts an active rule cannot be published 
+✓  596 apps/api-e2e/src/rules/rules-engine.spec.ts:136:7 › rules engine › editing an active rule opens a new draft instead of changing the active version 
+✓  597 apps/api-e2e/src/rules/rules-engine.spec.ts:218:7 › rules engine › retiring a rule stops it deciding anything and is refused twice 
+✓  598 apps/api-e2e/src/rules/rules-engine.spec.ts:280:7 › rules engine › a replayed publish returns the first response instead of creating another version 
+✓  599 apps/api-e2e/src/rules/workflows-authority.spec.ts:26:7 › approval workflows and authority › routing names the steps for a request and the rules that matched it 
+✓  600 apps/api-e2e/src/rules/workflows-authority.spec.ts:59:7 › approval workflows and authority › a delegation cannot be to yourself, longer than 30 days, or above your own limit 
+✓  601 apps/api-e2e/src/rules/workflows-authority.spec.ts:130:7 › approval workflows and authority › a new approval limit version needs two people and never leaves today without a matrix 
+✓  602 apps/api-e2e/src/rules/workflows-authority.spec.ts:219:7 › approval workflows and authority › overdue approvals escalate to the next authority and are audited 
+✓  603 apps/api-e2e/src/rules/workflows-authority.spec.ts:245:7 › approval workflows and authority › a post-spend exception is settled once and the decision is recorded 
+✓  604 apps/api-e2e/src/rules/workflows-authority.spec.ts:291:7 › approval workflows and authority › the approval history records real decisions and shows an approver only their own 
+✓  605 apps/api-e2e/src/rules/workflows-authority.spec.ts:328:7 › approval workflows and authority › rules administration is refused to people without it 
+✓  606 apps/api-e2e/src/scope/director-isolation.spec.ts:14:7 › director isolation on the seeded hierarchy › the India regional manager sees the India subtree only 
+✓  607 apps/api-e2e/src/scope/director-isolation.spec.ts:64:7 › director isolation on the seeded hierarchy › Director A cannot allocate from or read Director B's budget 
+✓  608 apps/api-e2e/src/scope/director-isolation.spec.ts:82:7 › director isolation on the seeded hierarchy › a location manager sees their location, not the region above it 
+✓  609 apps/api-e2e/src/scope/director-isolation.spec.ts:95:7 › director isolation on the seeded hierarchy › an owner allocates within their own subtree 
+✓  610 apps/api-e2e/src/scope/director-isolation.spec.ts:125:7 › role scope from the authorization matrix › read-only roles read everything and change nothing 
+✓  611 apps/api-e2e/src/scope/director-isolation.spec.ts:146:7 › role scope from the authorization matrix › roles without budget visibility get not found, including the platform operator without break-glass 
+✓  612 apps/api-e2e/src/scope/director-isolation.spec.ts:170:7 › role scope from the authorization matrix › the CEO and finance admins see the whole tenant 
+✓  613 apps/api-e2e/src/scope/operator-isolation.spec.ts:40:5 › every parameter-free GET endpoint refuses the operator or returns nothing 
+✓  614 apps/api-e2e/src/scope/operator-isolation.spec.ts:58:5 › event templates, with their per-attendee estimates, are not found for the operator 
+✓  615 apps/api-e2e/src/scope/operator-isolation.spec.ts:70:5 › headcount: the operator is refused and a scoped reader sees only their own totals 
+✓  616 apps/api-e2e/src/scope/tenant-references.spec.ts:19:7 › tenant-scoped references › a child budget cannot reference another tenant's cost center, org unit or owner 
+✓  617 apps/api-e2e/src/scope/tenant-references.spec.ts:49:7 › tenant-scoped references › the database refuses another tenant's parent or master data even for the application role 
+✓  618 apps/api-e2e/src/scope/tenant-references.spec.ts:77:7 › tenant-scoped references › authorization is checked before references are looked up, so refusals reveal nothing 
+✓  619 apps/api-e2e/src/scope/tenant-rls.spec.ts:11:7 › tenant isolation through the API › a forged X-Tenant-Id for a tenant the user does not belong to is refused 
+✓  620 apps/api-e2e/src/scope/tenant-rls.spec.ts:33:7 › tenant isolation through the API › without a header the single membership is used 
+✓  621 apps/api-e2e/src/scope/tenant-rls.spec.ts:48:7 › tenant isolation through the API › another tenant's budgets are not found, cannot be allocated from, and never listed 
+✓  622 apps/api-e2e/src/security/dev-secrets.spec.ts:44:7 › api: production without its secrets refuses to start and names the variable 
+✓  623 apps/api-e2e/src/security/dev-secrets.spec.ts:51:7 › api: one missing secret is enough to refuse 
+✓  624 apps/api-e2e/src/security/dev-secrets.spec.ts:58:7 › api: real secrets, or the local stack's opt-in, pass the check 
+✓  625 apps/api-e2e/src/security/dev-secrets.spec.ts:44:7 › worker: production without its secrets refuses to start and names the variable 
+✓  626 apps/api-e2e/src/security/dev-secrets.spec.ts:51:7 › worker: one missing secret is enough to refuse 
+✓  627 apps/api-e2e/src/security/dev-secrets.spec.ts:58:7 › worker: real secrets, or the local stack's opt-in, pass the check 
+627 passed (3.0m)

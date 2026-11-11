@@ -1,0 +1,762 @@
+✓    1 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as super-admin 
+✓    2 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as org-admin 
+✓    3 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as ceo 
+✓    4 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-admin 
+✓    5 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as finance-controller 
+✓    6 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as budget-owner 
+✓    7 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as department-head 
+✓    8 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as regional-manager 
+✓    9 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as location-manager 
+✓   10 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as event-organizer 
+✓   11 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as employee 
+✓   12 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as auditor 
+✓   13 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as integration-admin 
+✓   14 [setup] › apps/web-e2e/src/auth.setup.ts:12:8 › sign in as analyst 
+✓   16 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:72:9 › Wave 2 core acceptance › Step 2 — hierarchy and per-head › shows India hierarchy, per-head Hyderabad and authorized from the ledger 
+✓   15 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:46:9 › Wave 2 core acceptance › Step 1 — USD plan context › shows FY2026 plan tie-out in USD and matches the API 
+✓   17 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:91:9 › Wave 2 core acceptance › Step 3 — cross-location event funding › creates a cross-location event and submits it for approval 
+✓   18 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:143:9 › Wave 2 core acceptance › Step 4 — Inter-Director Budget Contribution Request › Lena contributes in part and declines another ask 
+✓   19 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:198:9 › Wave 2 core acceptance › Step 5 — DoA approval › Lena approves within her DoA limit and the requester sees the route 
+✓   21 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:254:9 › Wave 2 core acceptance › Step 7 — actuals import and matching › shows the seeded November ERP import with plan-rate FX 
+✓   22 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:274:9 › Wave 2 core acceptance › Step 8 — event reconciliation › the New York offsite cannot close while an actual is still unmatched 
+✓   23 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:294:9 › Wave 2 core acceptance › Step 9 — GL tie-out › India shows a travel difference; the controller cannot sign off alone 
+✓   24 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:318:9 › Wave 2 core acceptance › Step 10 — utilization and ledger roll-up › utilization by location matches the API totals in USD 
+✓   25 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate 
+✓   26 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API 
+✓   27 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:91:7 › actuals import and matching › employees cannot open the actuals screens 
+✓   28 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:105:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit 
+✓   29 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:118:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment 
+✓   30 [desktop] › apps/web-e2e/src/accounting/actuals.spec.ts:129:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched 
+✓   20 [desktop] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:225:9 › Wave 2 core acceptance › Step 6 — freeze and set-to-zero on requests › freeze holds approval; set to zero cancels the request 
+✓   31 [desktop] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off 
+✓   33 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:34:9 › feature flags (105): a waiting change never reads as a result › as the Finance Controller who would confirm it › shows the state still in force next to the change waiting for a second person 
+✓   34 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:54:9 › feature flags (105): a waiting change never reads as a result › as the Finance Admin who asked for it › the requester is told somebody else has to confirm, and can only withdraw 
+✓   32 [desktop] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off 
+✓   35 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:68:9 › feature flags (105): a waiting change never reads as a result › as a read-only analyst › reads the switches without being offered any of them 
+✓   36 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:87:9 › a money-affecting switch takes two people › the Finance Admin asks › the flag stays off and the request is recorded as waiting 
+✓   37 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:134:7 › a capability that is on is still not permission › the Finance Admin can switch bulk owner invites on 
+✓   38 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:110:9 › a money-affecting switch takes two people › the Finance Controller confirms › confirming puts the new state in force and clears the waiting state 
+✓   39 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:147:7 › a capability that is on is still not permission › the same person is still refused the capability they just switched on 
+✓   40 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:167:7 › bulk owner invites as the Organization Admin (103a) › tracks who was invited and says an invitation grants nothing 
+✓   41 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:185:9 › data retention and legal holds (111) › as the Organization Admin › presents every period as a provisional default and says which are acted on 
+✓   42 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:214:9 › data retention and legal holds (111) › as the Organization Admin › can preview a run but is not offered the irreversible apply 
+✓   43 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:229:9 › data retention and legal holds (111) › as the Organization Admin › a shortened financial period waits, and the old one stays in force 
+✓   44 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:256:9 › data retention and legal holds (111) › as the Finance Controller who may apply a run › previews first, then applies it only once DELETE is typed 
+✓   45 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:280:9 › data retention and legal holds (111) › the seeded legal holds › say whether they are in force, who placed them and what releasing means 
+✓   46 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:304:11 › data retention and legal holds (111) › placing a hold takes two people › the Auditor places it › a new hold protects nothing until somebody else confirms it 
+✓   47 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:354:7 › users and roles (103) › lists people with their roles and marks the privileged ones 
+✓   48 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:331:11 › data retention and legal holds (111) › placing a hold takes two people › the Finance Controller confirms it › confirming puts the hold in force 
+✓   49 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:365:7 › users and roles (103) › a grant beyond the requester’s own authority waits, and the roles stay as they were 
+✓   50 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:403:9 › company settings (102b, 109, 110, 112) › as the Organization Admin › offers only the sections the API says this person may change 
+✓   51 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:412:9 › company settings (102b, 109, 110, 112) › as the Organization Admin › saves a shorter idle timeout 
+✓   52 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:429:9 › company settings (102b, 109, 110, 112) › as a read-only analyst › reads the settings with no editing controls at all 
+✓   53 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:444:7 › system health and maintenance (114) › reports services and nightly jobs without any financial data 
+✓   54 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:456:7 › system health and maintenance (114) › announces and then cancels planned maintenance 
+✓   55 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:481:7 › setup checklist (010a) › counts the steps from the data that exists and links to what is missing 
+✓   56 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:500:9 › my activity (122) › as a department head › shows this person’s own entries and filters them by kind 
+✓   57 [desktop] › apps/web-e2e/src/admin/administration.spec.ts:517:9 › my activity (122) › as an employee › says plainly when a filter matches none of this person’s activity 
+✓   59 [desktop] › apps/web-e2e/src/ai/ask.spec.ts:39:7 › Ask BudgetFlow (011a) › answers about a budget the asker owns, with every figure read from the ledger and labelled as BudgetFlow data 
+✓   58 [desktop] › apps/web-e2e/src/admin/break-glass.spec.ts:59:7 › break-glass access (112) as the Organization Admin › reviews a request, approves it, sees the audited reads and revokes it 
+✓   60 [desktop] › apps/web-e2e/src/ai/ask.spec.ts:77:7 › Ask BudgetFlow (011a) › refuses a question about a budget outside the asker’s scope without confirming it exists 
+✓   61 [desktop] › apps/web-e2e/src/ai/ask.spec.ts:94:7 › Ask BudgetFlow (011a) › refuses to approve a request and sends the asker to the screen where they decide 
+✓   62 [desktop] › apps/web-e2e/src/ai/ask.spec.ts:114:7 › Ask BudgetFlow (011a) › keeps the conversation in the asker’s own history and lets them delete it 
+✓   63 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:19:9 › AI feature switches and the states they produce › Ask BudgetFlow in Slack and Teams (061f) › shows the chat feature’s own kill switch as its own state, not as empty data 
+✓   64 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:145:7 › AI query log and accuracy (113a) › the auditor reads the log, which records the scope applied and never the question text 
+✓   66 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:172:7 › AI query log and accuracy (113a) › accuracy shows every metric against its threshold 
+✓   67 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:184:7 › AI query log and accuracy (113a) › an employee is refused the query log in place, with the URL kept 
+✓   65 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:41:9 › AI feature switches and the states they produce › AI settings (113a) › shows the exact fields a feature would send before it is turned on, and holds a finance feature pending until a Finance Admin confirms 
+✓   68 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:200:7 › Spending outlook (016b) › keeps the projection apart from the ledger figures and only offers steps the owner takes 
+✓   69 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:133:9 › AI feature switches and the states they produce › AI settings (113a) › validates the limits in plain English before they can be saved 
+✓   70 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:233:7 › Policy assistant (069a) › leads with the rules engine outcome and never repeats it back as an AI explanation 
+✓   71 [desktop] › apps/web-e2e/src/ai/settings.spec.ts:255:7 › Policy assistant (069a) › refuses to explain a request that belongs to someone else 
+✓   73 [desktop] › apps/web-e2e/src/ai/suggestions.spec.ts:241:7 › Anomaly flags (017c) › raises an advisory flag with evidence from the records and clears it with a reason 
+✓   72 [desktop] › apps/web-e2e/src/ai/suggestions.spec.ts:59:7 › AI matching suggestions (080f) › ranks unmatched lines without matching anything, then matches through the normal command and records the decision 
+✓   75 [desktop] › apps/web-e2e/src/ai/suggestions.spec.ts:145:7 › AI matching suggestions (080f) › refuses an acceptance that was never applied, straight from the API the screen uses 
+✓   74 [desktop] › apps/web-e2e/src/ai/suggestions.spec.ts:280:7 › Receipt extraction (121a) › prefills the details from the verified receipt and records only what the person confirms 
+✓   76 [desktop] › apps/web-e2e/src/ai/suggestions.spec.ts:184:7 › Suggested allocations (022d) › suggests a split the owner can change, then posts it through the normal allocation command 
+✓   77 [desktop] › apps/web-e2e/src/auth/forgot-password.spec.ts:13:5 › a reset email lets the user set a new password and sign in 
+✓   78 [desktop] › apps/web-e2e/src/auth/mfa.spec.ts:6:5 › the authenticator code is required: wrong code refused, right code signs in 
+✓   79 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:7:7 › sign-in › a deep link asks the user to sign in, then opens the page they asked for 
+✓   80 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:21:7 › sign-in › a wrong password is refused with a plain message and no session 
+✓   81 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:29:7 › sign-in › single sign-on: a new tab in the same browser opens without asking again 
+✓   82 [desktop] › apps/web-e2e/src/auth/sign-in.spec.ts:43:7 › sign-in › sign-out ends the session; signing in again asks for credentials 
+✓   83 [desktop] › apps/web-e2e/src/auth/sso.spec.ts:7:5 › signing in with Hyland SSO lands in BudgetFlow as the linked employee 
+✓   85 [desktop] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:51:7 › error states read as sentences (F8) › a budget that does not exist says so plainly 
+✓   84 [desktop] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:16:7 › blocked budgets say why (F5) › a frozen budget shows Request increase disabled with the reason 
+✓   86 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules 
+✓   88 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India 
+✓   87 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request 
+✓   89 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab 
+✓   91 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change 
+✓   92 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:158:7 › finance admin controls a program › validates a plan spreadsheet with column mapping 
+✓   90 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero 
+✓   94 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:218:7 › per-head driver › allocates rate x eligible headcount from the HR import 
+✓   93 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:174:7 › increase request › the location manager asks; the regional manager approves part of it 
+-   96 [desktop] › apps/web-e2e/src/channels/channels.spec.ts:26:7 › mobile web approvals, balance check, receipts and alerts (059a, 059b) › an approver works the whole phone app: waiting list, decision, balance, receipt and alerts
+✓   95 [desktop] › apps/web-e2e/src/budgets/budgets.spec.ts:240:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel 
+✓   97 [desktop] › apps/web-e2e/src/channels/channels.spec.ts:86:7 › notifications, settings, discussion and following (123, 059c, 060a) › notifications feed, tasks tab, notification settings and discussion comments 
+✓   98 [desktop] › apps/web-e2e/src/channels/channels.spec.ts:136:7 › Slack and Teams admin setup, cards, account linking and digests (061b-061e, 064a) › Integration Admin manages Slack/Teams channels, Finance Admin edits digests, and approver views Slack/Teams cards 
+✓   99 [desktop] › apps/web-e2e/src/close/close.spec.ts:29:7 › period close checklist › November lists every period of the fiscal year and opens its checklist 
+✓  101 [desktop] › apps/web-e2e/src/close/close.spec.ts:41:7 › period close checklist › a close that cannot happen says so and leaves the button disabled 
+✓  100 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:14:7 › year-end run › the FY2026 run opens from the list and offers no execution until it is ready 
+✓  102 [desktop] › apps/web-e2e/src/close/close.spec.ts:51:7 › period close checklist › a hard check cannot be accepted; only soft checks offer a reason 
+✓  103 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:30:7 › year-end run › a dry run fills the per-budget outcome and execute stays refused with the reason 
+✓  104 [desktop] › apps/web-e2e/src/close/close.spec.ts:63:7 › accepting a soft check › the controller accepts a soft check with a reason and it stops holding the close 
+✓  105 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:59:7 › rollover policies › every rollover mode is shown with what it does at year end 
+✓  107 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:71:7 › rollover policies › a policy is assigned to a budget with a reason 
+✓  108 [desktop] › apps/web-e2e/src/close/year-end.spec.ts:91:7 › year-end scope › an analyst reads the run but is offered no dry run or execution 
+✓  106 [desktop] › apps/web-e2e/src/close/close.spec.ts:93:7 › break-glass reopen › reopening a closed period needs two different people 
+✓  109 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:126:7 › BI connector (092a) › the connector states what it can read and what it can never do 
+✓  110 [desktop] › apps/web-e2e/src/close/close.spec.ts:152:7 › period close scope › someone without ledger access is told so instead of seeing a blank page 
+✓  111 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:163:7 › BI connections (092a, a person connecting their own tool) › a connection token is shown once, and a revoked connection does not look healthy 
+✓  112 [desktop] › apps/web-e2e/src/extended/narratives.spec.ts:61:7 › a drafted leadership summary stays a draft until a person reads it (011b) › every number in the text is a BudgetFlow figure, never a raw token 
+✓  113 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:228:7 › connector for AI assistants (092c) › the connector is presented as read-only and offers no action it cannot perform 
+✓  115 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:262:7 › connector for AI assistants (092c) › the consent a person gives says the assistant cannot change anything 
+✓  114 [desktop] › apps/web-e2e/src/extended/narratives.spec.ts:87:7 › a drafted leadership summary stays a draft until a person reads it (011b) › approval waits until the author has opened every section, then freezes the text 
+✓  116 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:280:7 › no-code automations (092b) › platforms carry their allowed state and triggers say they are not delivered yet 
+✓  117 [desktop] › apps/web-e2e/src/extended/narratives.spec.ts:125:7 › a read-only analyst reads summaries but does not draft or approve them › the analyst gets the list without a drafting action 
+✓  118 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:317:7 › marketplace partners (092d, administration) › a partner without an approved vendor cannot be enabled, and says why 
+✓  119 [desktop] › apps/web-e2e/src/extended/outcomes.spec.ts:67:7 › outcome linkage never exposes an individual (015c) › the association note and the thresholds are stated on the page itself 
+✓  120 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:343:7 › marketplace partners (092d, administration) › syncing a partner says what it moved and that nothing reached the ledger 
+✓  121 [desktop] › apps/web-e2e/src/extended/outcomes.spec.ts:87:7 › outcome linkage never exposes an individual (015c) › a figure the API withheld reads "fewer than N", never a blank or a zero 
+✓  123 [desktop] › apps/web-e2e/src/extended/outcomes.spec.ts:118:7 › retention cohorts stay with the roles that read people company-wide › a regional manager gets pulse and eNPS but is told why retention is absent 
+✓  122 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:366:7 › marketplace browse and booking (092d) › an organizer asks a partner for a price and gets a quote, not a commitment 
+✓  124 [desktop] › apps/web-e2e/src/extended/outcomes.spec.ts:138:7 › outcome figures are not for everyone › an employee is refused the outcomes screen 
+✓  125 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:413:7 › embeddable widgets (102d) › the allowed-site list is presented as the boundary it is 
+✓  126 [desktop] › apps/web-e2e/src/extended/recognition.spec.ts:50:7 › recognition spends a budget, a thank-you note does not (120a) › a frozen Recognition budget refuses its award type by name, in the form 
+✓  128 [desktop] › apps/web-e2e/src/extended/recognition.spec.ts:78:7 › recognition spends a budget, a thank-you note does not (120a) › the giver is never offered as their own recipient 
+✓  127 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:435:7 › embeddable widgets (102d) › a site that is not on the list is refused, listed with its address, and never free 
+✓  130 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:490:7 › embeddable widgets (102d) › the embed frame refuses a host that is not on the list, and says why 
+✓  129 [desktop] › apps/web-e2e/src/extended/recognition.spec.ts:96:7 › a people manager gives a thank-you note (120a) › a thank-you note is given without touching a budget 
+✓  132 [desktop] › apps/web-e2e/src/extended/recognition.spec.ts:124:7 › organizer recognition credits the work without exposing a respondent (122b) › the profile shows the seeded thank-you notes and guards small feedback groups 
+✓  133 [desktop] › apps/web-e2e/src/extended/scenarios.spec.ts:44:7 › a what-if scenario is a projection, not a decision (031a) › the list names the seeded scenario and says nothing here has changed a budget 
+✓  131 [desktop] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:512:7 › another company (102d, tenant isolation) › an admin of another company gets nothing from this company's widget 
+✓  134 [desktop] › apps/web-e2e/src/extended/scenarios.spec.ts:65:7 › a what-if scenario is a projection, not a decision (031a) › the editor projects a reduction while the budget keeps the balances it has 
+✓  136 [desktop] › apps/web-e2e/src/extended/scenarios.spec.ts:163:7 › scenarios are private to the people who model them › an employee is refused the scenarios screen 
+✓  135 [desktop] › apps/web-e2e/src/extended/scenarios.spec.ts:107:7 › a what-if scenario is a projection, not a decision (031a) › a scenario whose baseline has moved refuses promotion and says so before the dialog 
+✓  137 [desktop] › apps/web-e2e/src/extended/wallets.spec.ts:49:7 › a wallet is an allowance inside a budget (120b) › an allowance is visible before any wallet row exists 
+✓  138 [desktop] › apps/web-e2e/src/extended/wallets.spec.ts:130:7 › the reviewer queue shows what is waiting, and nothing else (120b) › a programme reviewer sees the queue with its pre-encumbrance explained 
+✓  140 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions 
+✓  139 [desktop] › apps/web-e2e/src/extended/wallets.spec.ts:72:7 › a wallet is an allowance inside a budget (120b) › a claim over the allowance is refused with the amount it is over by 
+✓  142 [desktop] › apps/web-e2e/src/extended/wallets.spec.ts:97:7 › a wallet is an allowance inside a budget (120b) › a claim states the receipt it needs and refuses to submit without one 
+✓  141 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order 
+✓  143 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately 
+✓  144 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked 
+✓  145 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly 
+✓  146 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code 
+✓  148 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix 
+✓  147 [desktop] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold 
+✓  149 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:118:7 › connector hub (092) › an integration admin sees every connector, and the broken one is named 
+✓  150 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history 
+✓  151 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:153:7 › connector hub (092) › a connector the provider refuses says what stopped and offers the fix 
+✓  152 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history 
+✓  153 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:191:7 › credentials (092 Connection tab) › a stored credential is never shown, only when it was set and by whom 
+✓  154 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason 
+✓  155 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:209:7 › credentials (092 Connection tab) › replacing a credential keeps it off the screen and tells the admin to test it 
+✓  156 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it 
+✓  158 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team 
+✓  157 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:236:7 › running a sync (092 Sync tab, 099) › a run reports what it moved, and running it again applies nothing twice 
+✓  159 [desktop] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import 
+✓  160 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:293:7 › API keys (101) › a key is shown once, then only by its prefix, and cannot approve anything 
+✓  161 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history 
+✓  163 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only 
+✓  162 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:332:7 › API keys (101) › revoking states the consequence and needs the key name typed 
+✓  164 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import 
+✓  165 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:369:7 › webhooks (101) › a test ping is reported honestly and lands in the delivery log 
+✓  166 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file 
+✓  167 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:393:7 › webhooks (101) › removing an endpoint says what goes quiet first 
+✓  168 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date 
+✓  169 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:410:7 › identity and SCIM (098) › a SCIM token is shown once and the list keeps only its prefix 
+✓  170 [desktop] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it 
+✓  171 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:434:7 › cross-source duplicates (99a) › finance keeps one line as the record and the other is excluded, not deleted 
+✓  172 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:116:7 › forecast and variance (087) › the report shows the API notes, the method, and the variance direction as a word 
+✓  173 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:500:9 › who may do what › as an auditor › the connectors are readable and every action is absent 
+✓  174 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:166:7 › forecast and variance (087) › comparing two snapshots adds the previous forecast and the change 
+✓  175 [desktop] › apps/web-e2e/src/integrations/integrations.spec.ts:520:9 › who may do what › as an employee › integrations are refused, in place, with the URL kept 
+✓  176 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:183:7 › forecast and variance (087) › “commentary required only” narrows the report to the rows that owe an explanation 
+✓  177 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:207:7 › forecast cycles (87a) › finance monitors a cycle and the actions come from the API, not the browser 
+✓  178 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:261:7 › forecast cycles (87a) › a closed cycle is read-only and says its snapshot cannot change 
+✓  179 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:283:7 › forecast cycles (87a) › an owner sees only their own budgets and is told so 
+✓  180 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:312:7 › forecast cycles (87a) › a large variance without commentary is refused on the field, with the figure spelled out 
+✓  181 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:354:7 › forecast cycles (87a) › the method cards carry the amounts and the sentence behind each 
+✓  182 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:378:7 › board and FP&A pack (16a) › the pack renders the API pages, keeps an empty page with its statement, and bridges FX separately 
+✓  183 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:412:7 › board and FP&A pack (16a) › the open period is a draft and every page is watermarked 
+✓  185 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:453:7 › who may open what › an owner-scoped role opens 087 but is refused the board pack 
+✓  186 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:493:7 › who may open what › an employee reaches neither the cycle nor the pack 
+✓  184 [desktop] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:424:7 › board and FP&A pack (16a) › generating a pack queues it, polls it and offers the two files 
+✓  187 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:66:7 › report catalog (79) › a finance admin sees every report grouped by the question it answers 
+✓  188 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:99:7 › the shared report frame (80-86, 15a, 15b) › budget versus actual renders the server figures and says they tie to the ledger 
+✓  190 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:137:7 › the shared report frame (80-86, 15a, 15b) › a drillable figure opens the ledger lines behind it 
+✓  191 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:151:7 › the shared report frame (80-86, 15a, 15b) › an export is recorded honestly: no file is promised 
+✓  192 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:168:7 › budget health (13) › the five checks are summarised, mapped and written out per budget 
+✓  193 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:201:7 › scope › a budget owner sees only their subtree, and is told so 
+✓  189 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:125:7 › the shared report frame (80-86, 15a, 15b) › every report in the catalog opens in the same frame 
+✓  194 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:230:7 › scope › the catalog hides a company-wide report from a scoped owner, and opening it is refused 
+✓  195 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:253:7 › scope › an employee has no reports area at all 
+✓  196 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:270:7 › scheduled reports (91) › the seeded schedules show their rhythm, recipients and delivery history 
+✓  197 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:301:7 › scheduled reports (91) › a finance admin pauses a schedule and resumes it 
+✓  199 [desktop] › apps/web-e2e/src/rules/rules.spec.ts:11:7 › rules and policies › Finance sees what the rules are doing and opens the one that needs attention 
+✓  200 [desktop] › apps/web-e2e/src/rules/rules.spec.ts:35:7 › rules and policies › Finance tests a request and sees which rule decided it and why 
+✓  198 [desktop] › apps/web-e2e/src/reports/reports.spec.ts:320:7 › saved views › an auditor saves the filters of a report and opens it again from the catalog 
+✓  202 [desktop] › apps/web-e2e/src/rules/rules.spec.ts:88:7 › approval limits › the CEO approves the approval-limit change Finance submitted 
+✓  201 [desktop] › apps/web-e2e/src/rules/rules.spec.ts:55:7 › rules and policies › Finance settles a post-spend exception and it leaves the open queue 
+✓  204 [desktop] › apps/web-e2e/src/rules/rules.spec.ts:137:7 › approval history › an auditor reads every decision and narrows it to the rejections 
+✓  203 [desktop] › apps/web-e2e/src/rules/rules.spec.ts:112:7 › policy settings › every policy section shows its settings 
+✓  206 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST 
+✓  207 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:60:7 › regional manager in Bengaluru › an INR amount uses lakh grouping 
+✓  208 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:99:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset 
+✓  205 [desktop] › apps/web-e2e/src/shell/analytics.spec.ts:10:5 › sign-in and navigation send product analytics events the API accepts 
+✓  209 [desktop] › apps/web-e2e/src/shell/formatting.spec.ts:99:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset 
+✓  210 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:87:7 › ceo › the answer line states where the year stands, from the API figures 
+✓  211 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:124:7 › ceo › every bucket tile carries its denominator and matches the roll-up 
+✓  212 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:158:7 › ceo › needs attention lists the API reasons worst first, each linking to its budget 
+✓  214 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:265:7 › ceo › the health filter uses the levels the API returned, not thresholds of its own 
+✓  213 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:203:7 › ceo › the budget list searches, sorts, paginates and filters, and a row opens the budget 
+✓  216 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:323:7 › ceo › waiting on your decision reflects the inbox the API returned 
+✓  215 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:290:7 › ceo › company-wide Available and a budget’s own Available are labelled apart 
+✓  218 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:394:7 › ceo › the overview adds no combobox to Home 
+✓  217 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:350:7 › ceo › a failing section shows its own retry and leaves the rest of the page standing 
+✓  219 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:404:7 › finance controller › a finance role sees the same tenant-wide overview 
+✓  220 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:421:7 › department head › a department head sees their own subtree, and the page says so 
+✓  221 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:449:7 › employee › a role without budget visibility keeps the placeholder Home 
+✓  222 [desktop] › apps/web-e2e/src/shell/home-overview.spec.ts:467:7 › platform operator › a platform operator still sees only the break-glass banner 
+✓  223 [desktop] › apps/web-e2e/src/shell/nav-overlay.spec.ts:59:5 › the expanded navigation closes on a page pick, Escape and an outside click 
+✓  225 [desktop] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport 
+✓  226 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow 
+✓  227 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow 
+✓  228 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for ceo › ceo sees exactly the areas their permissions allow 
+✓  229 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow 
+✓  230 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow 
+✓  231 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow 
+✓  232 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for department-head › department-head sees exactly the areas their permissions allow 
+✓  224 [desktop] › apps/web-e2e/src/shell/nav-overlay.spec.ts:106:7 › on a touch screen › a swipe reaches the last menu item above the account row 
+✓  233 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow 
+✓  234 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow 
+✓  235 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow 
+✓  236 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for employee › employee sees exactly the areas their permissions allow 
+✓  237 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for auditor › auditor sees exactly the areas their permissions allow 
+✓  238 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow 
+✓  239 [desktop] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for analyst › analyst sees exactly the areas their permissions allow 
+✓  240 [desktop] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL 
+✓  241 [desktop] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell 
+✓  242 [desktop] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access 
+✓  243 [desktop] › apps/web-e2e/src/shell/states.spec.ts:39:7 › org admin › every navigation area the role can open renders a real screen 
+✓  244 [desktop] › apps/web-e2e/src/shell/states.spec.ts:49:7 › finance controller › a server error shows the error state and recovers on retry 
+✓  246 [desktop] › apps/web-e2e/src/shell/states.spec.ts:94:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end 
+✓  245 [desktop] › apps/web-e2e/src/shell/states.spec.ts:73:7 › finance controller › a rejected token ends the session and offers to sign in again 
+✓  248 [desktop] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors 
+✓  247 [desktop] › apps/web-e2e/src/shell/states.spec.ts:119:7 › super admin › a platform operator sees no tenant financial data 
+✓  249 [desktop] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) 
+✓  250 [desktop] › apps/web-e2e/src/spend/approvals.spec.ts:23:7 › approval inbox › Lena approves a request with the budget-impact card and her DoA limit on the route 
+✓  251 [desktop] › apps/web-e2e/src/spend/approvals.spec.ts:59:7 › actionable approval email › approve from the email link, then reject another request on the reason page 
+✓  252 [desktop] › apps/web-e2e/src/spend/approvals.spec.ts:89:7 › budget controls seen by the requester › freeze holds a waiting request; set to zero cancels it with the reason 
+✓  253 [desktop] › apps/web-e2e/src/spend/event-depth.spec.ts:20:7 › event organizer plans and runs an event › plans the checklist, invites people and sees the RSVP tracker 
+✓  255 [desktop] › apps/web-e2e/src/spend/event-depth.spec.ts:97:7 › employee answers an invitation › says Going and gives dietary and accessibility needs 
+✓  256 [desktop] › apps/web-e2e/src/spend/event-depth.spec.ts:134:7 › the events dashboard and a closed event scorecard › the dashboard lands on what needs the organizer 
+✓  257 [desktop] › apps/web-e2e/src/spend/event-depth.spec.ts:141:7 › the events dashboard and a closed event scorecard › the template library offers the company templates 
+✓  258 [desktop] › apps/web-e2e/src/spend/event-depth.spec.ts:148:7 › the events dashboard and a closed event scorecard › the wellbeing week shows survey results and its scorecard 
+✓  259 [desktop] › apps/web-e2e/src/spend/events.spec.ts:43:7 › event organizer › creates a cross-location event with participants and a cost split, then asks for more funds 
+✓  254 [desktop] › apps/web-e2e/src/spend/event-depth.spec.ts:57:7 › event organizer plans and runs an event › marks attendance and applies the attendance-based cost split 
+✓  261 [desktop] › apps/web-e2e/src/spend/requests.spec.ts:23:7 › requester › resubmits after changes were asked and compares the versions in the history tab 
+✓  262 [desktop] › apps/web-e2e/src/spend/requests.spec.ts:57:7 › requester › uploads a receipt on its own page and sees it on the request after verification 
+✓  260 [desktop] › apps/web-e2e/src/spend/events.spec.ts:118:7 › Inter-Director Budget Contribution Request › Jordan asks, Lena contributes in full, in part and declines; the board shows each 
+✓  263 [desktop] › apps/web-e2e/src/spend/requests.spec.ts:90:7 › requester › a file that is not a PDF, image, CSV or spreadsheet is refused before upload 
+✓  264 [desktop] › apps/web-e2e/src/spend/requests.spec.ts:104:7 › requester › accepts an approver counter-offer in one step (065) 
+✓  265 [desktop] › apps/web-e2e/src/spend/requests.spec.ts:132:7 › requester › sees what was approved with used and open amounts 
+✓  267 [desktop] › apps/web-e2e/src/spend/requests.spec.ts:186:7 › employee › dashboard shows the request entry points and the upload page 
+✓  268 [desktop] › apps/web-e2e/src/spend/requests.spec.ts:195:7 › employee › cannot open event funding without the organizer permission 
+✓  266 [desktop] › apps/web-e2e/src/spend/requests.spec.ts:151:7 › requester › requests funding for a team event in one step 
+✓  269 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:46:9 › Wave 2 core acceptance › Step 1 — USD plan context › shows FY2026 plan tie-out in USD and matches the API 
+-  271 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:91:9 › Wave 2 core acceptance › Step 3 — cross-location event funding › creates a cross-location event and submits it for approval
+-  272 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:143:9 › Wave 2 core acceptance › Step 4 — Inter-Director Budget Contribution Request › Lena contributes in part and declines another ask
+-  273 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:198:9 › Wave 2 core acceptance › Step 5 — DoA approval › Lena approves within her DoA limit and the requester sees the route
+-  274 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:225:9 › Wave 2 core acceptance › Step 6 — freeze and set-to-zero on requests › freeze holds approval; set to zero cancels the request
+✓  270 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:72:9 › Wave 2 core acceptance › Step 2 — hierarchy and per-head › shows India hierarchy, per-head Hyderabad and authorized from the ledger 
+✓  275 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:254:9 › Wave 2 core acceptance › Step 7 — actuals import and matching › shows the seeded November ERP import with plan-rate FX 
+✓  276 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:274:9 › Wave 2 core acceptance › Step 8 — event reconciliation › the New York offsite cannot close while an actual is still unmatched 
+✓  277 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:294:9 › Wave 2 core acceptance › Step 9 — GL tie-out › India shows a travel difference; the controller cannot sign off alone 
+✓  278 [tablet] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:318:9 › Wave 2 core acceptance › Step 10 — utilization and ledger roll-up › utilization by location matches the API totals in USD 
+-  280 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API
+✓  279 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate 
+✓  281 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:91:7 › actuals import and matching › employees cannot open the actuals screens 
+✓  282 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:105:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit 
+✓  283 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:118:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment 
+✓  284 [tablet] › apps/web-e2e/src/accounting/actuals.spec.ts:129:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched 
+-  286 [tablet] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off
+✓  285 [tablet] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off 
+✓  287 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:34:9 › feature flags (105): a waiting change never reads as a result › as the Finance Controller who would confirm it › shows the state still in force next to the change waiting for a second person 
+✓  288 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:54:9 › feature flags (105): a waiting change never reads as a result › as the Finance Admin who asked for it › the requester is told somebody else has to confirm, and can only withdraw 
+-  290 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:87:9 › a money-affecting switch takes two people › the Finance Admin asks › the flag stays off and the request is recorded as waiting
+-  291 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:110:9 › a money-affecting switch takes two people › the Finance Controller confirms › confirming puts the new state in force and clears the waiting state
+-  292 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:134:7 › a capability that is on is still not permission › the Finance Admin can switch bulk owner invites on
+-  293 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:147:7 › a capability that is on is still not permission › the same person is still refused the capability they just switched on
+✓  289 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:68:9 › feature flags (105): a waiting change never reads as a result › as a read-only analyst › reads the switches without being offered any of them 
+✓  294 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:167:7 › bulk owner invites as the Organization Admin (103a) › tracks who was invited and says an invitation grants nothing 
+-  296 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:214:9 › data retention and legal holds (111) › as the Organization Admin › can preview a run but is not offered the irreversible apply
+✓  295 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:185:9 › data retention and legal holds (111) › as the Organization Admin › presents every period as a provisional default and says which are acted on 
+-  297 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:229:9 › data retention and legal holds (111) › as the Organization Admin › a shortened financial period waits, and the old one stays in force
+-  298 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:256:9 › data retention and legal holds (111) › as the Finance Controller who may apply a run › previews first, then applies it only once DELETE is typed
+-  300 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:304:11 › data retention and legal holds (111) › placing a hold takes two people › the Auditor places it › a new hold protects nothing until somebody else confirms it
+-  301 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:331:11 › data retention and legal holds (111) › placing a hold takes two people › the Finance Controller confirms it › confirming puts the hold in force
+✓  299 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:280:9 › data retention and legal holds (111) › the seeded legal holds › say whether they are in force, who placed them and what releasing means 
+-  303 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:365:7 › users and roles (103) › a grant beyond the requester’s own authority waits, and the roles stay as they were
+✓  302 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:354:7 › users and roles (103) › lists people with their roles and marks the privileged ones 
+-  305 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:412:9 › company settings (102b, 109, 110, 112) › as the Organization Admin › saves a shorter idle timeout
+✓  304 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:403:9 › company settings (102b, 109, 110, 112) › as the Organization Admin › offers only the sections the API says this person may change 
+✓  306 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:429:9 › company settings (102b, 109, 110, 112) › as a read-only analyst › reads the settings with no editing controls at all 
+-  308 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:456:7 › system health and maintenance (114) › announces and then cancels planned maintenance
+✓  307 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:444:7 › system health and maintenance (114) › reports services and nightly jobs without any financial data 
+✓  309 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:481:7 › setup checklist (010a) › counts the steps from the data that exists and links to what is missing 
+✓  310 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:500:9 › my activity (122) › as a department head › shows this person’s own entries and filters them by kind 
+-  312 [tablet] › apps/web-e2e/src/admin/break-glass.spec.ts:59:7 › break-glass access (112) as the Organization Admin › reviews a request, approves it, sees the audited reads and revokes it
+✓  311 [tablet] › apps/web-e2e/src/admin/administration.spec.ts:517:9 › my activity (122) › as an employee › says plainly when a filter matches none of this person’s activity 
+✓  313 [tablet] › apps/web-e2e/src/ai/ask.spec.ts:39:7 › Ask BudgetFlow (011a) › answers about a budget the asker owns, with every figure read from the ledger and labelled as BudgetFlow data 
+✓  314 [tablet] › apps/web-e2e/src/ai/ask.spec.ts:77:7 › Ask BudgetFlow (011a) › refuses a question about a budget outside the asker’s scope without confirming it exists 
+-  316 [tablet] › apps/web-e2e/src/ai/ask.spec.ts:114:7 › Ask BudgetFlow (011a) › keeps the conversation in the asker’s own history and lets them delete it
+✓  315 [tablet] › apps/web-e2e/src/ai/ask.spec.ts:94:7 › Ask BudgetFlow (011a) › refuses to approve a request and sends the asker to the screen where they decide 
+✓  317 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:19:9 › AI feature switches and the states they produce › Ask BudgetFlow in Slack and Teams (061f) › shows the chat feature’s own kill switch as its own state, not as empty data 
+-  319 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:41:9 › AI feature switches and the states they produce › AI settings (113a) › shows the exact fields a feature would send before it is turned on, and holds a finance feature pending until a Finance Admin confirms
+✓  318 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:145:7 › AI query log and accuracy (113a) › the auditor reads the log, which records the scope applied and never the question text 
+✓  320 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:133:9 › AI feature switches and the states they produce › AI settings (113a) › validates the limits in plain English before they can be saved 
+✓  321 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:172:7 › AI query log and accuracy (113a) › accuracy shows every metric against its threshold 
+-  323 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:200:7 › Spending outlook (016b) › keeps the projection apart from the ledger figures and only offers steps the owner takes
+✓  322 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:184:7 › AI query log and accuracy (113a) › an employee is refused the query log in place, with the URL kept 
+✓  325 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:255:7 › Policy assistant (069a) › refuses to explain a request that belongs to someone else 
+✓  324 [tablet] › apps/web-e2e/src/ai/settings.spec.ts:233:7 › Policy assistant (069a) › leads with the rules engine outcome and never repeats it back as an AI explanation 
+-  326 [tablet] › apps/web-e2e/src/ai/suggestions.spec.ts:59:7 › AI matching suggestions (080f) › ranks unmatched lines without matching anything, then matches through the normal command and records the decision
+-  327 [tablet] › apps/web-e2e/src/ai/suggestions.spec.ts:241:7 › Anomaly flags (017c) › raises an advisory flag with evidence from the records and clears it with a reason
+✓  328 [tablet] › apps/web-e2e/src/ai/suggestions.spec.ts:145:7 › AI matching suggestions (080f) › refuses an acceptance that was never applied, straight from the API the screen uses 
+-  329 [tablet] › apps/web-e2e/src/ai/suggestions.spec.ts:280:7 › Receipt extraction (121a) › prefills the details from the verified receipt and records only what the person confirms
+-  330 [tablet] › apps/web-e2e/src/ai/suggestions.spec.ts:184:7 › Suggested allocations (022d) › suggests a split the owner can change, then posts it through the normal allocation command
+-  331 [tablet] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:16:7 › blocked budgets say why (F5) › a frozen budget shows Request increase disabled with the reason
+✓  332 [tablet] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:51:7 › error states read as sentences (F8) › a budget that does not exist says so plainly 
+✓  333 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules 
+✓  335 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India 
+✓  334 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request 
+-  337 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero
+-  338 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change
+✓  336 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab 
+-  340 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:174:7 › increase request › the location manager asks; the regional manager approves part of it
+-  341 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:218:7 › per-head driver › allocates rate x eligible headcount from the HR import
+✓  339 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:158:7 › finance admin controls a program › validates a plan spreadsheet with column mapping 
+-  343 [tablet] › apps/web-e2e/src/channels/channels.spec.ts:26:7 › mobile web approvals, balance check, receipts and alerts (059a, 059b) › an approver works the whole phone app: waiting list, decision, balance, receipt and alerts
+✓  342 [tablet] › apps/web-e2e/src/budgets/budgets.spec.ts:240:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel 
+-  344 [tablet] › apps/web-e2e/src/channels/channels.spec.ts:86:7 › notifications, settings, discussion and following (123, 059c, 060a) › notifications feed, tasks tab, notification settings and discussion comments
+-  345 [tablet] › apps/web-e2e/src/channels/channels.spec.ts:136:7 › Slack and Teams admin setup, cards, account linking and digests (061b-061e, 064a) › Integration Admin manages Slack/Teams channels, Finance Admin edits digests, and approver views Slack/Teams cards
+✓  346 [tablet] › apps/web-e2e/src/close/close.spec.ts:29:7 › period close checklist › November lists every period of the fiscal year and opens its checklist 
+✓  347 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:14:7 › year-end run › the FY2026 run opens from the list and offers no execution until it is ready 
+-  349 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:30:7 › year-end run › a dry run fills the per-budget outcome and execute stays refused with the reason
+✓  348 [tablet] › apps/web-e2e/src/close/close.spec.ts:41:7 › period close checklist › a close that cannot happen says so and leaves the button disabled 
+✓  350 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:59:7 › rollover policies › every rollover mode is shown with what it does at year end 
+-  352 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:71:7 › rollover policies › a policy is assigned to a budget with a reason
+✓  351 [tablet] › apps/web-e2e/src/close/close.spec.ts:51:7 › period close checklist › a hard check cannot be accepted; only soft checks offer a reason 
+-  354 [tablet] › apps/web-e2e/src/close/close.spec.ts:63:7 › accepting a soft check › the controller accepts a soft check with a reason and it stops holding the close
+✓  353 [tablet] › apps/web-e2e/src/close/year-end.spec.ts:91:7 › year-end scope › an analyst reads the run but is offered no dry run or execution 
+-  355 [tablet] › apps/web-e2e/src/close/close.spec.ts:93:7 › break-glass reopen › reopening a closed period needs two different people
+✓  357 [tablet] › apps/web-e2e/src/close/close.spec.ts:152:7 › period close scope › someone without ledger access is told so instead of seeing a blank page 
+✓  356 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:126:7 › BI connector (092a) › the connector states what it can read and what it can never do 
+-  359 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:163:7 › BI connections (092a, a person connecting their own tool) › a connection token is shown once, and a revoked connection does not look healthy
+✓  360 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:228:7 › connector for AI assistants (092c) › the connector is presented as read-only and offers no action it cannot perform 
+✓  358 [tablet] › apps/web-e2e/src/extended/narratives.spec.ts:61:7 › a drafted leadership summary stays a draft until a person reads it (011b) › every number in the text is a BudgetFlow figure, never a raw token 
+✓  361 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:262:7 › connector for AI assistants (092c) › the consent a person gives says the assistant cannot change anything 
+✓  363 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:280:7 › no-code automations (092b) › platforms carry their allowed state and triggers say they are not delivered yet 
+✓  362 [tablet] › apps/web-e2e/src/extended/narratives.spec.ts:87:7 › a drafted leadership summary stays a draft until a person reads it (011b) › approval waits until the author has opened every section, then freezes the text 
+✓  364 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:317:7 › marketplace partners (092d, administration) › a partner without an approved vendor cannot be enabled, and says why 
+-  366 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:343:7 › marketplace partners (092d, administration) › syncing a partner says what it moved and that nothing reached the ledger
+✓  365 [tablet] › apps/web-e2e/src/extended/narratives.spec.ts:125:7 › a read-only analyst reads summaries but does not draft or approve them › the analyst gets the list without a drafting action 
+-  367 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:366:7 › marketplace browse and booking (092d) › an organizer asks a partner for a price and gets a quote, not a commitment
+✓  369 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:413:7 › embeddable widgets (102d) › the allowed-site list is presented as the boundary it is 
+✓  368 [tablet] › apps/web-e2e/src/extended/outcomes.spec.ts:67:7 › outcome linkage never exposes an individual (015c) › the association note and the thresholds are stated on the page itself 
+-  370 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:435:7 › embeddable widgets (102d) › a site that is not on the list is refused, listed with its address, and never free
+✓  372 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:490:7 › embeddable widgets (102d) › the embed frame refuses a host that is not on the list, and says why 
+-  373 [tablet] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:512:7 › another company (102d, tenant isolation) › an admin of another company gets nothing from this company's widget
+✓  371 [tablet] › apps/web-e2e/src/extended/outcomes.spec.ts:87:7 › outcome linkage never exposes an individual (015c) › a figure the API withheld reads "fewer than N", never a blank or a zero 
+✓  375 [tablet] › apps/web-e2e/src/extended/outcomes.spec.ts:138:7 › outcome figures are not for everyone › an employee is refused the outcomes screen 
+✓  374 [tablet] › apps/web-e2e/src/extended/outcomes.spec.ts:118:7 › retention cohorts stay with the roles that read people company-wide › a regional manager gets pulse and eNPS but is told why retention is absent 
+✓  377 [tablet] › apps/web-e2e/src/extended/recognition.spec.ts:78:7 › recognition spends a budget, a thank-you note does not (120a) › the giver is never offered as their own recipient 
+✓  376 [tablet] › apps/web-e2e/src/extended/recognition.spec.ts:50:7 › recognition spends a budget, a thank-you note does not (120a) › a frozen Recognition budget refuses its award type by name, in the form 
+✓  379 [tablet] › apps/web-e2e/src/extended/recognition.spec.ts:124:7 › organizer recognition credits the work without exposing a respondent (122b) › the profile shows the seeded thank-you notes and guards small feedback groups 
+✓  378 [tablet] › apps/web-e2e/src/extended/recognition.spec.ts:96:7 › a people manager gives a thank-you note (120a) › a thank-you note is given without touching a budget 
+✓  380 [tablet] › apps/web-e2e/src/extended/scenarios.spec.ts:44:7 › a what-if scenario is a projection, not a decision (031a) › the list names the seeded scenario and says nothing here has changed a budget 
+✓  381 [tablet] › apps/web-e2e/src/extended/scenarios.spec.ts:65:7 › a what-if scenario is a projection, not a decision (031a) › the editor projects a reduction while the budget keeps the balances it has 
+✓  382 [tablet] › apps/web-e2e/src/extended/scenarios.spec.ts:107:7 › a what-if scenario is a projection, not a decision (031a) › a scenario whose baseline has moved refuses promotion and says so before the dialog 
+✓  383 [tablet] › apps/web-e2e/src/extended/scenarios.spec.ts:163:7 › scenarios are private to the people who model them › an employee is refused the scenarios screen 
+✓  384 [tablet] › apps/web-e2e/src/extended/wallets.spec.ts:49:7 › a wallet is an allowance inside a budget (120b) › an allowance is visible before any wallet row exists 
+✓  385 [tablet] › apps/web-e2e/src/extended/wallets.spec.ts:130:7 › the reviewer queue shows what is waiting, and nothing else (120b) › a programme reviewer sees the queue with its pre-encumbrance explained 
+✓  387 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions 
+✓  386 [tablet] › apps/web-e2e/src/extended/wallets.spec.ts:72:7 › a wallet is an allowance inside a budget (120b) › a claim over the allowance is refused with the amount it is over by 
+-  388 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
+✓  389 [tablet] › apps/web-e2e/src/extended/wallets.spec.ts:97:7 › a wallet is an allowance inside a budget (120b) › a claim states the receipt it needs and refuses to submit without one 
+-  391 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked
+✓  390 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately 
+-  393 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code
+✓  394 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold 
+✓  395 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix 
+✓  392 [tablet] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly 
+✓  396 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:118:7 › connector hub (092) › an integration admin sees every connector, and the broken one is named 
+-  398 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:153:7 › connector hub (092) › a connector the provider refuses says what stopped and offers the fix
+✓  397 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history 
+-  400 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history
+-  401 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason
+✓  399 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:191:7 › credentials (092 Connection tab) › a stored credential is never shown, only when it was set and by whom 
+-  403 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:209:7 › credentials (092 Connection tab) › replacing a credential keeps it off the screen and tells the admin to test it
+-  404 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:236:7 › running a sync (092 Sync tab, 099) › a run reports what it moved, and running it again applies nothing twice
+✓  402 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it 
+-  405 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:293:7 › API keys (101) › a key is shown once, then only by its prefix, and cannot approve anything
+-  407 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:332:7 › API keys (101) › revoking states the consequence and needs the key name typed
+-  408 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:369:7 › webhooks (101) › a test ping is reported honestly and lands in the delivery log
+✓  406 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team 
+✓  409 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:393:7 › webhooks (101) › removing an endpoint says what goes quiet first 
+-  411 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:410:7 › identity and SCIM (098) › a SCIM token is shown once and the list keeps only its prefix
+-  412 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:434:7 › cross-source duplicates (99a) › finance keeps one line as the record and the other is excluded, not deleted
+✓  410 [tablet] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import 
+✓  413 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:500:9 › who may do what › as an auditor › the connectors are readable and every action is absent 
+✓  414 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history 
+✓  415 [tablet] › apps/web-e2e/src/integrations/integrations.spec.ts:520:9 › who may do what › as an employee › integrations are refused, in place, with the URL kept 
+✓  416 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only 
+-  418 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file
+-  419 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date
+-  420 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it
+✓  417 [tablet] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import 
+✓  422 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:166:7 › forecast and variance (087) › comparing two snapshots adds the previous forecast and the change 
+✓  421 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:116:7 › forecast and variance (087) › the report shows the API notes, the method, and the variance direction as a word 
+✓  424 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:207:7 › forecast cycles (87a) › finance monitors a cycle and the actions come from the API, not the browser 
+✓  425 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:261:7 › forecast cycles (87a) › a closed cycle is read-only and says its snapshot cannot change 
+✓  423 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:183:7 › forecast and variance (087) › “commentary required only” narrows the report to the rows that owe an explanation 
+-  427 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:312:7 › forecast cycles (87a) › a large variance without commentary is refused on the field, with the figure spelled out
+✓  426 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:283:7 › forecast cycles (87a) › an owner sees only their own budgets and is told so 
+✓  428 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:354:7 › forecast cycles (87a) › the method cards carry the amounts and the sentence behind each 
+✓  429 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:378:7 › board and FP&A pack (16a) › the pack renders the API pages, keeps an empty page with its statement, and bridges FX separately 
+-  431 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:424:7 › board and FP&A pack (16a) › generating a pack queues it, polls it and offers the two files
+✓  430 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:412:7 › board and FP&A pack (16a) › the open period is a draft and every page is watermarked 
+✓  432 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:453:7 › who may open what › an owner-scoped role opens 087 but is refused the board pack 
+✓  433 [tablet] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:493:7 › who may open what › an employee reaches neither the cycle nor the pack 
+✓  434 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:66:7 › report catalog (79) › a finance admin sees every report grouped by the question it answers 
+✓  435 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:99:7 › the shared report frame (80-86, 15a, 15b) › budget versus actual renders the server figures and says they tie to the ledger 
+✓  437 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:137:7 › the shared report frame (80-86, 15a, 15b) › a drillable figure opens the ledger lines behind it 
+-  438 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:151:7 › the shared report frame (80-86, 15a, 15b) › an export is recorded honestly: no file is promised
+✓  439 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:168:7 › budget health (13) › the five checks are summarised, mapped and written out per budget 
+✓  440 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:201:7 › scope › a budget owner sees only their subtree, and is told so 
+✓  441 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:230:7 › scope › the catalog hides a company-wide report from a scoped owner, and opening it is refused 
+✓  442 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:253:7 › scope › an employee has no reports area at all 
+✓  436 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:125:7 › the shared report frame (80-86, 15a, 15b) › every report in the catalog opens in the same frame 
+-  444 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:301:7 › scheduled reports (91) › a finance admin pauses a schedule and resumes it
+-  445 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:320:7 › saved views › an auditor saves the filters of a report and opens it again from the catalog
+-  446 [tablet] › apps/web-e2e/src/rules/rules.spec.ts:11:7 › rules and policies › Finance sees what the rules are doing and opens the one that needs attention
+-  447 [tablet] › apps/web-e2e/src/rules/rules.spec.ts:35:7 › rules and policies › Finance tests a request and sees which rule decided it and why
+✓  443 [tablet] › apps/web-e2e/src/reports/reports.spec.ts:270:7 › scheduled reports (91) › the seeded schedules show their rhythm, recipients and delivery history 
+-  448 [tablet] › apps/web-e2e/src/rules/rules.spec.ts:55:7 › rules and policies › Finance settles a post-spend exception and it leaves the open queue
+-  450 [tablet] › apps/web-e2e/src/rules/rules.spec.ts:112:7 › policy settings › every policy section shows its settings
+-  449 [tablet] › apps/web-e2e/src/rules/rules.spec.ts:88:7 › approval limits › the CEO approves the approval-limit change Finance submitted
+-  451 [tablet] › apps/web-e2e/src/rules/rules.spec.ts:137:7 › approval history › an auditor reads every decision and narrows it to the rejections
+-  453 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:60:7 › regional manager in Bengaluru › an INR amount uses lakh grouping
+✓  452 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST 
+✓  454 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:99:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset 
+✓  455 [tablet] › apps/web-e2e/src/shell/formatting.spec.ts:99:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset 
+✓  456 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:87:7 › ceo › the answer line states where the year stands, from the API figures 
+✓  457 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:124:7 › ceo › every bucket tile carries its denominator and matches the roll-up 
+✓  458 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:158:7 › ceo › needs attention lists the API reasons worst first, each linking to its budget 
+✓  460 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:265:7 › ceo › the health filter uses the levels the API returned, not thresholds of its own 
+✓  459 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:203:7 › ceo › the budget list searches, sorts, paginates and filters, and a row opens the budget 
+✓  461 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:290:7 › ceo › company-wide Available and a budget’s own Available are labelled apart 
+✓  462 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:323:7 › ceo › waiting on your decision reflects the inbox the API returned 
+✓  463 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:350:7 › ceo › a failing section shows its own retry and leaves the rest of the page standing 
+✓  464 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:394:7 › ceo › the overview adds no combobox to Home 
+✓  465 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:404:7 › finance controller › a finance role sees the same tenant-wide overview 
+✓  466 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:421:7 › department head › a department head sees their own subtree, and the page says so 
+✓  467 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:449:7 › employee › a role without budget visibility keeps the placeholder Home 
+✓  468 [tablet] › apps/web-e2e/src/shell/home-overview.spec.ts:467:7 › platform operator › a platform operator still sees only the break-glass banner 
+✓  470 [tablet] › apps/web-e2e/src/shell/nav-overlay.spec.ts:106:7 › on a touch screen › a swipe reaches the last menu item above the account row 
+✓  469 [tablet] › apps/web-e2e/src/shell/nav-overlay.spec.ts:59:5 › the expanded navigation closes on a page pick, Escape and an outside click 
+✓  472 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow 
+✓  471 [tablet] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport 
+✓  473 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow 
+✓  474 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for ceo › ceo sees exactly the areas their permissions allow 
+✓  475 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow 
+✓  476 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow 
+✓  477 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow 
+✓  478 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for department-head › department-head sees exactly the areas their permissions allow 
+✓  479 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow 
+✓  480 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow 
+✓  481 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow 
+✓  482 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for employee › employee sees exactly the areas their permissions allow 
+✓  483 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for auditor › auditor sees exactly the areas their permissions allow 
+✓  484 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow 
+✓  485 [tablet] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for analyst › analyst sees exactly the areas their permissions allow 
+✓  486 [tablet] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL 
+✓  487 [tablet] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell 
+✓  488 [tablet] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access 
+✓  489 [tablet] › apps/web-e2e/src/shell/states.spec.ts:39:7 › org admin › every navigation area the role can open renders a real screen 
+✓  490 [tablet] › apps/web-e2e/src/shell/states.spec.ts:49:7 › finance controller › a server error shows the error state and recovers on retry 
+✓  491 [tablet] › apps/web-e2e/src/shell/states.spec.ts:73:7 › finance controller › a rejected token ends the session and offers to sign in again 
+✓  492 [tablet] › apps/web-e2e/src/shell/states.spec.ts:94:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end 
+✓  494 [tablet] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors 
+✓  493 [tablet] › apps/web-e2e/src/shell/states.spec.ts:119:7 › super admin › a platform operator sees no tenant financial data 
+-  496 [tablet] › apps/web-e2e/src/spend/approvals.spec.ts:23:7 › approval inbox › Lena approves a request with the budget-impact card and her DoA limit on the route
+-  497 [tablet] › apps/web-e2e/src/spend/approvals.spec.ts:59:7 › actionable approval email › approve from the email link, then reject another request on the reason page
+-  498 [tablet] › apps/web-e2e/src/spend/approvals.spec.ts:89:7 › budget controls seen by the requester › freeze holds a waiting request; set to zero cancels it with the reason
+-  499 [tablet] › apps/web-e2e/src/spend/event-depth.spec.ts:20:7 › event organizer plans and runs an event › plans the checklist, invites people and sees the RSVP tracker
+✓  495 [tablet] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) 
+-  500 [tablet] › apps/web-e2e/src/spend/event-depth.spec.ts:57:7 › event organizer plans and runs an event › marks attendance and applies the attendance-based cost split
+-  501 [tablet] › apps/web-e2e/src/spend/event-depth.spec.ts:97:7 › employee answers an invitation › says Going and gives dietary and accessibility needs
+✓  502 [tablet] › apps/web-e2e/src/spend/event-depth.spec.ts:134:7 › the events dashboard and a closed event scorecard › the dashboard lands on what needs the organizer 
+✓  503 [tablet] › apps/web-e2e/src/spend/event-depth.spec.ts:141:7 › the events dashboard and a closed event scorecard › the template library offers the company templates 
+-  505 [tablet] › apps/web-e2e/src/spend/events.spec.ts:43:7 › event organizer › creates a cross-location event with participants and a cost split, then asks for more funds
+-  506 [tablet] › apps/web-e2e/src/spend/events.spec.ts:118:7 › Inter-Director Budget Contribution Request › Jordan asks, Lena contributes in full, in part and declines; the board shows each
+-  507 [tablet] › apps/web-e2e/src/spend/requests.spec.ts:23:7 › requester › resubmits after changes were asked and compares the versions in the history tab
+-  508 [tablet] › apps/web-e2e/src/spend/requests.spec.ts:57:7 › requester › uploads a receipt on its own page and sees it on the request after verification
+-  509 [tablet] › apps/web-e2e/src/spend/requests.spec.ts:90:7 › requester › a file that is not a PDF, image, CSV or spreadsheet is refused before upload
+-  510 [tablet] › apps/web-e2e/src/spend/requests.spec.ts:104:7 › requester › accepts an approver counter-offer in one step (065)
+-  511 [tablet] › apps/web-e2e/src/spend/requests.spec.ts:132:7 › requester › sees what was approved with used and open amounts
+-  512 [tablet] › apps/web-e2e/src/spend/requests.spec.ts:151:7 › requester › requests funding for a team event in one step
+✓  504 [tablet] › apps/web-e2e/src/spend/event-depth.spec.ts:148:7 › the events dashboard and a closed event scorecard › the wellbeing week shows survey results and its scorecard 
+✓  513 [tablet] › apps/web-e2e/src/spend/requests.spec.ts:186:7 › employee › dashboard shows the request entry points and the upload page 
+✓  514 [tablet] › apps/web-e2e/src/spend/requests.spec.ts:195:7 › employee › cannot open event funding without the organizer permission 
+✓  515 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:46:9 › Wave 2 core acceptance › Step 1 — USD plan context › shows FY2026 plan tie-out in USD and matches the API 
+✓  516 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:72:9 › Wave 2 core acceptance › Step 2 — hierarchy and per-head › shows India hierarchy, per-head Hyderabad and authorized from the ledger 
+-  517 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:91:9 › Wave 2 core acceptance › Step 3 — cross-location event funding › creates a cross-location event and submits it for approval
+-  518 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:143:9 › Wave 2 core acceptance › Step 4 — Inter-Director Budget Contribution Request › Lena contributes in part and declines another ask
+-  519 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:198:9 › Wave 2 core acceptance › Step 5 — DoA approval › Lena approves within her DoA limit and the requester sees the route
+-  520 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:225:9 › Wave 2 core acceptance › Step 6 — freeze and set-to-zero on requests › freeze holds approval; set to zero cancels the request
+✓  521 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:254:9 › Wave 2 core acceptance › Step 7 — actuals import and matching › shows the seeded November ERP import with plan-rate FX 
+✓  522 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:274:9 › Wave 2 core acceptance › Step 8 — event reconciliation › the New York offsite cannot close while an actual is still unmatched 
+✓  523 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:294:9 › Wave 2 core acceptance › Step 9 — GL tie-out › India shows a travel difference; the controller cannot sign off alone 
+✓  524 [mobile] › apps/web-e2e/src/acceptance/wave-2-core.spec.ts:318:9 › Wave 2 core acceptance › Step 10 — utilization and ledger roll-up › utilization by location matches the API totals in USD 
+-  526 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:35:7 › actuals import and matching › imports a file, resolves its unmatched lines from the queue drawer and cross-checks them through the API
+✓  525 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:17:7 › actuals import and matching › shows the November ERP import: auto-matched, partial and unmatched lines by currency at the plan rate 
+✓  527 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:91:7 › actuals import and matching › employees cannot open the actuals screens 
+✓  528 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:105:7 › accruals, commitment hygiene and event close › accruals and prepaids list the seeded Hack Week accrual and the Annual Day venue deposit 
+✓  529 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:118:7 › accruals, commitment hygiene and event close › commitment hygiene prompts to release the stale team lunch commitment 
+✓  530 [mobile] › apps/web-e2e/src/accounting/actuals.spec.ts:129:7 › accruals, commitment hygiene and event close › the New York offsite cannot close while an actual with its event code is unmatched 
+-  532 [mobile] › apps/web-e2e/src/accounting/tieout.spec.ts:30:7 › GL tie-out › a controller prepares and explains a tie-out; a finance admin signs the month off
+✓  531 [mobile] › apps/web-e2e/src/accounting/tieout.spec.ts:14:7 › GL tie-out › the seeded India tie-out shows the travel difference with its unmatched lines and blocks sign-off 
+✓  533 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:34:9 › feature flags (105): a waiting change never reads as a result › as the Finance Controller who would confirm it › shows the state still in force next to the change waiting for a second person 
+✓  534 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:54:9 › feature flags (105): a waiting change never reads as a result › as the Finance Admin who asked for it › the requester is told somebody else has to confirm, and can only withdraw 
+-  536 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:87:9 › a money-affecting switch takes two people › the Finance Admin asks › the flag stays off and the request is recorded as waiting
+-  537 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:110:9 › a money-affecting switch takes two people › the Finance Controller confirms › confirming puts the new state in force and clears the waiting state
+-  538 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:134:7 › a capability that is on is still not permission › the Finance Admin can switch bulk owner invites on
+-  539 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:147:7 › a capability that is on is still not permission › the same person is still refused the capability they just switched on
+✓  535 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:68:9 › feature flags (105): a waiting change never reads as a result › as a read-only analyst › reads the switches without being offered any of them 
+✓  540 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:167:7 › bulk owner invites as the Organization Admin (103a) › tracks who was invited and says an invitation grants nothing 
+✓  541 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:185:9 › data retention and legal holds (111) › as the Organization Admin › presents every period as a provisional default and says which are acted on 
+-  542 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:214:9 › data retention and legal holds (111) › as the Organization Admin › can preview a run but is not offered the irreversible apply
+-  543 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:229:9 › data retention and legal holds (111) › as the Organization Admin › a shortened financial period waits, and the old one stays in force
+-  544 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:256:9 › data retention and legal holds (111) › as the Finance Controller who may apply a run › previews first, then applies it only once DELETE is typed
+-  546 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:304:11 › data retention and legal holds (111) › placing a hold takes two people › the Auditor places it › a new hold protects nothing until somebody else confirms it
+-  547 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:331:11 › data retention and legal holds (111) › placing a hold takes two people › the Finance Controller confirms it › confirming puts the hold in force
+✓  545 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:280:9 › data retention and legal holds (111) › the seeded legal holds › say whether they are in force, who placed them and what releasing means 
+-  549 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:365:7 › users and roles (103) › a grant beyond the requester’s own authority waits, and the roles stay as they were
+✓  548 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:354:7 › users and roles (103) › lists people with their roles and marks the privileged ones 
+-  551 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:412:9 › company settings (102b, 109, 110, 112) › as the Organization Admin › saves a shorter idle timeout
+✓  550 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:403:9 › company settings (102b, 109, 110, 112) › as the Organization Admin › offers only the sections the API says this person may change 
+✓  552 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:429:9 › company settings (102b, 109, 110, 112) › as a read-only analyst › reads the settings with no editing controls at all 
+-  554 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:456:7 › system health and maintenance (114) › announces and then cancels planned maintenance
+✓  553 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:444:7 › system health and maintenance (114) › reports services and nightly jobs without any financial data 
+✓  555 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:481:7 › setup checklist (010a) › counts the steps from the data that exists and links to what is missing 
+✓  556 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:500:9 › my activity (122) › as a department head › shows this person’s own entries and filters them by kind 
+-  558 [mobile] › apps/web-e2e/src/admin/break-glass.spec.ts:59:7 › break-glass access (112) as the Organization Admin › reviews a request, approves it, sees the audited reads and revokes it
+✓  557 [mobile] › apps/web-e2e/src/admin/administration.spec.ts:517:9 › my activity (122) › as an employee › says plainly when a filter matches none of this person’s activity 
+✓  559 [mobile] › apps/web-e2e/src/ai/ask.spec.ts:39:7 › Ask BudgetFlow (011a) › answers about a budget the asker owns, with every figure read from the ledger and labelled as BudgetFlow data 
+✓  560 [mobile] › apps/web-e2e/src/ai/ask.spec.ts:77:7 › Ask BudgetFlow (011a) › refuses a question about a budget outside the asker’s scope without confirming it exists 
+-  562 [mobile] › apps/web-e2e/src/ai/ask.spec.ts:114:7 › Ask BudgetFlow (011a) › keeps the conversation in the asker’s own history and lets them delete it
+✓  561 [mobile] › apps/web-e2e/src/ai/ask.spec.ts:94:7 › Ask BudgetFlow (011a) › refuses to approve a request and sends the asker to the screen where they decide 
+✓  563 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:19:9 › AI feature switches and the states they produce › Ask BudgetFlow in Slack and Teams (061f) › shows the chat feature’s own kill switch as its own state, not as empty data 
+-  565 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:41:9 › AI feature switches and the states they produce › AI settings (113a) › shows the exact fields a feature would send before it is turned on, and holds a finance feature pending until a Finance Admin confirms
+✓  564 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:145:7 › AI query log and accuracy (113a) › the auditor reads the log, which records the scope applied and never the question text 
+✓  566 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:133:9 › AI feature switches and the states they produce › AI settings (113a) › validates the limits in plain English before they can be saved 
+✓  567 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:172:7 › AI query log and accuracy (113a) › accuracy shows every metric against its threshold 
+-  569 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:200:7 › Spending outlook (016b) › keeps the projection apart from the ledger figures and only offers steps the owner takes
+✓  568 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:184:7 › AI query log and accuracy (113a) › an employee is refused the query log in place, with the URL kept 
+✓  570 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:233:7 › Policy assistant (069a) › leads with the rules engine outcome and never repeats it back as an AI explanation 
+✓  571 [mobile] › apps/web-e2e/src/ai/settings.spec.ts:255:7 › Policy assistant (069a) › refuses to explain a request that belongs to someone else 
+-  573 [mobile] › apps/web-e2e/src/ai/suggestions.spec.ts:241:7 › Anomaly flags (017c) › raises an advisory flag with evidence from the records and clears it with a reason
+-  572 [mobile] › apps/web-e2e/src/ai/suggestions.spec.ts:59:7 › AI matching suggestions (080f) › ranks unmatched lines without matching anything, then matches through the normal command and records the decision
+✓  575 [mobile] › apps/web-e2e/src/ai/suggestions.spec.ts:145:7 › AI matching suggestions (080f) › refuses an acceptance that was never applied, straight from the API the screen uses 
+-  574 [mobile] › apps/web-e2e/src/ai/suggestions.spec.ts:280:7 › Receipt extraction (121a) › prefills the details from the verified receipt and records only what the person confirms
+-  577 [mobile] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:16:7 › blocked budgets say why (F5) › a frozen budget shows Request increase disabled with the reason
+-  576 [mobile] › apps/web-e2e/src/ai/suggestions.spec.ts:184:7 › Suggested allocations (022d) › suggests a split the owner can change, then posts it through the normal allocation command
+✓  578 [mobile] › apps/web-e2e/src/budgets/blocked-actions.spec.ts:51:7 › error states read as sentences (F8) › a budget that does not exist says so plainly 
+✓  579 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:24:7 › regional manager (India) › sees the India tree, the per-head budget and Available under its rules 
+✓  581 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:52:7 › regional manager (India) › the allocation workspace blocks a grid that exceeds India 
+✓  580 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:40:7 › regional manager (India) › Bengaluru shows its figures, limits and the pending increase request 
+-  583 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:77:7 › finance admin controls a program › allocates, freezes, reduces within the floor and sets a budget to zero
+-  584 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:137:7 › finance admin controls a program › pastes allocations from Excel into the grid and submits them as one change
+✓  582 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:64:7 › department head (Europe) › lists the Europe budgets with the zeroed one under its own tab 
+-  586 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:174:7 › increase request › the location manager asks; the regional manager approves part of it
+-  587 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:218:7 › per-head driver › allocates rate x eligible headcount from the HR import
+✓  585 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:158:7 › finance admin controls a program › validates a plan spreadsheet with column mapping 
+✓  588 [mobile] › apps/web-e2e/src/budgets/budgets.spec.ts:240:7 › contingency reserve › the CEO sees the pending release with its impact and decision panel 
+-  590 [mobile] › apps/web-e2e/src/channels/channels.spec.ts:86:7 › notifications, settings, discussion and following (123, 059c, 060a) › notifications feed, tasks tab, notification settings and discussion comments
+-  591 [mobile] › apps/web-e2e/src/channels/channels.spec.ts:136:7 › Slack and Teams admin setup, cards, account linking and digests (061b-061e, 064a) › Integration Admin manages Slack/Teams channels, Finance Admin edits digests, and approver views Slack/Teams cards
+✓  592 [mobile] › apps/web-e2e/src/close/close.spec.ts:29:7 › period close checklist › November lists every period of the fiscal year and opens its checklist 
+✓  593 [mobile] › apps/web-e2e/src/close/close.spec.ts:41:7 › period close checklist › a close that cannot happen says so and leaves the button disabled 
+✓  594 [mobile] › apps/web-e2e/src/close/close.spec.ts:51:7 › period close checklist › a hard check cannot be accepted; only soft checks offer a reason 
+-  595 [mobile] › apps/web-e2e/src/close/close.spec.ts:63:7 › accepting a soft check › the controller accepts a soft check with a reason and it stops holding the close
+-  596 [mobile] › apps/web-e2e/src/close/close.spec.ts:93:7 › break-glass reopen › reopening a closed period needs two different people
+✓  597 [mobile] › apps/web-e2e/src/close/close.spec.ts:152:7 › period close scope › someone without ledger access is told so instead of seeing a blank page 
+✓  589 [mobile] › apps/web-e2e/src/channels/channels.spec.ts:26:7 › mobile web approvals, balance check, receipts and alerts (059a, 059b) › an approver works the whole phone app: waiting list, decision, balance, receipt and alerts 
+-  599 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:30:7 › year-end run › a dry run fills the per-budget outcome and execute stays refused with the reason
+✓  598 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:14:7 › year-end run › the FY2026 run opens from the list and offers no execution until it is ready 
+✓  600 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:59:7 › rollover policies › every rollover mode is shown with what it does at year end 
+-  601 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:71:7 › rollover policies › a policy is assigned to a budget with a reason
+✓  602 [mobile] › apps/web-e2e/src/close/year-end.spec.ts:91:7 › year-end scope › an analyst reads the run but is offered no dry run or execution 
+✓  603 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:126:7 › BI connector (092a) › the connector states what it can read and what it can never do 
+-  605 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:163:7 › BI connections (092a, a person connecting their own tool) › a connection token is shown once, and a revoked connection does not look healthy
+✓  604 [mobile] › apps/web-e2e/src/extended/narratives.spec.ts:61:7 › a drafted leadership summary stays a draft until a person reads it (011b) › every number in the text is a BudgetFlow figure, never a raw token 
+✓  606 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:228:7 › connector for AI assistants (092c) › the connector is presented as read-only and offers no action it cannot perform 
+✓  608 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:262:7 › connector for AI assistants (092c) › the consent a person gives says the assistant cannot change anything 
+✓  607 [mobile] › apps/web-e2e/src/extended/narratives.spec.ts:87:7 › a drafted leadership summary stays a draft until a person reads it (011b) › approval waits until the author has opened every section, then freezes the text 
+✓  609 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:280:7 › no-code automations (092b) › platforms carry their allowed state and triggers say they are not delivered yet 
+✓  611 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:317:7 › marketplace partners (092d, administration) › a partner without an approved vendor cannot be enabled, and says why 
+✓  610 [mobile] › apps/web-e2e/src/extended/narratives.spec.ts:125:7 › a read-only analyst reads summaries but does not draft or approve them › the analyst gets the list without a drafting action 
+-  612 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:343:7 › marketplace partners (092d, administration) › syncing a partner says what it moved and that nothing reached the ledger
+-  613 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:366:7 › marketplace browse and booking (092d) › an organizer asks a partner for a price and gets a quote, not a commitment
+✓  614 [mobile] › apps/web-e2e/src/extended/outcomes.spec.ts:67:7 › outcome linkage never exposes an individual (015c) › the association note and the thresholds are stated on the page itself 
+✓  615 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:413:7 › embeddable widgets (102d) › the allowed-site list is presented as the boundary it is 
+-  617 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:435:7 › embeddable widgets (102d) › a site that is not on the list is refused, listed with its address, and never free
+✓  616 [mobile] › apps/web-e2e/src/extended/outcomes.spec.ts:87:7 › outcome linkage never exposes an individual (015c) › a figure the API withheld reads "fewer than N", never a blank or a zero 
+✓  618 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:490:7 › embeddable widgets (102d) › the embed frame refuses a host that is not on the list, and says why 
+-  620 [mobile] › apps/web-e2e/src/ecosystem/ecosystem.spec.ts:512:7 › another company (102d, tenant isolation) › an admin of another company gets nothing from this company's widget
+✓  619 [mobile] › apps/web-e2e/src/extended/outcomes.spec.ts:118:7 › retention cohorts stay with the roles that read people company-wide › a regional manager gets pulse and eNPS but is told why retention is absent 
+✓  621 [mobile] › apps/web-e2e/src/extended/outcomes.spec.ts:138:7 › outcome figures are not for everyone › an employee is refused the outcomes screen 
+✓  623 [mobile] › apps/web-e2e/src/extended/recognition.spec.ts:78:7 › recognition spends a budget, a thank-you note does not (120a) › the giver is never offered as their own recipient 
+✓  622 [mobile] › apps/web-e2e/src/extended/recognition.spec.ts:50:7 › recognition spends a budget, a thank-you note does not (120a) › a frozen Recognition budget refuses its award type by name, in the form 
+✓  625 [mobile] › apps/web-e2e/src/extended/recognition.spec.ts:124:7 › organizer recognition credits the work without exposing a respondent (122b) › the profile shows the seeded thank-you notes and guards small feedback groups 
+✓  624 [mobile] › apps/web-e2e/src/extended/recognition.spec.ts:96:7 › a people manager gives a thank-you note (120a) › a thank-you note is given without touching a budget 
+✓  626 [mobile] › apps/web-e2e/src/extended/scenarios.spec.ts:44:7 › a what-if scenario is a projection, not a decision (031a) › the list names the seeded scenario and says nothing here has changed a budget 
+✓  627 [mobile] › apps/web-e2e/src/extended/scenarios.spec.ts:65:7 › a what-if scenario is a projection, not a decision (031a) › the editor projects a reduction while the budget keeps the balances it has 
+✓  628 [mobile] › apps/web-e2e/src/extended/scenarios.spec.ts:107:7 › a what-if scenario is a projection, not a decision (031a) › a scenario whose baseline has moved refuses promotion and says so before the dialog 
+✓  629 [mobile] › apps/web-e2e/src/extended/scenarios.spec.ts:163:7 › scenarios are private to the people who model them › an employee is refused the scenarios screen 
+✓  630 [mobile] › apps/web-e2e/src/extended/wallets.spec.ts:49:7 › a wallet is an allowance inside a budget (120b) › an allowance is visible before any wallet row exists 
+✓  631 [mobile] › apps/web-e2e/src/extended/wallets.spec.ts:130:7 › the reviewer queue shows what is waiting, and nothing else (120b) › a programme reviewer sees the queue with its pre-encumbrance explained 
+✓  632 [mobile] › apps/web-e2e/src/extended/wallets.spec.ts:72:7 › a wallet is an allowance inside a budget (120b) › a claim over the allowance is refused with the amount it is over by 
+✓  633 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:12:7 › fiscal calendars › shows the Hyland calendars, the UK 53-week year and ordered period actions 
+-  635 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:32:7 › fiscal calendars › creates a 4-4-5 calendar with a live preview and closes, locks and reopens periods in order
+✓  634 [mobile] › apps/web-e2e/src/extended/wallets.spec.ts:97:7 › a wallet is an allowance inside a budget (120b) › a claim states the receipt it needs and refuses to submit without one 
+-  637 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:93:9 › exchange rates › finance admin › adds a spot rate and sees which plan years are locked
+✓  636 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:68:7 › exchange rates › converts INR at the locked plan rate and at spot, showing the FX effect separately 
+-  639 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:140:7 › master data › adds and blocks a vendor, and adds and retires a reason code
+✓  640 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:180:9 › delegation of authority › finance controller › checks a limit exactly at and one cent above the threshold 
+✓  641 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:199:9 › delegation of authority › employee › cannot open the DoA matrix 
+✓  638 [mobile] › apps/web-e2e/src/finance-admin/finance-setup.spec.ts:115:7 › master data › legal entities, GL mapping, vendors and reason codes read correctly 
+✓  642 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:118:7 › connector hub (092) › an integration admin sees every connector, and the broken one is named 
+✓  643 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:15:7 › org admin › sees the whole Hyland hierarchy and a unit with manager, headcount and history 
+-  644 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:153:7 › connector hub (092) › a connector the provider refuses says what stopped and offers the fix
+-  645 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:40:7 › org admin › adds a unit from a future date and renames it later, keeping history
+-  647 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:78:7 › org admin › a backdated change is refused with a plain-English reason
+✓  646 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:191:7 › credentials (092 Connection tab) › a stored credential is never shown, only when it was set and by whom 
+✓  648 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:95:9 › scope › regional manager › sees the India subtree only and cannot change it 
+-  649 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:209:7 › credentials (092 Connection tab) › replacing a credential keeps it off the screen and tells the admin to test it
+-  651 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:236:7 › running a sync (092 Sync tab, 099) › a run reports what it moved, and running it again applies nothing twice
+-  652 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:293:7 › API keys (101) › a key is shown once, then only by its prefix, and cannot approve anything
+-  653 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:332:7 › API keys (101) › revoking states the consequence and needs the key name typed
+-  654 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:369:7 › webhooks (101) › a test ping is reported honestly and lands in the delivery log
+✓  650 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:110:9 › scope › employee › sees only their own location and team 
+✓  655 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:393:7 › webhooks (101) › removing an endpoint says what goes quiet first 
+-  657 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:410:7 › identity and SCIM (098) › a SCIM token is shown once and the list keeps only its prefix
+-  658 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:434:7 › cross-source duplicates (99a) › finance keeps one line as the record and the other is excluded, not deleted
+✓  656 [mobile] › apps/web-e2e/src/org/org-hierarchy.spec.ts:121:9 › scope › finance admin › reads the whole org but has no change actions and cannot import 
+✓  660 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:14:9 › people › org admin › finds a person and opens their profile with reporting history 
+✓  659 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:500:9 › who may do what › as an auditor › the connectors are readable and every action is absent 
+✓  661 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:31:9 › people › employee › sees colleagues in their own location only 
+✓  662 [mobile] › apps/web-e2e/src/integrations/integrations.spec.ts:520:9 › who may do what › as an employee › integrations are refused, in place, with the URL kept 
+-  664 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:56:7 › headcount › validates an HR file, refuses bad lines, then imports a clean file
+-  665 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:93:7 › org import › plans and applies a hierarchy file from an effective date
+-  666 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:115:7 › cost centers › adds a cost center from a future date and deactivates it
+✓  663 [mobile] › apps/web-e2e/src/org/people-headcount.spec.ts:45:7 › headcount › shows the latest HR snapshot by location and team with the change since the previous import 
+✓  668 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:166:7 › forecast and variance (087) › comparing two snapshots adds the previous forecast and the change 
+✓  667 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:116:7 › forecast and variance (087) › the report shows the API notes, the method, and the variance direction as a word 
+✓  670 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:207:7 › forecast cycles (87a) › finance monitors a cycle and the actions come from the API, not the browser 
+✓  671 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:261:7 › forecast cycles (87a) › a closed cycle is read-only and says its snapshot cannot change 
+✓  669 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:183:7 › forecast and variance (087) › “commentary required only” narrows the report to the rows that owe an explanation 
+-  673 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:312:7 › forecast cycles (87a) › a large variance without commentary is refused on the field, with the figure spelled out
+✓  672 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:283:7 › forecast cycles (87a) › an owner sees only their own budgets and is told so 
+✓  674 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:354:7 › forecast cycles (87a) › the method cards carry the amounts and the sentence behind each 
+✓  675 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:378:7 › board and FP&A pack (16a) › the pack renders the API pages, keeps an empty page with its statement, and bridges FX separately 
+-  677 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:424:7 › board and FP&A pack (16a) › generating a pack queues it, polls it and offers the two files
+✓  676 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:412:7 › board and FP&A pack (16a) › the open period is a draft and every page is watermarked 
+✓  678 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:453:7 › who may open what › an owner-scoped role opens 087 but is refused the board pack 
+✓  679 [mobile] › apps/web-e2e/src/reports/forecast-board-pack.spec.ts:493:7 › who may open what › an employee reaches neither the cycle nor the pack 
+✓  681 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:99:7 › the shared report frame (80-86, 15a, 15b) › budget versus actual renders the server figures and says they tie to the ledger 
+✓  682 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:125:7 › the shared report frame (80-86, 15a, 15b) › every report in the catalog opens in the same frame 
+✓  683 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:137:7 › the shared report frame (80-86, 15a, 15b) › a drillable figure opens the ledger lines behind it 
+-  684 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:151:7 › the shared report frame (80-86, 15a, 15b) › an export is recorded honestly: no file is promised
+✓  685 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:168:7 › budget health (13) › the five checks are summarised, mapped and written out per budget 
+✓  680 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:66:7 › report catalog (79) › a finance admin sees every report grouped by the question it answers 
+✓  686 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:201:7 › scope › a budget owner sees only their subtree, and is told so 
+✓  687 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:230:7 › scope › the catalog hides a company-wide report from a scoped owner, and opening it is refused 
+✓  688 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:253:7 › scope › an employee has no reports area at all 
+-  690 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:301:7 › scheduled reports (91) › a finance admin pauses a schedule and resumes it
+-  691 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:320:7 › saved views › an auditor saves the filters of a report and opens it again from the catalog
+-  692 [mobile] › apps/web-e2e/src/rules/rules.spec.ts:11:7 › rules and policies › Finance sees what the rules are doing and opens the one that needs attention
+-  693 [mobile] › apps/web-e2e/src/rules/rules.spec.ts:35:7 › rules and policies › Finance tests a request and sees which rule decided it and why
+-  694 [mobile] › apps/web-e2e/src/rules/rules.spec.ts:55:7 › rules and policies › Finance settles a post-spend exception and it leaves the open queue
+-  695 [mobile] › apps/web-e2e/src/rules/rules.spec.ts:88:7 › approval limits › the CEO approves the approval-limit change Finance submitted
+✓  689 [mobile] › apps/web-e2e/src/reports/reports.spec.ts:270:7 › scheduled reports (91) › the seeded schedules show their rhythm, recipients and delivery history 
+-  696 [mobile] › apps/web-e2e/src/rules/rules.spec.ts:112:7 › policy settings › every policy section shows its settings
+-  697 [mobile] › apps/web-e2e/src/rules/rules.spec.ts:137:7 › approval history › an auditor reads every decision and narrows it to the rejections
+-  699 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:60:7 › regional manager in Bengaluru › an INR amount uses lakh grouping
+✓  698 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:38:7 › regional manager in Bengaluru › India is held in USD with western grouping; times show IST 
+✓  700 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:99:9 › department-head in Europe/Berlin › amounts use western grouping and times show the local offset 
+✓  701 [mobile] › apps/web-e2e/src/shell/formatting.spec.ts:99:9 › budget-owner in America/New_York › amounts use western grouping and times show the local offset 
+✓  702 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:87:7 › ceo › the answer line states where the year stands, from the API figures 
+✓  703 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:124:7 › ceo › every bucket tile carries its denominator and matches the roll-up 
+✓  704 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:158:7 › ceo › needs attention lists the API reasons worst first, each linking to its budget 
+✓  706 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:265:7 › ceo › the health filter uses the levels the API returned, not thresholds of its own 
+✓  705 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:203:7 › ceo › the budget list searches, sorts, paginates and filters, and a row opens the budget 
+✓  707 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:290:7 › ceo › company-wide Available and a budget’s own Available are labelled apart 
+✓  708 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:323:7 › ceo › waiting on your decision reflects the inbox the API returned 
+✓  709 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:350:7 › ceo › a failing section shows its own retry and leaves the rest of the page standing 
+✓  710 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:394:7 › ceo › the overview adds no combobox to Home 
+✓  711 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:404:7 › finance controller › a finance role sees the same tenant-wide overview 
+✓  712 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:421:7 › department head › a department head sees their own subtree, and the page says so 
+✓  714 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:467:7 › platform operator › a platform operator still sees only the break-glass banner 
+✓  713 [mobile] › apps/web-e2e/src/shell/home-overview.spec.ts:449:7 › employee › a role without budget visibility keeps the placeholder Home 
+✓  715 [mobile] › apps/web-e2e/src/shell/nav-overlay.spec.ts:59:5 › the expanded navigation closes on a page pick, Escape and an outside click 
+✓  717 [mobile] › apps/web-e2e/src/shell/responsive.spec.ts:8:5 › the navigation opens, navigates and closes on every viewport 
+✓  718 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for super-admin › super-admin sees exactly the areas their permissions allow 
+✓  719 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for org-admin › org-admin sees exactly the areas their permissions allow 
+✓  720 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for ceo › ceo sees exactly the areas their permissions allow 
+✓  721 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for finance-admin › finance-admin sees exactly the areas their permissions allow 
+✓  722 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for finance-controller › finance-controller sees exactly the areas their permissions allow 
+✓  723 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for budget-owner › budget-owner sees exactly the areas their permissions allow 
+✓  716 [mobile] › apps/web-e2e/src/shell/nav-overlay.spec.ts:106:7 › on a touch screen › a swipe reaches the last menu item above the account row 
+✓  724 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for department-head › department-head sees exactly the areas their permissions allow 
+✓  725 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for regional-manager › regional-manager sees exactly the areas their permissions allow 
+✓  726 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for location-manager › location-manager sees exactly the areas their permissions allow 
+✓  727 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for event-organizer › event-organizer sees exactly the areas their permissions allow 
+✓  728 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for employee › employee sees exactly the areas their permissions allow 
+✓  729 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for auditor › auditor sees exactly the areas their permissions allow 
+✓  730 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for integration-admin › integration-admin sees exactly the areas their permissions allow 
+✓  731 [mobile] › apps/web-e2e/src/shell/role-navigation.spec.ts:297:9 › navigation for analyst › analyst sees exactly the areas their permissions allow 
+✓  732 [mobile] › apps/web-e2e/src/shell/states.spec.ts:10:7 › employee › a page outside the role shows the forbidden state and keeps the URL 
+✓  733 [mobile] › apps/web-e2e/src/shell/states.spec.ts:21:7 › employee › an unknown address shows page not found inside the shell 
+✓  734 [mobile] › apps/web-e2e/src/shell/states.spec.ts:27:7 › employee › home explains what the role will see without budget access 
+✓  735 [mobile] › apps/web-e2e/src/shell/states.spec.ts:39:7 › org admin › every navigation area the role can open renders a real screen 
+✓  736 [mobile] › apps/web-e2e/src/shell/states.spec.ts:49:7 › finance controller › a server error shows the error state and recovers on retry 
+✓  737 [mobile] › apps/web-e2e/src/shell/states.spec.ts:73:7 › finance controller › a rejected token ends the session and offers to sign in again 
+✓  738 [mobile] › apps/web-e2e/src/shell/states.spec.ts:94:7 › finance controller › an account without a BudgetFlow membership gets a clear dead end 
+✓  739 [mobile] › apps/web-e2e/src/shell/states.spec.ts:119:7 › super admin › a platform operator sees no tenant financial data 
+✓  740 [mobile] › apps/web-e2e/src/smoke/app-loads.spec.ts:9:5 › the shell loads with the Satori light theme and no errors 
+-  742 [mobile] › apps/web-e2e/src/spend/approvals.spec.ts:23:7 › approval inbox › Lena approves a request with the budget-impact card and her DoA limit on the route
+-  743 [mobile] › apps/web-e2e/src/spend/approvals.spec.ts:59:7 › actionable approval email › approve from the email link, then reject another request on the reason page
+-  744 [mobile] › apps/web-e2e/src/spend/approvals.spec.ts:89:7 › budget controls seen by the requester › freeze holds a waiting request; set to zero cancels it with the reason
+-  745 [mobile] › apps/web-e2e/src/spend/event-depth.spec.ts:20:7 › event organizer plans and runs an event › plans the checklist, invites people and sees the RSVP tracker
+-  746 [mobile] › apps/web-e2e/src/spend/event-depth.spec.ts:57:7 › event organizer plans and runs an event › marks attendance and applies the attendance-based cost split
+✓  741 [mobile] › apps/web-e2e/src/smoke/app-loads.spec.ts:31:5 › unknown routes fall back to the app (single-page routing) 
+-  747 [mobile] › apps/web-e2e/src/spend/event-depth.spec.ts:97:7 › employee answers an invitation › says Going and gives dietary and accessibility needs
+✓  748 [mobile] › apps/web-e2e/src/spend/event-depth.spec.ts:134:7 › the events dashboard and a closed event scorecard › the dashboard lands on what needs the organizer 
+✓  749 [mobile] › apps/web-e2e/src/spend/event-depth.spec.ts:141:7 › the events dashboard and a closed event scorecard › the template library offers the company templates 
+-  751 [mobile] › apps/web-e2e/src/spend/events.spec.ts:43:7 › event organizer › creates a cross-location event with participants and a cost split, then asks for more funds
+-  752 [mobile] › apps/web-e2e/src/spend/events.spec.ts:118:7 › Inter-Director Budget Contribution Request › Jordan asks, Lena contributes in full, in part and declines; the board shows each
+-  753 [mobile] › apps/web-e2e/src/spend/requests.spec.ts:23:7 › requester › resubmits after changes were asked and compares the versions in the history tab
+-  754 [mobile] › apps/web-e2e/src/spend/requests.spec.ts:57:7 › requester › uploads a receipt on its own page and sees it on the request after verification
+-  755 [mobile] › apps/web-e2e/src/spend/requests.spec.ts:90:7 › requester › a file that is not a PDF, image, CSV or spreadsheet is refused before upload
+-  756 [mobile] › apps/web-e2e/src/spend/requests.spec.ts:104:7 › requester › accepts an approver counter-offer in one step (065)
+-  757 [mobile] › apps/web-e2e/src/spend/requests.spec.ts:132:7 › requester › sees what was approved with used and open amounts
+-  758 [mobile] › apps/web-e2e/src/spend/requests.spec.ts:151:7 › requester › requests funding for a team event in one step
+✓  750 [mobile] › apps/web-e2e/src/spend/event-depth.spec.ts:148:7 › the events dashboard and a closed event scorecard › the wellbeing week shows survey results and its scorecard 
+✓  760 [mobile] › apps/web-e2e/src/spend/requests.spec.ts:195:7 › employee › cannot open event funding without the organizer permission 
+✓  759 [mobile] › apps/web-e2e/src/spend/requests.spec.ts:186:7 › employee › dashboard shows the request entry points and the upload page 
+170 skipped
+590 passed (4.6m)

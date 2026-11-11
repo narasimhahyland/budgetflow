@@ -1,0 +1,8 @@
+1) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:103:13 › 011a-ai-assistant-panel refused-out-of-scope › tablet 
+2) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:103:13 › 011a-ai-assistant-panel action-redirect › tablet 
+3 flaky
+3) [visual-light] › apps/web-e2e/src/visual/visual.spec.ts:103:13 › 069a-policy-assistant is-allowed › tablet 
+941 passed (15.3m)
+[visual-light] › apps/web-e2e/src/visual/visual.spec.ts:103:13 › 011a-ai-assistant-panel action-redirect › tablet 
+[visual-light] › apps/web-e2e/src/visual/visual.spec.ts:103:13 › 011a-ai-assistant-panel refused-out-of-scope › tablet 
+[visual-light] › apps/web-e2e/src/visual/visual.spec.ts:103:13 › 069a-policy-assistant is-allowed › tablet 
