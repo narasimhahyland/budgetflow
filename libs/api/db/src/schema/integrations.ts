@@ -9,7 +9,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
+import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
 import { importBatches } from './actuals';
 import { commitments, events } from './spend';
 import { tenants } from './tenancy';
@@ -104,7 +104,7 @@ export const syncRuns = pgTable(
     direction: varchar('direction', { length: 10 }).notNull(),
     mode: varchar('mode', { length: 10 }).notNull(),
     status: varchar('status', { length: 20 }).notNull().default('running'),
-    startedAt: ts('started_at').notNull().defaultNow(),
+    startedAt: ts('started_at').notNull().default(appNow),
     finishedAt: ts('finished_at'),
     recordsRead: integer('records_read').notNull().default(0),
     recordsApplied: integer('records_applied').notNull().default(0),
@@ -142,7 +142,7 @@ export const integrationMessages = pgTable(
     lastError: text('last_error').notNull(),
     attempts: integer('attempts').notNull().default(1),
     maxAttempts: integer('max_attempts').notNull().default(8),
-    firstFailedAt: ts('first_failed_at').notNull().defaultNow(),
+    firstFailedAt: ts('first_failed_at').notNull().default(appNow),
     nextRetryAt: ts('next_retry_at'),
     movedToDeadLetterAt: ts('moved_to_dead_letter_at'),
     status: varchar('status', { length: 20 }).notNull().default('retrying'),
@@ -169,7 +169,7 @@ export const inboundWebhookEvents = pgTable(
       .references(() => integrationConnections.id),
     externalEventId: varchar('external_event_id', { length: 200 }).notNull(),
     eventType: varchar('event_type', { length: 100 }).notNull(),
-    receivedAt: ts('received_at').notNull().defaultNow(),
+    receivedAt: ts('received_at').notNull().default(appNow),
     syncRunId: uuid('sync_run_id').references(() => syncRuns.id),
     recordsApplied: integer('records_applied').notNull().default(0),
   },
@@ -245,7 +245,7 @@ export const apiKeyRequests = pgTable(
     apiKeyId: uuid('api_key_id')
       .notNull()
       .references(() => apiKeys.id),
-    at: ts('at').notNull().defaultNow(),
+    at: ts('at').notNull().default(appNow),
     method: varchar('method', { length: 10 }).notNull(),
     path: varchar('path', { length: 300 }).notNull(),
     status: integer('status').notNull(),
@@ -280,7 +280,7 @@ export const webhookEndpoints = pgTable(
     status: varchar('status', { length: 20 }).notNull().default('active'),
     secretRef: uuid('secret_ref'),
     previousSecretRef: uuid('previous_secret_ref'),
-    secretSetAt: ts('secret_set_at').notNull().defaultNow(),
+    secretSetAt: ts('secret_set_at').notNull().default(appNow),
     secretRotatedAt: ts('secret_rotated_at'),
     previousSecretValidUntil: ts('previous_secret_valid_until'),
     failingSince: ts('failing_since'),
@@ -329,7 +329,7 @@ export const scimOperations = pgTable(
   {
     id: pk(),
     tenantId: tenantRef().references(() => tenants.id),
-    at: ts('at').notNull().defaultNow(),
+    at: ts('at').notNull().default(appNow),
     operation: varchar('operation', { length: 20 }).notNull(),
     externalId: varchar('external_id', { length: 120 }).notNull(),
     personId: uuid('person_id'),

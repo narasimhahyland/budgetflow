@@ -9,6 +9,8 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  nowUtc,
+  todayUtc,
 } from '@bf/api/core';
 import {
   accruals,
@@ -251,8 +253,10 @@ export class ChannelsService {
   private async deriveTasks(tx: Tx, actor: RequestActor): Promise<TaskItem[]> {
     if (!actor.personId) return [];
     const out: TaskItem[] = [];
-    const now = Date.now();
-    const todayStr = new Date(now).toISOString().slice(0, 10);
+    // The API clock, like the due times it compares against: approval tasks are stamped from
+    // nowUtc() and seeded under the same pinned instant.
+    const now = nowUtc().getTime();
+    const todayStr = todayUtc();
 
     // 1. Open approval tasks (assigned or delegated)
     const inbox = await this.approvals.inbox(actor, 'assigned', 25);

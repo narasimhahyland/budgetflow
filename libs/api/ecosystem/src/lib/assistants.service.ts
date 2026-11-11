@@ -9,6 +9,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  nowUtc,
 } from '@bf/api/core';
 import { withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
@@ -490,7 +491,7 @@ export class AssistantConnectorService {
     const { enabled, config } = await this.surfaces.assistants(tx, actor.tenantId);
     const [connectedPeople, calls, aiOn] = await Promise.all([
       this.connections.activeCount(tx, 'assistant'),
-      this.connections.callsSince(tx, 'assistant', new Date(Date.now() - WEEK_MS)),
+      this.connections.callsSince(tx, 'assistant', new Date(nowUtc().getTime() - WEEK_MS)),
       this.aiSettings.isEnabled(tx, actor.tenantId, 'mcp'),
     ]);
     return {

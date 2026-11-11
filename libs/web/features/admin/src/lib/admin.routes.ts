@@ -48,6 +48,14 @@ export const adminRoutes: Routes = [
     loadComponent: () => import('./settings.page').then((m) => m.AdminSettingsPage),
   },
   {
+    // No route guard: the platform operator holds no tenant permission besides asking for access, so
+    // the page relies on the API, which answers 403 to anyone who may neither read nor request.
+    path: 'admin/security/break-glass',
+    title: 'Break-glass access',
+    data: { pageTitle: 'Break-glass access', section: 'Admin' },
+    loadComponent: () => import('./break-glass.page').then((m) => m.BreakGlassPage),
+  },
+  {
     path: 'admin/health',
     title: 'System health',
     data: { pageTitle: 'System health', section: 'Admin' },
