@@ -1,6 +1,12 @@
 # BudgetFlow Enterprise — final report
 
 Phase 20, 11 November 2026, against `main` at `30d64422`. This closes the build plan's 20 phases.
+
+**Not everything the plan lists is built.** A review of the plan against the code after this report
+was first written found unbuilt scope (Navan live integration, several dashboards, report file
+exports, tax and benefit ledgers, finance exports, the developer portal, the installable app, and
+more) and an acceptance scenario thinner than the plan's ten steps. Each is a work package in
+[`docs/gap-closure-plan.md`](../../docs/gap-closure-plan.md); read this report with it.
 Every figure below is derived from the repository; the evidence pack for each phase is under
 `evidence/phase-NN/`.
 
@@ -37,18 +43,18 @@ A multi-tenant corporate budget delegation and control platform, end to end:
 
 The definition of done is functional proof on the running product, not unit tests.
 
-| Proof                                               | Result                                                                          | Evidence                    |
-| --------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------- |
-| Every gate mode on `main`, fresh seed               | all pass                                                                        | `evidence/phase-19/`        |
-| API scenarios over HTTP, real tokens per role       | 627 passed                                                                      | `evidence/phase-19/`        |
-| User journeys, desktop, tablet, mobile              | 590 passed (170 skipped by design: data-changing journeys run once, on desktop) | `evidence/phase-19/`        |
-| Core acceptance scenario, ten steps                 | all pass                                                                        | `evidence/phase-19/`        |
-| Visual regression, every screen state               | 941 passed, 3 flaky (known id-wrap in AI captions)                              | `evidence/phase-19/`        |
-| Every routed screen reached by a functional check   | 112 of 112                                                                      | `evidence/phase-17/` (#101) |
-| Migrations from empty and from the previous release | pass, data survives                                                             | `evidence/phase-17/` (#101) |
-| Performance on the seed and on 20,136 ledger lines  | all 2xx; two aggregating reads slow 3–4x, the rest flat                         | `evidence/phase-17/` (#101) |
-| Ledger rebuild and audit chain at volume            | clean over 20,130 lines; chain valid                                            | `evidence/phase-17/` (#101) |
-| Security review, eight checks plus secrets          | six findings, all fixed and proven                                              | `evidence/phase-18/`        |
+| Proof                                               | Result                                                                          | Evidence             |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------- |
+| Every gate mode on `main`, fresh seed               | all pass                                                                        | `evidence/phase-19/` |
+| API scenarios over HTTP, real tokens per role       | 627 passed                                                                      | `evidence/phase-19/` |
+| User journeys, desktop, tablet, mobile              | 590 passed (170 skipped by design: data-changing journeys run once, on desktop) | `evidence/phase-19/` |
+| Core acceptance scenario, ten steps                 | all pass                                                                        | `evidence/phase-19/` |
+| Visual regression, every screen state               | 941 passed, 3 flaky (known id-wrap in AI captions)                              | `evidence/phase-19/` |
+| Every routed screen reached by a functional check   | 112 of 112                                                                      | `evidence/phase-17/` |
+| Migrations from empty and from the previous release | pass, data survives                                                             | `evidence/phase-17/` |
+| Performance on the seed and on 20,136 ledger lines  | all 2xx; two aggregating reads slow 3–4x, the rest flat                         | `evidence/phase-17/` |
+| Ledger rebuild and audit chain at volume            | clean over 20,130 lines; chain valid                                            | `evidence/phase-17/` |
+| Security review, eight checks plus secrets          | six findings, all fixed and proven                                              | `evidence/phase-18/` |
 
 ## Decisions the user took
 
@@ -68,8 +74,8 @@ The definition of done is functional proof on the running product, not unit test
 
 **Waiting on the user**
 
-- Review and merge [#101](https://github.com/narasimhahyland/budgetflow/pull/101), the Phase 17
-  evidence pack (every item done or deferred).
+- Decide the open questions in [`docs/gap-closure-plan.md`](../../docs/gap-closure-plan.md)
+  (D1–D6) and the order of its work packages.
 - Add to `infra/.env.example`: `TRUSTED_PROXY_CIDRS`, the five production secrets
   (`SLACK_SIGNING_SECRET`, `TEAMS_WEBHOOK_SECRET`, `CHAT_LINK_SECRET`, `APPROVAL_LINK_SECRET`,
   `INTEGRATIONS_SECRET_KEY`) and `BF_ALLOW_DEV_SECRETS` for the local stack. The file is blocked
