@@ -39,8 +39,8 @@ Delivery runs as 20 gated phases. A phase is on `main` only when its evidence pa
 | 16    | Ecosystem: BI, assistant, no-code, marketplace     | [yes](evidence/phase-16/) |
 | 17    | Quality: traceability, migrations, performance     | in review (PR #101)       |
 | 18    | Security review and break-glass access             | [yes](evidence/phase-18/) |
-| 19    | Local evidence: whole product, all gates           | in progress               |
-| 20    | Docs and final report                              | in progress               |
+| 19    | Local evidence: whole product, all gates           | [yes](evidence/phase-19/) |
+| 20    | Docs and final report                              | [yes](evidence/phase-20/) |
 
 Each pack holds the gate summary, the functional outcome table, scrubbed API responses and
 database proofs, and the visual QA report — [`evidence/README.md`](evidence/README.md) explains the
