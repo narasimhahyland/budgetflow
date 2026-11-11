@@ -42,23 +42,45 @@
   }
 }
 
+// The company is a static label (no switcher): one row with an organisation icon.
 .bf-shell__brand {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 12px;
   margin: 4px 12px 12px;
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: var(--mat-sys-corner-medium);
   background: var(--sat-sys-on-primary-opacity-12);
   color: var(--mat-sys-on-primary);
 }
 
-.bf-shell__product {
-  font: var(--mat-sys-title-medium);
+.bf-shell__brand-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
 }
 
 .bf-shell__company {
+  font: var(--mat-sys-title-small);
+}
+
+.bf-nav-user {
+  display: inline-flex;
+  min-width: 0;
+  flex-direction: column;
+  text-align: start;
+}
+
+.bf-nav-user__name,
+.bf-nav-user__role {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bf-nav-user__role {
   font: var(--mat-sys-body-small);
+  opacity: 0.8;
 }
 
 .bf-shell__group {
@@ -111,25 +133,16 @@
   white-space: nowrap;
 }
 
+// The avatar menu trigger ends 16px from the edge, not on it (section 3 outer margin).
 .bf-header__actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding-inline-end: 16px;
 }
 
-.bf-chip {
-  padding: 4px 12px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-full);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-label-medium);
-  white-space: nowrap;
-}
-
-.bf-chip--primary {
-  border-color: transparent;
-  background: var(--mat-sys-primary-container);
-  color: var(--mat-sys-on-primary-container);
+.bf-header__back {
+  display: none;
 }
 
 .bf-account {
@@ -137,6 +150,22 @@
   flex-direction: column;
   gap: 2px;
   padding: 12px 16px 8px;
+}
+
+.bf-account--header {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 240px;
+  margin-bottom: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.bf-account__who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .bf-account__name {
@@ -152,23 +181,157 @@
   width: 280px;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 8px 16px 12px;
+  padding: 8px 0 4px;
+}
+
+.bf-notifications__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 8px 8px 16px;
 }
 
 .bf-notifications__title {
-  margin: 0 0 12px;
+  margin: 0;
   font: var(--mat-sys-title-medium);
+}
+
+.bf-notifications__tabs {
+  margin: 0 16px 8px;
+}
+
+.bf-notifications__count {
+  margin-inline-start: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-notifications__problem {
+  margin: 0 16px 8px;
+  color: var(--mat-sys-error);
+  font: var(--mat-sys-body-small);
+}
+
+// One row per notification: tone icon, title, detail, time and an unread dot. The text wraps
+// inside the menu item instead of being cut to one line.
+.bf-notifications__item {
+  height: auto;
+  min-height: 64px;
+  padding-block: 8px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.bf-notifications__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  white-space: normal;
+}
+
+.bf-notifications__item .bf-notifications__text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  white-space: normal;
+}
+
+.bf-notifications__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.bf-notifications__icon mat-icon {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.bf-notifications__icon--info {
+  background: var(--sat-sys-info-container);
+  color: var(--sat-sys-info-icon);
+}
+
+.bf-notifications__icon--warning {
+  background: var(--sat-sys-warning-container);
+  color: var(--sat-sys-warning-icon);
+}
+
+.bf-notifications__icon--important {
+  background: var(--sat-sys-important-container);
+  color: var(--sat-sys-important-icon);
+}
+
+.bf-notifications__icon--success {
+  background: var(--sat-sys-success-container);
+  color: var(--sat-sys-success-icon);
+}
+
+.bf-notifications__item-title {
+  font: var(--mat-sys-title-small);
+}
+
+.bf-notifications__detail {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.bf-notifications__time {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-small);
+}
+
+.bf-notifications__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-primary);
+}
+
+.bf-notifications__action {
+  flex: none;
+  align-self: center;
+  padding: 4px 12px;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font: var(--mat-sys-label-medium);
 }
 
 .bf-notifications__empty {
   margin: 0;
+  padding: 8px 16px 0;
   font: var(--mat-sys-title-small);
 }
 
 .bf-notifications__hint {
-  margin: 4px 0 0;
+  margin: 4px 0 8px;
+  padding: 0 16px;
   color: var(--mat-sys-on-surface-variant);
   font: var(--mat-sys-body-small);
+}
+
+.bf-notifications__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+.bf-notifications__all {
+  justify-content: center;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  color: var(--mat-sys-primary);
 }
 
 .bf-content {
@@ -188,8 +351,20 @@
 
   .bf-header__crumbs,
   .bf-header__product,
-  .bf-chip {
+  .bf-header__fy {
     display: none;
+  }
+
+  .bf-header__back {
+    display: inline-flex;
+  }
+
+  // The header row does not shrink its leading part, so a long page title would push the bell and
+  // avatar past the edge. Cap the title to what is left beside the menu button (44px) and the
+  // actions (100px plus the 16px gap); the page name then ends in an ellipsis.
+  .bf-header__title {
+    max-width: calc(100vw - 168px);
+    gap: 4px;
   }
 
   .bf-header__brand {

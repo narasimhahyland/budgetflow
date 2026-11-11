@@ -17,7 +17,7 @@
       <div class="bf-shell__nav">
         @if (!navState.collapsed()) {
           <div class="bf-shell__brand">
-            <span class="bf-shell__product">BudgetFlow</span>
+            <mat-icon class="bf-shell__brand-icon" svgIcon="graph_org" aria-hidden="true" />
             <span class="bf-shell__company" data-testid="company-name">{{ me()?.tenantName }}</span>
           </div>
         }
@@ -52,7 +52,12 @@
           [attr.aria-label]="'Account menu for ' + (me()?.displayName ?? '')"
         >
           <sat-avatar [initials]="me()?.displayName ?? '' | satPlatformNavInitials" />
-          {{ me()?.displayName }}
+          <span class="bf-nav-user">
+            <span class="bf-nav-user__name">{{ me()?.displayName }}</span>
+            @if (roleLabel()) {
+              <span class="bf-nav-user__role">{{ roleLabel() }}</span>
+            }
+          </span>
         </button>
         <mat-menu #sidebarAccount="matMenu" satPlatformNavUserMenu>
           <div class="bf-account">
@@ -79,6 +84,16 @@
           <mat-icon svgIcon="menu" aria-hidden="true" />
         </button>
         <div satAppHeaderTitle class="bf-header__title">
+          @if (backTo(); as back) {
+            <a
+              mat-icon-button
+              class="bf-header__back"
+              [routerLink]="back.routerLink"
+              [attr.aria-label]="'Back to ' + back.label"
+            >
+              <mat-icon svgIcon="arrow_left" aria-hidden="true" />
+            </a>
+          }
           <span class="bf-header__brand">
             <span class="bf-header__product">BudgetFlow</span>
             <span class="bf-header__company" data-testid="header-company">{{
@@ -90,31 +105,147 @@
         </div>
         <div satAppHeaderActions class="bf-header__actions">
           @if (fiscalYear(); as fy) {
-            <span class="bf-chip bf-chip--primary" [attr.aria-label]="'Fiscal year ' + fy">{{
-              fy
-            }}</span>
-          }
-          @if (me(); as m) {
-            <span class="bf-chip" [attr.aria-label]="'Reporting currency ' + m.reportingCurrency"
-              >Reporting {{ m.reportingCurrency }}</span
+            <sat-category-tag
+              class="bf-header__fy"
+              category="purple"
+              [attr.aria-label]="'Fiscal year ' + fy"
+              >{{ fy }}</sat-category-tag
             >
           }
           <button
             mat-icon-button
             type="button"
-            aria-label="Notifications"
+            [attr.aria-label]="
+              unread() ? 'Notifications, ' + unread() + ' unread' : 'Notifications'
+            "
             [matMenuTriggerFor]="notifications"
+            (menuOpened)="notificationsFeed.reload()"
           >
-            <mat-icon svgIcon="bell" aria-hidden="true" />
+            <mat-icon
+              svgIcon="bell"
+              aria-hidden="true"
+              [matBadge]="unread() || ''"
+              [matBadgeHidden]="!unread()"
+              matBadgeOverlap
+            />
           </button>
           <mat-menu #notifications="matMenu" class="bf-notifications" xPosition="before">
             <div class="bf-notifications__panel" role="region" aria-label="Notifications">
-              <p class="bf-notifications__title">Notifications</p>
-              <p class="bf-notifications__empty">You are all caught up</p>
-              <p class="bf-notifications__hint">
-                Approvals, budget alerts and changes to your budgets will appear here.
-              </p>
-              <a mat-button routerLink="/notifications">See all</a>
+              <div class="bf-notifications__head">
+                <p class="bf-notifications__title">Notifications</p>
+                @if (unread()) {
+                  <button
+                    mat-button
+                    type="button"
+                    class="bf-notifications__mark"
+                    [disabled]="marking()"
+                    (click)="$event.stopPropagation(); markAllRead()"
+                  >
+                    Mark all as read
+                  </button>
+                }
+              </div>
+              <mat-button-toggle-group
+                class="bf-notifications__tabs"
+                aria-label="Notification lists"
+                hideSingleSelectionIndicator
+                [value]="notificationsTab()"
+                (click)="$event.stopPropagation()"
+                (change)="notificationsTab.set($event.value)"
+              >
+                <mat-button-toggle value="all"
+                  >All
+                  <span class="bf-notifications__count">{{ unread() }}</span></mat-button-toggle
+                >
+                <mat-button-toggle value="tasks"
+                  >Tasks
+                  <span class="bf-notifications__count">{{
+                    feed()?.counts?.tasks ?? 0
+                  }}</span></mat-button-toggle
+                >
+              </mat-button-toggle-group>
+              @if (markProblem(); as problem) {
+                <p class="bf-notifications__problem" role="alert">{{ problem }}</p>
+              }
+              @if (notificationsFeed.error()) {
+                <p class="bf-notifications__empty">Notifications could not load</p>
+                <button
+                  mat-button
+                  type="button"
+                  (click)="$event.stopPropagation(); notificationsFeed.reload()"
+                >
+                  Try again
+                </button>
+              } @else if (!feed()) {
+                <div
+                  class="bf-notifications__loading"
+                  aria-busy="true"
+                  aria-label="Loading notifications"
+                >
+                  <sat-ghost [height]="40" fitContainer />
+                  <sat-ghost [height]="40" fitContainer />
+                </div>
+              } @else if (notificationsTab() === 'all') {
+                @for (n of recent(); track n.id) {
+                  <a
+                    mat-menu-item
+                    class="bf-notifications__item"
+                    [routerLink]="n.itemLink ? linkPath(n.itemLink) : '/notifications'"
+                    [queryParams]="n.itemLink ? linkQuery(n.itemLink) : null"
+                  >
+                    <span class="bf-notifications__row">
+                      <span class="bf-notifications__icon bf-notifications__icon--{{ n.tone }}">
+                        <mat-icon [svgIcon]="toneIcon(n.tone)" aria-hidden="true" />
+                      </span>
+                      <span class="bf-notifications__text">
+                        <span class="bf-notifications__item-title">{{ n.title }}</span>
+                        <span class="bf-notifications__detail">{{ n.detail }}</span>
+                        <span class="bf-notifications__time" data-testid="relative-time">{{
+                          n.createdAt | bfDateTime: session.timezone() : 'd MMM, HH:mm'
+                        }}</span>
+                      </span>
+                      @if (!n.readAt) {
+                        <span class="bf-notifications__dot" role="img" aria-label="Unread"></span>
+                      }
+                    </span>
+                  </a>
+                } @empty {
+                  <p class="bf-notifications__empty">You are all caught up</p>
+                  <p class="bf-notifications__hint">
+                    Approvals, budget alerts and changes to your budgets will appear here.
+                  </p>
+                }
+              } @else {
+                @for (task of openTasks(); track task.id) {
+                  <a
+                    mat-menu-item
+                    class="bf-notifications__item"
+                    [routerLink]="linkPath(task.actionLink)"
+                    [queryParams]="linkQuery(task.actionLink)"
+                  >
+                    <span class="bf-notifications__row">
+                      <span class="bf-notifications__icon bf-notifications__icon--warning">
+                        <mat-icon svgIcon="clock" aria-hidden="true" />
+                      </span>
+                      <span class="bf-notifications__text">
+                        <span class="bf-notifications__item-title">{{ task.title }}</span>
+                        <span class="bf-notifications__detail">
+                          @if (task.amount; as a) {
+                            <bf-money [amountMinor]="a.amountMinor" [currency]="a.currency" /> ·
+                          }
+                          {{ task.subtitle }}
+                        </span>
+                      </span>
+                      <span class="bf-notifications__action">{{ task.actionLabel }}</span>
+                    </span>
+                  </a>
+                } @empty {
+                  <p class="bf-notifications__empty">No tasks waiting for you</p>
+                }
+              }
+              <a mat-menu-item class="bf-notifications__all" routerLink="/notifications"
+                >View all notifications</a
+              >
             </div>
           </mat-menu>
           <button
@@ -130,11 +261,27 @@
             />
           </button>
           <mat-menu #account="matMenu" xPosition="before">
-            <div class="bf-account">
-              <span class="bf-account__name">{{ me()?.displayName }}</span>
-              <span class="bf-account__meta">{{ userSubtitle() }}</span>
-              <span class="bf-account__meta">{{ me()?.tenantName }}</span>
+            <div class="bf-account bf-account--header">
+              <sat-avatar
+                category="purple"
+                size="36"
+                [initials]="me()?.displayName ?? '' | satPlatformNavInitials"
+              />
+              <div class="bf-account__who">
+                <span class="bf-account__name">{{ me()?.displayName }}</span>
+                @if (roleLabel()) {
+                  <span class="bf-account__meta">{{ roleLabel() }}</span>
+                }
+                <span class="bf-account__meta">{{ officeLine() }}</span>
+                <span class="bf-account__meta">Timezone: {{ session.timezone() }}</span>
+              </div>
             </div>
+            @if (session.can('tenant.read')) {
+              <a mat-menu-item routerLink="/approvals/delegations">
+                <mat-icon svgIcon="users" aria-hidden="true" />
+                Delegations
+              </a>
+            }
             <a mat-menu-item routerLink="/me/notifications">
               <mat-icon svgIcon="bell" aria-hidden="true" />
               Notification settings

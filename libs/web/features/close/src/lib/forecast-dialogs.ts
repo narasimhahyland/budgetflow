@@ -1,4 +1,4 @@
-import { formatNumber } from '@angular/common';
+import { DatePipe, formatNumber } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -143,6 +143,7 @@ export class NewForecastCycleDialog {
 @Component({
   selector: 'bf-submit-forecast-dialog',
   imports: [
+    DatePipe,
     FormsModule,
     MatButtonModule,
     MatDialogModule,
@@ -159,8 +160,9 @@ export class NewForecastCycleDialog {
     <h2 mat-dialog-title>Forecast {{ line().budgetName ?? line().eventName }}</h2>
     <mat-dialog-content>
       <p class="bf-dialog__subtitle">
-        {{ d.cycle.name }} · as of {{ d.cycle.asOfDate }} · due {{ d.cycle.dueDate }}. A forecast is
-        not an actual: it posts nothing and consumes no budget.
+        {{ d.cycle.name }} · as of {{ d.cycle.asOfDate | date: 'd MMM y' : 'UTC' }} · due
+        {{ d.cycle.dueDate | date: 'd MMM y' : 'UTC' }}. A forecast is not an actual: it posts
+        nothing and consumes no budget.
       </p>
 
       @if (line().commentaryNote; as note) {
@@ -236,7 +238,7 @@ export class NewForecastCycleDialog {
               [attr.aria-label]="label(option.method)"
               [attr.data-testid]="'method-' + option.method"
             />
-            <span satInteractiveCardTitle>{{ label(option.method) }}</span>
+            <span satInteractiveCardTitle class="bf-method__title">{{ label(option.method) }}</span>
             <sat-interactive-card-content>
               <p class="bf-method__amount">
                 <bf-money
@@ -255,7 +257,7 @@ export class NewForecastCycleDialog {
             aria-label="My own figure"
             data-testid="method-owner_input"
           />
-          <span satInteractiveCardTitle>My own figure</span>
+          <span satInteractiveCardTitle class="bf-method__title">My own figure</span>
           <sat-interactive-card-content>
             <mat-form-field class="bf-field">
               <mat-label>Year-end forecast in {{ line().authorized.currency }}</mat-label>

@@ -30,3 +30,15 @@
 .bf-inline-form .bf-form__actions {
   padding: 0;
 }
+
+.bf-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bf-locked__icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}

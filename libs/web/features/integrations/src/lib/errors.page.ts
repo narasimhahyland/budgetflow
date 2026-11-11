@@ -21,15 +21,15 @@ import type {
   IntegrationMessageView,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { IntegrationsNav } from './integrations-nav';
 import { DIRECTION_LABELS, ERROR_CLASS_LABELS, type Tone } from './labels';
-import { LoadState } from './load-state';
 import { byOldest, byRank, ordered, rankIn } from './order';
+import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 
 const ERROR_CLASS_TONES: Record<IntegrationErrorClass, Tone> = {
   authentication: 'important',
@@ -59,9 +59,11 @@ const ERROR_CLASS_TONES: Record<IntegrationErrorClass, Tone> = {
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
+    SAT_NAVIGATION_TABS_IMPORTS,
   ],
   templateUrl: './errors.page.html',
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ErrorsPage {

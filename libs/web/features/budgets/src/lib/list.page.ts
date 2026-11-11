@@ -3,9 +3,13 @@ import {
   Component,
   computed,
   effect,
+  inject,
   resource,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { map } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,14 +17,24 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { BudgetDetail } from '@bf/contracts';
-import { BudgetStatus, Money } from '@bf/web/ui';
+import { BudgetStatus, LoadState, Money } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
-import { balancesOf, BUDGET_TYPE_LABEL, data, downloadCsv, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import {
+  balancesOf,
+  BUDGET_TYPE_LABEL,
+  data,
+  downloadCsv,
+  exportAmount,
+  initials,
+  injectApi,
+  valueOf,
+} from './api';
 import { UsageBar } from './widgets';
 
 const TABS = [
@@ -48,33 +62,16 @@ const TABS = [
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SAT_NAVIGATION_TABS_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatAvatar,
     UsageBar,
   ],
   styleUrl: './page.scss',
   styles: `
     .bf-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
       padding: 0 12px;
       border-bottom: 1px solid var(--mat-sys-outline-variant);
-    }
-    .bf-tab {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 12px;
-      border: 0;
-      border-bottom: 2px solid transparent;
-      background: transparent;
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-title-small);
-      cursor: pointer;
-    }
-    .bf-tab--active {
-      border-bottom-color: var(--mat-sys-primary);
-      color: var(--mat-sys-primary);
     }
     .bf-tab__count {
       padding: 0 6px;
@@ -85,9 +82,18 @@ const TABS = [
     .bf-banner {
       margin: 12px 16px 0;
     }
+    .bf-nowrap {
+      white-space: nowrap;
+    }
     .bf-available {
       color: var(--sat-sys-on-success-container);
       font-weight: 600;
+    }
+    .bf-available--info {
+      color: var(--sat-sys-on-info-container);
+    }
+    .bf-available--important {
+      color: var(--sat-sys-on-important-container);
     }
     a.bf-cell__primary {
       color: var(--mat-sys-on-surface);
@@ -146,20 +152,19 @@ const TABS = [
           <button mat-button type="button" (click)="q.set(''); type.set('')">Clear</button>
         }
       </div>
-      <div class="bf-tabs" role="tablist" aria-label="Status">
+      <sat-navigation-tabs class="bf-tabs" aria-label="Status">
         @for (t of tabs; track t.key) {
-          <button
-            type="button"
-            role="tab"
-            class="bf-tab"
-            [class.bf-tab--active]="tab() === t.key"
-            [attr.aria-selected]="tab() === t.key"
-            (click)="tab.set(t.key)"
+          <a
+            satNavigationTab
+            [active]="tab() === t.key"
+            [routerLink]="[]"
+            [queryParams]="{ status: t.key === 'all' ? null : t.key }"
+            queryParamsHandling="merge"
+            replaceUrl
+            >{{ t.label }} <span class="bf-tab__count">{{ counts()[t.key] ?? 0 }}</span></a
           >
-            {{ t.label }} <span class="bf-tab__count">{{ counts()[t.key] ?? 0 }}</span>
-          </button>
         }
-      </div>
+      </sat-navigation-tabs>
       <sat-banner variant="info" class="bf-banner"
         ><sat-banner-message
           >Available = budget − pending requests − committed − actual. Each budget’s own control
@@ -167,6 +172,7 @@ const TABS = [
         ></sat-banner
       >
       <bf-load-state
+        shape="table"
         [loading]="list.isLoading()"
         [error]="list.error()"
         what="budgets"
@@ -176,21 +182,50 @@ const TABS = [
         <sat-empty-state>
           <h2 satEmptyStateHeadline>No budgets match</h2>
           <p satEmptyStateDescription>Change the filters, or create a budget.</p>
+          @if (q() || type() || tab() !== 'all') {
+            <a
+              mat-stroked-button
+              satEmptyStateAction
+              [routerLink]="[]"
+              [queryParams]="{ status: null }"
+              (click)="q.set(''); type.set('')"
+              ><mat-icon svgIcon="clear_filter" aria-hidden="true" />Clear filters</a
+            >
+          } @else {
+            <a mat-flat-button satEmptyStateAction routerLink="/budgets/new"
+              ><mat-icon svgIcon="plus_small" aria-hidden="true" />Create budget</a
+            >
+          }
         </sat-empty-state>
       }
       @if (rows().length) {
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="rows()" aria-label="Budgets">
+          <table mat-table class="bf-table" [dataSource]="rows()" aria-label="Budgets">
             <ng-container matColumnDef="budget">
               <th mat-header-cell *matHeaderCellDef>Budget</th>
               <td mat-cell *matCellDef="let b">
-                <a class="bf-cell__primary" [routerLink]="['/budgets', b.id]">{{ b.name }}</a>
+                <span class="bf-cell__name">
+                  <a class="bf-cell__primary" [routerLink]="['/budgets', b.id]">{{ b.name }}</a>
+                  @if (b.code) {
+                    <span class="bf-cell__code">{{ b.code }}</span>
+                  }
+                </span>
                 <span class="bf-cell__secondary">{{ b.display.parentName ?? 'Hyland' }}</span>
               </td>
             </ng-container>
             <ng-container matColumnDef="owner">
               <th mat-header-cell *matHeaderCellDef>Owner</th>
-              <td mat-cell *matCellDef="let b">{{ b.display.ownerName ?? '—' }}</td>
+              <td mat-cell *matCellDef="let b">
+                @if (b.display.ownerName; as owner) {
+                  <span class="bf-cell__owner"
+                    ><sat-avatar size="28" [initials]="initials(owner)" aria-hidden="true" />{{
+                      owner
+                    }}</span
+                  >
+                } @else {
+                  —
+                }
+              </td>
             </ng-container>
             <ng-container matColumnDef="type">
               <th mat-header-cell *matHeaderCellDef>Type</th>
@@ -202,7 +237,9 @@ const TABS = [
             </ng-container>
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let b"><bf-budget-status [status]="b.status" /></td>
+              <td mat-cell *matCellDef="let b" class="bf-nowrap">
+                <bf-budget-status [status]="b.status" />
+              </td>
             </ng-container>
             <ng-container matColumnDef="budgetAmount">
               <th mat-header-cell *matHeaderCellDef class="bf-num">Budget (USD)</th>
@@ -224,7 +261,13 @@ const TABS = [
             </ng-container>
             <ng-container matColumnDef="available">
               <th mat-header-cell *matHeaderCellDef class="bf-num">Available (USD)</th>
-              <td mat-cell *matCellDef="let b" class="bf-num bf-available">
+              <td
+                mat-cell
+                *matCellDef="let b"
+                class="bf-num bf-available"
+                [class.bf-available--info]="b.status === 'frozen'"
+                [class.bf-available--important]="b.status === 'set_to_zero'"
+              >
                 <bf-money
                   [amountMinor]="b.balances.available.amountMinor"
                   [currency]="b.currency"
@@ -232,15 +275,17 @@ const TABS = [
               </td>
             </ng-container>
             <ng-container matColumnDef="used">
-              <th mat-header-cell *matHeaderCellDef>Used</th>
-              <td mat-cell *matCellDef="let b">
+              <th mat-header-cell *matHeaderCellDef class="bf-num">Used</th>
+              <td mat-cell *matCellDef="let b" class="bf-num">
                 <bf-usage-bar [bps]="b.utilizationBps" [thresholds]="b.alertThresholdsPct" />
               </td>
             </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-header-row *matHeaderRowDef="columns()"></tr>
             <tr
               mat-row
-              *matRowDef="let row; columns: columns"
+              *matRowDef="let row; columns: columns()"
+              [class.bf-row--info]="row.status === 'frozen'"
+              [class.bf-row--important]="row.status === 'set_to_zero'"
               [attr.data-testid]="'row-' + (row.code ?? row.id)"
             ></tr>
           </table>
@@ -260,20 +305,42 @@ export class BudgetListPage {
   protected readonly valueOf = valueOf;
   protected readonly tabs = TABS;
   protected readonly types = Object.entries(BUDGET_TYPE_LABEL);
-  protected readonly columns = [
-    'budget',
-    'owner',
-    'type',
-    'status',
-    'budgetAmount',
-    'committed',
-    'actual',
-    'available',
-    'used',
-  ];
+  private readonly size = toSignal(
+    inject(BreakpointObserver)
+      .observe(['(width < 600px)', '(width < 1024px)'])
+      .pipe(
+        map((s) =>
+          s.breakpoints['(width < 600px)'] ? 'sm' : s.breakpoints['(width < 1024px)'] ? 'md' : 'lg',
+        ),
+      ),
+    { initialValue: 'lg' },
+  );
+  /** Fewer columns on smaller screens, so Available and status stay in view without scrolling. */
+  protected readonly columns = computed(() =>
+    this.size() === 'sm'
+      ? ['budget', 'status', 'available']
+      : this.size() === 'md'
+        ? ['budget', 'owner', 'status', 'budgetAmount', 'available', 'used']
+        : [
+            'budget',
+            'owner',
+            'type',
+            'status',
+            'budgetAmount',
+            'committed',
+            'actual',
+            'available',
+            'used',
+          ],
+  );
   protected readonly q = signal('');
   protected readonly type = signal('');
-  protected readonly tab = signal<string>('all');
+  private readonly route = inject(ActivatedRoute);
+  private readonly query = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
+  protected readonly tab = computed(() => this.query().get('status') ?? 'all');
+  protected readonly initials = initials;
   protected readonly fy = signal<string | null>(null);
   protected readonly limit = signal(200);
   private readonly calendars = resource({
@@ -362,10 +429,10 @@ export class BudgetListPage {
           b.display.ownerName ?? '',
           b.budgetType,
           b.status,
-          x.authorized / 100,
-          x.committed / 100,
-          x.actual / 100,
-          x.available / 100,
+          exportAmount(x.authorized, b.currency),
+          exportAmount(x.committed, b.currency),
+          exportAmount(x.actual, b.currency),
+          exportAmount(x.available, b.currency),
         ];
       }),
     ]);

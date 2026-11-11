@@ -22,6 +22,7 @@
   margin: 0;
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-headline-small);
+  font-weight: 600;
 }
 
 .bf-page__subtitle {
@@ -40,7 +41,7 @@
 .bf-card {
   overflow: hidden;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-large);
+  border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-surface-container-lowest);
 }
 
@@ -68,26 +69,24 @@
   padding: 8px 20px 20px;
 }
 
-.bf-table-scroll {
-  overflow-x: auto;
-}
-
-.bf-table-scroll table {
-  width: 100%;
-}
+// .bf-table-scroll, .bf-split-table and table row states live in the shared data-table.scss.
 
 .bf-num {
   text-align: end;
   font-variant-numeric: tabular-nums;
 }
 
-.bf-cell__primary {
+// display: block on a td takes the cell out of the table layout.
+.bf-cell__primary:not(td),
+.bf-cell__secondary:not(td) {
   display: block;
+}
+
+.bf-cell__primary {
   font: var(--mat-sys-body-medium);
 }
 
 .bf-cell__secondary {
-  display: block;
   color: var(--mat-sys-on-surface-variant);
   font: var(--mat-sys-body-small);
 }
@@ -118,36 +117,7 @@
   padding: 8px 20px 0;
 }
 
-.bf-kpis {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.bf-kpi {
-  padding: 16px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-large);
-  background: var(--mat-sys-surface-container-lowest);
-}
-
-.bf-kpi__label {
-  margin: 0;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-label-medium);
-}
-
-.bf-kpi__value {
-  margin: 4px 0 0;
-  font: var(--mat-sys-headline-small);
-  font-variant-numeric: tabular-nums;
-}
-
-.bf-kpi__delta {
-  margin: 2px 0 0;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-small);
-}
+// KPI cards (.bf-kpis, .bf-kpi*) come from the shared kpi-card.scss (section 9).
 
 .bf-facts {
   display: grid;
@@ -155,6 +125,18 @@
   gap: 12px 16px;
   margin: 0;
   padding: 8px 20px 16px;
+}
+
+// One label/value pair per grid item, so a value never lands under the next label.
+.bf-facts > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bf-facts > div > dd {
+  margin: 0;
 }
 
 .bf-facts dt {

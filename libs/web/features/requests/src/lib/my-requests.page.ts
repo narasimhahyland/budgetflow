@@ -15,12 +15,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, DateTimePipe, Money, SpendStatus } from '@bf/web/ui';
+import { DateOnlyPipe, DateTimePipe, LoadState, Money, SpendStatus } from '@bf/web/ui';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SAT_TABLE_WITH_ROW_STATES_IMPORTS } from '@hylandsoftware/satori-ui/table-with-row-states';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type Tab = 'all' | 'drafts' | 'pending' | 'approved' | 'rejected';
 const TABS: { id: Tab; label: string }[] = [
@@ -57,6 +57,7 @@ const KIND: Record<string, string> = {
     SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
     SAT_TABLE_WITH_ROW_STATES_IMPORTS,
+    SatStatusTag,
     SpendStatus,
   ],
   template: `
@@ -106,9 +107,15 @@ const KIND: Record<string, string> = {
         <h2 class="bf-card__title" id="requests-title">{{ rows().length }} requests</h2>
       </div>
       <div class="bf-filters">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-form-field class="bf-search" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Search title or reference</mat-label>
-          <input matInput [ngModel]="q()" (ngModelChange)="search($event)" />
+          <mat-icon matPrefix svgIcon="search" aria-hidden="true" />
+          <input
+            matInput
+            placeholder="For example REQ-00007 or team lunch"
+            [ngModel]="q()"
+            (ngModelChange)="search($event)"
+          />
         </mat-form-field>
       </div>
       <bf-load-state
@@ -124,29 +131,37 @@ const KIND: Record<string, string> = {
               You have no requests {{ tab() === 'all' ? 'yet' : 'here' }}
             </h2>
             <p satEmptyStateDescription>Ask for money from a budget you may request from.</p>
-            <a mat-stroked-button routerLink="/requests/new">New request</a>
+            <a satEmptyStateAction mat-stroked-button routerLink="/requests/new">New request</a>
           </sat-empty-state>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table satTableWithRowStates [dataSource]="rows()" aria-label="My requests">
+            <table
+              mat-table
+              satTableWithRowStates
+              class="bf-table bf-table--stack"
+              [dataSource]="rows()"
+              aria-label="My requests"
+            >
               <ng-container matColumnDef="title">
                 <th mat-header-cell *matHeaderCellDef>Request</th>
-                <td mat-cell *matCellDef="let r">
-                  <a
-                    satRowPrimaryAction
-                    class="bf-cell__primary"
-                    [routerLink]="['/requests', r.id]"
-                    >{{ r.title }}</a
-                  >
-                  <span class="bf-cell__secondary"
-                    >{{ r.ref }} · {{ kind(r.kind)
-                    }}{{ r.eventName ? ' · ' + r.eventName : '' }}</span
-                  >
+                <td mat-cell *matCellDef="let r" data-label="Request">
+                  <span class="bf-request">
+                    <a
+                      satRowPrimaryAction
+                      class="bf-cell__primary"
+                      [routerLink]="['/requests', r.id]"
+                      >{{ r.title }}</a
+                    >
+                    <span class="bf-cell__secondary"
+                      ><span class="bf-cell__code">{{ r.ref }}</span> {{ kind(r.kind)
+                      }}{{ r.eventName ? ' · ' + r.eventName : '' }}</span
+                    >
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="amount">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">Amount</th>
-                <td mat-cell *matCellDef="let r" class="bf-num">
+                <td mat-cell *matCellDef="let r" class="bf-num" data-label="Amount">
                   <bf-money [amountMinor]="r.amount.amountMinor" [currency]="r.amount.currency" />
                   @if (r.approvedAmount && r.approvedAmount.amountMinor !== r.amount.amountMinor) {
                     <span class="bf-cell__secondary"
@@ -160,34 +175,45 @@ const KIND: Record<string, string> = {
               </ng-container>
               <ng-container matColumnDef="budget">
                 <th mat-header-cell *matHeaderCellDef>Budget</th>
-                <td mat-cell *matCellDef="let r">{{ r.budgetName }}</td>
+                <td mat-cell *matCellDef="let r" class="bf-nowrap" data-label="Budget">
+                  {{ r.budgetName }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let r">
-                  <bf-spend-status kind="request" [status]="r.status" />
-                  @if (r.onHold) {
-                    <span class="bf-cell__secondary">On hold: budget frozen</span>
-                  }
-                  @if (r.status === 'rejected' && r.decisionReason) {
-                    <span class="bf-cell__secondary">{{ r.decisionReason }}</span>
-                  }
-                  @if (r.status === 'cancelled' && r.cancelReason) {
-                    <span class="bf-cell__secondary">{{ r.cancelReason }}</span>
-                  }
+                <td mat-cell *matCellDef="let r" data-label="Status">
+                  <span class="bf-stack">
+                    <span class="bf-tags">
+                      <bf-spend-status kind="request" [status]="r.status" />
+                      @if (r.onHold) {
+                        <sat-status-tag status="info"
+                          ><mat-icon svgIcon="lock" aria-hidden="true" />On hold: budget
+                          frozen</sat-status-tag
+                        >
+                      }
+                    </span>
+                    @if (r.status === 'rejected' && r.decisionReason) {
+                      <span class="bf-cell__secondary">{{ r.decisionReason }}</span>
+                    }
+                    @if (r.status === 'cancelled' && r.cancelReason) {
+                      <span class="bf-cell__secondary">{{ r.cancelReason }}</span>
+                    }
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="step">
                 <th mat-header-cell *matHeaderCellDef>Current step</th>
-                <td mat-cell *matCellDef="let r">
+                <td mat-cell *matCellDef="let r" data-label="Current step">
                   @if (r.currentStep) {
-                    <span class="bf-cell__primary">{{ r.currentStep.approverName }}</span>
-                    <span class="bf-cell__secondary" data-testid="relative-time"
-                      >due
-                      {{
-                        r.currentStep.dueAt | bfDateTime: session.timezone() : 'd MMM, HH:mm'
-                      }}</span
-                    >
+                    <span class="bf-stack">
+                      <span class="bf-cell__primary">{{ r.currentStep.approverName }}</span>
+                      <span class="bf-cell__secondary" data-testid="relative-time"
+                        >due
+                        {{
+                          r.currentStep.dueAt | bfDateTime: session.timezone() : 'd MMM, HH:mm'
+                        }}</span
+                      >
+                    </span>
                   } @else {
                     —
                   }
@@ -195,19 +221,57 @@ const KIND: Record<string, string> = {
               </ng-container>
               <ng-container matColumnDef="updated">
                 <th mat-header-cell *matHeaderCellDef>Updated</th>
-                <td mat-cell *matCellDef="let r">
+                <td mat-cell *matCellDef="let r" data-label="Updated">
                   <span data-testid="relative-time">{{
                     r.updatedAt | bfDate: session.timezone()
                   }}</span>
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="columns"></tr>
-              <tr mat-row satRowState *matRowDef="let row; columns: columns"></tr>
+              <tr
+                mat-row
+                satRowState
+                *matRowDef="let row; columns: columns"
+                [class.bf-row--info]="row.onHold"
+              ></tr>
             </table>
           </div>
         }
       }
     </section>
+  `,
+  styles: `
+    .bf-search {
+      flex: 1 1 320px;
+      max-width: 480px;
+    }
+    .bf-request {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 200px;
+    }
+    .bf-nowrap {
+      white-space: nowrap;
+    }
+    .bf-stack {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+    @media (width < 600px) {
+      .bf-stack {
+        align-items: flex-end;
+        text-align: end;
+      }
+    }
+    .bf-tags {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      white-space: nowrap;
+    }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,

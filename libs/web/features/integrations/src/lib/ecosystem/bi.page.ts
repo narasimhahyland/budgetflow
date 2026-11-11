@@ -19,14 +19,13 @@ import { BI_TOOLS, type BiDataset, type BiTool, type EcosystemConnectionView } f
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from '../api';
-import { LoadState } from '../load-state';
 import { OneTimeSecret } from '../one-time-secret';
 import { EcosystemConnections } from './connections-table';
 import { EcosystemNav } from './ecosystem-nav';
 import { BI_TOOL_LABELS, READ_ONLY_NOTE } from './labels';
+import { LoadState } from '@bf/web/ui';
 
 /**
  * Screen 092a. A BI tool reads curated datasets through a token the person creates for themselves,
@@ -51,10 +50,10 @@ import { BI_TOOL_LABELS, READ_ONLY_NOTE } from './labels';
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
-    SatImportantButton,
   ],
   templateUrl: './bi.page.html',
   styleUrls: ['../page.scss', '../integrations.scss', './ecosystem.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiConnectorPage {

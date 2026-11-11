@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,11 +10,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
+import { LoadState, type StatusView } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { RuleStatusTag } from './rule-tags';
 import { RulesTabs } from './rules-tabs';
 
@@ -22,16 +24,19 @@ import { RulesTabs } from './rules-tabs';
 @Component({
   selector: 'bf-rule-history-page',
   imports: [
+    DatePipe,
     DecimalPipe,
     FormsModule,
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatSelectModule,
     RouterLink,
     RuleStatusTag,
     RulesTabs,
     SAT_BANNER_IMPORTS,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -59,7 +64,7 @@ import { RulesTabs } from './rules-tabs';
           <h2 class="bf-card__title" id="versions-title">{{ r.code }} versions</h2>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Rule versions">
+          <table class="bf-split-table bf-table--stack" aria-label="Rule versions">
             <thead>
               <tr>
                 <th scope="col">Version</th>
@@ -73,12 +78,23 @@ import { RulesTabs } from './rules-tabs';
             <tbody>
               @for (v of r.versions; track v.id) {
                 <tr>
-                  <td class="bf-cell__primary">v{{ v.version }}</td>
-                  <td><bf-rule-status [status]="v.status" /></td>
-                  <td class="bf-num">{{ v.priority }}</td>
-                  <td>{{ v.validFrom }}{{ v.validTo ? ' to ' + v.validTo : ' onwards' }}</td>
-                  <td>{{ v.publishedByName ?? 'Not published' }}</td>
-                  <td class="bf-num">{{ v.matchCount30d | number }}</td>
+                  <td>
+                    <span class="bf-cell__primary">v{{ v.version }}</span>
+                  </td>
+                  <td class="bf-nowrap" data-label="Status">
+                    <bf-rule-status [status]="v.status" />
+                  </td>
+                  <td class="bf-num" data-label="Priority">{{ v.priority }}</td>
+                  <td class="bf-nowrap" data-label="In force">
+                    {{ v.validFrom | date: 'd MMM y' : 'UTC' }}
+                    @if (v.validTo) {
+                      to {{ v.validTo | date: 'd MMM y' : 'UTC' }}
+                    } @else {
+                      onwards
+                    }
+                  </td>
+                  <td data-label="Published by">{{ v.publishedByName ?? 'Not published' }}</td>
+                  <td class="bf-num" data-label="Matches">{{ v.matchCount30d | number }}</td>
                 </tr>
               }
             </tbody>
@@ -129,12 +145,33 @@ import { RulesTabs } from './rules-tabs';
             </sat-banner>
             <ul class="bf-timeline">
               @for (line of d.summaryLines; track $index) {
-                <li>{{ line.text }}</li>
+                <li class="bf-diff">
+                  @let look = diffLook(line.kind);
+                  @if (look) {
+                    <sat-status-tag [status]="look.tone"
+                      ><mat-icon [svgIcon]="look.icon" aria-hidden="true" />{{
+                        look.label
+                      }}</sat-status-tag
+                    >
+                  }
+                  <span>{{ line.text }}</span>
+                </li>
               }
             </ul>
           </div>
         }
       </section>
+    }
+  `,
+  styles: `
+    .bf-nowrap {
+      white-space: nowrap;
+    }
+    .bf-diff {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 8px;
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -151,6 +188,19 @@ export class RuleHistoryPage {
     params: () => ({ ruleId: this.ruleId() }),
     loader: ({ params }) => data(this.api.getRule({ params })),
   });
+
+  /** Diff markers carry text as well as tone (section 5): added, removed, changed. */
+  protected diffLook(kind: string): StatusView | null {
+    return (
+      (
+        {
+          added: { label: 'Added', tone: 'success', icon: 'circle_check' },
+          removed: { label: 'Removed', tone: 'important', icon: 'circle_x' },
+          changed: { label: 'Changed', tone: 'warning', icon: 'note_edit' },
+        } as Record<string, StatusView>
+      )[kind] ?? null
+    );
+  }
 
   /** Defaults to the two newest versions until the reader picks a pair. */
   protected readonly pair = computed(() => {

@@ -26,6 +26,7 @@ import {
   Money,
   type KpiDelta,
 } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatGhost } from '@hylandsoftware/satori-ui/ghost';
@@ -97,6 +98,7 @@ type SortKey = 'name' | 'owner' | 'committed' | 'available' | 'utilization' | 's
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TABLE_WITH_ROW_STATES_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatAvatar,
     SatGhost,
   ],
   templateUrl: './home.page.html',
@@ -117,6 +119,7 @@ export class HomePage implements OnInit {
   /** Display-only gates; the API enforces scope on every call it serves. */
   protected readonly canSeeBudgets = computed(() => this.session.can('budget.read'));
   protected readonly canSeeHealth = computed(() => this.session.can('report.read'));
+  protected readonly canCreateBudget = computed(() => this.session.can('budget.create_child'));
 
   protected readonly subtitle = computed(() =>
     [this.me()?.jobTitle, this.me()?.locationName, this.me()?.tenantName]

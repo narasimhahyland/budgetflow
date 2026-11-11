@@ -17,14 +17,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { EventFeedbackView, GalleryPhotoView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { EventTabs } from './event-tabs';
-import { LoadState } from './load-state';
+import { label } from './labels';
 
 type Sub = 'results' | 'gallery';
 
@@ -45,7 +45,7 @@ type Sub = 'results' | 'gallery';
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
-    SatImportantButton,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -114,48 +114,79 @@ type Sub = 'results' | 'gallery';
 
         <section class="bf-kpis" aria-label="Survey results">
           <div class="bf-kpi">
-            <p class="bf-kpi__label">Responses</p>
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Responses</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="note_edit" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value" data-testid="response-count">{{ v.responseCount }}</p>
-            <p class="bf-kpi__delta">
-              of {{ v.audienceCount }} attendees ({{ v.responseRatePct }}%)
-            </p>
+            <div class="bf-kpi__foot">
+              <span>Of {{ v.audienceCount }} attendees</span>
+              <span class="bf-kpi__pct">{{ v.responseRatePct }}%</span>
+              <span class="bf-kpi__track"
+                ><span class="bf-kpi__fill" [style.width.%]="v.responseRatePct"></span
+              ></span>
+            </div>
           </div>
           <div class="bf-kpi">
-            <p class="bf-kpi__label">Average rating</p>
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Average rating</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="star" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value" data-testid="average-rating">
               {{ v.averageRating === null ? 'Not enough responses' : v.averageRating + ' of 5' }}
             </p>
           </div>
-          <div class="bf-kpi">
-            <p class="bf-kpi__label">Would attend again</p>
+          <div class="bf-kpi bf-kpi--success">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">Would attend again</p>
+              <mat-icon class="bf-kpi__icon" svgIcon="thumbsup" aria-hidden="true" />
+            </div>
             <p class="bf-kpi__value">
               {{ v.wouldAttendAgainPct === null ? '—' : v.wouldAttendAgainPct + '%' }}
             </p>
+            @if (v.wouldAttendAgainPct !== null) {
+              <div class="bf-kpi__foot">
+                <span>Of those who answered</span>
+                <span class="bf-kpi__pct">{{ v.wouldAttendAgainPct }}%</span>
+                <span class="bf-kpi__track"
+                  ><span class="bf-kpi__fill" [style.width.%]="v.wouldAttendAgainPct"></span
+                ></span>
+              </div>
+            }
           </div>
         </section>
 
         @if (v.minimumResponsesMet) {
           <section class="bf-card" aria-label="Rating distribution">
             <div class="bf-card__header"><h2 class="bf-card__title">How people rated it</h2></div>
-            <table class="bf-split-table">
-              <caption class="bf-empty">
-                Ratings from 5 down to 1.
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Rating</th>
-                  <th scope="col" class="bf-num">Responses</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (row of v.ratingDistribution; track row.rating) {
+            <div class="bf-table-scroll">
+              <table class="bf-split-table" aria-label="Rating distribution">
+                <caption>
+                  Ratings from 5 down to 1; the bars show each rating's share of the responses.
+                </caption>
+                <thead>
                   <tr>
-                    <th scope="row">{{ row.rating }}</th>
-                    <td class="bf-num">{{ row.count }}</td>
+                    <th scope="col" class="bf-num">Rating</th>
+                    <th scope="col">Share</th>
+                    <th scope="col" class="bf-num">Responses</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (row of v.ratingDistribution; track row.rating) {
+                    <tr>
+                      <th scope="row" class="bf-num">{{ row.rating }}</th>
+                      <td class="bf-rating" aria-hidden="true">
+                        <span
+                          class="bf-rating__bar"
+                          [style.width.%]="share(row.count, v.responseCount)"
+                        ></span>
+                      </td>
+                      <td class="bf-num">{{ row.count }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </section>
           @if (v.comments.length) {
             <section class="bf-card" aria-label="Comments">
@@ -195,13 +226,13 @@ type Sub = 'results' | 'gallery';
         @if (v.canManage && v.status !== 'closed') {
           <section class="bf-card" aria-label="Survey status">
             <div class="bf-card__header">
-              <h2 class="bf-card__title">Survey status: {{ v.status }}</h2>
+              <h2 class="bf-card__title">Survey</h2>
+              <sat-status-tag [status]="surveyTone(v.status)">{{ label(v.status) }}</sat-status-tag>
             </div>
             <div class="bf-form__actions">
               @if (v.status !== 'open') {
                 <button
                   mat-flat-button
-                  satImportantButton
                   type="button"
                   [disabled]="busy()"
                   (click)="setStatus('open')"
@@ -249,10 +280,10 @@ type Sub = 'results' | 'gallery';
                     <span>{{ p.caption }}</span>
                     <span class="bf-page__actions">
                       @if (p.status === 'removal_requested') {
-                        <span class="bf-chip">Removal requested</span>
+                        <sat-status-tag status="warning">Removal requested</sat-status-tag>
                       }
                       @if (p.status === 'hidden') {
-                        <span class="bf-chip">Hidden</span>
+                        <sat-status-tag status="neutral">Hidden</sat-status-tag>
                       }
                       <button
                         mat-button
@@ -312,6 +343,18 @@ type Sub = 'results' | 'gallery';
       }
     }
   `,
+  styles: `
+    .bf-rating {
+      width: 60%;
+      min-width: 120px;
+    }
+    .bf-rating__bar {
+      display: block;
+      height: 12px;
+      border-radius: var(--mat-sys-corner-extra-small);
+      background: var(--sequential-data-viz-5);
+    }
+  `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -321,6 +364,13 @@ export class EventFeedbackPage {
   protected readonly session = inject(SessionStore);
   readonly eventId = input.required<string>();
   protected readonly sub = signal<Sub>('results');
+  protected readonly label = label;
+  protected share(part: number, whole: number): number {
+    return whole > 0 ? Math.min(100, Math.round((part * 100) / whole)) : 0;
+  }
+  protected surveyTone(status: string): 'success' | 'info' | 'neutral' {
+    return status === 'open' ? 'success' : status === 'scheduled' ? 'info' : 'neutral';
+  }
   protected readonly busy = signal(false);
   protected readonly failure = signal('');
   protected caption = '';

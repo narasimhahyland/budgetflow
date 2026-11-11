@@ -80,6 +80,7 @@
 <div class="bf-split">
   <section class="bf-card" aria-label="Budget tree">
     <bf-load-state
+      shape="table"
       [loading]="tree.isLoading() || tops.isLoading()"
       [error]="tree.error() ?? tops.error()"
       what="the budget hierarchy"
@@ -93,14 +94,14 @@
     }
     @if (rows().length) {
       <div class="bf-table-scroll">
-        <table class="bf-tree" role="treegrid" aria-label="Budget hierarchy">
+        <table class="bf-tree bf-split-table" role="treegrid" aria-label="Budget hierarchy">
           <thead>
             <tr>
               <th scope="col">Budget unit</th>
-              <th scope="col" class="bf-num">Authorized (USD)</th>
-              <th scope="col" class="bf-num">Allocated (USD)</th>
+              <th scope="col" class="bf-num bf-hide-sm">Authorized (USD)</th>
+              <th scope="col" class="bf-num bf-hide-sm">Allocated (USD)</th>
               <th scope="col" class="bf-num">Available (USD)</th>
-              <th scope="col">Used</th>
+              <th scope="col" class="bf-num bf-hide-sm">Used</th>
               <th scope="col">Status</th>
             </tr>
           </thead>
@@ -108,6 +109,8 @@
             @for (r of rows(); track r.b.id) {
               <tr
                 [class.bf-tree__row--selected]="r.b.id === selectedId()"
+                [class.bf-row--info]="r.b.status === 'frozen'"
+                [class.bf-row--important]="r.b.status === 'set_to_zero'"
                 [attr.aria-level]="r.depth + 1"
                 [attr.aria-expanded]="r.hasChildren ? r.expanded : null"
                 [attr.aria-selected]="r.b.id === selectedId()"
@@ -141,35 +144,32 @@
                     </span>
                   </div>
                 </td>
-                <td class="bf-num">
+                <td class="bf-num bf-hide-sm">
                   <bf-money
                     [amountMinor]="r.b.balances.budgetCurrency.authorized.amountMinor"
                     [currency]="r.b.currency"
                   />
                 </td>
-                <td class="bf-num">
+                <td class="bf-num bf-hide-sm">
                   <bf-money
                     [amountMinor]="r.b.balances.budgetCurrency.allocatedOut.amountMinor"
                     [currency]="r.b.currency"
                   />
                 </td>
-                <td class="bf-num bf-available">
+                <td
+                  class="bf-num bf-available"
+                  [class.bf-available--info]="r.b.status === 'frozen'"
+                  [class.bf-available--important]="r.b.status === 'set_to_zero'"
+                >
                   <bf-money
                     [amountMinor]="r.b.balances.available.amountMinor"
                     [currency]="r.b.currency"
                   />
                 </td>
-                <td>
+                <td class="bf-num bf-hide-sm">
                   <bf-usage-bar [bps]="r.b.utilizationBps" [thresholds]="r.b.alertThresholdsPct" />
                 </td>
-                <td>
-                  <span class="bf-status">
-                    @if (r.b.status === 'frozen') {
-                      <mat-icon svgIcon="lock" aria-hidden="true" class="bf-status__icon" />
-                    }
-                    <bf-budget-status [status]="r.b.status" />
-                  </span>
-                </td>
+                <td><bf-budget-status [status]="r.b.status" /></td>
               </tr>
             }
           </tbody>

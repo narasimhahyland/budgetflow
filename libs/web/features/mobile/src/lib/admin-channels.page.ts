@@ -15,15 +15,21 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
-import type { ChatAccountLinkView, ChatFeatures, ChatProvider } from '@bf/contracts';
+import type {
+  ChannelDeliveryLogView,
+  ChatAccountLinkView,
+  ChatFeatures,
+  ChatProvider,
+} from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState, type StatusView } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
-import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { channelLabel, DELIVERY_STATUS, initials, sentence } from './labels';
 
 /**
  * Screen 061e: Slack and Microsoft Teams app setup, account linking & delivery health (`/admin/channels`).
@@ -45,6 +51,8 @@ import { LoadState } from './load-state';
     MatSlideToggleModule,
     MatTableModule,
     SAT_BANNER_IMPORTS,
+    SatAvatar,
+    SatCategoryTag,
     SatImportantButton,
     SAT_NAVIGATION_TABS_IMPORTS,
     SatStatusTag,
@@ -154,13 +162,14 @@ import { LoadState } from './load-state';
               @if (a.canManage && a.slack.status === 'connected') {
                 <div class="bf-admin-channels__add-channel">
                   <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Add channel (e.g. #exec-updates)</mat-label>
+                    <mat-label>Add channel</mat-label>
                     <input
                       matInput
                       [(ngModel)]="newSlackChannel"
                       name="newSlackChannel"
                       data-testid="new-slack-channel"
                     />
+                    <mat-hint>For example #exec-updates</mat-hint>
                   </mat-form-field>
                   <button
                     mat-stroked-button
@@ -200,7 +209,6 @@ import { LoadState } from './load-state';
                 </button>
                 <button
                   mat-stroked-button
-                  satImportantButton
                   type="button"
                   [disabled]="!a.canManage || busy()"
                   (click)="showDisconnect.set('slack')"
@@ -211,7 +219,6 @@ import { LoadState } from './load-state';
               } @else {
                 <button
                   mat-flat-button
-                  satImportantButton
                   type="button"
                   [disabled]="!a.canManage || busy()"
                   (click)="connectProvider('slack')"
@@ -243,7 +250,7 @@ import { LoadState } from './load-state';
                     Cancel
                   </button>
                   <button
-                    mat-stroked-button
+                    mat-flat-button
                     satImportantButton
                     type="button"
                     [disabled]="busy() || disconnectConfirm !== 'DISCONNECT'"
@@ -313,8 +320,7 @@ import { LoadState } from './load-state';
             <div class="bf-form__actions">
               @if (a.teams.status !== 'connected') {
                 <button
-                  mat-flat-button
-                  satImportantButton
+                  mat-stroked-button
                   type="button"
                   [disabled]="!a.canManage || busy()"
                   (click)="checkConsent('teams')"
@@ -393,6 +399,7 @@ import { LoadState } from './load-state';
           <div class="bf-table-scroll">
             <table
               mat-table
+              class="bf-table bf-table--stack"
               [dataSource]="filteredLinks()"
               aria-label="Linked people"
               data-testid="linked-people-table"
@@ -400,20 +407,27 @@ import { LoadState } from './load-state';
               <ng-container matColumnDef="person">
                 <th mat-header-cell *matHeaderCellDef>Person</th>
                 <td mat-cell *matCellDef="let l">
-                  <span class="bf-cell__primary">{{ l.personName }}</span>
-                  <span class="bf-cell__secondary">{{ l.personRole }}</span>
+                  <span class="bf-cell__owner">
+                    <sat-avatar size="28" [initials]="initials(l.personName)" />
+                    <span>
+                      <span class="bf-cell__primary">{{ l.personName }}</span>
+                      <span class="bf-cell__secondary">{{ l.personRole }}</span>
+                    </span>
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="account">
                 <th mat-header-cell *matHeaderCellDef>Chat account</th>
-                <td mat-cell *matCellDef="let l">
-                  <span class="bf-cell__primary">{{ l.handle }}</span>
-                  <span class="bf-cell__secondary">{{ l.verifiedEmail }}</span>
+                <td mat-cell *matCellDef="let l" data-label="Chat account">
+                  <span class="bf-admin-channels__account">
+                    <span class="bf-cell__primary">{{ l.handle }}</span>
+                    <span class="bf-cell__secondary">{{ l.verifiedEmail }}</span>
+                  </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="linkedAt">
                 <th mat-header-cell *matHeaderCellDef>Linked on</th>
-                <td mat-cell *matCellDef="let l">
+                <td mat-cell *matCellDef="let l" data-label="Linked on">
                   <span data-testid="relative-time">{{
                     l.linkedAt | bfDateTime: session.timezone()
                   }}</span>
@@ -421,7 +435,7 @@ import { LoadState } from './load-state';
               </ng-container>
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Action</th>
-                <td mat-cell *matCellDef="let l">
+                <td mat-cell *matCellDef="let l" data-label="Action">
                   @if (a.canManage) {
                     <button
                       mat-button
@@ -451,34 +465,38 @@ import { LoadState } from './load-state';
         <div class="bf-table-scroll">
           <table
             mat-table
+            class="bf-table bf-table--stack"
             [dataSource]="a.deliveries.slice(0, 15)"
             aria-label="Recent channel deliveries"
           >
             <ng-container matColumnDef="channel">
               <th mat-header-cell *matHeaderCellDef>Channel</th>
-              <td mat-cell *matCellDef="let d">
-                <span class="bf-chip">{{ d.channel }}</span>
+              <td mat-cell *matCellDef="let d" data-label="Channel">
+                <sat-category-tag category="gray">{{ channelLabel(d.channel) }}</sat-category-tag>
               </td>
             </ng-container>
             <ng-container matColumnDef="recipient">
               <th mat-header-cell *matHeaderCellDef>Recipient</th>
-              <td mat-cell *matCellDef="let d">{{ d.recipientName ?? 'Workspace' }}</td>
+              <td mat-cell *matCellDef="let d" data-label="Recipient">
+                {{ d.recipientName ?? 'Workspace' }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="kind">
               <th mat-header-cell *matHeaderCellDef>Event</th>
-              <td mat-cell *matCellDef="let d">{{ d.kind }}</td>
+              <td mat-cell *matCellDef="let d" data-label="Event">{{ sentence(d.kind) }}</td>
             </ng-container>
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let d">
-                <sat-status-tag [status]="d.status === 'failed' ? 'important' : 'success'">
-                  {{ d.status }}
-                </sat-status-tag>
+              <td mat-cell *matCellDef="let d" data-label="Status">
+                @let s = deliveryStatusOf(d);
+                <sat-status-tag [status]="s.tone"
+                  ><mat-icon [svgIcon]="s.icon" aria-hidden="true" />{{ s.label }}</sat-status-tag
+                >
               </td>
             </ng-container>
             <ng-container matColumnDef="createdAt">
               <th mat-header-cell *matHeaderCellDef>Time</th>
-              <td mat-cell *matCellDef="let d">
+              <td mat-cell *matCellDef="let d" data-label="Time">
                 <span data-testid="relative-time">{{
                   d.createdAt | bfDateTime: session.timezone()
                 }}</span>
@@ -492,6 +510,11 @@ import { LoadState } from './load-state';
     }
   `,
   styles: `
+    /* Handles and e-mail addresses have no break points; let them wrap in a narrow cell. */
+    .bf-admin-channels__account {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
     .bf-admin-channels__grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -545,6 +568,12 @@ export class AdminChannelsPage {
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
+  protected readonly initials = initials;
+  protected readonly sentence = sentence;
+  protected readonly channelLabel = channelLabel;
+  protected deliveryStatusOf(d: ChannelDeliveryLogView): StatusView {
+    return DELIVERY_STATUS[d.status];
+  }
 
   protected readonly linkColumns = ['person', 'account', 'linkedAt', 'actions'];
   protected readonly deliveryColumns = ['channel', 'recipient', 'kind', 'status', 'createdAt'];

@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,26 +21,66 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
 import type { EventDetail, Person } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateOnlyPipe, DateTimePipe, DiscussionBox, formatMoney, Money, SpendStatus } from '@bf/web/ui';
+import {
+  BudgetBar,
+  type BudgetBarSegment,
+  DateOnlyPipe,
+  DateTimePipe,
+  DiscussionBox,
+  formatMoney,
+  LoadState,
+  Money,
+  SpendStatus,
+} from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
+import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { DocumentsPanel } from './documents-panel';
-import { LoadState } from './load-state';
+import { EventTabs } from './event-tabs';
+import { initials, label } from './labels';
 import { toMinor } from './money-input';
 
 type Tab = 'overview' | 'participants' | 'funding' | 'commitments' | 'documents' | 'activity';
+
+/** The overview's own views, one row below the event sections every event page shares. */
+const VIEWS: { id: Tab; label: string }[] = [
+  { id: 'overview', label: 'Summary' },
+  { id: 'participants', label: 'Participants' },
+  { id: 'funding', label: 'Budget and funding' },
+  { id: 'commitments', label: 'Commitments' },
+  { id: 'documents', label: 'Documents' },
+  { id: 'activity', label: 'Activity' },
+];
+
+interface SourceRow {
+  id: string;
+  budgetName: string;
+  ownerName: string | null;
+  own: boolean;
+  ref: string;
+  mode: string;
+  amount: { amountMinor: number; currency: string };
+  status: string;
+  pending: boolean;
+  contributionId: string | null;
+}
 type Panel = 'contribution' | 'commit' | 'participants' | 'cancel' | null;
 
 /** Screen 46 (with 47 participants, 49 cost split, 51 commitments, 52 documents): one place for an event's money. */
 @Component({
   selector: 'bf-event-detail-page',
   imports: [
+    BudgetBar,
     DateOnlyPipe,
     DateTimePipe,
+    DecimalPipe,
     DiscussionBox,
     DocumentsPanel,
+    EventTabs,
     FormsModule,
     LoadState,
     MatButtonModule,
@@ -53,11 +94,51 @@ type Panel = 'contribution' | 'commit' | 'participants' | 'cancel' | null;
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
+    SAT_EMPTY_STATE_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
+    SatAvatar,
+    SatCategoryTag,
     SatImportantButton,
+    SatStatusTag,
     SpendStatus,
   ],
   templateUrl: './event-detail.page.html',
+  styles: `
+    .bf-subtabs {
+      margin-top: -4px;
+    }
+
+    .bf-tab-count {
+      margin-inline-start: 4px;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-medium);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bf-lines {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 200px;
+    }
+
+    .bf-lines__row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+    }
+
+    .bf-wrap {
+      white-space: normal;
+    }
+
+    .bf-timeline__empty {
+      padding-inline-start: 0;
+      border-inline-start: 0;
+    }
+  `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -67,6 +148,9 @@ export class EventDetailPage {
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
+  protected readonly label = label;
+  protected readonly initials = initials;
+  protected readonly views = VIEWS;
   readonly eventId = input.required<string>();
   protected readonly tab = signal<Tab>('overview');
   protected readonly panel = signal<Panel>(null);
@@ -158,7 +242,68 @@ export class EventDetailPage {
     valueOf(this.candidates)?.items.find((c) => c.budgetId === this.giverBudgetId),
   );
 
-  protected readonly participantColumns = ['name', 'location', 'entity', 'costCenter', 'share'];
+  protected readonly participantColumns = computed(() =>
+    this.can('add_participants')
+      ? ['name', 'location', 'entity', 'costCenter', 'share', 'actions']
+      : ['name', 'location', 'entity', 'costCenter', 'share'],
+  );
+  protected readonly missingCostCenters = computed(
+    () => (valueOf(this.participantsList)?.items ?? []).filter((p) => p.missingCostCenter).length,
+  );
+
+  /** Approved sources and contributions still waiting for a decision, in one table. */
+  protected readonly sourceRows = computed<SourceRow[]>(() => {
+    const e = this.e();
+    if (!e) return [];
+    const approved = e.sources.map((s) => ({
+      id: s.id,
+      budgetName: s.originBudgetName,
+      ownerName: s.ownerName ?? null,
+      own: s.kind === 'own',
+      ref: s.contributionRef ?? '',
+      mode: s.mode,
+      amount: s.funded,
+      status: s.status === 'returned' ? 'settled' : 'earmarked',
+      pending: false,
+      contributionId: s.contributionId,
+    }));
+    const pending = e.contributions
+      .filter((c) => c.status === 'pending_approval' || c.status === 'submitted')
+      .map((c) => ({
+        id: c.id,
+        budgetName: c.giverBudgetName,
+        ownerName: c.giverOwnerName ?? null,
+        own: false,
+        ref: c.ref,
+        mode: c.mode,
+        amount: c.requested,
+        status: c.status,
+        pending: true,
+        contributionId: c.id,
+      }));
+    return [...approved, ...pending];
+  });
+
+  /** Section 10: what the cap has committed and what it can still commit, as the API reports. */
+  protected readonly commitmentSegments = computed<BudgetBarSegment[]>(() => {
+    const f = this.e()?.funding;
+    if (!f) return [];
+    return [
+      { bucket: 'encumbered', amountMinor: f.committed.amountMinor, label: 'Committed' },
+      {
+        bucket: 'available',
+        amountMinor: f.available.amountMinor,
+        label: "Available under this event's rules",
+      },
+    ];
+  });
+
+  protected viewCount(e: EventDetail, view: Tab): number {
+    if (view === 'participants') return e.participantCount;
+    if (view === 'commitments') return e.commitments.length;
+    if (view === 'documents') return e.documents.length;
+    return 0;
+  }
   protected readonly sourceColumns = ['source', 'owner', 'type', 'amount', 'status'];
   protected readonly commitmentColumns = [
     'description',

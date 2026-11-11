@@ -10,28 +10,28 @@
   </div>
 </header>
 
-<nav class="bf-tabs" aria-label="Duplicate groups">
-  <button
-    class="bf-tabs__tab"
-    type="button"
-    [class.bf-tabs__tab--active]="view() === 'open'"
-    [attr.aria-current]="view() === 'open' ? 'page' : null"
+<sat-navigation-tabs aria-label="Duplicate groups">
+  <a
+    satNavigationTab
+    [active]="view() === 'open'"
     (click)="view.set('open'); selected.set(null)"
+    (keydown.enter)="view.set('open'); selected.set(null)"
+    tabindex="0"
     data-testid="tab-open"
   >
     Waiting for a decision ({{ openCount() }})
-  </button>
-  <button
-    class="bf-tabs__tab"
-    type="button"
-    [class.bf-tabs__tab--active]="view() === 'resolved'"
-    [attr.aria-current]="view() === 'resolved' ? 'page' : null"
+  </a>
+  <a
+    satNavigationTab
+    [active]="view() === 'resolved'"
     (click)="view.set('resolved'); selected.set(null)"
+    (keydown.enter)="view.set('resolved'); selected.set(null)"
+    tabindex="0"
     data-testid="tab-resolved"
   >
     Decided
-  </button>
-</nav>
+  </a>
+</sat-navigation-tabs>
 
 @if (notice()) {
   <sat-banner variant="success" data-testid="duplicates-notice"
@@ -288,17 +288,19 @@
   }
 } @else {
   <section class="bf-card">
-    <sat-empty-state data-testid="duplicates-empty">
-      <h2 satEmptyStateHeadline>
-        {{ view() === 'open' ? 'No possible duplicates' : 'Nothing decided yet' }}
-      </h2>
-      <p satEmptyStateDescription>
-        @if (view() === 'open') {
-          Nothing is being held. Every actual that arrived has a single source.
-        } @else {
-          Groups appear here once finance has decided which line is the record.
-        }
-      </p>
-    </sat-empty-state>
+    <div class="bf-card__body">
+      <sat-empty-state data-testid="duplicates-empty">
+        <h2 satEmptyStateHeadline>
+          {{ view() === 'open' ? 'No possible duplicates' : 'Nothing decided yet' }}
+        </h2>
+        <p satEmptyStateDescription>
+          @if (view() === 'open') {
+            Nothing is being held. Every actual that arrived has a single source.
+          } @else {
+            Groups appear here once finance has decided which line is the record.
+          }
+        </p>
+      </sat-empty-state>
+    </div>
   </section>
 }

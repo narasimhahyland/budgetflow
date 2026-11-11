@@ -16,14 +16,17 @@ import { MatTableModule } from '@angular/material/table';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { LoadState } from '@bf/web/ui';
+import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
-import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
+import { data, errorMessage, initialsOf, injectApi, todayIso, valueOf } from './api';
 
 /** Screens 39-40: employee profile and reporting relationship management (effective-dated). */
 @Component({
   selector: 'bf-person-page',
+  host: { class: 'bf-page-layout' },
   imports: [
+    SatAvatar,
     DatePipe,
     FormsModule,
     LoadState,
@@ -39,8 +42,15 @@ import { LoadState } from './load-state';
     <header class="bf-page__header">
       <div class="bf-page__heading">
         <a mat-button routerLink="/org/people" class="bf-back">Back to people</a>
-        <h1 class="bf-page__title">{{ valueOf(person)?.displayName ?? 'Person' }}</h1>
-        <p class="bf-page__subtitle">{{ valueOf(person)?.jobTitle }}</p>
+        <div class="bf-profile">
+          @if (valueOf(person); as p) {
+            <sat-avatar size="64" [initials]="initials(p.displayName)" aria-hidden="true" />
+          }
+          <div>
+            <h1 class="bf-page__title">{{ valueOf(person)?.displayName ?? 'Person' }}</h1>
+            <p class="bf-page__subtitle">{{ valueOf(person)?.jobTitle }}</p>
+          </div>
+        </div>
       </div>
       @if (canManage() && !editing()) {
         <button mat-flat-button type="button" (click)="editing.set(true)">Change manager</button>
@@ -160,22 +170,31 @@ import { LoadState } from './load-state';
           <h2 class="bf-card__title" id="lines-title">Reporting history</h2>
         </div>
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="p.reportingLines" aria-labelledby="lines-title">
+          <table
+            class="bf-table bf-table--stack"
+            mat-table
+            [dataSource]="p.reportingLines"
+            aria-labelledby="lines-title"
+          >
             <ng-container matColumnDef="manager">
               <th mat-header-cell *matHeaderCellDef>Manager</th>
-              <td mat-cell *matCellDef="let l">{{ l.managerName }}</td>
+              <td class="bf-cell--full" mat-cell *matCellDef="let l">{{ l.managerName }}</td>
             </ng-container>
             <ng-container matColumnDef="kind">
               <th mat-header-cell *matHeaderCellDef>Line</th>
-              <td mat-cell *matCellDef="let l">{{ l.kind === 'solid' ? 'Solid' : 'Matrix' }}</td>
+              <td mat-cell *matCellDef="let l" data-label="Line">
+                {{ l.kind === 'solid' ? 'Solid' : 'Matrix' }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="from">
               <th mat-header-cell *matHeaderCellDef>From</th>
-              <td mat-cell *matCellDef="let l">{{ l.validFrom | date: 'd MMM y' : 'UTC' }}</td>
+              <td mat-cell *matCellDef="let l" data-label="From">
+                {{ l.validFrom | date: 'd MMM y' : 'UTC' }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="to">
               <th mat-header-cell *matHeaderCellDef>To</th>
-              <td mat-cell *matCellDef="let l">
+              <td mat-cell *matCellDef="let l" data-label="To">
                 {{ l.validTo ? (l.validTo | date: 'd MMM y' : 'UTC') : 'Open' }}
               </td>
             </ng-container>
@@ -207,6 +226,11 @@ import { LoadState } from './load-state';
   `,
   styleUrl: './page.scss',
   styles: `
+    .bf-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
     .bf-list {
       margin: 0;
       padding: 0 20px 20px 40px;
@@ -221,6 +245,7 @@ import { LoadState } from './load-state';
 })
 export class PersonPage {
   protected readonly valueOf = valueOf;
+  protected readonly initials = initialsOf;
   private readonly api = injectApi();
   private readonly personId = toSignal(
     inject(ActivatedRoute).paramMap.pipe(map((p) => p.get('personId') ?? '')),

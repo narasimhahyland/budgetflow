@@ -11,8 +11,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ExtractedField, ExtractionResult } from '@bf/contracts';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { fieldName } from './ai-labels';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
 import { data, errorMessage, injectApi } from './api';
 
@@ -34,7 +34,6 @@ import { data, errorMessage, injectApi } from './api';
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
-    SatImportantButton,
     SatStatusTag,
   ],
   template: `
@@ -150,7 +149,7 @@ import { data, errorMessage, injectApi } from './api';
               </sat-banner>
             }
 
-            <div class="bf-form">
+            <div class="bf-form bf-extract__fields">
               @for (f of r.fields; track f.field) {
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
                   <mat-label>{{ f.label }}</mat-label>
@@ -167,7 +166,7 @@ import { data, errorMessage, injectApi } from './api';
 
             @if (r.droppedFields.length) {
               <p class="bf-cell__secondary" data-testid="dropped-fields">
-                Read and discarded, never stored: {{ r.droppedFields.join(', ') }}.
+                Read and discarded, never stored: {{ dropped(r.droppedFields) }}.
               </p>
             }
 
@@ -175,12 +174,16 @@ import { data, errorMessage, injectApi } from './api';
             <bf-ai-provenance [provenance]="r.provenance" />
 
             @if (r.status === 'open') {
-              <mat-checkbox [(ngModel)]="checked" data-testid="confirm-checked">
+              <mat-checkbox
+                class="bf-extract__check"
+                [(ngModel)]="checked"
+                data-testid="confirm-checked"
+              >
                 I have checked these details
               </mat-checkbox>
               <div class="bf-form__actions">
                 <button
-                  satImportantButton
+                  mat-flat-button
                   type="button"
                   [disabled]="busy() || !checked() || incomplete()"
                   (click)="confirm(r)"
@@ -239,14 +242,30 @@ import { data, errorMessage, injectApi } from './api';
     .bf-extract {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: stretch;
       gap: 16px;
+      min-width: 0;
+    }
+    .bf-extract > a,
+    .bf-extract > button,
+    .bf-extract__check {
+      align-self: flex-start;
+    }
+    /* Room for each field's AI hint, so it never sits on the next field's label. */
+    .bf-extract__fields {
+      row-gap: 16px;
+      padding-inline: 0;
     }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExtractionPage {
+  /** Discarded fields in words: "card number, cardholder signature". */
+  protected dropped(fields: readonly string[]): string {
+    return fields.map((f) => fieldName(f).toLowerCase()).join(', ');
+  }
+
   private readonly api = injectApi();
   private readonly route = inject(ActivatedRoute);
   private readonly snack = inject(MatSnackBar);

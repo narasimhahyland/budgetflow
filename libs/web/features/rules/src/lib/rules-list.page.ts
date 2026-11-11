@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,14 +10,16 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
+import { LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { RuleEffectTag, RuleStatusTag } from './rule-tags';
 import { RulesTabs } from './rules-tabs';
 
@@ -25,11 +27,13 @@ import { RulesTabs } from './rules-tabs';
 @Component({
   selector: 'bf-rules-list-page',
   imports: [
+    DatePipe,
     DecimalPipe,
     FormsModule,
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     RouterLink,
@@ -38,6 +42,7 @@ import { RulesTabs } from './rules-tabs';
     RulesTabs,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SatStatusTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -95,12 +100,19 @@ import { RulesTabs } from './rules-tabs';
         [loading]="list.isLoading() && !list.hasValue()"
         [error]="list.error()"
         what="rules"
+        shape="table"
         (retry)="list.reload()"
       />
       @if (list.hasValue()) {
         @if (rows().length) {
+          <sat-banner variant="info" class="bf-banner">
+            <sat-banner-message>
+              When rules disagree the strictest outcome wins: block, then hold, then approvals, then
+              a warning, then goes through. Equal outcomes are settled by priority.
+            </sat-banner-message>
+          </sat-banner>
           <div class="bf-table-scroll">
-            <table class="bf-split-table" aria-label="Rules">
+            <table class="bf-split-table bf-table--stack" aria-label="Rules">
               <thead>
                 <tr>
                   <th scope="col" class="bf-num">Priority</th>
@@ -116,27 +128,38 @@ import { RulesTabs } from './rules-tabs';
                 @for (r of rows(); track r.id) {
                   <tr>
                     <td class="bf-num">{{ r.priority }}</td>
-                    <td>
+                    <td data-label="Rule">
                       <a [routerLink]="['/admin/rules', r.id]" class="bf-cell__primary">{{
                         r.code
                       }}</a>
                       <span class="bf-cell__secondary">{{ r.name }}</span>
                       @if (r.conflictsWith.length) {
-                        <span class="bf-cell__secondary"
-                          >Conflicts with {{ r.conflictsWith.join(', ') }}</span
-                        >
+                        <span class="bf-conflict">
+                          <sat-status-tag status="important-loud"
+                            ><mat-icon svgIcon="error" aria-hidden="true" />Conflicts with
+                            {{ r.conflictsWith.join(', ') }}</sat-status-tag
+                          >
+                        </span>
                       }
                     </td>
-                    <td><bf-rule-effect [effect]="r.effect" /></td>
-                    <td>{{ r.scopeSummary }}</td>
-                    <td>
+                    <td data-label="Outcome"><bf-rule-effect [effect]="r.effect" /></td>
+                    <td data-label="Applies to">{{ sentence(r.scopeSummary) }}</td>
+                    <td class="bf-nowrap" data-label="Status">
                       <bf-rule-status [status]="r.status" />
                       @if (r.draftVersion !== null) {
                         <span class="bf-cell__secondary">Draft v{{ r.draftVersion }} waiting</span>
                       }
                     </td>
-                    <td class="bf-num">{{ r.matches30d | number }}</td>
-                    <td>{{ r.validFrom ?? '—' }}</td>
+                    <td class="bf-num" data-label="Matches (30 days)">
+                      {{ r.matches30d | number }}
+                    </td>
+                    <td class="bf-nowrap" data-label="From">
+                      @if (r.validFrom) {
+                        {{ r.validFrom | date: 'd MMM y' : 'UTC' }}
+                      } @else {
+                        —
+                      }
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -150,6 +173,15 @@ import { RulesTabs } from './rules-tabs';
         }
       }
     </section>
+  `,
+  styles: `
+    .bf-conflict {
+      display: block;
+      margin-top: 4px;
+    }
+    .bf-nowrap {
+      white-space: nowrap;
+    }
   `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -173,6 +205,10 @@ export class RulesListPage {
       return !term || `${r.code} ${r.name}`.toLowerCase().includes(term);
     });
   });
+
+  protected sentence(text: string): string {
+    return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+  }
 
   protected notify(message: string): void {
     this.snack.open(message, undefined, { duration: 4000 });

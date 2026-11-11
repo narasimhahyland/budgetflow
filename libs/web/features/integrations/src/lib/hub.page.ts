@@ -10,6 +10,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
@@ -18,12 +19,12 @@ import type {
   IntegrationCategory,
   IntegrationMode,
   IntegrationProvider,
+  IntegrationsHub,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
 import { IntegrationsNav } from './integrations-nav';
@@ -36,7 +37,6 @@ import {
   sentence,
   type Tone,
 } from './labels';
-import { LoadState } from './load-state';
 import { byText, ordered } from './order';
 
 /** Screen 092: the connector hub — health, every connection by category, and the connect form. */
@@ -50,16 +50,17 @@ import { byText, ordered } from './order';
     LoadState,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
-    SatImportantButton,
   ],
   templateUrl: './hub.page.html',
   styleUrls: ['./page.scss', './integrations.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HubPage {
@@ -67,6 +68,16 @@ export class HubPage {
   private readonly router = inject(Router);
   private readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
+
+  protected systems(h: IntegrationsHub): number {
+    return h.health.connected + h.health.needsAttention + h.health.notConnected;
+  }
+
+  /** Share of all systems, in percent, for a KPI footer. */
+  protected share(n: number, h: IntegrationsHub): number {
+    const all = this.systems(h);
+    return all ? (n * 100) / all : 0;
+  }
   protected readonly sentence = sentence;
   protected readonly timezone = computed(() => this.session.timezone());
 

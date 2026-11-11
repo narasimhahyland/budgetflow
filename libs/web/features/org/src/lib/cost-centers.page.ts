@@ -18,11 +18,12 @@ import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, todayIso, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 /** Screen 41: cost-center management, effective-dated per legal entity. */
 @Component({
   selector: 'bf-cost-centers-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DatePipe,
     FormsModule,
@@ -173,42 +174,49 @@ import { LoadState } from './load-state';
           <p class="bf-empty">No cost centers yet.</p>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="l.items" aria-labelledby="cc-title">
+            <table
+              class="bf-table bf-table--stack"
+              mat-table
+              [dataSource]="l.items"
+              aria-labelledby="cc-title"
+            >
               <ng-container matColumnDef="code">
                 <th mat-header-cell *matHeaderCellDef>Code</th>
-                <td mat-cell *matCellDef="let c">
+                <td class="bf-cell--full" mat-cell *matCellDef="let c">
                   <span class="bf-cell__primary">{{ c.code }}</span>
                   <span class="bf-cell__secondary">{{ c.name }}</span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="entity">
                 <th mat-header-cell *matHeaderCellDef>Legal entity</th>
-                <td mat-cell *matCellDef="let c">{{ c.legalEntityCode }}</td>
+                <td mat-cell *matCellDef="let c" data-label="Legal entity">
+                  {{ c.legalEntityCode }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="unit">
                 <th mat-header-cell *matHeaderCellDef>Org unit</th>
-                <td mat-cell *matCellDef="let c">{{ c.orgUnitName ?? '—' }}</td>
+                <td mat-cell *matCellDef="let c" data-label="Org unit">
+                  {{ c.orgUnitName ?? '—' }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="dates">
                 <th mat-header-cell *matHeaderCellDef>Active</th>
-                <td mat-cell *matCellDef="let c">
+                <td mat-cell *matCellDef="let c" data-label="Active">
                   {{ c.validFrom | date: 'd MMM y' : 'UTC' }} –
                   {{ c.validTo ? (c.validTo | date: 'd MMM y' : 'UTC') : 'open' }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let c">
+                <td mat-cell *matCellDef="let c" data-label="Status">
                   <sat-status-tag [status]="c.active ? 'success' : 'neutral'">{{
                     c.active ? 'Active' : 'Inactive'
                   }}</sat-status-tag>
                 </td>
               </ng-container>
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>
-                  <span class="bf-visually-hidden">Actions</span>
-                </th>
-                <td mat-cell *matCellDef="let c">
+                <th mat-header-cell *matHeaderCellDef class="bf-col-actions">Actions</th>
+                <td mat-cell *matCellDef="let c" class="bf-col-actions" data-label="Actions">
                   @if (canManage() && !c.validTo) {
                     <button mat-button type="button" (click)="startDeactivate(c)">
                       Deactivate
@@ -225,15 +233,6 @@ import { LoadState } from './load-state';
     </section>
   `,
   styleUrl: './page.scss',
-  styles: `
-    .bf-visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-    }
-  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CostCentersPage {

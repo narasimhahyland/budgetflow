@@ -17,6 +17,7 @@ const EXAMPLE =
 /** Screens 9 and 42: initial org hierarchy import and later synchronization from a CSV file. */
 @Component({
   selector: 'bf-org-import-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     CsvInput,
     FormsModule,
@@ -90,18 +91,23 @@ const EXAMPLE =
         </sat-banner>
         @if (r.issues.length) {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="r.issues" aria-label="Problems in the file">
+            <table
+              class="bf-table bf-table--stack"
+              mat-table
+              [dataSource]="r.issues"
+              aria-label="Problems in the file"
+            >
               <ng-container matColumnDef="line">
                 <th mat-header-cell *matHeaderCellDef>Line</th>
-                <td mat-cell *matCellDef="let i">{{ i.line }}</td>
+                <td class="bf-cell--full" mat-cell *matCellDef="let i">{{ i.line }}</td>
               </ng-container>
               <ng-container matColumnDef="field">
                 <th mat-header-cell *matHeaderCellDef>Column</th>
-                <td mat-cell *matCellDef="let i">{{ i.field ?? '—' }}</td>
+                <td mat-cell *matCellDef="let i" data-label="Column">{{ i.field ?? '—' }}</td>
               </ng-container>
               <ng-container matColumnDef="message">
                 <th mat-header-cell *matHeaderCellDef>Problem</th>
-                <td mat-cell *matCellDef="let i">{{ i.message }}</td>
+                <td mat-cell *matCellDef="let i" data-label="Problem">{{ i.message }}</td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="issueColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: issueColumns"></tr>
@@ -109,14 +115,19 @@ const EXAMPLE =
           </div>
         }
         <div class="bf-table-scroll">
-          <table mat-table [dataSource]="r.operations" aria-label="Planned changes">
+          <table
+            class="bf-table bf-table--stack"
+            mat-table
+            [dataSource]="r.operations"
+            aria-label="Planned changes"
+          >
             <ng-container matColumnDef="line">
               <th mat-header-cell *matHeaderCellDef>Line</th>
-              <td mat-cell *matCellDef="let o">{{ o.line }}</td>
+              <td class="bf-cell--full" mat-cell *matCellDef="let o">{{ o.line }}</td>
             </ng-container>
             <ng-container matColumnDef="op">
               <th mat-header-cell *matHeaderCellDef>Action</th>
-              <td mat-cell *matCellDef="let o">
+              <td mat-cell *matCellDef="let o" data-label="Action">
                 <sat-status-tag
                   [status]="
                     o.op === 'create' ? 'success' : o.op === 'change' ? 'warning' : 'neutral-quiet'
@@ -129,15 +140,15 @@ const EXAMPLE =
             </ng-container>
             <ng-container matColumnDef="code">
               <th mat-header-cell *matHeaderCellDef>Code</th>
-              <td mat-cell *matCellDef="let o">{{ o.code }}</td>
+              <td mat-cell *matCellDef="let o" data-label="Code">{{ o.code }}</td>
             </ng-container>
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
-              <td mat-cell *matCellDef="let o">{{ o.name ?? '—' }}</td>
+              <td mat-cell *matCellDef="let o" data-label="Name">{{ o.name ?? '—' }}</td>
             </ng-container>
             <ng-container matColumnDef="parent">
               <th mat-header-cell *matHeaderCellDef>Parent</th>
-              <td mat-cell *matCellDef="let o">{{ o.parentCode ?? '—' }}</td>
+              <td mat-cell *matCellDef="let o" data-label="Parent">{{ o.parentCode ?? '—' }}</td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="opColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: opColumns"></tr>

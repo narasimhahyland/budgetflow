@@ -15,14 +15,13 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { AllocationSuggestion, BatchAllocationResult } from '@bf/contracts';
-import { formatMoney, Money } from '@bf/web/ui';
+import { formatMoney, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 /**
  * Screen 022d: suggested allocations. The model proposes the weights and writes the reasons; the
@@ -79,6 +78,7 @@ import { LoadState } from './load-state';
         [loading]="suggestion.isLoading() && !suggestion.hasValue()"
         [error]="loadError()"
         what="the suggested split"
+        shape="table"
         (retry)="suggestion.reload()"
       />
       @if (suggestion.hasValue()) {
@@ -198,7 +198,10 @@ import { LoadState } from './load-state';
                 </span>
               </div>
               <div class="bf-table-scroll">
-                <table class="bf-split-table" aria-label="Suggested allocation per child budget">
+                <table
+                  class="bf-split-table bf-table--stack"
+                  aria-label="Suggested allocation per child budget"
+                >
                   <thead>
                     <tr>
                       <th>Child budget</th>
@@ -215,20 +218,22 @@ import { LoadState } from './load-state';
                     @for (line of s.lines; track line.budgetId) {
                       <tr [attr.data-testid]="'split-row-' + line.budgetId">
                         <td>{{ line.budgetName }}</td>
-                        <td class="bf-num">{{ line.eligibleHeadcount }}</td>
-                        <td class="bf-num">
+                        <td class="bf-num" data-label="Eligible headcount">
+                          {{ line.eligibleHeadcount }}
+                        </td>
+                        <td class="bf-num" data-label="Last year's use">
                           {{ line.priorUseBps === null ? '—' : pct(line.priorUseBps) }}
                         </td>
-                        <td class="bf-num">
+                        <td class="bf-num" data-label="Reach">
                           {{ line.participationBps === null ? '—' : pct(line.participationBps) }}
                         </td>
-                        <td class="bf-num">
+                        <td class="bf-num" data-label="Current allocation">
                           <bf-money
                             [amountMinor]="line.currentAllocation.amountMinor"
                             [currency]="line.currentAllocation.currency"
                           />
                         </td>
-                        <td class="bf-num bf-split__suggested">
+                        <td class="bf-num bf-split__suggested" data-label="Suggested">
                           <bf-money
                             [amountMinor]="line.suggested.amountMinor"
                             [currency]="line.suggested.currency"
@@ -241,9 +246,14 @@ import { LoadState } from './load-state';
                             >
                           }
                         </td>
-                        <td class="bf-num">
-                          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                            <mat-label>{{ line.suggested.currency }}</mat-label>
+                        <td class="bf-num" data-label="Your amount">
+                          <mat-form-field
+                            appearance="outline"
+                            subscriptSizing="dynamic"
+                            class="bf-split__amount"
+                          >
+                            <mat-label>Your amount</mat-label>
+                            <span matTextPrefix>{{ line.suggested.currency }}&nbsp;</span>
                             <input
                               matInput
                               type="number"
@@ -254,30 +264,31 @@ import { LoadState } from './load-state';
                             />
                           </mat-form-field>
                         </td>
-                        <td>{{ line.why }}</td>
+                        <td data-label="Why this line">{{ line.why }}</td>
                       </tr>
                     }
                     <tr class="bf-total">
                       <td>Total</td>
                       <td colspan="4"></td>
-                      <td class="bf-num">
+                      <td class="bf-num" data-label="Suggested">
                         <bf-money
                           [amountMinor]="s.total.amountMinor"
                           [currency]="s.total.currency"
                         />
                       </td>
-                      <td class="bf-num" data-testid="draft-total">
+                      <td class="bf-num" data-testid="draft-total" data-label="Your amount">
                         {{ formatted(draftTotal(s), s.amount.currency) }}
                       </td>
-                      <td>
-                        Never more than the parent's
-                        {{ formatted(s.amount.amountMinor, s.amount.currency) }} available under its
-                        own rules.
-                      </td>
+                      <td></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+              <p class="bf-card__hint bf-split__limit">
+                The total is never more than the parent's
+                {{ formatted(s.amount.amountMinor, s.amount.currency) }} available under its own
+                rules.
+              </p>
 
               @if (s.excluded.length) {
                 <div class="bf-section">
@@ -291,7 +302,7 @@ import { LoadState } from './load-state';
               }
 
               @if (s.notes.length) {
-                <sat-banner variant="info" data-testid="split-notes">
+                <sat-banner variant="info" class="bf-banner" data-testid="split-notes">
                   <sat-banner-message>
                     @for (note of s.notes; track note) {
                       {{ note }}
@@ -337,6 +348,7 @@ import { LoadState } from './load-state';
                   Check against the parent
                 </button>
                 <button
+                  mat-flat-button
                   satImportantButton
                   type="button"
                   [disabled]="busy()"
@@ -386,6 +398,12 @@ import { LoadState } from './load-state';
     }
     .bf-weights__total--invalid {
       color: var(--mat-sys-error);
+    }
+    .bf-split__amount {
+      width: 10rem;
+    }
+    .bf-split__limit {
+      margin: 8px 20px 0;
     }
     .bf-split__suggested {
       background: var(--sat-sys-info-container);

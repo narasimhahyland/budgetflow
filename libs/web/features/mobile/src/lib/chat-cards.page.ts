@@ -10,18 +10,18 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ChatApprovalCardView, ChatProvider } from '@bf/contracts';
-import { formatMoney, Money } from '@bf/web/ui';
+import { BudgetStatus, formatMoney, LoadState, Money, type StatusView } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const REASONS = [
   { code: 'REJ-BUDGET', label: 'Insufficient budget' },
@@ -38,11 +38,13 @@ const REASONS = [
 @Component({
   selector: 'bf-chat-cards-page',
   imports: [
+    BudgetStatus,
     FormsModule,
     LoadState,
     MatButtonModule,
     MatButtonToggleModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     Money,
@@ -72,11 +74,9 @@ const REASONS = [
         aria-label="Chat provider"
         hideSingleSelectionIndicator
       >
-        <mat-button-toggle value="slack" data-testid="provider-slack">
-          Slack Block Kit (061b)
-        </mat-button-toggle>
+        <mat-button-toggle value="slack" data-testid="provider-slack"> Slack </mat-button-toggle>
         <mat-button-toggle value="teams" data-testid="provider-teams">
-          Microsoft Teams Adaptive Card (061c)
+          Microsoft Teams
         </mat-button-toggle>
       </mat-button-toggle-group>
 
@@ -97,7 +97,7 @@ const REASONS = [
           (keydown.enter)="surface.set('app-home')"
           tabindex="0"
           data-testid="surface-app-home"
-          >App Home & Balance (061d)</a
+          >App Home and balance</a
         >
       </sat-navigation-tabs>
     </div>
@@ -125,22 +125,18 @@ const REASONS = [
           <div class="bf-card__header">
             <div>
               <span class="bf-chip">{{
-                provider() === 'slack' ? 'Slack direct message · Block Kit' : 'Teams personal chat · Adaptive Card 1.5'
+                provider() === 'slack'
+                  ? 'Slack direct message · Block Kit'
+                  : 'Teams personal chat · Adaptive Card 1.5'
               }}</span>
               <h2 class="bf-card__title" data-testid="card-headline">{{ c.stateHeadline }}</h2>
             </div>
-            <sat-status-tag
-              [status]="
-                c.state === 'approved'
-                  ? 'success'
-                  : c.state === 'rejected' || c.state === 'outside_doa' || c.state === 'hard_block'
-                    ? 'important'
-                    : 'warning'
-              "
-              data-testid="card-state-tag"
+            @let state = cardState[c.state];
+            <sat-status-tag [status]="state.tone" data-testid="card-state-tag"
+              ><mat-icon [svgIcon]="state.icon" aria-hidden="true" />{{
+                state.label
+              }}</sat-status-tag
             >
-              {{ c.state.replaceAll('_', ' ') }}
-            </sat-status-tag>
           </div>
 
           <dl class="bf-facts">
@@ -187,7 +183,9 @@ const REASONS = [
             </div>
           }
 
-          <p class="bf-cell__secondary" data-testid="card-why-you">{{ c.whyYou }}</p>
+          <p class="bf-cell__secondary bf-chat-cards__why" data-testid="card-why-you">
+            {{ c.whyYou }}
+          </p>
 
           @if (rejectModalOpen()) {
             <div class="bf-chat-cards__reject" data-testid="card-reject-modal">
@@ -195,7 +193,11 @@ const REASONS = [
               <div class="bf-form">
                 <mat-form-field appearance="outline">
                   <mat-label>Reason code</mat-label>
-                  <mat-select [(ngModel)]="rejectCode" name="rejectCode" data-testid="card-reject-code">
+                  <mat-select
+                    [(ngModel)]="rejectCode"
+                    name="rejectCode"
+                    data-testid="card-reject-code"
+                  >
                     @for (r of reasons; track r.code) {
                       <mat-option [value]="r.code">{{ r.code }} · {{ r.label }}</mat-option>
                     }
@@ -213,9 +215,11 @@ const REASONS = [
                 </mat-form-field>
               </div>
               <div class="bf-form__actions">
-                <button mat-button type="button" (click)="rejectModalOpen.set(false)">Cancel</button>
+                <button mat-button type="button" (click)="rejectModalOpen.set(false)">
+                  Cancel
+                </button>
                 <button
-                  mat-stroked-button
+                  mat-flat-button
                   satImportantButton
                   type="button"
                   [disabled]="busy() || !rejectCode || !rejectReason.trim()"
@@ -252,7 +256,6 @@ const REASONS = [
             @if (c.canReject) {
               <button
                 mat-stroked-button
-                satImportantButton
                 type="button"
                 [disabled]="busy()"
                 (click)="rejectModalOpen.set(true)"
@@ -261,7 +264,11 @@ const REASONS = [
                 Reject
               </button>
             }
-            <a mat-stroked-button [routerLink]="['/requests', c.subjectId]" data-testid="card-open-bf">
+            <a
+              mat-stroked-button
+              [routerLink]="['/requests', c.subjectId]"
+              data-testid="card-open-bf"
+            >
               Open in BudgetFlow
             </a>
           </div>
@@ -273,7 +280,8 @@ const REASONS = [
         <section class="bf-card" aria-labelledby="home-waiting-title">
           <div class="bf-card__header">
             <h2 class="bf-card__title" id="home-waiting-title">
-              {{ provider() === 'slack' ? 'Slack App Home' : 'Teams Personal Tab' }} · Waiting for you
+              {{ provider() === 'slack' ? 'Slack App Home' : 'Teams Personal Tab' }} · Waiting for
+              you
             </h2>
           </div>
           <ul class="bf-list">
@@ -282,11 +290,7 @@ const REASONS = [
                 <span>
                   <strong>{{ t.ref }}</strong> {{ t.title }} · {{ money(t.amount) }}
                 </span>
-                <button
-                  mat-stroked-button
-                  type="button"
-                  (click)="pickTask(t.taskId)"
-                >
+                <button mat-stroked-button type="button" (click)="pickTask(t.taskId)">
                   Open card
                 </button>
               </li>
@@ -312,7 +316,7 @@ const REASONS = [
               <li class="bf-list__item">
                 <div class="bf-list__row">
                   <strong>{{ b.name }}</strong>
-                  <span class="bf-chip">{{ b.status.replaceAll('_', ' ') }}</span>
+                  <bf-budget-status [status]="b.status" />
                 </div>
                 <p class="bf-cell__secondary">
                   Available under this budget's rules: {{ money(b.balances.available) }} of
@@ -343,16 +347,19 @@ const REASONS = [
     }
     .bf-chat-cards__impact {
       padding: 12px 16px;
-      margin: 12px 0;
+      margin: 12px 20px;
       border-radius: var(--mat-sys-corner-medium);
       background: var(--mat-sys-surface-container-low);
     }
     .bf-chat-cards__impact p {
       margin: 0 0 6px;
     }
+    .bf-chat-cards__why {
+      margin: 0 20px 12px;
+    }
     .bf-chat-cards__reject {
       padding: 12px 16px;
-      margin: 12px 0;
+      margin: 12px 20px;
       border: 1px solid var(--mat-sys-error);
       border-radius: var(--mat-sys-corner-medium);
     }
@@ -361,6 +368,17 @@ const REASONS = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatCardsPage {
+  protected readonly cardState: Record<ChatApprovalCardView['state'], StatusView> = {
+    waiting: { label: 'Waiting for you', tone: 'warning', icon: 'clock' },
+    approved: { label: 'Approved', tone: 'success', icon: 'circle_check' },
+    rejected: { label: 'Rejected', tone: 'important', icon: 'circle_x' },
+    outside_doa: { label: 'Outside your approval limit', tone: 'important', icon: 'block' },
+    hard_block: { label: 'Blocked', tone: 'important', icon: 'block' },
+    request_changed: { label: 'Request changed', tone: 'info', icon: 'restore' },
+    decided_elsewhere: { label: 'Decided elsewhere', tone: 'neutral', icon: 'check_double' },
+    not_linked: { label: 'Account not linked', tone: 'neutral', icon: 'circle_minus' },
+    read_only: { label: 'Read only', tone: 'neutral', icon: 'circle_minus' },
+  };
   private readonly api = injectApi();
   private readonly route = inject(ActivatedRoute);
   private readonly snack = inject(MatSnackBar);

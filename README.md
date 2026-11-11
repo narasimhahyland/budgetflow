@@ -37,7 +37,10 @@ Delivery runs as 20 gated phases. A phase is on `main` only when its evidence pa
 | 14    | Experience and administration                      | [yes](evidence/phase-14/) |
 | 15    | Extended product features                          | [yes](evidence/phase-15/) |
 | 16    | Ecosystem: BI, assistant, no-code, marketplace     | [yes](evidence/phase-16/) |
-| 17-20 | Quality, security, evidence, final report          | not started               |
+| 17    | Quality: traceability, migrations, performance     | in review (PR #101)       |
+| 18    | Security review and break-glass access             | [yes](evidence/phase-18/) |
+| 19    | Local evidence: whole product, all gates           | in progress               |
+| 20    | Docs and final report                              | in progress               |
 
 Each pack holds the gate summary, the functional outcome table, scrubbed API responses and
 database proofs, and the visual QA report — [`evidence/README.md`](evidence/README.md) explains the
@@ -100,8 +103,9 @@ in `infra/.env.example` is a dev-only placeholder that works against a local sta
 There are no unit tests, by design. Correctness is proven against the running product:
 
 - **API scenarios** — `apps/api-e2e`, Playwright's request fixture over HTTP against the running API,
-  with real Keycloak tokens per role and real PostgreSQL. Isolated runs give each worker its own
-  Postgres Testcontainer. Every response is validated against its `libs/contracts` schema.
+  with real Keycloak tokens per role and real PostgreSQL. Scenarios run on one worker against the local
+  stack (isolated per-worker Testcontainers runs were deferred); the migration checks use throwaway
+  Postgres 16 containers. Every response is validated against its `libs/contracts` schema.
 - **User journeys** — `apps/web-e2e`, Playwright through the real browser as the relevant role,
   asserting the UI and the numbers the API reports.
 - **Visual regression** — baselines in `apps/web-e2e/src/__screenshots__/`, captured in a pinned
@@ -137,7 +141,7 @@ seed. Logs land in `tmp/gate/<timestamp>/`.
 | `libs/api/<module>`               | NestJS domain modules (budgets, events, approvals, ledger, ai, …)        |
 | `libs/web/features/*`             | One lazy-loaded library per screen group                                 |
 | `libs/web/{shell,ui,data-access}` | Navigation, shared components, typed API access and state                |
-| `libs/seed`                       | Deterministic fixtures with fixed ids, amounts and clock                 |
+| `libs/seed`                       | Deterministic fixtures: fixed ids and amounts, dates from the API clock  |
 | `infra/`                          | Docker Compose, Keycloak realm, Postgres roles, mock connector providers |
 | `scripts/`                        | `stack.sh`, `gate.sh`, `worktree.sh`, `secret-scan.sh`, visual tooling   |
 | `design/`, `docs/`, `evidence/`   | Approved Stitch exports, documentation, per-phase evidence packs         |
@@ -152,6 +156,19 @@ Nx 23 monorepo on npm and Node 24. Angular 22 (standalone, signals, OnPush) with
 `@hylandsoftware/satori-ui`; NestJS 11 with zod contracts and generated OpenAPI; PostgreSQL 16 with
 row-level security and Drizzle migrations; Keycloak 26 for OIDC with PKCE; pg-boss for background work
 behind a transactional outbox; Docker Compose for the local stack; Playwright for every test level.
+
+## Configuration
+
+Everything comes from environment variables validated at startup; `infra/.env.example` holds
+development placeholders and `scripts/stack.sh` passes them to Compose. Variables worth knowing:
+
+| Variable                                                                                                              | What it does                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BF_FIXED_NOW` (`FIXED_NOW` in the API)                                                                               | Development and test only: the instant the API and the database (`app_now()`) treat as now, so a visual run describes the product, not the day it ran. Unset means real time.                         |
+| `SLACK_SIGNING_SECRET`, `TEAMS_WEBHOOK_SECRET`, `CHAT_LINK_SECRET`, `APPROVAL_LINK_SECRET`, `INTEGRATIONS_SECRET_KEY` | Signing and encryption secrets, 16 characters or more. In production the API and worker refuse to start without them, because the development values are public (`libs/api/core/src/lib/secrets.ts`). |
+| `BF_ALLOW_DEV_SECRETS`                                                                                                | Local stack only (`infra/compose.yaml` sets it): lets those secrets fall back to the public development values, with a warning per secret. Never set it in a deployment.                              |
+| `TRUSTED_PROXY_CIDRS`                                                                                                 | The reverse proxies whose `X-Forwarded-For` the API believes when it decides a caller's address (API-key and SCIM allowed networks). Empty means the header is ignored.                               |
+| `BF_CI_TRACES`                                                                                                        | CI records no Playwright traces, because its reports are public artifacts; `BF_CI_TRACES=1` keeps them for failing tests on that run.                                                                 |
 
 ## Deliberate constraints
 

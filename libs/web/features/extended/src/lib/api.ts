@@ -41,3 +41,10 @@ export const todayIso = (): string => new Date().toISOString().slice(0, 10);
 export function valueOf<T>(r: { hasValue(): boolean; value(): T }): T | undefined {
   return r.hasValue() ? r.value() : undefined;
 }
+
+/** Two initials for a person's avatar (first and last name), as section 6 shows beside an owner. */
+export function initialsOf(name: string | null | undefined): string {
+  const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}

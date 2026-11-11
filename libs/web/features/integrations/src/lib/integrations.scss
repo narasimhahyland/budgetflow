@@ -33,7 +33,7 @@
   gap: 6px;
   padding: 2px 10px;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-full);
+  border-radius: var(--mat-sys-corner-small);
   background: var(--mat-sys-surface-container);
   font: var(--mat-sys-label-medium);
 }
@@ -43,8 +43,12 @@
   flex-wrap: wrap;
   gap: 6px;
   margin: 0;
-  padding: 0;
   list-style: none;
+}
+
+// A chip list that is also the card body keeps the body's padding.
+.bf-chip-list:not(.bf-card__body) {
+  padding: 0;
 }
 
 .bf-nowrap {
@@ -162,31 +166,6 @@
   font: var(--mat-sys-body-small);
 }
 
-// The connector frame tab strip (092, shared by 093-098 and 094a) --------------------------------
-
-.bf-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
-}
-
-.bf-tabs__tab {
-  padding: 10px 14px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-label-large);
-  cursor: pointer;
-}
-
-.bf-tabs__tab--active {
-  border-bottom-color: var(--mat-sys-primary);
-  color: var(--mat-sys-primary);
-}
-
 // One-time secrets (098, 101) --------------------------------------------------------------------
 
 .bf-secret {
@@ -256,4 +235,79 @@
   border-radius: var(--mat-sys-corner-small);
   background: var(--mat-sys-surface-container);
   font: var(--mat-sys-body-small);
+}
+
+// A group of checkboxes in a card body (key scopes, webhook events, consent): no browser groove
+// border, the legend reads as the group's label, and the options stack one per line.
+fieldset.bf-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-inline-size: 0;
+  margin: 0;
+  border: 0;
+}
+
+fieldset.bf-card__body > legend {
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.bf-actions-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+// Tablet: a row-action table wider than its card scrolls sideways, but its last column (the
+// row's actions: Revoke, Remove, Unlink) stays pinned to the edge so it is always reachable.
+// Phones stack the rows instead (`bf-table--stack` in the shared data-table sheet).
+@media (600px <= width < 1024px) {
+  // Material renders the tbody and thead itself, so they carry no attribute of this component:
+  // select only the rows and cells this template declares.
+  .bf-table--stack tr > td:last-child,
+  .bf-table--stack tr > th:last-child {
+    position: sticky;
+    inset-inline-end: 0;
+    z-index: 1;
+    box-shadow: inset 1px 0 0 var(--mat-sys-outline-variant);
+  }
+
+  .bf-table--stack tr > td:last-child {
+    background: var(--mat-sys-surface-container-lowest);
+  }
+
+  .bf-table--stack.bf-table--stack tr > th:last-child {
+    background: var(--mat-sys-surface-container);
+  }
+}
+
+// What a destructive confirmation will do, as the impact summary of a section 11 dialog: the
+// important tone, with the bullets inside the box.
+.bf-impact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 20px 12px;
+  padding: 12px 16px 12px 36px;
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--sat-sys-important-container);
+  color: var(--sat-sys-on-important-container);
+  font: var(--mat-sys-body-medium);
+}
+
+.bf-tile__category {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+// A long value (a callback path, a credential note) takes the whole row of a facts list instead of
+// wrapping inside one narrow column.
+.bf-facts > .bf-facts__wide {
+  grid-column: 1 / -1;
 }

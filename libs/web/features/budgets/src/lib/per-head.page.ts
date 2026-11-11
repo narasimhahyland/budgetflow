@@ -9,17 +9,18 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { RouterLink } from '@angular/router';
 import type { PerHeadResult } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { Money, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, toMajor, toMinor, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type EmploymentType = 'employee' | 'contractor' | 'intern';
 const TYPES: { key: EmploymentType; label: string }[] = [
@@ -35,6 +36,7 @@ const TYPES: { key: EmploymentType; label: string }[] = [
     FormsModule,
     LoadState,
     MatButtonModule,
+    MatChipsModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -43,6 +45,7 @@ const TYPES: { key: EmploymentType; label: string }[] = [
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_TAG_IMPORTS,
+    SatImportantButton,
   ],
   styleUrl: './page.scss',
   styles: `
@@ -58,52 +61,15 @@ const TYPES: { key: EmploymentType; label: string }[] = [
       }
     }
     .bf-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      display: block;
       margin: 8px 0 16px;
     }
-    .bf-chip {
-      padding: 6px 12px;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--mat-sys-corner-full);
-      background: var(--mat-sys-surface-container-lowest);
-      color: var(--mat-sys-on-surface);
-      cursor: pointer;
-      font: var(--mat-sys-label-large);
-    }
-    .bf-chip--on {
-      border-color: var(--sat-sys-on-success-container);
-      background: var(--sat-sys-success-container);
-      color: var(--sat-sys-on-success-container);
-    }
-    .bf-chip--off {
-      border-color: var(--mat-sys-error);
-      background: var(--mat-sys-error-container);
-      color: var(--mat-sys-on-error-container);
-    }
-    .bf-breakdown {
-      width: 100%;
-      border-collapse: collapse;
-      font: var(--mat-sys-body-medium);
-    }
-    .bf-breakdown th,
-    .bf-breakdown td {
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--mat-sys-outline-variant);
-      text-align: end;
-    }
-    .bf-breakdown th:first-child,
-    .bf-breakdown td:first-child {
-      text-align: start;
-    }
-    .bf-breakdown th {
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-label-medium);
+    .bf-ph > * {
+      min-width: 0;
     }
     .bf-compare {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
     .bf-box {
@@ -119,7 +85,9 @@ const TYPES: { key: EmploymentType; label: string }[] = [
     }
     .bf-big {
       font: var(--mat-sys-headline-small);
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
     }
     .bf-delta {
       display: flex;
@@ -181,7 +149,8 @@ const TYPES: { key: EmploymentType; label: string }[] = [
             <div class="bf-card__body">
               <div class="bf-form" style="padding: 0">
                 <mat-form-field
-                  ><mat-label>Rate per eligible employee per month (USD)</mat-label
+                  ><mat-label>Rate per eligible person a month</mat-label
+                  ><span matTextPrefix>USD&nbsp;</span
                   ><input
                     matInput
                     inputmode="decimal"
@@ -199,21 +168,16 @@ const TYPES: { key: EmploymentType; label: string }[] = [
                 /></mat-form-field>
               </div>
               <p class="bf-card__hint">Eligibility (select to include)</p>
-              <div class="bf-chips" role="group" aria-label="Eligible employment types">
+              <mat-chip-listbox class="bf-chips" multiple aria-label="Eligible employment types">
                 @for (t of types; track t.key) {
-                  <button
-                    type="button"
-                    class="bf-chip"
-                    [class.bf-chip--on]="eligible().includes(t.key)"
-                    [class.bf-chip--off]="!eligible().includes(t.key)"
-                    [attr.aria-pressed]="eligible().includes(t.key)"
-                    (click)="toggle(t.key)"
+                  <mat-chip-option
+                    [selected]="eligible().includes(t.key)"
+                    (selectionChange)="$event.isUserInput && toggle(t.key)"
                     [attr.data-testid]="'eligible-' + t.key"
+                    >{{ t.label }}</mat-chip-option
                   >
-                    {{ eligible().includes(t.key) ? '✓' : '✕' }} {{ t.label }}
-                  </button>
                 }
-              </div>
+              </mat-chip-listbox>
               <mat-slide-toggle [ngModel]="prorate()" (ngModelChange)="prorate.set($event)"
                 >Prorate joiners and leavers</mat-slide-toggle
               >
@@ -231,26 +195,32 @@ const TYPES: { key: EmploymentType; label: string }[] = [
               </div>
             </div>
             @if (preview(); as p) {
-              <table class="bf-breakdown" data-testid="breakdown">
-                <thead>
-                  <tr>
-                    <th scope="col">Employment type</th>
-                    <th scope="col">Headcount</th>
-                    <th scope="col">{{ prorate() ? 'Prorated' : 'Counted' }}</th>
-                    <th scope="col">Eligible</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (t of p.preview.byType; track t.employmentType) {
+              <div class="bf-table-scroll">
+                <table class="bf-breakdown bf-split-table" data-testid="breakdown">
+                  <thead>
                     <tr>
-                      <td>{{ t.employmentType }}</td>
-                      <td>{{ t.headcount }}</td>
-                      <td>{{ t.headcountMilli / 1000 }}</td>
-                      <td>{{ t.eligible ? 'Yes' : 'Excluded' }}</td>
+                      <th scope="col">Employment type</th>
+                      <th scope="col" class="bf-num">Headcount</th>
+                      <th scope="col" class="bf-num">{{ prorate() ? 'Prorated' : 'Counted' }}</th>
+                      <th scope="col">Eligible</th>
                     </tr>
-                  }
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    @for (t of p.preview.byType; track t.employmentType) {
+                      <tr>
+                        <td>{{ typeLabel(t.employmentType) }}</td>
+                        <td class="bf-num">{{ t.headcount }}</td>
+                        <td class="bf-num">{{ t.headcountMilli / 1000 }}</td>
+                        <td>
+                          <sat-status-tag [status]="t.eligible ? 'success' : 'neutral'">{{
+                            t.eligible ? 'Eligible' : 'Excluded'
+                          }}</sat-status-tag>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
               <p class="bf-card__hint" style="padding: 12px 20px">
                 Formula: {{ p.preview.eligibleHeadcountMilli / 1000 }} eligible ×
                 <bf-money [amountMinor]="p.preview.rateMinor" [currency]="p.preview.currency" /> =
@@ -265,6 +235,8 @@ const TYPES: { key: EmploymentType; label: string }[] = [
                   ><sat-banner-message>{{ problem() }}</sat-banner-message></sat-banner
                 >
               </div>
+            } @else {
+              <bf-load-state shape="table" [lines]="3" [loading]="true" what="the breakdown" />
             }
           </section>
         </div>
@@ -330,6 +302,7 @@ const TYPES: { key: EmploymentType; label: string }[] = [
               </button>
               <button
                 mat-flat-button
+                satImportantButton
                 type="button"
                 (click)="apply()"
                 [disabled]="
@@ -401,6 +374,10 @@ export class PerHeadPage {
     } catch {
       this.pendingTrueUp.set(null);
     }
+  }
+
+  protected typeLabel(t: string): string {
+    return TYPES.find((x) => x.key === t)?.label ?? t;
   }
 
   protected toggle(t: EmploymentType): void {

@@ -17,17 +17,14 @@ import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
+import { LoadState } from '@bf/web/ui';
 
 type Vendor = ResponseOf<'listVendors'>['items'][number];
 type Status = Vendor['status'];
 
-const STATUS: Record<
-  Status,
-  { label: string; tone: 'success' | 'info' | 'important' | 'neutral' }
-> = {
+const STATUS: Record<Status, { label: string; tone: 'success' | 'important' | 'neutral' }> = {
   preferred: { label: 'Preferred', tone: 'success' },
-  approved: { label: 'Approved', tone: 'info' },
+  approved: { label: 'Approved', tone: 'success' },
   blocked: { label: 'Blocked', tone: 'important' },
   unknown: { label: 'Not reviewed', tone: 'neutral' },
 };
@@ -35,6 +32,7 @@ const STATUS: Record<
 /** Screen 106c: vendor master (approved, preferred, blocked). */
 @Component({
   selector: 'bf-vendors-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     FormsModule,
     LoadState,
@@ -187,10 +185,15 @@ const STATUS: Record<
           <p class="bf-empty">No vendors match.</p>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="l.items" aria-labelledby="v-title">
+            <table
+              class="bf-table bf-table--stack"
+              mat-table
+              [dataSource]="l.items"
+              aria-labelledby="v-title"
+            >
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef>Vendor</th>
-                <td mat-cell *matCellDef="let v">
+                <td class="bf-cell--full" mat-cell *matCellDef="let v">
                   <span class="bf-cell__primary">{{ v.name }}</span>
                   <span class="bf-cell__secondary">{{
                     v.erpVendorId ? 'ERP ' + v.erpVendorId : 'Not in the ERP'
@@ -199,23 +202,23 @@ const STATUS: Record<
               </ng-container>
               <ng-container matColumnDef="category">
                 <th mat-header-cell *matHeaderCellDef>Category</th>
-                <td mat-cell *matCellDef="let v">{{ v.category ?? '—' }}</td>
+                <td mat-cell *matCellDef="let v" data-label="Category">{{ v.category ?? '—' }}</td>
               </ng-container>
               <ng-container matColumnDef="country">
                 <th mat-header-cell *matHeaderCellDef>Country</th>
-                <td mat-cell *matCellDef="let v">{{ v.country ?? '—' }}</td>
+                <td mat-cell *matCellDef="let v" data-label="Country">{{ v.country ?? '—' }}</td>
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let v">
+                <td mat-cell *matCellDef="let v" data-label="Status">
                   <sat-status-tag [status]="statusOf(v.status).tone">{{
                     statusOf(v.status).label
                   }}</sat-status-tag>
                 </td>
               </ng-container>
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef><span class="bf-sr">Actions</span></th>
-                <td mat-cell *matCellDef="let v">
+                <th mat-header-cell *matHeaderCellDef class="bf-col-actions">Actions</th>
+                <td mat-cell *matCellDef="let v" class="bf-col-actions" data-label="Actions">
                   @if (canManage()) {
                     <button mat-button type="button" (click)="startChange(v)">Change status</button>
                   }

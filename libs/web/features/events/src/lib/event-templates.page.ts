@@ -18,14 +18,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { EventTemplate } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
+import { SAT_INTERACTIVE_CARD_IMPORTS } from '@hylandsoftware/satori-ui/interactive-card';
+import { SatCategoryTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
-import { toMinor } from './money-input';
+import { label } from './labels';
+import { toMajor, toMinor } from './money-input';
 
 type Scope = 'company' | 'personal';
 
@@ -46,8 +47,9 @@ type Scope = 'company' | 'personal';
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SAT_INTERACTIVE_CARD_IMPORTS,
     SAT_NAVIGATION_TABS_IMPORTS,
-    SatImportantButton,
+    SatCategoryTag,
   ],
   template: `
     <header class="bf-page__header">
@@ -60,7 +62,7 @@ type Scope = 'company' | 'personal';
       </div>
       <div class="bf-page__actions">
         <a mat-stroked-button routerLink="/events">Events</a>
-        <button mat-flat-button satImportantButton type="button" (click)="startNew()">
+        <button mat-flat-button type="button" (click)="startNew()">
           <mat-icon svgIcon="plus_small" />New template
         </button>
       </div>
@@ -108,33 +110,37 @@ type Scope = 'company' | 'personal';
             Save the way you run an event once, and the next one starts with the checklist, agenda,
             invitation and survey already in place.
           </p>
-          <button mat-flat-button type="button" (click)="startNew()">Create a template</button>
+          <button mat-flat-button satEmptyStateAction type="button" (click)="startNew()">
+            Create a template
+          </button>
         </sat-empty-state>
       } @else {
-        <div class="bf-options" data-testid="template-cards">
+        <div class="bf-templates" data-testid="template-cards">
           @for (t of shown(); track t.id) {
-            <article class="bf-option" [class.bf-option--selected]="editing()?.id === t.id">
-              <span class="bf-list__row">
-                <span class="bf-option__title">{{ t.name }}</span>
-                <span class="bf-chip">{{ t.category.replace('_', ' ') }}</span>
-              </span>
-              <span class="bf-cell__secondary"
-                >{{ t.eventType.replace('_', ' ') }} · {{ t.typicalDuration }} ·
-                {{ t.locationType }}</span
+            <sat-interactive-card surface="container-lowest" [active]="editing()?.id === t.id">
+              <span satInteractiveCardTitle>{{ t.name }}</span>
+              <span satInteractiveCardSubtitle
+                >{{ label(t.eventType) }} · {{ t.typicalDuration }} ·
+                {{ label(t.locationType) }}</span
               >
-              <span class="bf-cell__primary"
-                ><bf-money
-                  [amountMinor]="t.estimatePerAttendee.amountMinor"
-                  [currency]="t.estimatePerAttendee.currency"
-                />
-                per attendee</span
-              >
-              <span class="bf-cell__secondary">
-                {{ t.checklistTasks.length }} checklist tasks · {{ t.agendaItems.length }} agenda
-                items · {{ t.surveyQuestions.length }} survey questions ·
-                {{ t.preferredVendors.length }} preferred vendors
-              </span>
-              <span class="bf-page__actions">
+              <sat-interactive-card-content>
+                <span class="bf-templates__body">
+                  <sat-category-tag category="purple">{{ label(t.category) }}</sat-category-tag>
+                  <span class="bf-cell__primary"
+                    ><bf-money
+                      [amountMinor]="t.estimatePerAttendee.amountMinor"
+                      [currency]="t.estimatePerAttendee.currency"
+                    />
+                    per attendee</span
+                  >
+                  <span class="bf-cell__secondary">
+                    {{ t.checklistTasks.length }} checklist tasks ·
+                    {{ t.agendaItems.length }} agenda items · {{ t.surveyQuestions.length }} survey
+                    questions · {{ t.preferredVendors.length }} preferred vendors
+                  </span>
+                </span>
+              </sat-interactive-card-content>
+              <sat-interactive-card-actions>
                 <a
                   mat-flat-button
                   [routerLink]="['/events/new']"
@@ -143,16 +149,26 @@ type Scope = 'company' | 'personal';
                 >
                 <button mat-stroked-button type="button" (click)="edit(t)">Edit</button>
                 <button
-                  mat-button
+                  mat-icon-button
                   type="button"
-                  [disabled]="busy()"
-                  (click)="archive(t)"
-                  [attr.aria-label]="'Archive ' + t.name"
+                  [matMenuTriggerFor]="templateMenu"
+                  [attr.aria-label]="'More actions for ' + t.name"
                 >
-                  Archive
+                  <mat-icon svgIcon="more_vert" />
                 </button>
-              </span>
-            </article>
+                <mat-menu #templateMenu="matMenu">
+                  <button
+                    mat-menu-item
+                    type="button"
+                    [disabled]="busy()"
+                    (click)="archive(t)"
+                    [attr.aria-label]="'Archive ' + t.name"
+                  >
+                    Archive
+                  </button>
+                </mat-menu>
+              </sat-interactive-card-actions>
+            </sat-interactive-card>
           }
         </div>
       }
@@ -220,13 +236,7 @@ type Scope = 'company' | 'personal';
           >
         </div>
         <div class="bf-form__actions">
-          <button
-            mat-flat-button
-            satImportantButton
-            type="button"
-            [disabled]="busy()"
-            (click)="save()"
-          >
+          <button mat-flat-button type="button" [disabled]="busy()" (click)="save()">
             Save template
           </button>
           <button mat-button type="button" (click)="editing.set(null)">Cancel</button>
@@ -234,10 +244,27 @@ type Scope = 'company' | 'personal';
       </section>
     }
   `,
+  styles: `
+    .bf-templates {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .bf-templates a[mat-flat-button] {
+      white-space: nowrap;
+    }
+    .bf-templates__body {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EventTemplatesPage {
+  protected readonly label = label;
   private readonly api = injectApi();
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
@@ -293,7 +320,7 @@ export class EventTemplatesPage {
       eventType: t.eventType,
       typicalDuration: t.typicalDuration,
       locationType: t.locationType,
-      estimate: (t.estimatePerAttendee.amountMinor / 100).toFixed(2),
+      estimate: toMajor(t.estimatePerAttendee.amountMinor, t.estimatePerAttendee.currency),
       toleranceBps: t.toleranceBps,
       costSplitRule: t.costSplitRule,
       message: t.invitationDefaults.message,

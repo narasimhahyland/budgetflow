@@ -22,7 +22,7 @@ test.describe('sign-in', () => {
     await page.goto('/');
     await submitSignIn(page, 'department-head', 'not-the-password');
     await expect(page.getByText('Invalid username or password.')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Sign in to your account' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign in to BudgetFlow' })).toBeVisible();
     await expect(page.getByRole('navigation', { name: 'Platform Navigation' })).toHaveCount(0);
   });
 
@@ -37,7 +37,7 @@ test.describe('sign-in', () => {
     await second.goto('/reports');
     await expectShell(second);
     await expect(second.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible();
-    await expect(second.getByRole('heading', { name: 'Sign in to your account' })).toHaveCount(0);
+    await expect(second.getByRole('heading', { name: 'Sign in to BudgetFlow' })).toHaveCount(0);
   });
 
   test('sign-out ends the session; signing in again asks for credentials', async ({ page }) => {
@@ -49,8 +49,8 @@ test.describe('sign-in', () => {
     await expect(page).toHaveURL(/\/signed-out$/);
     await expect(page.getByRole('heading', { name: 'You have signed out' })).toBeVisible();
     await page.getByRole('button', { name: 'Sign in again' }).click();
-    await expect(page.getByRole('heading', { name: 'Sign in to your account' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign in to BudgetFlow' })).toBeVisible();
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Sign in to your account' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sign in to BudgetFlow' })).toBeVisible();
   });
 });

@@ -16,12 +16,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import type { Scenario, ScenarioStatus } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const STATUS_LABEL: Record<ScenarioStatus, string> = {
   draft: 'Draft',
@@ -30,7 +29,7 @@ const STATUS_LABEL: Record<ScenarioStatus, string> = {
 };
 
 const STATUS_TONE: Record<ScenarioStatus, 'info' | 'success' | 'neutral'> = {
-  draft: 'info',
+  draft: 'neutral',
   promoted: 'success',
   archived: 'neutral',
 };

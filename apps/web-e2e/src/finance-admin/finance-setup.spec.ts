@@ -81,7 +81,7 @@ test.describe('exchange rates', () => {
     await page.getByTestId('lookup-type').click();
     await page.getByRole('option', { name: 'Month-end' }).click();
     await expect(page.getByTestId('lookup-other')).toContainText('No rate');
-    await expect(page.getByTestId('plan-INR')).toContainText('83.25 (locked)');
+    await expect(page.getByTestId('plan-INR')).toContainText('83.2500 (locked)');
     await expect(page.getByTestId('plan-rate-state')).toContainText(
       'Locked plan rate active for FY2026',
     );

@@ -31,13 +31,12 @@ import type {
   ScenarioImpact,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe, Money } from '@bf/web/ui';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorCode, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const KIND_LABEL: Record<ScenarioChangeKind, string> = {
   reduce: 'Reduce',
@@ -465,147 +464,149 @@ export class PromoteScenarioDialog {
             </p>
           </sat-empty-state>
         } @else {
-          <table class="bf-split-table" aria-label="Modelled changes and their impact">
-            <thead>
-              <tr>
-                <th>Change</th>
-                <th>Budget</th>
-                <th class="bf-num">Authorized now</th>
-                <th class="bf-num">Floor</th>
-                <th class="bf-num">Authorized after</th>
-                <th class="bf-num">Available after</th>
-                <th>Outcome</th>
-                @if (s.status === 'draft') {
-                  <th><span class="bf-visually-hidden">Actions</span></th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              @for (c of s.changes; track c.id) {
-                @let ci = impactFor(c.id);
-                <tr [attr.data-testid]="'change-' + c.id">
-                  <td>
-                    <span class="bf-cell__primary">{{ label(c.kind) }}</span>
-                    @if (c.amount) {
-                      <span class="bf-cell__secondary">
-                        <bf-money
-                          [amountMinor]="c.amount.amountMinor"
-                          [currency]="c.amount.currency"
-                        />
-                      </span>
-                    } @else if (c.percentBps) {
-                      <span class="bf-cell__secondary">{{ c.percentBps / 100 }}%</span>
-                    }
-                  </td>
-                  <td>
-                    <span class="bf-cell__primary">{{ c.budgetName }}</span>
-                    @if (c.destinationBudgetName) {
-                      <span class="bf-cell__secondary">to {{ c.destinationBudgetName }}</span>
-                    } @else if (c.destination) {
-                      <span class="bf-cell__secondary">to {{ c.destination }}</span>
-                    }
-                  </td>
-                  <td class="bf-num">
-                    @if (ci) {
-                      <bf-money
-                        [amountMinor]="ci.currentAuthorized.amountMinor"
-                        [currency]="ci.currentAuthorized.currency"
-                      />
-                    }
-                  </td>
-                  <td class="bf-num">
-                    @if (ci) {
-                      <span
-                        [matTooltip]="
-                          'Committed + actual + what children keep. A reduction cannot go below it.'
-                        "
-                        tabindex="0"
-                      >
-                        <bf-money
-                          [amountMinor]="ci.floor.amountMinor"
-                          [currency]="ci.floor.currency"
-                        />
-                      </span>
-                    }
-                  </td>
-                  <td class="bf-num">
-                    @if (ci) {
-                      <bf-money
-                        [amountMinor]="ci.newAuthorized.amountMinor"
-                        [currency]="ci.newAuthorized.currency"
-                      />
-                    }
-                  </td>
-                  <td class="bf-num">
-                    @if (ci) {
-                      <bf-money
-                        [amountMinor]="ci.availableAfter.amountMinor"
-                        [currency]="ci.availableAfter.currency"
-                      />
-                    }
-                  </td>
-                  <td>
-                    @if (c.promotion; as p) {
-                      <sat-status-tag
-                        [status]="
-                          p.status === 'applied'
-                            ? 'success'
-                            : p.status === 'failed'
-                              ? 'important'
-                              : 'warning'
-                        "
-                        [attr.data-testid]="'promotion-' + c.id"
-                      >
-                        {{
-                          p.status === 'applied'
-                            ? 'Applied'
-                            : p.status === 'failed'
-                              ? 'Rejected'
-                              : 'Waiting'
-                        }}
-                      </sat-status-tag>
-                      @if (p.problemDetail) {
-                        <span class="bf-cell__secondary">{{ p.problemDetail }}</span>
-                      }
-                    } @else if (ci && ci.blocked) {
-                      <span class="bf-blocked" [attr.data-testid]="'change-blocked-' + c.id">
-                        <mat-icon svgIcon="error" class="bf-blocked__icon" />
-                        {{ ci.problemDetail ?? 'This change cannot be promoted.' }}
-                        <span class="bf-cell__secondary">
-                          The most this budget can give up is
-                          <bf-money
-                            [amountMinor]="ci.maxReduction.amountMinor"
-                            [currency]="ci.maxReduction.currency"
-                          />.
-                        </span>
-                      </span>
-                    } @else if (ci && ci.unfitRequestIds.length) {
-                      <span class="bf-cell__secondary">
-                        {{ ci.unfitRequestIds.length }} pending
-                        {{ ci.unfitRequestIds.length === 1 ? 'request' : 'requests' }} would no
-                        longer fit and would be returned.
-                      </span>
-                    } @else {
-                      <span class="bf-cell__secondary">Fits within the floor.</span>
-                    }
-                  </td>
+          <div class="bf-table-scroll">
+            <table class="bf-split-table" aria-label="Modelled changes and their impact">
+              <thead>
+                <tr>
+                  <th>Change</th>
+                  <th>Budget</th>
+                  <th class="bf-num">Authorized now</th>
+                  <th class="bf-num">Floor</th>
+                  <th class="bf-num">Authorized after</th>
+                  <th class="bf-num">Available after</th>
+                  <th>Outcome</th>
                   @if (s.status === 'draft') {
-                    <td>
-                      <button
-                        mat-button
-                        type="button"
-                        (click)="removeChange(c.id)"
-                        [attr.data-testid]="'remove-change-' + c.id"
-                        [attr.aria-label]="'Remove modelled change on ' + c.budgetName"
-                      >
-                        Remove
-                      </button>
-                    </td>
+                    <th><span class="bf-visually-hidden">Actions</span></th>
                   }
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (c of s.changes; track c.id) {
+                  @let ci = impactFor(c.id);
+                  <tr [attr.data-testid]="'change-' + c.id">
+                    <td>
+                      <span class="bf-cell__primary">{{ label(c.kind) }}</span>
+                      @if (c.amount) {
+                        <span class="bf-cell__secondary">
+                          <bf-money
+                            [amountMinor]="c.amount.amountMinor"
+                            [currency]="c.amount.currency"
+                          />
+                        </span>
+                      } @else if (c.percentBps) {
+                        <span class="bf-cell__secondary">{{ c.percentBps / 100 }}%</span>
+                      }
+                    </td>
+                    <td>
+                      <span class="bf-cell__primary">{{ c.budgetName }}</span>
+                      @if (c.destinationBudgetName) {
+                        <span class="bf-cell__secondary">to {{ c.destinationBudgetName }}</span>
+                      } @else if (c.destination) {
+                        <span class="bf-cell__secondary">to {{ c.destination }}</span>
+                      }
+                    </td>
+                    <td class="bf-num">
+                      @if (ci) {
+                        <bf-money
+                          [amountMinor]="ci.currentAuthorized.amountMinor"
+                          [currency]="ci.currentAuthorized.currency"
+                        />
+                      }
+                    </td>
+                    <td class="bf-num">
+                      @if (ci) {
+                        <span
+                          [matTooltip]="
+                            'Committed + actual + what children keep. A reduction cannot go below it.'
+                          "
+                          tabindex="0"
+                        >
+                          <bf-money
+                            [amountMinor]="ci.floor.amountMinor"
+                            [currency]="ci.floor.currency"
+                          />
+                        </span>
+                      }
+                    </td>
+                    <td class="bf-num">
+                      @if (ci) {
+                        <bf-money
+                          [amountMinor]="ci.newAuthorized.amountMinor"
+                          [currency]="ci.newAuthorized.currency"
+                        />
+                      }
+                    </td>
+                    <td class="bf-num">
+                      @if (ci) {
+                        <bf-money
+                          [amountMinor]="ci.availableAfter.amountMinor"
+                          [currency]="ci.availableAfter.currency"
+                        />
+                      }
+                    </td>
+                    <td>
+                      @if (c.promotion; as p) {
+                        <sat-status-tag
+                          [status]="
+                            p.status === 'applied'
+                              ? 'success'
+                              : p.status === 'failed'
+                                ? 'important'
+                                : 'warning'
+                          "
+                          [attr.data-testid]="'promotion-' + c.id"
+                        >
+                          {{
+                            p.status === 'applied'
+                              ? 'Applied'
+                              : p.status === 'failed'
+                                ? 'Rejected'
+                                : 'Waiting'
+                          }}
+                        </sat-status-tag>
+                        @if (p.problemDetail) {
+                          <span class="bf-cell__secondary">{{ p.problemDetail }}</span>
+                        }
+                      } @else if (ci && ci.blocked) {
+                        <span class="bf-blocked" [attr.data-testid]="'change-blocked-' + c.id">
+                          <mat-icon svgIcon="error" class="bf-blocked__icon" />
+                          {{ ci.problemDetail ?? 'This change cannot be promoted.' }}
+                          <span class="bf-cell__secondary">
+                            The most this budget can give up is
+                            <bf-money
+                              [amountMinor]="ci.maxReduction.amountMinor"
+                              [currency]="ci.maxReduction.currency"
+                            />.
+                          </span>
+                        </span>
+                      } @else if (ci && ci.unfitRequestIds.length) {
+                        <span class="bf-cell__secondary">
+                          {{ ci.unfitRequestIds.length }} pending
+                          {{ ci.unfitRequestIds.length === 1 ? 'request' : 'requests' }} would no
+                          longer fit and would be returned.
+                        </span>
+                      } @else {
+                        <sat-status-tag status="success">Fits within the floor</sat-status-tag>
+                      }
+                    </td>
+                    @if (s.status === 'draft') {
+                      <td>
+                        <button
+                          mat-button
+                          type="button"
+                          (click)="removeChange(c.id)"
+                          [attr.data-testid]="'remove-change-' + c.id"
+                          [attr.aria-label]="'Remove modelled change on ' + c.budgetName"
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         }
       </section>
 
@@ -683,44 +684,46 @@ export class PromoteScenarioDialog {
           @if (i.fairness.length === 0) {
             <p>No budget in this scenario has an eligible headcount to divide by.</p>
           } @else {
-            <table class="bf-split-table" aria-label="Spend per eligible head before and after">
-              <thead>
-                <tr>
-                  <th>Budget</th>
-                  <th class="bf-num">Eligible people</th>
-                  <th class="bf-num">Per head today</th>
-                  <th class="bf-num">Per head if promoted</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (f of i.fairness; track f.budgetId) {
+            <div class="bf-table-scroll">
+              <table class="bf-split-table" aria-label="Spend per eligible head before and after">
+                <thead>
                   <tr>
-                    <td>{{ f.budgetName }}</td>
-                    <td class="bf-num">{{ f.eligibleHeadcount }}</td>
-                    <td class="bf-num">
-                      @if (f.perHeadBefore) {
-                        <bf-money
-                          [amountMinor]="f.perHeadBefore.amountMinor"
-                          [currency]="f.perHeadBefore.currency"
-                        />
-                      } @else {
-                        <span class="bf-cell__secondary">Not available</span>
-                      }
-                    </td>
-                    <td class="bf-num">
-                      @if (f.perHeadAfter) {
-                        <bf-money
-                          [amountMinor]="f.perHeadAfter.amountMinor"
-                          [currency]="f.perHeadAfter.currency"
-                        />
-                      } @else {
-                        <span class="bf-cell__secondary">Not available</span>
-                      }
-                    </td>
+                    <th>Budget</th>
+                    <th class="bf-num">Eligible people</th>
+                    <th class="bf-num">Per head today</th>
+                    <th class="bf-num">Per head if promoted</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (f of i.fairness; track f.budgetId) {
+                    <tr>
+                      <td>{{ f.budgetName }}</td>
+                      <td class="bf-num">{{ f.eligibleHeadcount }}</td>
+                      <td class="bf-num">
+                        @if (f.perHeadBefore) {
+                          <bf-money
+                            [amountMinor]="f.perHeadBefore.amountMinor"
+                            [currency]="f.perHeadBefore.currency"
+                          />
+                        } @else {
+                          <span class="bf-cell__secondary">Not available</span>
+                        }
+                      </td>
+                      <td class="bf-num">
+                        @if (f.perHeadAfter) {
+                          <bf-money
+                            [amountMinor]="f.perHeadAfter.amountMinor"
+                            [currency]="f.perHeadAfter.currency"
+                          />
+                        } @else {
+                          <span class="bf-cell__secondary">Not available</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           }
         </section>
       }
@@ -778,18 +781,16 @@ export class PromoteScenarioDialog {
     .bf-at-risk .bf-cell__secondary {
       display: block;
     }
+    /* The scroller contains the hidden header label, so it scrolls with the table, not the page. */
+    .bf-table-scroll {
+      position: relative;
+    }
     .bf-visually-hidden {
       position: absolute;
       width: 1px;
       height: 1px;
       overflow: hidden;
       clip: rect(0 0 0 0);
-    }
-    @media (max-width: 834px) {
-      .bf-split-table {
-        display: block;
-        overflow-x: auto;
-      }
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -829,7 +830,7 @@ export class ScenarioEditorPage {
   });
   protected readonly statusTone = computed<'info' | 'success' | 'neutral'>(() => {
     const status = this.scenario()?.status;
-    return status === 'promoted' ? 'success' : status === 'archived' ? 'neutral' : 'info';
+    return status === 'promoted' ? 'success' : 'neutral';
   });
 
   /**

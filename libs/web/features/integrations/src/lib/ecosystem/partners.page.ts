@@ -14,13 +14,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import type { MarketplaceCategory, PartnerSyncResult, PartnerView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from '../api';
 import type { Tone } from '../labels';
-import { LoadState } from '../load-state';
 import { byRank, byText, ordered } from '../order';
 import { EcosystemNav } from './ecosystem-nav';
 import {
@@ -55,6 +54,7 @@ const VENDOR_OK = ['approved', 'preferred'];
   ],
   templateUrl: './partners.page.html',
   styleUrls: ['../page.scss', '../integrations.scss', './ecosystem.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MarketplacePartnersPage {

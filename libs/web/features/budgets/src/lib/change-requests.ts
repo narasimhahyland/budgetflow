@@ -11,16 +11,17 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
 import type { BudgetChangeRequest } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { Money, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
+import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, toMajor, toMinor, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const STATUS_TONE = {
   pending: 'warning',
@@ -40,12 +41,14 @@ const STATUS_TONE = {
     FormsModule,
     LoadState,
     MatButtonModule,
+    MatButtonToggleModule,
     MatFormFieldModule,
     MatInputModule,
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SatImportantButton,
     SatStatusTag,
   ],
   styleUrl: './page.scss',
@@ -63,23 +66,7 @@ const STATUS_TONE = {
     }
     .bf-req__tabs {
       display: flex;
-      gap: 4px;
-      padding: 12px 16px 0;
-    }
-    .bf-req__table {
-      width: 100%;
-      border-collapse: collapse;
-      font: var(--mat-sys-body-medium);
-    }
-    .bf-req__table th,
-    .bf-req__table td {
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--mat-sys-outline-variant);
-      text-align: start;
-    }
-    .bf-req__table th {
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-label-medium);
+      padding: 12px 16px;
     }
     .bf-req__table tbody tr {
       cursor: pointer;
@@ -117,6 +104,7 @@ const STATUS_TONE = {
     }
     .bf-field {
       width: 100%;
+      margin-bottom: 12px;
     }
     .bf-decide {
       display: flex;
@@ -127,21 +115,19 @@ const STATUS_TONE = {
   template: `
     <div class="bf-req">
       <section class="bf-card" aria-label="Requests">
-        <div class="bf-req__tabs" role="tablist">
-          @for (s of statuses; track s) {
-            <button
-              mat-button
-              type="button"
-              role="tab"
-              [attr.aria-selected]="status() === s"
-              [class.mat-mdc-unelevated-button]="status() === s"
-              (click)="status.set(s)"
-            >
-              {{ label(s) }} {{ count(s) }}
-            </button>
-          }
+        <div class="bf-req__tabs">
+          <mat-button-toggle-group
+            [value]="status()"
+            (change)="status.set($event.value)"
+            aria-label="Status"
+          >
+            @for (s of statuses; track s) {
+              <mat-button-toggle [value]="s">{{ label(s) }} {{ count(s) }}</mat-button-toggle>
+            }
+          </mat-button-toggle-group>
         </div>
         <bf-load-state
+          shape="table"
           [loading]="list.isLoading()"
           [error]="list.error()"
           what="requests"
@@ -159,7 +145,7 @@ const STATUS_TONE = {
         }
         @if (rows().length) {
           <div class="bf-table-scroll">
-            <table class="bf-req__table">
+            <table class="bf-req__table bf-split-table" aria-label="Budget requests">
               <thead>
                 <tr>
                   <th scope="col">For budget</th>
@@ -272,15 +258,16 @@ const STATUS_TONE = {
               @if (
                 r.sourceAvailableMinor !== null && (amountMinor() ?? 0) > r.sourceAvailableMinor
               ) {
-                <sat-banner variant="important"
+                <sat-banner variant="important" [border]="true"
                   ><sat-banner-message
-                    >{{ r.sourceBudgetName }} does not have enough available for this
-                    amount.</sat-banner-message
+                    ><strong>Blocked:</strong> {{ r.sourceBudgetName }} does not have enough
+                    available for this amount.</sat-banner-message
                   ></sat-banner
                 >
               }
-              <mat-form-field class="bf-field">
-                <mat-label>Amount to approve ({{ r.amount.currency }})</mat-label>
+              <mat-form-field class="bf-field" subscriptSizing="dynamic">
+                <mat-label>Amount to approve</mat-label>
+                <span matTextPrefix>{{ r.amount.currency }}&nbsp;</span>
                 <input
                   matInput
                   inputmode="decimal"
@@ -290,13 +277,14 @@ const STATUS_TONE = {
                 />
                 <mat-hint>Lower it to approve part of the request.</mat-hint>
               </mat-form-field>
-              <mat-form-field class="bf-field">
+              <mat-form-field class="bf-field" subscriptSizing="dynamic">
                 <mat-label>Note</mat-label>
                 <textarea matInput rows="2" [(ngModel)]="note"></textarea>
               </mat-form-field>
               <div class="bf-decide">
                 <button
                   mat-flat-button
+                  satImportantButton
                   type="button"
                   [disabled]="busy() || !(amountMinor() ?? 0)"
                   (click)="decide('approve')"

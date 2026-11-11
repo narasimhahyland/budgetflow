@@ -18,13 +18,12 @@ import type { AssistantTool, EcosystemConnectionView } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from '../api';
-import { LoadState } from '../load-state';
 import { OneTimeSecret } from '../one-time-secret';
 import { EcosystemConnections } from './connections-table';
 import { EcosystemNav } from './ecosystem-nav';
+import { LoadState } from '@bf/web/ui';
 
 /**
  * Screen 092c. The connector an AI assistant speaks to. It is read-only by design and there is no
@@ -48,10 +47,10 @@ import { EcosystemNav } from './ecosystem-nav';
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
-    SatImportantButton,
   ],
   templateUrl: './assistants.page.html',
   styleUrls: ['../page.scss', '../integrations.scss', './ecosystem.scss'],
+  host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssistantConnectorPage {

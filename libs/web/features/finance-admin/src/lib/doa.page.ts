@@ -7,10 +7,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import type { DoaLimit, DoaLookupResponse } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type RoleId = NonNullable<DoaLimit['role']>;
 
@@ -28,6 +27,7 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
 /** Screen 104a: delegation-of-authority matrix (seeded, read-only), with a limit lookup. */
 @Component({
   selector: 'bf-doa-page',
+  host: { class: 'bf-page-layout' },
   imports: [
     DatePipe,
     FormsModule,
@@ -183,10 +183,15 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
           <p class="bf-empty">No active matrix.</p>
         } @else {
           <div class="bf-table-scroll">
-            <table mat-table [dataSource]="m.items" aria-labelledby="doa-title">
+            <table
+              class="bf-table bf-table--stack"
+              mat-table
+              [dataSource]="m.items"
+              aria-labelledby="doa-title"
+            >
               <ng-container matColumnDef="who">
                 <th mat-header-cell *matHeaderCellDef>Who</th>
-                <td mat-cell *matCellDef="let l">
+                <td class="bf-cell--full" mat-cell *matCellDef="let l">
                   <span class="bf-cell__primary">{{ l.personName ?? roleName(l.role) }}</span>
                   <span class="bf-cell__secondary">{{
                     l.personName ? 'Person-specific' : 'Role'
@@ -195,23 +200,25 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
               </ng-container>
               <ng-container matColumnDef="spend">
                 <th mat-header-cell *matHeaderCellDef>Spend type</th>
-                <td mat-cell *matCellDef="let l">
+                <td mat-cell *matCellDef="let l" data-label="Spend type">
                   {{ l.spendType === '*' ? 'Any' : l.spendType }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="entity">
                 <th mat-header-cell *matHeaderCellDef>Legal entity</th>
-                <td mat-cell *matCellDef="let l">{{ l.legalEntityCode ?? 'Any' }}</td>
+                <td mat-cell *matCellDef="let l" data-label="Legal entity">
+                  {{ l.legalEntityCode ?? 'Any' }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="limit">
                 <th mat-header-cell *matHeaderCellDef class="bf-num">Limit</th>
-                <td mat-cell *matCellDef="let l" class="bf-num">
+                <td mat-cell *matCellDef="let l" class="bf-num" data-label="Limit">
                   <bf-money [amountMinor]="l.limit.amountMinor" [currency]="l.limit.currency" />
                 </td>
               </ng-container>
               <ng-container matColumnDef="from">
                 <th mat-header-cell *matHeaderCellDef>Effective</th>
-                <td mat-cell *matCellDef="let l">
+                <td mat-cell *matCellDef="let l" data-label="Effective">
                   {{ l.validFrom | date: 'd MMM y' : 'UTC'
                   }}{{ l.validTo ? ' – ' + (l.validTo | date: 'd MMM y' : 'UTC') : '' }}
                 </td>

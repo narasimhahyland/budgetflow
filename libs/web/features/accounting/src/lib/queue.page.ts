@@ -20,13 +20,12 @@ import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import type { ActualDetail, ActualLine, BudgetDetail } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { formatMoney, Money } from '@bf/web/ui';
+import { formatMoney, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SAT_TAG_IMPORTS } from '@hylandsoftware/satori-ui/tag';
 import { ActualsTabs } from './actuals-tabs';
 import { data, errorMessage, injectApi, todayIso, toMinor, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type Target = { kind: 'commitment'; id: string } | { kind: 'budget'; id: string };
 type Mode = 'match' | 'split' | 'exclude' | 'over-budget';

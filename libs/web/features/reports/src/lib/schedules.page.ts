@@ -24,12 +24,11 @@ import {
   type ScheduleRun,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
-import { DateTimePipe } from '@bf/web/ui';
+import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const FREQUENCY_LABELS: Record<ScheduleFrequency, string> = {
   daily_weekdays: 'Every weekday',
@@ -295,9 +294,18 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
               <div>
                 <dt>Last run</dt>
                 <dd>
-                  <span class="bf-when" data-testid="relative-time">{{
-                    lastRunText(schedule)
-                  }}</span>
+                  @if (schedule.lastRunAt) {
+                    <span class="bf-when" data-testid="relative-time">{{
+                      schedule.lastRunAt | bfDateTime: session.timezone()
+                    }}</span>
+                    @if (schedule.lastRunStatus) {
+                      <span class="bf-cell__secondary">{{
+                        runStatusLabel(schedule.lastRunStatus)
+                      }}</span>
+                    }
+                  } @else {
+                    Never
+                  }
                 </dd>
               </div>
               <div>
@@ -438,9 +446,11 @@ const RUN_STATUS_LABELS: Record<ScheduleRunStatus, string> = {
                   <td>{{ item.format.toUpperCase() }}</td>
                   <td class="bf-num">{{ item.rowCount }}</td>
                   <td>
-                    <sat-status-tag [status]="exportTone(item.status)">{{
-                      item.status
-                    }}</sat-status-tag>
+                    <sat-status-tag [status]="exportTone(item.status)"
+                      ><mat-icon [svgIcon]="exportIcon(item.status)" aria-hidden="true" />{{
+                        exportLabel(item.status)
+                      }}</sat-status-tag
+                    >
                   </td>
                   <td>{{ item.requestedByName ?? 'A schedule' }}</td>
                   <td>
@@ -582,12 +592,12 @@ export class ReportSchedulesPage {
     }
   }
 
-  protected exportTone(status: string): 'success' | 'warning' | 'important' | 'info' {
+  protected exportTone(status: string): 'success' | 'neutral' | 'important' | 'info' {
     switch (status) {
       case 'ready':
         return 'success';
       case 'expired':
-        return 'warning';
+        return 'neutral';
       case 'failed':
         return 'important';
       default:
@@ -610,14 +620,18 @@ export class ReportSchedulesPage {
     return formats.map((f) => f.toUpperCase()).join(', ');
   }
 
-  protected lastRunText(schedule: ReportSchedule): string {
-    if (!schedule.lastRunAt) return 'Never';
-    const when = new Date(schedule.lastRunAt).toLocaleString('en-US', {
-      timeZone: this.session.timezone(),
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
-    return schedule.lastRunStatus ? `${when} · ${RUN_STATUS_LABELS[schedule.lastRunStatus]}` : when;
+  protected exportLabel(status: string): string {
+    return status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ');
+  }
+
+  protected exportIcon(status: string): string {
+    return status === 'ready'
+      ? 'circle_check'
+      : status === 'expired'
+        ? 'timer_off'
+        : status === 'failed'
+          ? 'error'
+          : 'clock';
   }
 
   protected channelList(schedule: ReportSchedule): string {

@@ -6,6 +6,7 @@ import {
   resource,
   signal,
 } from '@angular/core';
+import { formatNumber } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -21,10 +22,10 @@ import {
   DOCUMENT_KINDS,
   type RequestSummary,
 } from '@bf/contracts';
-import { formatMoney, Money } from '@bf/web/ui';
+import { formatMoney, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
+import { SAT_UPLOAD_IMPORTS } from '@hylandsoftware/satori-ui/upload';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 import { toMinor } from './money-input';
 
 type DocumentKind = (typeof DOCUMENT_KINDS)[number];
@@ -51,6 +52,7 @@ const KINDS: { id: DocumentKind; label: string }[] = [
     Money,
     RouterLink,
     SAT_BANNER_IMPORTS,
+    SAT_UPLOAD_IMPORTS,
   ],
   template: `
     <header class="bf-page__header">
@@ -124,18 +126,24 @@ const KINDS: { id: DocumentKind; label: string }[] = [
               </button>
             </div>
           } @else {
-            <label
+            <sat-upload-area
               class="bf-upload__area"
-              [class.bf-upload__area--over]="dragging()"
-              (dragover)="$event.preventDefault(); dragging.set(true)"
-              (dragleave)="dragging.set(false)"
-              (drop)="drop($event)"
+              [input]="fileInput"
+              (filesLoaded)="choose($event[0] ?? null)"
             >
-              <input type="file" [accept]="accept" (change)="pick($event)" />
               <mat-icon svgIcon="upload" aria-hidden="true" />
-              <span class="bf-cell__primary">Drop a file or browse</span>
+              <span class="bf-cell__primary"
+                >Drop a file or <span class="bf-upload__link">browse</span></span
+              >
               <span class="bf-cell__secondary">PDF, PNG, JPEG, CSV or XLSX, up to 10 MB</span>
-            </label>
+            </sat-upload-area>
+            <input
+              #fileInput
+              class="bf-upload__native"
+              type="file"
+              [accept]="accept"
+              aria-label="Choose a file to upload"
+            />
           }
           @if (stage() !== 'idle') {
             <div class="bf-upload__progress" role="status">
@@ -160,6 +168,7 @@ const KINDS: { id: DocumentKind; label: string }[] = [
               <mat-label
                 >Amount on the {{ kind }} ({{ selected()?.amount?.currency ?? 'USD' }})</mat-label
               >
+              <span matTextPrefix>{{ selected()?.amount?.currency ?? 'USD' }}&nbsp;</span>
               <input
                 matInput
                 inputmode="decimal"
@@ -177,11 +186,19 @@ const KINDS: { id: DocumentKind; label: string }[] = [
         </section>
       }
       <div class="bf-form__actions">
+        @if (!busy() && (!requestId || !file())) {
+          <p class="bf-upload__why" id="upload-why">
+            {{
+              !requestId ? 'Choose the request this document belongs to.' : 'Choose a file first.'
+            }}
+          </p>
+        }
         <a mat-button [routerLink]="backLink()">Cancel</a>
         <button
           mat-flat-button
           type="button"
           [disabled]="!requestId || !file() || busy()"
+          [attr.aria-describedby]="!requestId || !file() ? 'upload-why' : null"
           (click)="upload()"
         >
           Upload {{ kindLabel() }}
@@ -206,14 +223,23 @@ const KINDS: { id: DocumentKind; label: string }[] = [
       cursor: pointer;
       text-align: center;
     }
-    .bf-upload__area--over {
-      border-color: var(--mat-sys-primary);
+    .bf-upload__link {
+      color: var(--mat-sys-primary);
+      text-decoration: underline;
     }
-    .bf-upload__area input {
+    .bf-upload__native {
       position: absolute;
       width: 1px;
       height: 1px;
+      overflow: hidden;
       opacity: 0;
+    }
+    .bf-upload__why {
+      flex: 1 1 240px;
+      margin: 0;
+      align-self: center;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
     }
     .bf-upload__file {
       display: flex;
@@ -245,7 +271,6 @@ export class UploadReceiptPage {
   protected kind: DocumentKind = 'receipt';
   protected receiptAmount = '';
   protected readonly file = signal<File | null>(null);
-  protected readonly dragging = signal(false);
   protected readonly stage = signal<'idle' | 'uploading' | 'verifying'>('idle');
   protected readonly busy = computed(() => this.stage() !== 'idle');
   protected readonly failure = signal('');
@@ -297,23 +322,11 @@ export class UploadReceiptPage {
 
   protected size(bytes: number): string {
     return bytes >= 1_048_576
-      ? `${(bytes / 1_048_576).toFixed(1)} MB`
-      : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+      ? `${formatNumber(bytes / 1_048_576, 'en-US', '1.1-1')} MB`
+      : `${formatNumber(Math.max(1, Math.round(bytes / 1024)), 'en-US')} KB`;
   }
 
-  protected pick(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.choose(input.files?.[0] ?? null);
-    input.value = '';
-  }
-
-  protected drop(event: DragEvent): void {
-    event.preventDefault();
-    this.dragging.set(false);
-    this.choose(event.dataTransfer?.files?.[0] ?? null);
-  }
-
-  private choose(f: File | null): void {
+  protected choose(f: File | null): void {
     this.failure.set('');
     if (!f) return;
     if (!(DOCUMENT_CONTENT_TYPES as readonly string[]).includes(f.type)) {

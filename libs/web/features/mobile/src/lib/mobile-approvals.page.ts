@@ -24,15 +24,17 @@ import {
   DateTimePipe,
   DiscussionBox,
   formatMoney,
+  LoadState,
   MobileTabBar,
   Money,
+  SpendStatus,
+  spendStatus,
 } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 type Tab = 'assigned' | 'delegated' | 'completed';
 const REASONS = [
@@ -69,6 +71,7 @@ const REASONS = [
     SAT_EMPTY_STATE_IMPORTS,
     SatImportantButton,
     SatStatusTag,
+    SpendStatus,
   ],
   template: `
     <div class="bf-mobile-page">
@@ -85,9 +88,7 @@ const REASONS = [
           <div class="bf-list__row">
             <div>
               <strong>Add BudgetFlow to your home screen</strong>
-              <p class="bf-cell__secondary">
-                Get push alerts and one-tap approvals on your phone.
-              </p>
+              <p class="bf-cell__secondary">Get push alerts and one-tap approvals on your phone.</p>
             </div>
             <div class="bf-mobile__install-actions">
               <button
@@ -170,7 +171,9 @@ const REASONS = [
               <p satEmptyStateDescription>
                 New requests routed to you appear here and in your notifications.
               </p>
-              <a mat-stroked-button routerLink="/approvals/delegations">Set up a delegate</a>
+              <a satEmptyStateAction mat-stroked-button routerLink="/approvals/delegations">
+                Set up a delegate
+              </a>
             </sat-empty-state>
           } @else {
             <ul class="bf-mobile__cards" data-testid="mobile-approval-cards">
@@ -186,10 +189,17 @@ const REASONS = [
                       <strong>{{ item.ref }} · {{ item.title }}</strong>
                       @if (item.onHold) {
                         <sat-status-tag status="info">On hold</sat-status-tag>
-                      } @else if (item.taskStatus === 'pending') {
-                        <sat-status-tag status="warning">Due soon</sat-status-tag>
                       } @else {
-                        <sat-status-tag status="success">{{ item.taskStatus }}</sat-status-tag>
+                        @let due = item.taskStatus === 'pending' ? dueLabel(item.dueAt) : null;
+                        @if (due) {
+                          <sat-status-tag status="warning"
+                            ><mat-icon svgIcon="clock" aria-hidden="true" />{{
+                              due
+                            }}</sat-status-tag
+                          >
+                        } @else {
+                          <bf-spend-status kind="task" [status]="item.taskStatus" />
+                        }
                       }
                     </div>
                     <p class="bf-cell__secondary">
@@ -235,7 +245,11 @@ const REASONS = [
         />
 
         @if (valueOf(detail); as d) {
-          <section class="bf-card" aria-labelledby="mobile-detail-title" data-testid="mobile-approval-detail">
+          <section
+            class="bf-card"
+            aria-labelledby="mobile-detail-title"
+            data-testid="mobile-approval-detail"
+          >
             <div class="bf-section">
               <p class="bf-meta">
                 <span class="bf-chip">{{ d.task.ref }}</span>
@@ -356,7 +370,7 @@ const REASONS = [
                   Cancel
                 </button>
                 <button
-                  mat-stroked-button
+                  mat-flat-button
                   satImportantButton
                   type="button"
                   [disabled]="busy() || offline()"
@@ -417,7 +431,7 @@ const REASONS = [
           } @else {
             <sat-banner variant="info" data-testid="mobile-already-decided">
               <sat-banner-message>
-                Already decided ({{ d.task.taskStatus.replaceAll('_', ' ') }}).
+                Already decided ({{ taskLabel(d.task.taskStatus) }}).
               </sat-banner-message>
             </sat-banner>
           }
@@ -447,6 +461,10 @@ const REASONS = [
     }
     .bf-mobile__card {
       width: 100%;
+      /* A button does not inherit the page font; the card reads in the theme type like any card. */
+      font: inherit;
+      color: inherit;
+      background: var(--mat-sys-surface-container-lowest);
       text-align: start;
       cursor: pointer;
       padding: 16px;
@@ -500,6 +518,18 @@ export class MobileApprovalsPage {
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
+
+  /** "Overdue" or "Due soon" (within a day) for a pending task; nothing when it is not urgent. */
+  protected dueLabel(dueAt: string | null | undefined): string | null {
+    if (!dueAt) return null;
+    const left = new Date(dueAt).getTime() - Date.now();
+    if (left < 0) return 'Overdue';
+    return left <= 24 * 3600 * 1000 ? 'Due soon' : null;
+  }
+
+  protected taskLabel(status: string): string {
+    return spendStatus('task', status).label.toLowerCase();
+  }
   protected readonly reasons = REASONS;
 
   readonly taskId = input<string | undefined>(undefined);
@@ -510,17 +540,13 @@ export class MobileApprovalsPage {
   protected readonly showInstallPrompt = signal(
     this.route.snapshot.queryParamMap.get('install') === '1',
   );
-  protected readonly offline = signal(
-    this.route.snapshot.queryParamMap.get('offline') === '1',
-  );
+  protected readonly offline = signal(this.route.snapshot.queryParamMap.get('offline') === '1');
   protected readonly busy = signal(false);
   protected readonly failure = signal('');
   protected rejectCode = '';
   protected rejectReason = '';
 
-  protected readonly activeTaskId = computed(
-    () => this.pickedTaskId() ?? this.taskId() ?? null,
-  );
+  protected readonly activeTaskId = computed(() => this.pickedTaskId() ?? this.taskId() ?? null);
 
   protected readonly inbox = resource({
     params: () => ({ tab: this.tab() }),

@@ -6,14 +6,14 @@ import {
   resource,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, type NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatStepperModule } from '@angular/material/stepper';
+import { type MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { Router, RouterLink } from '@angular/router';
 import type { CreateEventBody, Person } from '@bf/contracts';
 import { formatMoney, Money } from '@bf/web/ui';
@@ -73,10 +73,18 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
           aria-label="Create event steps"
         >
           <mat-step label="Event details" [completed]="detailsValid()">
-            <div class="bf-form">
+            <form
+              class="bf-form"
+              #detailsForm="ngForm"
+              (ngSubmit)="continueDetails(stepper, detailsForm)"
+            >
               <mat-form-field appearance="outline" class="bf-form__wide">
                 <mat-label>Event name</mat-label>
-                <input matInput required [(ngModel)]="name" name="name" />
+                <input matInput required minlength="3" [(ngModel)]="name" name="name" />
+                <mat-error
+                  ><mat-icon svgIcon="error" aria-hidden="true" />Give the event a name of at least
+                  3 characters</mat-error
+                >
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Event type</mat-label>
@@ -99,10 +107,18 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
                   [(ngModel)]="startsAt"
                   name="startsAt"
                 />
+                <mat-error
+                  ><mat-icon svgIcon="error" aria-hidden="true" />Choose when the event
+                  starts</mat-error
+                >
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>Ends</mat-label>
                 <input matInput type="datetime-local" required [(ngModel)]="endsAt" name="endsAt" />
+                <mat-error
+                  ><mat-icon svgIcon="error" aria-hidden="true" />Choose when the event
+                  ends</mat-error
+                >
               </mat-form-field>
               <mat-form-field appearance="outline" class="bf-form__wide">
                 <mat-label>Venue</mat-label>
@@ -112,9 +128,11 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
                 <mat-label>Description</mat-label>
                 <textarea matInput rows="3" [(ngModel)]="description" name="description"></textarea>
               </mat-form-field>
-            </div>
+            </form>
             <div class="bf-form__actions">
-              <button mat-flat-button matStepperNext type="button">Continue</button>
+              <button mat-flat-button type="button" (click)="continueDetails(stepper, detailsForm)">
+                Continue
+              </button>
             </div>
           </mat-step>
 
@@ -188,8 +206,11 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
                 <mat-select [(ngModel)]="homeBudgetId" name="home">
                   @for (b of budgets(); track b.budgetId) {
                     <mat-option [value]="b.budgetId" [disabled]="!!b.blockedReason"
-                      >{{ b.name }}{{ b.blockedReason ? ' (blocked)' : '' }}</mat-option
-                    >
+                      >{{ b.name }}
+                      @if (b.blockedReason) {
+                        <span> — {{ b.blockedReason }}</span>
+                      }
+                    </mat-option>
                   }
                 </mat-select>
               </mat-form-field>
@@ -226,7 +247,8 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
                     />
                   </mat-form-field>
                   <mat-form-field appearance="outline">
-                    <mat-label>Unit cost ({{ currency() }})</mat-label>
+                    <mat-label>Unit cost</mat-label>
+                    <span matTextPrefix>{{ currency() }}&nbsp;</span>
                     <input
                       matInput
                       inputmode="decimal"
@@ -281,7 +303,8 @@ const CATEGORIES = ['venue', 'catering', 'travel', 'activities', 'decor', 'gifts
           <mat-step label="Funding" [completed]="ownFundsMinor() !== null">
             <div class="bf-form">
               <mat-form-field appearance="outline">
-                <mat-label>Own funds from the home budget ({{ currency() }})</mat-label>
+                <mat-label>Own funds from the home budget</mat-label>
+                <span matTextPrefix>{{ currency() }}&nbsp;</span>
                 <input
                   matInput
                   inputmode="decimal"
@@ -514,6 +537,12 @@ export class CreateEventPage {
         .join(', ') || '—'
     );
   });
+
+  /** Step 1 shows every missing field with its message instead of moving on silently. */
+  protected continueDetails(stepper: MatStepper, form: NgForm): void {
+    form.control.markAllAsTouched();
+    if (this.detailsValid()) stepper.next();
+  }
 
   protected detailsValid(): boolean {
     return this.name.trim().length >= 3 && !!this.startsAt && !!this.endsAt;

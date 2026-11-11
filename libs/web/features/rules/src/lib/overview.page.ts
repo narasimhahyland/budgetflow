@@ -1,21 +1,25 @@
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, resource } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
+import type { RulesDashboard } from '@bf/contracts';
+import { LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { data, injectApi, valueOf } from './api';
 import { RuleEffectTag } from './rule-tags';
-import { LoadState } from './load-state';
 import { RulesTabs } from './rules-tabs';
 
 /** Screen 066: what the rules are doing right now and what needs a decision. */
 @Component({
   selector: 'bf-rules-overview-page',
   imports: [
+    DatePipe,
     DecimalPipe,
     LoadState,
     MatButtonModule,
+    MatIconModule,
     RouterLink,
     RulesTabs,
     SAT_BANNER_IMPORTS,
@@ -33,7 +37,7 @@ import { RulesTabs } from './rules-tabs';
       </div>
       <div class="bf-page__actions">
         <a mat-stroked-button routerLink="/admin/rules/simulate">Test a request</a>
-        <a mat-flat-button routerLink="/admin/rules/list">All rules</a>
+        <a mat-stroked-button routerLink="/admin/rules/list">All rules</a>
       </div>
     </header>
     <bf-rules-tabs current="overview" />
@@ -41,35 +45,26 @@ import { RulesTabs } from './rules-tabs';
       [loading]="view.isLoading() && !view.hasValue()"
       [error]="view.error()"
       what="rules and policies"
+      shape="cards"
       (retry)="view.reload()"
     />
     @if (valueOf(view); as v) {
-      <dl class="bf-kpis">
-        <div class="bf-kpi">
-          <dt class="bf-kpi__label">Active rules</dt>
-          <dd class="bf-kpi__value">{{ v.kpis.activeRules | number }}</dd>
-        </div>
-        <div class="bf-kpi">
-          <dt class="bf-kpi__label">Drafts not published</dt>
-          <dd class="bf-kpi__value">{{ v.kpis.draftsAwaitingPublish | number }}</dd>
-        </div>
-        <div class="bf-kpi">
-          <dt class="bf-kpi__label">Conflicts to resolve</dt>
-          <dd class="bf-kpi__value">{{ v.kpis.conflicts | number }}</dd>
-        </div>
-        <div class="bf-kpi">
-          <dt class="bf-kpi__label">Starting later</dt>
-          <dd class="bf-kpi__value">{{ v.kpis.scheduledToStart | number }}</dd>
-        </div>
-        <div class="bf-kpi">
-          <dt class="bf-kpi__label">Open exceptions</dt>
-          <dd class="bf-kpi__value">{{ v.kpis.openExceptions | number }}</dd>
-        </div>
-        <div class="bf-kpi">
-          <dt class="bf-kpi__label">Approvals past their time</dt>
-          <dd class="bf-kpi__value">{{ v.kpis.approvalsPastSla | number }}</dd>
-        </div>
-      </dl>
+      <div class="bf-kpis bf-kpis--six">
+        @for (k of kpis(v.kpis); track k.label) {
+          <div class="bf-kpi" [class]="'bf-kpi--' + (k.alert ?? 'plain')">
+            <div class="bf-kpi__head">
+              <p class="bf-kpi__label">{{ k.label }}</p>
+              <mat-icon class="bf-kpi__icon" [svgIcon]="k.icon" aria-hidden="true" />
+            </div>
+            <p class="bf-kpi__value" [class]="'bf-kpi__value--' + (k.alert ?? 'plain')">
+              {{ k.value | number }}
+            </p>
+            @if (k.link && k.value > 0) {
+              <a class="bf-kpi__delta" [routerLink]="k.link">{{ k.linkText }}</a>
+            }
+          </div>
+        }
+      </div>
 
       <section class="bf-card" aria-labelledby="attention-title">
         <div class="bf-card__header">
@@ -81,7 +76,7 @@ import { RulesTabs } from './rules-tabs';
               <sat-banner-message>
                 <strong>{{ item.title }}</strong> {{ item.detail }}
               </sat-banner-message>
-              <a sat-banner-action mat-button [routerLink]="item.linkPath">Open</a>
+              <a mat-button satBannerAction [routerLink]="item.linkPath">Open</a>
             </sat-banner>
           } @empty {
             <sat-empty-state>
@@ -99,8 +94,61 @@ import { RulesTabs } from './rules-tabs';
           <h2 class="bf-card__title" id="decisions-title">Decisions over the last four weeks</h2>
           <p class="bf-card__hint">How the rules decided requests, week by week.</p>
         </div>
+        @if (v.weeklyDecisions.length) {
+          <div class="bf-card__body">
+            <ul class="bf-week-legend" aria-hidden="true">
+              <li><span class="bf-week-swatch bf-week-swatch--through"></span>Went through</li>
+              <li><span class="bf-week-swatch bf-week-swatch--approval"></span>Needed approval</li>
+              <li><span class="bf-week-swatch bf-week-swatch--warned"></span>Warned</li>
+              <li><span class="bf-week-swatch bf-week-swatch--blocked"></span>Blocked or held</li>
+            </ul>
+            <div class="bf-week-chart">
+              @for (w of v.weeklyDecisions; track w.weekLabel) {
+                @let total = w.autoApproved + w.approvalRequired + w.warned + w.blocked;
+                <span class="bf-week-chart__label">{{ w.weekLabel }}</span>
+                <span
+                  class="bf-week-chart__bar"
+                  role="img"
+                  [attr.aria-label]="
+                    'Week of ' +
+                    w.weekLabel +
+                    ': ' +
+                    w.autoApproved +
+                    ' went through, ' +
+                    w.approvalRequired +
+                    ' needed approval, ' +
+                    w.warned +
+                    ' warned, ' +
+                    w.blocked +
+                    ' blocked or held'
+                  "
+                >
+                  @if (total > 0) {
+                    <span
+                      class="bf-week-swatch--through"
+                      [style.width.%]="(w.autoApproved * 100) / total"
+                    ></span>
+                    <span
+                      class="bf-week-swatch--approval"
+                      [style.width.%]="(w.approvalRequired * 100) / total"
+                    ></span>
+                    <span
+                      class="bf-week-swatch--warned"
+                      [style.width.%]="(w.warned * 100) / total"
+                    ></span>
+                    <span
+                      class="bf-week-swatch--blocked"
+                      [style.width.%]="(w.blocked * 100) / total"
+                    ></span>
+                  }
+                </span>
+              }
+            </div>
+            <p class="bf-card__hint">The table below lists the same figures.</p>
+          </div>
+        }
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Decisions by week">
+          <table class="bf-split-table bf-table--stack" aria-label="Decisions by week">
             <thead>
               <tr>
                 <th scope="col">Week of</th>
@@ -113,11 +161,13 @@ import { RulesTabs } from './rules-tabs';
             <tbody>
               @for (w of v.weeklyDecisions; track w.weekLabel) {
                 <tr>
-                  <td>{{ w.weekLabel }}</td>
-                  <td class="bf-num">{{ w.autoApproved | number }}</td>
-                  <td class="bf-num">{{ w.approvalRequired | number }}</td>
-                  <td class="bf-num">{{ w.warned | number }}</td>
-                  <td class="bf-num">{{ w.blocked | number }}</td>
+                  <td class="bf-nowrap">{{ w.weekLabel }}</td>
+                  <td class="bf-num" data-label="Went through">{{ w.autoApproved | number }}</td>
+                  <td class="bf-num" data-label="Needed approval">
+                    {{ w.approvalRequired | number }}
+                  </td>
+                  <td class="bf-num" data-label="Warned">{{ w.warned | number }}</td>
+                  <td class="bf-num" data-label="Blocked or held">{{ w.blocked | number }}</td>
                 </tr>
               } @empty {
                 <tr>
@@ -134,7 +184,7 @@ import { RulesTabs } from './rules-tabs';
           <h2 class="bf-card__title" id="matched-title">Rules that matched most often</h2>
         </div>
         <div class="bf-table-scroll">
-          <table class="bf-split-table" aria-label="Most matched rules">
+          <table class="bf-split-table bf-table--stack" aria-label="Most matched rules">
             <thead>
               <tr>
                 <th scope="col">Rule</th>
@@ -153,10 +203,12 @@ import { RulesTabs } from './rules-tabs';
                     }}</a>
                     <span class="bf-cell__secondary">{{ r.name }}</span>
                   </td>
-                  <td><bf-rule-effect [effect]="r.effect" /></td>
-                  <td class="bf-num">{{ r.matches | number }}</td>
-                  <td class="bf-num">{{ r.sharePct }}%</td>
-                  <td>{{ r.lastChange }}</td>
+                  <td data-label="Outcome"><bf-rule-effect [effect]="r.effect" /></td>
+                  <td class="bf-num" data-label="Matches">{{ r.matches | number }}</td>
+                  <td class="bf-num" data-label="Share">{{ r.sharePct }}%</td>
+                  <td class="bf-nowrap" data-label="Last change">
+                    {{ r.lastChange | date: 'd MMM y' : 'UTC' }}
+                  </td>
                 </tr>
               } @empty {
                 <tr>
@@ -169,11 +221,105 @@ import { RulesTabs } from './rules-tabs';
       </section>
     }
   `,
+  styles: `
+    .bf-kpis--six {
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    }
+    .bf-nowrap {
+      white-space: nowrap;
+    }
+    .bf-week-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+      margin: 0 0 12px;
+      padding: 0;
+      list-style: none;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+    }
+    .bf-week-legend li {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bf-week-legend .bf-week-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: var(--mat-sys-corner-extra-small);
+    }
+    .bf-week-chart {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 8px 12px;
+      align-items: center;
+      font: var(--mat-sys-body-small);
+    }
+    .bf-week-chart__label {
+      color: var(--mat-sys-on-surface-variant);
+      white-space: nowrap;
+    }
+    .bf-week-chart__bar {
+      display: flex;
+      height: 16px;
+      overflow: hidden;
+      border-radius: var(--mat-sys-corner-extra-small);
+      background: var(--mat-sys-surface-container-high);
+    }
+    .bf-week-chart__bar > span {
+      display: block;
+      height: 100%;
+    }
+    .bf-week-swatch--through {
+      background: var(--categorical-data-viz-1);
+    }
+    .bf-week-swatch--approval {
+      background: var(--categorical-data-viz-2);
+    }
+    .bf-week-swatch--warned {
+      background: var(--categorical-data-viz-5);
+    }
+    .bf-week-swatch--blocked {
+      background: var(--categorical-data-viz-3);
+    }
+  `,
   host: { class: 'bf-page-layout' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RulesOverviewPage {
   private readonly api = injectApi();
   protected readonly valueOf = valueOf;
+
+  /** The six counts with their icons; conflicts and late approvals are toned when there are any. */
+  protected kpis(k: RulesDashboard['kpis']) {
+    return [
+      { label: 'Active rules', value: k.activeRules, icon: 'circle_check' },
+      { label: 'Drafts not published', value: k.draftsAwaitingPublish, icon: 'note_edit' },
+      {
+        label: 'Conflicts to resolve',
+        value: k.conflicts,
+        icon: 'error',
+        alert: k.conflicts > 0 ? 'important' : undefined,
+        link: '/admin/rules/list',
+        linkText: 'See the conflicting rules',
+      },
+      { label: 'Starting later', value: k.scheduledToStart, icon: 'calendar' },
+      {
+        label: 'Open exceptions',
+        value: k.openExceptions,
+        icon: 'flag',
+        alert: k.openExceptions > 0 ? 'warning' : undefined,
+        link: '/admin/rules/exceptions',
+        linkText: 'Settle them',
+      },
+      {
+        label: 'Approvals past their time',
+        value: k.approvalsPastSla,
+        icon: 'alarm',
+        alert: k.approvalsPastSla > 0 ? 'warning' : undefined,
+      },
+    ];
+  }
+
   protected readonly view = resource({ loader: () => data(this.api.getRulesDashboard({})) });
 }

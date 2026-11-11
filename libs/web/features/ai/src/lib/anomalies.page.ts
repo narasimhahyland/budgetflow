@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -15,13 +16,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import type { AiConfidence, AnomalyFlag, AnomalyKind } from '@bf/contracts';
-import { Money } from '@bf/web/ui';
+import { SessionStore } from '@bf/web/data-access';
+import { DateTimePipe, LoadState, Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
-import { SatInteractiveTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
+import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
 import { data, errorMessage, injectApi, valueOf } from './api';
-import { LoadState } from './load-state';
 
 const KIND_LABELS: Record<AnomalyKind, string> = {
   possible_split: 'Possible split',
@@ -50,8 +51,10 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
   imports: [
     AI_OUTPUT_IMPORTS,
     FormsModule,
+    DateTimePipe,
     LoadState,
     MatButtonModule,
+    MatChipsModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -60,7 +63,6 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
     RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
-    SatInteractiveTag,
     SatStatusTag,
   ],
   template: `
@@ -99,6 +101,7 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
         [loading]="flags.isLoading() && !flags.hasValue()"
         [error]="loadError()"
         what="the anomaly flags"
+        shape="table"
         (retry)="flags.reload()"
       />
       @if (flags.hasValue()) {
@@ -117,19 +120,17 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
             <h2 class="bf-card__title" id="flags-title">Flags</h2>
           </div>
           <div class="bf-filters">
-            @for (s of statuses; track s) {
-              <sat-status-tag
-                satInteractiveTag
-                [status]="status() === s ? 'info' : 'neutral-quiet'"
-                [hideIcon]="true"
-                role="button"
-                tabindex="0"
-                (click)="status.set(s)"
-                (keydown.enter)="status.set(s)"
-                [attr.data-testid]="'flag-status-' + s"
-                >{{ statusLabel(s) }}</sat-status-tag
-              >
-            }
+            <mat-chip-listbox aria-label="Flag status">
+              @for (s of statuses; track s) {
+                <mat-chip-option
+                  [selected]="status() === s"
+                  [selectable]="status() !== s"
+                  (selectionChange)="$event.selected && status.set(s)"
+                  [attr.data-testid]="'flag-status-' + s"
+                  >{{ statusLabel(s) }}</mat-chip-option
+                >
+              }
+            </mat-chip-listbox>
             <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>Kind</mat-label>
               <mat-select [ngModel]="kind()" (ngModelChange)="kind.set($event)">
@@ -142,17 +143,29 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
           </div>
 
           @if (rows().length === 0) {
-            <sat-empty-state data-testid="flags-empty">
-              <h2 satEmptyStateHeadline>
-                No {{ statusLabel(status()).toLowerCase() }} anomaly flags
-              </h2>
-              <p satEmptyStateDescription>
-                Scan for flags, or open the exceptions dashboard for items the Phase 7 rules caught.
-              </p>
-            </sat-empty-state>
+            <div class="bf-card__body">
+              <sat-empty-state data-testid="flags-empty">
+                <h2 satEmptyStateHeadline>
+                  No {{ statusLabel(status()).toLowerCase() }} anomaly flags
+                </h2>
+                <p satEmptyStateDescription>
+                  Scan for flags, or open the post-spend exceptions for items the rules already
+                  caught.
+                </p>
+                <button
+                  mat-stroked-button
+                  satEmptyStateAction
+                  type="button"
+                  [disabled]="scanning()"
+                  (click)="scan()"
+                >
+                  Scan for flags
+                </button>
+              </sat-empty-state>
+            </div>
           } @else {
             <div class="bf-table-scroll">
-              <table class="bf-split-table" aria-label="Anomaly flags">
+              <table class="bf-split-table bf-table--stack" aria-label="Anomaly flags">
                 <thead>
                   <tr>
                     <th>Raised</th>
@@ -169,9 +182,11 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
                   @for (f of rows(); track f.id) {
                     <tr [attr.data-testid]="'flag-row-' + f.id">
                       <td>
-                        <span data-testid="relative-time">{{ f.raisedAt }}</span>
+                        <span class="bf-nowrap" data-testid="relative-time">{{
+                          f.raisedAt | bfDateTime: session.timezone()
+                        }}</span>
                       </td>
-                      <td>
+                      <td data-label="Kind">
                         <button
                           mat-button
                           type="button"
@@ -181,14 +196,14 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
                           {{ kindLabel(f.kind) }}
                         </button>
                       </td>
-                      <td>
+                      <td data-label="Confidence">
                         <sat-status-tag [status]="confidenceTone(f.confidence)">
                           {{ confidenceWord(f.confidence) }}
                         </sat-status-tag>
                       </td>
-                      <td>{{ f.subjectLabel }}</td>
-                      <td>{{ f.budgetName ?? '—' }}</td>
-                      <td class="bf-num">
+                      <td data-label="Subject">{{ f.subjectLabel }}</td>
+                      <td data-label="Budget">{{ f.budgetName ?? '—' }}</td>
+                      <td class="bf-num" data-label="Amount">
                         @if (f.amount) {
                           <bf-money
                             [amountMinor]="f.amount.amountMinor"
@@ -198,10 +213,10 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
                           <span class="bf-cell__secondary">—</span>
                         }
                       </td>
-                      <td>
+                      <td data-label="Stage">
                         {{ f.stage === 'before_approval' ? 'Before approval' : 'After approval' }}
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <sat-status-tag [status]="flagStatusTone(f.status)">{{
                           statusLabel(f.status)
                         }}</sat-status-tag>
@@ -336,6 +351,7 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
 export class AnomaliesPage {
   private readonly api = injectApi();
   private readonly snack = inject(MatSnackBar);
+  protected readonly session = inject(SessionStore);
   protected readonly valueOf = valueOf;
   protected readonly statuses = STATUSES;
   protected readonly kinds = Object.keys(KIND_LABELS) as AnomalyKind[];
