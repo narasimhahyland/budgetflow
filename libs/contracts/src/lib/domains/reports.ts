@@ -638,11 +638,34 @@ export const ReportExport = named(
       requestedAt: IsoDateTime,
       expiresAt: IsoDateTime,
       scheduleId: Id.nullable(),
+      fileName: z
+        .string()
+        .nullable()
+        .optional()
+        .describe(
+          'Name of the rendered file in the DocumentStore; null for an export recorded before files were produced.',
+        ),
+      sha256: z
+        .string()
+        .nullable()
+        .optional()
+        .describe('SHA-256 of the rendered file, so a recipient can check what they received.'),
     })
     .strict()
-    .describe('Download links expire after 7 days.'),
+    .describe(
+      'One export of a report run, rendered with the filters and scope of the person who asked for it. The file expires after 7 days.',
+    ),
 );
 export type ReportExport = z.infer<typeof ReportExport>;
+
+export const ReportExportDownload = named(
+  'ReportExportDownload',
+  z
+    .object({ url: z.string(), fileName: z.string(), expiresAt: IsoDateTime })
+    .strict()
+    .describe('A short-lived signed URL (5 minutes) for one rendered export file.'),
+);
+export type ReportExportDownload = z.infer<typeof ReportExportDownload>;
 
 export const ReportExportList = named(
   'ReportExportList',
@@ -881,6 +904,7 @@ export const BoardPackDownload = named(
 export type BoardPackDownload = z.infer<typeof BoardPackDownload>;
 
 const ReportParams = z.object({ reportId: ReportId }).strict();
+const ExportParams = z.object({ exportId: Id }).strict();
 const ScheduleParams = z.object({ scheduleId: Id }).strict();
 const ViewParams = z.object({ viewId: Id }).strict();
 const GenerationParams = z.object({ generationId: Id }).strict();
@@ -1039,7 +1063,7 @@ export const reportEndpoints = {
     operationId: 'createReportExport',
     method: 'post',
     path: '/api/reports/{reportId}/exports',
-    summary: 'Export a report run (CSV, XLSX or PDF)',
+    summary: "Export a report run to a CSV, XLSX or PDF file, with the viewer's filters and scope",
     tags: ['reports'],
     auth: true,
     idempotent: true,
@@ -1057,6 +1081,17 @@ export const reportEndpoints = {
     auth: true,
     response: { status: 200, schema: ReportExportList },
     errors: [401, 403],
+  },
+  getReportExportDownload: {
+    operationId: 'getReportExportDownload',
+    method: 'get',
+    path: '/api/reports/exports/{exportId}/download',
+    summary: 'A short-lived signed link to the rendered export file',
+    tags: ['reports'],
+    auth: true,
+    params: ExportParams,
+    response: { status: 200, schema: ReportExportDownload },
+    errors: [401, 403, 404, 409],
   },
   getBoardPack: {
     operationId: 'getBoardPack',

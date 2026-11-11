@@ -336,6 +336,8 @@ export const PROBLEM_CODES = [
   'FORECAST_CYCLE_ALREADY_OPEN',
   'FORECAST_NOT_IN_SCOPE',
   'BOARD_PACK_NOT_READY',
+  'REPORT_EXPORT_NO_FILE',
+  'REPORT_EXPORT_EXPIRED',
   'BOARD_PACK_NO_SNAPSHOT',
   // AI layer (P13). AI suggests; people decide: none of these ever authorize a financial action.
   'AI_FEATURE_DISABLED',

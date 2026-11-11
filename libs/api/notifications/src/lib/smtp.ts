@@ -7,6 +7,7 @@ export interface MailMessage {
   subject: string;
   text: string;
   html: string;
+  attachments?: { fileName: string; contentType: string; body: Buffer }[];
 }
 
 const encodeHeader = (v: string) =>
@@ -19,19 +20,19 @@ const base64Lines = (v: string) =>
       .match(/.{1,76}/g) ?? []
   ).join('\r\n');
 
-/** RFC 5322 message with text and HTML alternatives (bodies base64-encoded, so no line-length or dot issues). */
+const bufferLines = (b: Buffer) => (b.toString('base64').match(/.{1,76}/g) ?? []).join('\r\n');
+
+/** A file name safe for a MIME header: no quotes, line breaks or path separators. */
+const headerFileName = (v: string) => v.replace(/["\\/\r\n]+/g, '_').slice(0, 150) || 'attachment';
+
+/**
+ * RFC 5322 message with text and HTML alternatives (bodies base64-encoded, so no line-length or dot
+ * issues). With attachments, the alternatives are wrapped in multipart/mixed with one part per file.
+ */
 export function mimeMessage(m: MailMessage, now = new Date()): string {
   const boundary = `bf-${randomUUID()}`;
   const domain = m.from.replace(/.*@/, '').replace(/>.*/, '') || 'budgetflow.example.test';
-  return [
-    `From: ${m.from}`,
-    `To: ${m.to}`,
-    `Subject: ${encodeHeader(m.subject)}`,
-    `Date: ${now.toUTCString()}`,
-    `Message-ID: <${randomUUID()}@${domain}>`,
-    'MIME-Version: 1.0',
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    '',
+  const alternative = [
     `--${boundary}`,
     'Content-Type: text/plain; charset=utf-8',
     'Content-Transfer-Encoding: base64',
@@ -43,6 +44,45 @@ export function mimeMessage(m: MailMessage, now = new Date()): string {
     '',
     base64Lines(m.html),
     `--${boundary}--`,
+  ];
+  const headers = [
+    `From: ${m.from}`,
+    `To: ${m.to}`,
+    `Subject: ${encodeHeader(m.subject)}`,
+    `Date: ${now.toUTCString()}`,
+    `Message-ID: <${randomUUID()}@${domain}>`,
+    'MIME-Version: 1.0',
+  ];
+  const files = m.attachments ?? [];
+  if (!files.length)
+    return [
+      ...headers,
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      '',
+      ...alternative,
+      '',
+    ].join('\r\n');
+  const mixed = `bf-mixed-${randomUUID()}`;
+  return [
+    ...headers,
+    `Content-Type: multipart/mixed; boundary="${mixed}"`,
+    '',
+    `--${mixed}`,
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    '',
+    ...alternative,
+    ...files.flatMap((f) => {
+      const name = headerFileName(f.fileName);
+      return [
+        `--${mixed}`,
+        `Content-Type: ${f.contentType}; name="${name}"`,
+        'Content-Transfer-Encoding: base64',
+        `Content-Disposition: attachment; filename="${name}"`,
+        '',
+        bufferLines(f.body),
+      ];
+    }),
+    `--${mixed}--`,
     '',
   ].join('\r\n');
 }

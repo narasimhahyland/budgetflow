@@ -35,6 +35,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { desc, eq, sql } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
 import { buildBoardPackPage, type BoardPackData } from './board-pack-pages';
+import { xlsxWorkbook } from './file-writers';
 import { ReportExtrasReads } from './report-extras.service';
 import { ReportReads, sumBuckets } from './report-reads.service';
 
@@ -923,10 +924,7 @@ const cellText = (cell: BoardPackPage['rows'][number]['cells'][string] | undefin
   return cell.text ?? '';
 };
 
-const xmlEscape = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-/** A stored (uncompressed) zip: an XLSX workbook with one sheet per page and the underlying rows. */
+/** An XLSX workbook with one sheet per page and the underlying rows. */
 function renderXlsx(pack: BoardPack, periodId: string): Buffer {
   const sheets = pack.pages.map((page, i) => ({
     name: `${i + 1}-${page.page}`.slice(0, 31),
@@ -957,139 +955,6 @@ function renderXlsx(pack: BoardPack, periodId: string): Buffer {
       ]),
     ],
   });
-  const sheetXml = (rows: string[][]) =>
-    `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${rows
-      .map(
-        (cells, r) =>
-          `<row r="${r + 1}">${cells
-            .map(
-              (v, c) =>
-                `<c r="${colName(c)}${r + 1}" t="inlineStr"><is><t>${xmlEscape(v)}</t></is></c>`,
-            )
-            .join('')}</row>`,
-      )
-      .join('')}</sheetData></worksheet>`;
-  const files: { name: string; body: Buffer }[] = [
-    {
-      name: '[Content_Types].xml',
-      body: Buffer.from(
-        `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets
-          .map(
-            (_s, i) =>
-              `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`,
-          )
-          .join('')}</Types>`,
-      ),
-    },
-    {
-      name: '_rels/.rels',
-      body: Buffer.from(
-        `<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
-      ),
-    },
-    {
-      name: 'xl/workbook.xml',
-      body: Buffer.from(
-        `<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets
-          .map(
-            (s, i) => `<sheet name="${xmlEscape(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`,
-          )
-          .join('')}</sheets></workbook>`,
-      ),
-    },
-    {
-      name: 'xl/_rels/workbook.xml.rels',
-      body: Buffer.from(
-        `<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets
-          .map(
-            (_s, i) =>
-              `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`,
-          )
-          .join('')}</Relationships>`,
-      ),
-    },
-    ...sheets.map((s, i) => ({
-      name: `xl/worksheets/sheet${i + 1}.xml`,
-      body: Buffer.from(sheetXml(s.rows)),
-    })),
-  ];
   // A fixed timestamp keyed to the period, so regenerating the same pack produces the same bytes.
-  return zipStore(files, periodId);
-}
-
-const colName = (i: number): string => {
-  let n = i;
-  let name = '';
-  do {
-    name = String.fromCharCode(65 + (n % 26)) + name;
-    n = Math.floor(n / 26) - 1;
-  } while (n >= 0);
-  return name;
-};
-
-const CRC_TABLE = (() => {
-  const t = new Uint32Array(256);
-  for (let i = 0; i < 256; i += 1) {
-    let c = i;
-    for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    t[i] = c >>> 0;
-  }
-  return t;
-})();
-
-const crc32 = (buf: Buffer): number => {
-  let c = 0xffffffff;
-  for (const b of buf) c = CRC_TABLE[(c ^ b) & 0xff] ^ (c >>> 8);
-  return (c ^ 0xffffffff) >>> 0;
-};
-
-/** Zip with stored entries: enough for XLSX and it adds no dependency. */
-function zipStore(files: readonly { name: string; body: Buffer }[], seed: string): Buffer {
-  // A deterministic DOS timestamp derived from the seed: the same pack regenerates byte for byte.
-  const stamp = [...seed].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 0xffff, 7);
-  const locals: Buffer[] = [];
-  const centrals: Buffer[] = [];
-  let offset = 0;
-  for (const f of files) {
-    const name = Buffer.from(f.name);
-    const crc = crc32(f.body);
-    const local = Buffer.alloc(30 + name.length);
-    local.writeUInt32LE(0x04034b50, 0);
-    local.writeUInt16LE(20, 4);
-    local.writeUInt16LE(0, 6);
-    local.writeUInt16LE(0, 8);
-    local.writeUInt16LE(stamp, 10);
-    local.writeUInt16LE(stamp, 12);
-    local.writeUInt32LE(crc, 14);
-    local.writeUInt32LE(f.body.length, 18);
-    local.writeUInt32LE(f.body.length, 22);
-    local.writeUInt16LE(name.length, 26);
-    local.writeUInt16LE(0, 28);
-    name.copy(local, 30);
-    locals.push(local, f.body);
-    const central = Buffer.alloc(46 + name.length);
-    central.writeUInt32LE(0x02014b50, 0);
-    central.writeUInt16LE(20, 4);
-    central.writeUInt16LE(20, 6);
-    central.writeUInt16LE(0, 8);
-    central.writeUInt16LE(0, 10);
-    central.writeUInt16LE(stamp, 12);
-    central.writeUInt16LE(stamp, 14);
-    central.writeUInt32LE(crc, 16);
-    central.writeUInt32LE(f.body.length, 20);
-    central.writeUInt32LE(f.body.length, 24);
-    central.writeUInt16LE(name.length, 28);
-    central.writeUInt32LE(offset, 42);
-    name.copy(central, 46);
-    centrals.push(central);
-    offset += local.length + f.body.length;
-  }
-  const centralDirectory = Buffer.concat(centrals);
-  const end = Buffer.alloc(22);
-  end.writeUInt32LE(0x06054b50, 0);
-  end.writeUInt16LE(files.length, 8);
-  end.writeUInt16LE(files.length, 10);
-  end.writeUInt32LE(centralDirectory.length, 12);
-  end.writeUInt32LE(offset, 16);
-  return Buffer.concat([...locals, centralDirectory, end]);
+  return xlsxWorkbook(sheets, periodId);
 }
