@@ -6831,6 +6831,229 @@
         "additionalProperties": false,
         "description": "Program branding (102b). The Satori theme stays in charge of everything else."
       },
+      "BreakGlassDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "decline"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "BreakGlassGrant": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "requestedByName": {
+            "type": "string",
+            "description": "The platform operator who asked."
+          },
+          "reason": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "const": "budgets_and_ledger"
+          },
+          "scopeLabel": {
+            "type": "string",
+            "description": "Plain English: what the grant opens, always read-only."
+          },
+          "requestedMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 240
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "requested",
+              "active",
+              "expired",
+              "declined",
+              "revoked"
+            ],
+            "description": "Active and expired are derived from the approved window and the real time now."
+          },
+          "decidedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "decidedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decisionReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startsAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set on approval; the window starts then."
+          },
+          "endsAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revokedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "revokedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revokeReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "actionsTaken": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Audited requests made under this grant (088)."
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "approve",
+                "decline",
+                "revoke"
+              ]
+            },
+            "description": "What the signed-in person may do with this grant now."
+          }
+        },
+        "required": [
+          "id",
+          "requestedByName",
+          "reason",
+          "scope",
+          "scopeLabel",
+          "requestedMinutes",
+          "requestedAt",
+          "status",
+          "decidedByName",
+          "decidedAt",
+          "decisionReason",
+          "startsAt",
+          "endsAt",
+          "revokedByName",
+          "revokedAt",
+          "revokeReason",
+          "actionsTaken",
+          "allowedActions"
+        ],
+        "additionalProperties": false
+      },
+      "BreakGlassGrantList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BreakGlassGrant"
+            },
+            "description": "Newest first. A platform operator sees only their own."
+          },
+          "canRequest": {
+            "type": "boolean",
+            "description": "The signed-in person is a platform operator."
+          },
+          "canDecide": {
+            "type": "boolean",
+            "description": "The signed-in person may approve, decline and revoke."
+          },
+          "maxMinutes": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Longest window a request may ask for."
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "canRequest",
+          "canDecide",
+          "maxMinutes",
+          "note"
+        ],
+        "additionalProperties": false
+      },
       "BudgetBalances": {
         "type": "object",
         "properties": {
@@ -38237,6 +38460,27 @@
         ],
         "additionalProperties": false
       },
+      "RequestBreakGlassRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "15 to 240 minutes, checked server-side so an out-of-range value answers a typed problem."
+          }
+        },
+        "required": [
+          "reason",
+          "durationMinutes"
+        ],
+        "additionalProperties": false
+      },
       "RequestDetail": {
         "type": "object",
         "properties": {
@@ -39609,6 +39853,20 @@
         },
         "required": [
           "confirmName"
+        ],
+        "additionalProperties": false
+      },
+      "RevokeBreakGlassRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
         ],
         "additionalProperties": false
       },
@@ -90072,6 +90330,401 @@
             }
           },
           "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/break-glass": {
+      "get": {
+        "operationId": "breakGlassGrants",
+        "summary": "Break-glass requests and grants, with what the signed-in person may do",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BreakGlassGrantList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "requestBreakGlass",
+        "summary": "Platform operator: ask for time-limited, read-only access to budgets and the ledger",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestBreakGlassRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BreakGlassGrant"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/break-glass/{grantId}/decision": {
+      "post": {
+        "operationId": "decideBreakGlass",
+        "summary": "Approve or decline a break-glass request (never the requester)",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "grantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BreakGlassDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BreakGlassGrant"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/break-glass/{grantId}/revocation": {
+      "post": {
+        "operationId": "revokeBreakGlass",
+        "summary": "End an active break-glass grant now",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "grantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeBreakGlassRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BreakGlassGrant"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {

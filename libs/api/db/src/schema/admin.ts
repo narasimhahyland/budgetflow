@@ -9,7 +9,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { createdAt, day, pk, tenantRef, ts, updatedAt } from './_columns';
+import { appNow, createdAt, day, pk, tenantRef, ts, updatedAt } from './_columns';
 import { people } from './org';
 import { tenants } from './tenancy';
 
@@ -124,7 +124,7 @@ export const retentionRuns = pgTable(
     scopeKey: text('scope_key').notNull(),
     requestedByPersonId: uuid('requested_by_person_id').references(() => people.id),
     confirmedByPersonId: uuid('confirmed_by_person_id').references(() => people.id),
-    startedAt: ts('started_at').notNull().defaultNow(),
+    startedAt: ts('started_at').notNull().default(appNow),
     finishedAt: ts('finished_at'),
     error: text('error'),
     createdAt: createdAt(),

@@ -14,6 +14,8 @@ const PERSONAL = new Set([
   '/api/me/activity',
   '/api/me/following',
   '/api/notifications',
+  // The operator's own break-glass requests (screen 112): the one tenant action it holds.
+  '/api/admin/break-glass',
 ]);
 
 /** True when a 200 body carries nothing: every list empty, every amount zero, no named records. */
