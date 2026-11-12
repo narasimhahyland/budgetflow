@@ -31791,7 +31791,8 @@
                   "budget",
                   "event",
                   "request",
-                  "contribution"
+                  "contribution",
+                  "reclaim_notice"
                 ]
               },
               {
@@ -39048,6 +39049,10 @@
             "description": "The most that can be reclaimed now.",
             "$ref": "#/components/schemas/Money"
           },
+          "pendingRequests": {
+            "description": "Pending (pre-encumbered) requests on the budget: listed, never part of the floor.",
+            "$ref": "#/components/schemas/Money"
+          },
           "canRespond": {
             "type": "boolean"
           },
@@ -39084,6 +39089,7 @@
           "available",
           "floor",
           "maxReclaimable",
+          "pendingRequests",
           "canRespond",
           "canEscalate"
         ],

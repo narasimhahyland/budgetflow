@@ -91,11 +91,11 @@ import { CAMPAIGN_STATUS, moneyText } from './reclaim-format';
             </ng-container>
             <ng-container matColumnDef="started">
               <th mat-header-cell *matHeaderCellDef>Started</th>
-              <td mat-cell *matCellDef="let c">{{ c.startedOn | date: 'd MMM y' : 'UTC' }}</td>
+              <td mat-cell *matCellDef="let c">{{ c.startedOn | date: 'd MMM y' }}</td>
             </ng-container>
             <ng-container matColumnDef="respondBy">
               <th mat-header-cell *matHeaderCellDef>Respond by</th>
-              <td mat-cell *matCellDef="let c">{{ c.respondBy | date: 'd MMM y' : 'UTC' }}</td>
+              <td mat-cell *matCellDef="let c">{{ c.respondBy | date: 'd MMM y' }}</td>
             </ng-container>
             <ng-container matColumnDef="candidates">
               <th mat-header-cell *matHeaderCellDef>Candidates</th>

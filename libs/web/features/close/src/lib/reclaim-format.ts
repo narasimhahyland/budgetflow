@@ -1,4 +1,5 @@
 import type { ReclaimCampaign, ReclaimNotice } from '@bf/contracts';
+import { formatDate } from '@angular/common';
 import { formatMoney } from '@bf/web/ui';
 import type { Tag } from './close-format';
 
@@ -43,11 +44,12 @@ export function responseText(n: ReclaimNotice): string {
       : '';
   if (n.status === 'sent')
     return n.overdue
-      ? `No response (was due ${n.respondBy})`
-      : `No response yet (due ${n.respondBy})`;
+      ? `No response (was due ${formatDate(n.respondBy, 'd MMM', 'en')})`
+      : `No response yet (due ${formatDate(n.respondBy, 'd MMM', 'en')})`;
   if (n.status === 'parent_review')
     return `Sent to ${n.parentOwnerName ?? 'the parent owner'} for a decision`;
-  if (n.choice === 'keep') return `Keep it: ${n.reason ?? ''}${n.plan ? ` (${n.plan})` : ''}${by}`;
+  if (n.choice === 'keep')
+    return `Keep it: ${n.reason ?? ''}${n.plan ? ` (${n.plan})` : ''}${by}. Nothing reclaimed.`;
   if (n.choice === 'release_part')
     return `Release part: keep ${m(n.kept)}${n.reason ? ` for ${n.reason}` : ''}${by}`;
   return `Release all${by}`;

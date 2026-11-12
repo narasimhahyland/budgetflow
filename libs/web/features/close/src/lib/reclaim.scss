@@ -48,6 +48,13 @@
 .bf-reclaim__row-action {
   display: block;
   margin-top: 6px;
+  white-space: nowrap;
+}
+
+.bf-reclaim__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .bf-reclaim__floors {
@@ -72,4 +79,16 @@
 
 .bf-reclaim__facts {
   margin-top: 12px;
+}
+
+// The owner-responses table on tablet: the budget keeps a readable width and the forecast column
+// (equal to the proposal unless the floor caps it, and shown on each owner's notice) gives way.
+.bf-reclaim__budget {
+  min-width: 160px;
+}
+
+@media (max-width: 1000px) {
+  .bf-reclaim__wide {
+    display: none;
+  }
 }

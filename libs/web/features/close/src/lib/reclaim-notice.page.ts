@@ -55,7 +55,7 @@ import { noticeTag, responseText } from './reclaim-format';
         <div class="bf-page__heading">
           <h1 class="bf-page__title">Release unused money from {{ n.budgetName }}</h1>
           <p class="bf-page__subtitle">
-            {{ n.campaignName }} · respond by {{ n.respondBy | date: 'd MMM y' : 'UTC' }}
+            {{ n.campaignName }} · respond by {{ n.respondBy | date: 'd MMM y' }}
           </p>
         </div>
       </header>
@@ -78,6 +78,17 @@ import { noticeTag, responseText } from './reclaim-format';
               />
             </dd>
           </div>
+          @if (n.pendingRequests.amountMinor > 0) {
+            <div>
+              <dt>Pending requests (not part of the floor)</dt>
+              <dd>
+                <bf-money
+                  [amountMinor]="n.pendingRequests.amountMinor"
+                  [currency]="n.pendingRequests.currency"
+                />
+              </dd>
+            </div>
+          }
           <div class="bf-rows__total">
             <dt>Proposed release</dt>
             <dd>
@@ -86,9 +97,13 @@ import { noticeTag, responseText } from './reclaim-format';
           </div>
         </dl>
         <p class="bf-note">
-          Why: {{ money(n.proposed) }} is forecast to lapse on
-          {{ n.yearEnd | date: 'd MMM y' : 'UTC' }}. At most {{ money(n.maxReclaimable) }} can be
-          released today (floor: committed + actual + children, {{ money(n.floor) }}).
+          Why: {{ money(n.proposed) }} is forecast to lapse on {{ n.yearEnd | date: 'd MMM y' }}. At
+          most {{ money(n.maxReclaimable) }} can be released today (floor: committed + actual +
+          children, {{ money(n.floor) }}).
+          @if (n.pendingRequests.amountMinor > 0) {
+            Releasing more than is available leaves pending requests of
+            {{ money(n.pendingRequests) }} short; those go back to their requesters.
+          }
         </p>
       </section>
 
@@ -168,7 +183,7 @@ import { noticeTag, responseText } from './reclaim-format';
           @if (failure()) {
             <p class="bf-reclaim__error" id="release-error" role="alert">{{ failure() }}</p>
           }
-          <div class="bf-form__actions">
+          <div class="bf-reclaim__actions">
             <button
               mat-flat-button
               satImportantButton
@@ -185,7 +200,17 @@ import { noticeTag, responseText } from './reclaim-format';
         <section class="bf-card bf-reclaim__notice" aria-labelledby="notice-answer">
           <h2 class="bf-card__title" id="notice-answer">Answer</h2>
           <p><bf-close-tag [tag]="tagOf(n)" /></p>
-          <p class="bf-note">{{ responseOf(n) }}</p>
+          @if (n.released.amountMinor > 0) {
+            <p class="bf-reclaim__remainder">
+              Released <strong>{{ money(n.released) }}</strong>
+            </p>
+          }
+          <p class="bf-note">
+            {{ responseOf(n) }}
+            @if (n.respondedByName && n.respondedAt) {
+              · answered by {{ n.respondedByName }} on {{ n.respondedAt | date: 'd MMM y' }}
+            }
+          </p>
         </section>
       }
     }

@@ -141,6 +141,9 @@ export const ReclaimNotice = named(
       available: Money.describe('Available now, under the budget rules.'),
       floor: Money.describe('The floor now: allocated out + held + encumbered + actual.'),
       maxReclaimable: Money.describe('The most that can be reclaimed now.'),
+      pendingRequests: Money.describe(
+        'Pending (pre-encumbered) requests on the budget: listed, never part of the floor.',
+      ),
       canRespond: z.boolean(),
       canEscalate: z.boolean(),
     })

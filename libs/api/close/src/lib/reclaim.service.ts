@@ -529,6 +529,9 @@ export class ReclaimService {
     const fy = await this.reads.fiscalYear(tx, campaign.fiscalYearId);
     const today = todayUtc();
     const manage = this.can(actor, 'reclaim.manage');
+    const pending = new Map<string, number>();
+    for (const n of notices)
+      pending.set(n.budgetId, await this.controls.pendingMinor(tx, n.budgetId));
     return notices.map((n) => {
       const row = rows.get(n.budgetId)!;
       const parent = row.parentId ? parents.get(row.parentId) : undefined;
@@ -574,6 +577,7 @@ export class ReclaimService {
         available: m(allocationAvailable(b, toPostingBudget(row).control)),
         floor: m(reductionFloor(b, false)),
         maxReclaimable: m(maxReclaimable(b)),
+        pendingRequests: m(pending.get(n.budgetId) ?? 0),
         canRespond,
         canEscalate: open && overdue && manage,
       };

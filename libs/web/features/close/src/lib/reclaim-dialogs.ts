@@ -337,7 +337,7 @@ export interface ConfirmPoolData {
           @for (s of p.sources; track s.budgetId) {
             <li [class.bf-reclaim__floor--bad]="!s.withinFloor">
               <strong>{{ s.budgetName }}</strong
-              >: {{ money(s.authorizedBefore) }} → {{ money(s.authorizedAfter) }}, floor
+              >: authorized {{ money(s.authorizedBefore) }} → {{ money(s.authorizedAfter) }}, floor
               {{ money(s.floor) }} (most {{ money(s.maxReclaimable) }})
               @if (s.pendingRequests.amountMinor > 0) {
                 · pending requests {{ money(s.pendingRequests) }} are not floored and may go back to
@@ -359,7 +359,7 @@ export interface ConfirmPoolData {
             data-testid="reclaim-reason-code"
           >
             @for (r of reasonCodes(); track r.code) {
-              <mat-option [value]="r.code">{{ r.label }} ({{ r.code }})</mat-option>
+              <mat-option [value]="r.code">{{ r.label }}</mat-option>
             }
           </mat-select>
         </mat-form-field>

@@ -61,8 +61,8 @@ import { CAMPAIGN_STATUS, moneyText, noticeTag, responseText } from './reclaim-f
         <div class="bf-page__heading">
           <h1 class="bf-page__title">{{ d.campaign.name }}</h1>
           <p class="bf-page__subtitle">
-            Started {{ d.campaign.startedOn | date: 'd MMM y' : 'UTC' }} · respond by
-            {{ d.campaign.respondBy | date: 'd MMM y' : 'UTC' }} · {{ d.campaign.answered }} of
+            Started {{ d.campaign.startedOn | date: 'd MMM y' }} · respond by
+            {{ d.campaign.respondBy | date: 'd MMM y' }} · {{ d.campaign.answered }} of
             {{ d.campaign.candidates }} answered
           </p>
         </div>
@@ -115,18 +115,18 @@ import { CAMPAIGN_STATUS, moneyText, noticeTag, responseText } from './reclaim-f
           <table mat-table class="bf-table" [dataSource]="d.notices" aria-label="Owner responses">
             <ng-container matColumnDef="budget">
               <th mat-header-cell *matHeaderCellDef>Budget</th>
-              <td mat-cell *matCellDef="let n">
+              <td mat-cell *matCellDef="let n" class="bf-reclaim__budget">
                 <span class="bf-cell__primary">{{ n.budgetName }}</span>
-                <span class="bf-cell__secondary">{{ n.legalEntityCode }}</span>
+                <span class="bf-cell__secondary"
+                  >{{ n.ownerName ?? 'No owner' }} · {{ n.legalEntityCode }}</span
+                >
               </td>
             </ng-container>
-            <ng-container matColumnDef="owner">
-              <th mat-header-cell *matHeaderCellDef>Owner</th>
-              <td mat-cell *matCellDef="let n">{{ n.ownerName ?? 'No owner' }}</td>
-            </ng-container>
             <ng-container matColumnDef="unused">
-              <th mat-header-cell *matHeaderCellDef class="bf-num">Forecast unused</th>
-              <td mat-cell *matCellDef="let n" class="bf-num">
+              <th mat-header-cell *matHeaderCellDef class="bf-num bf-reclaim__wide">
+                Forecast unused
+              </th>
+              <td mat-cell *matCellDef="let n" class="bf-num bf-reclaim__wide">
                 <bf-money
                   [amountMinor]="n.forecastUnused.amountMinor"
                   [currency]="n.forecastUnused.currency"
@@ -296,7 +296,7 @@ export class ReclaimCampaignPage {
   protected readonly campaignId = computed(() => this.params().get('campaignId') ?? '');
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
-  protected readonly columns = ['budget', 'owner', 'unused', 'proposed', 'response', 'released'];
+  protected readonly columns = ['budget', 'unused', 'proposed', 'response', 'released'];
   protected readonly busy = signal(false);
   protected readonly failure = signal<string | null>(null);
   protected readonly notice = signal<string | null>(null);
