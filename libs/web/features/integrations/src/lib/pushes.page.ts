@@ -26,6 +26,7 @@ const STATUS_LABELS: Record<PushItemView['status'], string> = {
   pushed: 'Sent',
   failed: 'Failed',
   closed: 'Closed',
+  disabled: 'Switched off: budget not accepting spend',
 };
 
 const STATUS_TONES: Record<PushItemView['status'], Tone> = {
@@ -33,6 +34,7 @@ const STATUS_TONES: Record<PushItemView['status'], Tone> = {
   pushed: 'success',
   failed: 'important',
   closed: 'neutral',
+  disabled: 'info',
 };
 
 /** Screen 099b: event codes and card limits BudgetFlow pushes out, and whether they arrived. */
@@ -242,7 +244,9 @@ export class PushesPage {
   protected readonly items = computed(() =>
     ordered(
       valueOf(this.pushes)?.items ?? [],
-      byRank<PushItemView>((p) => rankIn(['failed', 'pending', 'pushed', 'closed'], p.status)),
+      byRank<PushItemView>((p) =>
+        rankIn(['failed', 'pending', 'disabled', 'pushed', 'closed'], p.status),
+      ),
       byNewest<PushItemView>((p) => p.pushedAt),
       byText<PushItemView>((p) => p.reference),
     ),

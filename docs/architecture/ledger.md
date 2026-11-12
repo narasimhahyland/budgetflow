@@ -123,4 +123,4 @@ existing commitment and actual postings move:
   `benefit_thresholds` on each threshold's own tax year.
 
 Posting tables and examples: `evidence/gap-b3-tax-benefits/posting-design.md`. Scenarios: invariants
-106-109.
+109-112.

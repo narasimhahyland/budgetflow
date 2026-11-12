@@ -18,6 +18,8 @@ export interface OutboundResponse {
   durationMs: number;
   body: string;
   ok: boolean;
+  /** Response headers, lower-cased; Navan's 429 handling reads `retry-after`. */
+  headers?: Record<string, string>;
 }
 
 /** Classifies a provider failure so 100 can group it and decide whether to retry. */
@@ -99,6 +101,7 @@ export class OutboundHttp {
           durationMs: Date.now() - started,
           body,
           ok: res.ok,
+          headers: Object.fromEntries(res.headers.entries()),
         };
       } catch (e) {
         last = {

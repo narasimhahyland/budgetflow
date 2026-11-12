@@ -102,6 +102,7 @@ export const MAPPING_KIND_LABELS: Record<MappingKind, string> = {
   hr_field: 'HR field',
   plan_level: 'Plan level',
   group_role: 'Group to role',
+  person: 'Person',
 };
 
 export const ERROR_CLASS_LABELS: Record<IntegrationErrorClass, string> = {

@@ -1,4 +1,4 @@
-// Gap B3 (080g), invariants 106 and 107: recoverable GST/VAT never uses budget; the net amount plus
+// Gap B3 (080g), invariants 109 and 110: recoverable GST/VAT never uses budget; the net amount plus
 // the non-recoverable tax does, on a commitment and on an actual, exactly at the available amount and
 // one minor unit above. The split comes from the published rule set in force (seeded, fictional) and
 // is recorded once on the commitment or actual; the ledger rebuild still balances afterwards.

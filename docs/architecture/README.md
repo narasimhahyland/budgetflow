@@ -9,6 +9,7 @@ BudgetFlow Enterprise is a multi-tenant corporate budget delegation and control 
 | [state-machines.md](state-machines.md)                                 | Budget, commitment, event, request, contribution, period, forecast and recharge lifecycles                           |
 | [authorization.md](authorization.md)                                   | The 14 roles, the action matrix behind `PolicyService.can`, scopes, DoA versus ownership                             |
 | [api-conventions.md](api-conventions.md)                               | Paths, auth, tenancy, idempotency, problem details, contracts and OpenAPI                                            |
+| [navan-integration.md](navan-integration.md)                           | Navan connector (16a): OAuth, windows, options at the point of spend, write-back, approvals boundary                 |
 | [phase-handoff.md](phase-handoff.md)                                   | Where Phases 2-18 extend: modules, contracts, tables, seed hooks, owned paths                                        |
 | [../adr/](../adr/)                                                     | Architecture decisions (Nov 2026 product decisions: [0006](../adr/0006-single-company-usd-reporting-export-only.md)) |
 | [../ux/screen-inventory.md](../ux/screen-inventory.md)                 | 124 specified plus review-added screens, build phase per screen, role-to-screen matrix                               |

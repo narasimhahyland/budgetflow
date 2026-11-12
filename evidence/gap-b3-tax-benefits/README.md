@@ -53,10 +53,10 @@ Migration `0023_b3_tax_benefits` (A2 holds `0022`).
 
 | Row | Invariant                                                                                                                  | Scenario                                       |
 | --- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 106 | Recoverable tax never uses budget on a commitment; exactly at available and one minor unit above                           | `apps/api-e2e/src/tax/tax-consumption.spec.ts` |
-| 107 | Actuals use gross less recoverable tax; exact match and one unit over; reversals; duplicates; rebuild check clean          | same file                                      |
-| 108 | Versioned rules and thresholds, tax approver, immutability, role scope, RLS                                                | same file and `benefit-ledger.spec.ts`         |
-| 109 | Benefit ledger per employee and tax year, the BIK flag at the limit and one unit above, event close, reversals, role scope | `apps/api-e2e/src/tax/benefit-ledger.spec.ts`  |
+| 109 | Recoverable tax never uses budget on a commitment; exactly at available and one minor unit above                           | `apps/api-e2e/src/tax/tax-consumption.spec.ts` |
+| 110 | Actuals use gross less recoverable tax; exact match and one unit over; reversals; duplicates; rebuild check clean          | same file                                      |
+| 111 | Versioned rules and thresholds, tax approver, immutability, role scope, RLS                                                | same file and `benefit-ledger.spec.ts`         |
+| 112 | Benefit ledger per employee and tax year, the BIK flag at the limit and one unit above, event close, reversals, role scope | `apps/api-e2e/src/tax/benefit-ledger.spec.ts`  |
 
 Outcome table: [`functional/outcomes.md`](functional/outcomes.md). It records 20 API scenarios and
 3 journeys, all passing. API samples are in [`api/`](api/); they hold no tokens and only fictional

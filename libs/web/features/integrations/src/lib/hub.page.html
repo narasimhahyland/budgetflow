@@ -171,8 +171,37 @@
           <mat-label>Account or tenant id at the provider (optional)</mat-label>
           <input matInput [ngModel]="accountRef()" (ngModelChange)="accountRef.set($event)" />
         </mat-form-field>
+        @if (provider() === 'navan') {
+          <mat-form-field appearance="outline">
+            <mat-label>Client id</mat-label>
+            <input
+              matInput
+              autocomplete="off"
+              [ngModel]="clientId()"
+              (ngModelChange)="clientId.set($event)"
+              data-testid="connect-client-id"
+            />
+            <mat-hint
+              >Navan connects with OAuth client credentials: the id here, the secret
+              below.</mat-hint
+            >
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Navan region</mat-label>
+            <mat-select
+              [ngModel]="region()"
+              (ngModelChange)="region.set($event)"
+              data-testid="connect-region"
+            >
+              <mat-option value="us">United States</mat-option>
+              <mat-option value="eu"
+                >European Union (sends the region header on every call)</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+        }
         <mat-form-field appearance="outline" class="bf-form__wide">
-          <mat-label>Credential</mat-label>
+          <mat-label>{{ provider() === 'navan' ? 'Client secret' : 'Credential' }}</mat-label>
           <input
             matInput
             type="password"
@@ -192,7 +221,12 @@
         <button
           mat-flat-button
           type="button"
-          [disabled]="busy() || !provider() || credential().length < 8"
+          [disabled]="
+            busy() ||
+            !provider() ||
+            credential().length < 8 ||
+            (provider() === 'navan' && !clientId().trim())
+          "
           (click)="connect()"
           data-testid="connect-submit"
         >
