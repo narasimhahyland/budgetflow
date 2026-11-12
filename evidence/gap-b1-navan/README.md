@@ -13,6 +13,13 @@ connection: `docs/architecture/navan-integration.md`.
 | API samples                   | sync runs, connection detail, custom fields, pushes, over-budget exceptions, mock call log                                  | `api/`                                |
 | Invariant map                 | rows 103-105                                                                                                                | `docs/testing/invariant-scenarios.md` |
 
+## After merging main (A2, D1-D6)
+
+`scripts/gate.sh functional` on the merge commit: functional-e2e PASS; functional-api 669 passed and
+2 failed, both in `ledger/rebuild-check.spec.ts`, while the worker logged `getaddrinfo EAI_AGAIN
+postgres` (a Docker DNS outage on the host). Re-run on the same stack: `rebuild-check.spec.ts` and
+`integrations/navan.spec.ts`, 21 of 21 passed. Static gate on the merge commit: PASS.
+
 ## The visual failure
 
 The gate's visual step failed on `092-integrations-hub` (9 states, expected: the Navan connector
