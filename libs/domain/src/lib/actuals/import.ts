@@ -26,6 +26,11 @@ export const ACTUAL_IMPORT_FIELDS = [
   'original_ref',
   'kind',
   'card_program',
+  // Gap B3 (080g): GST/VAT included in the amount, and what the tax rules need to split it.
+  'tax_amount',
+  'tax_category',
+  'employees_present',
+  'others_present',
 ] as const;
 export type ActualImportField = (typeof ACTUAL_IMPORT_FIELDS)[number];
 
@@ -55,6 +60,10 @@ const SYNONYMS: Record<ActualImportField, readonly string[]> = {
   original_ref: ['original_ref', 'original_reference', 'reverses', 'applies_to'],
   kind: ['kind', 'type', 'line_type'],
   card_program: ['card_program', 'program', 'card'],
+  tax_amount: ['tax_amount', 'tax', 'vat', 'gst', 'vat_amount', 'gst_amount'],
+  tax_category: ['tax_category', 'category', 'spend_category', 'expense_category'],
+  employees_present: ['employees_present', 'employees', 'staff'],
+  others_present: ['others_present', 'clients', 'guests', 'non_employees'],
 };
 
 export type ColumnMapping = Partial<Record<ActualImportField, string>>;
@@ -144,6 +153,15 @@ export interface ParsedActualLine {
   reference: string | null;
   originalRef: string | null;
   cardProgram: string | null;
+  /** Tax included in the amount (same sign), or null when the line carries no tax column. */
+  taxMinor: number | null;
+  taxCategory: string | null;
+  attendance: { employees: number; others: number } | null;
+  /**
+   * The line as charged, set when tax handling replaces `amountMinor` with what the budget uses.
+   * Duplicate detection compares gross amounts, so a feed with a tax column and one without still match.
+   */
+  grossMinor?: number;
 }
 
 /**
@@ -220,6 +238,28 @@ export function validateActualRows(
       );
     if ((kind === 'refund' || kind === 'credit_note') && amountMinor > 0)
       amountMinor = -amountMinor;
+    let taxMinor: number | null = null;
+    const taxRaw = get(row.values, 'tax_amount');
+    if (taxRaw && currency) {
+      const t = parseDecimalAmount(taxRaw, currency);
+      if (!t.ok) issue('tax_amount', t.error.message);
+      else {
+        taxMinor = amountMinor < 0 ? -Math.abs(t.value) : Math.abs(t.value);
+        if (Math.abs(taxMinor) > Math.abs(amountMinor))
+          issue('tax_amount', 'The tax cannot be more than the amount it is included in.');
+      }
+    }
+    const count = (f: 'employees_present' | 'others_present') => {
+      const v = get(row.values, f);
+      if (v === null) return null;
+      if (!/^\d{1,6}$/.test(v)) {
+        issue(f, 'Give the number of people as a whole number.');
+        return null;
+      }
+      return Number(v);
+    };
+    const employees = count('employees_present');
+    const others = count('others_present');
     const originalRef = get(row.values, 'original_ref');
     if (kind === 'reversal' && !originalRef)
       issue('original_ref', 'A reversal names the source reference of the line it reverses.');
@@ -245,6 +285,12 @@ export function validateActualRows(
       reference: get(row.values, 'reference'),
       originalRef,
       cardProgram: get(row.values, 'card_program'),
+      taxMinor,
+      taxCategory: get(row.values, 'tax_category'),
+      attendance:
+        employees === null && others === null
+          ? null
+          : { employees: employees ?? 0, others: others ?? 0 },
     });
   }
   return { lines, issues };

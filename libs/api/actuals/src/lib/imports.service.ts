@@ -1,5 +1,6 @@
 import {
   actualMappingRules,
+  actualTaxLines,
   actuals,
   budgets,
   commitments,
@@ -26,12 +27,15 @@ import {
   type CommandResult,
   type RequestActor,
 } from '@bf/api/core';
+import { TaxService } from '@bf/api/finance';
 import { LedgerReads } from '@bf/api/ledger';
 import { AnalyticsService } from '@bf/api/tenancy';
 import type { ImportBatch, ImportBatchList } from '@bf/contracts';
 import {
+  ANY_CATEGORY,
   buildTriplet,
   classifyFit,
+  recoverableForPart,
   DEFAULT_MATCH_TOLERANCE_BPS,
   duplicateKey,
   parseCsv,
@@ -80,6 +84,7 @@ export class ImportsService {
     private readonly dtos: ActualsDtos,
     private readonly audit: AuditService,
     private readonly analytics: AnalyticsService,
+    private readonly tax: TaxService,
   ) {}
 
   list(actor: RequestActor, q: { fileName?: string } = {}): Promise<ImportBatchList> {
@@ -144,6 +149,7 @@ export class ImportsService {
             missing: missing.join(','),
           });
         const { lines, issues } = validateActualRows(parsed.rows, mapping, await this.refs(tx));
+        const taxed = await this.applyTax(tx, req.source, lines);
         const tolerance = req.toleranceBps ?? DEFAULT_MATCH_TOLERANCE_BPS;
         const prepared = await this.prepare(
           tx,
@@ -179,6 +185,24 @@ export class ImportsService {
               );
           }
           for (const f of prepared.flags) await tx.insert(integrityFlags).values(f);
+          const taxLines = prepared.rows.flatMap((r) => {
+            const t = taxed.get(r.sourceRef);
+            if (!t) return [];
+            const base = {
+              tenantId: actor.tenantId,
+              actualId: r.id!,
+              taxCode: t.taxCode,
+              ruleId: t.ruleId,
+              shareBps: t.shareBps,
+              currency: t.currency,
+            };
+            return [
+              { ...base, amountMinor: t.recoverableMinor, recoverable: true },
+              { ...base, amountMinor: t.nonRecoverableMinor, recoverable: false },
+            ];
+          });
+          for (let i = 0; i < taxLines.length; i += 200)
+            await tx.insert(actualTaxLines).values(taxLines.slice(i, i + 200));
         } else {
           throw new ApiProblem(422, 'IMPORT_INVALID', 'No line in the file can be imported.', {
             rejected: issues.length,
@@ -330,6 +354,109 @@ export class ImportsService {
     );
   }
 
+  /**
+   * Gap B3 (080g): a line charged with GST/VAT uses budget for its gross amount less the tax the
+   * entity can recover, by the rule in force on its accounting date. The stored transaction amount
+   * becomes that consumable amount (the only amount matching, accruals and the ledger ever see) and
+   * the split goes to the actual's tax lines; the gross is the amount plus the recoverable tax.
+   * Refunds, credit notes and reversals without a tax column take the same share of their
+   * original's tax, so a full reversal negates the original exactly.
+   */
+  private async applyTax(tx: Tx, source: Source, lines: ParsedActualLine[]) {
+    type Split = {
+      taxCode: string;
+      ruleId: string | null;
+      shareBps: number;
+      currency: string;
+      recoverableMinor: number;
+      nonRecoverableMinor: number;
+      grossMinor: number;
+    };
+    const out = new Map<string, Split>();
+    // First pass: every line that carries its own tax, whatever its order in the file.
+    for (const l of lines) {
+      if (l.taxMinor === null || l.taxMinor === 0) continue;
+      const s = await this.tax.splitGross(tx, {
+        legalEntityId: l.legalEntityId,
+        categoryCode: l.taxCategory ?? ANY_CATEGORY,
+        attendance: l.attendance,
+        grossMinor: l.amountMinor,
+        taxMinor: l.taxMinor,
+        date: l.accountingDate,
+      });
+      out.set(l.sourceRef, {
+        taxCode: s.split.taxCode,
+        ruleId: s.split.ruleId,
+        shareBps: s.split.shareBps,
+        currency: l.currency,
+        recoverableMinor: s.split.recoverableMinor,
+        nonRecoverableMinor: s.split.nonRecoverableMinor,
+        grossMinor: l.amountMinor,
+      });
+      l.grossMinor = l.amountMinor;
+      l.amountMinor = s.split.consumptionMinor;
+    }
+    // Originals already in BudgetFlow, from the same source (references are unique per source).
+    const refs = lines
+      .filter((l) => l.taxMinor === null && l.originalRef && l.kind !== 'charge')
+      .map((l) => l.originalRef!);
+    const stored = new Map<string, Split>();
+    if (refs.length) {
+      const rows = await tx
+        .select({
+          ref: actuals.sourceRef,
+          amount: actuals.transactionAmountMinor,
+          line: actualTaxLines,
+        })
+        .from(actualTaxLines)
+        .innerJoin(actuals, eq(actuals.id, actualTaxLines.actualId))
+        .where(and(eq(actuals.source, source), inArray(actuals.sourceRef, refs)))
+        .orderBy(asc(actualTaxLines.id));
+      for (const r of rows) {
+        const o = stored.get(r.ref) ?? {
+          taxCode: r.line.taxCode,
+          ruleId: r.line.ruleId,
+          shareBps: r.line.shareBps ?? 0,
+          currency: r.line.currency ?? '',
+          recoverableMinor: 0,
+          nonRecoverableMinor: 0,
+          grossMinor: r.amount,
+        };
+        if (r.line.recoverable) {
+          o.recoverableMinor += r.line.amountMinor;
+          o.grossMinor += r.line.amountMinor;
+        } else o.nonRecoverableMinor += r.line.amountMinor;
+        stored.set(r.ref, o);
+      }
+    }
+    // Second pass: refunds, credit notes and reversals without a tax column take their original's
+    // split in proportion (an original earlier or later in this file wins over one stored before).
+    for (const l of lines) {
+      if (l.taxMinor !== null || !l.originalRef || l.kind === 'charge') continue;
+      const o = out.get(l.originalRef) ?? stored.get(l.originalRef);
+      if (!o || o.recoverableMinor + o.nonRecoverableMinor === 0) continue;
+      const part = { grossMinor: o.grossMinor };
+      const rec = recoverableForPart(
+        { ...part, recoverableMinor: o.recoverableMinor },
+        l.amountMinor,
+      );
+      const non = recoverableForPart(
+        { ...part, recoverableMinor: o.nonRecoverableMinor },
+        l.amountMinor,
+      );
+      out.set(l.sourceRef, {
+        ...o,
+        currency: l.currency,
+        recoverableMinor: rec,
+        nonRecoverableMinor: non,
+        grossMinor: l.amountMinor,
+      });
+      l.grossMinor = l.amountMinor;
+      l.amountMinor -= rec;
+    }
+    return out;
+  }
+
   /** A source reversal undoes the line it names: its match is reversed and both lines leave the queue. */
   private async applyReversal(
     tx: Tx,
@@ -460,7 +587,8 @@ export class ImportsService {
     const keys = fresh.map((l) =>
       duplicateKey({
         transactionDate: l.transactionDate,
-        amountMinor: l.amountMinor,
+        // The gross as charged: the same expense from a feed with or without a tax column matches.
+        amountMinor: l.grossMinor ?? l.amountMinor,
         currency: l.currency,
         merchant: l.merchant,
       }),

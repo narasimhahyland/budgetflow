@@ -5,3 +5,5 @@ export * from './lib/gl.service';
 export * from './lib/reference-data.service';
 export * from './lib/doa.service';
 export * from './lib/finance.module';
+export * from './lib/tax.service';
+export * from './lib/benefits.service';

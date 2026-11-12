@@ -1,5 +1,15 @@
-import { index, integer, pgTable, text, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
-import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts } from './_columns';
+import { sql } from 'drizzle-orm';
+import {
+  boolean,
+  index,
+  integer,
+  pgTable,
+  text,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
+import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
 import { budgets, rolloverPolicies } from './budgets';
 import { closeCheckCode, reopenAction, reopenRequestStatus, yearEndLineStatus } from './enums';
 import { fiscalPeriods, legalEntities } from './finance';
@@ -130,5 +140,101 @@ export const yearEndCommitmentCarries = pgTable(
   (t) => [
     uniqueIndex('year_end_commitment_carries_source').on(t.tenantId, t.sourceCommitmentId),
     index('year_end_commitment_carries_run').on(t.tenantId, t.runId),
+  ],
+);
+
+/**
+ * Tax recoverability rule sets (gap B3, screen 080g). A version is drafted by finance, submitted to
+ * the tax approver and published with an effective date; a published version never changes (a
+ * database trigger rejects it) and a later one supersedes it from its own effective date.
+ */
+export const taxRuleSets = pgTable(
+  'tax_rule_sets',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    version: integer('version').notNull(),
+    status: varchar('status', { length: 20 }).notNull().default('draft'),
+    effectiveFrom: day('effective_from'),
+    comment: text('comment'),
+    createdByPersonId: uuid('created_by_person_id'),
+    submittedByPersonId: uuid('submitted_by_person_id'),
+    submittedAt: ts('submitted_at'),
+    decidedByPersonId: uuid('decided_by_person_id'),
+    decidedAt: ts('decided_at'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex('tax_rule_sets_version').on(t.tenantId, t.version),
+    index('tax_rule_sets_status').on(t.tenantId, t.status),
+  ],
+);
+
+/** One rule of a rule set: entity × spend category × attendee type → recoverable share. */
+export const taxRules = pgTable(
+  'tax_rules',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    ruleSetId: uuid('rule_set_id')
+      .notNull()
+      .references(() => taxRuleSets.id),
+    legalEntityId: uuid('legal_entity_id')
+      .notNull()
+      .references(() => legalEntities.id),
+    categoryCode: varchar('category_code', { length: 50 }).notNull(),
+    attendeeType: varchar('attendee_type', { length: 20 }).notNull(),
+    taxCode: varchar('tax_code', { length: 30 }).notNull(),
+    recoverableBps: integer('recoverable_bps'),
+    proportional: boolean('proportional').notNull().default(false),
+    notes: text('notes'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('tax_rules_set').on(t.tenantId, t.ruleSetId)],
+);
+
+/**
+ * Benefit-in-kind thresholds and company caps (gap B3, screen 080h), versioned per code like the
+ * tax rules: drafted, submitted to the tax approver, published; published versions are immutable.
+ */
+export const benefitThresholds = pgTable(
+  'benefit_thresholds',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    code: varchar('code', { length: 50 }).notNull(),
+    version: integer('version').notNull(),
+    name: text('name').notNull(),
+    jurisdiction: varchar('jurisdiction', { length: 10 }).notNull(),
+    legalEntityIds: uuid('legal_entity_ids')
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
+    benefitTypes: text('benefit_types').array().notNull(),
+    limitMinor: minor('limit_minor').notNull(),
+    currency: ccy('currency')
+      .notNull()
+      .references(() => currencies.code),
+    basis: varchar('basis', { length: 20 }).notNull(),
+    maxOccasions: integer('max_occasions'),
+    periodStartMonth: integer('period_start_month').notNull(),
+    periodStartDay: integer('period_start_day').notNull(),
+    exceeded: varchar('exceeded', { length: 20 }).notNull(),
+    status: varchar('status', { length: 20 }).notNull().default('draft'),
+    effectiveFrom: day('effective_from'),
+    effectiveTo: day('effective_to'),
+    comment: text('comment'),
+    createdByPersonId: uuid('created_by_person_id'),
+    submittedByPersonId: uuid('submitted_by_person_id'),
+    submittedAt: ts('submitted_at'),
+    decidedByPersonId: uuid('decided_by_person_id'),
+    decidedAt: ts('decided_at'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex('benefit_thresholds_version').on(t.tenantId, t.code, t.version),
+    index('benefit_thresholds_status').on(t.tenantId, t.status),
   ],
 );

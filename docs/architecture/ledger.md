@@ -101,3 +101,26 @@ Any mismatch sets the run to `drift_detected` and writes `integrity_flags`. Noth
 ## Actuals (Phase 6)
 
 A matched actual posts, in one command: the charge in its transaction currency (budget `actual` against `obligations`, triplet at the locked plan rate, with the actual's cost center, GL account and event code on both lines for the GL tie-out), the relief of the commitment in the budget currency (`obligations` against `encumbered`, never more than the commitment still has encumbered, so partial invoices in another currency leave no drift), and the FX effect (reporting currency at the month-end or spot rate minus at the plan rate) on counter accounts only. A partial match relieves the matched amount; a match within tolerance relieves what is left and releases the difference; above tolerance needs an approved over-budget request. Matching a commitment reverses its posted accruals. Corrections reverse every journal of the match. Deposits matched as prepaids post nothing to the budget until recognized in their service period. Journals are not written inside savepoints: the guard that lines are inserted in their journal's transaction compares the top-level transaction id, so batch posting runs each match as a dry run first.
+
+## Tax-aware consumption and the benefit ledger (gap B3)
+
+Recoverable GST/VAT never uses budget. Tax adds no account or bucket; it changes how much the
+existing commitment and actual postings move:
+
+- A request's amount is net of tax. On submission, `TaxService.splitNet` applies the published rule
+  in force (legal entity × spend category × attendee type) and the commitment pre-encumbers the net
+  plus the non-recoverable tax. The split is written once as append-only `commitment_tax_lines`;
+  approvals, partial approvals and counter-offers read it back (`consumptionForNet`, `scaleSplit`)
+  instead of re-evaluating rules.
+- An imported actual with a `tax_amount` stores its gross less the recoverable tax as the
+  transaction amount, with the split in `actual_tax_lines`. Refunds and reversals without a tax
+  column take their original's split in proportion.
+- Rule sets (`tax_rule_sets`, `tax_rules`) are versioned and effective-dated. The tax approver
+  (`tax.publish`) publishes them, and a database trigger keeps published versions unchanged. A new
+  version never re-posts past commitments or actuals.
+- `employee_benefit_ledger` records each person's share of costs already posted. It posts no
+  journal, is append-only (reversals are negating rows) and is evaluated against
+  `benefit_thresholds` on each threshold's own tax year.
+
+Posting tables and examples: `evidence/gap-b3-tax-benefits/posting-design.md`. Scenarios: invariants
+103-106.

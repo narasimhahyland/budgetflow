@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { CurrencyCode, CursorQuery, Id, IsoDate, IsoDateTime, Money, RateType } from '../common';
 import type { Endpoint } from '../endpoint';
 import { named } from '../registry';
+import { ActualTaxView } from './tax';
 
 // Actuals and accounting (Phase 6) ---------------------------------------------------------------
 // File imports with auto-match, the unmatched queue, matching to commitments and budgets at the
@@ -336,6 +337,9 @@ export const ActualDetail = named(
       actual: ActualLine,
       matches: z.array(ActualMatchPart),
       candidates: z.array(MatchCandidate),
+      tax: ActualTaxView.nullable().describe(
+        'GST/VAT on the line: the amount above is what uses budget (gross less recoverable tax).',
+      ),
     })
     .strict(),
 );
