@@ -14,10 +14,7 @@ import { SEED } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
-import { AI_LIVE, AI_LIVE_REASON, uploadReceipt } from './support';
-
-test.skip(!AI_LIVE, AI_LIVE_REASON);
-
+import { uploadReceipt } from './support';
 const INDIA = SEED.budgets.india;
 
 test('a suggested split totals the amount exactly, stays within the parent, and saves nothing', async ({
