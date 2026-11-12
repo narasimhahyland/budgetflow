@@ -351,6 +351,14 @@ branch ([PR #72](https://github.com/narasimhahyland/budgetflow/pull/72), closed 
 landed through PR #68 while its author was still working), and two agents sent into one worktree
 collided over the same files.
 
+### A stacked PR merges into its base branch, not `main`
+
+When PR B is opened against PR A's branch and A merges first, merging B lands it on A's leftover
+branch: GitHub shows B as merged while `main` never gets it. It has happened twice (#99 into
+`fix/clock-stage-3`, #121 into `feat/gap-b2-dashboards-1`). After the base merges, retarget the
+stacked PR to `main` before merging it, and check with
+`git merge-base --is-ancestor <merge commit> origin/main`.
+
 ### Commit and push checkpoints constantly
 
 Seven agents were stopped by infrastructure in a single day. In every case the work survived only
