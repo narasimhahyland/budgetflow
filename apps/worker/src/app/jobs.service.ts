@@ -11,10 +11,13 @@ import { EMAIL_TOPIC, NotificationsService, type EmailPayload } from '@bf/api/no
 import {
   BOARD_PACK_TOPIC,
   BoardPackService,
+  EVIDENCE_PACK_TOPIC,
+  EvidencePacksService,
   REPORT_DELIVER_TOPIC,
   REPORT_SWEEP_TOPIC,
   ReportDeliveryService,
   type BoardPackJob,
+  type EvidencePackJob,
   type ReportDeliverJob,
 } from '@bf/api/reports';
 import { BUDGET_THRESHOLD_TOPIC, BudgetAlertsConsumer, type ThresholdCrossed } from '@bf/api/spend';
@@ -65,6 +68,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly slaSweep: SlaSweepService,
     private readonly reportDelivery: ReportDeliveryService,
     private readonly boardPacks: BoardPackService,
+    private readonly evidencePacks: EvidencePacksService,
     private readonly webhooks: WebhooksService,
     private readonly retention: RetentionService,
     private readonly documents: S3DocumentStore,
@@ -103,6 +107,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       CHANNEL_DELIVER_TOPIC,
       REPORT_DELIVER_TOPIC,
       BOARD_PACK_TOPIC,
+      EVIDENCE_PACK_TOPIC,
     ]) {
       await boss.createQueue(topic, {
         retryLimit: 5,
@@ -144,6 +149,10 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     // generation id, and a generation already `ready` is left alone, so a replay is a no-op.
     await boss.work<BoardPackJob>(BOARD_PACK_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.boardPacks.render(job.data);
+    });
+    // One-click evidence pack (088a): keyed by the pack id; a pack past `queued` is left alone.
+    await boss.work<EvidencePackJob>(EVIDENCE_PACK_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.evidencePacks.render(job.data);
     });
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();

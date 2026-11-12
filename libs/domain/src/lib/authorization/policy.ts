@@ -68,6 +68,12 @@ export const ACTIONS = [
    */
   'report.board_pack',
   'audit.read',
+  /**
+   * Generate a one-click evidence pack for an event or budget (088a). Held only at tenant scope by
+   * the Auditor, Finance Controller and Finance Admin: a pack bundles documents and decisions across
+   * several owners. Downloading a ready pack needs `audit.read`.
+   */
+  'evidence.generate',
   'integrity.run',
   'integrity.read',
   'integration.manage',
@@ -193,6 +199,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
+    'evidence.generate': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
     'integration.read': 'tenant',
@@ -218,6 +225,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
+    'evidence.generate': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
     'integration.read': 'tenant',
@@ -259,6 +267,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
+    'evidence.generate': 'tenant',
     'integrity.read': 'tenant',
     'integration.read': 'tenant',
     'org.read': 'tenant',
