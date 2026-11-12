@@ -9,9 +9,9 @@
 // Each read advances one millisecond, the same tick the database clock uses, so records created one
 // after another keep their order instead of tying on a frozen instant.
 //
-// A seeded value that the API compares with real time - API key and connection expiry, which are
-// security checks and stay on the wall clock - must not be pinned, or every seeded credential would
-// lapse on one fixed real date. Those read `globalThis.__bfRealDate`, the original Date.
+// Seeded credential expiry (API key, ecosystem connections) is compared with real time by the API, so
+// the seed does not derive it from this clock: it is a fixed far-future instant
+// (SEED_CREDENTIAL_EXPIRES_AT in libs/seed).
 'use strict';
 
 const raw = process.env.BF_PINNED_CLOCK;
@@ -36,5 +36,4 @@ class PinnedDate extends RealDate {
   }
 }
 
-globalThis.__bfRealDate = RealDate;
 globalThis.Date = PinnedDate;
