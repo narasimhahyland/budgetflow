@@ -125,7 +125,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.SATORI_PACKAGES_TOKEN }}
       - name: Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Functional gates (stack with MinIO and the fake AI provider, deterministic seed)
+      - name: Functional gates (stack with MinIO, deterministic seed; AI scenarios skip without Bedrock credentials)
         run: bash scripts/gate.sh functional --evidence tmp/ci-evidence
       - name: Upload functional reports and evidence
         if: always()
