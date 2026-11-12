@@ -1,0 +1,179 @@
+{
+  "request": "GET /api/dashboards/pending-approvals as finance-controller",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-16T09:00:00.000Z",
+    "currency": "USD",
+    "scope": {
+      "tenantWide": true,
+      "label": "Hyland",
+      "budgetIds": 2,
+      "note": null
+    },
+    "kpis": {
+      "pending": 2,
+      "preEncumbered": {
+        "amountMinor": 21600,
+        "currency": "USD"
+      },
+      "coFundingRequested": {
+        "amountMinor": 72000,
+        "currency": "USD"
+      },
+      "pastSla": 0,
+      "medianWaitHours": 0
+    },
+    "bySteps": [
+      {
+        "step": "Budget owner",
+        "within": 1,
+        "dueToday": 0,
+        "breached": 0
+      },
+      {
+        "step": "Giving director (co-funding)",
+        "within": 1,
+        "dueToday": 0,
+        "breached": 0
+      }
+    ],
+    "aging": [
+      {
+        "approverPersonId": "40000000-0000-4000-8000-000000000008",
+        "approverName": "Ananya Iyer",
+        "bands": [
+          {
+            "count": 1,
+            "amount": {
+              "amountMinor": 72000,
+              "currency": "USD"
+            }
+          },
+          {
+            "count": 0,
+            "amount": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          {
+            "count": 0,
+            "amount": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          {
+            "count": 0,
+            "amount": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          }
+        ],
+        "pastSla": 0
+      },
+      {
+        "approverPersonId": "40000000-0000-4000-8000-000000000009",
+        "approverName": "Rahul Menon",
+        "bands": [
+          {
+            "count": 1,
+            "amount": {
+              "amountMinor": 21600,
+              "currency": "USD"
+            }
+          },
+          {
+            "count": 0,
+            "amount": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          {
+            "count": 0,
+            "amount": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          },
+          {
+            "count": 0,
+            "amount": {
+              "amountMinor": 0,
+              "currency": "USD"
+            }
+          }
+        ],
+        "pastSla": 0
+      }
+    ],
+    "items": [
+      {
+        "taskId": "0bafbfc5-876e-4612-b746-e2f30ac325f7",
+        "subjectType": "contribution",
+        "subjectId": "73000000-0000-4000-8000-000000000021",
+        "reference": "IDC-00002",
+        "title": "Gifts for the Hyderabad attendees added after the RSVP count.",
+        "kind": "co_funding",
+        "requesterName": "Kavya Rao",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "India Region",
+        "amount": {
+          "amountMinor": 72000,
+          "currency": "USD"
+        },
+        "transactionAmount": {
+          "amountMinor": 72000,
+          "currency": "USD"
+        },
+        "held": false,
+        "step": "Giving director (co-funding)",
+        "stepNo": 1,
+        "approverPersonId": "40000000-0000-4000-8000-000000000008",
+        "approverName": "Ananya Iyer",
+        "delegateName": "Rahul Menon",
+        "waitingHours": 0,
+        "dueAt": "2026-11-18T09:00:00.176Z",
+        "sla": "within",
+        "slaText": "Within SLA, 48 hours left",
+        "lastNotifiedChannel": "slack",
+        "lastNudgedAt": null,
+        "canNudge": true
+      },
+      {
+        "taskId": "8a6a8e84-872f-40a6-a0f2-c5c5e23d3b4c",
+        "subjectType": "request",
+        "subjectId": "73000000-0000-4000-8000-000000000010",
+        "reference": "REQ-00002",
+        "title": "Team lunch: Platform squad",
+        "kind": "spending",
+        "requesterName": "Kavya Rao",
+        "budgetId": "70000000-0000-4000-8000-000000000005",
+        "budgetName": "Bengaluru Events",
+        "amount": {
+          "amountMinor": 21600,
+          "currency": "USD"
+        },
+        "transactionAmount": {
+          "amountMinor": 21600,
+          "currency": "USD"
+        },
+        "held": true,
+        "step": "Budget owner",
+        "stepNo": 1,
+        "approverPersonId": "40000000-0000-4000-8000-000000000009",
+        "approverName": "Rahul Menon",
+        "delegateName": null,
+        "waitingHours": 0,
+        "dueAt": "2026-11-18T09:00:00.215Z",
+        "sla": "within",
+        "slaText": "Within SLA, 48 hours left",
+        "lastNotifiedChannel": "slack",
+        "lastNudgedAt": null,
+        "canNudge": true
+      }
+    ]
+  }
+}

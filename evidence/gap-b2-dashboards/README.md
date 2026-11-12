@@ -24,6 +24,18 @@ seed runs (`expiresInDays: 90` in `libs/seed/src/lib/integrations.ts`, issued th
 day the stack is seeded. Recorded as a follow-up; fixing it needs the seed to run on the pinned
 clock (`scripts/stack.sh` passes `BF_FIXED_NOW` to the database session, not to the seed process).
 
-## Part 2 — 018, 018a, 018b, 088a
+## Part 2 — 018 pending approvals, 018a approval performance, 018b product analytics, 088a evidence pack
 
-Planned in the second pull request.
+| Claim                                                                                                  | Proof                                                                             |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Figures equal the approval, ledger, analytics and audit rows; nudge window; pack manifest and download | `part-2/functional/README.md`, `apps/api-e2e/src/dashboards/dashboards-2.spec.ts` |
+| Role scope per read and command; operator refused                                                      | same spec; `apps/api-e2e/src/scope/operator-isolation.spec.ts`                    |
+| Pages as the roles that use them                                                                       | `apps/web-e2e/src/reports/dashboards-2.spec.ts`                                   |
+| No blocking visual findings; 33 new baselines                                                          | `visual-qa/report.md` (part 2 section)                                            |
+| Invariants mapped                                                                                      | `docs/testing/invariant-scenarios.md` rows 106–108                                |
+| Gate                                                                                                   | `part-2/gate-summary.txt`                                                         |
+| API responses (no tokens)                                                                              | `part-2/api/`                                                                     |
+
+Shared surfaces: migration **0024** `evidence_packs` (0023 is claimed by package B3; renumber the
+journal on merge if B3 lands first), new action `evidence.generate` in `libs/domain` policy and
+`docs/architecture/authorization.md`, contracts (additive), worker queue `reports.evidence-pack`.
