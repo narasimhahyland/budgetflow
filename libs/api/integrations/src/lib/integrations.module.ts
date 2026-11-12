@@ -1,5 +1,7 @@
 import { ActualsModule } from '@bf/api/actuals';
 import { AuditModule } from '@bf/api/audit';
+import { DocumentsModule } from '@bf/api/documents';
+import { RulesModule } from '@bf/api/rules';
 import { CoreModule } from '@bf/api/core';
 import { LedgerModule } from '@bf/api/ledger';
 import { OrgModule } from '@bf/api/org';
@@ -9,6 +11,9 @@ import { ConnectionsService } from './connections.service';
 import { DuplicatesService } from './duplicates.service';
 import { IntegrationsController } from './integrations.controller';
 import { MessagesService } from './messages.service';
+import { NavanClient } from './navan/navan-client';
+import { NavanSyncService } from './navan/navan-sync.service';
+import { ActualDocuments } from './navan/actual-documents';
 import { OutboundHttp } from './http';
 import { PlanImportService } from './plan-import.service';
 import { PublicApiController } from './public-api.controller';
@@ -19,6 +24,7 @@ import { WebhooksService } from './webhooks.service';
 
 const SERVICES = [
   OutboundHttp,
+  NavanClient,
   ConnectionsService,
   SyncService,
   MessagesService,
@@ -28,11 +34,21 @@ const SERVICES = [
   ApiKeysService,
   WebhooksService,
   ScimService,
+  NavanSyncService,
+  ActualDocuments,
 ];
 
 /** Services only: imported by the worker for webhook delivery and by the API through IntegrationsApiModule. */
 @Module({
-  imports: [CoreModule, AuditModule, LedgerModule, ActualsModule, OrgModule],
+  imports: [
+    CoreModule,
+    AuditModule,
+    LedgerModule,
+    ActualsModule,
+    OrgModule,
+    RulesModule,
+    DocumentsModule,
+  ],
   providers: SERVICES,
   exports: SERVICES,
 })

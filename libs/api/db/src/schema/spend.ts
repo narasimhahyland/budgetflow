@@ -101,6 +101,8 @@ export const requests = pgTable(
     nonEmployeeCount: integer('non_employee_count'),
     /** The part of the amount spent on alcohol, in the request currency. */
     alcoholAmountMinor: minor('alcohol_amount_minor'),
+    /** Gap B3 (080g): GST/VAT on the request, in the request currency; the amount is net of it. */
+    taxAmountMinor: minor('tax_amount_minor'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -203,6 +205,12 @@ export const commitmentTaxLines = pgTable(
     amountMinor: minor('amount_minor').notNull(),
     recoverable: boolean('recoverable').notNull(),
     withholding: boolean('withholding').notNull().default(false),
+    // Gap B3 (080g): the rule in force when the commitment was raised, and the line's currency.
+    ruleId: uuid('rule_id'),
+    shareBps: integer('share_bps'),
+    currency: ccy('currency'),
+    /** The net amount the split was made on (a counter-offer records its own, scaled net). */
+    netMinor: minor('net_minor'),
   },
   (t) => [index('commitment_tax_lines_commitment').on(t.tenantId, t.commitmentId)],
 );
@@ -459,6 +467,26 @@ export const employeeBenefitLedger = pgTable(
       .references(() => currencies.code),
     taxable: boolean('taxable').notNull().default(false),
     createdAt: createdAt(),
+    // Gap B3 (080h): where the benefit came from, when it counts, and the reporting view at the
+    // locked plan rate. Append-only: a reversal is a new row pointing at the entry it negates.
+    legalEntityId: uuid('legal_entity_id').references(() => legalEntities.id),
+    entryDate: day('entry_date'),
+    sourceType: varchar('source_type', { length: 20 }),
+    sourceId: uuid('source_id'),
+    description: text('description'),
+    reportingCurrency: ccy('reporting_currency'),
+    reportingAmountMinor: minor('reporting_amount_minor'),
+    reversalOfId: uuid('reversal_of_id'),
+    createdByPersonId: uuid('created_by_person_id'),
   },
-  (t) => [index('employee_benefit_ledger_person').on(t.tenantId, t.personId, t.fiscalYearId)],
+  (t) => [
+    index('employee_benefit_ledger_person').on(t.tenantId, t.personId, t.fiscalYearId),
+    index('employee_benefit_ledger_date').on(t.tenantId, t.entryDate),
+    uniqueIndex('employee_benefit_ledger_source')
+      .on(t.tenantId, t.sourceType, t.sourceId, t.personId)
+      .where(sql`${t.sourceId} is not null and ${t.reversalOfId} is null`),
+    uniqueIndex('employee_benefit_ledger_reversal')
+      .on(t.tenantId, t.reversalOfId)
+      .where(sql`${t.reversalOfId} is not null`),
+  ],
 );

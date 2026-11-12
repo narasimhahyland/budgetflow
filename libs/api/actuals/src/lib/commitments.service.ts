@@ -20,6 +20,7 @@ import {
   type CommandResult,
   type RequestActor,
 } from '@bf/api/core';
+import { BenefitsService } from '@bf/api/finance';
 import { LedgerReads } from '@bf/api/ledger';
 import type { CommitmentHygieneItem, CommitmentHygieneList } from '@bf/contracts';
 import {
@@ -57,6 +58,7 @@ export class CommitmentsService {
     private readonly engine: MatchEngine,
     private readonly relief: CommitmentRelief,
     private readonly audit: AuditService,
+    private readonly benefits: BenefitsService,
   ) {}
 
   list(
@@ -319,6 +321,18 @@ export class CommitmentsService {
         updatedAt: new Date(),
       })
       .where(eq(commitments.id, c.id));
+    // Gap B3 (080h): a request released before anything was spent gave nobody a benefit, so its
+    // benefit entries are reversed (append-only negating entries) in this command.
+    const benefitReversals =
+      c.requestId && consumed === 0
+        ? await this.benefits.reverseSource(
+            tx,
+            actor,
+            'request',
+            c.requestId,
+            `Commitment ${o.kind === 'release' ? 'released' : 'cancelled'} before any spend`,
+          )
+        : [];
     await this.audit.append(tx, {
       tenantId: actor.tenantId,
       actorPersonId: actor.personId,
@@ -335,6 +349,9 @@ export class CommitmentsService {
         feeMinor: { from: 0, to: fee },
         depositConsumedMinor: { from: 0, to: deposit.budgetMinor },
         journals: { from: null, to: journals },
+        ...(benefitReversals.length
+          ? { benefitReversals: { from: null, to: benefitReversals } }
+          : {}),
       },
     });
     const [after] = await tx.select().from(commitments).where(eq(commitments.id, c.id));

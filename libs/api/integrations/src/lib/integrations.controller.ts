@@ -50,6 +50,7 @@ import {
   type PushItemView,
   type ScimTokenCreated,
   type SendTestPingResult,
+  type NavanCustomFieldList,
   type SyncRunList,
   type SyncRunView,
   type TestConnectionResult,
@@ -223,6 +224,14 @@ export class IntegrationsController {
     );
     if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
     return r.body;
+  }
+
+  @Get('api/integrations/connections/:connectionId/navan/custom-fields')
+  listNavanCustomFields(
+    @CurrentActor() actor: RequestActor,
+    @Param('connectionId') raw: string,
+  ): Promise<NavanCustomFieldList> {
+    return this.connections.navanCustomFields(actor, parseWith(UuidParam, raw));
   }
 
   // Sync runs (099) -------------------------------------------------------------------------------

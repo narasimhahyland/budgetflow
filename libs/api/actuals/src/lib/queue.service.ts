@@ -1,5 +1,6 @@
 import {
   actualMatches,
+  actualTaxLines,
   actuals,
   budgets,
   commitments,
@@ -175,6 +176,33 @@ export class QueueService {
         a.matchStatus === 'matched' || a.matchStatus === 'excluded'
           ? []
           : await this.candidates(tx, actor, a),
+      tax: await this.taxView(tx, a),
+    };
+  }
+
+  /** Gap B3 (080g): the line's tax split; the actual's amount is already gross less recoverable tax. */
+  private async taxView(tx: Tx, a: typeof actuals.$inferSelect): Promise<ActualDetail['tax']> {
+    const lines = await tx
+      .select()
+      .from(actualTaxLines)
+      .where(eq(actualTaxLines.actualId, a.id))
+      .orderBy(asc(actualTaxLines.id));
+    if (!lines.length) return null;
+    const m = (amountMinor: number) => ({ amountMinor, currency: a.transactionCurrency });
+    const rec = lines.filter((l) => l.recoverable).reduce((s, l) => s + l.amountMinor, 0);
+    const non = lines.filter((l) => !l.recoverable).reduce((s, l) => s + l.amountMinor, 0);
+    return {
+      gross: m(a.transactionAmountMinor + rec),
+      lines: lines.map((l) => ({
+        taxCode: l.taxCode,
+        amount: m(l.amountMinor),
+        recoverable: l.recoverable,
+        shareBps: l.shareBps,
+        ruleId: l.ruleId,
+      })),
+      recoverable: m(rec),
+      nonRecoverable: m(non),
+      usesBudget: m(a.transactionAmountMinor),
     };
   }
 

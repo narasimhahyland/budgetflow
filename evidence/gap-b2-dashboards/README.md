@@ -32,10 +32,9 @@ clock (`scripts/stack.sh` passes `BF_FIXED_NOW` to the database session, not to 
 | Role scope per read and command; operator refused                                                      | same spec; `apps/api-e2e/src/scope/operator-isolation.spec.ts`                    |
 | Pages as the roles that use them                                                                       | `apps/web-e2e/src/reports/dashboards-2.spec.ts`                                   |
 | No blocking visual findings; 33 new baselines                                                          | `visual-qa/report.md` (part 2 section)                                            |
-| Invariants mapped                                                                                      | `docs/testing/invariant-scenarios.md` rows 106–108                                |
+| Invariants mapped                                                                                      | `docs/testing/invariant-scenarios.md` rows 113–115                                |
 | Gate                                                                                                   | `part-2/gate-summary.txt`                                                         |
 | API responses (no tokens)                                                                              | `part-2/api/`                                                                     |
 
-Shared surfaces: migration **0024** `evidence_packs` (0023 is claimed by package B3; renumber the
-journal on merge if B3 lands first), new action `evidence.generate` in `libs/domain` policy and
+Shared surfaces: migration **0024** `evidence_packs` (regenerated on top of B3's 0023), new action `evidence.generate` in `libs/domain` policy and
 `docs/architecture/authorization.md`, contracts (additive), worker queue `reports.evidence-pack`.

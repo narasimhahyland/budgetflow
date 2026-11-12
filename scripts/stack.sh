@@ -26,11 +26,15 @@ compose_file=${BF_COMPOSE_FILE:-infra/compose.yaml}
 default_project=$(basename "$root" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-' '-' | sed 's/-*$//')
 env_file=infra/.env.example
 [ -f .env ] && env_file=.env
-# Values from the env file (ports, dev-only passwords); variables already set in the shell win.
-while IFS='=' read -r key value; do
-  case "$key" in '' | \#*) continue ;; esac
-  [ -n "${!key:-}" ] || export "$key=$value"
-done <"$env_file"
+# Values from .env (your overrides and secrets such as AWS_BEARER_TOKEN_BEDROCK) first, then the
+# dev-only defaults in infra/.env.example (ports, passwords) for anything .env leaves out. Variables
+# already set in the shell win over both. They are exported, so compose interpolates them.
+for f in "$env_file" infra/.env.example; do
+  while IFS='=' read -r key value; do
+    case "$key" in '' | \#*) continue ;; esac
+    [ -n "${!key:-}" ] || export "$key=$value"
+  done <"$f"
+done
 
 # One "now" for the whole stack. The visual suite freezes the *browser* clock to freezeTime in
 # apps/web-e2e/visual/screens.json; unless the API agrees, every age, countdown and overdue flag the

@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "id": "cf-event-code",
+      "name": "Event code",
+      "type": "LIST",
+      "optionCount": 0,
+      "usedFor": "event_code"
+    },
+    {
+      "id": "cf-cost-center",
+      "name": "Cost center",
+      "type": "LIST",
+      "optionCount": 0,
+      "usedFor": "cost_center"
+    },
+    {
+      "id": "cf-trip-purpose",
+      "name": "Trip purpose",
+      "type": "TEXT",
+      "optionCount": 0,
+      "usedFor": null
+    }
+  ]
+}

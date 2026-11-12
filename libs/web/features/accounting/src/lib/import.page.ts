@@ -58,6 +58,10 @@ const FIELD_LABEL: Record<ActualImportField, string> = {
   original_ref: 'Original line (refunds, reversals)',
   kind: 'Line type',
   card_program: 'Card program',
+  tax_amount: 'GST/VAT included in the amount',
+  tax_category: 'Spend category (tax rules)',
+  employees_present: 'Employees present',
+  others_present: 'Clients or guests present',
 };
 
 const RULE_LABEL: Record<string, { title: string; hint: string; tag: string | null }> = {

@@ -311,3 +311,11 @@ fieldset.bf-card__body > legend {
 .bf-facts > .bf-facts__wide {
   grid-column: 1 / -1;
 }
+
+// The Navan approvals boundary (16a): a plain list inside an info banner, not a consequence list.
+.bf-navan-boundary {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: 0.25rem;
+}

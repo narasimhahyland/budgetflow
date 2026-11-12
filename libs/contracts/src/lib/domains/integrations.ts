@@ -106,6 +106,7 @@ export const MAPPING_KINDS = [
   'hr_field',
   'plan_level',
   'group_role',
+  'person',
 ] as const;
 export const MappingKind = z.enum(MAPPING_KINDS);
 
@@ -474,7 +475,7 @@ export type MessageActionResult = z.infer<typeof MessageActionResult>;
 
 // Outbound pushes: event codes and card limits (99b) ----------------------------------------------
 
-export const PUSH_KINDS = ['event_code', 'card_limit'] as const;
+export const PUSH_KINDS = ['event_code', 'card_limit', 'cost_center'] as const;
 export const PushKind = z.enum(PUSH_KINDS);
 
 export const PushItemView = named(
@@ -485,11 +486,15 @@ export const PushItemView = named(
       connectionId: Id,
       provider: IntegrationProvider,
       kind: PushKind,
-      reference: z.string().describe('Event code or commitment reference.'),
+      reference: z.string().describe('Event code, cost center code or commitment reference.'),
       amount: Money.nullable(),
       validFrom: IsoDate.nullable(),
       validTo: IsoDate.nullable(),
-      status: z.enum(['pending', 'pushed', 'failed', 'closed']),
+      status: z
+        .enum(['pending', 'pushed', 'failed', 'closed', 'disabled'])
+        .describe(
+          'Disabled: an option published to the provider and switched off there because its budget no longer accepts spend.',
+        ),
       externalId: z.string().nullable(),
       lastError: z.string().nullable(),
       pushedAt: IsoDateTime.nullable(),
@@ -516,6 +521,80 @@ export const CreatePushRequest = named(
     .describe('A card limit never exceeds the approved commitment at the locked plan rate.'),
 );
 export type CreatePushRequest = z.infer<typeof CreatePushRequest>;
+
+// Navan live integration (16a) ---------------------------------------------------------------------
+
+export const NAVAN_REGIONS = ['us', 'eu'] as const;
+export const NavanRegion = z
+  .enum(NAVAN_REGIONS)
+  .describe('Where the Navan account is hosted; EU accounts send the region header on every call.');
+export type NavanRegion = z.infer<typeof NavanRegion>;
+
+export const NavanSettings = named(
+  'NavanSettings',
+  z
+    .object({
+      region: NavanRegion.default('us'),
+      expenseWrite: z
+        .boolean()
+        .default(false)
+        .describe(
+          'The Expense: Write scope was granted to these credentials. Off means read only: no option, coding or write-back call is made.',
+        ),
+      eventCodeFieldId: z
+        .string()
+        .trim()
+        .max(120)
+        .nullable()
+        .default(null)
+        .describe('The Navan list field BudgetFlow publishes event codes into.'),
+      costCenterFieldId: z
+        .string()
+        .trim()
+        .max(120)
+        .nullable()
+        .default(null)
+        .describe('The Navan list field BudgetFlow publishes cost centers into.'),
+      systemOfRecord: z
+        .boolean()
+        .default(false)
+        .describe(
+          "BudgetFlow is the accounting system of record for Navan spend. Only then does write-back mark transactions as synced; otherwise Navan's ERP sync status is never touched.",
+        ),
+      pageSize: z.int().min(1).max(500).default(500).describe('Transactions per page (1-500).'),
+      writeBatchSize: z
+        .int()
+        .min(1)
+        .max(100)
+        .default(100)
+        .describe('Transactions per write-back PATCH; Navan accepts at most 100.'),
+    })
+    .strip()
+    .describe('Navan connection settings, kept in the connection settings.'),
+);
+export type NavanSettings = z.infer<typeof NavanSettings>;
+
+export const NavanCustomField = named(
+  'NavanCustomField',
+  z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      type: z.string().describe('LIST fields take options; other types cannot hold event codes.'),
+      optionCount: z.int(),
+      usedFor: z
+        .enum(['event_code', 'cost_center'])
+        .nullable()
+        .describe('What BudgetFlow publishes into this field, if anything.'),
+    })
+    .strict(),
+);
+
+export const NavanCustomFieldList = named(
+  'NavanCustomFieldList',
+  z.object({ items: z.array(NavanCustomField) }).strict(),
+);
+export type NavanCustomFieldList = z.infer<typeof NavanCustomFieldList>;
 
 // Cross-source duplicates (99a) --------------------------------------------------------------------
 
@@ -1339,6 +1418,17 @@ export const integrationEndpoints = {
     body: CreatePushRequest,
     response: { status: 201, schema: PushItemView },
     errors: [400, 401, 403, 404, 409, 422],
+  },
+  listNavanCustomFields: {
+    operationId: 'listNavanCustomFields',
+    method: 'get',
+    path: '/api/integrations/connections/{connectionId}/navan/custom-fields',
+    summary: 'Custom fields defined in the connected Navan account, for the field mapping (16a)',
+    tags: ['integrations'],
+    auth: true,
+    params: ConnectionParams,
+    response: { status: 200, schema: NavanCustomFieldList },
+    errors: [401, 403, 404, 409, 422],
   },
   listCrossSourceDuplicates: {
     operationId: 'listCrossSourceDuplicates',

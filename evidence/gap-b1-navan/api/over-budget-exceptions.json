@@ -1,0 +1,57 @@
+{
+  "items": [
+    {
+      "id": "6721fd2a-865a-48e9-bd2d-870978385ddb",
+      "raisedAt": "2026-11-12T06:42:39.162Z",
+      "type": "over_budget",
+      "typeLabel": "Spend above the remaining budget",
+      "status": "open",
+      "sourceKind": "actual",
+      "sourceRef": "NVN-T-BA74E467-OVER",
+      "sourceId": "f07007ca-bdef-4d53-abe3-20f2323b6c58",
+      "budgetId": "6508ff7f-d65f-4509-b252-344b557bec3c",
+      "budgetName": "P5 budget-owner 84b064",
+      "location": "CC-US-NYC-300",
+      "personName": "Jordan Smith",
+      "transactionAmount": {
+        "amountMinor": 15000,
+        "currency": "USD"
+      },
+      "reportingAmount": {
+        "amountMinor": 15000,
+        "currency": "USD"
+      },
+      "ruleCode": "over_budget",
+      "ruleVersion": 1,
+      "ageDays": 4,
+      "summary": "Navan spend NVN-T-BA74E467-OVER needs 15000 USD minor units; the budget had 10000 left. It was approved in Navan under its own policy, so Finance decides here.",
+      "facts": {
+        "source": "Navan",
+        "eventCode": null,
+        "roomMinor": 10000,
+        "excessMinor": 5000,
+        "commitmentId": null,
+        "availableMinor": 10000,
+        "budgetCurrency": "USD",
+        "amountBudgetMinor": 15000,
+        "commitmentRemainingMinor": 0
+      },
+      "relatedItems": [],
+      "ownerExplanation": null,
+      "resolution": null,
+      "resolutionReasonCode": null,
+      "resolutionReason": null,
+      "repaymentAmount": null,
+      "reclassifiedToGlCode": null,
+      "reversalJournalId": null,
+      "resolvedByName": null,
+      "resolvedAt": null,
+      "allowedActions": ["resolve", "explain"]
+    }
+  ],
+  "counts": {
+    "open": 5,
+    "explained": 1,
+    "resolved": 0
+  }
+}

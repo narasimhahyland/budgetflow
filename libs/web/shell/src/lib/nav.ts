@@ -288,6 +288,18 @@ export const NAV: NavGroup[] = [
         icon: 'gavel',
         permission: 'doa.read',
       },
+      {
+        label: 'Tax recoverability',
+        path: '/finance/tax-recoverability',
+        icon: 'tag',
+        permission: 'tax.read',
+      },
+      {
+        label: 'Employee benefits',
+        path: '/finance/employee-benefits',
+        icon: 'user_group',
+        permission: 'benefits.read',
+      },
     ],
   },
   {

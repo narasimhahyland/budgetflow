@@ -5,6 +5,7 @@ import { named } from '../registry';
 import { ActivityEntry, ApprovalRouteView, BudgetImpact } from './approvals';
 import { DocumentSummary } from './documents';
 import { FactKey, RuleEffect } from './rules';
+import { RequestTaxInput, TaxBreakdown } from './tax';
 
 export const REQUEST_KINDS = [
   'budget',
@@ -196,6 +197,9 @@ export const RequestDetail = named(
     nonEmployeeCount: z.int().nullable(),
     alcoholAmount: Money.nullable(),
     policyCheck: PolicyCheckView.nullable(),
+    tax: TaxBreakdown.nullable().describe(
+      'GST/VAT on the request: recoverable tax never uses budget; a preview until submitted.',
+    ),
   }).strict(),
 );
 export type RequestDetail = z.infer<typeof RequestDetail>;
@@ -233,6 +237,9 @@ export const CreateRequestBody = named(
       alcoholAmount: Money.optional().describe(
         'The part of the amount spent on alcohol, in the request currency.',
       ),
+      tax: RequestTaxInput.optional().describe(
+        'GST/VAT on top of the amount. Only the non-recoverable part uses budget.',
+      ),
       submit: z.boolean().optional().describe('Submit now (default) or save a draft.'),
     })
     .strict(),
@@ -244,6 +251,9 @@ export const ResubmitRequestBody = named(
   z
     .object({
       amount: Money.optional(),
+      tax: RequestTaxInput.optional().describe(
+        'New GST/VAT for the new amount; without it, a changed amount scales the tax with it.',
+      ),
       title: z.string().trim().min(3).max(200).optional(),
       purpose: z.string().trim().min(3).max(4000).optional(),
       neededBy: IsoDate.optional(),
@@ -289,6 +299,14 @@ export const RoutePreviewQuery = z
     currency: CurrencyCode,
     spendType: z.string().min(1).max(50),
     eventId: Id.optional(),
+    taxMinor: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('GST/VAT on top of the amount: the preview uses net + non-recoverable tax.'),
+    employees: z.coerce.number().int().min(0).optional(),
+    others: z.coerce.number().int().min(0).optional(),
   })
   .strict();
 export const RoutePreview = named(

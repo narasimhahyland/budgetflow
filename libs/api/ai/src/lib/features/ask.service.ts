@@ -25,7 +25,7 @@ import { AiSettingsService } from '../settings.service';
 import type { Fact } from '../provider/ai-provider';
 
 /** What the model may return. Anything that fails this shape is discarded, never shown. */
-const AskOutput = z
+export const AskOutput = z
   .object({
     answer: z.string().min(1).max(2000),
     why: z.array(z.string().max(400)).max(5),

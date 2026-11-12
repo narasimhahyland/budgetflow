@@ -25,7 +25,7 @@ npx playwright test -c apps/web-e2e/playwright.config.ts src/reports/dashboards-
 | Operator sweep   | the new parameter-free reads (`/api/evidence-packs`, `/api/analytics/kpis`, the dashboards) refuse the operator     | green                                                                                                                       | pass   |
 | Journeys         | the pages show the API's figures; nudge from the page; generate and download a pack; refused roles                  | 29 passed plus the two mutating journeys on desktop                                                                         | pass   |
 
-API responses (no tokens): `../api/`. Invariant map rows 106–108.
+API responses (no tokens): `../api/`. Invariant map rows 113–115.
 
 Findings:
 
