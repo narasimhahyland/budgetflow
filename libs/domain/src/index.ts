@@ -38,6 +38,7 @@ export * from './lib/actuals/import';
 export * from './lib/actuals/matching';
 export * from './lib/actuals/accounting';
 export * from './lib/reports/health';
+export * from './lib/reports/alerts';
 export * from './lib/reports/schedule';
 export * from './lib/admin/feature-flags';
 export * from './lib/admin/retention';

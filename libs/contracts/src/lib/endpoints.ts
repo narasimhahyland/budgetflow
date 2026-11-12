@@ -6,6 +6,7 @@ import { approvalEndpoints } from './domains/approvals';
 import { auditEndpoints } from './domains/audit';
 import { budgetEndpoints } from './domains/budgets';
 import { contributionEndpoints } from './domains/contributions';
+import { dashboardEndpoints } from './domains/dashboards';
 import { documentEndpoints } from './domains/documents';
 import { eventEndpoints } from './domains/events';
 import { financeEndpoints } from './domains/finance';
@@ -59,6 +60,7 @@ export const endpoints = {
   ...extendedEndpoints,
   ...ecosystemEndpoints,
   ...taxEndpoints,
+  ...dashboardEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;

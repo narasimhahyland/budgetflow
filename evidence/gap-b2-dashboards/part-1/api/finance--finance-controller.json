@@ -1,0 +1,610 @@
+{
+  "request": "GET /api/dashboards/finance as finance-controller",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-16T09:00:00.000Z",
+    "asOf": "2026-11-16",
+    "currency": "USD",
+    "close": [
+      {
+        "period": {
+          "id": "23000000-0000-4000-8000-052026100000",
+          "fiscalYearId": "22000000-0000-4000-8000-052026000000",
+          "fiscalYearLabel": "FY2026",
+          "label": "P10 FY2026",
+          "periodNumber": 10,
+          "startDate": "2026-09-27",
+          "endDate": "2026-10-24",
+          "status": "soft_closed",
+          "targetCloseDate": "2026-10-28",
+          "snapshotCount": 0,
+          "lateItemCount": 0,
+          "reopenRequestPending": false
+        },
+        "entities": [
+          {
+            "legalEntityId": "20000000-0000-4000-8000-000000000006",
+            "legalEntityCode": "HYL-UK",
+            "legalEntityName": "Hyland Solutions UK Limited",
+            "checks": [
+              {
+                "code": "gl_tieout_signed_off",
+                "kind": "hard",
+                "status": "fail",
+                "title": "GL tie-out signed off",
+                "detail": "HYL-UK has no tie-out for this period.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "journals_balanced",
+                "kind": "hard",
+                "status": "pass",
+                "title": "No unbalanced journals",
+                "detail": "0 journal(s) in the period balance.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "ledger_check_clean",
+                "kind": "hard",
+                "status": "fail",
+                "title": "Nightly ledger check clean",
+                "detail": "No ledger rebuild check has run yet; run one before the close.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "audit_chain_verified",
+                "kind": "hard",
+                "status": "fail",
+                "title": "Audit chain verified",
+                "detail": "No check has verified the audit chain yet.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "actuals_imported",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Actuals imported for every source",
+                "detail": "No import batch is waiting in review.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "unmatched_actuals_cleared",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Unmatched actuals cleared or carried",
+                "detail": "Every actual of the period is matched or excluded.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "accruals_reviewed",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Accrual proposals reviewed",
+                "detail": "No accrual proposal is waiting for a decision.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "prepaids_recognized",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Prepaids recognized through the period end",
+                "detail": "Every prepaid in service is recognized through the period end.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "commitments_accrued",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Commitments past their service date accrued",
+                "detail": "Every commitment that ended in the period is accrued or invoiced.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              }
+            ],
+            "blocking": true
+          }
+        ]
+      },
+      {
+        "period": {
+          "id": "23000000-0000-4000-8000-012026100000",
+          "fiscalYearId": "22000000-0000-4000-8000-012026000000",
+          "fiscalYearLabel": "FY2026",
+          "label": "Oct 2026",
+          "periodNumber": 10,
+          "startDate": "2026-10-01",
+          "endDate": "2026-10-31",
+          "status": "soft_closed",
+          "targetCloseDate": "2026-11-04",
+          "snapshotCount": 0,
+          "lateItemCount": 0,
+          "reopenRequestPending": false
+        },
+        "entities": [
+          {
+            "legalEntityId": "20000000-0000-4000-8000-000000000003",
+            "legalEntityCode": "HYL-DE",
+            "legalEntityName": "Hyland Europe GmbH",
+            "checks": [
+              {
+                "code": "gl_tieout_signed_off",
+                "kind": "hard",
+                "status": "fail",
+                "title": "GL tie-out signed off",
+                "detail": "HYL-DE has no tie-out for this period.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "journals_balanced",
+                "kind": "hard",
+                "status": "pass",
+                "title": "No unbalanced journals",
+                "detail": "0 journal(s) in the period balance.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "ledger_check_clean",
+                "kind": "hard",
+                "status": "fail",
+                "title": "Nightly ledger check clean",
+                "detail": "No ledger rebuild check has run yet; run one before the close.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "audit_chain_verified",
+                "kind": "hard",
+                "status": "fail",
+                "title": "Audit chain verified",
+                "detail": "No check has verified the audit chain yet.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "actuals_imported",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Actuals imported for every source",
+                "detail": "No import batch is waiting in review.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "unmatched_actuals_cleared",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Unmatched actuals cleared or carried",
+                "detail": "Every actual of the period is matched or excluded.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "accruals_reviewed",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Accrual proposals reviewed",
+                "detail": "No accrual proposal is waiting for a decision.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "prepaids_recognized",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Prepaids recognized through the period end",
+                "detail": "Every prepaid in service is recognized through the period end.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "commitments_accrued",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Commitments past their service date accrued",
+                "detail": "Every commitment that ended in the period is accrued or invoiced.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              }
+            ],
+            "blocking": true
+          },
+          {
+            "legalEntityId": "20000000-0000-4000-8000-000000000001",
+            "legalEntityCode": "HYL-US",
+            "legalEntityName": "Hyland North America, Inc.",
+            "checks": [
+              {
+                "code": "gl_tieout_signed_off",
+                "kind": "hard",
+                "status": "fail",
+                "title": "GL tie-out signed off",
+                "detail": "HYL-US has no tie-out for this period.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "journals_balanced",
+                "kind": "hard",
+                "status": "pass",
+                "title": "No unbalanced journals",
+                "detail": "0 journal(s) in the period balance.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "ledger_check_clean",
+                "kind": "hard",
+                "status": "fail",
+                "title": "Nightly ledger check clean",
+                "detail": "No ledger rebuild check has run yet; run one before the close.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "audit_chain_verified",
+                "kind": "hard",
+                "status": "fail",
+                "title": "Audit chain verified",
+                "detail": "No check has verified the audit chain yet.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "actuals_imported",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Actuals imported for every source",
+                "detail": "No import batch is waiting in review.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "unmatched_actuals_cleared",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Unmatched actuals cleared or carried",
+                "detail": "Every actual of the period is matched or excluded.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "accruals_reviewed",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Accrual proposals reviewed",
+                "detail": "No accrual proposal is waiting for a decision.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "prepaids_recognized",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Prepaids recognized through the period end",
+                "detail": "Every prepaid in service is recognized through the period end.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "commitments_accrued",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Commitments past their service date accrued",
+                "detail": "Every commitment that ended in the period is accrued or invoiced.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              }
+            ],
+            "blocking": true
+          }
+        ]
+      },
+      {
+        "period": {
+          "id": "23000000-0000-4000-8000-022027070000",
+          "fiscalYearId": "22000000-0000-4000-8000-022027000000",
+          "fiscalYearLabel": "FY2027",
+          "label": "Oct 2026",
+          "periodNumber": 7,
+          "startDate": "2026-10-01",
+          "endDate": "2026-10-31",
+          "status": "soft_closed",
+          "targetCloseDate": "2026-11-04",
+          "snapshotCount": 0,
+          "lateItemCount": 0,
+          "reopenRequestPending": false
+        },
+        "entities": [
+          {
+            "legalEntityId": "20000000-0000-4000-8000-000000000002",
+            "legalEntityCode": "HYL-IN",
+            "legalEntityName": "Hyland Technologies India Private Limited",
+            "checks": [
+              {
+                "code": "gl_tieout_signed_off",
+                "kind": "hard",
+                "status": "fail",
+                "title": "GL tie-out signed off",
+                "detail": "HYL-IN has no tie-out for this period.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "journals_balanced",
+                "kind": "hard",
+                "status": "pass",
+                "title": "No unbalanced journals",
+                "detail": "0 journal(s) in the period balance.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "ledger_check_clean",
+                "kind": "hard",
+                "status": "fail",
+                "title": "Nightly ledger check clean",
+                "detail": "No ledger rebuild check has run yet; run one before the close.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "audit_chain_verified",
+                "kind": "hard",
+                "status": "fail",
+                "title": "Audit chain verified",
+                "detail": "No check has verified the audit chain yet.",
+                "count": 1,
+                "amount": null,
+                "blocking": true,
+                "acknowledgement": null
+              },
+              {
+                "code": "actuals_imported",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Actuals imported for every source",
+                "detail": "No import batch is waiting in review.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "unmatched_actuals_cleared",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Unmatched actuals cleared or carried",
+                "detail": "Every actual of the period is matched or excluded.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "accruals_reviewed",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Accrual proposals reviewed",
+                "detail": "No accrual proposal is waiting for a decision.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "prepaids_recognized",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Prepaids recognized through the period end",
+                "detail": "Every prepaid in service is recognized through the period end.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              },
+              {
+                "code": "commitments_accrued",
+                "kind": "soft",
+                "status": "pass",
+                "title": "Commitments past their service date accrued",
+                "detail": "Every commitment that ended in the period is accrued or invoiced.",
+                "count": 0,
+                "amount": null,
+                "blocking": false,
+                "acknowledgement": null
+              }
+            ],
+            "blocking": true
+          }
+        ]
+      }
+    ],
+    "recharges": [],
+    "allClear": false,
+    "tiles": [
+      {
+        "key": "unmatched_actuals",
+        "label": "Unmatched actuals",
+        "count": 4,
+        "amount": {
+          "amountMinor": 643808,
+          "currency": "USD"
+        },
+        "oldestDays": 14,
+        "detail": "4 lines, USD 6,438.08, oldest 14 days.",
+        "link": "/finance/actuals/queue"
+      },
+      {
+        "key": "post_spend_exceptions",
+        "label": "Post-spend exceptions",
+        "count": 5,
+        "amount": {
+          "amountMinor": 102646,
+          "currency": "USD"
+        },
+        "oldestDays": 18,
+        "detail": "5 open, 0 above USD 500.00 need you.",
+        "link": "/admin/rules/exceptions"
+      },
+      {
+        "key": "accrual_proposals",
+        "label": "Accrual proposals",
+        "count": 2,
+        "amount": {
+          "amountMinor": 225297,
+          "currency": "USD"
+        },
+        "oldestDays": 11,
+        "detail": "2 proposals, USD 2,252.97.",
+        "link": "/finance/actuals/accruals"
+      },
+      {
+        "key": "recharges_pending_tax",
+        "label": "Recharges awaiting tax approval",
+        "count": 0,
+        "amount": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "oldestDays": null,
+        "detail": "0 recharges, USD 0.00.",
+        "link": "/finance/recharges"
+      },
+      {
+        "key": "stale_commitments",
+        "label": "Stale commitments",
+        "count": 3,
+        "amount": {
+          "amountMinor": 5606000,
+          "currency": "USD"
+        },
+        "oldestDays": 52,
+        "detail": "3 commitments, USD 56,060.00 past service end.",
+        "link": "/finance/actuals/commitments"
+      },
+      {
+        "key": "escalated_approvals",
+        "label": "Approvals escalated to you",
+        "count": 0,
+        "amount": null,
+        "oldestDays": null,
+        "detail": "0 approvals escalated to you.",
+        "link": "/approvals"
+      }
+    ],
+    "integrity": {
+      "lastRun": null,
+      "auditChain": null,
+      "openLedgerFlags": 0
+    },
+    "feeds": [
+      {
+        "source": "card",
+        "label": "Card feed",
+        "lastImportAt": "2026-11-16T09:00:00.281Z",
+        "expectedEveryHours": 24,
+        "lateByHours": null
+      },
+      {
+        "source": "erp",
+        "label": "ERP feed",
+        "lastImportAt": "2026-11-16T09:00:00.278Z",
+        "expectedEveryHours": 24,
+        "lateByHours": null
+      }
+    ],
+    "fx": {
+      "total": {
+        "amountMinor": -9333,
+        "currency": "USD"
+      },
+      "byCurrency": [
+        {
+          "currency": "EUR",
+          "effect": {
+            "amountMinor": -5376,
+            "currency": "USD"
+          }
+        },
+        {
+          "currency": "INR",
+          "effect": {
+            "amountMinor": -3957,
+            "currency": "USD"
+          }
+        }
+      ],
+      "fiscalYearLabel": "FY2026"
+    }
+  }
+}

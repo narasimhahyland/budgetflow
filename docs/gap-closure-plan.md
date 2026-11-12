@@ -10,16 +10,16 @@ Items the plan or [`handoff.md`](handoff.md) already defers (translations, entit
 dark theme, accessibility, isolated Testcontainers runs, native wrappers, the demo environment 102c,
 SoD and access reviews, and the handoff's section 5) are not repeated here.
 
-## Decisions needed first
+## Decisions (taken 12 November 2026)
 
-| #   | Decision                                                                                                                                                                                                                                                                        | Why it blocks                                                                    |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| D1  | The plan names a **"17-step core workflow"** (Phase 19), **"16 critical scenarios"** (Phase 17) and **"four required tables"** (Phase 20) but never defines them. Define them, or drop them in favour of the 10-step acceptance scenario and the catalog traceability (A3, A4). | Phases 17, 19 and 20 cannot be shown complete against criteria nobody wrote down |
-| D2  | **Designs for new screens.** None of the 19 gap screens has an approved Stitch design. Design and approve first (the UX rule), or build from the written specs in `docs/ux/screens/` as screen 112 was.                                                                         | Every screen package (B2–B10) starts with this                                   |
-| D3  | **Tax and benefit rules (B3).** Which rules: recoverable GST/VAT per entity and category, benefit-in-kind thresholds per country. Fictional seed rules are fine for the build; real rates need finance.                                                                         | The ledger postings depend on them                                               |
-| D4  | **Navan access (B1).** The plan's open questions (webhooks, a pre-approval hook, Booking API, edition-gated endpoints, deactivating options) need Navan's documentation and ideally a test tenant. Credentials come from you, never the repository.                             | 16a says the questions are answered before the build                             |
-| D5  | **Push delivery (B8)** needs Web Push keys (VAPID), which are secrets: they belong in env, like the five Phase 18 secrets.                                                                                                                                                      | Real delivery cannot be proven without them                                      |
-| D6  | **Order.** The tiers below are a recommendation.                                                                                                                                                                                                                                | —                                                                                |
+| #   | Question                                                                                         | Decision                                                                                                                                                                                                                                       |
+| --- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | The plan's undefined "17-step core workflow", "16 critical scenarios" and "four required tables" | **Dropped.** The criteria are the full ten-step acceptance scenario (A3) and the feature-catalog traceability table (A4).                                                                                                                      |
+| D2  | Designs for the 19 gap screens (none has an approved Stitch design)                              | **Build from the written specs** in `docs/ux/screens/` with the shared Satori components, as screen 112 was. `/visual-qa` still applies.                                                                                                       |
+| D3  | Tax and benefit-in-kind rules (B3)                                                               | **Fictional seed rules**: configurable rates and thresholds in the seed, so the mechanism is complete; finance enters real ones later.                                                                                                         |
+| D4  | Navan access (B1)                                                                                | **Build against the mock now**, to the public API shapes, with polling as the baseline; live mode behind an env flag, verified later against a test tenant.                                                                                    |
+| D5  | Web Push keys (B8)                                                                               | Follow the Phase 18 pattern: a development key pair locally, refusal to start in production without real keys (`secretOrDev`).                                                                                                                 |
+| D6  | Order                                                                                            | **A4 last in Tier A**; then **B2 dashboards, B3 tax and benefits, B1 Navan** in parallel (three sessions); then B5 finance exports (needs B3), B4, B7, B8, B9, B10, B6; Tier C alongside. At most three heavy sessions at once on one machine. |
 
 ## Tier A — make what is claimed true (do first)
 
@@ -69,6 +69,14 @@ request; it now does, and every decision is recorded with its rule versions and 
 | **B9** AI jobs                      | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                     | —               | S–M  |
 | **B10** Experience                  | Onboarding wizard (005, 008, 010), 104 permission matrix, 124 profile and preferences, global search, 106 categories and custom fields (read-only today), 116a team budget card, 113 integrity-checks tab. Split by area.                                                         | D2              | L    |
 
+**B2 part 1 done** (012, 017, 017a). The finance controller dashboard shows the close checklist per
+entity, the queues that block the close, the ledger check, feeds and the FX effect; alerts are derived
+on every read from the health checks, owner thresholds and controls, and acknowledging or snoozing is
+per person; the exceptions dashboard counts control exceptions by type and age and links each to its
+queue. Proof: `apps/api-e2e/src/dashboards/dashboards.spec.ts` (invariants 103–105) and the
+dashboards journeys; evidence in [`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md).
+Part 2 (018, 018a, 018b, 088a) follows.
+
 **B3 done.** Tax-aware consumption (080g): a request's amount is net of tax, and on submission its
 GST/VAT splits by the published rule in force (legal entity × spend category × attendee type, mixed
 attendance in proportion to employees present). The commitment uses the net plus only the
@@ -82,7 +90,7 @@ requests that name recipients, and entries finance records. Entries are append-o
 negating rows, and evaluated against each threshold in its own tax year (whole amount or excess
 reportable; company caps never reportable). Seeded rates and thresholds are fictional (D3); screens
 are built from the specs (D2). Migration `0023`. Proof: `apps/api-e2e/src/tax/` (invariants
-103-106) and the `finance-admin/tax-benefits` journeys. Evidence:
+106-109) and the `finance-admin/tax-benefits` journeys. Evidence:
 [`evidence/gap-b3-tax-benefits/`](../evidence/gap-b3-tax-benefits/README.md). Left for B5: the
 payroll export tab and batches (the ledger shows the reportable amounts B5 exports). Left as
 follow-ups: the screens' CSV/XLSX/PDF export, employees seeing their own benefits (122), and the

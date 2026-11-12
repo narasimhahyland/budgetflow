@@ -1,4 +1,4 @@
-// Gap B3 (080h), invariants 105 and 106: the employee benefit ledger records each person's share of
+// Gap B3 (080h), invariants 108 and 109: the employee benefit ledger records each person's share of
 // benefits per tax year, never moves budget money, is append-only (reversals are negating entries),
 // and flags benefit-in-kind thresholds: exactly at the limit is Approaching, one minor unit above is
 // Over with the reportable amount the threshold defines. Seeded thresholds and entries are fictional.

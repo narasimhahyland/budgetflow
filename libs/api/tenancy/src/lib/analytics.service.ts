@@ -63,9 +63,16 @@ export class AnalyticsService {
   }
 
   /** For commands in later phases: records a server-side event inside the command's transaction. */
-  async track(tx: Tx, actor: Actor, name: ServerEventName, properties: Properties = {}) {
+  async track(
+    tx: Tx,
+    actor: Actor,
+    name: ServerEventName,
+    properties: Properties = {},
+    occurredAt?: Date,
+  ) {
     await tx.insert(productAnalyticsEvents).values({
       tenantId: actor.tenantId,
+      ...(occurredAt ? { occurredAt } : {}),
       actorPersonId: actor.personId,
       name,
       properties: { ...properties, source: 'api' },

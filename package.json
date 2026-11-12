@@ -80,6 +80,7 @@
     "@angular/material": "~22.2.0",
     "@angular/platform-browser": "~22.2.3",
     "@angular/router": "~22.2.3",
+    "@aws-sdk/client-bedrock-runtime": "3.1165.0",
     "@hylandsoftware/satori-ui": "1.0.0-alpha.171",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",

@@ -287,7 +287,8 @@ export class Sources {
       @if (provenance(); as p) {
         <span class="bf-cell__secondary">
           Model {{ p.modelId }} {{ p.modelVersion }} through {{ p.provider }}. Query log entry
-          <span data-testid="ai-ids">{{ p.queryLogId.slice(0, 8) }}</span
+          <span data-testid="ai-ids"
+            ><span class="bf-ai-id">{{ p.queryLogId.slice(0, 8) }}</span></span
           >.
         </span>
       }
@@ -300,8 +301,19 @@ export class Sources {
       align-items: center;
       gap: 8px;
     }
+    /*
+     * The query-log id changes per call and its glyphs differ in width, so it sits in a box of fixed
+     * width, wide enough for any eight hex characters (eight of the widest, b or d, measure 9.14ch
+     * in the body-small font). Line breaking then sees the same width whatever the id is; the visual
+     * mask hides glyphs, not width. Same rule as bf-ai-provenance in the AI feature lib.
+     */
     .bf-ai-note [data-testid='ai-ids'] {
       white-space: nowrap;
+    }
+    .bf-ai-note .bf-ai-id {
+      display: inline-block;
+      inline-size: 9.25ch;
+      font-variant-numeric: tabular-nums;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

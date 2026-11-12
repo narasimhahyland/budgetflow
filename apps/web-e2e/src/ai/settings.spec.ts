@@ -6,6 +6,9 @@ import { SEED } from '@bf/seed';
 import { expectShell } from '../support/auth';
 import { authFile } from '../support/roles';
 import { apiAs, setAiFeature } from './support';
+import { AI_LIVE, AI_LIVE_REASON } from './live';
+
+test.skip(!AI_LIVE, AI_LIVE_REASON);
 
 // AI feature switches are tenant-wide, so every test that turns one on or off, and every test whose
 // subject is a feature being off, runs in one serial group. Otherwise they would decide each other's
@@ -46,7 +49,7 @@ test.describe('AI feature switches and the states they produce', () => {
       await page.goto('/admin/ai/features');
       await expectShell(page);
       await expect(page.getByRole('heading', { name: 'AI settings' })).toBeVisible();
-      await expect(page.getByTestId('provider')).toContainText('budgetflow-fake');
+      await expect(page.getByTestId('provider')).toContainText('claude');
       await expect(page.getByTestId('provider')).toContainText(
         'Provider keys are held in the server environment',
       );
@@ -218,7 +221,7 @@ test.describe('Spending outlook (016b)', () => {
     await expect(detail.getByTestId('figures-caption')).toContainText('read from the ledger');
     await expect(detail.getByTestId('detail-range')).toContainText('not spent money');
     await expect(detail.getByTestId('ai-provenance')).toHaveCount(0);
-    await expect(detail.getByTestId('detail-model')).toContainText('budgetflow-fake');
+    await expect(detail.getByTestId('detail-model')).toContainText('claude');
 
     const nudge = detail.getByTestId(`nudge-${SEED.budgets.bengaluru}`);
     await expect(nudge).toContainText('may not use all of its budget');
@@ -249,7 +252,7 @@ test.describe('Policy assistant (069a)', () => {
     // label: the assistant explains a decision, it never restates one as if it were its own.
     await expect(result.getByTestId('policy-no-extra')).toBeVisible();
     await expect(result.getByTestId('ai-prose')).toHaveCount(0);
-    await expect(result.getByTestId('ai-provenance')).toContainText('budgetflow-fake');
+    await expect(result.getByTestId('ai-provenance')).toContainText('claude');
   });
 
   test('refuses to explain a request that belongs to someone else', async ({ page }) => {

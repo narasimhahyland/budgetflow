@@ -1,0 +1,116 @@
+{
+  "request": "GET /api/dashboards/alerts as regional-manager",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-16T09:00:00.000Z",
+    "asOf": "2026-11-16",
+    "currency": "USD",
+    "scope": {
+      "tenantWide": false,
+      "label": "India Region and below",
+      "budgetIds": 3,
+      "note": "Showing budgets you can see."
+    },
+    "tab": "open",
+    "counts": {
+      "open": 4,
+      "acknowledged": 0,
+      "resolved": 0
+    },
+    "severity": {
+      "hardBlock": 0,
+      "warning": 3,
+      "information": 1
+    },
+    "items": [
+      {
+        "key": "lapse:70000000-0000-4000-8000-000000000005",
+        "kind": "lapse",
+        "severity": "warning",
+        "tone": "warning",
+        "budgetId": "70000000-0000-4000-8000-000000000005",
+        "budgetName": "Bengaluru Events",
+        "budgetStatus": "active",
+        "ownerName": "Rahul Menon",
+        "text": "Bengaluru Events: USD 3,081.71 is forecast to lapse on 31 Dec 2026.",
+        "rule": "Health check: unused",
+        "raisedAt": null,
+        "action": {
+          "label": "Plan spend or release",
+          "link": "/reports/unused-expired"
+        },
+        "snoozable": true,
+        "acknowledgedAt": null,
+        "snoozedUntil": null,
+        "resolvedAt": null,
+        "owned": false
+      },
+      {
+        "key": "lapse:70000000-0000-4000-8000-000000000006",
+        "kind": "lapse",
+        "severity": "warning",
+        "tone": "warning",
+        "budgetId": "70000000-0000-4000-8000-000000000006",
+        "budgetName": "Hyderabad Events",
+        "budgetStatus": "active",
+        "ownerName": "Ananya Iyer",
+        "text": "Hyderabad Events: USD 3,678.75 is forecast to lapse on 31 Dec 2026.",
+        "rule": "Health check: unused",
+        "raisedAt": null,
+        "action": {
+          "label": "Plan spend or release",
+          "link": "/reports/unused-expired"
+        },
+        "snoozable": true,
+        "acknowledgedAt": null,
+        "snoozedUntil": null,
+        "resolvedAt": null,
+        "owned": true
+      },
+      {
+        "key": "lapse:70000000-0000-4000-8000-000000000002",
+        "kind": "lapse",
+        "severity": "warning",
+        "tone": "warning",
+        "budgetId": "70000000-0000-4000-8000-000000000002",
+        "budgetName": "India Region",
+        "budgetStatus": "active",
+        "ownerName": "Ananya Iyer",
+        "text": "India Region: USD 18,680.21 is forecast to lapse on 31 Dec 2026.",
+        "rule": "Health check: unused",
+        "raisedAt": null,
+        "action": {
+          "label": "Plan spend or release",
+          "link": "/reports/unused-expired"
+        },
+        "snoozable": true,
+        "acknowledgedAt": null,
+        "snoozedUntil": null,
+        "resolvedAt": null,
+        "owned": true
+      },
+      {
+        "key": "threshold:70000000-0000-4000-8000-000000000005:5000",
+        "kind": "threshold",
+        "severity": "information",
+        "tone": "info",
+        "budgetId": "70000000-0000-4000-8000-000000000005",
+        "budgetName": "Bengaluru Events",
+        "budgetStatus": "active",
+        "ownerName": "Rahul Menon",
+        "text": "Bengaluru Events passed 50%: USD 8,918.29 of USD 12,000.00 committed or spent.",
+        "rule": "Owner threshold 50%",
+        "raisedAt": null,
+        "action": {
+          "label": "Open budget",
+          "link": "/budgets/70000000-0000-4000-8000-000000000005"
+        },
+        "snoozable": true,
+        "acknowledgedAt": null,
+        "snoozedUntil": null,
+        "resolvedAt": null,
+        "owned": false
+      }
+    ]
+  }
+}

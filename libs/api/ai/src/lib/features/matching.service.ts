@@ -28,7 +28,7 @@ import { AiRetrieval } from '../retrieval.service';
 import { AiSettingsService } from '../settings.service';
 import { AiSuggestionsService } from '../suggestions.service';
 
-const RankOutput = z
+export const RankOutput = z
   .object({
     ranking: z.array(z.string()).max(20),
     reasons: z.record(z.string(), z.array(z.string().max(200)).max(6)),

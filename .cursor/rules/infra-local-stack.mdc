@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Local stack
 
-- `infra/compose.yaml` starts Postgres 16, Keycloak, Mailpit, MinIO, API, worker and web (API configured with the deterministic fake `AiProvider`), each with a health check; the API waits on healthy dependencies. Drive it only through `scripts/stack.sh` (it derives `COMPOSE_PROJECT_NAME` from the checkout, so worktrees do not collide).
+- `infra/compose.yaml` starts Postgres 16, Keycloak, Mailpit, MinIO, API, worker and web (API configured for Amazon Bedrock; AWS credentials come from the gitignored root `.env`), each with a health check; the API waits on healthy dependencies. Drive it only through `scripts/stack.sh` (it derives `COMPOSE_PROJECT_NAME` from the checkout, so worktrees do not collide).
 - Host ports come from env with defaults (`BF_PG_PORT`, `BF_API_PORT`, `BF_KEYCLOAK_PORT`, `BF_MAILPIT_PORT`, `BF_MINIO_PORT`, `BF_WEB_PORT`) and bind to `127.0.0.1`.
 - All credentials are dev-only placeholders in `infra/.env.example`, copied to a gitignored `.env`. Never real values; never reuse them elsewhere.
 - Keycloak realm export in `infra/keycloak/`: public SPA client with PKCE, confidential API client, a local-only `budgetflow-e2e` client with direct grant for API scenario tokens, roles, TOTP policy, fictional seeded users per role (including a TOTP user for MFA tests). Regenerate it from a running instance.

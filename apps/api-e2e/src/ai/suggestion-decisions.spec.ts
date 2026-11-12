@@ -9,6 +9,9 @@ import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { suggestionFor, unmatchedLine } from './support';
+import { AI_LIVE, AI_LIVE_REASON } from './support';
+
+test.skip(!AI_LIVE, AI_LIVE_REASON);
 
 const detail = async (request: APIRequestContext, actualId: string) =>
   expectContract(
