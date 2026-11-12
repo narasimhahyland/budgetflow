@@ -61,6 +61,14 @@ utilization carries no FX column. Evidence: [`evidence/gap-a3-acceptance/`](../e
 | **B9** AI jobs                      | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                     | —               | S–M  |
 | **B10** Experience                  | Onboarding wizard (005, 008, 010), 104 permission matrix, 124 profile and preferences, global search, 106 categories and custom fields (read-only today), 116a team budget card, 113 integrity-checks tab. Split by area.                                                         | D2              | L    |
 
+**B2 part 1 done** (012, 017, 017a). The finance controller dashboard shows the close checklist per
+entity, the queues that block the close, the ledger check, feeds and the FX effect; alerts are derived
+on every read from the health checks, owner thresholds and controls, and acknowledging or snoozing is
+per person; the exceptions dashboard counts control exceptions by type and age and links each to its
+queue. Proof: `apps/api-e2e/src/dashboards/dashboards.spec.ts` (invariants 103–105) and the
+dashboards journeys; evidence in [`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md).
+Part 2 (018, 018a, 018b, 088a) follows.
+
 ## Tier C — prove what is built but thinly covered
 
 - Connector scenarios for Odoo, Workday (HCM and Financials), NetSuite, Brex, Coupa and Google

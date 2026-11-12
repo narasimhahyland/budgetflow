@@ -1,0 +1,12 @@
+{
+  "request": "GET /api/dashboards/finance as location-manager",
+  "status": 403,
+  "body": {
+    "type": "urn:budgetflow:problem:forbidden",
+    "title": "Forbidden",
+    "status": 403,
+    "code": "FORBIDDEN",
+    "detail": "The finance overview is for finance roles.",
+    "instance": "/api/dashboards/finance"
+  }
+}

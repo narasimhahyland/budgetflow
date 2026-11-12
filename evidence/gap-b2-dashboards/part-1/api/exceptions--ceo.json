@@ -1,0 +1,199 @@
+{
+  "request": "GET /api/dashboards/exceptions as ceo",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-16T09:00:00.000Z",
+    "asOf": "2026-11-16",
+    "currency": "USD",
+    "fiscalYearLabel": "FY2026",
+    "kpis": {
+      "open": 5,
+      "informational": 0,
+      "olderThan14Days": 1,
+      "resolvedThisMonth": 0,
+      "atStake": {
+        "amountMinor": 102646,
+        "currency": "USD"
+      }
+    },
+    "integrityFlagOpen": false,
+    "withheld": ["split_request", "duplicate", "just_under_threshold", "ledger_integrity"],
+    "types": [
+      {
+        "type": "post_spend_breach",
+        "label": "Post-spend policy breach",
+        "source": "Post-spend re-check",
+        "informational": false,
+        "open": 5,
+        "oldestDays": 18,
+        "atStake": {
+          "amountMinor": 102646,
+          "currency": "USD"
+        },
+        "queue": {
+          "label": "Post-spend exceptions",
+          "link": "/admin/rules/exceptions"
+        },
+        "bands": {
+          "d0to7": 2,
+          "d8to30": 3,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "approved_over_budget",
+        "label": "Approved over budget",
+        "source": "Approvals",
+        "informational": true,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Approval history",
+          "link": "/approvals/history"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "approved_after_escalation",
+        "label": "Approved after escalation",
+        "source": "Approvals",
+        "informational": true,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Approval history",
+          "link": "/approvals/history"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "late_posting",
+        "label": "Late postings into the next period",
+        "source": "Ledger (late flag)",
+        "informational": false,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Period close",
+          "link": "/finance/close"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "missing_recharge",
+        "label": "Cross-entity contribution without recharge",
+        "source": "Recharges",
+        "informational": false,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Recharges",
+          "link": "/finance/recharges"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      }
+    ],
+    "trend": [
+      {
+        "weekStart": "2026-09-28",
+        "opened": 0,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-10-05",
+        "opened": 0,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-10-12",
+        "opened": 0,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-10-19",
+        "opened": 0,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-10-26",
+        "opened": 2,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-11-02",
+        "opened": 1,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-11-09",
+        "opened": 2,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-11-16",
+        "opened": 0,
+        "resolved": 0
+      }
+    ],
+    "byLocation": [
+      {
+        "location": "Bengaluru",
+        "open": 2,
+        "atStake": {
+          "amountMinor": 53308,
+          "currency": "USD"
+        }
+      },
+      {
+        "location": "Hyderabad",
+        "open": 1,
+        "atStake": {
+          "amountMinor": 14970,
+          "currency": "USD"
+        }
+      },
+      {
+        "location": "London",
+        "open": 1,
+        "atStake": {
+          "amountMinor": 23368,
+          "currency": "USD"
+        }
+      },
+      {
+        "location": "Westlake",
+        "open": 1,
+        "atStake": {
+          "amountMinor": 11000,
+          "currency": "USD"
+        }
+      }
+    ],
+    "items": []
+  }
+}
