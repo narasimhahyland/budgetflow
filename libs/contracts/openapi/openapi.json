@@ -3073,6 +3073,131 @@
         ],
         "additionalProperties": false
       },
+      "AlertDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "acknowledge",
+              "snooze"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "decision"
+        ],
+        "additionalProperties": false,
+        "description": "Acknowledge or snooze one alert for yourself. It does not change the budget; snoozing lasts 7 days."
+      },
+      "AlertsOverview": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/ReportScope"
+          },
+          "tab": {
+            "type": "string",
+            "enum": [
+              "open",
+              "acknowledged",
+              "resolved"
+            ]
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "open": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "acknowledged": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "resolved": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "open",
+              "acknowledged",
+              "resolved"
+            ],
+            "additionalProperties": false,
+            "description": "Per tab, before the type and severity filters."
+          },
+          "severity": {
+            "type": "object",
+            "properties": {
+              "hardBlock": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "warning": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "information": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "hardBlock",
+              "warning",
+              "information"
+            ],
+            "additionalProperties": false,
+            "description": "Open alerts by severity, after filters."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BudgetAlert"
+            }
+          }
+        },
+        "required": [
+          "generatedAt",
+          "asOf",
+          "currency",
+          "scope",
+          "tab",
+          "counts",
+          "severity",
+          "items"
+        ],
+        "additionalProperties": false
+      },
       "AllocateRequest": {
         "type": "object",
         "properties": {
@@ -7051,6 +7176,188 @@
           "canDecide",
           "maxMinutes",
           "note"
+        ],
+        "additionalProperties": false
+      },
+      "BudgetAlert": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Stable key: kind, budget and band. A worsening condition produces a new key, so it is raised again."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "threshold",
+              "hard_block",
+              "pace",
+              "forecast",
+              "lapse",
+              "frozen",
+              "set_to_zero",
+              "approvals_overdue",
+              "stale_commitments"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "hard_block",
+              "warning",
+              "information"
+            ]
+          },
+          "tone": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info",
+              "important"
+            ]
+          },
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetName": {
+            "type": "string"
+          },
+          "budgetStatus": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "pending_approval",
+              "approved",
+              "active",
+              "partially_allocated",
+              "fully_allocated",
+              "frozen",
+              "reduced",
+              "set_to_zero",
+              "exhausted",
+              "expired",
+              "closed",
+              "revised",
+              "cancelled"
+            ],
+            "description": "Budget lifecycle state (all 15)."
+          },
+          "ownerName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "description": "What it means, in one sentence."
+          },
+          "rule": {
+            "type": "string",
+            "description": "The rule or threshold that raised it."
+          },
+          "raisedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "action": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "link": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "link"
+            ],
+            "additionalProperties": false
+          },
+          "snoozable": {
+            "type": "boolean",
+            "description": "Hard-block alerts cannot be snoozed."
+          },
+          "acknowledgedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "snoozedUntil": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolvedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Resolved tab only: when you last saw it raised."
+          },
+          "owned": {
+            "type": "boolean",
+            "description": "The viewer owns or co-owns the budget."
+          }
+        },
+        "required": [
+          "key",
+          "kind",
+          "severity",
+          "tone",
+          "budgetId",
+          "budgetName",
+          "budgetStatus",
+          "ownerName",
+          "text",
+          "rule",
+          "raisedAt",
+          "action",
+          "snoozable",
+          "acknowledgedAt",
+          "snoozedUntil",
+          "resolvedAt",
+          "owned"
         ],
         "additionalProperties": false
       },
@@ -21941,6 +22248,360 @@
         ],
         "additionalProperties": false
       },
+      "ExceptionItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "post_spend_breach",
+              "split_request",
+              "duplicate",
+              "approved_over_budget",
+              "approved_after_escalation",
+              "late_posting",
+              "missing_recharge",
+              "just_under_threshold",
+              "ledger_integrity"
+            ]
+          },
+          "reference": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "raisedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "ageDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "atStake": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "reference",
+          "summary",
+          "location",
+          "raisedAt",
+          "ageDays",
+          "atStake",
+          "link"
+        ],
+        "additionalProperties": false
+      },
+      "ExceptionsOverview": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "fiscalYearLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kpis": {
+            "type": "object",
+            "properties": {
+              "open": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "informational": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "olderThan14Days": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "resolvedThisMonth": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "atStake": {
+                "$ref": "#/components/schemas/Money"
+              }
+            },
+            "required": [
+              "open",
+              "informational",
+              "olderThan14Days",
+              "resolvedThisMonth",
+              "atStake"
+            ],
+            "additionalProperties": false
+          },
+          "integrityFlagOpen": {
+            "type": "boolean",
+            "description": "Any ledger integrity or audit chain flag is open."
+          },
+          "withheld": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "post_spend_breach",
+                "split_request",
+                "duplicate",
+                "approved_over_budget",
+                "approved_after_escalation",
+                "late_posting",
+                "missing_recharge",
+                "just_under_threshold",
+                "ledger_integrity"
+              ]
+            },
+            "description": "Types built from integrity flags, left out for viewers without integrity.read."
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionTypeRow"
+            }
+          },
+          "trend": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "weekStart": {
+                  "type": "string",
+                  "format": "date",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                  "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+                },
+                "opened": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "resolved": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "weekStart",
+                "opened",
+                "resolved"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Work items opened and resolved per week, last 8 weeks."
+          },
+          "byLocation": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "location": {
+                  "type": "string"
+                },
+                "open": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "atStake": {
+                  "$ref": "#/components/schemas/Money"
+                }
+              },
+              "required": [
+                "location",
+                "open",
+                "atStake"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionItem"
+            },
+            "description": "Open items of the selected type, oldest first; empty without a type."
+          }
+        },
+        "required": [
+          "generatedAt",
+          "asOf",
+          "currency",
+          "fiscalYearLabel",
+          "kpis",
+          "integrityFlagOpen",
+          "withheld",
+          "types",
+          "trend",
+          "byLocation",
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "ExceptionTypeRow": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "post_spend_breach",
+              "split_request",
+              "duplicate",
+              "approved_over_budget",
+              "approved_after_escalation",
+              "late_posting",
+              "missing_recharge",
+              "just_under_threshold",
+              "ledger_integrity"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "informational": {
+            "type": "boolean",
+            "description": "Counts for audit sampling, not work items."
+          },
+          "open": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "oldestDays": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "atStake": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "queue": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "link": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "link"
+            ],
+            "additionalProperties": false
+          },
+          "bands": {
+            "type": "object",
+            "properties": {
+              "d0to7": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "d8to30": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "d31to60": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "over60": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "d0to7",
+              "d8to30",
+              "d31to60",
+              "over60"
+            ],
+            "additionalProperties": false,
+            "description": "Open items by age band."
+          }
+        },
+        "required": [
+          "type",
+          "label",
+          "source",
+          "informational",
+          "open",
+          "oldestDays",
+          "atStake",
+          "queue",
+          "bands"
+        ],
+        "additionalProperties": false
+      },
       "ExchangeRate": {
         "type": "object",
         "properties": {
@@ -22559,6 +23220,419 @@
           "rows"
         ],
         "additionalProperties": false
+      },
+      "FinanceFeed": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "lastImportAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expectedEveryHours": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "lateByHours": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when on time."
+          }
+        },
+        "required": [
+          "source",
+          "label",
+          "lastImportAt",
+          "expectedEveryHours",
+          "lateByHours"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceIntegrity": {
+        "type": "object",
+        "properties": {
+          "lastRun": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                    "description": "Opaque identifier (UUID)."
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "queued",
+                      "running",
+                      "clean",
+                      "drift_detected",
+                      "failed"
+                    ]
+                  },
+                  "trigger": {
+                    "type": "string"
+                  },
+                  "requestedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "description": "Timestamp, ISO 8601 in UTC."
+                  },
+                  "finishedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                        "description": "Timestamp, ISO 8601 in UTC."
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "budgetsChecked": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "driftCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "id",
+                  "status",
+                  "trigger",
+                  "requestedAt",
+                  "finishedAt",
+                  "budgetsChecked",
+                  "driftCount"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "auditChain": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "checked": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "brokenAt": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "valid",
+                  "checked",
+                  "brokenAt"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Audit hash-chain result of the last check."
+          },
+          "openLedgerFlags": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open ledger_drift, journal_unbalanced, negative_bucket, triplet_mismatch flags."
+          }
+        },
+        "required": [
+          "lastRun",
+          "auditChain",
+          "openLedgerFlags"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceOverview": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "close": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "period": {
+                  "$ref": "#/components/schemas/ClosePeriodSummary"
+                },
+                "entities": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CloseEntityChecklist"
+                  }
+                }
+              },
+              "required": [
+                "period",
+                "entities"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Per fiscal calendar, the period being closed (the oldest open or soft-closed period that has ended, else the current one) with its entity checklists."
+          },
+          "recharges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceRechargeStatus"
+            }
+          },
+          "allClear": {
+            "type": "boolean",
+            "description": "Every check passes for every entity."
+          },
+          "tiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceQueueTile"
+            }
+          },
+          "integrity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinanceIntegrity"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when the viewer lacks integrity.read."
+          },
+          "feeds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceFeed"
+            }
+          },
+          "fx": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "$ref": "#/components/schemas/Money"
+              },
+              "byCurrency": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "currency": {
+                      "$ref": "#/components/schemas/CurrencyCode"
+                    },
+                    "effect": {
+                      "$ref": "#/components/schemas/Money"
+                    }
+                  },
+                  "required": [
+                    "currency",
+                    "effect"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "fiscalYearLabel": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "total",
+              "byCurrency",
+              "fiscalYearLabel"
+            ],
+            "additionalProperties": false,
+            "description": "FX effect of actuals this fiscal year; never part of spend or available."
+          }
+        },
+        "required": [
+          "generatedAt",
+          "asOf",
+          "currency",
+          "close",
+          "recharges",
+          "allClear",
+          "tiles",
+          "integrity",
+          "feeds",
+          "fx"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceQueueTile": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "unmatched_actuals",
+              "post_spend_exceptions",
+              "accrual_proposals",
+              "recharges_pending_tax",
+              "stale_commitments",
+              "escalated_approvals"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Total in the reporting currency; null for count-only tiles."
+          },
+          "oldestDays": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Age of the oldest item in days."
+          },
+          "detail": {
+            "type": "string",
+            "description": "One plain-English sentence for the tile."
+          },
+          "link": {
+            "type": "string",
+            "description": "Route of the queue that clears it."
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "count",
+          "amount",
+          "oldestDays",
+          "detail",
+          "link"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceRechargeStatus": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "pendingTaxApproval": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "awaitingPosting": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Approved or scheduled, not yet posted."
+          },
+          "posted": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "legalEntityId",
+          "pendingTaxApproval",
+          "awaitingPosting",
+          "posted"
+        ],
+        "additionalProperties": false,
+        "description": "Recharges due in the closing period where the entity pays or receives."
       },
       "FiscalCalendarDetail": {
         "type": "object",
@@ -99912,6 +100986,386 @@
             }
           },
           "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboards/finance": {
+      "get": {
+        "operationId": "getFinanceOverview",
+        "summary": "Finance controller dashboard: close status, blocking queues, integrity, feeds, FX",
+        "tags": [
+          "dashboards"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceOverview"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboards/alerts": {
+      "get": {
+        "operationId": "getAlerts",
+        "summary": "Budget alerts on the budgets the viewer is responsible for",
+        "tags": [
+          "dashboards"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tab",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "acknowledged",
+                "resolved"
+              ]
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "threshold",
+                "hard_block",
+                "pace",
+                "forecast",
+                "lapse",
+                "frozen",
+                "set_to_zero",
+                "approvals_overdue",
+                "stale_commitments"
+              ]
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "hard_block",
+                "warning",
+                "information"
+              ]
+            }
+          },
+          {
+            "name": "ownedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "Only budgets I own.",
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsOverview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboards/alerts/decisions": {
+      "post": {
+        "operationId": "decideAlert",
+        "summary": "Acknowledge or snooze an alert for yourself",
+        "tags": [
+          "dashboards"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetAlert"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboards/exceptions": {
+      "get": {
+        "operationId": "getExceptions",
+        "summary": "Control exceptions by type and age, with the queue that works each",
+        "tags": [
+          "dashboards"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "post_spend_breach",
+                "split_request",
+                "duplicate",
+                "approved_over_budget",
+                "approved_after_escalation",
+                "late_posting",
+                "missing_recharge",
+                "just_under_threshold",
+                "ledger_integrity"
+              ]
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionsOverview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {

@@ -46,6 +46,7 @@ import { and, asc, desc, eq, inArray, lte, sql } from 'drizzle-orm';
 import {
   assertTenant,
   CloseReads,
+  todayUtc,
   type CommandContext,
   type LegalEntityRow,
   type PeriodRow,
@@ -157,6 +158,44 @@ export class PeriodCloseService {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       assertTenant(this.policy, actor, 'ledger.read');
       return this.detail(tx, actor, await this.reads.period(tx, periodId));
+    });
+  }
+
+  /**
+   * The period each fiscal calendar in use is closing (012): the oldest open or soft-closed period
+   * that has already ended, else the period containing today, with its per-entity checklist. Read
+   * only; the same checks the close command runs.
+   */
+  closing(actor: RequestActor) {
+    return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
+      assertTenant(this.policy, actor, 'ledger.read');
+      const today = todayUtc();
+      const used = await tx
+        .selectDistinct({ calendarId: legalEntities.fiscalCalendarId })
+        .from(legalEntities);
+      const out: { period: ClosePeriodSummary; entities: ClosePeriodDetail['entities'] }[] = [];
+      for (const { calendarId } of used) {
+        if (!calendarId) continue;
+        const periods = await this.reads.calendarPeriods(tx, calendarId);
+        const period =
+          periods.find(
+            (p) => (p.status === 'open' || p.status === 'soft_closed') && p.endDate < today,
+          ) ?? periods.find((p) => p.startDate <= today && p.endDate >= today);
+        if (!period) continue;
+        const year = await this.reads.fiscalYear(tx, period.fiscalYearId);
+        const entities = await this.reads.entitiesOfPeriod(tx, period);
+        out.push({
+          period: await this.summary(tx, period, year.label),
+          entities: await this.checklist(tx, period, entities),
+        });
+      }
+      return out.sort(
+        (a, b) =>
+          a.period.endDate.localeCompare(b.period.endDate) ||
+          (a.entities[0]?.legalEntityCode ?? '').localeCompare(
+            b.entities[0]?.legalEntityCode ?? '',
+          ),
+      );
     });
   }
 
