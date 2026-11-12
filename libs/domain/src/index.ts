@@ -31,6 +31,7 @@ export * from './lib/authorization/policy';
 export * from './lib/audit/hash-chain';
 export * from './lib/rules/conflict';
 export * from './lib/rules/evaluator';
+export * from './lib/rules/cap-facts';
 export * from './lib/org/hierarchy';
 export * from './lib/org/imports';
 export * from './lib/actuals/import';

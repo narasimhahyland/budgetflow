@@ -1,0 +1,22 @@
+{
+  "status": 409,
+  "body": {
+    "type": "urn:budgetflow:problem:policy-blocked",
+    "title": "Policy blocked",
+    "status": 409,
+    "code": "POLICY_BLOCKED",
+    "detail": "This would take a recipient past their annual employee benefit cap. Lower the amount, or remove the recipient who has reached the cap.",
+    "instance": "/api/requests",
+    "params": {
+      "stage": "submit",
+      "ruleCode": "R-31",
+      "ruleName": "Employee annual benefit cap",
+      "ruleVersion": 1,
+      "employeeYtdBenefitMinor": 30001,
+      "employeeCapRemainingMinor": -1,
+      "giftYtdMinor": 0,
+      "giftAnnualCapRemainingMinor": 15000,
+      "capPersonId": "c8c0a239-20a9-4793-a52d-37e4e0d0e6d7"
+    }
+  }
+}

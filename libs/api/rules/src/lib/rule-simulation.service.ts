@@ -22,6 +22,8 @@ import type {
 import {
   evaluateConditionGroup,
   evaluateRules,
+  capRuleFacts,
+  neutralCapFacts,
   type EvaluableRule,
   type EvaluationFacts,
   type RuleEffect,
@@ -32,6 +34,23 @@ import { conditionText, formatFactValue, toEvaluable } from './rule-mapping';
 import { RulesService } from './rules.service';
 
 const TENANT = (actor: RequestActor) => ({ kind: 'tenant' as const, tenantId: actor.tenantId });
+
+/** Cap facts the simulation form set; the rest stay neutral (no cap applies). */
+function definedCapFacts(input: SimulationFactsInput): Partial<EvaluationFacts> {
+  const entries: [keyof EvaluationFacts, unknown][] = [
+    ['employee_ytd_benefit_minor', input.employeeYtdBenefitMinor],
+    ['employee_cap_remaining_minor', input.employeeCapRemainingMinor],
+    ['employee_cap_used_pct', input.employeeCapUsedPct],
+    ['gift_value_minor', input.giftValueMinor],
+    ['gift_ytd_minor', input.giftYtdMinor],
+    ['gift_annual_cap_remaining_minor', input.giftAnnualCapRemainingMinor],
+    ['alcohol_amount_minor', input.alcoholAmountMinor],
+    ['non_employee_count', input.nonEmployeeCount],
+    ['is_intercompany', input.isIntercompany],
+    ['requester_recent_total_minor', input.requesterRecentTotalMinor],
+  ];
+  return Object.fromEntries(entries.filter(([, v]) => v !== undefined));
+}
 
 /** The facts the evaluator reads, built from a simulation form or from a historical request. */
 function factsFrom(input: SimulationFactsInput, date: string): EvaluationFacts {
@@ -51,6 +70,8 @@ function factsFrom(input: SimulationFactsInput, date: string): EvaluationFacts {
     attendee_type: input.attendeeType,
     alcohol_requested: input.alcoholRequested,
     is_cash_equivalent: input.isCashEquivalent,
+    ...capRuleFacts(neutralCapFacts()),
+    ...definedCapFacts(input),
     date,
   };
 }
@@ -288,6 +309,8 @@ export class RuleSimulationService {
           attendee_type: 'employee',
           alcohol_requested: false,
           is_cash_equivalent: false,
+          // Historical requests are replayed without cap history: caps never decide a backtest.
+          ...capRuleFacts(neutralCapFacts()),
           request_kind: r.kind,
           date,
         };

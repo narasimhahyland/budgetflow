@@ -193,6 +193,7 @@ export async function seedEvents(_app: INestApplicationContext): Promise<void> {
           title: r.title,
           purpose: r.purpose,
           category: r.category,
+          ...(r.benefitRecipientIds ? { benefitRecipientIds: r.benefitRecipientIds } : {}),
           submit: r.outcome !== 'draft',
         },
         { ...key(`request:${r.id}`), fixedId: r.id },
@@ -213,7 +214,7 @@ export async function seedEvents(_app: INestApplicationContext): Promise<void> {
           {
             decision: 'reject',
             reasonCode: 'REJ-POLICY',
-            comment: 'reason' in r ? r.reason : 'Rejected',
+            comment: r.reason ?? 'Rejected',
             noConflictAttested: false,
           },
           `request:${r.id}:reject`,
