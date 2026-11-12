@@ -114,6 +114,7 @@ export const DOMAIN_ERROR_CODES = [
   'FORECAST_ALREADY_ACCEPTED',
   'FORECAST_SUPERSEDED',
   'FORECAST_NOT_SUBMITTED',
+  'POLICY_BLOCKED',
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

@@ -30,6 +30,7 @@ import {
   eventCoOrganizers,
   eventParticipants,
   events,
+  people,
   requests,
   withTenant,
   type Db,
@@ -61,12 +62,14 @@ import {
   type CurrencyCode,
   type Money,
   type RequestStatus,
+  type TripletContext,
 } from '@bf/domain';
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { and, desc, eq, inArray, like, ne, notInArray, or, sql, type SQL } from 'drizzle-orm';
 import { CommitmentsService } from './commitments.service';
 import { FundingSourcesService } from './funding-sources.service';
 import { PostingSupport, type PostCtx } from './posting-support';
+import { RequestPolicyService } from './request-policy.service';
 import { SpendHooks } from './spend-hooks';
 
 type RequestRow = typeof requests.$inferSelect;
@@ -121,6 +124,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     private readonly documents: DocumentsService,
     private readonly hooks: SpendHooks,
     private readonly planning: PlanningService,
+    private readonly requestPolicy: RequestPolicyService,
   ) {}
 
   onModuleInit(): void {
@@ -333,7 +337,58 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         decisionReason: ctx.reason,
       });
     }
+    await this.enforceOnApproval(tx, ctx.actor, r, s, approvedMinor);
     return { status, changes };
+  }
+
+  /**
+   * Approval re-runs the rules on the approved amount, now encumbered or held, so a cap that other
+   * requests used up since submission still holds. A block refuses the approval (nothing is written).
+   */
+  private async enforceOnApproval(
+    tx: Tx,
+    actor: RequestActor,
+    r: RequestRow,
+    s: ApprovalSubject,
+    approvedMinor: number,
+  ): Promise<void> {
+    const locked = (await this.posting.lock(tx, [r.budgetId!])).get(r.budgetId!)!;
+    const pctx = await this.posting.context(tx, locked, actor.reportingCurrency);
+    const budgetMinor = unwrap(
+      buildTriplet(
+        { amountMinor: approvedMinor, currency: r.currency as CurrencyCode },
+        {
+          budgetCurrency: locked.currency,
+          reportingCurrency: actor.reportingCurrency,
+          rates: pctx.rates,
+        },
+      ),
+    ).budget.amountMinor;
+    const authorized = locked.balances.authorized;
+    const used =
+      locked.balances.allocated_out +
+      locked.balances.held +
+      locked.balances.pre_encumbered +
+      locked.balances.encumbered +
+      locked.balances.actual;
+    await this.requestPolicy.enforce(
+      tx,
+      actor,
+      r,
+      locked.row,
+      this.policyAmounts(
+        r,
+        approvedMinor,
+        budgetMinor,
+        {
+          budgetCurrency: locked.currency,
+          reportingCurrency: actor.reportingCurrency,
+          rates: pctx.rates,
+        },
+        authorized > 0 ? Math.floor(((authorized - used) * 100) / authorized) : 0,
+      ),
+      'approve',
+    );
   }
 
   /** Releases a pending request's pre-encumbrance exactly (event funding or spending commitment). */
@@ -473,6 +528,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
           actor,
           await this.posting.budget(tx, body.budgetId),
         );
+        await this.assertBenefitDetails(tx, body);
         if (body.kind === 'additional_fund') {
           if (!body.eventId)
             throw new ApiProblem(
@@ -507,6 +563,11 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
             purpose: body.purpose,
             category: body.category ?? null,
             neededBy: body.neededBy ?? null,
+            benefitRecipientIds: body.benefitRecipientIds?.length
+              ? [...new Set(body.benefitRecipientIds)]
+              : null,
+            nonEmployeeCount: body.nonEmployeeCount ?? null,
+            alcoholAmountMinor: body.alcoholAmount?.amountMinor ?? null,
           })
           .returning();
         if (body.submit === false) {
@@ -530,6 +591,74 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         return this.detailTx(tx, actor, r.id);
       },
     );
+  }
+
+  /** Benefit recipients must be people in the tenant; alcohol is part of the amount, in its currency. */
+  private async assertBenefitDetails(tx: Tx, body: CreateRequestBody): Promise<void> {
+    const ids = [...new Set(body.benefitRecipientIds ?? [])];
+    if ((ids.length || body.nonEmployeeCount) && body.kind === 'additional_fund') {
+      // Event money is held for the event, then spent through the event's own commitments; the
+      // benefit reaches people through those, so the funding request carries no recipients.
+      throw new ApiProblem(
+        422,
+        'VALIDATION_FAILED',
+        'Name benefit recipients on the spending request, not on event funding.',
+        { field: 'benefitRecipientIds' },
+      );
+    }
+    if (ids.length) {
+      const found = await tx.select({ id: people.id }).from(people).where(inArray(people.id, ids));
+      if (found.length !== ids.length) {
+        throw new ApiProblem(
+          422,
+          'VALIDATION_FAILED',
+          'Choose benefit recipients from the people in your organisation.',
+          { field: 'benefitRecipientIds' },
+        );
+      }
+    }
+    if (body.alcoholAmount) {
+      if (body.alcoholAmount.currency !== body.amount.currency) {
+        throw new ApiProblem(
+          422,
+          'VALIDATION_FAILED',
+          'Give the alcohol amount in the same currency as the request.',
+          { field: 'alcoholAmount' },
+        );
+      }
+      if (
+        body.alcoholAmount.amountMinor < 0 ||
+        body.alcoholAmount.amountMinor > body.amount.amountMinor
+      ) {
+        throw new ApiProblem(
+          422,
+          'VALIDATION_FAILED',
+          'The alcohol amount must be between zero and the request amount.',
+          { field: 'alcoholAmount' },
+        );
+      }
+    }
+  }
+
+  /** The request amount (or the approved part) and its alcohol share in the reporting currency at plan rate. */
+  private policyAmounts(
+    r: RequestRow,
+    amountMinor: number,
+    budgetMinor: number,
+    rates: TripletContext,
+    remainingPct: number,
+  ) {
+    const reporting = (minor: number) =>
+      minor > 0
+        ? unwrap(buildTriplet({ amountMinor: minor, currency: r.currency as CurrencyCode }, rates))
+            .reporting.amountMinor
+        : 0;
+    return {
+      reportingMinor: reporting(amountMinor),
+      budgetMinor,
+      alcoholReportingMinor: reporting(Math.min(r.alcoholAmountMinor ?? 0, amountMinor)),
+      remainingPct,
+    };
   }
 
   /** Additional funds and event budgets: the event's currency, its lifecycle, and estimate + tolerance. */
@@ -729,6 +858,25 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     }
     const overBudget = check.outcome === 'warning' || r.kind === 'over_budget';
     const after = check.availableMinor - budgetAmount.amountMinor;
+    // The pre-encumbrance is posted, so the ledger now counts this request in every cap total.
+    await this.requestPolicy.enforce(
+      tx,
+      actor,
+      r,
+      locked.row,
+      this.policyAmounts(
+        r,
+        r.amountMinor,
+        budgetAmount.amountMinor,
+        {
+          budgetCurrency: locked.currency,
+          reportingCurrency: actor.reportingCurrency,
+          rates: pctx.rates,
+        },
+        locked.balances.authorized > 0 ? Math.floor((after * 100) / locked.balances.authorized) : 0,
+      ),
+      'submit',
+    );
     const submitted = unwrap(
       requestMachine.next(r.status, r.status === 'changes_requested' ? 'resubmit' : 'submit'),
     );
@@ -1025,6 +1173,14 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
             updatedAt: new Date(),
           })
           .where(eq(requests.id, r.id));
+        // Accepting a counter-offer approves the offered amount: the caps are checked on it as on approval.
+        await this.enforceOnApproval(
+          tx,
+          actor,
+          await this.row(tx, r.id),
+          (await this.load(tx, r.id))!,
+          offeredMinor,
+        );
 
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
@@ -1450,7 +1606,24 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       documents: await this.documents.listTx(tx, 'request', id, actor.personId),
       allowedActions: allowed,
       myTaskId,
+      benefitRecipients: await this.recipientsOf(tx, r),
+      nonEmployeeCount: r.nonEmployeeCount,
+      alcoholAmount:
+        r.alcoholAmountMinor !== null
+          ? { amountMinor: r.alcoholAmountMinor, currency: r.currency }
+          : null,
+      policyCheck: showImpact ? await this.requestPolicy.latest(tx, r.tenantId, r.id) : null,
     };
+  }
+
+  private async recipientsOf(tx: Tx, r: RequestRow): Promise<RequestDetail['benefitRecipients']> {
+    const ids = r.benefitRecipientIds ?? [];
+    if (!ids.length) return [];
+    const names = await personNames(tx, ids);
+    return ids.map((personId) => ({
+      personId,
+      displayName: names.get(personId) ?? 'Former employee',
+    }));
   }
 
   /** Each submission as recorded in its audit entry, oldest first (entries before snapshots carry the amount only). */

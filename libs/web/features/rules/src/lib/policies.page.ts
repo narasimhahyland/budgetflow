@@ -198,6 +198,10 @@ const CATEGORY_LOOKS: Record<string, StatusView> = {
                         <bf-money [amountMinor]="p.leftMinor" currency="USD" />
                       </td>
                     </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4">No one has used any of their yearly limit this year.</td>
+                    </tr>
                   }
                 </tbody>
               </table>
