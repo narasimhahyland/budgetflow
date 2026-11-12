@@ -472,20 +472,24 @@
         <div class="bf-card__header">
           <h2 class="bf-card__title" id="boundary-title">Who approves what</h2>
         </div>
-        <ul class="bf-impact-list" data-testid="navan-boundary">
-          <li>
-            Navan approves trips and expenses under its own policy. BudgetFlow never approves inside
-            Navan, and AI never approves.
-          </li>
-          <li>
-            BudgetFlow keeps delegation-of-authority limits, co-funding and controls; a frozen,
-            zero, exhausted, expired or closed budget switches its event code off in Navan.
-          </li>
-          <li>
-            Spend that arrives above the remaining budget goes to the post-spend exception queue for
-            Finance.
-          </li>
-        </ul>
+        <sat-banner class="bf-banner" variant="info" data-testid="navan-boundary">
+          <sat-banner-message>
+            <ul class="bf-navan-boundary">
+              <li>
+                Navan approves trips and expenses under its own policy. BudgetFlow never approves
+                inside Navan, and AI never approves.
+              </li>
+              <li>
+                BudgetFlow keeps delegation-of-authority limits, co-funding and controls; a frozen,
+                zero, exhausted, expired or closed budget switches its event code off in Navan.
+              </li>
+              <li>
+                Spend that arrives above the remaining budget goes to the post-spend exception queue
+                for Finance.
+              </li>
+            </ul>
+          </sat-banner-message>
+        </sat-banner>
       </section>
     }
     @case ('mappings') {

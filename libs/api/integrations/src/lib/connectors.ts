@@ -491,10 +491,8 @@ export const CONNECTORS: Record<IntegrationProvider, ConnectorDefinition> = {
     category: 'expense',
     displayName: 'Navan',
     exchanges: [
-      'Inbound: card, connected-card, reimbursement, repayment, fee, adjustment, rebate and dispute transactions, with receipts',
-      'Outbound: event codes and cost centers as Navan field options, switched off when their budget stops accepting spend',
-      'Outbound: GL code, cost center and event code written back to matched transactions',
-      'Navan approves trips and expenses; BudgetFlow never approves inside Navan',
+      'Inbound: every transaction type, with receipts',
+      'Outbound: event-code options and coding write-back',
     ],
     // Navan calls run in the worker through NavanClient (OAuth client credentials); see navan/.
     testPath: '/v1/expense/custom-fields',

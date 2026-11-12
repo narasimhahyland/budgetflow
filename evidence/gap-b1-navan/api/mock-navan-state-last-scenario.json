@@ -1,0 +1,28 @@
+{
+  "tokenRequests": [
+    {
+      "at": "2026-11-12T06:42:56.196Z",
+      "grantType": "client_credentials",
+      "clientId": "budgetflow-eu-readonly",
+      "sentScope": false
+    },
+    {
+      "at": "2026-11-12T06:42:57.095Z",
+      "grantType": "client_credentials",
+      "clientId": "budgetflow-eu-client",
+      "sentScope": false
+    }
+  ],
+  "calls": [
+    {
+      "at": "2026-11-12T06:42:57.097Z",
+      "method": "GET",
+      "path": "/navan/v1/expense/custom-fields",
+      "query": {},
+      "region": "eu",
+      "status": 200
+    }
+  ],
+  "patches": [],
+  "jobs": []
+}
