@@ -11,7 +11,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
 import { importBatches } from './actuals';
-import { commitments, events } from './spend';
+import { commitments, events, requests } from './spend';
+import { people } from './org';
 import { tenants } from './tenancy';
 
 /**
@@ -338,4 +339,38 @@ export const scimOperations = pgTable(
     tokenId: uuid('token_id').references(() => apiKeys.id),
   },
   (t) => [index('scim_operations_tenant_at').on(t.tenantId, t.at)],
+);
+
+/**
+ * Hand-off of an approved request to a prefilled draft expense in the expense tool (117a): one per
+ * request. The draft is the employee's to submit; its progress (Submitted, Approved, Paid) and the
+ * amount claimed come back from the tool. Moves no money: the commitment stays encumbered until the
+ * expense line is matched in the actuals review.
+ */
+export const expenseHandoffs = pgTable(
+  'expense_handoffs',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    requestId: uuid('request_id')
+      .notNull()
+      .references(() => requests.id),
+    connectionId: uuid('connection_id')
+      .notNull()
+      .references(() => integrationConnections.id),
+    externalId: varchar('external_id', { length: 200 }).notNull(),
+    status: varchar('status', { length: 20 }).notNull().default('draft_created'),
+    /** The fields sent, as the person confirmed them. */
+    fields: jsonb('fields').notNull(),
+    claimedMinor: minor('claimed_minor'),
+    claimedCurrency: ccy('claimed_currency'),
+    history: jsonb('history').notNull().default([]),
+    createdBy: uuid('created_by').references(() => people.id),
+    createdAt: createdAt(),
+    statusChangedAt: ts('status_changed_at').notNull().default(appNow),
+  },
+  (t) => [
+    uniqueIndex('expense_handoffs_request').on(t.tenantId, t.requestId),
+    uniqueIndex('expense_handoffs_external').on(t.tenantId, t.connectionId, t.externalId),
+  ],
 );

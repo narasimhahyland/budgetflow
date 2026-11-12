@@ -85,6 +85,10 @@ export interface ConnectorDefinition {
   supportsInboundWebhook: boolean;
   objects: ObjectSpec[];
   pushes: PushSpec[];
+  /** ERPs that control budgets themselves answer a budget check before a commitment is approved. */
+  budgetCheck?: { path: string };
+  /** Expense tools that accept a prefilled draft expense for an approved request (117a). */
+  draftExpense?: { path: string; openUrl: (externalId: string) => string };
 }
 
 const text = (row: Record<string, unknown>, key: string): string => {
@@ -237,7 +241,15 @@ export const CONNECTORS: Record<IntegrationProvider, ConnectorDefinition> = {
         envelope: 'data',
         cursorField: 'name',
         source: null,
-        map: (row) => ({ externalId: text(row, 'name'), data: { name: text(row, 'name') } }),
+        // ERPNext keys a Supplier by its document name; supplier_name is the display name.
+        map: (row) => ({
+          externalId: text(row, 'name'),
+          data: {
+            name: text(row, 'supplier_name'),
+            category: text(row, 'supplier_group'),
+            country: text(row, 'country_code'),
+          },
+        }),
       },
       {
         object: 'event_codes',
@@ -328,6 +340,8 @@ export const CONNECTORS: Record<IntegrationProvider, ConnectorDefinition> = {
         externalIdPath: ['id'],
       },
     ],
+    // runBudgetCheck: the connection's `budgetCheck` setting (off, Warn or Block) decides whether it runs.
+    budgetCheck: { path: '/workday-financials/ccx/api/v1/budgetChecks' },
   },
   netsuite: {
     provider: 'netsuite',
@@ -481,10 +495,32 @@ export const CONNECTORS: Record<IntegrationProvider, ConnectorDefinition> = {
         source: 'expense',
         map: expenseLine,
       },
+      {
+        // 117a: the drafts BudgetFlow created come back with the employee's progress in Concur.
+        object: 'expense_reports',
+        direction: 'inbound',
+        path: '/concur/api/v4/expense/drafts',
+        envelope: 'Items',
+        cursorField: 'LastModified',
+        source: null,
+        map: (row) => ({
+          externalId: text(row, 'ID'),
+          data: {
+            status: text(row, 'Status'),
+            claimedAmount: text(row, 'ClaimedAmount'),
+            currency: text(row, 'CurrencyCode'),
+            at: text(row, 'LastModified'),
+          },
+        }),
+      },
     ],
     pushes: [
       { kind: 'event_code', path: '/concur/api/v3.0/common/listitems', externalIdPath: ['ID'] },
     ],
+    draftExpense: {
+      path: '/concur/api/v4/expense/drafts',
+      openUrl: (id) => `https://concur.example.test/expense/drafts/${encodeURIComponent(id)}`,
+    },
   },
   navan: {
     provider: 'navan',
@@ -701,6 +737,7 @@ export const CONNECTORS: Record<IntegrationProvider, ConnectorDefinition> = {
         map: (row) => ({
           externalId: text(row, 'id'),
           data: {
+            eventCode: text(row, 'eventCode'),
             attendee: text(row, 'attendee'),
             response: text(row, 'response'),
             at: text(row, 'at'),
@@ -731,6 +768,7 @@ export const CONNECTORS: Record<IntegrationProvider, ConnectorDefinition> = {
         map: (row) => ({
           externalId: text(row, 'id'),
           data: {
+            eventCode: text(row, 'eventCode'),
             attendee: text(row, 'attendee'),
             response: text(row, 'response'),
             at: text(row, 'at'),

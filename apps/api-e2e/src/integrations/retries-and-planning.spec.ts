@@ -9,6 +9,7 @@ import {
   MessageActionResult,
   SyncRunView,
 } from '@bf/contracts';
+import { SEED } from '@bf/seed';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { armFailure, CONNECTIONS, resetMock } from '../support/p12';
@@ -133,15 +134,9 @@ test.describe('planning import preview', () => {
       headers: await mutate('integration-admin'),
       data: { credential: 'mock-adaptive-dev-only-0002' },
     });
-    const roots = await request.get('/api/budgets', {
-      headers: await as('finance-admin'),
-      params: { limit: 100 },
-    });
-    const body = (await roots.json()) as {
-      items: { id: string; name: string; parentId: string | null }[];
-    };
-    const root = body.items.find((b) => b.parentId === null);
-    test.skip(!root, 'no root budget to map the plan onto');
+    // The seeded Employee Experience root (EX-2026), so the subject is fixed whatever other
+    // scenarios created before this one.
+    const root = { id: SEED.budgets.employeeExperience };
 
     await request.put(`/api/integrations/connections/${CONNECTIONS.adaptivePlanning}/mappings`, {
       headers: await mutate('integration-admin'),
@@ -150,7 +145,7 @@ test.describe('planning import preview', () => {
           {
             kind: 'plan_level',
             externalValue: 'Employee programs',
-            internalValue: root!.id,
+            internalValue: root.id,
           },
         ],
       },
@@ -161,7 +156,8 @@ test.describe('planning import preview', () => {
         `/api/integrations/connections/${CONNECTIONS.adaptivePlanning}/plan-import/preview`,
         {
           headers: await mutate('finance-admin'),
-          data: { externalVersion: 'FY2027 Budget, Approved', fiscalYearLabel: 'FY2027' },
+          // The root's own year: a revision, so the floor applies (a new year's roots have none).
+          data: { externalVersion: 'FY2027 Budget, Approved', fiscalYearLabel: 'FY2026' },
         },
       ),
       200,
@@ -169,7 +165,7 @@ test.describe('planning import preview', () => {
     );
     expect(preview.lines.length).toBeGreaterThan(0);
     const line = preview.lines[0];
-    expect(line.rootBudgetId).toBe(root!.id);
+    expect(line.rootBudgetId).toBe(root.id);
     expect(line.floorAmount).not.toBeNull();
     // A level with no mapping is listed rather than guessed, and blocks the import.
     expect(preview.unmappedLevels).toContain('Reserve');

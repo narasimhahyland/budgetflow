@@ -5,7 +5,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
-import type { AdaptivePlanLine, AdaptivePlanPreview, ConnectionDetail } from '@bf/contracts';
+import { RouterLink } from '@angular/router';
+import type {
+  AdaptivePlanImportResult,
+  AdaptivePlanLine,
+  AdaptivePlanPreview,
+  ConnectionDetail,
+} from '@bf/contracts';
 import { Money } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
@@ -15,8 +21,9 @@ import { sentence } from './labels';
 
 /**
  * Screen 094a, inside the connector frame: the differences between an Adaptive Planning version and
- * the root budgets, with the floor each root cannot drop below. The preview is read-only — applying
- * a plan version is the budget plan import (020a), which is where the approval lives.
+ * the root budgets, with the floor each root cannot drop below, then the import itself. Importing
+ * creates a Draft plan version through the budget plan import (020a); nothing posts until a Finance
+ * Admin (and the CEO, for new money) approves it and it is applied on Plan versions.
  */
 @Component({
   selector: 'bf-plan-import',
@@ -28,6 +35,7 @@ import { sentence } from './labels';
     MatInputModule,
     MatTableModule,
     Money,
+    RouterLink,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SAT_TAG_IMPORTS,
@@ -54,7 +62,7 @@ import { sentence } from './labels';
         </sat-banner>
       }
 
-      @if (canManage()) {
+      <div>
         <div class="bf-form">
           <mat-form-field appearance="outline">
             <mat-label>Version in the planning system</mat-label>
@@ -88,11 +96,10 @@ import { sentence } from './labels';
             Show the differences
           </button>
         </div>
-      } @else {
         <p class="bf-card__body bf-note">
-          Reading only. Previewing a plan version needs the Integration Admin role.
+          Previewing and importing a plan need root budget authority (Finance Admin).
         </p>
-      }
+      </div>
 
       @if (failure()) {
         <sat-banner class="bf-banner" variant="important" data-testid="plan-error"
@@ -100,8 +107,49 @@ import { sentence } from './labels';
         >
       }
 
+      @if (imported(); as done) {
+        <sat-banner class="bf-banner" variant="success" data-testid="plan-imported">
+          <sat-banner-message>
+            <strong>Draft plan version “{{ done.planVersionLabel }}” created.</strong>
+            Nothing has posted yet. Approve it on
+            <a routerLink="/budgets/plans">Plan versions</a>
+            @if (done.preview.requiresCeoApproval) {
+              (new money: a Finance Admin and the CEO, neither of them you)
+            }
+            and apply it there to change the root budgets.
+          </sat-banner-message>
+        </sat-banner>
+      }
+
       @if (result(); as p) {
-        @if (p.blocked) {
+        @if (p.refusedRows.length) {
+          <sat-banner class="bf-banner" variant="important" data-testid="plan-refused">
+            <sat-banner-message>
+              <strong
+                >{{ p.refusedRows.length }}
+                {{ p.refusedRows.length === 1 ? 'row is' : 'rows are' }} refused, so the plan cannot
+                be imported:</strong
+              >
+              <ul class="bf-list">
+                @for (r of p.refusedRows; track $index) {
+                  <li>{{ r.level }}: {{ r.reason }}</li>
+                }
+              </ul>
+            </sat-banner-message>
+          </sat-banner>
+        }
+        @if (p.period?.late) {
+          <sat-banner class="bf-banner" variant="warning" data-testid="plan-late">
+            <sat-banner-message>
+              <strong
+                >The plan takes effect in {{ p.period!.periodLabel }}, which is closed.</strong
+              >
+              Nothing posts to a closed period: once approved and applied it posts in
+              {{ p.period!.postsInPeriodLabel }}, flagged late.
+            </sat-banner-message>
+          </sat-banner>
+        }
+        @if (p.blocked && !p.refusedRows.length) {
           <sat-banner class="bf-banner" variant="important" data-testid="plan-floor-blocked">
             <sat-banner-message>
               <strong>This version cannot be applied as it stands.</strong>
@@ -244,9 +292,20 @@ import { sentence } from './labels';
         }
 
         <p class="bf-card__body bf-note" data-testid="plan-next-step">
-          This is a comparison, not a change. To apply it, take the version to the budget plan
-          import, where the plan version is created in Draft and approved before any money moves.
+          Importing creates a Draft plan version for these root budgets. It is approved and applied
+          on Plan versions before any money moves.
         </p>
+        <div class="bf-form__actions">
+          <button
+            mat-flat-button
+            type="button"
+            [disabled]="busy() || p.blocked || !!imported()"
+            (click)="importPlan()"
+            data-testid="plan-import"
+          >
+            Import as a draft plan version
+          </button>
+        </div>
       }
     </section>
   `,
@@ -265,6 +324,9 @@ export class PlanImport {
   protected readonly busy = signal(false);
   protected readonly failure = signal<string | null>(null);
   protected readonly result = signal<AdaptivePlanPreview | null>(null);
+  protected readonly imported = signal<AdaptivePlanImportResult | null>(null);
+  /** One key per import attempt, so a double click or a retried request imports once. */
+  private importKey = crypto.randomUUID();
 
   /** Blocked rows first, then new money, then the rest by level: a fixed order on every preview. */
   protected readonly lines = computed(() =>
@@ -273,9 +335,34 @@ export class PlanImport {
     ),
   );
 
+  protected async importPlan(): Promise<void> {
+    this.busy.set(true);
+    this.failure.set(null);
+    try {
+      this.imported.set(
+        await data(
+          this.api.importAdaptivePlan({
+            params: { connectionId: this.connection().summary.id },
+            body: {
+              externalVersion: this.version().trim(),
+              fiscalYearLabel: this.fiscalYear().trim(),
+            },
+            idempotencyKey: this.importKey,
+          }),
+        ),
+      );
+    } catch (e) {
+      this.failure.set(errorMessage(e));
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
   protected async preview(): Promise<void> {
     this.busy.set(true);
     this.failure.set(null);
+    this.imported.set(null);
+    this.importKey = crypto.randomUUID();
     try {
       this.result.set(
         await data(

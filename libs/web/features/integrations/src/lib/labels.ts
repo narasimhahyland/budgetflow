@@ -71,6 +71,7 @@ export const SYNC_OBJECT_LABELS: Record<SyncObject, string> = {
   event_codes: 'Event codes',
   card_limits: 'Card limits',
   actuals_export: 'Actuals export',
+  expense_reports: 'Draft expenses',
 };
 
 export const DIRECTION_LABELS: Record<SyncDirection, string> = {

@@ -4,6 +4,7 @@ import { FinanceModule } from '@bf/api/finance';
 import { LedgerModule } from '@bf/api/ledger';
 import { NotificationsModule } from '@bf/api/notifications';
 import { TenancyModule } from '@bf/api/tenancy';
+import { ExternalBudgetChecks } from './external-checks';
 import { Module } from '@nestjs/common';
 import { ApprovalHandlers } from './approval-handlers';
 import { ApprovalLinks } from './approval-links';
@@ -14,6 +15,7 @@ import { RoutingService } from './routing.service';
 import { SlaSweepService } from './sla-sweep.service';
 
 const SERVICES = [
+  ExternalBudgetChecks,
   ApprovalHandlers,
   ApprovalLinks,
   ApprovalsService,
