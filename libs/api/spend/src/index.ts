@@ -5,3 +5,4 @@ export * from './lib/requests.service';
 export * from './lib/spend-hooks';
 export * from './lib/budget-alerts.consumer';
 export * from './lib/spend.module';
+export * from './lib/request-policy.service';

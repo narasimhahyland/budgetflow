@@ -11,7 +11,7 @@ connection: `docs/architecture/navan-integration.md`.
 | Navan API scenarios           | 17 of 17, three runs on one stack                                                                                           | `functional/README.md`                |
 | Navan journeys                | 3 of 3 (connect, field mapping, exception queue)                                                                            | `functional/README.md`                |
 | API samples                   | sync runs, connection detail, custom fields, pushes, over-budget exceptions, mock call log                                  | `api/`                                |
-| Invariant map                 | rows 100-102                                                                                                                | `docs/testing/invariant-scenarios.md` |
+| Invariant map                 | rows 103-105                                                                                                                | `docs/testing/invariant-scenarios.md` |
 
 ## The visual failure
 

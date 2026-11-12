@@ -32,6 +32,16 @@ export const FACT_KEYS = [
   'attendee_type',
   'alcohol_requested',
   'is_cash_equivalent',
+  'employee_ytd_benefit_minor',
+  'employee_cap_remaining_minor',
+  'employee_cap_used_pct',
+  'gift_value_minor',
+  'gift_ytd_minor',
+  'gift_annual_cap_remaining_minor',
+  'alcohol_amount_minor',
+  'non_employee_count',
+  'is_intercompany',
+  'requester_recent_total_minor',
 ] as const;
 export const FactKey = z.enum(FACT_KEYS);
 
@@ -356,6 +366,23 @@ export const SimulationFactsInput = named(
       attendeeType: z.enum(['employee', 'client']).optional().default('employee'),
       alcoholRequested: z.boolean().optional().default(false),
       isCashEquivalent: z.boolean().optional().default(false),
+      employeeYtdBenefitMinor: z
+        .int()
+        .min(0)
+        .optional()
+        .describe('Year-to-date benefit of the recipient nearest the employee annual cap.'),
+      employeeCapRemainingMinor: z
+        .int()
+        .optional()
+        .describe('Employee annual cap left after the request; negative when above the cap.'),
+      employeeCapUsedPct: z.int().min(0).optional(),
+      giftValueMinor: z.int().min(0).optional().describe('Gift value per recipient.'),
+      giftYtdMinor: z.int().min(0).optional(),
+      giftAnnualCapRemainingMinor: z.int().optional(),
+      alcoholAmountMinor: z.int().min(0).optional(),
+      nonEmployeeCount: z.int().min(0).max(10000).optional(),
+      isIntercompany: z.boolean().optional(),
+      requesterRecentTotalMinor: z.int().min(0).optional(),
     })
     .strict(),
 );

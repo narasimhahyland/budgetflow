@@ -265,7 +265,11 @@ export class AiWhy {
       AI-generated. Check the figures before you act. Model {{ provenance().modelId }}
       {{ provenance().modelVersion }} through {{ provenance().provider }}. Query log entry
       <!-- Ids are generated per call, so visual baselines mask them. -->
-      <span data-testid="ai-ids">{{ ids() }}</span
+      <span data-testid="ai-ids"
+        ><span class="bf-ai-id">{{ queryLogId() }}</span>
+        @if (suggestionId(); as s) {
+          <span>, suggestion </span><span class="bf-ai-id">{{ s }}</span>
+        }</span
       >.
     </p>
   `,
@@ -277,26 +281,30 @@ export class AiWhy {
     }
     /*
      * The ids change per call, and eight characters of a proportional font do not all come out the
-     * same width, so a wider id used to rewrap this sentence and shift the rest of the page down by
-     * a line. Monospace makes eight characters one width whatever they are, and nowrap keeps the
-     * sentence from breaking inside the ids. The full stop follows the span with no space between,
-     * so it can never end up alone on the next line either.
+     * same width, so a wider id rewrapped this sentence and changed the height of the card. The
+     * visual mask hides the glyphs but not their width. Each id therefore sits in a box of fixed
+     * width, wide enough for any eight hex characters (eight of the widest, b or d, measure 9.14ch
+     * in the body-small font), so line breaking sees the same width whatever the id is. Nowrap
+     * keeps the sentence from breaking inside the ids, and the full stop follows the span with no
+     * space between, so it never ends up alone on the next line.
      */
     .bf-ai-provenance [data-testid='ai-ids'] {
       white-space: nowrap;
+    }
+    .bf-ai-provenance .bf-ai-id {
+      display: inline-block;
+      inline-size: 9.25ch;
+      font-variant-numeric: tabular-nums;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiProvenanceNote {
   readonly provenance = input.required<AiProvenance>();
-
-  /** One text node, so no template whitespace can land between the ids and the full stop. */
-  protected readonly ids = computed(() => {
-    const { queryLogId, suggestionId } = this.provenance();
-    const suggestion = suggestionId ? `, suggestion ${suggestionId.slice(0, 8)}` : '';
-    return `${queryLogId.slice(0, 8)}${suggestion}`;
-  });
+  protected readonly queryLogId = computed(() => this.provenance().queryLogId.slice(0, 8));
+  protected readonly suggestionId = computed(
+    () => this.provenance().suggestionId?.slice(0, 8) ?? null,
+  );
 }
 
 /**

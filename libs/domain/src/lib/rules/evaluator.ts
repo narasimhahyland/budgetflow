@@ -15,7 +15,17 @@ export type FactKey =
   | 'vendor_status'
   | 'attendee_type'
   | 'alcohol_requested'
-  | 'is_cash_equivalent';
+  | 'is_cash_equivalent'
+  | 'employee_ytd_benefit_minor'
+  | 'employee_cap_remaining_minor'
+  | 'employee_cap_used_pct'
+  | 'gift_value_minor'
+  | 'gift_ytd_minor'
+  | 'gift_annual_cap_remaining_minor'
+  | 'alcohol_amount_minor'
+  | 'non_employee_count'
+  | 'is_intercompany'
+  | 'requester_recent_total_minor';
 
 export type ConditionOperator = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'not_in';
 
@@ -78,6 +88,22 @@ export interface EvaluationFacts {
   attendee_type: string;
   alcohol_requested: boolean;
   is_cash_equivalent: boolean;
+  /** Year-to-date benefit of the request's recipient nearest the cap, this request included (reporting minor). */
+  employee_ytd_benefit_minor: number;
+  /** The annual cap's block limit minus that year-to-date benefit: 0 exactly at the cap, -1 one unit above. */
+  employee_cap_remaining_minor: number;
+  employee_cap_used_pct: number;
+  /** Gift value per recipient (reporting minor). */
+  gift_value_minor: number;
+  /** Gifts the recipient nearest the annual gift cap received this year, this request included. */
+  gift_ytd_minor: number;
+  gift_annual_cap_remaining_minor: number;
+  alcohol_amount_minor: number;
+  non_employee_count: number;
+  /** The budget's legal entity differs from the requester's or a recipient's employing entity. */
+  is_intercompany: boolean;
+  /** The requester's live requests over the last 30 days, this one included (reporting minor). */
+  requester_recent_total_minor: number;
   org_unit_ids?: readonly string[];
   request_kind?: string;
   date?: string;
