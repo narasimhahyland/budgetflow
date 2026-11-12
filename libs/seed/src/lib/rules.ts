@@ -25,6 +25,9 @@ export const P7_RULES = {
   alcohol: seedId('80000000', 26),
   splitPurchase: seedId('80000000', 28),
   contributionThresholds: seedId('80000000', 30),
+  employeeCapBlock: seedId('80000000', 31),
+  employeeCapWarn: seedId('80000000', 32),
+  giftAnnualCap: seedId('80000000', 33),
 } as const;
 
 export const P7_DOA_V2 = seedId('83000000', 2);
@@ -359,6 +362,65 @@ export const P7_RULE_SEEDS: RuleSeed[] = [
         explanation:
           'This is just under an approval threshold and the same requester raised a similar request this week. Finance reviews it after the spend.',
         validFrom: '2026-02-01',
+      },
+    ],
+  },
+  // Gap A2: the employee annual benefit cap and the annual gift cap, read from the cap facts. The cap
+  // amounts live in policy (screens 071 and 073), so these rules compare what is left, not a figure.
+  {
+    id: P7_RULES.employeeCapBlock,
+    code: 'R-31',
+    name: 'Employee annual benefit cap',
+    family: 'spending_limits',
+    templateCode: null,
+    publishedBy: 'finance-admin',
+    versions: [
+      {
+        version: 1,
+        priority: 920,
+        effect: 'block',
+        conditions: [{ fact: 'employee_cap_remaining_minor', op: 'lt', value: 0 }],
+        explanation:
+          'This would take a recipient past their annual employee benefit cap. Lower the amount, or remove the recipient who has reached the cap.',
+        validFrom: '2026-01-01',
+      },
+    ],
+  },
+  {
+    id: P7_RULES.employeeCapWarn,
+    code: 'R-32',
+    name: 'Employee benefit nearing the annual cap',
+    family: 'spending_limits',
+    templateCode: null,
+    publishedBy: 'finance-admin',
+    versions: [
+      {
+        version: 1,
+        priority: 450,
+        effect: 'warn',
+        conditions: [{ fact: 'employee_cap_used_pct', op: 'gte', value: 80 }],
+        explanation:
+          'A recipient has used 80% or more of their annual employee benefit cap with this request. It can go ahead; later requests for them may be blocked.',
+        validFrom: '2026-01-01',
+      },
+    ],
+  },
+  {
+    id: P7_RULES.giftAnnualCap,
+    code: 'R-33',
+    name: 'Annual gift cap per recipient',
+    family: 'gifts_entertainment',
+    templateCode: 'TPL-GIFTS-ENT',
+    publishedBy: 'finance-admin',
+    versions: [
+      {
+        version: 1,
+        priority: 910,
+        effect: 'block',
+        conditions: [{ fact: 'gift_annual_cap_remaining_minor', op: 'lt', value: 0 }],
+        explanation:
+          'This gift would take a recipient past the annual gift cap. Choose a smaller gift or another recipient.',
+        validFrom: '2026-01-01',
       },
     ],
   },

@@ -2,7 +2,7 @@ import { personNames, RoutingService } from '@bf/api/approvals';
 import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import { budgets, orgUnits, withTenant, type Db } from '@bf/api/db';
 import type { TestWorkflowRouteRequest, TestWorkflowRouteResponse } from '@bf/contracts';
-import { evaluateRules, type EvaluationFacts } from '@bf/domain';
+import { capRuleFacts, evaluateRules, neutralCapFacts, type EvaluationFacts } from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { RulesService } from './rules.service';
@@ -61,6 +61,7 @@ export class WorkflowTestService {
         attendee_type: 'employee',
         alcohol_requested: false,
         is_cash_equivalent: false,
+        ...capRuleFacts(neutralCapFacts()),
         request_kind: body.requestKind,
         date: todayUtc(),
       };

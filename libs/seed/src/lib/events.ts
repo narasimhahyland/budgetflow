@@ -135,7 +135,24 @@ export const P5_EVENT = {
   },
 };
 
-export const P5_REQUESTS = [
+/** Fictional Bengaluru engineers from the org seed who receive the seeded team-lunch benefits. */
+const SEED_PEOPLE = {
+  rohan: '40000000-0000-4000-8000-000000000102',
+  meera: '40000000-0000-4000-8000-000000000103',
+  kabir: '40000000-0000-4000-8000-000000000104',
+};
+
+export const P5_REQUESTS: {
+  id: string;
+  title: string;
+  purpose: string;
+  spendType: string;
+  category: string;
+  amount: ReturnType<typeof amount>;
+  benefitRecipientIds?: string[];
+  outcome: 'pending' | 'approved' | 'rejected' | 'draft';
+  reason?: string;
+}[] = [
   {
     id: P5_IDS.requests.teamLunch,
     title: 'Team lunch: Platform squad',
@@ -143,6 +160,8 @@ export const P5_REQUESTS = [
     spendType: 'team_lunch',
     category: 'team_lunch',
     amount: amount(21_600, 1_800_000),
+    // Gap A2: the employees the lunch benefits, so their annual caps count it ("employees nearest cap").
+    benefitRecipientIds: [SEED_PEOPLE.rohan, SEED_PEOPLE.meera, SEED_PEOPLE.kabir],
     outcome: 'pending' as const,
   },
   {
@@ -152,6 +171,7 @@ export const P5_REQUESTS = [
     spendType: 'team_lunch',
     category: 'team_lunch',
     amount: amount(11_400, 950_000),
+    benefitRecipientIds: [SEED_PEOPLE.rohan, SEED_PEOPLE.meera],
     outcome: 'approved' as const,
   },
   {

@@ -21,6 +21,8 @@ import type {
   ActivityEntry,
   DecisionRequest,
   Money as MoneyAmount,
+  PolicyCheckView,
+  RequestDetail,
   RequestVersion,
 } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
@@ -514,6 +516,61 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
                   <p>{{ r.purpose }}</p>
                 </div>
               </section>
+              @if (r.policyCheck; as pc) {
+                <section class="bf-card" aria-labelledby="policy-title" data-testid="policy-check">
+                  <div class="bf-card__header">
+                    <h2 class="bf-card__title" id="policy-title">Policy check</h2>
+                    <sat-status-tag [status]="policyTone(pc.effect)">{{
+                      pc.outcomeLabel
+                    }}</sat-status-tag>
+                  </div>
+                  <div class="bf-section">
+                    <p>{{ pc.explanation }}</p>
+                    <p class="bf-card__hint">
+                      Checked at {{ pc.stage === 'approve' ? 'approval' : 'submission' }},
+                      {{ pc.evaluatedAt | bfDateTime: session.timezone() }}
+                    </p>
+                  </div>
+                  @if (r.benefitRecipients.length || pc.facts.length) {
+                    <dl class="bf-facts">
+                      @if (r.benefitRecipients.length) {
+                        <div>
+                          <dt>Benefit recipients</dt>
+                          <dd>{{ recipientNames(r) }}</dd>
+                        </div>
+                      }
+                      @if (pc.capPersonName) {
+                        <div>
+                          <dt>Nearest their cap</dt>
+                          <dd>{{ pc.capPersonName }}</dd>
+                        </div>
+                      }
+                      @for (f of pc.facts; track f.fact) {
+                        <div>
+                          <dt>{{ f.label }}</dt>
+                          <dd>{{ f.value }}</dd>
+                        </div>
+                      }
+                    </dl>
+                  }
+                  @if (pc.matches.length) {
+                    <div class="bf-section">
+                      <h3 class="bf-section__title">Rules that matched</h3>
+                      <ul class="bf-timeline">
+                        @for (m of pc.matches; track m.ruleCode) {
+                          <li>
+                            <strong
+                              >{{ m.ruleCode }} v{{ m.version }} {{ m.ruleName
+                              }}{{ m.decisive ? ' (decides)' : '' }}</strong
+                            >
+                            <span>{{ m.explanation }}</span>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </section>
+              }
               @if (r.route; as route) {
                 <section class="bf-card" aria-labelledby="route-title">
                   <div class="bf-card__header">
@@ -695,6 +752,20 @@ export class RequestDetailPage {
 
   protected closedLabel(status: string): string {
     return status === 'rejected' ? 'rejected' : status === 'withdrawn' ? 'withdrawn' : 'cancelled';
+  }
+
+  /** Soft warning in the warning tone, a block in the important tone (budget-safety visual rules). */
+  protected policyTone(
+    effect: PolicyCheckView['effect'],
+  ): 'important' | 'warning' | 'info' | 'neutral' {
+    if (effect === 'block' || effect === 'freeze') return 'important';
+    if (effect === 'warn') return 'warning';
+    if (effect === 'require_approval') return 'info';
+    return 'neutral';
+  }
+
+  protected recipientNames(r: RequestDetail): string {
+    return r.benefitRecipients.map((p) => p.displayName).join(', ');
   }
 
   protected spendLabel(type: string): string {

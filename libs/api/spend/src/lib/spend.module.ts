@@ -4,6 +4,7 @@ import { BudgetsModule } from '@bf/api/budgets';
 import { DocumentsModule } from '@bf/api/documents';
 import { LedgerModule } from '@bf/api/ledger';
 import { NotificationsModule } from '@bf/api/notifications';
+import { RulesModule } from '@bf/api/rules';
 import { TenancyModule } from '@bf/api/tenancy';
 import { Module } from '@nestjs/common';
 import { BudgetAlertsConsumer } from './budget-alerts.consumer';
@@ -11,6 +12,7 @@ import { CommitmentsService } from './commitments.service';
 import { FundingSourcesService } from './funding-sources.service';
 import { PostingSupport } from './posting-support';
 import { RequestsController } from './requests.controller';
+import { RequestPolicyService } from './request-policy.service';
 import { RequestsService } from './requests.service';
 import { SpendHooks } from './spend-hooks';
 
@@ -19,6 +21,7 @@ const SERVICES = [
   FundingSourcesService,
   CommitmentsService,
   RequestsService,
+  RequestPolicyService,
   SpendHooks,
   BudgetAlertsConsumer,
 ];
@@ -33,6 +36,7 @@ const SERVICES = [
     NotificationsModule,
     TenancyModule,
     DocumentsModule,
+    RulesModule,
   ],
   providers: SERVICES,
   exports: SERVICES,

@@ -11217,7 +11217,17 @@
               "vendor_status",
               "attendee_type",
               "alcohol_requested",
-              "is_cash_equivalent"
+              "is_cash_equivalent",
+              "employee_ytd_benefit_minor",
+              "employee_cap_remaining_minor",
+              "employee_cap_used_pct",
+              "gift_value_minor",
+              "gift_ytd_minor",
+              "gift_annual_cap_remaining_minor",
+              "alcohol_amount_minor",
+              "non_employee_count",
+              "is_intercompany",
+              "requester_recent_total_minor"
             ]
           },
           "op": {
@@ -14850,6 +14860,27 @@
             "format": "date",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
             "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "benefitRecipientIds": {
+            "description": "Employees who receive the benefit (gifts, meals, events). Their annual caps apply; the amount is split evenly between them and any non-employees.",
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          "nonEmployeeCount": {
+            "description": "People outside the company who share the benefit (clients, guests).",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "alcoholAmount": {
+            "description": "The part of the amount spent on alcohol, in the request currency.",
+            "$ref": "#/components/schemas/Money"
           },
           "submit": {
             "description": "Submit now (default) or save a draft.",
@@ -33591,6 +33622,165 @@
         ],
         "additionalProperties": false
       },
+      "PolicyCheckView": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": [
+              "submit",
+              "approve"
+            ],
+            "description": "When the rules engine made this decision."
+          },
+          "effect": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "block",
+                  "freeze",
+                  "require_approval",
+                  "warn",
+                  "auto_approve"
+                ]
+              },
+              {
+                "type": "string",
+                "const": "none"
+              }
+            ]
+          },
+          "outcomeLabel": {
+            "type": "string",
+            "description": "The decision in plain English."
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Why: the decisive rule’s explanation, or why no rule applied."
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ruleCode": {
+                  "type": "string"
+                },
+                "ruleName": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "effect": {
+                  "type": "string",
+                  "enum": [
+                    "block",
+                    "freeze",
+                    "require_approval",
+                    "warn",
+                    "auto_approve"
+                  ]
+                },
+                "explanation": {
+                  "type": "string"
+                },
+                "decisive": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "ruleCode",
+                "ruleName",
+                "version",
+                "effect",
+                "explanation",
+                "decisive"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fact": {
+                  "type": "string",
+                  "enum": [
+                    "amount_reporting_minor",
+                    "amount_budget_minor",
+                    "amount_per_person_minor",
+                    "remaining_pct",
+                    "category",
+                    "spend_type",
+                    "location",
+                    "legal_entity",
+                    "requester_role",
+                    "seniority",
+                    "employee_count",
+                    "vendor_status",
+                    "attendee_type",
+                    "alcohol_requested",
+                    "is_cash_equivalent",
+                    "employee_ytd_benefit_minor",
+                    "employee_cap_remaining_minor",
+                    "employee_cap_used_pct",
+                    "gift_value_minor",
+                    "gift_ytd_minor",
+                    "gift_annual_cap_remaining_minor",
+                    "alcohol_amount_minor",
+                    "non_employee_count",
+                    "is_intercompany",
+                    "requester_recent_total_minor"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "fact",
+                "label",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The cap and policy facts the rules read, formatted for display."
+          },
+          "capPersonName": {
+            "description": "The recipient nearest the employee or gift cap, when a cap applies.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "stage",
+          "effect",
+          "outcomeLabel",
+          "explanation",
+          "evaluatedAt",
+          "matches",
+          "facts",
+          "capPersonName"
+        ],
+        "additionalProperties": false,
+        "description": "The latest rules-engine decision on the request, with rule versions and facts."
+      },
       "PolicyConfigsBundle": {
         "type": "object",
         "properties": {
@@ -34589,6 +34779,7 @@
               "FORECAST_ALREADY_ACCEPTED",
               "FORECAST_SUPERSEDED",
               "FORECAST_NOT_SUBMITTED",
+              "POLICY_BLOCKED",
               "FORECAST_CYCLE_ALREADY_OPEN",
               "FORECAST_NOT_IN_SCOPE",
               "BOARD_PACK_NOT_READY",
@@ -38852,6 +39043,61 @@
               }
             ],
             "description": "The viewer’s pending approval task, if any."
+          },
+          "benefitRecipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "personId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "description": "Opaque identifier (UUID)."
+                },
+                "displayName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "personId",
+                "displayName"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Employees who receive the benefit; their annual caps apply."
+          },
+          "nonEmployeeCount": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "alcoholAmount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "policyCheck": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PolicyCheckView"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -38890,7 +39136,11 @@
           "versions",
           "documents",
           "allowedActions",
-          "myTaskId"
+          "myTaskId",
+          "benefitRecipients",
+          "nonEmployeeCount",
+          "alcoholAmount",
+          "policyCheck"
         ],
         "additionalProperties": false
       },
@@ -43322,6 +43572,57 @@
           "isCashEquivalent": {
             "default": false,
             "type": "boolean"
+          },
+          "employeeYtdBenefitMinor": {
+            "description": "Year-to-date benefit of the recipient nearest the employee annual cap.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "employeeCapRemainingMinor": {
+            "description": "Employee annual cap left after the request; negative when above the cap.",
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "employeeCapUsedPct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "giftValueMinor": {
+            "description": "Gift value per recipient.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "giftYtdMinor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "giftAnnualCapRemainingMinor": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "alcoholAmountMinor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "nonEmployeeCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "isIntercompany": {
+            "type": "boolean"
+          },
+          "requesterRecentTotalMinor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
           }
         },
         "required": [

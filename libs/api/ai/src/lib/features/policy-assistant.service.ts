@@ -32,6 +32,7 @@ const EFFECT_OUTCOMES: Record<string, PolicyExplanation['outcome']> = {
   warn: 'needs_approval',
   auto_approve: 'allowed',
   allow: 'allowed',
+  none: 'allowed',
 };
 
 /**

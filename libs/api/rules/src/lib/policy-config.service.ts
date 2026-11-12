@@ -8,7 +8,15 @@ import {
   type RequestActor,
   todayUtc,
 } from '@bf/api/core';
-import { policyConfigs, withTenant, workflowTemplates, type Db, type Tx } from '@bf/api/db';
+import {
+  orgUnits,
+  people,
+  policyConfigs,
+  withTenant,
+  workflowTemplates,
+  type Db,
+  type Tx,
+} from '@bf/api/db';
 import type {
   PolicyConfigsBundle,
   SaveWorkflowRouteRequest,
@@ -20,15 +28,27 @@ import type {
   WorkflowRouteView,
   WorkflowStepDef,
 } from '@bf/contracts';
-import { validateThresholdBands } from '@bf/domain';
+import {
+  benefitByPerson,
+  validateThresholdBands,
+  type EmployeeCapPolicy,
+  type GiftCapPolicy,
+} from '@bf/domain';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
+import { benefitSpends, capWindowOn } from './cap-usage';
 import {
   DEFAULT_POLICY_CONFIGS,
   DEFAULT_POLICY_TEMPLATES,
   DEFAULT_THRESHOLD_FAMILIES,
   DEFAULT_WORKFLOW_STEPS,
 } from './rules-defaults';
+
+/** Gifts are requested under this spend type (the category policy's gift category). */
+export const GIFT_SPEND_TYPE = 'gifts';
+
+/** How many people the "employees nearest cap" list shows. */
+const NEAREST_CAP_COUNT = 10;
 
 interface Ctx {
   idempotencyKey: string;
@@ -333,8 +353,82 @@ export class PolicyConfigService {
         | PolicyConfigsBundle['slaNotifications']
         | undefined;
       if (sla) bundle.slaNotifications = sla;
+      const employeeCap = bundle.spendingLimits.employeeCap;
+      bundle.spendingLimits = {
+        ...bundle.spendingLimits,
+        employeeCap: {
+          ...employeeCap,
+          employeesNearestCap: await this.nearestCap(tx, {
+            annualCapMinor: employeeCap.annualCapUsdMinor,
+            includedCategories: employeeCap.includedCategories,
+            warnAtPct: employeeCap.warnAtPct,
+            blockAtPct: employeeCap.blockAtPct,
+          }),
+        },
+      };
       return bundle;
     });
+  }
+
+  /**
+   * The employee annual cap and the annual gift cap as saved (or the shipped defaults). Read inside the
+   * caller's transaction with no policy check: request submission and approval enforce the caps for
+   * people who cannot read the policy screens.
+   */
+  async capSettings(
+    tx: Tx,
+    tenantId: string,
+  ): Promise<{ employeeCap: EmployeeCapPolicy; giftCap: GiftCapPolicy }> {
+    const saved = await this.sections(tx, tenantId);
+    const cap = (saved.get('employee_cap') ??
+      DEFAULT_POLICY_CONFIGS.spendingLimits
+        .employeeCap) as PolicyConfigsBundle['spendingLimits']['employeeCap'];
+    const gifts = (saved.get('gifts_entertainment') ??
+      DEFAULT_POLICY_CONFIGS.giftsEntertainment) as PolicyConfigsBundle['giftsEntertainment'];
+    return {
+      employeeCap: {
+        annualCapMinor: cap.annualCapUsdMinor,
+        includedCategories: cap.includedCategories,
+        warnAtPct: cap.warnAtPct,
+        blockAtPct: cap.blockAtPct,
+      },
+      giftCap: { annualCapMinor: gifts.giftAnnualCapMinor, giftSpendType: GIFT_SPEND_TYPE },
+    };
+  }
+
+  /** The employees with the most of their annual cap used this year, from live ledger spend. */
+  private async nearestCap(
+    tx: Tx,
+    cap: EmployeeCapPolicy,
+  ): Promise<PolicyConfigsBundle['spendingLimits']['employeeCap']['employeesNearestCap']> {
+    const window = await capWindowOn(tx, todayUtc());
+    if (!window) return [];
+    const used = benefitByPerson(
+      await benefitSpends(tx, { spendTypes: cap.includedCategories, window }),
+    );
+    const top = [...used.entries()]
+      .filter(([, minor]) => minor > 0)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, NEAREST_CAP_COUNT);
+    if (!top.length) return [];
+    const rows = await tx
+      .select({ id: people.id, name: people.displayName, location: orgUnits.name })
+      .from(people)
+      .leftJoin(orgUnits, eq(orgUnits.id, people.locationOrgUnitId))
+      .where(
+        inArray(
+          people.id,
+          top.map(([id]) => id),
+        ),
+      );
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return top.map(([personId, usedMinor]) => ({
+      personId,
+      displayName: byId.get(personId)?.name ?? 'Former employee',
+      location: byId.get(personId)?.location ?? 'Not set',
+      usedMinor,
+      leftMinor: cap.annualCapMinor - usedMinor,
+    }));
   }
 
   async updatePolicyConfig(
