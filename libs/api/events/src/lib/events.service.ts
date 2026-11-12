@@ -68,6 +68,7 @@ import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { and, asc, desc, eq, inArray, like, or, sql, type SQL } from 'drizzle-orm';
 import { randomBytes } from 'node:crypto';
 import { asFundingSource } from '@bf/api/spend';
+import { BenefitsService } from '@bf/api/finance';
 import { EventCloseChecks } from './event-close-checks';
 
 export type EventRow = typeof events.$inferSelect;
@@ -111,6 +112,7 @@ export class EventsService implements OnModuleInit {
     private readonly analytics: AnalyticsService,
     private readonly hooks: SpendHooks,
     private readonly closeChecks: EventCloseChecks,
+    private readonly benefits: BenefitsService,
   ) {}
 
   onModuleInit(): void {
@@ -825,6 +827,7 @@ export class EventsService implements OnModuleInit {
           this.pc(actor, 'events.close', ctx),
         );
         await this.setStatus(tx, e, closed, { closedAt: new Date() });
+        const benefitEntryIds = await this.recordAttendeeBenefits(tx, actor, e);
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
@@ -846,6 +849,9 @@ export class EventsService implements OnModuleInit {
               })),
             },
             journalIds: { from: null, to: journalIds },
+            ...(benefitEntryIds.length
+              ? { benefitEntryIds: { from: null, to: benefitEntryIds } }
+              : {}),
           },
         });
         return { event: await this.detailTx(tx, actor, e.id), surplusReturns: returns };
@@ -1176,6 +1182,63 @@ export class EventsService implements OnModuleInit {
   }
 
   // Reads -----------------------------------------------------------------------------------------
+
+  /**
+   * Gap B3 (080h): at close, each employee marked Attended or Walk-in gets the event's final cost per
+   * attendee (actual spend in the event currency, split evenly over everyone who attended, guests
+   * included) in the employee benefit ledger. The entries record costs already posted; they never
+   * move budget money. Idempotent per event and person; listed in the close's audit event.
+   */
+  private async recordAttendeeBenefits(
+    tx: Tx,
+    actor: RequestActor,
+    e: EventRow,
+  ): Promise<string[]> {
+    const attended = (await this.participantsOf(tx, e.id)).filter(
+      (p) => p.attendanceStatus === 'attended' || p.attendanceStatus === 'walk_in',
+    );
+    if (!attended.length) return [];
+    // Final cost in the event currency: consumed amounts in another currency convert at the
+    // locked plan rate of the event date (integer minor units, half-even once per commitment).
+    const day = (e.endsAt ?? e.startsAt ?? new Date()).toISOString().slice(0, 10);
+    let actualMinor = 0;
+    try {
+      for (const c of await this.commitmentsService.listForEvent(tx, e.id)) {
+        actualMinor +=
+          c.consumed.currency === e.currency
+            ? c.consumed.amountMinor
+            : await this.benefits.convertAtPlan(tx, actor, c.consumed, e.currency, day);
+      }
+    } catch {
+      // No plan rate for a commitment's currency (a lookup failure, not a SQL error): the close
+      // goes ahead without benefit entries rather than recording a wrong share.
+      return [];
+    }
+    if (actualMinor <= 0) return [];
+    const shares = unwrap(splitEvenly(actualMinor, attended.length));
+    const ids: string[] = [];
+    for (const [i, p] of attended.entries()) {
+      if (!p.personId || !p.isEmployee || shares[i] <= 0) continue;
+      const row = await this.benefits.record(
+        tx,
+        actor,
+        {
+          personId: p.personId,
+          legalEntityId: p.employingEntityId,
+          eventId: e.id,
+          entryDate: day,
+          benefitType: e.spendType,
+          amount: { amountMinor: shares[i], currency: e.currency },
+          sourceType: 'event',
+          sourceId: e.id,
+          description: e.name,
+        },
+        { audit: false, lenient: true },
+      );
+      if (row) ids.push(row.id);
+    }
+    return ids;
+  }
 
   async participantsOf(tx: Tx, eventId: string) {
     return tx

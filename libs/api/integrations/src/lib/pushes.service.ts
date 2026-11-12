@@ -45,7 +45,7 @@ export class PushesService {
 
   list(
     actor: RequestActor,
-    q: { connectionId?: string; kind?: 'event_code' | 'card_limit' },
+    q: { connectionId?: string; kind?: PushItemView['kind'] },
   ): Promise<PushItemList> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       this.policy.assert(actor, 'integration.read', tenantOf(actor));

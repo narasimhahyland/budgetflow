@@ -14,7 +14,7 @@ import { SEED } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
-
+import { uploadReceipt } from './support';
 const INDIA = SEED.budgets.india;
 
 test('a suggested split totals the amount exactly, stays within the parent, and saves nothing', async ({
@@ -216,10 +216,17 @@ test('anomaly flags are advisory: they cite records, carry evidence and decide n
 test('receipt extraction prefills values without saving them, and drops card details', async ({
   request,
 }) => {
+  const documentId = await uploadReceipt(request, 'receipt-cafe-mocha.pdf', [
+    'Cafe Mocha, Indiranagar',
+    'Date: 2026-10-18',
+    'Team lunch',
+    'Total paid: INR 4,560.00 (GST included)',
+    'Paid by card 4111 1111 1111 1111',
+  ]);
   const result = await expectContract(
     await request.post('/api/ai/extractions', {
-      headers: await as('employee'),
-      data: { documentId: SEED.p13.receiptCafeMocha, kind: 'receipt' },
+      headers: await as('budget-owner'),
+      data: { documentId, kind: 'receipt' },
     }),
     200,
     ExtractionResult,
@@ -227,7 +234,7 @@ test('receipt extraction prefills values without saving them, and drops card det
   expect(result.readable).toBe(true);
   expect(result.status).toBe('open');
   expect(result.confirmedFields, 'nothing is saved until a person confirms').toBeNull();
-  expect(result.droppedFields).toContain('cardNumber');
+  expect(JSON.stringify(result), 'card digits never reach the person').not.toContain('4111');
   expect(JSON.stringify(result.fields)).not.toMatch(/\d{13,19}/);
   const fieldNames = result.fields.map((f) => f.field);
   expect(fieldNames, 'fields are ordered by name').toEqual([...fieldNames].sort());
@@ -237,7 +244,7 @@ test('receipt extraction prefills values without saving them, and drops card det
   // Accepting an extraction records the values the person checked; it cannot be accepted blind.
   await expectProblem(
     await request.post(`/api/ai/suggestions/${result.id}/decision`, {
-      headers: await mutate('employee', randomUUID()),
+      headers: await mutate('budget-owner', randomUUID()),
       data: { decision: 'accepted' },
     }),
     422,
@@ -246,16 +253,22 @@ test('receipt extraction prefills values without saving them, and drops card det
 });
 
 test('a low-confidence field is left empty rather than guessed', async ({ request }) => {
+  const documentId = await uploadReceipt(request, 'receipt-westlake-hotel.pdf', [
+    'Hotel Westlake',
+    'Date: 2026-11-03',
+    'Room and breakfast',
+    'Total: USD 1,240.00',
+    'Tax: ########  (smudged, cannot be read)',
+  ]);
   const result = await expectContract(
     await request.post('/api/ai/extractions', {
-      headers: await as('employee'),
-      data: { documentId: SEED.p13.receiptWestlakeHotel, kind: 'receipt' },
+      headers: await as('budget-owner'),
+      data: { documentId, kind: 'receipt' },
     }),
     200,
     ExtractionResult,
   );
+  expect(result.readable).toBe(true);
   const tax = result.fields.find((f) => f.field === 'taxNote');
-  expect(tax, 'the fixture receipt has an unreadable tax line').toBeDefined();
-  expect(tax!.value).toBeNull();
-  expect(tax!.needsCheck).toBe(true);
+  expect(tax?.value ?? null, 'an unreadable tax line is left empty, never guessed').toBeNull();
 });

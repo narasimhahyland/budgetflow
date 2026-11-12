@@ -13,7 +13,6 @@ import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { allocateOk, createChild, createRoot } from '../support/factory';
 import { reason, usd } from './support';
-
 async function periods(request: import('@playwright/test').APIRequestContext) {
   const body = await expectContract(
     await request.get('/api/close/periods', { headers: await as('finance-admin') }),

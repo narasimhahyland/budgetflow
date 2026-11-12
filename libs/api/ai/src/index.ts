@@ -1,5 +1,6 @@
 export * from './lib/provider/ai-provider';
-export * from './lib/provider/fake-provider';
+export * from './lib/provider/bedrock-provider';
+export * from './lib/provider/recorded-provider';
 export * from './lib/minimization';
 export * from './lib/figure-guard';
 export * from './lib/allocation-math';

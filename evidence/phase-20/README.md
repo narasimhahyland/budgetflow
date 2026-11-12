@@ -58,17 +58,17 @@ The definition of done is functional proof on the running product, not unit test
 
 ## Decisions the user took
 
-| Decision                                                 | What it means                                                                                    |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Keep the fake AI provider                                | The repository stays token-free and every AI test reproducible; no real model has been exercised |
-| Purge AI conversation turns (built)                      | The retention window is a deletion, not a read filter                                            |
-| Ship the twelve retention periods as provisional         | Finance and legal have not signed them off; the product says so on its own screen                |
-| Read-only roles may edit a summary draft                 | Collaborative editing is the intent                                                              |
-| Accessibility and dark theme deferred                    | `AGENTS.md`; not part of Phase 17                                                                |
-| Isolated Testcontainers runs deferred                    | API scenarios run serially on one stack                                                          |
-| Refuse to start on public development secrets            | A deployment must set five secrets; the local stack opts in                                      |
-| Legal holds read only by admins, finance and the Auditor | Retention policies stay readable by every member                                                 |
-| CI records no traces unless `BF_CI_TRACES=1`             | Public artifacts carry no tokens; #82 can still get a trace                                      |
+| Decision                                                                | What it means                                                                                                                                |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bedrock in the product, recorded provider in tests (revised 2026-11-12) | `AI_PROVIDER=bedrock` calls Amazon Bedrock; the default `recorded` keeps every AI test offline and token-free (`evidence/ai-offline-tests/`) |
+| Purge AI conversation turns (built)                                     | The retention window is a deletion, not a read filter                                                                                        |
+| Ship the twelve retention periods as provisional                        | Finance and legal have not signed them off; the product says so on its own screen                                                            |
+| Read-only roles may edit a summary draft                                | Collaborative editing is the intent                                                                                                          |
+| Accessibility and dark theme deferred                                   | `AGENTS.md`; not part of Phase 17                                                                                                            |
+| Isolated Testcontainers runs deferred                                   | API scenarios run serially on one stack                                                                                                      |
+| Refuse to start on public development secrets                           | A deployment must set five secrets; the local stack opts in                                                                                  |
+| Legal holds read only by admins, finance and the Auditor                | Retention policies stay readable by every member                                                                                             |
+| CI records no traces unless `BF_CI_TRACES=1`                            | Public artifacts carry no tokens; #82 can still get a trace                                                                                  |
 
 ## Open at the end of the build
 

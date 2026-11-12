@@ -152,12 +152,12 @@ than a wave later. Keep it out of the gate: it is a measurement, not a pass cond
 to, so they are not re-opened as questions. The detail behind them is in
 [section 6](#6-known-gaps-worth-a-decision).
 
-| Question                                                             | Decision                    | What it commits the build to                                                                                                                                                                                                                                                                                                                                                            |
-| -------------------------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Wire a real AI provider?**                                         | **No — keep the fake.**     | `AI_PROVIDER` stays `z.enum(['fake'])`, the repository stays token-free and every AI test stays reproducible. The standing consequence is that **nothing in the AI layer has been exercised against a real model**, and the first live provider will be an integration project rather than a config change. Do not treat the single-value enum as an oversight.                         |
-| **Purge `ai_conversation_turns`, or stop promising a window?**       | **Make it a real purge.**   | **This is the only one of the four that is work.** `conversationHistoryDays` (default 30, range 7–90) is today a read-side SQL filter in `libs/api/ai/src/lib/features/ask.service.ts` line 403, and nothing deletes a row. It becomes an actual deletion, so screen `113a` means what it says. Accepted cost: history the evaluation sets might have wanted is gone once it is purged. |
-| **Sign off the twelve retention periods, or keep them provisional?** | **Ship as provisional.**    | `signoff_status` stays `'provisional'` on every seeded category. The product therefore states a retention position that **finance and legal have not approved**, and says so on its own screen. This is accepted deliberately, not pending; it needs no further chasing unless those functions ask.                                                                                     |
-| **May a read-only role edit a summary draft's text?**                | **Yes — keep it as built.** | `editSection` and `regenerate` keep `assertDraft` plus the `report.read` reader check, so anyone who can read summaries can rewrite an unapproved draft. Collaborative editing is the intent. Note the asymmetry is now deliberate: `draft` and `approve` still require `audit.read` through `assertAuthor`. Do not "fix" this to match them.                                           |
+| Question                                                             | Decision                                                                             | What it commits the build to                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Wire a real AI provider?**                                         | **Yes — Bedrock, with an offline recorded provider for tests (revised 2026-11-12).** | Amazon Bedrock is in the product (`AI_PROVIDER=bedrock`, credentials from the environment; [#119](https://github.com/narasimhahyland/budgetflow/pull/119)). The default, and what the local stack, functional runs and CI use, is `AI_PROVIDER=recorded`: committed, scrubbed recordings, no live call and no token. Every AI scenario, eval and journey runs on it.                    |
+| **Purge `ai_conversation_turns`, or stop promising a window?**       | **Make it a real purge.**                                                            | **This is the only one of the four that is work.** `conversationHistoryDays` (default 30, range 7–90) is today a read-side SQL filter in `libs/api/ai/src/lib/features/ask.service.ts` line 403, and nothing deletes a row. It becomes an actual deletion, so screen `113a` means what it says. Accepted cost: history the evaluation sets might have wanted is gone once it is purged. |
+| **Sign off the twelve retention periods, or keep them provisional?** | **Ship as provisional.**                                                             | `signoff_status` stays `'provisional'` on every seeded category. The product therefore states a retention position that **finance and legal have not approved**, and says so on its own screen. This is accepted deliberately, not pending; it needs no further chasing unless those functions ask.                                                                                     |
+| **May a read-only role edit a summary draft's text?**                | **Yes — keep it as built.**                                                          | `editSection` and `regenerate` keep `assertDraft` plus the `report.read` reader check, so anyone who can read summaries can rewrite an unapproved draft. Collaborative editing is the intent. Note the asymmetry is now deliberate: `draft` and `approve` still require `audit.read` through `assertAuthor`. Do not "fix" this to match them.                                           |
 
 The one piece of work this block created, the AI conversation purge, is done: rows past each
 tenant's window are deleted by a sweep, not filtered on read
@@ -251,19 +251,21 @@ These are stated plainly here because they are easy to miss and awkward to disco
 were decided on 2026-11-09** — each section ends with the decision, so read the decision before
 acting on the description above it. [Section 2.4](#24-decisions-the-user-has-taken) is the summary.
 
-### The AI layer never calls a model
+### The AI layer calls Bedrock in the product and recordings in tests
 
-`AI_PROVIDER` is `z.enum(['fake'])` in `libs/api/core/src/lib/config.ts` — a **single-value enum**. No
-model token exists anywhere in the repository or the Compose stack. The AI features are real and
-genuinely guarded (retrieval scoped through `PolicyService`, data minimization with per-feature
-allow-lists, a figure guard, an append-only query log, a person confirming every action), but every
-answer comes from `FakeAiProvider` fixtures. That makes the tests reproducible; it also means
-**nothing here has been exercised against a real model**, and the first live provider will be a real
-integration project, not a config change.
+`AI_PROVIDER` is `z.enum(['recorded', 'bedrock'])` in `libs/api/core/src/lib/config.ts`, default
+`recorded`. `bedrock` calls Amazon Bedrock with credentials from the server environment
+(`docs/ai-harness/bedrock.md`). `recorded` answers offline from committed, scrubbed recordings
+(`libs/api/ai/src/lib/provider/recordings/`); the local stack, functional runs and CI use it, so no
+model token exists in the repository, the Compose defaults or CI. The guards (scoped retrieval,
+minimization, schema check, figure guard, query log, a person confirming every action) are the same
+for both.
 
-**Decided 2026-11-09: keep the fake.** The repository stays token-free and the AI tests stay
-reproducible. The consequence above stands as an accepted, standing limitation rather than a gap to
-close: the single-value enum is the decision, not an oversight.
+**Decided 2026-11-09: keep the fake. Revised 2026-11-12:** keep Bedrock in the product (#119) and add
+back an offline test provider, so the AI layer stays tested without live calls or tokens. The
+guardrail and extraction evals, the figure-guard and schema-discard scenarios and the accuracy
+thresholds that #119 removed are restored (`evidence/ai-offline-tests/`). Live answers are only
+exercised when someone starts a stack with `AI_PROVIDER=bedrock` and credentials.
 
 ### AI conversation text is retained indefinitely, not for 30 days
 
@@ -350,6 +352,14 @@ Both failure modes have happened: merging underneath a live agent stranded its c
 branch ([PR #72](https://github.com/narasimhahyland/budgetflow/pull/72), closed because the same fix
 landed through PR #68 while its author was still working), and two agents sent into one worktree
 collided over the same files.
+
+### A stacked PR merges into its base branch, not `main`
+
+When PR B is opened against PR A's branch and A merges first, merging B lands it on A's leftover
+branch: GitHub shows B as merged while `main` never gets it. It has happened twice (#99 into
+`fix/clock-stage-3`, #121 into `feat/gap-b2-dashboards-1`). After the base merges, retarget the
+stacked PR to `main` before merging it, and check with
+`git merge-base --is-ancestor <merge commit> origin/main`.
 
 ### Commit and push checkpoints constantly
 

@@ -6,6 +6,9 @@ import { expect, test } from '@playwright/test';
 import { expectShell } from '../support/auth';
 import { authFile } from '../support/roles';
 import { getJson, money, postJson, type Money } from './support';
+import { onRecordedProvider } from '../ai/recorded';
+
+onRecordedProvider();
 
 interface SummaryFigure {
   token: string;

@@ -1,0 +1,89 @@
+{
+  "items": [
+    {
+      "id": "e3d89a79-8062-4426-91ce-d659ca12857d",
+      "connectionId": "cad08061-4303-4607-850b-dd291d8b3344",
+      "provider": "navan",
+      "kind": "event_code",
+      "reference": "BLR-ANNUAL-26",
+      "amount": null,
+      "validFrom": null,
+      "validTo": null,
+      "status": "pushed",
+      "externalId": "cf-event-code:BLR-ANNUAL-26",
+      "lastError": null,
+      "pushedAt": "2026-11-12T06:42:44.413Z"
+    },
+    {
+      "id": "6d08c806-a720-4281-a89d-f68828473ece",
+      "connectionId": "cad08061-4303-4607-850b-dd291d8b3344",
+      "provider": "navan",
+      "kind": "event_code",
+      "reference": "EV-2026-DIWALI",
+      "amount": null,
+      "validFrom": null,
+      "validTo": null,
+      "status": "pushed",
+      "externalId": "cf-event-code:EV-2026-DIWALI",
+      "lastError": null,
+      "pushedAt": "2026-11-12T06:42:44.415Z"
+    },
+    {
+      "id": "1f533551-f656-481d-aa0a-ba5142442811",
+      "connectionId": "cad08061-4303-4607-850b-dd291d8b3344",
+      "provider": "navan",
+      "kind": "event_code",
+      "reference": "EV-2026-WELLBEING",
+      "amount": null,
+      "validFrom": null,
+      "validTo": null,
+      "status": "pushed",
+      "externalId": "cf-event-code:EV-2026-WELLBEING",
+      "lastError": null,
+      "pushedAt": "2026-11-12T06:42:44.417Z"
+    },
+    {
+      "id": "339d19c5-3f04-4584-b36d-aa93945b1f12",
+      "connectionId": "cad08061-4303-4607-850b-dd291d8b3344",
+      "provider": "navan",
+      "kind": "event_code",
+      "reference": "HYD-HACK-26",
+      "amount": null,
+      "validFrom": null,
+      "validTo": null,
+      "status": "pushed",
+      "externalId": "cf-event-code:HYD-HACK-26",
+      "lastError": null,
+      "pushedAt": "2026-11-12T06:42:44.419Z"
+    },
+    {
+      "id": "47fd0601-9e4d-47db-a7c3-bafdf0735941",
+      "connectionId": "cad08061-4303-4607-850b-dd291d8b3344",
+      "provider": "navan",
+      "kind": "event_code",
+      "reference": "NYC-OFFSITE-26",
+      "amount": null,
+      "validFrom": null,
+      "validTo": null,
+      "status": "pushed",
+      "externalId": "cf-event-code:NYC-OFFSITE-26",
+      "lastError": null,
+      "pushedAt": "2026-11-12T06:42:44.421Z"
+    },
+    {
+      "id": "eaab4b2c-4368-4ef6-8219-c53d0a69083a",
+      "connectionId": "cad08061-4303-4607-850b-dd291d8b3344",
+      "provider": "navan",
+      "kind": "event_code",
+      "reference": "SC-1D365055",
+      "amount": null,
+      "validFrom": null,
+      "validTo": null,
+      "status": "pushed",
+      "externalId": "cf-event-code:SC-1D365055",
+      "lastError": null,
+      "pushedAt": "2026-11-12T06:42:48.347Z"
+    }
+  ],
+  "cardLimitPushEnabled": false
+}

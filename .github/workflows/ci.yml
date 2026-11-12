@@ -125,8 +125,11 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.SATORI_PACKAGES_TOKEN }}
       - name: Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Functional gates (stack with MinIO and the fake AI provider, deterministic seed)
+      - name: Functional gates (stack with MinIO and the offline recorded AI provider, deterministic seed; never a live model)
         run: bash scripts/gate.sh functional --evidence tmp/ci-evidence
+        env:
+          # Pinned so no repository or runner variable can point CI at a live model.
+          AI_PROVIDER: recorded
       - name: Upload functional reports and evidence
         if: always()
         uses: actions/upload-artifact@v7

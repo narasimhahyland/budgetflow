@@ -19,7 +19,12 @@ const EnvSchema = z.object({
     .string()
     .default('budgetflow-web')
     .describe('Public OIDC client the web app signs in with (served by /api/auth/config).'),
-  AI_PROVIDER: z.enum(['fake']).default('fake'),
+  AI_PROVIDER: z
+    .enum(['recorded', 'bedrock'])
+    .default('recorded')
+    .describe(
+      'recorded: offline answers from committed recordings (local stack, functional runs, CI). bedrock: Amazon Bedrock, credentials from the environment.',
+    ),
   // Compose passes `FIXED_NOW: ${BF_FIXED_NOW:-}`, which is an empty string when the variable is
   // unset rather than absent, so empty has to mean "not set" or an ordinary stack fails to boot.
   FIXED_NOW: z

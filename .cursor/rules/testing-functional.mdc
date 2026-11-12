@@ -10,7 +10,7 @@ A feature is done when it is proven to work end to end on the running product, a
 
 ## Stack and data
 - `scripts/stack.sh up && scripts/stack.sh reset` starts Docker Compose (Postgres 16, Keycloak, Mailpit, MinIO, API, worker, web) and loads the deterministic seed: tenant Hyland (all other seed data fictional), one Keycloak user per role, fixed ids, amounts, rates and fiscal calendar, fixed clock for journeys.
-- Functional runs and CI use MinIO for documents (no in-memory document store) and the deterministic fake `AiProvider` (fixed answers per prompt fixture) for AI features.
+- Functional runs and CI use MinIO for documents (no in-memory document store) and, for AI features, the offline recorded provider (`AI_PROVIDER=recorded`, the default; no credentials, no live call). Every AI scenario and journey runs on it, none skipped; Bedrock runs only when a stack is started with `AI_PROVIDER=bedrock` and credentials.
 - `functional-api`, `functional-e2e` and `visual` run in that order against one stack, so `scripts/gate.sh` reseeds between them: every suite starts from the deterministic seed. Write each suite as if it owns a freshly seeded stack, and never rely on what another suite left behind.
 - A journey must not depend on state the API scenarios mutate. Those scenarios legitimately settle exceptions, approve authority versions, connect integrations and match actuals, so anything a journey reads may have moved by the time it runs.
 - Never point checks at shared or real environments.

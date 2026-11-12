@@ -1,0 +1,11 @@
+{
+  "status": 403,
+  "body": {
+    "type": "urn:budgetflow:problem:forbidden",
+    "title": "Forbidden",
+    "status": 403,
+    "code": "FORBIDDEN",
+    "detail": "You do not have permission to do this.",
+    "instance": "/api/finance/benefits/ledger"
+  }
+}

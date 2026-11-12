@@ -1,0 +1,10 @@
+scripts/gate.sh lint typecheck build — 2026-11-12T07:46:09Z — commit c1e05579
+PASS|secrets|7s
+PASS|lint|5s
+PASS|styles|3s
+PASS|satori|40s
+PASS|typecheck|4s
+PASS|build|1s
+PASS|openapi|1s
+PASS|db|1s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report

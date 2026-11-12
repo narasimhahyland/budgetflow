@@ -12,13 +12,20 @@ export interface Fact {
   fields: Record<string, string | number | boolean | null>;
 }
 
+export interface AiAttachment {
+  contentType: string;
+  bytes: Uint8Array;
+}
+
 export interface AiCall<T> {
   feature: AiFeature;
-  /** The recorded-answer key the fake provider dispatches on. */
+  /** Names the instructions the provider gives the model (`ask`, `policy_explain`, `extract_fields`, ...). */
   task: string;
   facts: readonly Fact[];
   /** The asker's own words, length-capped. Never another person's text. */
   prompt?: string;
+  /** Files the task must read (a receipt or quote). Only extraction sends any. */
+  attachments?: readonly AiAttachment[];
   /** Model output is parsed against this; anything that fails validation is discarded, never used. */
   schema: z.ZodType<T>;
 }
@@ -31,8 +38,9 @@ export interface AiRawResult {
 }
 
 /**
- * Every model call goes through this interface. Functional runs and CI use the deterministic fake
- * provider; a real provider's keys come from the server environment and never from code or the database.
+ * Every model call goes through this interface. `AI_PROVIDER` picks the implementation: the offline
+ * `RecordedAiProvider` (default; local stack, functional runs, CI) or `BedrockAiProvider`, whose
+ * credentials come from the server environment and never from code or the database.
  */
 export abstract class AiProvider {
   abstract readonly id: string;

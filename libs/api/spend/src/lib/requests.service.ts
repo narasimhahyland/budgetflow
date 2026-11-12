@@ -70,6 +70,7 @@ import { CommitmentsService } from './commitments.service';
 import { FundingSourcesService } from './funding-sources.service';
 import { PostingSupport, type PostCtx } from './posting-support';
 import { RequestPolicyService } from './request-policy.service';
+import { RequestTaxService } from './request-tax.service';
 import { SpendHooks } from './spend-hooks';
 
 type RequestRow = typeof requests.$inferSelect;
@@ -125,6 +126,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     private readonly hooks: SpendHooks,
     private readonly planning: PlanningService,
     private readonly requestPolicy: RequestPolicyService,
+    private readonly requestTax: RequestTaxService,
   ) {}
 
   onModuleInit(): void {
@@ -327,9 +329,13 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         r.kind as 'budget' | 'additional_fund',
       );
     } else {
-      const res = await this.commitments.encumberApproved(tx, pc, r.commitmentId!, approvedMinor);
+      // A taxed request is approved in net terms; the commitment holds net + non-recoverable tax.
+      const usesMinor = await this.requestTax.consumptionFor(tx, r, approvedMinor);
+      const res = await this.commitments.encumberApproved(tx, pc, r.commitmentId!, usesMinor);
       changes['commitmentId'] = r.commitmentId;
       changes['journalIds'] = res.journalIds;
+      const benefitIds = await this.requestTax.recordBenefits(tx, ctx.actor, r, usesMinor);
+      if (benefitIds.length) changes['benefitEntryIds'] = benefitIds;
       await this.decided(tx, r, {
         status,
         approvedMinor,
@@ -354,9 +360,10 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
   ): Promise<void> {
     const locked = (await this.posting.lock(tx, [r.budgetId!])).get(r.budgetId!)!;
     const pctx = await this.posting.context(tx, locked, actor.reportingCurrency);
+    const usesMinor = await this.requestTax.consumptionFor(tx, r, approvedMinor);
     const budgetMinor = unwrap(
       buildTriplet(
-        { amountMinor: approvedMinor, currency: r.currency as CurrencyCode },
+        { amountMinor: usesMinor, currency: r.currency as CurrencyCode },
         {
           budgetCurrency: locked.currency,
           reportingCurrency: actor.reportingCurrency,
@@ -378,7 +385,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       locked.row,
       this.policyAmounts(
         r,
-        approvedMinor,
+        usesMinor,
         budgetMinor,
         {
           budgetCurrency: locked.currency,
@@ -529,6 +536,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
           await this.posting.budget(tx, body.budgetId),
         );
         await this.assertBenefitDetails(tx, body);
+        this.requestTax.assertTaxInput(body);
         if (body.kind === 'additional_fund') {
           if (!body.eventId)
             throw new ApiProblem(
@@ -558,6 +566,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
             eventId: body.eventId ?? null,
             amountMinor: body.amount.amountMinor,
             currency: body.amount.currency,
+            taxAmountMinor: body.tax?.amount.amountMinor || null,
             spendType: body.spendType,
             title: body.title,
             purpose: body.purpose,
@@ -804,10 +813,15 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     unwrap(acceptsNewActivity(locked.status));
     const pc = this.postCtx(actor, 'requests.submit', ctx);
     const pctx = await this.posting.context(tx, locked, actor.reportingCurrency);
+    // Gap B3: a taxed request uses its net amount plus the tax the entity cannot recover.
+    const taxed = isEventFunding(r)
+      ? null
+      : await this.requestTax.splitOnSubmit(tx, r, locked.legalEntityId);
+    const usesMinor = taxed ? taxed.split.consumptionMinor : r.amountMinor;
     const check = await this.planning.spendCheckInTx(tx, locked.row, {
       amountMinor: unwrap(
         buildTriplet(
-          { amountMinor: r.amountMinor, currency: r.currency as CurrencyCode },
+          { amountMinor: usesMinor, currency: r.currency as CurrencyCode },
           {
             budgetCurrency: locked.currency,
             reportingCurrency: actor.reportingCurrency,
@@ -851,10 +865,11 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         requestId: r.id,
         eventId: null,
         description: r.title,
-        amount: { amountMinor: r.amountMinor, currency: r.currency as CurrencyCode },
+        amount: { amountMinor: usesMinor, currency: r.currency as CurrencyCode },
       });
       budgetAmount = res.budgetAmount;
       commitmentId = res.commitmentId;
+      if (taxed) await this.requestTax.record(tx, actor.tenantId, commitmentId, taxed, r.currency);
     }
     const overBudget = check.outcome === 'warning' || r.kind === 'over_budget';
     const after = check.availableMinor - budgetAmount.amountMinor;
@@ -866,7 +881,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       locked.row,
       this.policyAmounts(
         r,
-        r.amountMinor,
+        usesMinor,
         budgetAmount.amountMinor,
         {
           budgetCurrency: locked.currency,
@@ -1049,10 +1064,16 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         if (body.amount && body.amount.currency !== r.currency) {
           throw new ApiProblem(422, 'CURRENCY_MISMATCH', `Keep the request in ${r.currency}.`);
         }
+        this.requestTax.assertTaxInput({
+          kind: r.kind,
+          amount: { currency: r.currency },
+          tax: body.tax,
+        });
         await tx
           .update(requests)
           .set({
             amountMinor: body.amount?.amountMinor ?? r.amountMinor,
+            taxAmountMinor: this.requestTax.taxOnResubmit(r, body),
             title: body.title ?? r.title,
             purpose: body.purpose ?? r.purpose,
             neededBy: body.neededBy ?? r.neededBy,
@@ -1151,15 +1172,20 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
             currency: locked.currency,
           });
         } else {
+          // A taxed request keeps its recorded split, scaled to the offered net amount.
+          const scaled = await this.requestTax.scaled(tx, r, offeredMinor);
+          const usesMinor = scaled ? scaled.split.consumptionMinor : offeredMinor;
           const pre = await this.commitments.preEncumberForRequest(tx, pc, {
             budget: locked,
             requestId: r.id,
             eventId: null,
             description: r.title,
-            amount: { amountMinor: offeredMinor, currency: r.currency as CurrencyCode },
+            amount: { amountMinor: usesMinor, currency: r.currency as CurrencyCode },
           });
           commitmentId = pre.commitmentId;
-          const enc = await this.commitments.encumberApproved(tx, pc, commitmentId, offeredMinor);
+          if (scaled)
+            await this.requestTax.record(tx, actor.tenantId, commitmentId, scaled, r.currency);
+          const enc = await this.commitments.encumberApproved(tx, pc, commitmentId, usesMinor);
           journalIds.push(...enc.journalIds);
         }
 
@@ -1181,6 +1207,16 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
           (await this.load(tx, r.id))!,
           offeredMinor,
         );
+        // Gap B3: the offered share of a request naming recipients is their benefit (080h).
+        const accepted = await this.row(tx, r.id);
+        const benefitIds = isEventFunding(r)
+          ? []
+          : await this.requestTax.recordBenefits(
+              tx,
+              actor,
+              accepted,
+              await this.requestTax.consumptionFor(tx, accepted, offeredMinor),
+            );
 
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
@@ -1198,6 +1234,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
               to: { amountMinor: offeredMinor, currency: r.currency },
             },
             journalIds: { from: null, to: journalIds },
+            ...(benefitIds.length ? { benefitEntryIds: { from: null, to: benefitIds } } : {}),
           },
         });
         return this.detailTx(tx, actor, id);
@@ -1613,6 +1650,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
           ? { amountMinor: r.alcoholAmountMinor, currency: r.currency }
           : null,
       policyCheck: showImpact ? await this.requestPolicy.latest(tx, r.tenantId, r.id) : null,
+      tax: await this.requestTax.detail(tx, actor, r, s.budget.legalEntityId),
     };
   }
 
@@ -1754,6 +1792,9 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       currency: string;
       spendType: string;
       eventId?: string;
+      taxMinor?: number;
+      employees?: number;
+      others?: number;
     },
   ): Promise<RoutePreview> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
@@ -1763,16 +1804,29 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         await this.posting.budget(tx, q.budgetId),
       );
       const ctx = await this.posting.context(tx, budget, actor.reportingCurrency);
+      // Gap B3: price the preview as submission will, net + non-recoverable tax.
+      const usesMinor = q.taxMinor
+        ? (
+            await this.requestTax.splitPreview(tx, {
+              legalEntityId: budget.legalEntityId,
+              categoryCode: q.spendType,
+              netMinor: q.amountMinor,
+              taxMinor: q.taxMinor,
+              employees: q.employees ?? 0,
+              others: q.others ?? 0,
+            })
+          ).split.consumptionMinor
+        : q.amountMinor;
       const moved = postSpendMovement(
         {
           kind: 'pre_encumber',
           budget: await this.lockFree(tx, budget),
-          amount: { amountMinor: q.amountMinor, currency: q.currency as CurrencyCode },
+          amount: { amountMinor: usesMinor, currency: q.currency as CurrencyCode },
           journalType: 'commitment',
         },
         ctx,
       );
-      const budgetMinor = moved.ok ? moved.value.budgetAmount.amountMinor : q.amountMinor;
+      const budgetMinor = moved.ok ? moved.value.budgetAmount.amountMinor : usesMinor;
       const impact = await this.impacts.impact(tx, budget, budgetMinor, {
         pendingIncludesThis: false,
       });

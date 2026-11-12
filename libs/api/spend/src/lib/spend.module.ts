@@ -2,6 +2,7 @@ import { ApprovalsModule } from '@bf/api/approvals';
 import { AuditModule } from '@bf/api/audit';
 import { BudgetsModule } from '@bf/api/budgets';
 import { DocumentsModule } from '@bf/api/documents';
+import { FinanceModule } from '@bf/api/finance';
 import { LedgerModule } from '@bf/api/ledger';
 import { NotificationsModule } from '@bf/api/notifications';
 import { RulesModule } from '@bf/api/rules';
@@ -13,6 +14,7 @@ import { FundingSourcesService } from './funding-sources.service';
 import { PostingSupport } from './posting-support';
 import { RequestsController } from './requests.controller';
 import { RequestPolicyService } from './request-policy.service';
+import { RequestTaxService } from './request-tax.service';
 import { RequestsService } from './requests.service';
 import { SpendHooks } from './spend-hooks';
 
@@ -22,6 +24,7 @@ const SERVICES = [
   CommitmentsService,
   RequestsService,
   RequestPolicyService,
+  RequestTaxService,
   SpendHooks,
   BudgetAlertsConsumer,
 ];
@@ -37,6 +40,7 @@ const SERVICES = [
     TenancyModule,
     DocumentsModule,
     RulesModule,
+    FinanceModule,
   ],
   providers: SERVICES,
   exports: SERVICES,

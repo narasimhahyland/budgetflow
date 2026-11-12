@@ -13,6 +13,7 @@ import { seedIntegrations } from './integrations';
 import { seedOrg } from './org';
 import { seedReports } from './reports';
 import { seedRules } from './rules';
+import { seedTax } from './tax';
 
 /**
  * Seed steps added by later phases, run in order after the Phase 1 reference data and budget tree.
@@ -72,5 +73,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'BI and assistant connectors, an allowed no-code platform, marketplace partners and widgets',
     phase: 'P16',
     run: seedEcosystem,
+  },
+  {
+    name: 'tax recoverability rules, benefit-in-kind thresholds and recorded benefits (gap B3)',
+    phase: 'B3',
+    run: seedTax,
   },
 ];

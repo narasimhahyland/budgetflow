@@ -13,6 +13,11 @@ const Env = z.object({
   INTEGRATIONS_SECRET_KEY: z.string().optional(),
   INTEGRATIONS_WEBHOOK_TOLERANCE_SECONDS: z.coerce.number().int().min(30).max(900).default(300),
   INTEGRATIONS_HTTP_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(5_000),
+  /**
+   * Navan sandbox and live connections call the real Navan API. Off unless set to exactly `true`, and
+   * never set in CI: functional runs and CI use the mock provider (16a, decision D4).
+   */
+  NAVAN_LIVE_ENABLED: z.enum(['true', 'false']).default('false'),
 });
 
 /** Dev-only fallback, public in this repository: used only where secretOrDev allows it. */
@@ -33,6 +38,7 @@ export interface IntegrationsConfig {
   secretKey: string;
   webhookToleranceSeconds: number;
   httpTimeoutMs: number;
+  navanLiveEnabled: boolean;
 }
 
 export function integrationsConfig(env: NodeJS.ProcessEnv = process.env): IntegrationsConfig {
@@ -46,5 +52,6 @@ export function integrationsConfig(env: NodeJS.ProcessEnv = process.env): Integr
     secretKey: secretOrDev('INTEGRATIONS_SECRET_KEY', key, DEV_SECRET_KEY, env),
     webhookToleranceSeconds: parsed.INTEGRATIONS_WEBHOOK_TOLERANCE_SECONDS,
     httpTimeoutMs: parsed.INTEGRATIONS_HTTP_TIMEOUT_MS,
+    navanLiveEnabled: parsed.NAVAN_LIVE_ENABLED === 'true',
   };
 }

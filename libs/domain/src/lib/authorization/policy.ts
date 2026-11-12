@@ -90,6 +90,15 @@ export const ACTIONS = [
   'break_glass.request',
   'break_glass.decide',
   'break_glass.read',
+  /**
+   * Tax-aware consumption and the employee benefit ledger (080g, 080h). Finance drafts tax rules
+   * (`master_data.manage`) and thresholds (`benefits.manage`); the tax approver publishes them.
+   * `benefits.read` covers individual benefit entries, which are personal data.
+   */
+  'tax.read',
+  'tax.publish',
+  'benefits.read',
+  'benefits.manage',
 ] as const;
 export type Action = (typeof ACTIONS)[number];
 
@@ -201,6 +210,9 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'rules.manage': 'tenant',
     'exception.resolve': 'tenant',
     'ai.confirm_finance': 'tenant',
+    'tax.read': 'tenant',
+    'benefits.read': 'tenant',
+    'benefits.manage': 'tenant',
   },
   'finance-controller': {
     'tenant.read': 'tenant',
@@ -230,6 +242,11 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'flags.confirm_finance': 'tenant',
     'retention.confirm': 'tenant',
     'legal_hold.manage': 'tenant',
+    // The default tax approver (080g, 080h): publishes tax rules and benefit thresholds.
+    'tax.read': 'tenant',
+    'tax.publish': 'tenant',
+    'benefits.read': 'tenant',
+    'benefits.manage': 'tenant',
   },
   'budget-owner': OWNER,
   'department-head': OWNER,
@@ -267,6 +284,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     // Runs the integrity checks on demand (screen 113) and places legal holds with the Finance Controller.
     'integrity.run': 'tenant',
     'legal_hold.manage': 'tenant',
+    'tax.read': 'tenant',
+    'benefits.read': 'tenant',
   },
   'integration-admin': {
     'tenant.read': 'tenant',

@@ -1,22 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { AiProvider, type AiCall, type AiRawResult, type Fact } from './ai-provider';
+import { RECORDED_DOCUMENTS } from './recordings/documents';
+import { GUARDRAIL_FIXTURES } from './recordings/guardrail-fixtures';
+
+/** Bump when a recording or a task responder changes, so query logs and eval runs say which set answered. */
+export const RECORDINGS_VERSION = '2026.11-r1';
 
 /**
- * The deterministic provider used by the local stack, functional runs and CI. It never reaches the
- * network: every answer is derived from the minimized facts it was given, so the same question over
- * the same data always produces the same words, and nothing in a test depends on a live model.
+ * The offline provider used by the local stack, functional runs and CI (`AI_PROVIDER=recorded`, the
+ * default). It never reaches the network and needs no credentials, so no test ever makes a live
+ * model call or costs a token. Amazon Bedrock (`AI_PROVIDER=bedrock`) is selected explicitly.
+ *
+ * Answers come from, in order:
+ *  1. Recorded guardrail fixtures, keyed by prompt fixture (`__eval:<name>`): invented figures,
+ *     broken shapes, outages, workaround advice (`recordings/guardrail-fixtures.ts`).
+ *  2. Recorded document readings, keyed by file name, for extraction (`recordings/documents.ts`).
+ *  3. A recorded answer shape per task, filled only by copying values from the minimized facts
+ *     the call carries. Scenarios create their own budgets, lines and uploads, so a reply keyed on
+ *     exact fact values could never be replayed; the shape is fixed and the figures are the facts'.
  *
  * Numbers are only ever copied from the facts (`formatMinor` reads a fact value); the provider never
  * does arithmetic that ends up in text, which is what the figure guard then verifies.
- *
- * Prompts beginning with `__eval:` are recorded fixtures used by the evaluation sets to exercise the
- * guardrails (invented figure, invalid shape, provider down). They exist only in this fake provider.
  */
 @Injectable()
-export class FakeAiProvider extends AiProvider {
-  readonly id = 'fake';
-  readonly modelId = 'budgetflow-fake';
-  readonly modelVersion = '2026.11';
+export class RecordedAiProvider extends AiProvider {
+  readonly id = 'recorded';
+  readonly modelId = 'budgetflow-recorded';
+  readonly modelVersion = RECORDINGS_VERSION;
   readonly configured = true;
 
   async generate<T>(call: AiCall<T>): Promise<AiRawResult> {
@@ -50,52 +60,15 @@ export class FakeAiProvider extends AiProvider {
     }
   }
 
-  // Recorded guardrail fixtures ------------------------------------------------------------------
-
+  /** Recorded guardrail fixture for `__eval:<name>`; an unknown name answers like a normal question. */
   private fixture(prompt: string, task: string, facts: readonly Fact[]): AiRawResult {
     const name = prompt.slice('__eval:'.length).split(/\s/)[0];
-    if (name === 'unavailable') return { output: null, unavailable: true };
-    if (name === 'schema-invalid') return { output: { answer: 42, why: 'not an array' } };
-    if (name === 'invent-figure' && task === 'summary_sections')
-      return {
-        output: {
-          sections: [
-            {
-              key: 'headline',
-              // A figure written by the model instead of read from the ledger: the guard must
-              // discard the whole draft rather than show a number nobody can trace.
-              text: 'October spend was USD 61,450.00, comfortably inside plan.',
-            },
-          ],
-          confidence: 'high',
-        },
-      };
-    if (name === 'invent-figure' && task === 'variance_commentary')
-      return {
-        output: {
-          text: 'The forecast is USD 9,900.00 above authorized because of extra catering.',
-          needsExplanation: false,
-          confidence: 'high',
-        },
-      };
-    if (name === 'invent-figure')
-      return {
-        output: {
-          answer: 'Your budgets have USD 123,456.78 available right now.',
-          why: ['Figure written by the model rather than read from the ledger.'],
-          followUps: [],
-          confidence: 'high',
-        },
-      };
-    if (name === 'workaround' && task === 'policy_explain')
-      return {
-        output: {
-          explanation: 'Split the request into two so each one stays under the limit.',
-          options: ['Submit two smaller requests instead'],
-          confidence: 'high',
-        },
-      };
-    return { output: this.ask(prompt, facts) };
+    const byTask = GUARDRAIL_FIXTURES[name];
+    const recording = byTask?.[task] ?? byTask?.['*'];
+    if (!recording) return { output: this.ask(prompt, facts) };
+    return 'unavailable' in recording
+      ? { output: null, unavailable: true }
+      : { output: structuredClone(recording.output) };
   }
 
   // Per-task recorded answers --------------------------------------------------------------------
@@ -380,33 +353,3 @@ function followUpsFor(prompt: string, budgets: readonly Fact[]): string[] {
   if (/left|available|remaining/i.test(prompt)) out.push('What is committed but not spent yet?');
   return out.slice(0, 3);
 }
-
-/**
- * Recorded extraction answers keyed by the seeded file name, so receipt and quote extraction is
- * reproducible offline. Card digits, signatures and contact details are never among the fields.
- */
-const RECORDED_DOCUMENTS: Record<
-  string,
-  readonly { field: string; value: string | null; confidence: 'high' | 'medium' | 'low' }[]
-> = {
-  'receipt-cafe-mocha.pdf': [
-    { field: 'merchant', value: 'Cafe Mocha, Indiranagar', confidence: 'high' },
-    { field: 'receiptDate', value: '2026-10-18', confidence: 'high' },
-    { field: 'totalMinor', value: '456000', confidence: 'high' },
-    { field: 'taxNote', value: 'GST included', confidence: 'medium' },
-    { field: 'paymentMethod', value: 'Card payment', confidence: 'medium' },
-  ],
-  'receipt-westlake-hotel.pdf': [
-    { field: 'merchant', value: 'Hotel Westlake', confidence: 'high' },
-    { field: 'receiptDate', value: '2026-11-03', confidence: 'high' },
-    { field: 'totalMinor', value: '124000', confidence: 'high' },
-    { field: 'taxNote', value: null, confidence: 'low' },
-  ],
-  'quote-deccan-kitchen.pdf': [
-    { field: 'vendorName', value: 'Deccan Kitchen Co', confidence: 'high' },
-    { field: 'totalMinor', value: '27900000', confidence: 'high' },
-    { field: 'validUntil', value: '2026-11-15', confidence: 'high' },
-    { field: 'depositPct', value: '30', confidence: 'medium' },
-    { field: 'cancellationTerms', value: 'Free until 2026-11-25', confidence: 'medium' },
-  ],
-};

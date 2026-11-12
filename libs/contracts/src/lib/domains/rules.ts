@@ -1094,6 +1094,7 @@ export const EXCEPTION_TYPES = [
   'gifts_over_cap',
   'split_purchase',
   'duplicate_spend',
+  'over_budget',
 ] as const;
 export const ExceptionType = z.enum(EXCEPTION_TYPES);
 

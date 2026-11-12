@@ -9,7 +9,6 @@ import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { suggestionFor, unmatchedLine } from './support';
-
 const detail = async (request: APIRequestContext, actualId: string) =>
   expectContract(
     await request.get(`/api/actuals/${actualId}`, { headers: await as('finance-admin') }),

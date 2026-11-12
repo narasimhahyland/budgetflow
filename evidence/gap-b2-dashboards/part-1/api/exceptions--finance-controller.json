@@ -1,0 +1,357 @@
+{
+  "request": "GET /api/dashboards/exceptions?type=post_spend_breach as finance-controller",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-16T09:00:00.000Z",
+    "asOf": "2026-11-16",
+    "currency": "USD",
+    "fiscalYearLabel": "FY2026",
+    "kpis": {
+      "open": 6,
+      "informational": 0,
+      "olderThan14Days": 1,
+      "resolvedThisMonth": 0,
+      "atStake": {
+        "amountMinor": 125397,
+        "currency": "USD"
+      }
+    },
+    "integrityFlagOpen": false,
+    "withheld": [],
+    "types": [
+      {
+        "type": "post_spend_breach",
+        "label": "Post-spend policy breach",
+        "source": "Post-spend re-check",
+        "informational": false,
+        "open": 5,
+        "oldestDays": 18,
+        "atStake": {
+          "amountMinor": 102646,
+          "currency": "USD"
+        },
+        "queue": {
+          "label": "Post-spend exceptions",
+          "link": "/admin/rules/exceptions"
+        },
+        "bands": {
+          "d0to7": 2,
+          "d8to30": 3,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "split_request",
+        "label": "Possible split request",
+        "source": "Integrity flag: split request",
+        "informational": false,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Post-spend exceptions",
+          "link": "/admin/rules/exceptions"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "duplicate",
+        "label": "Possible duplicate",
+        "source": "Integrity flags: duplicate, cross-source duplicate, receipt reuse",
+        "informational": false,
+        "open": 1,
+        "oldestDays": 0,
+        "atStake": {
+          "amountMinor": 22751,
+          "currency": "USD"
+        },
+        "queue": {
+          "label": "Duplicates",
+          "link": "/finance/actuals/duplicates"
+        },
+        "bands": {
+          "d0to7": 1,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "approved_over_budget",
+        "label": "Approved over budget",
+        "source": "Approvals",
+        "informational": true,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Approval history",
+          "link": "/approvals/history"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "approved_after_escalation",
+        "label": "Approved after escalation",
+        "source": "Approvals",
+        "informational": true,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Approval history",
+          "link": "/approvals/history"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "late_posting",
+        "label": "Late postings into the next period",
+        "source": "Ledger (late flag)",
+        "informational": false,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Period close",
+          "link": "/finance/close"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "missing_recharge",
+        "label": "Cross-entity contribution without recharge",
+        "source": "Recharges",
+        "informational": false,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Recharges",
+          "link": "/finance/recharges"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "just_under_threshold",
+        "label": "Just under an approval threshold",
+        "source": "Integrity flag: just under threshold",
+        "informational": false,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Post-spend exceptions",
+          "link": "/admin/rules/exceptions"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      },
+      {
+        "type": "ledger_integrity",
+        "label": "Ledger integrity",
+        "source": "Integrity flags: drift, unbalanced journal, triplet mismatch, audit chain",
+        "informational": false,
+        "open": 0,
+        "oldestDays": null,
+        "atStake": null,
+        "queue": {
+          "label": "Finance overview",
+          "link": "/dashboards/finance"
+        },
+        "bands": {
+          "d0to7": 0,
+          "d8to30": 0,
+          "d31to60": 0,
+          "over60": 0
+        }
+      }
+    ],
+    "trend": [
+      {
+        "weekStart": "2026-09-28",
+        "opened": 0,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-10-05",
+        "opened": 0,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-10-12",
+        "opened": 0,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-10-19",
+        "opened": 0,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-10-26",
+        "opened": 2,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-11-02",
+        "opened": 1,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-11-09",
+        "opened": 2,
+        "resolved": 0
+      },
+      {
+        "weekStart": "2026-11-16",
+        "opened": 1,
+        "resolved": 0
+      }
+    ],
+    "byLocation": [
+      {
+        "location": "Bengaluru",
+        "open": 2,
+        "atStake": {
+          "amountMinor": 53308,
+          "currency": "USD"
+        }
+      },
+      {
+        "location": "Hyderabad",
+        "open": 1,
+        "atStake": {
+          "amountMinor": 14970,
+          "currency": "USD"
+        }
+      },
+      {
+        "location": "London",
+        "open": 1,
+        "atStake": {
+          "amountMinor": 23368,
+          "currency": "USD"
+        }
+      },
+      {
+        "location": "Not location-specific",
+        "open": 1,
+        "atStake": {
+          "amountMinor": 22751,
+          "currency": "USD"
+        }
+      },
+      {
+        "location": "Westlake",
+        "open": 1,
+        "atStake": {
+          "amountMinor": 11000,
+          "currency": "USD"
+        }
+      }
+    ],
+    "items": [
+      {
+        "id": "84000000-0000-4000-8000-000000000005",
+        "type": "post_spend_breach",
+        "reference": "ACT-00470",
+        "summary": "No itemised receipt was attached for a USD 233.68 team meal.",
+        "location": "London",
+        "raisedAt": "2026-10-28T09:00:00.294Z",
+        "ageDays": 18,
+        "atStake": {
+          "amountMinor": 23368,
+          "currency": "USD"
+        },
+        "link": "/admin/rules/exceptions"
+      },
+      {
+        "id": "84000000-0000-4000-8000-000000000004",
+        "type": "post_spend_breach",
+        "reference": "ACT-00455",
+        "summary": "A long-service gift came to USD 110.00 per recipient against the USD 75.00 cap.",
+        "location": "Westlake",
+        "raisedAt": "2026-11-01T09:00:00.293Z",
+        "ageDays": 14,
+        "atStake": {
+          "amountMinor": 11000,
+          "currency": "USD"
+        },
+        "link": "/admin/rules/exceptions"
+      },
+      {
+        "id": "84000000-0000-4000-8000-000000000003",
+        "type": "post_spend_breach",
+        "reference": "REQ-00118",
+        "summary": "Three requests to the same vendor within five days total USD 1,480.00, above the USD 500.00 threshold each one stayed under.",
+        "location": "Bengaluru",
+        "raisedAt": "2026-11-05T09:00:00.292Z",
+        "ageDays": 10,
+        "atStake": {
+          "amountMinor": 49500,
+          "currency": "USD"
+        },
+        "link": "/admin/rules/exceptions"
+      },
+      {
+        "id": "84000000-0000-4000-8000-000000000002",
+        "type": "post_spend_breach",
+        "reference": "ACT-00402",
+        "summary": "Catering was booked with a vendor blocked for a failed food-safety audit. The spend already settled.",
+        "location": "Hyderabad",
+        "raisedAt": "2026-11-09T09:00:00.291Z",
+        "ageDays": 6,
+        "atStake": {
+          "amountMinor": 14970,
+          "currency": "USD"
+        },
+        "link": "/admin/rules/exceptions"
+      },
+      {
+        "id": "84000000-0000-4000-8000-000000000001",
+        "type": "post_spend_breach",
+        "reference": "ACT-00318",
+        "summary": "Alcohol at the Annual Day came to USD 38.08 per attendee against a cap of USD 20.00 for 28 attendees.",
+        "location": "Bengaluru",
+        "raisedAt": "2026-11-13T09:00:00.290Z",
+        "ageDays": 2,
+        "atStake": {
+          "amountMinor": 3808,
+          "currency": "USD"
+        },
+        "link": "/admin/rules/exceptions"
+      }
+    ]
+  }
+}

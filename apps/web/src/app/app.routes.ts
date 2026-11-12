@@ -138,6 +138,26 @@ export const appRoutes: Route[] = [
         path: 'insights',
         loadChildren: () => import('@bf/web/features/extended').then((m) => m.narrativeRoutes),
       },
+      // Gap package B2 dashboards, before the extended lib's `dashboards` (outcomes, 015c).
+      {
+        path: 'dashboards/finance',
+        loadChildren: () =>
+          import('@bf/web/features/reports').then((m) => m.financeDashboardRoutes),
+      },
+      {
+        path: 'home/finance',
+        loadChildren: () =>
+          import('@bf/web/features/reports').then((m) => m.financeDashboardRoutes),
+      },
+      {
+        path: 'dashboards/alerts',
+        loadChildren: () => import('@bf/web/features/reports').then((m) => m.alertsDashboardRoutes),
+      },
+      {
+        path: 'dashboards/exceptions',
+        loadChildren: () =>
+          import('@bf/web/features/reports').then((m) => m.exceptionsDashboardRoutes),
+      },
       {
         path: 'dashboards',
         loadChildren: () => import('@bf/web/features/extended').then((m) => m.outcomeRoutes),

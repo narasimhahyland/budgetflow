@@ -14,7 +14,6 @@ import { SEED } from '@bf/seed';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { callTool, connectAssistant, withToken } from './support';
-
 const READ_TOOLS = [
   'list_my_budgets',
   'get_budget_balance',

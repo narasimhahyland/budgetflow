@@ -162,6 +162,13 @@
       "when": 1794398557333,
       "tag": "0022_a2_caps",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794463216351,
+      "tag": "0023_b3_tax_benefits",
+      "breakpoints": true
     }
   ]
 }

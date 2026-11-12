@@ -1,4 +1,5 @@
 import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { S3DocumentStore } from '@bf/api/documents';
 import { aiSuggestions, documents, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   AiSourceRef,
@@ -14,7 +15,7 @@ import { AiRetrieval } from '../retrieval.service';
 import { AiSettingsService } from '../settings.service';
 import { AiSuggestionsService } from '../suggestions.service';
 
-const ExtractOutput = z
+export const ExtractOutput = z
   .object({
     readable: z.boolean(),
     fields: z
@@ -61,6 +62,7 @@ export class AiExtractionService {
     private readonly retrieval: AiRetrieval,
     private readonly gateway: AiGateway,
     private readonly suggestions: AiSuggestionsService,
+    private readonly store: S3DocumentStore,
   ) {}
 
   extract(actor: RequestActor, req: ExtractionRequest): Promise<ExtractionResult> {
@@ -87,6 +89,8 @@ export class AiExtractionService {
         );
 
       const sources: AiSourceRef[] = [{ type: 'document', id: doc.id, label: doc.fileName }];
+      // The verified file itself is what the model reads; a file we cannot read is "not readable".
+      const bytes = await this.store.read(doc.storageKey).catch(() => null);
       const result = await this.gateway.run({
         tx,
         actor,
@@ -107,6 +111,7 @@ export class AiExtractionService {
             },
           },
         ],
+        attachments: bytes ? [{ contentType: doc.contentType, bytes }] : undefined,
         sources,
         scope: {
           action: 'request.create',

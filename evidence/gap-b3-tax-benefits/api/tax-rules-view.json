@@ -1,0 +1,307 @@
+{
+  "asOf": "2026-11-16",
+  "current": {
+    "id": "94000000-0000-4000-8000-000000000001",
+    "version": 1,
+    "status": "published",
+    "effectiveFrom": "2026-01-01",
+    "comment": null,
+    "submittedByName": "Priya Raman",
+    "submittedAt": "2025-12-15T10:00:00.000Z",
+    "decidedByName": "Daniel Weber",
+    "decidedAt": "2025-12-18T10:00:00.000Z",
+    "rules": [
+      {
+        "id": "94000000-0000-4000-8000-000000000111",
+        "legalEntityId": "20000000-0000-4000-8000-000000000003",
+        "legalEntityCode": "HYL-DE",
+        "taxJurisdiction": "DE",
+        "categoryCode": "employee_events",
+        "categoryName": "Employee events",
+        "attendeeType": "employees",
+        "taxCode": "VAT-19",
+        "recoverableBps": 10000,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount without VAT",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000112",
+        "legalEntityId": "20000000-0000-4000-8000-000000000003",
+        "legalEntityCode": "HYL-DE",
+        "taxJurisdiction": "DE",
+        "categoryCode": "training",
+        "categoryName": "Training",
+        "attendeeType": "any",
+        "taxCode": "VAT-19",
+        "recoverableBps": 10000,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount without VAT",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000104",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "legalEntityCode": "HYL-IN",
+        "taxJurisdiction": "IN",
+        "categoryCode": "conferences",
+        "categoryName": "Conferences",
+        "attendeeType": "any",
+        "taxCode": "GST-18",
+        "recoverableBps": 10000,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount without GST",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000100",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "legalEntityCode": "HYL-IN",
+        "taxJurisdiction": "IN",
+        "categoryCode": "employee_events",
+        "categoryName": "Employee events",
+        "attendeeType": "any",
+        "taxCode": "GST-18",
+        "recoverableBps": 0,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount plus GST",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000102",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "legalEntityCode": "HYL-IN",
+        "taxJurisdiction": "IN",
+        "categoryCode": "recognition",
+        "categoryName": "Recognition",
+        "attendeeType": "any",
+        "taxCode": "GST-18",
+        "recoverableBps": 0,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount plus GST",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000101",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "legalEntityCode": "HYL-IN",
+        "taxJurisdiction": "IN",
+        "categoryCode": "team_lunch",
+        "categoryName": "Team lunch",
+        "attendeeType": "any",
+        "taxCode": "GST-18",
+        "recoverableBps": 0,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount plus GST",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000103",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "legalEntityCode": "HYL-IN",
+        "taxJurisdiction": "IN",
+        "categoryCode": "training",
+        "categoryName": "Training",
+        "attendeeType": "any",
+        "taxCode": "GST-18",
+        "recoverableBps": 10000,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount without GST",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000106",
+        "legalEntityId": "20000000-0000-4000-8000-000000000006",
+        "legalEntityCode": "HYL-UK",
+        "taxJurisdiction": "GB",
+        "categoryCode": "employee_events",
+        "categoryName": "Employee events",
+        "attendeeType": "clients",
+        "taxCode": "VAT-20",
+        "recoverableBps": 0,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount plus VAT",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000105",
+        "legalEntityId": "20000000-0000-4000-8000-000000000006",
+        "legalEntityCode": "HYL-UK",
+        "taxJurisdiction": "GB",
+        "categoryCode": "employee_events",
+        "categoryName": "Employee events",
+        "attendeeType": "employees",
+        "taxCode": "VAT-20",
+        "recoverableBps": 10000,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount without VAT",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000107",
+        "legalEntityId": "20000000-0000-4000-8000-000000000006",
+        "legalEntityCode": "HYL-UK",
+        "taxJurisdiction": "GB",
+        "categoryCode": "employee_events",
+        "categoryName": "Employee events",
+        "attendeeType": "mixed",
+        "taxCode": "VAT-20",
+        "recoverableBps": null,
+        "proportional": true,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses the VAT on the share of non-employees",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000108",
+        "legalEntityId": "20000000-0000-4000-8000-000000000006",
+        "legalEntityCode": "HYL-UK",
+        "taxJurisdiction": "GB",
+        "categoryCode": "team_lunch",
+        "categoryName": "Team lunch",
+        "attendeeType": "employees",
+        "taxCode": "VAT-20",
+        "recoverableBps": 10000,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount without VAT",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000109",
+        "legalEntityId": "20000000-0000-4000-8000-000000000006",
+        "legalEntityCode": "HYL-UK",
+        "taxJurisdiction": "GB",
+        "categoryCode": "team_lunch",
+        "categoryName": "Team lunch",
+        "attendeeType": "mixed",
+        "taxCode": "VAT-20",
+        "recoverableBps": null,
+        "proportional": true,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses the VAT on the share of non-employees",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000110",
+        "legalEntityId": "20000000-0000-4000-8000-000000000006",
+        "legalEntityCode": "HYL-UK",
+        "taxJurisdiction": "GB",
+        "categoryCode": "training",
+        "categoryName": "Training",
+        "attendeeType": "any",
+        "taxCode": "VAT-20",
+        "recoverableBps": 10000,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount without VAT",
+        "changeMarker": "unchanged"
+      },
+      {
+        "id": "94000000-0000-4000-8000-000000000113",
+        "legalEntityId": "20000000-0000-4000-8000-000000000001",
+        "legalEntityCode": "HYL-US",
+        "taxJurisdiction": "US",
+        "categoryCode": "*",
+        "categoryName": "All categories",
+        "attendeeType": "any",
+        "taxCode": "SALES-TAX",
+        "recoverableBps": 0,
+        "proportional": false,
+        "notes": "Placeholder for review by the tax approver; not tax advice.",
+        "effect": "Budget uses amount plus sales tax",
+        "changeMarker": "unchanged"
+      }
+    ]
+  },
+  "upcoming": null,
+  "draft": null,
+  "categories": [
+    {
+      "code": "conferences",
+      "name": "Conferences"
+    },
+    {
+      "code": "employee_events",
+      "name": "Employee events"
+    },
+    {
+      "code": "equipment",
+      "name": "Equipment"
+    },
+    {
+      "code": "marketing",
+      "name": "Marketing"
+    },
+    {
+      "code": "office_supplies",
+      "name": "Office supplies"
+    },
+    {
+      "code": "other",
+      "name": "Other"
+    },
+    {
+      "code": "recognition",
+      "name": "Recognition"
+    },
+    {
+      "code": "team_lunch",
+      "name": "Team lunch"
+    },
+    {
+      "code": "training",
+      "name": "Training"
+    },
+    {
+      "code": "travel",
+      "name": "Travel"
+    },
+    {
+      "code": "wellbeing",
+      "name": "Wellbeing"
+    }
+  ],
+  "entities": [
+    {
+      "id": "20000000-0000-4000-8000-000000000003",
+      "code": "HYL-DE",
+      "name": "Hyland Europe GmbH",
+      "currency": "EUR",
+      "taxJurisdiction": "DE"
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000002",
+      "code": "HYL-IN",
+      "name": "Hyland Technologies India Private Limited",
+      "currency": "INR",
+      "taxJurisdiction": "IN"
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000006",
+      "code": "HYL-UK",
+      "name": "Hyland Solutions UK Limited",
+      "currency": "GBP",
+      "taxJurisdiction": "GB"
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "code": "HYL-US",
+      "name": "Hyland North America, Inc.",
+      "currency": "USD",
+      "taxJurisdiction": "US"
+    }
+  ],
+  "reportingCurrency": "USD",
+  "canEdit": true,
+  "canPublish": false
+}
