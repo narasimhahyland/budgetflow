@@ -60,7 +60,7 @@ request; it now does, and every decision is recorded with its rule versions and 
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ---- |
 | **B1** Navan live integration (16a) | The plan's Phase 16a: the real Navan Expense API in place of the placeholder adapter, inbound actuals in 93-day windows, outbound event-code options, and controls disabling options at the point of spend. Mock provider moved to the real shapes; live mode behind an env flag. | D4              | L    |
 | **B2** Dashboards                   | 012 finance controller, 017 alerts, 017a exceptions, 018 pending approvals, 018a approval performance (cycle time, bottlenecks), 018b product analytics, 088a one-click evidence pack. Split in two.                                                                              | D2              | L    |
-| **B3** Tax and benefits             | 080g tax-aware consumption (recoverable vs non-recoverable GST/VAT) and 080h the employee benefit ledger with benefit-in-kind thresholds. The tables exist, unused. Ledger-heavy: `/ledger-change`.                                                                               | D2, D3          | L    |
+| **B3** Tax and benefits — **done**  | 080g tax-aware consumption (recoverable vs non-recoverable GST/VAT) and 080h the employee benefit ledger with benefit-in-kind thresholds. The tables exist, unused. Ledger-heavy: `/ledger-change`.                                                                               | D2, D3          | L    |
 | **B4** Reclaim and burn rate        | 086a reclaim-and-redistribute campaigns, and burn-rate alerts.                                                                                                                                                                                                                    | D2              | M    |
 | **B5** Finance exports              | 094b: intercompany recharges, chargeback and reclass journals, payroll benefit data.                                                                                                                                                                                              | B3 for benefits | M    |
 | **B6** Developer portal             | 101a public API docs and sandbox (only `/api/openapi.json` exists). The sandbox overlaps the deferred demo environment, so scope it first.                                                                                                                                        | D2              | M    |
@@ -68,6 +68,25 @@ request; it now does, and every decision is recorded with its rule versions and 
 | **B8** Installable app and push     | 059a's installable mobile web app (web manifest, service worker) and real push delivery (today a row is recorded, nothing is sent).                                                                                                                                               | D5              | M    |
 | **B9** AI jobs                      | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                     | —               | S–M  |
 | **B10** Experience                  | Onboarding wizard (005, 008, 010), 104 permission matrix, 124 profile and preferences, global search, 106 categories and custom fields (read-only today), 116a team budget card, 113 integrity-checks tab. Split by area.                                                         | D2              | L    |
+
+**B3 done.** Tax-aware consumption (080g): a request's amount is net of tax, and on submission its
+GST/VAT splits by the published rule in force (legal entity × spend category × attendee type, mixed
+attendance in proportion to employees present). The commitment uses the net plus only the
+non-recoverable tax; recoverable tax is recorded on append-only tax lines and never uses budget.
+Actual imports take optional `tax_amount`, `tax_category`, `employees_present` and `others_present`
+columns, and a taxed line uses its gross less the recoverable tax. Rule sets and benefit thresholds
+are versioned: finance drafts, the tax approver (Finance Controller, new `tax.publish`) publishes
+from an effective date, and published versions never change. The employee benefit ledger (080h)
+writes each attended employee's final cost per attendee at event close, the shares of approved
+requests that name recipients, and entries finance records. Entries are append-only, reversed by
+negating rows, and evaluated against each threshold in its own tax year (whole amount or excess
+reportable; company caps never reportable). Seeded rates and thresholds are fictional (D3); screens
+are built from the specs (D2). Migration `0023`. Proof: `apps/api-e2e/src/tax/` (invariants
+103-106) and the `finance-admin/tax-benefits` journeys. Evidence:
+[`evidence/gap-b3-tax-benefits/`](../evidence/gap-b3-tax-benefits/README.md). Left for B5: the
+payroll export tab and batches (the ledger shows the reportable amounts B5 exports). Left as
+follow-ups: the screens' CSV/XLSX/PDF export, employees seeing their own benefits (122), and the
+071 cap reading the benefit ledger instead of live request consumption.
 
 ## Tier C — prove what is built but thinly covered
 
