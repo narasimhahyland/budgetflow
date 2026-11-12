@@ -11,6 +11,7 @@
 //   GET  /_control/received?path=/receiver/hook   webhook deliveries this server received
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { createServer } from 'node:http';
+import { handleNavan, resetNavan } from './navan.mjs';
 
 const PORT = Number(process.env.PORT ?? 4010);
 
@@ -242,20 +243,7 @@ const CONCUR_ENTRIES = [
   },
 ];
 
-const NAVAN_EXPENSES = [
-  {
-    uuid: 'NVN-3301',
-    date: '2026-11-04',
-    amount: '220.00',
-    currency: 'GBP',
-    company_code: 'HYL-UK',
-    cost_center: 'CC-EU-LON-410',
-    gl_account: '6140',
-    event_code: '',
-    merchant: 'Thames Side Hotel',
-    description: 'London hotel, one night',
-  },
-];
+// Navan (Phase 16a) lives in ./navan.mjs: real paths, OAuth client credentials, windows, jobs.
 
 const COUPA_PURCHASE_ORDERS = [
   {
@@ -431,7 +419,6 @@ const FETCH_ROUTES = {
   '/concur/api/v3.0/expense/entries': (url) => ({
     Items: since(url, 'TransactionDate', CONCUR_ENTRIES),
   }),
-  '/navan/api/v1/expenses': (url) => ({ data: since(url, 'date', NAVAN_EXPENSES) }),
   '/coupa/api/purchase_orders': (url) => since(url, 'created-at', COUPA_PURCHASE_ORDERS),
   '/hr/api/workers': () => ({ workers: HR_WORKERS }),
   '/workday-hcm/ccx/api/v1/workers': () => ({ data: HR_WORKERS }),
@@ -449,7 +436,6 @@ const PUSH_ROUTES = {
   '/ramp/developer/v1/limits': (body) => ({ id: `RMPLIM-${body.reference}` }),
   '/brex/v2/budgets': (body) => ({ id: `BRXBUD-${body.reference}` }),
   '/concur/api/v3.0/common/listitems': (body) => ({ ID: `LIST-${body.reference}` }),
-  '/navan/api/v1/event-codes': (body) => ({ uuid: `NVNEVT-${body.reference}` }),
   '/coupa/api/custom_fields': (body) => ({ id: `CPA-${body.reference}` }),
   '/adaptive/api/v2/actuals': (body) => ({ id: `ADP-${body.reference}` }),
 };
@@ -474,6 +460,7 @@ const server = createServer(async (req, res) => {
     armed.clear();
     received.length = 0;
     partnerAnswers.clear();
+    resetNavan();
     return json(res, 200, { reset: true });
   }
   // Decides what a marketplace partner will answer for one booking (Phase 16, 092d).
@@ -532,15 +519,26 @@ const server = createServer(async (req, res) => {
 
   const failure = armedFailure(path);
   if (failure) {
-    return json(res, failure, {
-      error:
-        failure === 401
-          ? '401 Unauthorized: check the client secret'
-          : failure === 429
-            ? 'Too many requests'
-            : 'The provider is unavailable',
-    });
+    // Rate limits say when to come back, as real providers do.
+    const retryAfter = failure === 429 ? { 'retry-after': '1' } : {};
+    return json(
+      res,
+      failure,
+      {
+        error:
+          failure === 401
+            ? '401 Unauthorized: check the client secret'
+            : failure === 429
+              ? 'Too many requests'
+              : 'The provider is unavailable',
+      },
+      retryAfter,
+    );
   }
+
+  // Navan authenticates with its own OAuth tokens and region rules, so it routes before the shared
+  // bearer check.
+  if (await handleNavan(req, res, url, path, readBody)) return;
 
   if (!authorized(req, res)) return;
 

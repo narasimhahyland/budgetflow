@@ -128,6 +128,8 @@ export class HubPage {
   protected readonly baseUrl = signal('');
   protected readonly accountRef = signal('');
   protected readonly credential = signal('');
+  protected readonly clientId = signal('');
+  protected readonly region = signal<'us' | 'eu'>('us');
   protected readonly busy = signal(false);
   protected readonly notice = signal<string | null>(null);
   protected readonly failure = signal<string | null>(null);
@@ -158,6 +160,8 @@ export class HubPage {
     this.failure.set(null);
     this.provider.set(this.available()[0]?.provider ?? null);
     this.credential.set('');
+    this.clientId.set('');
+    this.region.set('us');
   }
 
   protected async connect(): Promise<void> {
@@ -176,6 +180,9 @@ export class HubPage {
             ...(this.displayName().trim() ? { displayName: this.displayName().trim() } : {}),
             ...(this.baseUrl().trim() ? { baseUrl: this.baseUrl().trim() } : {}),
             ...(this.accountRef().trim() ? { accountRef: this.accountRef().trim() } : {}),
+            ...(provider === 'navan'
+              ? { clientId: this.clientId().trim(), settings: { region: this.region() } }
+              : {}),
           },
         }),
       );

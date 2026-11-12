@@ -13573,7 +13573,8 @@
               "event",
               "request",
               "contribution",
-              "commitment"
+              "commitment",
+              "actual"
             ]
           },
           "ownerId": {
@@ -14648,7 +14649,8 @@
             "type": "string",
             "enum": [
               "event_code",
-              "card_limit"
+              "card_limit",
+              "cost_center"
             ]
           },
           "eventId": {
@@ -16880,7 +16882,8 @@
               "event",
               "request",
               "contribution",
-              "commitment"
+              "commitment",
+              "actual"
             ]
           },
           "ownerId": {
@@ -28077,7 +28080,8 @@
               "expense_type",
               "hr_field",
               "plan_level",
-              "group_role"
+              "group_role",
+              "person"
             ]
           },
           "externalValue": {
@@ -29200,6 +29204,139 @@
         ],
         "additionalProperties": false,
         "description": "The person's own year, in counts and reporting-currency totals."
+      },
+      "NavanCustomField": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "LIST fields take options; other types cannot hold event codes."
+          },
+          "optionCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "usedFor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "event_code",
+                  "cost_center"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What BudgetFlow publishes into this field, if anything."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "optionCount",
+          "usedFor"
+        ],
+        "additionalProperties": false
+      },
+      "NavanCustomFieldList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NavanCustomField"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "NavanSettings": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "default": "us",
+            "type": "string",
+            "enum": [
+              "us",
+              "eu"
+            ],
+            "description": "Where the Navan account is hosted; EU accounts send the region header on every call."
+          },
+          "expenseWrite": {
+            "default": false,
+            "description": "The Expense: Write scope was granted to these credentials. Off means read only: no option, coding or write-back call is made.",
+            "type": "boolean"
+          },
+          "eventCodeFieldId": {
+            "default": null,
+            "description": "The Navan list field BudgetFlow publishes event codes into.",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "costCenterFieldId": {
+            "default": null,
+            "description": "The Navan list field BudgetFlow publishes cost centers into.",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "systemOfRecord": {
+            "default": false,
+            "description": "BudgetFlow is the accounting system of record for Navan spend. Only then does write-back mark transactions as synced; otherwise Navan's ERP sync status is never touched.",
+            "type": "boolean"
+          },
+          "pageSize": {
+            "default": 500,
+            "description": "Transactions per page (1-500).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "writeBatchSize": {
+            "default": 100,
+            "description": "Transactions per write-back PATCH; Navan accepts at most 100.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "region",
+          "expenseWrite",
+          "eventCodeFieldId",
+          "costCenterFieldId",
+          "systemOfRecord",
+          "pageSize",
+          "writeBatchSize"
+        ],
+        "additionalProperties": false,
+        "description": "Navan connection settings, kept in the connection settings."
       },
       "NewChildBudget": {
         "type": "object",
@@ -33944,7 +34081,8 @@
               "missing_receipt",
               "gifts_over_cap",
               "split_purchase",
-              "duplicate_spend"
+              "duplicate_spend",
+              "over_budget"
             ]
           },
           "typeLabel": {
@@ -34572,6 +34710,9 @@
               "API_KEY_SCOPE_MISSING",
               "API_KEY_IP_NOT_ALLOWED",
               "RATE_LIMIT_EXCEEDED",
+              "NAVAN_LIVE_DISABLED",
+              "NAVAN_WRITE_SCOPE_MISSING",
+              "NAVAN_FIELD_NOT_MAPPED",
               "PERIOD_CLOSE_BLOCKED",
               "CHECK_NOT_ACKNOWLEDGEABLE",
               "CONFIRMATION_MISMATCH",
@@ -35356,12 +35497,13 @@
             "type": "string",
             "enum": [
               "event_code",
-              "card_limit"
+              "card_limit",
+              "cost_center"
             ]
           },
           "reference": {
             "type": "string",
-            "description": "Event code or commitment reference."
+            "description": "Event code, cost center code or commitment reference."
           },
           "amount": {
             "anyOf": [
@@ -35405,8 +35547,10 @@
               "pending",
               "pushed",
               "failed",
-              "closed"
-            ]
+              "closed",
+              "disabled"
+            ],
+            "description": "Disabled: an option published to the provider and switched off there because its budget no longer accepts spend."
           },
           "externalId": {
             "type": [
@@ -35470,7 +35614,8 @@
                     "expense_type",
                     "hr_field",
                     "plan_level",
-                    "group_role"
+                    "group_role",
+                    "person"
                   ]
                 },
                 "externalValue": {
@@ -69259,7 +69404,8 @@
                 "event",
                 "request",
                 "contribution",
-                "commitment"
+                "commitment",
+                "actual"
               ]
             }
           },
@@ -78092,7 +78238,8 @@
                 "missing_receipt",
                 "gifts_over_cap",
                 "split_purchase",
-                "duplicate_spend"
+                "duplicate_spend",
+                "over_budget"
               ]
             }
           },
@@ -82447,7 +82594,8 @@
               "type": "string",
               "enum": [
                 "event_code",
-                "card_limit"
+                "card_limit",
+                "cost_center"
               ]
             }
           },
@@ -82566,6 +82714,105 @@
               "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/integrations/connections/{connectionId}/navan/custom-fields": {
+      "get": {
+        "operationId": "listNavanCustomFields",
+        "summary": "Custom fields defined in the connected Navan account, for the field mapping (16a)",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NavanCustomFieldList"
                 }
               }
             }

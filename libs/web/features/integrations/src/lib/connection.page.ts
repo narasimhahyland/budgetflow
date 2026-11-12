@@ -55,7 +55,7 @@ import { byNewest, byRank, byText, ordered, rankIn } from './order';
 import { PlanImport } from './plan-import';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 
-type TabId = 'overview' | 'connection' | 'mappings' | 'sync' | 'push' | 'plan' | 'logs';
+type TabId = 'overview' | 'connection' | 'fields' | 'mappings' | 'sync' | 'push' | 'plan' | 'logs';
 
 /** A setting the connector exposes as a switch, with the words a person needs before flipping it. */
 interface ToggleSetting {
@@ -67,6 +67,9 @@ interface ToggleSetting {
   consequenceOn?: string;
   confirmLabel?: string;
 }
+
+/** Navan settings chosen from lists on the Field mapping tab; the booleans are switches in Settings. */
+type NavanField = 'region' | 'eventCodeFieldId' | 'costCenterFieldId';
 
 const SETTING_COPY: Record<string, Omit<ToggleSetting, 'key' | 'value'>> = {
   cardLimitPush: {
@@ -92,6 +95,20 @@ const SETTING_COPY: Record<string, Omit<ToggleSetting, 'key' | 'value'>> = {
     label: 'Send invitations as the event organizer',
     hint: 'Off sends them from the shared calendar account instead.',
   },
+  expenseWrite: {
+    label: 'Navan granted Expense: Write to these credentials',
+    hint: 'Off means read only: BudgetFlow publishes no field options and writes nothing back to Navan.',
+    consequenceOn:
+      'BudgetFlow will publish event codes and cost centers as options of the mapped Navan fields, switch an option off while its budget is frozen, set to zero, exhausted, expired or closed, and write GL code, cost center and event code back to the Navan transactions it matched. It never approves anything in Navan.',
+    confirmLabel: 'Turn Expense: Write on',
+  },
+  systemOfRecord: {
+    label: 'BudgetFlow is the system of record for Navan spend',
+    hint: "Off by default: Navan's ERP sync status stays with the accounting system that owns it.",
+    consequenceOn:
+      'Write-back will mark each matched Navan transaction as synced. Only do this when no ERP integration in Navan exports the same transactions, or they will be skipped there.',
+    confirmLabel: 'Make BudgetFlow the system of record',
+  },
   holdOwnerDeactivations: {
     label: 'Hold deactivation of budget owners for review',
     hint: 'On delays a leaver losing access until an Organization Admin has looked at their budgets.',
@@ -103,6 +120,7 @@ const PUSH_STATUS_LABELS: Record<PushItemView['status'], string> = {
   pushed: 'Sent',
   failed: 'Failed',
   closed: 'Closed',
+  disabled: 'Switched off: budget not accepting spend',
 };
 
 const PUSH_STATUS_TONES: Record<PushItemView['status'], Tone> = {
@@ -110,6 +128,7 @@ const PUSH_STATUS_TONES: Record<PushItemView['status'], Tone> = {
   pushed: 'success',
   failed: 'important',
   closed: 'neutral',
+  disabled: 'info',
 };
 
 /**
@@ -173,6 +192,16 @@ export class ConnectionPage {
     loader: ({ params }) => data(this.api.listIntegrationPushes({ query: params })),
   });
 
+  /** The Navan account's custom fields, read when the field mapping is open (16a). */
+  protected readonly navanFields = resource({
+    params: () =>
+      this.tab() === 'fields' && valueOf(this.detail)?.summary.provider === 'navan'
+        ? { connectionId: this.connectionId() }
+        : undefined,
+    loader: ({ params }) => data(this.api.listNavanCustomFields({ params })),
+  });
+  protected readonly navanDraft = signal<Partial<Record<NavanField, string | null>>>({});
+
   protected readonly tab = signal<TabId>('overview');
   protected readonly busy = signal(false);
   protected readonly notice = signal<string | null>(null);
@@ -197,6 +226,7 @@ export class ConnectionPage {
       this.connectionId();
       this.tab.set('overview');
       this.mappingDrafts.set({});
+      this.navanDraft.set({});
       this.newCredential.set('');
       this.testResult.set(null);
       this.lastRun.set(null);
@@ -216,9 +246,9 @@ export class ConnectionPage {
     const tabs: { id: TabId; label: string }[] = [
       { id: 'overview', label: 'Overview' },
       { id: 'connection', label: 'Connection' },
-      { id: 'mappings', label: 'Mappings' },
-      { id: 'sync', label: 'Sync' },
     ];
+    if (d?.summary.provider === 'navan') tabs.push({ id: 'fields', label: 'Field mapping' });
+    tabs.push({ id: 'mappings', label: 'Mappings' }, { id: 'sync', label: 'Sync' });
     if (d?.summary.category === 'planning') tabs.push({ id: 'plan', label: 'Plan import' });
     tabs.push({ id: 'push', label: 'Push' }, { id: 'logs', label: 'Logs' });
     return tabs;
@@ -300,6 +330,33 @@ export class ConnectionPage {
       .sort((a, b) => a.label.localeCompare(b.label, 'en') || a.key.localeCompare(b.key));
   });
 
+  /** List fields can hold options; other Navan field types cannot carry event codes. */
+  protected readonly listFields = computed(() =>
+    [...(valueOf(this.navanFields)?.items ?? [])]
+      .filter((f) => f.type === 'LIST')
+      .sort((a, b) => a.name.localeCompare(b.name, 'en') || a.id.localeCompare(b.id)),
+  );
+
+  protected navanValue(key: NavanField): string | null {
+    const draft = this.navanDraft();
+    if (key in draft) return draft[key] ?? null;
+    const v = valueOf(this.detail)?.settings?.[key];
+    return typeof v === 'string' ? v : key === 'region' ? 'us' : null;
+  }
+
+  protected setNavan(key: NavanField, value: string | null): void {
+    this.navanDraft.update((d) => ({ ...d, [key]: value }));
+  }
+
+  protected readonly navanChanged = computed(() => Object.keys(this.navanDraft()).length > 0);
+
+  protected async saveNavanFields(): Promise<void> {
+    const draft = this.navanDraft();
+    await this.saveSettings(draft as Record<string, unknown>);
+    this.navanDraft.set({});
+    this.navanFields.reload();
+  }
+
   protected readonly runItems = computed(() =>
     ordered(
       valueOf(this.runs)?.items ?? [],
@@ -310,7 +367,9 @@ export class ConnectionPage {
   protected readonly pushItems = computed(() =>
     ordered(
       valueOf(this.pushes)?.items ?? [],
-      byRank<PushItemView>((p) => rankIn(['failed', 'pending', 'pushed', 'closed'], p.status)),
+      byRank<PushItemView>((p) =>
+        rankIn(['failed', 'pending', 'disabled', 'pushed', 'closed'], p.status),
+      ),
       byNewest<PushItemView>((p) => p.pushedAt),
       byText<PushItemView>((p) => p.reference),
     ),
@@ -506,8 +565,16 @@ export class ConnectionPage {
         }),
       );
       this.lastRun.set(run);
+      // Some connectors (Navan) queue the run for the worker: follow it until it has finished.
+      let current = run;
+      for (let i = 0; current.status === 'running' && i < 120; i++) {
+        await new Promise((r) => setTimeout(r, 1000));
+        current = await data(this.api.getSyncRun({ params: { runId: run.id } }));
+        this.lastRun.set(current);
+      }
       this.detail.reload();
       this.runs.reload();
+      this.pushes.reload();
     });
   }
 

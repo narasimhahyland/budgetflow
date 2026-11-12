@@ -24,17 +24,25 @@ import type {
   ConnectionSummary,
   IntegrationProvider,
   IntegrationsHub,
+  NavanCustomFieldList,
   PutMappingsRequest,
   SyncSchedule,
   TestConnectionResult,
   UpdateConnectionRequest,
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, gte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, ne, sql } from 'drizzle-orm';
 import { integrationsConfig } from './config';
 import { CONNECTORS, connectorFor, type ConnectorDefinition } from './connectors';
 import { decryptSecret, encryptSecret, type EncryptedSecret } from './crypto';
 import { OutboundHttp, providerMessage } from './http';
+import { NavanClient } from './navan/navan-client';
+import {
+  assertNavanModeAllowed,
+  navanConnectionOf,
+  navanSettingsOf,
+  validNavanSettings,
+} from './navan/navan-settings';
 
 export interface CommandContext {
   idempotencyKey: string;
@@ -66,6 +74,7 @@ export class ConnectionsService {
     private readonly policy: PolicyService,
     private readonly audit: AuditService,
     private readonly http: OutboundHttp,
+    private readonly navan: NavanClient,
   ) {}
 
   // Reads ---------------------------------------------------------------------------------------
@@ -281,6 +290,20 @@ export class ConnectionsService {
           );
         }
         if (req.baseUrl) this.http.assertAllowed(req.baseUrl);
+        let settings = req.settings ?? {};
+        if (req.provider === 'navan') {
+          // 16a: OAuth client credentials need the client id; live calls need the env flag.
+          assertNavanModeAllowed(req.mode);
+          if (!req.clientId) {
+            throw new ApiProblem(
+              422,
+              'VALIDATION_FAILED',
+              'Navan connects with OAuth client credentials: enter the client id as well as the secret.',
+              { field: 'clientId' },
+            );
+          }
+          settings = validNavanSettings(settings);
+        }
         const secretId = await this.storeSecret(
           tx,
           actor.tenantId,
@@ -301,7 +324,7 @@ export class ConnectionsService {
           secretRef: secretId,
           secretSetAt: new Date(),
           secretSetBy: actor.personId,
-          settings: req.settings ?? {},
+          settings,
           schedules: [],
           cursors: {},
           pausedAt: null,
@@ -372,14 +395,19 @@ export class ConnectionsService {
             }))
           : (row.schedules as SyncSchedule[]);
         const paused = req.paused ?? Boolean(row.pausedAt);
+        let settings: unknown = req.settings
+          ? { ...(row.settings as object), ...req.settings }
+          : row.settings;
+        if (row.provider === 'navan') {
+          if (req.mode) assertNavanModeAllowed(req.mode);
+          if (req.settings) settings = validNavanSettings(settings as Record<string, unknown>);
+        }
         await tx
           .update(integrationConnections)
           .set({
             displayName: req.displayName ?? row.displayName,
             mode: req.mode ?? row.mode,
-            settings: req.settings
-              ? { ...(row.settings as object), ...req.settings }
-              : row.settings,
+            settings,
             schedules,
             pausedAt: paused ? (row.pausedAt ?? new Date()) : null,
             pausedBy: paused ? (row.pausedBy ?? actor.personId) : null,
@@ -467,6 +495,7 @@ export class ConnectionsService {
         return { row: r, context: await this.contextFor(tx, r) };
       },
     );
+    if (row.provider === 'navan') return this.testNavan(actor, row, context.credential);
     if (!context.definition.testPath) {
       return {
         ok: true,
@@ -497,6 +526,87 @@ export class ConnectionsService {
           updatedAt: new Date(),
         })
         .where(eq(integrationConnections.id, connectionId)),
+    );
+    return result;
+  }
+
+  /** The connected Navan account's custom fields, and which one BudgetFlow publishes into (16a). */
+  async navanCustomFields(
+    actor: RequestActor,
+    connectionId: string,
+  ): Promise<NavanCustomFieldList> {
+    const { row, credential } = await withTenant(
+      this.db,
+      { tenantId: actor.tenantId, subject: actor.subject },
+      async (tx) => {
+        this.policy.assert(actor, 'integration.read', tenantOf(actor));
+        const r = await this.rowOrFail(tx, connectionId);
+        if (r.provider !== 'navan') throw ApiProblem.notFound('Navan connection');
+        return { row: r, credential: await this.credentialOf(tx, r) };
+      },
+    );
+    const settings = navanSettingsOf(row);
+    const page = await this.navan.call<{
+      data: { id: string; name: string; type: string; optionCount?: number }[];
+    }>(navanConnectionOf(row, credential), { path: '/custom-fields' });
+    return {
+      items: (page.data ?? []).map((f) => ({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+        optionCount: f.optionCount ?? 0,
+        usedFor:
+          f.id === settings.eventCodeFieldId
+            ? ('event_code' as const)
+            : f.id === settings.costCenterFieldId
+              ? ('cost_center' as const)
+              : null,
+      })),
+    };
+  }
+
+  /**
+   * Navan's test fetches an OAuth token with the stored client credentials and reads the custom
+   * fields, so a wrong secret, a missing region header or a missing write scope shows up here.
+   */
+  private async testNavan(
+    actor: RequestActor,
+    row: ConnectionRow,
+    credential: string,
+  ): Promise<TestConnectionResult> {
+    const started = Date.now();
+    let result: TestConnectionResult;
+    try {
+      const conn = navanConnectionOf(row, credential);
+      this.navan.forget(row.id);
+      await this.navan.call(conn, { path: '/custom-fields' });
+      const write = await this.navan.hasWriteScope(conn);
+      result = {
+        ok: true,
+        statusCode: 200,
+        durationMs: Date.now() - started,
+        message: write
+          ? `${row.displayName} answered in ${Date.now() - started} ms. The token carries Expense: Write.`
+          : `${row.displayName} answered in ${Date.now() - started} ms. The token is read only: options and write-back stay off until Navan grants Expense: Write.`,
+      };
+    } catch (e) {
+      const statusCode = e instanceof ApiProblem ? Number(e.params?.statusCode ?? 0) || null : null;
+      result = {
+        ok: false,
+        statusCode,
+        durationMs: Date.now() - started,
+        message: e instanceof ApiProblem ? e.detail : 'Navan could not be reached.',
+      };
+    }
+    await withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, (tx) =>
+      tx
+        .update(integrationConnections)
+        .set({
+          status: result.ok ? 'connected' : 'needs_attention',
+          attention: result.ok ? null : result.message,
+          updatedAt: new Date(),
+        })
+        .where(eq(integrationConnections.id, row.id)),
     );
     return result;
   }
@@ -567,10 +677,16 @@ export class ConnectionsService {
         // Entity and GL account mappings change accounting, so they wait for a Finance Admin.
         const needsFinance = (kind: string) => kind === 'legal_entity' || kind === 'gl_account';
         const canApprove = this.policy.can(actor, 'master_data.manage', tenantOf(actor)).allowed;
+        // Person mappings come from the provider's user list (Navan users run), not from this form.
         await tx
           .delete(integrationMappings)
-          .where(eq(integrationMappings.connectionId, connectionId));
-        for (const e of req.entries) {
+          .where(
+            and(
+              eq(integrationMappings.connectionId, connectionId),
+              ne(integrationMappings.kind, 'person'),
+            ),
+          );
+        for (const e of req.entries.filter((x) => x.kind !== 'person')) {
           await tx.insert(integrationMappings).values({
             tenantId: actor.tenantId,
             connectionId,

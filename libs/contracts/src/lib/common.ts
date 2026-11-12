@@ -313,6 +313,10 @@ export const PROBLEM_CODES = [
   'API_KEY_SCOPE_MISSING',
   'API_KEY_IP_NOT_ALLOWED',
   'RATE_LIMIT_EXCEEDED',
+  // Navan live integration (16a)
+  'NAVAN_LIVE_DISABLED',
+  'NAVAN_WRITE_SCOPE_MISSING',
+  'NAVAN_FIELD_NOT_MAPPED',
   // Period close, year end and roll-forward (P11)
   'PERIOD_CLOSE_BLOCKED',
   'CHECK_NOT_ACKNOWLEDGEABLE',
