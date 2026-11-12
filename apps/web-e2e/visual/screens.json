@@ -1926,6 +1926,86 @@
       ]
     },
     {
+      "id": "018-pending-approvals-dashboard",
+      "role": "finance-controller",
+      "path": "/dashboards/pending-approvals",
+      "waitFor": "[data-testid=pending-kpis]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "owner-scope",
+          "role": "regional-manager",
+          "waitFor": "[data-testid=scope-note]"
+        },
+        {
+          "state": "forbidden",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
+      "id": "018a-approval-performance",
+      "role": "finance-controller",
+      "path": "/dashboards/approval-performance",
+      "waitFor": "[data-testid=perf-kpis]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "analyst-aggregate",
+          "role": "analyst",
+          "waitFor": "[data-testid=perf-kpis]"
+        },
+        {
+          "state": "own-view",
+          "role": "department-head",
+          "waitFor": "[data-testid=own-view]"
+        }
+      ]
+    },
+    {
+      "id": "018b-product-analytics",
+      "role": "org-admin",
+      "path": "/admin/product-analytics",
+      "waitFor": "[data-testid=product-kpis]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "forbidden-owner",
+          "role": "regional-manager",
+          "waitFor": "role=heading[name=\"You cannot see product analytics\"]",
+          "allowRequests": ["/api/analytics/kpis"]
+        }
+      ]
+    },
+    {
+      "id": "088a-evidence-pack",
+      "role": "auditor",
+      "path": "/audit/evidence-packs",
+      "waitFor": "[data-testid=generate-pack]",
+      "states": [
+        {
+          "state": "list-empty"
+        },
+        {
+          "state": "ceo-download-only",
+          "role": "ceo",
+          "waitFor": "role=heading[name=\"No evidence packs yet\"]"
+        },
+        {
+          "state": "forbidden",
+          "role": "regional-manager",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
       "id": "080-budget-vs-actual",
       "role": "finance-controller",
       "path": "/reports/budget-vs-actual",
