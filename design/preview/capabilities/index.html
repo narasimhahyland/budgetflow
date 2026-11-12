@@ -510,15 +510,15 @@
           <li class="outcome">
             <h3>Added this week</h3>
             <p>
-              Real report files, enforced per-employee and gift caps, and the full ten-step
-              acceptance scenario, plus a steadier visual check. See
+              Real report files, enforced caps, the ten-step acceptance scenario, finance
+              dashboards, tax and benefits, the Navan connector and a live AI model. See
               <a href="#recent">Recently added</a>.
             </p>
           </li>
           <li class="outcome">
             <h3>Pending: the gaps</h3>
             <p>
-              A review found parts of the plan not built yet. Four are in progress, the rest are
+              A review found parts of the plan not built yet. Some are in progress, the rest are
               planned. They are marked on each wave and listed under <a href="#pending">Pending</a>.
             </p>
           </li>
@@ -878,6 +878,11 @@
                   to a single event or line. Home opens on an overview that fits the person's role.
                 </li>
                 <li>
+                  A finance controller view of what still needs attention before close, and alerts
+                  and exceptions in one queue, each figure equal to its source and limited to the
+                  viewer's scope.
+                </li>
+                <li>
                   Standard reports: budget versus actual, allocation, utilization, location and
                   department comparison, event spending, unused and expiring budget, and forecast
                   versus variance.
@@ -921,6 +926,15 @@
                   A year-end run with clear rules for what carries forward, what lapses and what is
                   swept back to the centre.
                 </li>
+                <li>
+                  Tax handled honestly: sales tax that can be recovered is not counted against the
+                  budget, and tax that cannot be recovered is. Tax rules are versioned and published
+                  by a tax approver. The shipped rates are sample values for finance to replace.
+                </li>
+                <li>
+                  An employee benefit ledger that records each person's share of events and awards
+                  and flags benefit-in-kind thresholds, exactly at the limit and one unit over.
+                </li>
               </ul>
             </article>
             <article class="pillar">
@@ -942,6 +956,12 @@
                   shown for a person to retry.
                 </li>
                 <li>
+                  A Navan connector built to Navan's documented interface: actuals brought in, event
+                  codes offered at the point of spend, and over-budget exceptions queued for a
+                  person. It is proven against a simulated Navan; the live connection is switched
+                  off until it is checked against a real test account.
+                </li>
+                <li>
                   A documented interface for the company's own automation, with keys that expire,
                   signed notifications of events and a delivery log.
                 </li>
@@ -951,20 +971,17 @@
               <h3>Still to come in this wave's area</h3>
               <ul>
                 <li>
-                  Finance controller, alerts and exceptions dashboards
-                  <span class="tag">In progress</span>; pending approvals, approval performance and
-                  product analytics dashboards, and the one-click evidence pack
+                  Pending approvals, approval performance and product analytics dashboards, and the
+                  one-click evidence pack <span class="tag">In progress</span>. They are built and
+                  reviewed, but not yet in the main product.
+                </li>
+                <li>
+                  The payroll, intercompany recharge and reclass exports that follow from the tax
+                  and benefit ledgers <span class="tag tag-planned">Planned</span>
+                </li>
+                <li>
+                  The Navan live connection checked against a real test account
                   <span class="tag tag-planned">Planned</span>
-                </li>
-                <li>
-                  Tax-aware consumption (unrecoverable sales tax counted as cost) and the employee
-                  benefit ledger with benefit-in-kind thresholds
-                  <span class="tag">In progress</span>; the payroll, recharge and reclass exports
-                  that follow from it <span class="tag tag-planned">Planned</span>
-                </li>
-                <li>
-                  Live Navan expense integration on its real interface, with event-code options at
-                  the point of spend <span class="tag">In progress</span>
                 </li>
                 <li>
                   Campaigns to reclaim and redistribute unused budget, and burn-rate alerts
@@ -1050,8 +1067,11 @@
                   audited action.
                 </li>
                 <li>
-                  The assistance runs on a recorded test model, so every answer is reproducible. It
-                  has not yet been run against a live AI model; that work is in progress.
+                  Since this week the assistance runs on a live AI model (Amazon Bedrock), behind
+                  the same guards: only permitted data is sent, every answer is checked against its
+                  expected shape, and figures must trace to a record. The assistance checks passed
+                  in a live local run; the screen journeys for these features are not all passing
+                  yet, and the automated pipeline skips AI checks because it has no model access.
                 </li>
               </ul>
             </article>
@@ -1088,8 +1108,8 @@
               <h3>Still to come in this wave's area</h3>
               <ul>
                 <li>
-                  Running the assistance on a live AI model
-                  <span class="tag">In progress</span>
+                  Every assistance screen journey passing on the live model, and AI checks in the
+                  automated pipeline <span class="tag tag-planned">Planned</span>
                 </li>
                 <li>
                   Nightly outlook and anomaly scans, and a tab for answers people reported as wrong
@@ -1282,7 +1302,7 @@
               <ul>
                 <li>
                   Business rules mapped to checks that prove them on the running product, with the
-                  results recorded rather than asserted: 102 rules today.
+                  results recorded rather than asserted: 112 rules today.
                 </li>
                 <li>
                   Every check run on a freshly loaded product: 627 checks of the interface and
@@ -1294,14 +1314,21 @@
                   An evidence pack for every phase, a final report, and refreshed documentation for
                   the people who use the product and the people who run it.
                 </li>
+                <li>
+                  Every one of the plan's 119 catalogued features traced to a passing check, a gap
+                  package or a recorded deferral (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/125"
+                    >#125</a
+                  >): 72 proven, 14 built but not yet proven, 19 gaps, 14 deferred.
+                </li>
               </ul>
             </article>
             <article class="pillar pending">
               <h3>Still to come in this wave's area</h3>
               <ul>
                 <li>
-                  Every row of the plan's feature catalogue traced to a passing check, a planned
-                  package or a recorded deferral <span class="tag tag-planned">Planned</span>
+                  Checks for the 14 features that are built but not yet proven
+                  <span class="tag tag-planned">Planned</span>
                 </li>
                 <li>
                   Performance at the plan's full scale (50,000 budgets, 500,000 ledger entries), and
@@ -1361,6 +1388,38 @@
                     href="https://github.com/narasimhahyland/budgetflow/pull/113"
                     >#113</a
                   >).
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Building what was missing</h3>
+              <ul>
+                <li>
+                  <strong>Finance dashboards.</strong> The finance controller view, and alerts and
+                  exceptions in one queue (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/117"
+                    >#117</a
+                  >).
+                </li>
+                <li>
+                  <strong>Tax and benefits.</strong> Only unrecoverable sales tax consumes budget,
+                  and an employee benefit ledger tracks benefit-in-kind thresholds, with sample
+                  rules finance will replace (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/120"
+                    >#120</a
+                  >).
+                </li>
+                <li>
+                  <strong>Navan connector.</strong> Built to Navan's documented interface and proven
+                  against a simulated Navan; the live connection stays off for now (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/118"
+                    >#118</a
+                  >).
+                </li>
+                <li>
+                  <strong>A live AI model.</strong> The assistance features now run on Amazon
+                  Bedrock instead of recorded answers. Not every assistance screen journey passes
+                  yet (<a href="https://github.com/narasimhahyland/budgetflow/pull/119">#119</a>).
                 </li>
               </ul>
             </article>
@@ -1430,43 +1489,24 @@
           </div>
           <div class="pillars">
             <article class="pillar">
-              <h3>In progress, under review</h3>
+              <h3>In progress</h3>
               <ul>
                 <li>
-                  <strong>Finance dashboards:</strong> finance controller, alerts and exceptions (<a
-                    href="https://github.com/narasimhahyland/budgetflow/pull/117"
-                    >#117</a
-                  >).
+                  <strong>The rest of the dashboards:</strong> pending approvals, approval
+                  performance, product analytics, and the one-click evidence pack. Built and
+                  reviewed (<a href="https://github.com/narasimhahyland/budgetflow/pull/121">#121</a
+                  >), but not yet in the main product.
                 </li>
                 <li>
-                  <strong>Navan live integration:</strong> the real expense interface, actuals
-                  brought in, and event-code options at the point of spend, live mode behind a
-                  switch (<a href="https://github.com/narasimhahyland/budgetflow/pull/118">#118</a
-                  >).
-                </li>
-                <li>
-                  <strong>Tax and benefits:</strong> unrecoverable sales tax counted as cost, and
-                  the employee benefit ledger with benefit-in-kind thresholds, using sample rules
-                  finance will replace (<a
-                    href="https://github.com/narasimhahyland/budgetflow/pull/120"
-                    >#120</a
-                  >).
-                </li>
-                <li>
-                  <strong>A live AI model</strong> for the assistance features (<a
-                    href="https://github.com/narasimhahyland/budgetflow/pull/119"
-                    >#119</a
-                  >).
+                  <strong>The live AI model, fully proven:</strong> every assistance screen journey
+                  passing on the live model, and AI checks in the automated pipeline.
                 </li>
               </ul>
             </article>
             <article class="pillar">
               <h3>Planned next</h3>
               <ul>
-                <li>
-                  The rest of the dashboards: pending approvals, approval performance, product
-                  analytics, and the one-click evidence pack.
-                </li>
+                <li>The Navan live connection checked against a real test account.</li>
                 <li>
                   Finance exports: intercompany recharges, reclass journals, payroll benefits.
                 </li>
@@ -1478,12 +1518,11 @@
                 <li>An installable phone app with real push notifications.</li>
                 <li>Nightly assistant scans, and the developer portal with a sandbox.</li>
                 <li>
-                  Experience: onboarding wizard, permission matrix, profile, global search, custom
-                  fields, the team budget card.
+                  Experience: onboarding wizard with sample data, permission matrix, profile, global
+                  search, custom fields, the team budget card, a role suggested from the job title,
+                  and a program logo.
                 </li>
-                <li>
-                  Feature-catalogue traceability and the thinly proven areas listed under Wave 7.
-                </li>
+                <li>Checks for the built-but-unproven features listed under Wave 7.</li>
               </ul>
             </article>
             <article class="pillar">
@@ -1522,7 +1561,7 @@
               wave.
             </p>
             <p>
-              <strong>In progress</strong> means the work is open for review and not yet in the
+              <strong>In progress</strong> means the work has started and is not yet in the main
               product. <strong>Planned</strong> means it is specified and scheduled, but not
               started. <strong>Not built</strong> means it is in the plan with no work scheduled
               yet.
@@ -1579,17 +1618,17 @@
               <div>
                 <h3>Reporting and close are in</h3>
                 <p>
-                  The executive dashboard, standard reports with real file exports, board packs,
-                  period close and year-end are in the product. Connections to other systems are
-                  built against simulated providers.
+                  The executive and finance dashboards, standard reports with real file exports,
+                  board packs, tax-aware consumption, period close and year-end are in the product.
+                  Connections to other systems are built against simulated providers.
                 </p>
               </div>
               <div>
                 <h3>The gaps are named</h3>
                 <p>
-                  Finance dashboards, tax and benefits, the Navan integration and a live AI model
-                  are in progress; the rest of the missing scope is planned or deferred, in the
-                  open.
+                  Finance dashboards, tax and benefits, the Navan connector and a live AI model
+                  landed this week; the rest of the missing scope is in progress, planned or
+                  deferred, in the open.
                 </p>
               </div>
             </div>
