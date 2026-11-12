@@ -38,8 +38,9 @@ export interface AiRawResult {
 }
 
 /**
- * Every model call goes through this interface. The provider is Amazon Bedrock; its credentials come
- * from the server environment and never from code or the database.
+ * Every model call goes through this interface. `AI_PROVIDER` picks the implementation: the offline
+ * `RecordedAiProvider` (default; local stack, functional runs, CI) or `BedrockAiProvider`, whose
+ * credentials come from the server environment and never from code or the database.
  */
 export abstract class AiProvider {
   abstract readonly id: string;

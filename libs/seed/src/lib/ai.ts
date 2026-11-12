@@ -3,7 +3,7 @@ import { P5_IDS } from './events';
 
 /**
  * Phase 13 fixtures (id prefix 91): the AI feature switches for the local stack and demo, the AI
- * settings of 113a, and two receipt files plus one vendor quote the deterministic fake provider has
+ * settings of 113a, and two receipt files plus one vendor quote the offline recorded provider has
  * recorded answers for. All fictional.
  */
 export const P13_IDS = {
@@ -41,7 +41,7 @@ export const AI_SEED_SETTINGS = {
 } as const;
 
 /**
- * Files the fake provider can read. The content is never stored: only the file name, which is what
+ * Files the recorded provider has readings for. The content is never stored: only the file name, which is what
  * the recorded answers are keyed on, so extraction is reproducible with no object storage involved.
  */
 export const AI_SEED_DOCUMENTS = [

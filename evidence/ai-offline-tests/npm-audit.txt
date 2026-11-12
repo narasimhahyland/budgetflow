@@ -1,0 +1,15 @@
+# npm audit report
+
+multer  2.0.0 - 2.4.0
+Severity: high
+multer vulnerable to Denial of Service via a pending asynchronous fileFilter after request teardown - https://github.com/advisories/GHSA-q7qp-rjg7-q26m
+fix available via `npm audit fix`
+node_modules/multer
+  @nestjs/platform-express  10.4.18 - 10.4.22 || 11.1.2 - 11.2.8 || 12.0.0-alpha.0 - 12.2.0
+  Depends on vulnerable versions of multer
+  node_modules/@nestjs/platform-express
+
+2 high severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix
