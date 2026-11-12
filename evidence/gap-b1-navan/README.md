@@ -33,8 +33,6 @@ columns shift by a few pixels. This branch does not touch that screen or its dat
 
 ## Not done here
 
-- The public research notes (`docs/research/navan-integration.md`) are in the main checkout,
-  uncommitted, waiting for the user's go-ahead.
 - `infra/.env.example` does not list `NAVAN_LIVE_ENABLED` (the worktree guard blocks reading env
   files); the default is off and the Compose file does not pass it.
 - Live mode is untested by design: it needs Navan credentials, and CI never runs it.

@@ -82,7 +82,8 @@ journeys in `apps/web-e2e/src/integrations/navan.spec.ts`.
 
 ## Confirm before live use
 
-Navan's public developer documentation describes these without naming them. They live in one place, `navan-client.ts`, and the mock uses the same
+Navan's public developer documentation ([research notes](../research/navan-integration.md)) describes
+these without naming them. They live in one place, `navan-client.ts`, and the mock uses the same
 values:
 
 | Value                           | Mock value                                                                                                  |
