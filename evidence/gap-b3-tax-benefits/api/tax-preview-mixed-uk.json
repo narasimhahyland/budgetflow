@@ -1,0 +1,36 @@
+{
+  "taxCode": "VAT-20",
+  "ruleId": "94000000-0000-4000-8000-000000000107",
+  "ruleVersion": 1,
+  "attendeeType": "mixed",
+  "recoverableShareBps": 8000,
+  "net": {
+    "amountMinor": 60000,
+    "currency": "GBP"
+  },
+  "tax": {
+    "amountMinor": 12000,
+    "currency": "GBP"
+  },
+  "recoverable": {
+    "amountMinor": 9600,
+    "currency": "GBP"
+  },
+  "nonRecoverable": {
+    "amountMinor": 2400,
+    "currency": "GBP"
+  },
+  "usesBudget": {
+    "amountMinor": 62400,
+    "currency": "GBP"
+  },
+  "usesBudgetReporting": {
+    "amountMinor": 78987,
+    "currency": "USD"
+  },
+  "recoverableReporting": {
+    "amountMinor": 12152,
+    "currency": "USD"
+  },
+  "posted": false
+}

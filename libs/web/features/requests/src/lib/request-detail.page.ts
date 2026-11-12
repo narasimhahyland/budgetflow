@@ -516,6 +516,61 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
                   <p>{{ r.purpose }}</p>
                 </div>
               </section>
+              @if (r.tax; as tx) {
+                <section class="bf-card" aria-labelledby="tax-title" data-testid="request-tax">
+                  <div class="bf-card__header">
+                    <h2 class="bf-card__title" id="tax-title">Tax</h2>
+                    <sat-status-tag [status]="tx.posted ? 'info' : 'neutral'">{{
+                      tx.posted ? 'Recorded on the commitment' : 'Preview until submitted'
+                    }}</sat-status-tag>
+                  </div>
+                  <dl class="bf-facts">
+                    <div>
+                      <dt>Net</dt>
+                      <dd>
+                        <bf-money [amountMinor]="tx.net.amountMinor" [currency]="tx.net.currency" />
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Recoverable {{ tx.taxCode }} ({{ tx.recoverableShareBps / 100 }}%)</dt>
+                      <dd>
+                        <bf-money
+                          [amountMinor]="tx.recoverable.amountMinor"
+                          [currency]="tx.recoverable.currency"
+                        />
+                        · does not use budget
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Non-recoverable {{ tx.taxCode }}</dt>
+                      <dd>
+                        <bf-money
+                          [amountMinor]="tx.nonRecoverable.amountMinor"
+                          [currency]="tx.nonRecoverable.currency"
+                        />
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Uses budget</dt>
+                      <dd>
+                        <bf-money
+                          [amountMinor]="tx.usesBudget.amountMinor"
+                          [currency]="tx.usesBudget.currency"
+                        />
+                        =
+                        <bf-money
+                          [amountMinor]="tx.usesBudgetReporting.amountMinor"
+                          [currency]="tx.usesBudgetReporting.currency"
+                        />
+                        at the locked plan rate
+                      </dd>
+                    </div>
+                  </dl>
+                  <p class="bf-card__hint">
+                    Split by the tax recoverability rules in force when the request was submitted.
+                  </p>
+                </section>
+              }
               @if (r.policyCheck; as pc) {
                 <section class="bf-card" aria-labelledby="policy-title" data-testid="policy-check">
                   <div class="bf-card__header">

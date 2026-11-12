@@ -3903,6 +3903,75 @@
       ]
     },
     {
+      "id": "080g-tax-recoverability",
+      "role": "finance-admin",
+      "path": "/finance/tax-recoverability",
+      "waitFor": "role=table[name=\"HYL-UK rules\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "calculator",
+          "actions": [
+            {
+              "click": "[data-testid=calc-entity]"
+            },
+            {
+              "click": "role=option[name=\"HYL-UK\"]"
+            },
+            {
+              "click": "role=button[name=\"Preview\"]"
+            },
+            {
+              "waitFor": "[data-testid=calc-result]"
+            }
+          ]
+        },
+        {
+          "state": "tax-approver",
+          "role": "finance-controller"
+        },
+        {
+          "state": "forbidden",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "role": "finance-controller",
+      "path": "/finance/employee-benefits",
+      "waitFor": "role=table[name=\"Ledger\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "person-drawer",
+          "actions": [
+            {
+              "click": "role=button[name=\"Oliver Hayes\"]"
+            },
+            {
+              "waitFor": "[data-testid=benefit-person] >> role=heading[name=\"Oliver Hayes\"]"
+            }
+          ]
+        },
+        {
+          "state": "thresholds",
+          "path": "/finance/employee-benefits?tab=thresholds",
+          "waitFor": "role=table[name=\"Thresholds by jurisdiction\"]"
+        },
+        {
+          "state": "forbidden",
+          "role": "budget-owner",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
       "id": "033-organization-hierarchy",
       "role": "org-admin",
       "path": "/org",

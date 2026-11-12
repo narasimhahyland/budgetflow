@@ -44,3 +44,5 @@ export * from './lib/admin/feature-flags';
 export * from './lib/admin/retention';
 export * from './lib/admin/role-administration';
 export * from './lib/admin/settings';
+export * from './lib/tax/recoverability';
+export * from './lib/tax/benefits';

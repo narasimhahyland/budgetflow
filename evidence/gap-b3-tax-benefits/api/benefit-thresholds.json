@@ -1,0 +1,89 @@
+{
+  "items": [
+    {
+      "id": "95000000-0000-4000-8000-000000000002",
+      "code": "DE-COMPANY-EVENTS",
+      "version": 1,
+      "name": "Germany company events",
+      "jurisdiction": "DE",
+      "legalEntityIds": [],
+      "legalEntityCodes": [],
+      "benefitTypes": ["employee_events"],
+      "limit": {
+        "amountMinor": 11000,
+        "currency": "EUR"
+      },
+      "basis": "per_event",
+      "maxOccasions": 2,
+      "periodStartMonth": 1,
+      "periodStartDay": 1,
+      "exceeded": "excess",
+      "status": "published",
+      "template": true,
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": null,
+      "comment": null,
+      "submittedByName": "Priya Raman",
+      "decidedByName": "Daniel Weber"
+    },
+    {
+      "id": "95000000-0000-4000-8000-000000000001",
+      "code": "UK-ANNUAL-FUNCTIONS",
+      "version": 1,
+      "name": "UK annual staff functions",
+      "jurisdiction": "GB",
+      "legalEntityIds": ["20000000-0000-4000-8000-000000000006"],
+      "legalEntityCodes": ["HYL-UK"],
+      "benefitTypes": ["employee_events"],
+      "limit": {
+        "amountMinor": 15000,
+        "currency": "GBP"
+      },
+      "basis": "per_year",
+      "maxOccasions": null,
+      "periodStartMonth": 4,
+      "periodStartDay": 6,
+      "exceeded": "whole",
+      "status": "published",
+      "template": false,
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": null,
+      "comment": null,
+      "submittedByName": "Priya Raman",
+      "decidedByName": "Daniel Weber"
+    },
+    {
+      "id": "95000000-0000-4000-8000-000000000003",
+      "code": "HYL-ANNUAL-CAP",
+      "version": 1,
+      "name": "Per-employee annual cap (FY2026)",
+      "jurisdiction": "GROUP",
+      "legalEntityIds": [
+        "20000000-0000-4000-8000-000000000001",
+        "20000000-0000-4000-8000-000000000002",
+        "20000000-0000-4000-8000-000000000003",
+        "20000000-0000-4000-8000-000000000006"
+      ],
+      "legalEntityCodes": ["HYL-US", "HYL-IN", "HYL-DE", "HYL-UK"],
+      "benefitTypes": ["team_lunch", "recognition"],
+      "limit": {
+        "amountMinor": 30000,
+        "currency": "USD"
+      },
+      "basis": "per_year",
+      "maxOccasions": null,
+      "periodStartMonth": 1,
+      "periodStartDay": 1,
+      "exceeded": "not_reportable",
+      "status": "published",
+      "template": false,
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": null,
+      "comment": null,
+      "submittedByName": "Priya Raman",
+      "decidedByName": "Daniel Weber"
+    }
+  ],
+  "canEdit": true,
+  "canPublish": false
+}

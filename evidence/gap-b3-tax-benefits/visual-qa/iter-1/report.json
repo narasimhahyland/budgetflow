@@ -1,0 +1,206 @@
+{
+  "generatedAt": "2026-11-12T05:44:13.543Z",
+  "base": "http://localhost:47200",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 24,
+  "blocking": 0,
+  "warnings": 0,
+  "results": [
+    {
+      "id": "080g-tax-recoverability",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "calculator",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--calculator--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "calculator",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--calculator--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "calculator",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--calculator--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "tax-approver",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--tax-approver--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "tax-approver",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--tax-approver--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "tax-approver",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--tax-approver--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "forbidden",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--forbidden--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "forbidden",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--forbidden--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080g-tax-recoverability",
+      "state": "forbidden",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080g-tax-recoverability--forbidden--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "person-drawer",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--person-drawer--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "person-drawer",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--person-drawer--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "person-drawer",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--person-drawer--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "thresholds",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--thresholds--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "thresholds",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--thresholds--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "thresholds",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--thresholds--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "forbidden",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--forbidden--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "forbidden",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--forbidden--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "080h-employee-benefit-ledger",
+      "state": "forbidden",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b3-tax-benefits/visual-qa/iter-1/screens/080h-employee-benefit-ledger--forbidden--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

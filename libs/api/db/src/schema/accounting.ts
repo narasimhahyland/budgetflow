@@ -182,6 +182,10 @@ export const actualTaxLines = pgTable(
     taxCode: varchar('tax_code', { length: 30 }).notNull(),
     amountMinor: minor('amount_minor').notNull(),
     recoverable: boolean('recoverable').notNull(),
+    // Gap B3 (080g): the rule in force on the accounting date, its share and the line's currency.
+    ruleId: uuid('rule_id'),
+    shareBps: integer('share_bps'),
+    currency: ccy('currency'),
   },
   (t) => [index('actual_tax_lines_actual').on(t.tenantId, t.actualId)],
 );

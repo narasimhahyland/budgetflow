@@ -52,4 +52,18 @@ export const financeAdminRoutes: Routes = [
     canActivate: [requirePermission('doa.read', 'Delegation of authority')],
     loadComponent: () => import('./doa.page').then((m) => m.DoaPage),
   },
+  {
+    path: 'finance/tax-recoverability',
+    title: 'Tax recoverability',
+    data: { pageTitle: 'Tax recoverability', section: 'Finance' },
+    canActivate: [requirePermission('tax.read', 'Tax recoverability')],
+    loadComponent: () => import('./tax-recoverability.page').then((m) => m.TaxRecoverabilityPage),
+  },
+  {
+    path: 'finance/employee-benefits',
+    title: 'Employee benefits',
+    data: { pageTitle: 'Employee benefits', section: 'Finance' },
+    canActivate: [requirePermission('benefits.read', 'Employee benefits')],
+    loadComponent: () => import('./employee-benefits.page').then((m) => m.EmployeeBenefitsPage),
+  },
 ];

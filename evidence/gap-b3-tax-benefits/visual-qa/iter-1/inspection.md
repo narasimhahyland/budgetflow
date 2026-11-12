@@ -1,0 +1,12 @@
+# Iteration 1 inspection (24 captures, 0 automated blocking)
+
+| Screen | State                     | Viewport        | Severity | Finding                                                                                      | Screenshot                                                              |
+| ------ | ------------------------- | --------------- | -------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| 080g   | all                       | desktop, tablet | blocking | Recoverable and Effect on budget columns run together ("100% Budget uses…"); no cell padding | screens/080g-tax-recoverability--calculator--desktop--light.png         |
+| 080g   | all                       | all             | blocking | US rule reads "Budget uses amount plus SALES" (tax word taken from the code)                 | screens/080g-tax-recoverability--default--desktop--light.png            |
+| 080g   | all                       | mobile          | blocking | Entity caption wraps one fragment per line ("HYL-/DE-/DE")                                   | screens/080g-tax-recoverability--calculator--mobile--light.png          |
+| 080g   | tax-approver              | tablet          | blocking | Tax codes wrap ("VAT-/20")                                                                   | screens/080g-tax-recoverability--tax-approver--tablet--light.png        |
+| 080g   | default                   | all             | blocking | Calculator opens with no legal entity; Preview disabled                                      | screens/080g-tax-recoverability--tax-approver--tablet--light.png        |
+| 080h   | thresholds                | tablet          | blocking | Table squeezed and the Status column clipped                                                 | screens/080h-employee-benefit-ledger--thresholds--tablet--light.png     |
+| 080h   | default                   | all             | minor    | Template note runs to the card edge                                                          | screens/080h-employee-benefit-ledger--default--desktop--light.png       |
+| 080h   | person-drawer, thresholds | all             | minor    | Benefit types shown as codes (`employee_events`)                                             | screens/080h-employee-benefit-ledger--person-drawer--desktop--light.png |

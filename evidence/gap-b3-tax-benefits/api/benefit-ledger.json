@@ -1,0 +1,188 @@
+{
+  "asOf": "2026-11-16",
+  "items": [
+    {
+      "personId": "40000000-0000-4000-8000-000000000116",
+      "personName": "Kavya Pillai",
+      "legalEntityId": "20000000-0000-4000-8000-000000000002",
+      "legalEntityCode": "HYL-IN",
+      "locationName": "Hyderabad",
+      "thresholdId": "95000000-0000-4000-8000-000000000003",
+      "thresholdName": "Per-employee annual cap (FY2026)",
+      "window": {
+        "fromDate": "2026-01-01",
+        "toDate": "2026-12-31"
+      },
+      "basis": "per_year",
+      "counted": {
+        "amountMinor": 21261,
+        "currency": "USD"
+      },
+      "limit": {
+        "amountMinor": 30000,
+        "currency": "USD"
+      },
+      "occasions": 1,
+      "maxOccasions": null,
+      "status": "under",
+      "exceeded": "not_reportable",
+      "reportable": null,
+      "exported": false
+    },
+    {
+      "personId": "40000000-0000-4000-8000-000000000103",
+      "personName": "Meera Nair",
+      "legalEntityId": "20000000-0000-4000-8000-000000000002",
+      "legalEntityCode": "HYL-IN",
+      "locationName": "Bengaluru",
+      "thresholdId": "95000000-0000-4000-8000-000000000003",
+      "thresholdName": "Per-employee annual cap (FY2026)",
+      "window": {
+        "fromDate": "2026-01-01",
+        "toDate": "2026-12-31"
+      },
+      "basis": "per_year",
+      "counted": {
+        "amountMinor": 5700,
+        "currency": "USD"
+      },
+      "limit": {
+        "amountMinor": 30000,
+        "currency": "USD"
+      },
+      "occasions": 1,
+      "maxOccasions": null,
+      "status": "under",
+      "exceeded": "not_reportable",
+      "reportable": null,
+      "exported": false
+    },
+    {
+      "personId": "40000000-0000-4000-8000-000000000102",
+      "personName": "Rohan Kulkarni",
+      "legalEntityId": "20000000-0000-4000-8000-000000000002",
+      "legalEntityCode": "HYL-IN",
+      "locationName": "Bengaluru",
+      "thresholdId": "95000000-0000-4000-8000-000000000003",
+      "thresholdName": "Per-employee annual cap (FY2026)",
+      "window": {
+        "fromDate": "2026-01-01",
+        "toDate": "2026-12-31"
+      },
+      "basis": "per_year",
+      "counted": {
+        "amountMinor": 5700,
+        "currency": "USD"
+      },
+      "limit": {
+        "amountMinor": 30000,
+        "currency": "USD"
+      },
+      "occasions": 1,
+      "maxOccasions": null,
+      "status": "under",
+      "exceeded": "not_reportable",
+      "reportable": null,
+      "exported": false
+    },
+    {
+      "personId": "40000000-0000-4000-8000-000000000150",
+      "personName": "Amelia Clarke",
+      "legalEntityId": "20000000-0000-4000-8000-000000000006",
+      "legalEntityCode": "HYL-UK",
+      "locationName": "London",
+      "thresholdId": "95000000-0000-4000-8000-000000000001",
+      "thresholdName": "UK annual staff functions",
+      "window": {
+        "fromDate": "2026-04-06",
+        "toDate": "2027-04-05"
+      },
+      "basis": "per_year",
+      "counted": {
+        "amountMinor": 14250,
+        "currency": "GBP"
+      },
+      "limit": {
+        "amountMinor": 15000,
+        "currency": "GBP"
+      },
+      "occasions": 1,
+      "maxOccasions": null,
+      "status": "approaching",
+      "exceeded": "whole",
+      "reportable": {
+        "amountMinor": 0,
+        "currency": "GBP"
+      },
+      "exported": false
+    },
+    {
+      "personId": "40000000-0000-4000-8000-000000000151",
+      "personName": "Oliver Hayes",
+      "legalEntityId": "20000000-0000-4000-8000-000000000006",
+      "legalEntityCode": "HYL-UK",
+      "locationName": "London",
+      "thresholdId": "95000000-0000-4000-8000-000000000001",
+      "thresholdName": "UK annual staff functions",
+      "window": {
+        "fromDate": "2026-04-06",
+        "toDate": "2027-04-05"
+      },
+      "basis": "per_year",
+      "counted": {
+        "amountMinor": 16800,
+        "currency": "GBP"
+      },
+      "limit": {
+        "amountMinor": 15000,
+        "currency": "GBP"
+      },
+      "occasions": 2,
+      "maxOccasions": null,
+      "status": "over",
+      "exceeded": "whole",
+      "reportable": {
+        "amountMinor": 16800,
+        "currency": "GBP"
+      },
+      "exported": false
+    },
+    {
+      "personId": "40000000-0000-4000-8000-000000000127",
+      "personName": "Mason Reed",
+      "legalEntityId": "20000000-0000-4000-8000-000000000001",
+      "legalEntityCode": "HYL-US",
+      "locationName": "Westlake",
+      "thresholdId": "95000000-0000-4000-8000-000000000003",
+      "thresholdName": "Per-employee annual cap (FY2026)",
+      "window": {
+        "fromDate": "2026-01-01",
+        "toDate": "2026-12-31"
+      },
+      "basis": "per_year",
+      "counted": {
+        "amountMinor": 28800,
+        "currency": "USD"
+      },
+      "limit": {
+        "amountMinor": 30000,
+        "currency": "USD"
+      },
+      "occasions": 1,
+      "maxOccasions": null,
+      "status": "approaching",
+      "exceeded": "not_reportable",
+      "reportable": null,
+      "exported": false
+    }
+  ],
+  "templates": [
+    {
+      "thresholdId": "95000000-0000-4000-8000-000000000002",
+      "name": "Germany company events",
+      "note": "Germany company events (EUR 110.00 per employee per event, 2 events a year): template, no legal entity in scope yet."
+    }
+  ],
+  "benefitTypes": ["employee_events", "recognition", "team_lunch"],
+  "reportingCurrency": "USD"
+}

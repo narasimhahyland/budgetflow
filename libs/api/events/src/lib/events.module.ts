@@ -2,6 +2,7 @@ import { ApprovalsModule } from '@bf/api/approvals';
 import { AuditModule } from '@bf/api/audit';
 import { ContributionsModule } from '@bf/api/contributions';
 import { DocumentsModule } from '@bf/api/documents';
+import { FinanceModule } from '@bf/api/finance';
 import { LedgerModule } from '@bf/api/ledger';
 import { SpendModule } from '@bf/api/spend';
 import { TenancyModule } from '@bf/api/tenancy';
@@ -46,6 +47,7 @@ const SERVICES = [EventsService, InsightsService, EventCloseChecks, ...DEPTH_SER
     ContributionsModule,
     DocumentsModule,
     TenancyModule,
+    FinanceModule,
   ],
   providers: SERVICES,
   exports: SERVICES,
