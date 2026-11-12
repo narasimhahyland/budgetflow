@@ -1,0 +1,8 @@
+{
+  "request": "GET /api/evidence-packs as ceo",
+  "status": 200,
+  "body": {
+    "items": [],
+    "canGenerate": false
+  }
+}

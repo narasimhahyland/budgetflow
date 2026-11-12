@@ -69,13 +69,18 @@ request; it now does, and every decision is recorded with its rule versions and 
 | **B9** AI jobs                      | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                     | —               | S–M  |
 | **B10** Experience                  | Onboarding wizard (005, 008, 010), 104 permission matrix, 124 profile and preferences, global search, 106 categories and custom fields (read-only today), 116a team budget card, 113 integrity-checks tab. Split by area.                                                         | D2              | L    |
 
-**B2 part 1 done** (012, 017, 017a). The finance controller dashboard shows the close checklist per
-entity, the queues that block the close, the ledger check, feeds and the FX effect; alerts are derived
-on every read from the health checks, owner thresholds and controls, and acknowledging or snoozing is
-per person; the exceptions dashboard counts control exceptions by type and age and links each to its
-queue. Proof: `apps/api-e2e/src/dashboards/dashboards.spec.ts` (invariants 103–105) and the
-dashboards journeys; evidence in [`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md).
-Part 2 (018, 018a, 018b, 088a) follows.
+**B2 done.** 012 finance controller (close checklist per entity, blocking queues, ledger check,
+feeds, FX effect), 017 alerts (derived on every read from health checks, owner thresholds and
+controls; acknowledge and snooze per person), 017a exceptions (by type and age, each linked to its
+queue), 018 pending approvals (held versus not yet held, SLA, a four-hourly nudge that decides
+nothing), 018a approval performance (names only for finance, aggregates for analysts, own figures for
+approvers), 018b product analytics (`GET /api/analytics/kpis`, counts only, against the plan targets)
+and 088a evidence packs (new action `evidence.generate`, migration 0024, worker-built ZIP with a
+SHA-256 manifest and a verified audit chain). Proof: `apps/api-e2e/src/dashboards/` (invariants
+103–108) and the dashboards journeys; evidence in
+[`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md). Not built: the Export and
+Schedule menus of these dashboards, sidebar entries, and the evidence-pack entry on event and budget
+details.
 
 ## Tier C — prove what is built but thinly covered
 
