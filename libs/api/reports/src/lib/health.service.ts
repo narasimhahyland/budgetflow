@@ -66,58 +66,9 @@ export class HealthService {
       throw ApiProblem.forbidden('Budget health is for finance roles and budget owners.');
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       const today = todayUtc();
-      const dataset = await this.reads.dataset(
-        tx,
-        actor,
-        { fiscalYearId: q.fiscalYearId, rootBudgetId: q.rootBudgetId },
-        today,
-      );
-      const ids = dataset.budgets.map((b) => b.row.id);
-      const [subtree, phased, hygiene] = await Promise.all([
-        this.subtotals(tx, ids),
-        this.phasedToDate(tx, ids, today),
-        this.hygiene(tx, ids, DEFAULT_HEALTH_THRESHOLDS.hygieneDays),
-      ]);
+      const { dataset, evaluated, subtree } = await this.evaluate(tx, actor, q, today);
       const currency = dataset.currency;
       const money = (amountMinor: number): Money => ({ amountMinor, currency });
-      const format = (amountMinor: number) =>
-        `${currency} ${(amountMinor / 100).toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}`;
-      const fy = dataset.fiscalYear;
-
-      const evaluated = dataset.budgets.map((b) => {
-        const sub = subtree.get(b.row.id) ?? {
-          held: 0,
-          preEncumbered: 0,
-          encumbered: 0,
-          actual: 0,
-        };
-        const hy = hygiene.get(b.row.id) ?? {
-          agedCommitmentsMinor: 0,
-          agedCommitmentsCount: 0,
-          unmatchedActualsMinor: 0,
-          unmatchedActualsCount: 0,
-        };
-        const input: HealthInput = {
-          status: b.row.status,
-          authorizedMinor: b.balances.authorized,
-          heldMinor: sub.held,
-          preEncumberedMinor: sub.preEncumbered,
-          encumberedMinor: sub.encumbered,
-          actualMinor: sub.actual,
-          phasedToDateMinor: phased.get(b.row.id) ?? null,
-          elapsedBps: fy?.elapsedBps ?? 0,
-          daysLeft: fy?.daysLeft ?? 0,
-          monthsLeft: fy?.monthsLeft ?? 0,
-          toleranceBps: b.row.toleranceBps,
-          openCommitmentsMinor: sub.encumbered + sub.preEncumbered,
-          ...hy,
-        };
-        const outcome = evaluateHealth(input, DEFAULT_HEALTH_THRESHOLDS, format);
-        return { budget: b, outcome, input };
-      });
 
       const summary = {
         budgets: evaluated.length,
@@ -191,6 +142,71 @@ export class HealthService {
         },
       };
     });
+  }
+
+  /**
+   * The five checks for every budget in the viewer's scope, from the same inputs the overview uses.
+   * Shared with the alerts dashboard (017), so an alert and the health row never disagree.
+   */
+  async evaluate(
+    tx: Tx,
+    actor: RequestActor,
+    q: Pick<BudgetHealthQuery, 'fiscalYearId' | 'rootBudgetId'>,
+    today: string,
+  ) {
+    const dataset = await this.reads.dataset(
+      tx,
+      actor,
+      { fiscalYearId: q.fiscalYearId, rootBudgetId: q.rootBudgetId },
+      today,
+    );
+    const ids = dataset.budgets.map((b) => b.row.id);
+    const [subtree, phased, hygiene] = await Promise.all([
+      this.subtotals(tx, ids),
+      this.phasedToDate(tx, ids, today),
+      this.hygiene(tx, ids, DEFAULT_HEALTH_THRESHOLDS.hygieneDays),
+    ]);
+    const currency = dataset.currency;
+    const format = (amountMinor: number) =>
+      `${currency} ${(amountMinor / 100).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+    const fy = dataset.fiscalYear;
+
+    const evaluated = dataset.budgets.map((b) => {
+      const sub = subtree.get(b.row.id) ?? {
+        held: 0,
+        preEncumbered: 0,
+        encumbered: 0,
+        actual: 0,
+      };
+      const hy = hygiene.get(b.row.id) ?? {
+        agedCommitmentsMinor: 0,
+        agedCommitmentsCount: 0,
+        unmatchedActualsMinor: 0,
+        unmatchedActualsCount: 0,
+      };
+      const input: HealthInput = {
+        status: b.row.status,
+        authorizedMinor: b.balances.authorized,
+        heldMinor: sub.held,
+        preEncumberedMinor: sub.preEncumbered,
+        encumberedMinor: sub.encumbered,
+        actualMinor: sub.actual,
+        phasedToDateMinor: phased.get(b.row.id) ?? null,
+        elapsedBps: fy?.elapsedBps ?? 0,
+        daysLeft: fy?.daysLeft ?? 0,
+        monthsLeft: fy?.monthsLeft ?? 0,
+        toleranceBps: b.row.toleranceBps,
+        openCommitmentsMinor: sub.encumbered + sub.preEncumbered,
+        ...hy,
+      };
+      const outcome = evaluateHealth(input, DEFAULT_HEALTH_THRESHOLDS, format);
+      return { budget: b, outcome, input };
+    });
+
+    return { dataset, evaluated, subtree };
   }
 
   /** Held, pre-encumbered, encumbered and actual of each budget and everything below it. */

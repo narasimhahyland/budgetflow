@@ -25,6 +25,7 @@ export * from './lib/domains/admin';
 export * from './lib/domains/ai';
 export * from './lib/domains/extended';
 export * from './lib/domains/ecosystem';
+export * from './lib/domains/dashboards';
 export * from './lib/endpoints';
 export * from './lib/openapi';
 export * from './lib/client';

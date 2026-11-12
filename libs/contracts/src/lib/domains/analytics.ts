@@ -26,6 +26,9 @@ export const SERVER_ANALYTICS_EVENTS = [
   'item.followed',
   'item.unfollowed',
   'chat.balance_checked',
+  // 017: per-user alert acknowledgements and snoozes; the alert key carries ids only.
+  'alert.acknowledged',
+  'alert.snoozed',
 ] as const;
 export const ANALYTICS_EVENTS = [...CLIENT_ANALYTICS_EVENTS, ...SERVER_ANALYTICS_EVENTS] as const;
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[number];
