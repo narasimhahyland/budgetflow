@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -40,7 +40,6 @@ const PERIOD_STATUS: Record<string, string> = {
 @Component({
   selector: 'bf-finance-overview-page',
   imports: [
-    DatePipe,
     DateTimePipe,
     DecimalPipe,
     LoadState,
