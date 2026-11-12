@@ -6,9 +6,11 @@ setup detail: [`../ai-harness/bedrock.md`](../ai-harness/bedrock.md). Users and 
 
 ## 1. Before the demo
 
-1. Put one credential in the gitignored `.env` at the repository root (never commit it):
+1. Select Bedrock and put one credential in the gitignored `.env` at the repository root (never commit
+   it). Without `AI_PROVIDER=bedrock` the stack runs the offline recorded provider instead:
 
    ```text
+   AI_PROVIDER=bedrock
    AWS_BEARER_TOKEN_BEDROCK=...
    ```
 
@@ -97,8 +99,12 @@ to the ledger, approves, or changes a rule.
 
 ## 5. Running the live checks
 
+Start the stack with `AI_PROVIDER=bedrock` (and credentials) for this demo. Then:
+
 ```bash
-BF_AI_LIVE=1 npx playwright test -c apps/api-e2e src/ai
+npx playwright test -c apps/api-e2e src/ai
 ```
 
-These call the real model, so wording varies and they skip when `BF_AI_LIVE` is unset.
+These call the real model, so wording varies; the three recorded-failure guardrail scenarios and the
+journeys skip on a live provider. Without `AI_PROVIDER=bedrock` the stack runs the offline recorded
+provider, which is what functional runs and CI use.

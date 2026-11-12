@@ -6,9 +6,9 @@ import { SEED } from '@bf/seed';
 import { apiToken, expectShell } from '../support/auth';
 import { API_URL } from '../support/env';
 import { authFile } from '../support/roles';
-import { AI_LIVE, AI_LIVE_REASON } from './live';
+import { onRecordedProvider, RECORDED_MODEL } from './recorded';
 
-test.skip(!AI_LIVE, AI_LIVE_REASON);
+onRecordedProvider();
 
 /** The same figures the answer shows, read straight from the budget read model. */
 async function budgetFigures(role: 'location-manager', budgetId: string) {
@@ -73,7 +73,7 @@ test.describe('Ask BudgetFlow (011a)', () => {
     // Sources are the records the answer was built from, and the provenance names the model.
     await page.getByTestId('sources-toggle').click();
     await expect(page.getByTestId('sources-list')).toContainText('Bengaluru Events');
-    await expect(page.getByTestId('ai-provenance')).toContainText('claude');
+    await expect(page.getByTestId('ai-provenance')).toContainText(RECORDED_MODEL);
     await expect(page.getByTestId('ai-confidence')).toBeVisible();
   });
 

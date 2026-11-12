@@ -238,12 +238,22 @@ export const P12_MAPPINGS: {
   },
 ];
 
+/**
+ * Expiry of every seeded credential (the API key here, the ecosystem connections in ./ecosystem): a
+ * fixed instant rather than "now + N days". The expiry renders as an absolute date (screens 101,
+ * 092a/092b), and the relative-time mask hides its glyphs but not its width, so a real-time value
+ * reflowed those tables from one day to the next. A pinned "now + N days" would not do either: the API
+ * checks expiry against real time (Date.now(), SQL now()), so every seeded credential would lapse on
+ * one fixed real date. Far in the future, the credentials stay active on every real date.
+ */
+export const SEED_CREDENTIAL_EXPIRES_AT = '2099-12-31T12:00:00Z';
+
 /** The scoped key the intranet budget widget uses; read-only, expiring, owned by a named person. */
 export const P12_API_KEY = {
   id: P12_IDS.apiKeys.intranetWidget,
   name: 'Intranet budget widget',
   scopes: ['budgets.read', 'events.read'],
-  expiresInDays: 90,
+  expiresAt: SEED_CREDENTIAL_EXPIRES_AT,
   rateLimitPerMinute: 120,
 } as const;
 

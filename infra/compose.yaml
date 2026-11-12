@@ -133,8 +133,10 @@ services:
       KEYCLOAK_ISSUER: http://localhost:${BF_KEYCLOAK_PORT:-8080}/realms/budgetflow
       KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/budgetflow/protocol/openid-connect/certs
       KEYCLOAK_AUDIENCE: budgetflow-api
-      AI_PROVIDER: bedrock
-      # Amazon Bedrock. Put credentials in the gitignored .env at the repo root (see docs/ai-harness/bedrock.md); empty means "not configured".
+      # AI: the offline recorded provider by default (no credentials, no network, what functional runs
+      # and CI use). AI_PROVIDER=bedrock selects Amazon Bedrock; put that and the credentials in the
+      # gitignored .env at the repo root or the shell (docs/ai-harness/bedrock.md). Empty means "not configured".
+      AI_PROVIDER: ${AI_PROVIDER:-recorded}
       AWS_REGION: ${AWS_REGION:-us-east-1}
       BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-us.anthropic.claude-sonnet-4-5-20250929-v1:0}
       AWS_BEARER_TOKEN_BEDROCK: ${AWS_BEARER_TOKEN_BEDROCK:-}

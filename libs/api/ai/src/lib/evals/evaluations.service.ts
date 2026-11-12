@@ -8,8 +8,10 @@ import { EVAL_SETS, type EvalSet } from './fixtures';
 
 /**
  * Quality is measured, not asserted (113a Accuracy). Each set runs against the configured provider -
- * the deterministic fake in functional runs and CI - and the result is stored next to its published
- * threshold. A flag kind below its threshold stops raising new flags until it is re-evaluated.
+ * the offline recorded provider in functional runs and CI, Amazon Bedrock when selected - and the
+ * result is stored next to its published threshold. Cases that replay a recorded fixture run only on
+ * the recorded provider; a set left with no case on a live provider is not stored. A flag kind below
+ * its threshold stops raising new flags until it is re-evaluated.
  */
 @Injectable()
 export class AiEvaluationsService {
@@ -31,7 +33,7 @@ export class AiEvaluationsService {
         'AI_PROVIDER_NOT_CONFIGURED',
         'No model provider is configured, so the evaluation sets cannot run.',
       );
-    const sets = EVAL_SETS.filter((s) => !feature || s.feature === feature);
+    const sets = this.applicable().filter((s) => !feature || s.feature === feature);
     const results: AiEvaluationResult[] = [];
     await withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       for (const set of sets) results.push(await this.runSet(tx, actor, set));
@@ -41,7 +43,16 @@ export class AiEvaluationsService {
 
   /** Seed only: runs every set for a tenant without an actor, so the accuracy tab starts populated. */
   async seedRun(tx: Tx, tenantId: string): Promise<void> {
-    for (const set of EVAL_SETS) await this.store(tx, tenantId, set);
+    for (const set of this.applicable()) await this.store(tx, tenantId, set);
+  }
+
+  /** The sets with the cases that mean something on this provider (see `EvalCase.requires`). */
+  private applicable(): EvalSet[] {
+    const recorded = this.provider.id === 'recorded';
+    return EVAL_SETS.map((set) => ({
+      ...set,
+      cases: set.cases.filter((c) => recorded || c.requires !== 'recorded'),
+    })).filter((set) => set.cases.length > 0);
   }
 
   private runSet(tx: Tx, actor: RequestActor, set: EvalSet): Promise<AiEvaluationResult> {
