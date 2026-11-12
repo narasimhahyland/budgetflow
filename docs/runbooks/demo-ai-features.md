@@ -16,26 +16,58 @@ setup detail: [`../ai-harness/bedrock.md`](../ai-harness/bedrock.md). Users and 
    (default `us-east-1`), `BEDROCK_MODEL_ID` (the model must be enabled in your account and region).
    `.env` only needs your overrides; `scripts/stack.sh` fills the rest from `infra/.env.example`.
 
-2. Start the stack with the deterministic seed:
+2. Pick ports that no other stack on your machine uses. Every checkout runs its own containers, and a
+   port that another checkout already holds silently sends your browser to that checkout's stack, which
+   may still be running the old fake provider. List what is taken, then set free ports in the same
+   terminal (or in `.env`):
+
+   ```bash
+   docker ps --format '{{.Names}} {{.Ports}}'
+   ```
+
+   ```bash
+   export BF_WEB_PORT=51200 BF_API_PORT=51000 BF_PG_PORT=51432 BF_KEYCLOAK_PORT=51080 BF_MAILPIT_PORT=51025 BF_MINIO_PORT=51900 BF_MOCK_PROVIDERS_PORT=51010
+   ```
+
+3. Start the stack with the deterministic seed. The first start builds images and can take several
+   minutes when Docker is busy; wait for it to finish and do not start a second copy:
 
    ```bash
    scripts/stack.sh up && scripts/stack.sh reset
    ```
 
-   If another stack already uses the default ports, set different `BF_*_PORT` values in `.env` first.
+4. Confirm this stack is on Bedrock before you demo (`<project>` is `bf-` plus the checkout folder name, for example `bf-bedrock-ai-integration-f0bd11`; `docker ps` lists it):
 
-3. Print the URLs and sign in as the roles below (realm `budgetflow`, password in `docs/local-access.md`):
+   ```bash
+   docker exec <project>-api-1 printenv AI_PROVIDER
+   ```
+
+   It must print `bedrock`. Check the token reached the API without printing it:
+
+   ```bash
+   docker exec <project>-api-1 sh -c 'test -n "$AWS_BEARER_TOKEN_BEDROCK" && echo token-present || echo token-MISSING'
+   ```
+
+5. Print the URLs and sign in as the roles below (realm `budgetflow`, password in `docs/local-access.md`):
 
    ```bash
    scripts/stack.sh urls
    ```
 
-4. Switch the features on: sign in as `org.admin@example.test`, open **Admin > AI > Features**
+6. Switch the features on: sign in as `org.admin@example.test`, open **Admin > AI > Features**
    (`/admin/ai/features`), and turn on the features you will show. Finance-affecting ones stay pending
    until a Finance Admin (`finance.admin@example.test`) confirms. If Bedrock is not configured the
    switches are refused with "No model provider is configured".
 
-## 2. Demo script
+## 2. How to tell the answers are real
+
+- The `ask` request in the browser Network tab takes several seconds, not tens of milliseconds.
+- The provenance line shows a `us.anthropic.claude-...` model id (the old fake showed `budgetflow-fake`).
+- Wording varies between runs. The old fake always wrote "... has USD x available under its rules, of
+  USD y authorized."; if you see that sentence, you are on a stale stack from another checkout.
+- The auditor's query log (`/admin/ai/log`) gains a row per question.
+
+## 3. Demo script
 
 | Step | Sign in as                        | Screen                                           | Do                                                      | What to point out                                                                                                  |
 | ---- | --------------------------------- | ------------------------------------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -52,7 +84,7 @@ setup detail: [`../ai-harness/bedrock.md`](../ai-harness/bedrock.md). Users and 
 
 The seeded receipt files have no content, so for step 9 upload your own receipt.
 
-## 3. What happens when a user asks a question
+## 4. What happens when a user asks a question
 
 ```text
 Browser -> POST /api/ai/ask -> AiAskService -> AiGateway -> BedrockAiProvider -> Amazon Bedrock
@@ -85,7 +117,7 @@ outputs are open suggestions; accepting one goes through the normal command path
 delegation-of-authority limits, audit) and records the suggestion id and model id. The AI never posts
 to the ledger, approves, or changes a rule.
 
-## 4. Troubleshooting
+## 5. Troubleshooting
 
 | Symptom                                             | Cause and fix                                                                                                                                                                       |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -95,7 +127,7 @@ to the ledger, approves, or changes a rule.
 | `stack.sh up` complains about missing variables     | Use the current `scripts/stack.sh`, which layers `.env` over `infra/.env.example`.                                                                                                  |
 | Port already allocated                              | Another stack uses it. Set `BF_*_PORT` values in `.env`.                                                                                                                            |
 
-## 5. Running the live checks
+## 6. Running the live checks
 
 ```bash
 BF_AI_LIVE=1 npx playwright test -c apps/api-e2e src/ai
