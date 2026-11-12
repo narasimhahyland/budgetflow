@@ -13,6 +13,7 @@ import { seedIntegrations } from './integrations';
 import { seedOrg } from './org';
 import { seedReports } from './reports';
 import { seedRules } from './rules';
+import { seedReclaim } from './reclaim';
 import { seedTax } from './tax';
 
 /**
@@ -78,5 +79,10 @@ export const SEED_EXTENSIONS: SeedExtension[] = [
     name: 'tax recoverability rules, benefit-in-kind thresholds and recorded benefits (gap B3)',
     phase: 'B3',
     run: seedTax,
+  },
+  {
+    name: 'year-end reclaim reason code and the Q4 FY2026 reclaim campaign (gap B4)',
+    phase: 'B4',
+    run: seedReclaim,
   },
 ];

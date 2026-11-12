@@ -61,7 +61,7 @@ request; it now does, and every decision is recorded with its rule versions and 
 | **B1** Navan live integration (16a) — **done** | The plan's Phase 16a: the real Navan Expense API in place of the placeholder adapter, inbound actuals in 93-day windows, outbound event-code options, and controls disabling options at the point of spend. Mock provider moved to the real shapes; live mode behind an env flag. | D4              | L    |
 | **B2** Dashboards                              | 012 finance controller, 017 alerts, 017a exceptions, 018 pending approvals, 018a approval performance (cycle time, bottlenecks), 018b product analytics, 088a one-click evidence pack. Split in two.                                                                              | D2              | L    |
 | **B3** Tax and benefits — **done**             | 080g tax-aware consumption (recoverable vs non-recoverable GST/VAT) and 080h the employee benefit ledger with benefit-in-kind thresholds. The tables exist, unused. Ledger-heavy: `/ledger-change`.                                                                               | D2, D3          | L    |
-| **B4** Reclaim and burn rate                   | 086a reclaim-and-redistribute campaigns, and burn-rate alerts.                                                                                                                                                                                                                    | D2              | M    |
+| **B4** Reclaim and burn rate — **done**        | 086a reclaim-and-redistribute campaigns, and burn-rate alerts.                                                                                                                                                                                                                    | D2              | M    |
 | **B5** Finance exports                         | 094b: intercompany recharges, chargeback and reclass journals, payroll benefit data.                                                                                                                                                                                              | B3 for benefits | M    |
 | **B6** Developer portal                        | 101a public API docs and sandbox (only `/api/openapi.json` exists). The sandbox overlaps the deferred demo environment, so scope it first.                                                                                                                                        | D2              | M    |
 | **B7** Integration completeness                | Apply an Adaptive Planning import (plan to root budgets; today preview only), Outlook and Google RSVP sync, vendor master from the ERP (both read and reported only), Workday `runBudgetCheck`, 117a hand-off to a prefilled expense.                                             | —               | M–L  |
@@ -105,6 +105,24 @@ are built from the specs (D2). Migration `0023`. Proof: `apps/api-e2e/src/tax/` 
 payroll export tab and batches (the ledger shows the reportable amounts B5 exports). Left as
 follow-ups: the screens' CSV/XLSX/PDF export, employees seeing their own benefits (122), and the
 071 cap reading the benefit ledger instead of live request consumption.
+
+**B4 done.** Reclaim campaigns (086a, built from the spec, D2): finance (or the CEO) previews and
+starts a campaign; every budget forecast to lapse above the criteria gets a notice; its owner
+releases all, part, or keeps it with a reason and plan, never above the floor (allocated out + held
+
+- encumbered + actual, as it stands when they answer). After the deadline finance can send an
+  unanswered notice to the nearest ancestor owner who is not its owner; nothing is reclaimed
+  automatically. A Finance Admin redistributes each legal entity's pool through a confirm dialog with
+  the floor check per source: reductions with a destination to targets in the same entity and tree,
+  the rest back to each source's parent, in one idempotent command under ordered locks with one audit
+  entry. Burn-rate alerts: the worker compares actual spend with the amount phased to date and tells
+  owners at 110% and 125%, once per budget, period and level, through the existing notifications.
+  Migration `0026`; new actions `reclaim.read`, `reclaim.manage`, `reclaim.redistribute`,
+  `burn_rate.run`. Proof: `apps/api-e2e/src/close/reclaim.spec.ts` and `burn-rate.spec.ts`
+  (invariants 116-120) and the reclaim journey. Evidence:
+  [`evidence/gap-b4-reclaim/`](../evidence/gap-b4-reclaim/README.md). Follow-ups: the Stitch images for
+  086a, an entry from the 086 unused report and the year-end setup, and a burn-rate panel on the
+  budget page (alerts reach owners only as notifications today).
 
 ## Tier C — prove what is built but thinly covered
 

@@ -415,6 +415,13 @@ export const PROBLEM_CODES = [
   'PARTNER_PAUSED',
   'PARTNER_VENDOR_NOT_APPROVED',
   'OFFER_NOT_AVAILABLE',
+  // Reclaim campaigns and burn-rate alerts (gap B4)
+  'RECLAIM_NO_CANDIDATES',
+  'RECLAIM_NOTICE_ANSWERED',
+  'RECLAIM_NOT_OVERDUE',
+  'RECLAIM_POOL_EXECUTED',
+  'RECLAIM_POOL_EMPTY',
+  'RECLAIM_CAMPAIGN_CLOSED',
 ] as const;
 export const ProblemCode = z.enum(PROBLEM_CODES);
 export type ProblemCode = z.infer<typeof ProblemCode>;

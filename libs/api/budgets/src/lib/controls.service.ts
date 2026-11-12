@@ -1211,6 +1211,119 @@ export class ControlsService {
     );
   }
 
+  /**
+   * Reclaim (086a): one budget's released money leaves as reductions with a destination, each leg
+   * either a reallocation to a target or a return to the budget's parent, under the same floor and
+   * confirmed-preview rules as a reduce. The caller holds the row locks on every chain involved and
+   * writes the command's one audit entry; this posts the journals, moves the status to reduced,
+   * snapshots the budgets and publishes `budget.control_changed` so pending requests that no longer
+   * fit go back to their requesters.
+   */
+  async reclaimInTx(
+    tx: Tx,
+    actor: RequestActor,
+    sourceId: string,
+    legs: readonly {
+      destination: BudgetRow;
+      kind: 'reallocation' | 'parent';
+      amountMinor: number;
+    }[],
+    reason: { reasonCode: string; reason: string; confirmedFloorMinor: number | undefined },
+    ctx: CommandContext,
+  ): Promise<{
+    journalIds: string[];
+    authorizedBeforeMinor: number;
+    authorizedAfterMinor: number;
+    floorMinor: number;
+    status: { from: BudgetStatus; to: BudgetStatus };
+    unfitRequestIds: string[];
+  }> {
+    const source = await this.views.row(tx, sourceId);
+    const total = legs.reduce((s, l) => s + l.amountMinor, 0);
+    const balances = (await this.reads.balances(tx, [sourceId])).get(sourceId)!.budget;
+    const impact = unwrap(
+      validateReduction(balances, toPostingBudget(source).control, {
+        kind: 'reduce',
+        amountMinor: total,
+        destination: legs.some((l) => l.kind === 'reallocation') ? 'reallocation' : 'parent',
+        destinationBudgetId: legs[0]?.destination.id ?? null,
+        reasonCode: reason.reasonCode,
+        reason: reason.reason,
+        confirmedPreview:
+          reason.confirmedFloorMinor === undefined
+            ? null
+            : { floorMinor: reason.confirmedFloorMinor },
+      }),
+    );
+    const before = await this.views.utilizations(tx, [
+      sourceId,
+      ...legs.map((l) => l.destination.id),
+    ]);
+    const unfitRequestIds = unfitPendingRequests(
+      await this.pendingRequests(tx, sourceId),
+      impact.availableAfterMinor,
+    );
+    const journalIds: string[] = [];
+    for (const leg of legs) {
+      if (leg.kind === 'reallocation') {
+        const accepts = acceptsNewActivity(leg.destination.status);
+        if (!accepts.ok)
+          throw new ApiProblem(
+            422,
+            accepts.error.code as 'TRANSFER_INVALID',
+            accepts.error.message,
+          );
+      }
+      journalIds.push(
+        await this.move(
+          tx,
+          actor,
+          source,
+          { kind: 'budget', row: leg.destination },
+          leg.amountMinor,
+          'reduction',
+          { reasonCode: reason.reasonCode, reason: reason.reason },
+          ctx,
+        ),
+      );
+    }
+    const next: BudgetStatus =
+      source.status === 'frozen' ? 'frozen' : unwrap(budgetMachine.next(source.status, 'reduce'));
+    if (next !== source.status)
+      await tx.update(budgets).set({ status: next }).where(eq(budgets.id, source.id));
+    await this.event(tx, actor, source, 'reduced', {
+      previousStatus: source.status,
+      status: next,
+      reasonCode: reason.reasonCode,
+      reason: reason.reason,
+      cascadeFromBudgetId: null,
+      journalId: journalIds[0] ?? null,
+      authorizedBeforeMinor: impact.currentAuthorizedMinor,
+      authorizedAfterMinor: impact.newAuthorizedMinor,
+      unfitRequestIds,
+    });
+    await this.views.snapshot(tx, actor, source.id, `Reclaimed: ${reason.reason}`);
+    for (const id of new Set(legs.map((l) => l.destination.id)))
+      await this.views.snapshot(tx, actor, id, `Received money reclaimed from ${source.name}`);
+    await this.views.emitThresholds(tx, actor, before, [
+      source.id,
+      ...legs.map((l) => l.destination.id),
+    ]);
+    return {
+      journalIds,
+      authorizedBeforeMinor: impact.currentAuthorizedMinor,
+      authorizedAfterMinor: impact.newAuthorizedMinor,
+      floorMinor: impact.floorMinor,
+      status: { from: source.status, to: next },
+      unfitRequestIds,
+    };
+  }
+
+  /** Pending (pre-encumbered) request money on a budget, for impact previews that list it. */
+  async pendingMinor(tx: Tx, budgetId: string): Promise<number> {
+    return (await this.pendingRequests(tx, budgetId)).reduce((s, p) => s + p.openMinor, 0);
+  }
+
   /** Whether a budget accepts new requests (used by spend checks and Phase 5 requests). */
   async statusOf(tx: Tx, budgetId: string): Promise<BudgetStatus | null> {
     const [r] = await tx

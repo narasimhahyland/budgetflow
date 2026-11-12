@@ -1992,6 +1992,71 @@
       ]
     },
     {
+      "id": "086a-reclaim-redistribute",
+      "role": "finance-admin",
+      "path": "/finance/reclaim/87000000-0000-4000-8000-000000000010",
+      "waitFor": "role=heading[name=\"Q4 FY2026 reclaim\"]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "list",
+          "path": "/finance/reclaim",
+          "waitFor": "role=table[name=\"Reclaim campaigns\"]"
+        },
+        {
+          "state": "new-campaign",
+          "path": "/finance/reclaim",
+          "waitFor": "[data-testid=new-reclaim]",
+          "actions": [
+            {
+              "click": "[data-testid=new-reclaim]"
+            },
+            {
+              "fill": ["[data-testid=reclaim-name]", "Q4 FY2026 second round"]
+            },
+            {
+              "click": "[data-testid=reclaim-preview]"
+            },
+            {
+              "waitFor": "role=table[name=\"Candidates\"]"
+            }
+          ],
+          "fullPage": false
+        },
+        {
+          "state": "redistribute",
+          "waitFor": "[data-testid=pool-HYL-IN]"
+        },
+        {
+          "state": "confirm-dialog",
+          "waitFor": "[data-testid=review-HYL-IN]",
+          "actions": [
+            {
+              "click": "[data-testid=review-HYL-IN]"
+            },
+            {
+              "waitFor": "role=table[name=\"Moves\"]"
+            }
+          ],
+          "fullPage": false
+        },
+        {
+          "state": "owner-response",
+          "role": "budget-owner",
+          "path": "/reclaim/87000000-0000-4000-8000-000000000013",
+          "waitFor": "[data-testid=submit-reclaim]"
+        },
+        {
+          "state": "owner-answered",
+          "role": "location-manager",
+          "path": "/reclaim/87000000-0000-4000-8000-000000000011",
+          "waitFor": "role=heading[name=\"Answer\"]"
+        }
+      ]
+    },
+    {
       "id": "015a-spend-per-head",
       "role": "ceo",
       "path": "/reports/spend-per-head",

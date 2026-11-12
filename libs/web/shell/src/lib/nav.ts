@@ -258,6 +258,12 @@ export const NAV: NavGroup[] = [
         permission: 'period.manage',
       },
       {
+        label: 'Reclaim campaigns',
+        path: '/finance/reclaim',
+        icon: 'sync',
+        permission: 'reclaim.read',
+      },
+      {
         label: 'Exchange rates',
         path: '/finance/rates',
         icon: 'currency_dollar',

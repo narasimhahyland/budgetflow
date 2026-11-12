@@ -2,6 +2,7 @@ import { AdminModule } from '@bf/api/admin';
 import { ApprovalsModule } from '@bf/api/approvals';
 import { ContributionsModule } from '@bf/api/contributions';
 import { ChannelsModule } from '@bf/api/channels';
+import { CloseModule } from '@bf/api/close';
 import { CoreModule } from '@bf/api/core';
 import { DocumentsModule } from '@bf/api/documents';
 import { EventsModule } from '@bf/api/events';
@@ -39,6 +40,7 @@ class WorkerHealthController {
     ReportsModule,
     IntegrationsModule,
     AdminModule,
+    CloseModule,
   ],
   providers: [JobsService],
   controllers: [WorkerHealthController],
