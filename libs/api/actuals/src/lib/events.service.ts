@@ -51,7 +51,7 @@ export class EventsCloseService implements OnModuleInit {
         .select({ eventCode: events.eventCode })
         .from(events)
         .where(eq(events.id, eventId));
-      const count = e ? (await this.actualStats(tx, e.eventCode)).unmatched : 0;
+      const count = e ? (await this.actualStats(tx, e.eventCode, eventId)).unmatched : 0;
       return count > 0 ? { code: 'EVENT_HAS_UNMATCHED_ACTUALS', message: UNMATCHED, count } : null;
     });
     this.closeChecks.register(async (tx, eventId) => {
@@ -97,8 +97,12 @@ export class EventsCloseService implements OnModuleInit {
     });
   }
 
-  /** Actuals carrying the event code, from manual entries and posted imports. */
-  private async actualStats(tx: Tx, eventCode: string) {
+  /**
+   * The event's actuals, from manual entries and posted imports: lines carrying the event code, and
+   * lines matched to one of the event's commitments without it (a taxi receipt matched by hand from
+   * the queue is still event spend, and the surplus at close already counts it).
+   */
+  private async actualStats(tx: Tx, eventCode: string, eventId: string) {
     const [s] = await tx
       .select({
         matched: sql<number>`count(*) filter (where ${actuals.matchStatus} = 'matched')`,
@@ -111,7 +115,11 @@ export class EventsCloseService implements OnModuleInit {
       .from(actuals)
       .where(
         and(
-          eq(actuals.eventCode, eventCode),
+          or(
+            eq(actuals.eventCode, eventCode),
+            sql`${actuals.matchedCommitmentId} in (select id from commitments where event_id = ${eventId}::uuid)`,
+            sql`${actuals.id} in (select m.actual_id from actual_matches m join commitments c on c.id = m.commitment_id where c.event_id = ${eventId}::uuid)`,
+          ),
           or(
             isNull(actuals.importBatchId),
             sql`${actuals.importBatchId} in (select id from import_batches where status = 'posted')`,
@@ -161,7 +169,7 @@ export class EventsCloseService implements OnModuleInit {
     e: EventRow,
   ): Promise<EventReconciliation> {
     const reporting = actor.reportingCurrency;
-    const stats = await this.actualStats(tx, e.eventCode);
+    const stats = await this.actualStats(tx, e.eventCode, e.id);
     const cRows = await tx
       .select()
       .from(commitments)

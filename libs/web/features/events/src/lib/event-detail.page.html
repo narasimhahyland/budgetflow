@@ -102,9 +102,11 @@
   @if (e.blockedReason) {
     <sat-banner variant="info" data-testid="event-blocked"
       ><sat-banner-message
-        >Home budget: {{ e.blockedReason }} Existing commitments stay visible and can
-        complete.</sat-banner-message
-      ></sat-banner
+        >Home budget: {{ e.blockedReason }}
+        @if (!e.blockedReason.includes('Existing commitments')) {
+          Existing commitments stay visible and can complete.
+        }
+      </sat-banner-message></sat-banner
     >
   }
   @if (surplus().length) {
