@@ -11,7 +11,7 @@ Delivery follows the build plan: 20 gated phases in 7 release waves (P1 architec
 - Nx 23 monorepo, npm, Node 24 (`source ~/.nvm/nvm.sh && nvm use 24`).
 - Web: Angular 22 (standalone, signals, OnPush), Angular Material/CDK, `@hylandsoftware/satori-ui` (mandatory UI library), Keycloak OIDC + PKCE.
 - API: NestJS, zod contracts with generated OpenAPI, pg-boss worker, transactional outbox. Data: PostgreSQL 16 with RLS, Drizzle migrations.
-- Local stack: Docker Compose (Postgres, Keycloak, Mailpit, MinIO, API, worker, web) with a deterministic seed and a fake AI provider.
+- Local stack: Docker Compose (Postgres, Keycloak, Mailpit, MinIO, API, worker, web) with a deterministic seed and Amazon Bedrock for AI (credentials in the gitignored `.env`; see `docs/ai-harness/bedrock.md`).
 - Verification: Playwright for API scenarios (`apps/api-e2e`, with Testcontainers for isolated runs), user journeys and visual regression (`apps/web-e2e`), autocannon for performance; ESLint + satori-lint, stylelint, `sdsc`.
 
 ## Layout

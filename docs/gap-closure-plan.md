@@ -76,8 +76,16 @@ receipts in the `DocumentStore`; event codes and cost centers are Navan field op
 while their budget does not accept spend; coding is written back by batch PATCH; spend above the
 remaining budget becomes an `over_budget` exception. Live calls need `NAVAN_LIVE_ENABLED=true`.
 Design and values to confirm before live use: [`navan-integration.md`](architecture/navan-integration.md).
-Proof: `apps/api-e2e/src/integrations/navan.spec.ts` (invariants 103-105) and the Navan journeys;
+Proof: `apps/api-e2e/src/integrations/navan.spec.ts` (invariants 106-108) and the Navan journeys;
 evidence in [`evidence/gap-b1-navan/`](../evidence/gap-b1-navan/README.md).
+
+**B2 part 1 done** (012, 017, 017a). The finance controller dashboard shows the close checklist per
+entity, the queues that block the close, the ledger check, feeds and the FX effect; alerts are derived
+on every read from the health checks, owner thresholds and controls, and acknowledging or snoozing is
+per person; the exceptions dashboard counts control exceptions by type and age and links each to its
+queue. Proof: `apps/api-e2e/src/dashboards/dashboards.spec.ts` (invariants 103–105) and the
+dashboards journeys; evidence in [`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md).
+Part 2 (018, 018a, 018b, 088a) follows.
 
 ## Tier C — prove what is built but thinly covered
 

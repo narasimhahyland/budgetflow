@@ -133,7 +133,14 @@ services:
       KEYCLOAK_ISSUER: http://localhost:${BF_KEYCLOAK_PORT:-8080}/realms/budgetflow
       KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/budgetflow/protocol/openid-connect/certs
       KEYCLOAK_AUDIENCE: budgetflow-api
-      AI_PROVIDER: ${BF_AI_PROVIDER:-fake}
+      AI_PROVIDER: bedrock
+      # Amazon Bedrock. Put credentials in the gitignored .env at the repo root (see docs/ai-harness/bedrock.md); empty means "not configured".
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-us.anthropic.claude-sonnet-4-5-20250929-v1:0}
+      AWS_BEARER_TOKEN_BEDROCK: ${AWS_BEARER_TOKEN_BEDROCK:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
       # Local stack only: pins the clock the API computes ages, countdowns and overdue flags from, so
       # a visual baseline describes the product and not the day it was recorded (issue #86). Unset
       # means real time. Keep it in step with freezeTime in apps/web-e2e/visual/screens.json.

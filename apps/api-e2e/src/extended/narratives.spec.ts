@@ -13,6 +13,9 @@ import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { allocateOk, createChild, createRoot } from '../support/factory';
 import { reason, usd } from './support';
+import { AI_LIVE, AI_LIVE_REASON } from '../ai/support';
+
+test.skip(!AI_LIVE, AI_LIVE_REASON);
 
 async function periods(request: import('@playwright/test').APIRequestContext) {
   const body = await expectContract(

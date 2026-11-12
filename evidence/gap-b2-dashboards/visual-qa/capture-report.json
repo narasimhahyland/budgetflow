@@ -1,0 +1,230 @@
+{
+  "generatedAt": "2026-11-12T03:20:30.520Z",
+  "base": "http://localhost:64200",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 27,
+  "blocking": 0,
+  "warnings": 0,
+  "results": [
+    {
+      "id": "012-finance-controller-dashboard",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/012-finance-controller-dashboard--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "012-finance-controller-dashboard",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/012-finance-controller-dashboard--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "012-finance-controller-dashboard",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/012-finance-controller-dashboard--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "012-finance-controller-dashboard",
+      "state": "forbidden-owner",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/012-finance-controller-dashboard--forbidden-owner--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "012-finance-controller-dashboard",
+      "state": "forbidden-owner",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/012-finance-controller-dashboard--forbidden-owner--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "012-finance-controller-dashboard",
+      "state": "forbidden-owner",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/012-finance-controller-dashboard--forbidden-owner--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "owner-scope",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--owner-scope--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "owner-scope",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--owner-scope--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "owner-scope",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--owner-scope--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "acknowledged-empty",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--acknowledged-empty--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "acknowledged-empty",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--acknowledged-empty--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "acknowledged-empty",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--acknowledged-empty--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "forbidden",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--forbidden--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "forbidden",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--forbidden--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "state": "forbidden",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017-alerts-dashboard--forbidden--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "by-type",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--by-type--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "by-type",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--by-type--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "by-type",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--by-type--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "ceo-view",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--ceo-view--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "ceo-view",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--ceo-view--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "state": "ceo-view",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/iter-3/screens/017a-exceptions-dashboard--ceo-view--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

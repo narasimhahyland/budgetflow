@@ -18,7 +18,7 @@ import { AiRetrieval } from '../retrieval.service';
 import { AiSettingsService } from '../settings.service';
 import { AiSuggestionsService } from '../suggestions.service';
 
-const DriversOutput = z
+export const DriversOutput = z
   .object({
     drivers: z
       .array(z.object({ label: z.string().max(60), detail: z.string().max(300) }).strict())

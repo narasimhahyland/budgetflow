@@ -1,8 +1,12 @@
 import { AuditModule } from '@bf/api/audit';
+import { CloseModule } from '@bf/api/close';
+import { TenancyModule } from '@bf/api/tenancy';
 import { DocumentsModule } from '@bf/api/documents';
 import { NotificationsModule } from '@bf/api/notifications';
 import { Module } from '@nestjs/common';
 import { BoardPackService } from './board-pack.service';
+import { DashboardsController } from './dashboards.controller';
+import { DashboardsService } from './dashboards.service';
 import { HealthService } from './health.service';
 import { ReportDeliveryService } from './report-delivery.service';
 import { ReportExtrasReads } from './report-extras.service';
@@ -14,7 +18,7 @@ import { SchedulesService } from './schedules.service';
 
 /** Phase 10 reporting read models, saved views, schedules and the worker-side delivery job. */
 @Module({
-  imports: [AuditModule, NotificationsModule, DocumentsModule],
+  imports: [AuditModule, NotificationsModule, DocumentsModule, CloseModule, TenancyModule],
   providers: [
     ReportReads,
     ReportExtrasReads,
@@ -24,6 +28,7 @@ import { SchedulesService } from './schedules.service';
     SchedulesService,
     ReportDeliveryService,
     BoardPackService,
+    DashboardsService,
   ],
   exports: [
     ReportsService,
@@ -32,9 +37,10 @@ import { SchedulesService } from './schedules.service';
     SchedulesService,
     ReportDeliveryService,
     BoardPackService,
+    DashboardsService,
   ],
 })
 export class ReportsModule {}
 
-@Module({ imports: [ReportsModule], controllers: [ReportsController] })
+@Module({ imports: [ReportsModule], controllers: [ReportsController, DashboardsController] })
 export class ReportsApiModule {}

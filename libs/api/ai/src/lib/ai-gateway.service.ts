@@ -1,11 +1,11 @@
 import type { RequestActor } from '@bf/api/core';
 import type { Tx } from '@bf/api/db';
 import type { AiChannel, AiFeature, AiOutcome, AiProvenance, AiSourceRef } from '@bf/contracts';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { z } from 'zod';
 import { allowedNumbers, figuresTraceable } from './figure-guard';
 import { minimize, minimizePrompt } from './minimization';
-import { AiProvider, type Fact } from './provider/ai-provider';
+import { AiProvider, type AiAttachment, type Fact } from './provider/ai-provider';
 import { AiQueryLogService, type ScopeSummary } from './query-log.service';
 
 export interface GatewayCall<T> {
@@ -19,6 +19,7 @@ export interface GatewayCall<T> {
   sources: readonly AiSourceRef[];
   scope: ScopeSummary;
   prompt?: string;
+  attachments?: readonly AiAttachment[];
   schema: z.ZodType<T>;
   /** The success outcome to log when the output survives every guard. */
   successOutcome: Extract<AiOutcome, 'answered' | 'suggested'>;
@@ -44,6 +45,8 @@ export interface GatewayResult<T> {
  */
 @Injectable()
 export class AiGateway {
+  private readonly logger = new Logger('AiGateway');
+
   constructor(
     private readonly provider: AiProvider,
     private readonly log: AiQueryLogService,
@@ -116,6 +119,7 @@ export class AiGateway {
         task: call.task,
         facts,
         prompt,
+        attachments: call.attachments,
         schema: call.schema,
       });
       if (raw.unavailable) {
@@ -130,6 +134,10 @@ export class AiGateway {
           if (!check.ok) {
             outcome = 'discarded_unreliable';
             untraceable = check.untraceable;
+            // Numbers only, never the sentence: enough to tune a prompt without logging tenant text.
+            this.logger.warn(
+              `${call.feature}/${call.task}: discarded, untraceable numbers: ${untraceable.join(' | ')}`,
+            );
           } else {
             output = parsed.data;
           }

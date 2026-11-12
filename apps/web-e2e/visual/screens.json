@@ -1862,6 +1862,70 @@
       ]
     },
     {
+      "id": "012-finance-controller-dashboard",
+      "role": "finance-controller",
+      "path": "/dashboards/finance",
+      "waitFor": "[data-testid=close-status]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "forbidden-owner",
+          "role": "location-manager",
+          "waitFor": "role=heading[name=\"You cannot see the finance overview\"]",
+          "allowRequests": ["/api/dashboards/finance"]
+        }
+      ]
+    },
+    {
+      "id": "017-alerts-dashboard",
+      "role": "finance-controller",
+      "path": "/dashboards/alerts",
+      "waitFor": "[data-testid=severity-summary]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "owner-scope",
+          "role": "regional-manager",
+          "waitFor": "[data-testid=severity-summary]"
+        },
+        {
+          "state": "acknowledged-empty",
+          "path": "/dashboards/alerts?tab=acknowledged",
+          "waitFor": "role=heading[name=\"Nothing acknowledged\"]"
+        },
+        {
+          "state": "forbidden",
+          "role": "employee",
+          "waitFor": "role=heading[name=\"You do not have access to this page\"]"
+        }
+      ]
+    },
+    {
+      "id": "017a-exceptions-dashboard",
+      "role": "finance-controller",
+      "path": "/dashboards/exceptions",
+      "waitFor": "[data-testid=exception-kpis]",
+      "states": [
+        {
+          "state": "default"
+        },
+        {
+          "state": "by-type",
+          "path": "/dashboards/exceptions?type=post_spend_breach",
+          "waitFor": "[data-testid=type-items]"
+        },
+        {
+          "state": "ceo-view",
+          "role": "ceo",
+          "waitFor": "[data-testid=exception-kpis]"
+        }
+      ]
+    },
+    {
       "id": "080-budget-vs-actual",
       "role": "finance-controller",
       "path": "/reports/budget-vs-actual",
