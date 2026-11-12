@@ -59,7 +59,7 @@ CEO, budget-owner, department-head, location-manager and auditor (audit reads). 
 
 ## Gates
 
-[`gate-summary.txt`](gate-summary.txt) is the `scripts/gate.sh all --evidence` output for this change.
+[`gate-summary.txt`](gate-summary.txt) is the `scripts/gate.sh all --evidence` output on the final branch, with `main` merged in. Every mode passes, visual included. Two earlier visual runs failed on the host, not on screens: first Chromium ran out of memory with 102 containers, then sign-in sessions expired during a 60-minute run.
 
 ## Visual QA
 
