@@ -1,9 +1,10 @@
 import { ImportsService } from '@bf/api/actuals';
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
+import { ApiProblem, DB, nowUtc, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
 import {
   integrationConnections,
   integrationMessages,
+  outboxMessages,
   syncRuns,
   withTenant,
   type Db,
@@ -43,12 +44,30 @@ import { classifyError, isRetryable, OutboundHttp, providerMessage } from './htt
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** Outbox topic for Navan runs: the worker makes every Navan call (16a). */
+export const NAVAN_RUN_TOPIC = 'integrations.navan.run';
+
+export interface NavanRunJob {
+  tenantId: string;
+  runId: string;
+  connectionId: string;
+  actor: {
+    personId: string | null;
+    subject: string;
+    displayName: string;
+    reportingCurrency: string;
+  };
+  requestId: string | null;
+  /** The end of an inbound window, fixed when the run is queued, so a redelivered job reads the same. */
+  windowEnd: string;
+}
+
 /**
  * The identity a connector applies records with. A person authorizes the run; the records themselves
  * are applied by the connector, which holds exactly the actions the review paths need and nothing
  * that approves, applies a control or posts to the ledger.
  */
-const CONNECTOR_SCOPES: Action[] = [
+export const CONNECTOR_SCOPES: Action[] = [
   'tenant.read',
   'integration.read',
   'integration.manage',
@@ -58,7 +77,7 @@ const CONNECTOR_SCOPES: Action[] = [
   'org.read',
 ];
 
-const connectorActor = (actor: RequestActor, provider: string): RequestActor => ({
+export const connectorActor = (actor: RequestActor, provider: string): RequestActor => ({
   ...actor,
   subject: `connector:${provider}`,
   roles: [],
@@ -66,7 +85,7 @@ const connectorActor = (actor: RequestActor, provider: string): RequestActor => 
   serviceScopes: CONNECTOR_SCOPES,
 });
 
-interface ApplyOutcome {
+export interface ApplyOutcome {
   applied: number;
   duplicates: number;
   failed: number;
@@ -214,7 +233,6 @@ export class SyncService {
             { object: req.object, direction: req.direction },
           );
         }
-        const context = await this.connections.contextFor(tx, row);
         const cursors = (row.cursors ?? {}) as Record<string, string>;
         const since = req.since ?? cursors[`${req.object}:${req.direction}`] ?? null;
         const [run] = await tx
@@ -231,11 +249,34 @@ export class SyncService {
             triggeredBy: actor.personId,
           })
           .returning();
-        return { row, spec, context, since, run };
+        if (row.provider === 'navan') {
+          // Navan calls run in the worker, which caches the OAuth token and backs off on 429s. The
+          // run is recorded as running now and finished by the worker; the outbox row commits with it.
+          const job: Omit<NavanRunJob, 'tenantId'> = {
+            runId: run.id,
+            connectionId,
+            actor: {
+              personId: actor.personId,
+              subject: actor.subject,
+              displayName: actor.displayName,
+              reportingCurrency: actor.reportingCurrency,
+            },
+            requestId: ctx.requestId,
+            windowEnd: nowUtc().toISOString(),
+          };
+          await tx
+            .insert(outboxMessages)
+            .values({ tenantId: actor.tenantId, topic: NAVAN_RUN_TOPIC, payload: job });
+          return { row, spec, context: null, since, run, queued: true as const };
+        }
+        const context = await this.connections.contextFor(tx, row);
+        return { row, spec, context, since, run, queued: false as const };
       },
     );
+    if (prepared.queued) return this.view(prepared.run, 'navan');
 
-    const { spec, context, since, run } = prepared;
+    const { spec, since, run } = prepared;
+    const context = prepared.context;
     let read = 0;
     let outcome: ApplyOutcome = {
       applied: 0,
@@ -287,6 +328,43 @@ export class SyncService {
       });
     }
 
+    return this.finish(actor, {
+      runId: run.id,
+      connectionId,
+      object: req.object,
+      direction: req.direction,
+      status,
+      read,
+      outcome,
+      nextCursor,
+      errorSummary,
+      requestId: ctx.requestId,
+    });
+  }
+
+  /**
+   * Closes a run: counts, the connection's cursor for the object, "Needs attention" on failure, and
+   * one audit entry. Shared with the Navan worker, which finishes runs the API queued.
+   */
+  async finish(
+    actor: RequestActor,
+    r: {
+      runId: string;
+      connectionId: string;
+      object: SyncObject;
+      direction: SyncDirection;
+      status: SyncStatus;
+      read: number;
+      outcome: ApplyOutcome;
+      nextCursor: string | null;
+      errorSummary: string | null;
+      requestId: string | null;
+    },
+  ): Promise<SyncRunView> {
+    const { connectionId, status, read, outcome, nextCursor, errorSummary } = r;
+    const req = { object: r.object, direction: r.direction };
+    const run = { id: r.runId };
+    const ctx = { requestId: r.requestId };
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
       const [updated] = await tx
         .update(syncRuns)
@@ -342,7 +420,7 @@ export class SyncService {
    * de-duplicates by source reference; headcount goes through the Phase 3 import with its own
    * validation; the rest is read and reported.
    */
-  private async apply(
+  async apply(
     actor: RequestActor,
     context: ConnectorContext,
     spec: ObjectSpec,

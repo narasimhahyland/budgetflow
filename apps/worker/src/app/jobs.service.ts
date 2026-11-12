@@ -3,7 +3,12 @@ import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
 import { CHANNEL_DELIVER_TOPIC, ChannelsService, type ChannelDeliverJob } from '@bf/api/channels';
 import { DB } from '@bf/api/core';
-import { WebhooksService } from '@bf/api/integrations';
+import {
+  NAVAN_RUN_TOPIC,
+  NavanSyncService,
+  WebhooksService,
+  type NavanRunJob,
+} from '@bf/api/integrations';
 import { outboxMessages, tenants, withTenant, type Db } from '@bf/api/db';
 import { LEDGER_CHECK_TOPIC, RebuildService } from '@bf/api/integrity';
 import { S3DocumentStore } from '@bf/api/documents';
@@ -68,6 +73,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly webhooks: WebhooksService,
     private readonly retention: RetentionService,
     private readonly documents: S3DocumentStore,
+    private readonly navan: NavanSyncService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -121,14 +127,31 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       BUDGET_CONTROL_TOPIC,
       fast,
       async (jobs) => {
-        for (const job of jobs)
+        for (const job of jobs) {
           await this.controls.handle(
             job.data.tenantId,
             job.data.budgetId,
             job.data.unfitRequestIds ?? [],
           );
+          // 16a: the budget's event codes are switched off (or back on) in Navan at the point of spend.
+          // A Navan failure is recorded on its own run and retried from there; it never re-runs the control.
+          await this.navan
+            .refreshForBudget(job.data.tenantId, job.data.budgetId)
+            .catch((e: Error) => this.log.error(`navan option refresh failed: ${e.message}`));
+        }
       },
     );
+    // Navan runs (16a): every Navan call happens here, with the cached OAuth token and 429 backoff.
+    // A run that is no longer running was finished before, so a redelivered job is a no-op.
+    await boss.createQueue(NAVAN_RUN_TOPIC, {
+      retryLimit: 3,
+      retryDelay: 10,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work<NavanRunJob>(NAVAN_RUN_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.navan.execute(job.data);
+    });
     await boss.work<ThresholdCrossed>(BUDGET_THRESHOLD_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.alerts.handle(job.data);
     });

@@ -3,7 +3,13 @@ import { Id, IsoDateTime } from '../common';
 import type { Endpoint } from '../endpoint';
 import { named } from '../registry';
 
-export const DOCUMENT_OWNER_TYPES = ['event', 'request', 'contribution', 'commitment'] as const;
+export const DOCUMENT_OWNER_TYPES = [
+  'event',
+  'request',
+  'contribution',
+  'commitment',
+  'actual',
+] as const;
 export const DocumentOwnerType = z.enum(DOCUMENT_OWNER_TYPES);
 export const DOCUMENT_KINDS = [
   'supporting',

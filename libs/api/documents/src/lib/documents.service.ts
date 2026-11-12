@@ -13,7 +13,7 @@ import { and, asc, eq, inArray, or } from 'drizzle-orm';
 import { createHash, randomUUID } from 'node:crypto';
 import { matchesSignature, S3DocumentStore } from './document-store';
 
-export type DocumentOwnerType = 'event' | 'request' | 'contribution' | 'commitment';
+export type DocumentOwnerType = 'event' | 'request' | 'contribution' | 'commitment' | 'actual';
 
 /** Each owning module says who may read and attach documents to its records. */
 export interface DocumentOwner {
@@ -264,6 +264,83 @@ export class DocumentsService {
         return (await this.toSummaries(tx, [row]))[0];
       },
     );
+  }
+
+  /**
+   * Stores a file a connector fetched from its provider (a Navan receipt, 16a) against a record that
+   * already exists. The key is derived from the provider's own reference, so fetching it again is a
+   * no-op, and the bytes pass the same type and size checks as a person's upload before the
+   * document becomes available. One audit entry per stored file.
+   */
+  async importFromSource(
+    actor: RequestActor,
+    input: {
+      ownerType: DocumentOwnerType;
+      ownerId: string;
+      sourceKey: string;
+      kind: 'receipt' | 'supporting';
+      fileName: string;
+      contentType: string;
+      body: Buffer;
+    },
+    ctx: { requestId: string | null },
+  ): Promise<{ stored: boolean; documentId: string | null; reason: string | null }> {
+    const safeSource = input.sourceKey.replace(/[^\w.-]+/g, '_').slice(0, 120);
+    const key = `tenants/${actor.tenantId}/${input.ownerType}/${input.ownerId}/source-${safeSource}`;
+    if (input.body.length === 0 || input.body.length > DOCUMENT_MAX_BYTES)
+      return { stored: false, documentId: null, reason: 'The file is empty or larger than 10 MB.' };
+    if (!matchesSignature(input.contentType, input.body.subarray(0, 16)))
+      return {
+        stored: false,
+        documentId: null,
+        reason: 'The file content does not match its declared type.',
+      };
+    const [existing] = await withTenant(
+      this.db,
+      { tenantId: actor.tenantId, subject: actor.subject },
+      (tx) => tx.select({ id: documents.id }).from(documents).where(eq(documents.storageKey, key)),
+    );
+    if (existing) return { stored: false, documentId: existing.id, reason: 'Already stored.' };
+    await this.store.put(key, input.contentType, input.body);
+    return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
+      const id = randomUUID();
+      const inserted = await tx
+        .insert(documents)
+        .values({
+          id,
+          tenantId: actor.tenantId,
+          ownerType: input.ownerType,
+          ownerId: input.ownerId,
+          kind: input.kind,
+          fileName: input.fileName,
+          contentType: input.contentType,
+          sizeBytes: input.body.length,
+          sha256: createHash('sha256').update(input.body).digest('hex'),
+          storageKey: key,
+          status: 'available',
+          verifiedAt: new Date(),
+          uploadedByPersonId: null,
+        })
+        .onConflictDoNothing()
+        .returning({ id: documents.id });
+      if (inserted.length === 0)
+        return { stored: false, documentId: null, reason: 'Already stored.' };
+      await this.audit.append(tx, {
+        tenantId: actor.tenantId,
+        actorPersonId: actor.personId,
+        actorSubject: actor.subject,
+        action: 'document.imported',
+        resourceType: input.ownerType,
+        resourceId: input.ownerId,
+        requestId: ctx.requestId,
+        changes: {
+          documentId: { from: null, to: id },
+          kind: { from: null, to: input.kind },
+          source: { from: null, to: input.sourceKey },
+        },
+      });
+      return { stored: true, documentId: id, reason: null };
+    });
   }
 
   download(actor: RequestActor, documentId: string): Promise<DocumentDownload> {

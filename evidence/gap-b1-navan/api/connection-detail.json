@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "id": "cad08061-4303-4607-850b-dd291d8b3344",
+    "provider": "navan",
+    "category": "expense",
+    "displayName": "Navan",
+    "status": "connected",
+    "mode": "mock",
+    "lastSyncAt": "2026-11-12T06:42:56.207Z",
+    "recordsLast24h": 52,
+    "errorsLast24h": 4,
+    "attention": null,
+    "pausedByName": null
+  },
+  "baseUrl": "http://mock-providers:4010",
+  "accountRef": null,
+  "credential": {
+    "secretRef": "b504c562-4a7b-4f86-817f-b941da746cd4",
+    "setAt": "2026-11-12T06:42:56.990Z",
+    "setByName": "Omar Haddad"
+  },
+  "settings": {
+    "region": "eu",
+    "pageSize": 500,
+    "expenseWrite": true,
+    "systemOfRecord": false,
+    "writeBatchSize": 100,
+    "eventCodeFieldId": "cf-event-code",
+    "costCenterFieldId": "cf-cost-center"
+  },
+  "schedules": [],
+  "mappings": [
+    {
+      "id": "180e57c1-76c7-4c2d-823f-3ea16cce0a74",
+      "kind": "person",
+      "externalValue": "nvn-u-06",
+      "internalId": "40000000-0000-4000-8000-000000000006",
+      "internalValue": "budget.owner@example.test",
+      "approved": true
+    },
+    {
+      "id": "ad413521-d2b6-4dde-aea7-02b2f05798f0",
+      "kind": "person",
+      "externalValue": "nvn-u-07",
+      "internalId": "40000000-0000-4000-8000-000000000007",
+      "internalValue": "department.head@example.test",
+      "approved": true
+    }
+  ],
+  "objects": [
+    {
+      "object": "transactions",
+      "direction": "inbound"
+    },
+    {
+      "object": "users",
+      "direction": "inbound"
+    },
+    {
+      "object": "event_codes",
+      "direction": "outbound"
+    },
+    {
+      "object": "cost_centers",
+      "direction": "outbound"
+    },
+    {
+      "object": "transactions",
+      "direction": "outbound"
+    }
+  ],
+  "inboundWebhookPath": null,
+  "recordsIn24h": 27,
+  "recordsOut24h": 25
+}
