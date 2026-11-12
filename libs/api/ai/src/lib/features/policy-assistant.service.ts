@@ -10,7 +10,7 @@ import { AiRetrieval } from '../retrieval.service';
 import { AiSettingsService } from '../settings.service';
 import { searchTerms } from './ask.service';
 
-const PolicyOutput = z
+export const PolicyOutput = z
   .object({
     explanation: z.string().min(1).max(1200),
     options: z.array(z.string().max(200)).max(6),

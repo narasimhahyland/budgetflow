@@ -7,6 +7,9 @@ import { randomUUID } from 'node:crypto';
 import { expectShell } from '../support/auth';
 import { authFile } from '../support/roles';
 import { apiAs, setAiFeature } from './support';
+import { AI_LIVE, AI_LIVE_REASON } from './live';
+
+test.skip(!AI_LIVE, AI_LIVE_REASON);
 
 const uniq = () => randomUUID().slice(0, 8).toUpperCase();
 
@@ -94,7 +97,7 @@ test.describe('AI matching suggestions (080f)', () => {
     );
     await expect(detail.getByTestId('fx-note')).toContainText('FX never consumes budget');
     await expect(detail.getByTestId('figures-caption')).toContainText('read from the ledger');
-    await expect(detail.getByTestId('ai-provenance')).toContainText('budgetflow-fake');
+    await expect(detail.getByTestId('ai-provenance')).toContainText('claude');
 
     await detail.getByTestId('accept-suggestion').click();
     await expect(detail.getByTestId('match-error')).toContainText(

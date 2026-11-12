@@ -26,6 +26,9 @@ import {
   setRetentionPeriodOk,
   startRunOk,
 } from '../admin/support';
+import { AI_LIVE, AI_LIVE_REASON } from './support';
+
+test.skip(!AI_LIVE, AI_LIVE_REASON);
 
 const CATEGORY = 'ai_conversations';
 

@@ -4,7 +4,7 @@ Everything below works only against a local Docker Compose stack. Every credenti
 
 ## Ports
 
-`scripts/stack.sh` reads `.env` when the checkout has one, otherwise `infra/.env.example`. The defaults below are the `infra/.env.example` values; `scripts/stack.sh urls` always prints the ports of the checkout you run it in.
+`scripts/stack.sh` reads `.env` when the checkout has one (your overrides and secrets such as `AWS_BEARER_TOKEN_BEDROCK`), and fills anything it leaves out from `infra/.env.example`. The defaults below are the `infra/.env.example` values; `scripts/stack.sh urls` always prints the ports of the checkout you run it in.
 
 | Service                  | Default URL             | Variable                 |
 | ------------------------ | ----------------------- | ------------------------ |
