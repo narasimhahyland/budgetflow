@@ -229,6 +229,35 @@
         background: var(--surface-variant);
         color: var(--text-secondary);
       }
+      .status-partial {
+        border-color: var(--primary);
+        background: var(--primary-container);
+        color: var(--primary-loud);
+      }
+
+      /* Items not built yet, inside a delivered wave */
+      .pillar.pending {
+        border-style: dashed;
+        background: var(--surface-variant);
+      }
+      .pillar.pending li::before {
+        border: 1.5px solid var(--text-secondary);
+        background: transparent;
+      }
+      .tag {
+        display: inline-block;
+        margin-left: 4px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--primary-loud);
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .tag-planned {
+        color: var(--text-secondary);
+      }
 
       /* Capability cards */
       .pillars {
@@ -447,6 +476,8 @@
           <a href="#wave-5">Wave 5</a>
           <a href="#wave-6">Wave 6</a>
           <a href="#wave-7">Wave 7</a>
+          <a href="#recent">Recently added</a>
+          <a href="#pending">Pending</a>
         </nav>
       </div>
       <div class="wrap hero-body">
@@ -457,8 +488,8 @@
           usable piece of the product in people's hands, and each one builds on the wave before it.
         </p>
         <p class="sublede">
-          This page describes what the business can do at every stage: what is working today and
-          what remains. Status is as of November 2026.
+          This page describes what the business can do at every stage: what is working today, what
+          was added most recently, and what is still to come. Status is as of 12 November 2026.
         </p>
         <p class="cta">
           <a class="button-light" href="../overview/">Back to the product overview</a>
@@ -470,24 +501,25 @@
       <div class="wrap">
         <ul class="outcomes" aria-label="Delivery status">
           <li class="outcome">
-            <h3>Delivered: Waves 1 to 3</h3>
+            <h3>Delivered: all seven waves</h3>
             <p>
-              The accounting foundation, budgets and spend, and policy and channels. Working in the
-              product and proven end to end.
+              All 20 build phases are in the product with their proof recorded, including the final
+              quality, security and documentation pass.
             </p>
           </li>
           <li class="outcome">
-            <h3>Delivered: Waves 4 to 6</h3>
+            <h3>Added this week</h3>
             <p>
-              Reporting and close, the connections to other systems, assistance and administration,
-              and the extended product and ecosystem. All working in the product.
+              Real report files, enforced per-employee and gift caps, and the full ten-step
+              acceptance scenario, plus a steadier visual check. See
+              <a href="#recent">Recently added</a>.
             </p>
           </li>
           <li class="outcome">
-            <h3>Remaining: Wave 7</h3>
+            <h3>Pending: the gaps</h3>
             <p>
-              The final quality, security and documentation pass. No new features: the assurance
-              work that readies the product for sign-off.
+              A review found parts of the plan not built yet. Four are in progress, the rest are
+              planned. They are marked on each wave and listed under <a href="#pending">Pending</a>.
             </p>
           </li>
         </ul>
@@ -713,7 +745,9 @@
                 </li>
                 <li>
                   When several rules apply, the strictest one decides, and every rule that matched
-                  is shown alongside it, so a decision can always be explained.
+                  is shown alongside it, so a decision can always be explained. Since this week the
+                  rules run on every real request at submission and approval, and each decision
+                  records the rule versions and facts behind it.
                 </li>
                 <li>
                   Try a rule before it goes live: test it against real past requests and see what
@@ -767,8 +801,9 @@
                   respecting frozen budgets.
                 </li>
                 <li>
-                  Work from a phone: approvals, balances, photographing a receipt with a queue for
-                  weak signal, and alerts.
+                  Work from a phone in the browser: approvals, balances, photographing a receipt
+                  with a queue for weak signal, and an alerts list. Push notifications to the phone
+                  are still to come (see <a href="#pending">Pending</a>).
                 </li>
                 <li>
                   Notifications and tasks in one place, with comments, mentions that never widen who
@@ -825,7 +860,7 @@
           <div class="section-head">
             <div class="wave-head">
               <p class="eyebrow">Wave 4</p>
-              <span class="status status-done">Delivered</span>
+              <span class="status status-partial">Delivered, with gaps</span>
             </div>
             <h2>Seeing the whole picture, closing the books, connecting the systems</h2>
             <p>
@@ -839,8 +874,8 @@
               <h3>Dashboards and reports</h3>
               <ul>
                 <li>
-                  An executive view of company budget health, and a finance view of what still needs
-                  attention, both drilling from the company total down to a single event or line.
+                  An executive view of company budget health, drilling from the company total down
+                  to a single event or line. Home opens on an overview that fits the person's role.
                 </li>
                 <li>
                   Standard reports: budget versus actual, allocation, utilization, location and
@@ -852,25 +887,23 @@
                   people each location's activities actually involved.
                 </li>
                 <li>
-                  Alerts and exceptions in one queue, plus how long approvals are taking and where
-                  they get stuck.
-                </li>
-                <li>
                   Every report reconciles to the same underlying record, so two reports cannot
                   disagree.
                 </li>
               </ul>
             </article>
             <article class="pillar">
-              <h3>Board packs, exports and evidence</h3>
+              <h3>Board packs and exports</h3>
               <ul>
                 <li>A board and planning pack assembled from the figures rather than by hand.</li>
                 <li>
-                  Reports exported, or scheduled and delivered on a timetable by email and chat.
+                  Reports downloaded as real CSV, Excel or PDF files of exactly what is on screen,
+                  with the same filters and permissions, through a short-lived link, and each export
+                  recorded in the history. Spreadsheet cells cannot smuggle in formulas.
                 </li>
                 <li>
-                  A one-click evidence pack for a budget, an event or an audit question: the
-                  numbers, the approvals and the documents behind them, gathered in one place.
+                  Reports scheduled on a timetable, with the files attached to the email for
+                  recipients allowed to see them.
                 </li>
               </ul>
             </article>
@@ -888,14 +921,6 @@
                   A year-end run with clear rules for what carries forward, what lapses and what is
                   swept back to the centre.
                 </li>
-                <li>
-                  Campaigns to reclaim and redistribute unused budget before it expires, instead of
-                  a rush of year-end spending.
-                </li>
-                <li>
-                  Tax handled honestly: sales tax that cannot be recovered is part of the cost, and
-                  per-employee benefit thresholds are tracked with an export for payroll.
-                </li>
               </ul>
             </article>
             <article class="pillar">
@@ -904,34 +929,63 @@
                 <li>
                   Connections to HR, the general ledger, planning, expense and procurement,
                   corporate cards, calendars and identity, each with a visible health status,
-                  retries and an error queue.
+                  retries and an error queue. They are built and checked against simulated
+                  providers; no live company system has been connected yet.
                 </li>
                 <li>
                   Duplicate spend arriving from two sources (a card charge and the expense claim
                   that itemises it) is held for a person to decide which one is the record.
                 </li>
                 <li>
-                  Event codes pushed into the card, expense and finance tools so spend is tagged
-                  where it happens and matches itself, and approved amounts optionally pushed to
-                  card limits so an approval becomes spending power for exactly that amount and
-                  period.
-                </li>
-                <li>
-                  An approved request turned into a prefilled expense claim in the company's expense
-                  tool, with its progress visible back in BudgetFlow.
+                  Event codes pushed to the card and expense tools so spend is tagged where it
+                  happens, and approved amounts optionally pushed to card limits, with failed pushes
+                  shown for a person to retry.
                 </li>
                 <li>
                   A documented interface for the company's own automation, with keys that expire,
-                  signed notifications of events, a delivery log, and a sandbox that uses sample
-                  data only.
+                  signed notifications of events and a delivery log.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar pending">
+              <h3>Still to come in this wave's area</h3>
+              <ul>
+                <li>
+                  Finance controller, alerts and exceptions dashboards
+                  <span class="tag">In progress</span>; pending approvals, approval performance and
+                  product analytics dashboards, and the one-click evidence pack
+                  <span class="tag tag-planned">Planned</span>
+                </li>
+                <li>
+                  Tax-aware consumption (unrecoverable sales tax counted as cost) and the employee
+                  benefit ledger with benefit-in-kind thresholds
+                  <span class="tag">In progress</span>; the payroll, recharge and reclass exports
+                  that follow from it <span class="tag tag-planned">Planned</span>
+                </li>
+                <li>
+                  Live Navan expense integration on its real interface, with event-code options at
+                  the point of spend <span class="tag">In progress</span>
+                </li>
+                <li>
+                  Campaigns to reclaim and redistribute unused budget, and burn-rate alerts
+                  <span class="tag tag-planned">Planned</span>
+                </li>
+                <li>
+                  Applying a planning-system import to the budgets (today it is preview only),
+                  calendar RSVP sync, the supplier list from the ERP, and an approved request handed
+                  off as a prefilled expense claim <span class="tag tag-planned">Planned</span>
+                </li>
+                <li>
+                  A developer portal with public documentation and a sample-data sandbox
+                  <span class="tag tag-planned">Planned</span>
                 </li>
               </ul>
             </article>
           </div>
           <p class="who">
             <strong>Who it helps:</strong> the CEO and executives get the board view; finance closes
-            the month and the year with less manual work; analysts get trustworthy numbers; auditors
-            get evidence on demand; IT connects BudgetFlow without custom glue.
+            the month and the year with less manual work; analysts get trustworthy numbers and real
+            export files; IT connects BudgetFlow without custom glue.
           </p>
         </section>
 
@@ -939,7 +993,7 @@
           <div class="section-head">
             <div class="wave-head">
               <p class="eyebrow">Wave 5</p>
-              <span class="status status-done">Delivered</span>
+              <span class="status status-partial">Delivered, with gaps</span>
             </div>
             <h2>Assistance that suggests, and a product that explains itself</h2>
             <p>
@@ -960,10 +1014,10 @@
                 </li>
                 <li>The same questions can be asked in Slack and Teams, with private answers.</li>
                 <li>
-                  Owners are warned early when a budget is heading for an overrun or for money left
+                  Owners can see early when a budget is heading for an overrun or for money left
                   unused, based on the rate of spend, what is committed, the requests in the
                   pipeline and last year's seasonal pattern, with a concrete next step they can take
-                  themselves.
+                  themselves. Today the check runs when asked; a nightly scan is planned.
                 </li>
                 <li>
                   A plain-English explanation of why a request was blocked or needs an extra
@@ -987,13 +1041,17 @@
                 <li>Receipts and quotes read automatically so forms arrive prefilled to check.</li>
                 <li>
                   Flags on things that look unusual before money is committed: possible split
-                  requests, duplicate or reused receipts, a cost per person far above comparable
-                  events.
+                  requests, duplicates, a cost per person far above comparable events. Reused
+                  receipts and unusual suppliers are not flagged yet.
                 </li>
                 <li>
                   <strong>Assistance suggests; people decide.</strong> Nothing here approves a
                   request or moves money, and every suggestion is accepted through the normal,
                   audited action.
+                </li>
+                <li>
+                  The assistance runs on a recorded test model, so every answer is reproducible. It
+                  has not yet been run against a live AI model; that work is in progress.
                 </li>
               </ul>
             </article>
@@ -1001,30 +1059,47 @@
               <h3>Running the product</h3>
               <ul>
                 <li>
-                  Guided set-up with safe sample data, and invitations that activate hundreds of
-                  budget owners in one pass.
+                  A guided set-up checklist worked out from what is already configured, and
+                  invitations that activate hundreds of budget owners in one pass.
                 </li>
                 <li>
                   Programs named the way employees know them ("Team Spirit" rather than a budget
                   code), with the company's branding on the emails they receive.
                 </li>
                 <li>
-                  Optional capabilities switched on or off, tried first with a pilot group, with a
-                  second person required for anything affecting money or approvals.
+                  Optional capabilities switched on or off, tried first with a pilot group, with an
+                  extra confirmation for anything affecting money or approvals. Switching a
+                  capability on never grants anyone a permission they did not have.
                 </li>
                 <li>
                   Company-wide settings for notifications, documents, data retention and legal
-                  holds, security and audit checks, plus a view of whether the service itself is
-                  healthy.
+                  holds, and security, plus a view of whether the service itself is healthy. The
+                  retention periods ship as provisional: finance and legal have not signed them off,
+                  and the product says so.
                 </li>
                 <li>
                   Each person gets their own activity history: what they asked for, what they
                   approved, what they attended and how much of their yearly allowance they have
                   used.
                 </li>
+              </ul>
+            </article>
+            <article class="pillar pending">
+              <h3>Still to come in this wave's area</h3>
+              <ul>
                 <li>
-                  A clear "your team's budget" card so employees know the money exists and what it
-                  is for.
+                  Running the assistance on a live AI model
+                  <span class="tag">In progress</span>
+                </li>
+                <li>
+                  Nightly outlook and anomaly scans, and a tab for answers people reported as wrong
+                  <span class="tag tag-planned">Planned</span>
+                </li>
+                <li>
+                  An onboarding wizard, a permission matrix, personal profile and preferences,
+                  global search, editable categories and custom fields, the integrity-checks tab,
+                  and a "your team's budget" card for employees
+                  <span class="tag tag-planned">Planned</span>
                 </li>
               </ul>
             </article>
@@ -1040,13 +1115,13 @@
           <div class="section-head">
             <div class="wave-head">
               <p class="eyebrow">Wave 6</p>
-              <span class="status status-done">Delivered</span>
+              <span class="status status-partial">Delivered, with gaps</span>
             </div>
-            <h2>Deeper decisions, better events, an open ecosystem</h2>
+            <h2>Deeper decisions, recognition, an open ecosystem</h2>
             <p>
               Wave 6 extends the product beyond controlling money into deciding well and showing
               what the money achieved, and opens BudgetFlow to the other tools the company and its
-              partners use.
+              partners use. The extra event-planning tools in the plan are not built yet.
             </p>
           </div>
           <div class="pillars">
@@ -1066,47 +1141,25 @@
                 <li>
                   Outcome linkage, handled carefully: how attendees rate events, which kinds of
                   event score best for their cost, and whether taking part relates to people
-                  staying. Shown as a relationship, never about an individual.
-                </li>
-                <li>
-                  Population-level warning signs for finance and audit: amounts clustered just under
-                  approval thresholds, unusually round numbers, the same requester and approver
-                  pairing repeatedly, approvals given within seconds.
+                  staying. Shown as a relationship, never about an individual, and only for groups
+                  large enough that nobody can be singled out.
                 </li>
               </ul>
             </article>
             <article class="pillar">
-              <h3>Events people actually enjoy</h3>
+              <h3>Recognition and allowances</h3>
               <ul>
                 <li>
-                  A planning assistant that starts an organiser from the company's own past events:
-                  a realistic cost per person for that city and activity, ideas that scored well,
-                  and a starter checklist.
-                </li>
-                <li>
-                  Local holidays and festivals on the calendar, so nobody books the offsite during a
-                  regional holiday and money is phased for the months spending really happens.
-                </li>
-                <li>
-                  Date and activity polls and an idea board, so events are planned around what
-                  people want and when they can come.
-                </li>
-                <li>
-                  Quick check-in at the door from a phone, including walk-ins, so cost per person
-                  and no-show figures reflect who actually came.
-                </li>
-                <li>
-                  Remote and hybrid colleagues included and funded from the same event, with
-                  per-person caps respected.
-                </li>
-                <li>
                   Recognition awards and per-person wellbeing and learning allowances paid from a
-                  real budget rather than leaking into expense claims, with taxable amounts
-                  reported.
+                  real budget rather than leaking into expense claims. A frozen programme budget
+                  refuses new claims while claims already in flight complete.
                 </li>
                 <li>
-                  Visible credit for volunteer organisers, and friendly competition between offices
-                  that ranks taking part, never spending.
+                  A peer award needs a second person, who can be neither the giver nor the
+                  recipient, and managers give within a quarterly allowance.
+                </li>
+                <li>
+                  Friendly competition between offices that ranks taking part, never spending.
                 </li>
               </ul>
             </article>
@@ -1120,7 +1173,9 @@
                 </li>
                 <li>
                   No-code connections to the long tail of tools teams use, while decisions about
-                  money stay with a person inside BudgetFlow.
+                  money stay with a person inside BudgetFlow. Automations triggered by BudgetFlow
+                  events are listed but not yet delivered, until each delivery can be limited to
+                  what its owner may see.
                 </li>
                 <li>
                   Budget questions answerable from the AI assistant somebody already uses, read-only
@@ -1135,18 +1190,39 @@
                   "Your team's budget" and upcoming events embedded in the intranet or HR portal,
                   each viewer seeing only their own.
                 </li>
+              </ul>
+            </article>
+            <article class="pillar pending">
+              <h3>Still to come in this wave's area</h3>
+              <ul>
                 <li>
-                  Installable iOS and Android apps for reliable notifications, biometric unlock,
-                  offline check-in and multi-page receipt capture.
+                  Event depth: a planning assistant that starts from past events, local holidays on
+                  the calendar, date and activity polls with an idea board, quick check-in at the
+                  door, and funded remote participation
+                  <span class="tag tag-planned">Not built</span>
+                </li>
+                <li>
+                  Population-level warning signs for finance and audit (amounts just under approval
+                  thresholds, approvals given within seconds). Waiting on approval timing being
+                  recorded first <span class="tag tag-planned">Not built</span>
+                </li>
+                <li>
+                  Withholding tax on awards, organiser badges, and a quarterly organiser summary for
+                  managers <span class="tag tag-planned">Not built</span>
+                </li>
+                <li>
+                  An installable phone app with real push notifications
+                  <span class="tag tag-planned">Planned</span>. Native iOS and Android app-store
+                  wrappers are deferred by decision; the phone pages already work in the browser.
                 </li>
               </ul>
             </article>
           </div>
           <p class="who">
-            <strong>Who it helps:</strong> executives test a decision before making it; finance and
-            audit get sharper signals; HR and people teams can show what engagement spending
-            achieved; organisers and employees get a better experience; analysts and IT get the data
-            where they already work.
+            <strong>Who it helps:</strong> executives test a decision before making it; HR and
+            people teams can show what engagement spending achieved; employees get recognition and
+            allowances paid from a real budget; analysts and IT get the data where they already
+            work.
           </p>
         </section>
 
@@ -1154,31 +1230,50 @@
           <div class="section-head">
             <div class="wave-head">
               <p class="eyebrow">Wave 7</p>
-              <span class="status status-planned">Planned</span>
+              <span class="status status-done">Delivered</span>
             </div>
             <h2>Proving it, securing it, writing it down</h2>
             <p>
-              The final wave adds no new features. It is the assurance pass that lets the company
+              The final wave added no new features. It is the assurance pass that lets the company
               put the product in front of an auditor, a security reviewer or a new joiner with
-              confidence.
+              confidence. It also produced the honest list of what the plan asks for and the product
+              does not yet do, which is the <a href="#pending">Pending</a> list below.
             </p>
           </div>
           <div class="pillars">
             <article class="pillar">
-              <h3>Quality and security</h3>
+              <h3>Quality</h3>
               <ul>
                 <li>
-                  Performance measured at realistic data volumes, so the product is known to hold up
-                  at the size the company will actually reach.
+                  Every screen in the product reached by a check that uses it as a real person
+                  would: 112 of 112.
                 </li>
                 <li>
-                  Upgrade checks that prove an existing installation moves to a new release without
-                  losing or corrupting data.
+                  Performance measured on the sample data and on about 20,000 ledger entries: every
+                  request succeeded, and two summary views slow down as the data grows.
                 </li>
                 <li>
-                  A full security review of access, credentials and the release process, plus a
-                  controlled, time-limited and fully audited procedure for the rare case where a
-                  platform operator must look at company financial data.
+                  Upgrade checks that move a database from empty, and from the previous release with
+                  data in it, to the current release without losing anything.
+                </li>
+                <li>
+                  The nightly balance rebuild and the tamper-evident history checked at volume, and
+                  found clean.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Security</h3>
+              <ul>
+                <li>
+                  A security review of access, credentials, exports and the release process. All six
+                  findings are fixed and proven, including a way round the allowed-network limits on
+                  keys and spreadsheet formula injection in exports.
+                </li>
+                <li>A deployment refuses to start with the publicly known development secrets.</li>
+                <li>
+                  A controlled, approved, read-only, time-limited and fully audited procedure for
+                  the rare case where a platform operator must look at company financial data.
                 </li>
               </ul>
             </article>
@@ -1186,16 +1281,37 @@
               <h3>Evidence and documentation</h3>
               <ul>
                 <li>
-                  Every business rule mapped to a check that proves it on the running product, with
-                  the results recorded rather than asserted.
+                  Business rules mapped to checks that prove them on the running product, with the
+                  results recorded rather than asserted: 102 rules today.
                 </li>
                 <li>
-                  A complete evidence pack covering the whole product, assembled the same way for
-                  every area.
+                  Every check run on a freshly loaded product: 627 checks of the interface and
+                  business outcomes, 590 user journeys across desktop, tablet and phone, the
+                  acceptance scenario, and a picture of every screen state compared with its
+                  approved version.
                 </li>
                 <li>
-                  Documentation for the people who use the product day to day and for the people who
-                  run it.
+                  An evidence pack for every phase, a final report, and refreshed documentation for
+                  the people who use the product and the people who run it.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar pending">
+              <h3>Still to come in this wave's area</h3>
+              <ul>
+                <li>
+                  Every row of the plan's feature catalogue traced to a passing check, a planned
+                  package or a recorded deferral <span class="tag tag-planned">Planned</span>
+                </li>
+                <li>
+                  Performance at the plan's full scale (50,000 budgets, 500,000 ledger entries), and
+                  upgrade checks from every earlier release
+                  <span class="tag tag-planned">Planned</span>
+                </li>
+                <li>
+                  Dedicated checks for each simulated connector and for a few areas proven only once
+                  (board pack currency effects, the approval routing builder)
+                  <span class="tag tag-planned">Planned</span>
                 </li>
               </ul>
             </article>
@@ -1203,8 +1319,193 @@
           <p class="who">
             <strong>Who it helps:</strong> auditors and security reviewers get what they need
             without a special project; administrators and new joiners get answers from
-            documentation; leadership gets a product that can be signed off.
+            documentation; leadership gets a clear account of what is proven and what is not.
           </p>
+        </section>
+
+        <section id="recent">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Recently added</p>
+              <span class="status status-done">Delivered</span>
+            </div>
+            <h2>What changed in the last week</h2>
+            <p>
+              After the seven waves, the first gap-closure work and the final assurance fixes
+              landed. Each item below is in the product and proven on the running system.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>Closing the first gaps</h3>
+              <ul>
+                <li>
+                  <strong>Real report files.</strong> CSV, Excel and PDF exports of exactly what is
+                  on screen, attached to scheduled emails, with every export audited (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/111"
+                    >#111</a
+                  >).
+                </li>
+                <li>
+                  <strong>Per-employee and gift caps enforced.</strong> Requests above an employee's
+                  annual cap or the annual gift cap are blocked, a warning appears from 80%, and the
+                  rules engine now decides every real request (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/112"
+                    >#112</a
+                  >).
+                </li>
+                <li>
+                  <strong>The full ten-step acceptance scenario.</strong> One story from the CEO
+                  creating the budget to the audit trail, through the screens, with every number
+                  checked. It found and fixed two event-money defects (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/113"
+                    >#113</a
+                  >).
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Security and assurance</h3>
+              <ul>
+                <li>
+                  Break-glass access for platform operators, approved, read-only and audited (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/99"
+                    >#99</a
+                  >), and the rest of the security review fixed (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/98"
+                    >#98</a
+                  >, <a href="https://github.com/narasimhahyland/budgetflow/pull/105">#105</a>).
+                </li>
+                <li>
+                  The quality pass, the full local evidence run and the final report (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/101"
+                    >#101</a
+                  >, <a href="https://github.com/narasimhahyland/budgetflow/pull/109">#109</a>).
+                </li>
+                <li>
+                  Old assistant conversations are now deleted after the retention window, not just
+                  hidden (<a href="https://github.com/narasimhahyland/budgetflow/pull/91">#91</a>).
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>A steadier product to look at</h3>
+              <ul>
+                <li>
+                  The server and the browser agree on today's date, so screens and sample data no
+                  longer drift from one day to the next (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/104"
+                    >#104</a
+                  >).
+                </li>
+                <li>
+                  Every screen re-recorded against the fixed clock, and the assistant's source
+                  captions no longer re-wrap, so the screen-by-screen picture check is reliable (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/108"
+                    >#108</a
+                  >, <a href="https://github.com/narasimhahyland/budgetflow/pull/114">#114</a>).
+                </li>
+                <li>
+                  The web app aligned with the design system, and Home made a role-aware overview
+                  (<a href="https://github.com/narasimhahyland/budgetflow/pull/103">#103</a>,
+                  <a href="https://github.com/narasimhahyland/budgetflow/pull/96">#96</a>).
+                </li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="pending">
+          <div class="section-head">
+            <div class="wave-head">
+              <p class="eyebrow">Pending</p>
+              <span class="status status-now">In progress and planned</span>
+            </div>
+            <h2>What the plan asks for that is not finished</h2>
+            <p>
+              A review of the plan against the product on 11 November 2026 found scope that is not
+              built yet. It is now a list of work packages, each built and proven like a phase.
+              Nothing here counts as delivered until it is merged and proven.
+            </p>
+          </div>
+          <div class="pillars">
+            <article class="pillar">
+              <h3>In progress, under review</h3>
+              <ul>
+                <li>
+                  <strong>Finance dashboards:</strong> finance controller, alerts and exceptions (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/117"
+                    >#117</a
+                  >).
+                </li>
+                <li>
+                  <strong>Navan live integration:</strong> the real expense interface, actuals
+                  brought in, and event-code options at the point of spend, live mode behind a
+                  switch (<a href="https://github.com/narasimhahyland/budgetflow/pull/118">#118</a
+                  >).
+                </li>
+                <li>
+                  <strong>Tax and benefits:</strong> unrecoverable sales tax counted as cost, and
+                  the employee benefit ledger with benefit-in-kind thresholds, using sample rules
+                  finance will replace (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/120"
+                    >#120</a
+                  >).
+                </li>
+                <li>
+                  <strong>A live AI model</strong> for the assistance features (<a
+                    href="https://github.com/narasimhahyland/budgetflow/pull/119"
+                    >#119</a
+                  >).
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Planned next</h3>
+              <ul>
+                <li>
+                  The rest of the dashboards: pending approvals, approval performance, product
+                  analytics, and the one-click evidence pack.
+                </li>
+                <li>
+                  Finance exports: intercompany recharges, reclass journals, payroll benefits.
+                </li>
+                <li>Reclaim-and-redistribute campaigns and burn-rate alerts.</li>
+                <li>
+                  Integration completeness: applying planning imports, calendar RSVP sync, the ERP
+                  supplier list, a hand-off to a prefilled expense claim.
+                </li>
+                <li>An installable phone app with real push notifications.</li>
+                <li>Nightly assistant scans, and the developer portal with a sandbox.</li>
+                <li>
+                  Experience: onboarding wizard, permission matrix, profile, global search, custom
+                  fields, the team budget card.
+                </li>
+                <li>
+                  Feature-catalogue traceability and the thinly proven areas listed under Wave 7.
+                </li>
+              </ul>
+            </article>
+            <article class="pillar">
+              <h3>Not built, or deferred by decision</h3>
+              <ul>
+                <li>
+                  <strong>Not built yet:</strong> the remaining event-depth tools, population-level
+                  warning signs (needs approval timing recorded first), withholding tax, organiser
+                  badges, and reused-receipt flags.
+                </li>
+                <li>
+                  <strong>Deferred:</strong> dark theme, accessibility checks, translations, native
+                  app-store wrappers, commercial plan tiers, and a separate demo environment.
+                </li>
+                <li>
+                  <strong>Known defects:</strong> the default board pack shows zeros on the sample
+                  data, and about one screen picture per check run renders blank and passes on
+                  retry.
+                </li>
+              </ul>
+            </article>
+          </div>
         </section>
 
         <section aria-label="How status is decided" class="note">
@@ -1215,10 +1516,20 @@
               working end to end against the running system, as the people whose job it is, with the
               results recorded.
             </p>
-            <p><strong>Planned</strong> means it is specified and scheduled, but not started.</p>
             <p>
-              Nothing on this page is described as delivered on the strength of a plan alone. Wave 7
-              is written from its specification and may change as it is built.
+              <strong>Delivered, with gaps</strong> means the wave is in the product and proven, but
+              parts of its plan are not built yet; they are listed in a dashed box at the end of the
+              wave.
+            </p>
+            <p>
+              <strong>In progress</strong> means the work is open for review and not yet in the
+              product. <strong>Planned</strong> means it is specified and scheduled, but not
+              started. <strong>Not built</strong> means it is in the plan with no work scheduled
+              yet.
+            </p>
+            <p>
+              Nothing on this page is described as delivered on the strength of a plan or an open
+              pull request alone.
             </p>
           </div>
           <div class="panel">
@@ -1268,8 +1579,17 @@
               <div>
                 <h3>Reporting and close are in</h3>
                 <p>
-                  Dashboards, board packs, period close and year-end, and the connections to HR,
-                  finance, card and expense systems are all in the product.
+                  The executive dashboard, standard reports with real file exports, board packs,
+                  period close and year-end are in the product. Connections to other systems are
+                  built against simulated providers.
+                </p>
+              </div>
+              <div>
+                <h3>The gaps are named</h3>
+                <p>
+                  Finance dashboards, tax and benefits, the Navan integration and a live AI model
+                  are in progress; the rest of the missing scope is planned or deferred, in the
+                  open.
                 </p>
               </div>
             </div>
