@@ -8,7 +8,6 @@
 // tenant, so assertions only ever look at the notices of budgets the scenario created (by id).
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import {
-  NotificationsFeed,
   ReclaimCampaignDetail,
   ReclaimReminderRun,
   ReclaimCandidateList,
@@ -17,7 +16,7 @@ import {
   ReclaimNoticeList,
   ReclaimPoolPreview,
 } from '@bf/contracts';
-import { RECLAIM_IDS, SEED } from '@bf/seed';
+import { RECLAIM_IDS, SEED, userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { daysFromToday, todayUtc } from '../support/clock';
@@ -625,19 +624,23 @@ test.describe('reclaim and redistribute campaigns (086a)', () => {
     expect(await reminded(t.b.id)).toEqual([]);
 
     // The owner was told through the existing notifications, once per reminder.
+    // Counted from the owner's notification rows rather than the feed: the feed returns only the
+    // newest notifications, and in a full suite the owner receives many more (every campaign
+    // notifies every candidate's owner), which pushes an older one off the page.
     await expect
       .poll(
-        async () => {
-          const feed = await expectContract(
-            await request.get('/api/notifications?limit=100', {
-              headers: await as('budget-owner'),
-            }),
-            200,
-            NotificationsFeed,
-          );
-          return feed.items.filter((n) => n.itemId === na.id && n.title.startsWith('Reminder:'))
-            .length;
-        },
+        () =>
+          asOwner(async (c) =>
+            Number(
+              (
+                await c.query<{ n: string }>(
+                  `select count(*)::text as n from notifications
+                      where recipient_person_id = $1 and item_id = $2 and title like 'Reminder:%'`,
+                  [userById('budget-owner').personId, na.id],
+                )
+              ).rows[0].n,
+            ),
+          ),
         { timeout: 30_000, intervals: [500, 1000] },
       )
       .toBe(2);

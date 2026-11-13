@@ -3,13 +3,15 @@
 // one alert per budget, fiscal period and level, and notifies the owner through the existing
 // notifications. Running again finds nothing new; the same request key queues one run, not two.
 import { expect, test, type APIRequestContext } from '@playwright/test';
-import { BudgetPhasing, BurnRateAlertList, BurnRateRun, NotificationsFeed } from '@bf/contracts';
+import { BudgetPhasing, BurnRateAlertList, BurnRateRun } from '@bf/contracts';
+import { userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { todayUtc } from '../support/clock';
 import { expectContract, expectProblem } from '../support/contract';
 import { allocateOk, createChild, createRoot } from '../support/factory';
 import { openingBalance, USD } from '../budgets/p4';
+import { asOwner } from '../support/db';
 
 async function runAndWait(request: APIRequestContext, key = randomUUID()) {
   const queued = await expectContract(
@@ -131,19 +133,23 @@ test.describe('burn-rate alerts', () => {
     expect(both.find((a) => a.level === 'well_ahead')!.burnBps).toBe(12_500);
 
     // The owner was told through the existing notifications, once per alert.
+    // Counted from the owner's notification rows rather than the feed: the feed returns only the
+    // newest notifications, and in a full suite the owner receives many more (every campaign
+    // notifies every candidate's owner), which pushes an older one off the page.
     await expect
       .poll(
-        async () => {
-          const feed = await expectContract(
-            await request.get('/api/notifications?limit=100', {
-              headers: await as('budget-owner'),
-            }),
-            200,
-            NotificationsFeed,
-          );
-          return feed.items.filter((n) => n.type === 'budget.burn_rate' && n.itemId === b.id)
-            .length;
-        },
+        () =>
+          asOwner(async (c) =>
+            Number(
+              (
+                await c.query<{ n: string }>(
+                  `select count(*)::text as n from notifications
+                      where recipient_person_id = $1 and item_id = $2 and type = 'budget.burn_rate'`,
+                  [userById('budget-owner').personId, b.id],
+                )
+              ).rows[0].n,
+            ),
+          ),
         { timeout: 30_000, intervals: [500, 1000] },
       )
       .toBe(2);
