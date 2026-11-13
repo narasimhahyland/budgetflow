@@ -43,12 +43,11 @@ The run output is in [`functional/targeted-runs.txt`](functional/targeted-runs.t
 
 ## Gates
 
-Gate summaries:
-
-- [`gate-summary-all-modes.txt`](gate-summary-all-modes.txt) is `scripts/gate.sh all`. Every mode passes except
-  visual, which failed only on `087b-year-end default`: the new button changes that screen, as expected.
-- [`gate-summary.txt`](gate-summary.txt) is the visual mode re-run after `npm run e2e:update-snapshots -g
-"087b-year-end default"`.
+[`gate-summary.txt`](gate-summary.txt) is `scripts/gate.sh all` on the branch with `main` merged in, including B2
+part 2's migration 0024. It was run from a fresh database. Every mode passes, visual included. The reminders
+migration was regenerated with drizzle-kit on top of main's journal and snapshot, and keeps the number 0028.
+[`gate-summary-all-modes.txt`](gate-summary-all-modes.txt) is the first full run, before the merge: only the
+expected `087b-year-end default` diff failed there, and the baselines were then updated.
 
 Visual baselines updated: 087b year-end shows the "Reclaim before year end" action for finance (desktop, tablet and
 mobile).
