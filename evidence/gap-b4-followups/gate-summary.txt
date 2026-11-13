@@ -1,0 +1,5 @@
+scripts/gate.sh visual — 2026-11-13T03:11:34Z — commit 67163680
+PASS|secrets|8s
+PASS|stack|56s
+PASS|visual|992s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report
