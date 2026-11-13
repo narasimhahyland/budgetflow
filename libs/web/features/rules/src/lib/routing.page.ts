@@ -71,9 +71,7 @@ import { RulesTabs } from './rules-tabs';
             <h2 class="bf-card__title" id="steps-title">
               {{ route.label }} — version {{ route.activeVersion }}
             </h2>
-            <p class="bf-card__hint">
-              In force from {{ route.validFrom | date: 'd MMM y' : 'UTC' }}.
-            </p>
+            <p class="bf-card__hint">In force from {{ route.validFrom | date: 'd MMM y' }}.</p>
             <mat-button-toggle-group
               hideSingleSelectionIndicator
               aria-label="How to show the steps"

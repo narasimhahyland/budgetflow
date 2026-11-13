@@ -180,7 +180,7 @@ import { LoadState } from '@bf/web/ui';
               <ng-container matColumnDef="since">
                 <th mat-header-cell *matHeaderCellDef>Since</th>
                 <td mat-cell *matCellDef="let r" data-label="Since">
-                  {{ r.since | date: 'd MMM y' : 'UTC' }}
+                  {{ r.since | date: 'd MMM y' }}
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="mapColumns"></tr>

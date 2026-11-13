@@ -79,7 +79,7 @@ interface EditRule {
           @if (v.current; as c) {
             <sat-status-tag status="success" data-testid="tax-version"
               >v{{ c.version }} Published, effective
-              {{ c.effectiveFrom | date: 'd MMM y' : 'UTC' }}</sat-status-tag
+              {{ c.effectiveFrom | date: 'd MMM y' }}</sat-status-tag
             >
           }
           @if (v.canEdit && !v.draft) {
@@ -107,9 +107,8 @@ interface EditRule {
       @if (v.upcoming; as u) {
         <sat-banner variant="info" class="bf-banner">
           <sat-banner-message
-            >Version {{ u.version }} takes effect on
-            {{ u.effectiveFrom | date: 'd MMM y' : 'UTC' }}; version {{ v.current?.version }} still
-            applies until then.</sat-banner-message
+            >Version {{ u.version }} takes effect on {{ u.effectiveFrom | date: 'd MMM y' }};
+            version {{ v.current?.version }} still applies until then.</sat-banner-message
           >
         </sat-banner>
       }

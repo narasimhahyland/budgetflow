@@ -272,7 +272,7 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
                           @if (o.nudge.snoozedUntil) {
                             <sat-status-tag status="neutral"
                               >Snoozed until
-                              {{ o.nudge.snoozedUntil | date: 'd MMM y' : 'UTC' }}</sat-status-tag
+                              {{ o.nudge.snoozedUntil | date: 'd MMM y' }}</sat-status-tag
                             >
                           } @else {
                             <sat-status-tag status="warning">Nudge raised</sat-status-tag>
