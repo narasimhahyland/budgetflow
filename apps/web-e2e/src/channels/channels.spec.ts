@@ -8,6 +8,7 @@
 // - Role-based digest templates (/admin/digests) with Email, Slack & Teams preview (064a)
 // - Notifications and tasks (/notifications) with All, Tasks, Mentions and Following tabs (123)
 import { expect, test } from '@playwright/test';
+import { api } from '../budgets/api';
 import { authFile } from '../support/roles';
 import {
   desktopOnly,
@@ -127,6 +128,62 @@ test.describe('notifications, settings, discussion and following (123, 059c, 060
     await page.goto('/me/following');
     await expect(page.getByRole('heading', { level: 1, name: 'Following' })).toBeVisible();
     await expect(page.getByTestId('following-table')).toBeVisible();
+  });
+});
+
+test.describe('notifications feed paging (123)', () => {
+  test.use({ storageState: authFile('finance-controller') });
+
+  test('a feed longer than one page loads older notifications until every one is shown', async ({
+    page,
+  }, info) => {
+    test.skip(!!desktopOnly(info.project.name), desktopOnly(info.project.name));
+    test.slow();
+
+    type Feed = { items: { id: string }[]; counts: { unread: number }; nextCursor: string | null };
+    const everything = async () => {
+      let cursor: string | null = null;
+      let total = 0;
+      let unread = 0;
+      do {
+        const q: string = cursor ? `&cursor=${encodeURIComponent(cursor)}` : '';
+        const feed: Feed = await api<Feed>(
+          'finance-controller',
+          'get',
+          `/api/notifications?limit=200${q}`,
+        );
+        total += feed.items.length;
+        unread = feed.counts.unread;
+        cursor = feed.nextCursor;
+      } while (cursor);
+      return { total, unread };
+    };
+
+    // Make the feed longer than the first page (50) through the real "send test notification" command.
+    const before = await everything();
+    for (let i = before.total; i < 75; i++) {
+      await api('finance-controller', 'post', '/api/me/notification-settings/test', {
+        channel: 'in_app',
+      });
+    }
+    const { total, unread } = await everything();
+    expect(total).toBeGreaterThan(50);
+
+    await page.goto('/notifications');
+    const rows = page.getByTestId('notifications-list').getByRole('listitem');
+    await expect(rows).toHaveCount(50);
+    await expect(page.getByTestId('unread-count')).toHaveText(String(unread));
+
+    const more = page.getByTestId('load-more-notifications');
+    while (await more.isVisible()) {
+      const shown = await rows.count();
+      await more.click();
+      await expect(rows).toHaveCount(Math.min(shown + 50, total));
+    }
+    await expect(rows).toHaveCount(total);
+    await expect(more).toBeHidden();
+    // The badge is the total over the window, not the rows loaded so far.
+    await expect(page.getByTestId('unread-count')).toHaveText(String(unread));
   });
 });
 
