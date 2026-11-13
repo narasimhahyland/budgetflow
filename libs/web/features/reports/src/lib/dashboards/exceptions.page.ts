@@ -273,7 +273,7 @@ import { data, injectApi, valueOf } from '../api';
               <tbody>
                 @for (w of o.trend; track w.weekStart) {
                   <tr>
-                    <td>{{ w.weekStart | date: 'd MMM' : 'UTC' }}</td>
+                    <td>{{ w.weekStart | date: 'd MMM' }}</td>
                     <td class="bf-num">{{ w.opened }}</td>
                     <td class="bf-num">{{ w.resolved }}</td>
                   </tr>

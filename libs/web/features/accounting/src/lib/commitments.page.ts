@@ -137,7 +137,7 @@ import { MatIconModule } from '@angular/material/icon';
               <th mat-header-cell *matHeaderCellDef>Service end</th>
               <td mat-cell *matCellDef="let c">
                 <span class="bf-cell__primary">{{
-                  c.serviceEnd ? (c.serviceEnd | date: 'd MMM y' : 'UTC') : '—'
+                  c.serviceEnd ? (c.serviceEnd | date: 'd MMM y') : '—'
                 }}</span>
                 <span class="bf-cell__secondary">{{
                   c.daysPast ? c.daysPast + ' days ago' : 'Not yet due'

@@ -118,7 +118,7 @@ import { RulesTabs } from './rules-tabs';
               Draft version {{ d.version }} <bf-rule-status status="draft" />
             </h2>
             <p class="bf-card__hint">
-              Not in force yet. It would start on {{ d.validFrom | date: 'd MMM y' : 'UTC' }} once
+              Not in force yet. It would start on {{ d.validFrom | date: 'd MMM y' }} once
               published.
             </p>
           </div>
@@ -206,9 +206,9 @@ import { RulesTabs } from './rules-tabs';
         <div>
           <dt>In force</dt>
           <dd class="bf-nowrap">
-            {{ v.validFrom | date: 'd MMM y' : 'UTC' }}
+            {{ v.validFrom | date: 'd MMM y' }}
             @if (v.validTo) {
-              to {{ v.validTo | date: 'd MMM y' : 'UTC' }}
+              to {{ v.validTo | date: 'd MMM y' }}
             } @else {
               onwards
             }

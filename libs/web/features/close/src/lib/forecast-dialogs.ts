@@ -160,9 +160,9 @@ export class NewForecastCycleDialog {
     <h2 mat-dialog-title>Forecast {{ line().budgetName ?? line().eventName }}</h2>
     <mat-dialog-content>
       <p class="bf-dialog__subtitle">
-        {{ d.cycle.name }} · as of {{ d.cycle.asOfDate | date: 'd MMM y' : 'UTC' }} · due
-        {{ d.cycle.dueDate | date: 'd MMM y' : 'UTC' }}. A forecast is not an actual: it posts
-        nothing and consumes no budget.
+        {{ d.cycle.name }} · as of {{ d.cycle.asOfDate | date: 'd MMM y' }} · due
+        {{ d.cycle.dueDate | date: 'd MMM y' }}. A forecast is not an actual: it posts nothing and
+        consumes no budget.
       </p>
 
       @if (line().commentaryNote; as note) {

@@ -155,7 +155,7 @@ import { RulesTabs } from './rules-tabs';
                     </td>
                     <td class="bf-nowrap" data-label="From">
                       @if (r.validFrom) {
-                        {{ r.validFrom | date: 'd MMM y' : 'UTC' }}
+                        {{ r.validFrom | date: 'd MMM y' }}
                       } @else {
                         —
                       }

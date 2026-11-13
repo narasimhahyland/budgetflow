@@ -201,7 +201,7 @@ import { MatIconModule } from '@angular/material/icon';
                   <span class="bf-cell__primary">{{ c.reference }} — {{ c.description }}</span>
                   <span class="bf-cell__secondary"
                     >{{ c.vendorName ?? '' }} · service end
-                    {{ c.serviceEnd ? (c.serviceEnd | date: 'd MMM y' : 'UTC') : '—' }}</span
+                    {{ c.serviceEnd ? (c.serviceEnd | date: 'd MMM y') : '—' }}</span
                   >
                 </td>
               </ng-container>

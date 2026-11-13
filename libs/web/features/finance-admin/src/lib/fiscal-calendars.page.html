@@ -149,10 +149,9 @@
         />
         @if (valueOf(preview); as p) {
           <p class="bf-card__hint" data-testid="calendar-preview">
-            {{ p.label }}: {{ p.startDate | date: 'd MMM y' : 'UTC' }} to
-            {{ p.endDate | date: 'd MMM y' : 'UTC' }}, {{ p.periods.length }} periods{{
-              p.weeks ? ', ' + p.weeks + ' weeks' : ''
-            }}. Period lengths:
+            {{ p.label }}: {{ p.startDate | date: 'd MMM y' }} to {{ p.endDate | date: 'd MMM y' }},
+            {{ p.periods.length }} periods{{ p.weeks ? ', ' + p.weeks + ' weeks' : '' }}. Period
+            lengths:
             @for (pp of p.periods; track pp.number; let last = $last) {
               {{ p.weeks ? pp.days / 7 + 'w' : pp.days + 'd' }}{{ last ? '' : ' · ' }}
             }
@@ -180,8 +179,7 @@
         <h2 class="bf-card__title" id="cal-title">{{ year()?.label ?? 'Calendar' }}</h2>
         @if (year(); as y) {
           <span class="bf-chip"
-            >{{ y.startDate | date: 'MMM y' : 'UTC' }} –
-            {{ y.endDate | date: 'MMM y' : 'UTC' }}</span
+            >{{ y.startDate | date: 'MMM y' }} – {{ y.endDate | date: 'MMM y' }}</span
           >
         }
       </div>
@@ -237,8 +235,8 @@
       </div>
       @if (year(); as y) {
         <p class="bf-card__hint bf-year-hint" data-testid="year-summary">
-          {{ y.label }} runs {{ y.startDate | date: 'd MMM y' : 'UTC' }} to
-          {{ y.endDate | date: 'd MMM y' : 'UTC' }} ({{ days(y.startDate, y.endDate) }} days{{
+          {{ y.label }} runs {{ y.startDate | date: 'd MMM y' }} to
+          {{ y.endDate | date: 'd MMM y' }} ({{ days(y.startDate, y.endDate) }} days{{
             y.weeks ? ', ' + y.weeks + ' weeks' : ''
           }})
           {{ y.groupFiscalYearLabel ? '· group year ' + y.groupFiscalYearLabel : '' }}
@@ -311,13 +309,13 @@
             <ng-container matColumnDef="start">
               <th mat-header-cell *matHeaderCellDef>Start</th>
               <td mat-cell *matCellDef="let p" class="bf-nowrap" data-label="Start">
-                {{ p.startDate | date: 'd MMM y' : 'UTC' }}
+                {{ p.startDate | date: 'd MMM y' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="end">
               <th mat-header-cell *matHeaderCellDef>End</th>
               <td mat-cell *matCellDef="let p" class="bf-nowrap" data-label="End">
-                {{ p.endDate | date: 'd MMM y' : 'UTC' }}
+                {{ p.endDate | date: 'd MMM y' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="status">

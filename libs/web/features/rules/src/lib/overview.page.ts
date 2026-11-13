@@ -207,7 +207,7 @@ import { RulesTabs } from './rules-tabs';
                   <td class="bf-num" data-label="Matches">{{ r.matches | number }}</td>
                   <td class="bf-num" data-label="Share">{{ r.sharePct }}%</td>
                   <td class="bf-nowrap" data-label="Last change">
-                    {{ r.lastChange | date: 'd MMM y' : 'UTC' }}
+                    {{ r.lastChange | date: 'd MMM y' }}
                   </td>
                 </tr>
               } @empty {
