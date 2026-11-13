@@ -186,8 +186,8 @@ const EXCEEDED_LABEL: Record<BenefitThresholdView['exceeded'], string> = {
                       <td data-label="Rule (tax year)">
                         {{ r.thresholdName }}
                         <span class="bf-cell__secondary"
-                          >{{ r.window.fromDate | date: 'd MMM y' : 'UTC' }} –
-                          {{ r.window.toDate | date: 'd MMM y' : 'UTC' }}</span
+                          >{{ r.window.fromDate | date: 'd MMM y' }} –
+                          {{ r.window.toDate | date: 'd MMM y' }}</span
                         >
                       </td>
                       <td class="bf-num" data-label="Counted">
@@ -247,7 +247,7 @@ const EXCEEDED_LABEL: Record<BenefitThresholdView['exceeded'], string> = {
               <div>
                 <h2 class="bf-card__title" id="benefit-person-title">{{ p.personName }}</h2>
                 <p class="bf-card__hint">
-                  {{ p.legalEntityCode }} · as of {{ p.asOf | date: 'd MMM y' : 'UTC' }}
+                  {{ p.legalEntityCode }} · as of {{ p.asOf | date: 'd MMM y' }}
                 </p>
               </div>
               <button mat-button type="button" (click)="selected.set(null)">Close</button>
@@ -270,7 +270,7 @@ const EXCEEDED_LABEL: Record<BenefitThresholdView['exceeded'], string> = {
                 <tbody>
                   @for (e of p.entries; track e.id) {
                     <tr>
-                      <td class="bf-cell--full">{{ e.entryDate | date: 'd MMM y' : 'UTC' }}</td>
+                      <td class="bf-cell--full">{{ e.entryDate | date: 'd MMM y' }}</td>
                       <td data-label="Event or item">
                         {{ e.description ?? e.source.label }}
                         <span class="bf-cell__secondary">{{ e.source.label }}</span>
@@ -419,7 +419,7 @@ const EXCEEDED_LABEL: Record<BenefitThresholdView['exceeded'], string> = {
                       }
                       @if (x.effectiveFrom) {
                         <span class="bf-cell__secondary"
-                          >from {{ x.effectiveFrom | date: 'd MMM y' : 'UTC' }}</span
+                          >from {{ x.effectiveFrom | date: 'd MMM y' }}</span
                         >
                       }
                       @if (x.status === 'returned' && x.comment) {

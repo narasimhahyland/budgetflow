@@ -32,3 +32,23 @@ Built from the written specs (decision D2); no Stitch design exists, so parity w
   pinned image. Reason: new screens 012, 017 and 017a.
 - ux-reviewer hand-off: not run in this session (the subagent is not available here); the
   inspection above is the author's.
+
+## Part 2 — 018, 018a, 018b, 088a
+
+| Iteration | Captures                     | Automated blocking | Inspection blocking | Fixed                                                                                           |
+| --------- | ---------------------------- | ------------------ | ------------------- | ----------------------------------------------------------------------------------------------- |
+| 1         | 33 (11 states x 3 viewports) | 0                  | 1                   | 088a generate form laid out by the shared `.bf-form` grid: selects and checkboxes interleaved   |
+| 2         | 33                           | 0                  | 0                   | non-blocking polish: channel and source names written out, "1 decision", unused-budget sentence |
+| 3         | 33                           | 0                  | 0                   | —                                                                                               |
+
+- Stop reason: no blocking findings (iteration 3). Capture report: `capture-report-part-2.md`.
+- Fix (before/after): `before-after/088a-list-empty-desktop--before.png` -> `--after.png`.
+- Checked: pending amounts shown as pre-encumbered (pending tone, dashed KPI) and co-funding as
+  "not yet held"; SLA tags in words; no approve or reject control on 018; analysts see no names on
+  018a; targets written next to each KPI on 018b; Generate is the `satImportantButton`; attendee
+  details and comments off by default on 088a.
+- Remaining non-blocking: on mobile the 018 tables scroll sideways rather than becoming cards; the
+  "Evidence pack" entry on event and budget details (046, 021) is not added, the list page takes
+  `?subjectType=&subjectId=` so those screens can link to it; no Export menu on 018, 018a, 018b.
+- Baselines: 33 new, recorded with `npm run e2e:update-snapshots -- --grep ...` in the pinned image.
+  Reason: new screens 018, 018a, 018b and 088a.

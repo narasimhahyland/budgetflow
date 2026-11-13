@@ -84,13 +84,18 @@ Design and values to confirm before live use: [`navan-integration.md`](architect
 Proof: `apps/api-e2e/src/integrations/navan.spec.ts` (invariants 106-108) and the Navan journeys;
 evidence in [`evidence/gap-b1-navan/`](../evidence/gap-b1-navan/README.md).
 
-**B2 part 1 done** (012, 017, 017a). The finance controller dashboard shows the close checklist per
-entity, the queues that block the close, the ledger check, feeds and the FX effect; alerts are derived
-on every read from the health checks, owner thresholds and controls, and acknowledging or snoozing is
-per person; the exceptions dashboard counts control exceptions by type and age and links each to its
-queue. Proof: `apps/api-e2e/src/dashboards/dashboards.spec.ts` (invariants 103–105) and the
-dashboards journeys; evidence in [`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md).
-Part 2 (018, 018a, 018b, 088a) follows.
+**B2 done.** 012 finance controller (close checklist per entity, blocking queues, ledger check,
+feeds, FX effect), 017 alerts (derived on every read from health checks, owner thresholds and
+controls; acknowledge and snooze per person), 017a exceptions (by type and age, each linked to its
+queue), 018 pending approvals (held versus not yet held, SLA, a four-hourly nudge that decides
+nothing), 018a approval performance (names only for finance, aggregates for analysts, own figures for
+approvers), 018b product analytics (`GET /api/analytics/kpis`, counts only, against the plan targets)
+and 088a evidence packs (new action `evidence.generate`, migration 0024, worker-built ZIP with a
+SHA-256 manifest and a verified audit chain). Proof: `apps/api-e2e/src/dashboards/` (invariants
+103–105 and 113–115) and the dashboards journeys; evidence in
+[`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md). Not built: the Export and
+Schedule menus of these dashboards, sidebar entries, and the evidence-pack entry on event and budget
+details.
 
 **B3 done.** Tax-aware consumption (080g): a request's amount is net of tax, and on submission its
 GST/VAT splits by the published rule in force (legal entity × spend category × attendee type, mixed

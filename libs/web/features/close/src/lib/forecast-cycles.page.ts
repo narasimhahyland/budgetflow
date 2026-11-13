@@ -93,11 +93,11 @@ import { CloseTag } from './close-tag';
             </ng-container>
             <ng-container matColumnDef="asOf">
               <th mat-header-cell *matHeaderCellDef>As of</th>
-              <td mat-cell *matCellDef="let c">{{ c.asOfDate | date: 'd MMM y' : 'UTC' }}</td>
+              <td mat-cell *matCellDef="let c">{{ c.asOfDate | date: 'd MMM y' }}</td>
             </ng-container>
             <ng-container matColumnDef="due">
               <th mat-header-cell *matHeaderCellDef>Due</th>
-              <td mat-cell *matCellDef="let c">{{ c.dueDate | date: 'd MMM y' : 'UTC' }}</td>
+              <td mat-cell *matCellDef="let c">{{ c.dueDate | date: 'd MMM y' }}</td>
             </ng-container>
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>

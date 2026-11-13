@@ -160,7 +160,7 @@ import { LoadState } from '@bf/web/ui';
     <section class="bf-card" aria-labelledby="cc-title">
       <div class="bf-card__header">
         <h2 class="bf-card__title" id="cc-title">
-          {{ activeCount() }} active on {{ asOf() | date: 'd MMM y' : 'UTC' }}
+          {{ activeCount() }} active on {{ asOf() | date: 'd MMM y' }}
         </h2>
       </div>
       <bf-load-state
@@ -202,8 +202,8 @@ import { LoadState } from '@bf/web/ui';
               <ng-container matColumnDef="dates">
                 <th mat-header-cell *matHeaderCellDef>Active</th>
                 <td mat-cell *matCellDef="let c" data-label="Active">
-                  {{ c.validFrom | date: 'd MMM y' : 'UTC' }} –
-                  {{ c.validTo ? (c.validTo | date: 'd MMM y' : 'UTC') : 'open' }}
+                  {{ c.validFrom | date: 'd MMM y' }} –
+                  {{ c.validTo ? (c.validTo | date: 'd MMM y') : 'open' }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="status">

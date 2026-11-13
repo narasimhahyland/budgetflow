@@ -78,7 +78,7 @@ const BUCKETS: Record<string, Bucket> = {
             <tbody>
               @for (line of d.lines; track line.id) {
                 <tr>
-                  <td>{{ line.accountingDate | date: 'mediumDate' : 'UTC' }}</td>
+                  <td>{{ line.accountingDate | date: 'mediumDate' }}</td>
                   <td>{{ line.account }}</td>
                   <td>{{ line.eventCode ?? '—' }}</td>
                   <td class="bf-num">

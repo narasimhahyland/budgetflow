@@ -116,9 +116,7 @@ import { CloseTag } from './close-tag';
             <ng-container matColumnDef="freeze">
               <th mat-header-cell *matHeaderCellDef scope="col">Commitment freeze</th>
               <td mat-cell *matCellDef="let r">
-                {{
-                  r.commitmentFreezeDate ? (r.commitmentFreezeDate | date: 'd MMM y' : 'UTC') : '—'
-                }}
+                {{ r.commitmentFreezeDate ? (r.commitmentFreezeDate | date: 'd MMM y') : '—' }}
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="columns"></tr>

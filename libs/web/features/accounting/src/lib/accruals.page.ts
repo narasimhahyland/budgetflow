@@ -261,8 +261,8 @@ const STATUS: Record<
             <ng-container matColumnDef="service">
               <th mat-header-cell *matHeaderCellDef>Service period</th>
               <td mat-cell *matCellDef="let p">
-                {{ p.serviceStart | date: 'd MMM y' : 'UTC' }} –
-                {{ p.serviceEnd | date: 'd MMM y' : 'UTC' }}
+                {{ p.serviceStart | date: 'd MMM y' }} –
+                {{ p.serviceEnd | date: 'd MMM y' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="amount">
