@@ -176,6 +176,13 @@
       "when": 1794476499404,
       "tag": "0026_b4_reclaim_burn",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794535756659,
+      "tag": "0028_b4_reclaim_reminders",
+      "breakpoints": true
     }
   ]
 }

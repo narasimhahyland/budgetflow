@@ -18,6 +18,8 @@ import {
   reclaimCampaigns,
   reclaimExecutions,
   reclaimNotices,
+  reclaimReminders,
+  tenants,
   withTenant,
   type Db,
   type Tx,
@@ -41,6 +43,8 @@ import type {
   ReclaimPoolPreview,
   ReclaimPoolPreviewRequest,
   RespondReclaimNoticeRequest,
+  ReclaimReminderRun,
+  RunReclaimRemindersRequest,
 } from '@bf/contracts';
 import {
   allocationAvailable,
@@ -48,14 +52,17 @@ import {
   maxReclaimable,
   planPoolRedistribution,
   reclaimCandidate,
+  reclaimReminderDue,
   reductionFloor,
   runRateAmount,
   validateReclaimResponse,
+  type ReclaimReminderKind,
   type BucketBalances,
   type PoolLeg,
   type Resource,
 } from '@bf/domain';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import type { CommandContext } from './close-reads';
 
@@ -89,6 +96,10 @@ const budgetRes = (b: BudgetRow): Resource => ({
 const iso = (d: Date | null) => (d ? d.toISOString().replace(/\+00:00$/, 'Z') : null);
 const PENDING_CARRY_MODES = ['carry_full', 'carry_with_approval'];
 const NOTICE_KIND = 'budget.reclaim_notice';
+/** Outbox topic and worker queue that send the deadline reminders due on a day. */
+export const RECLAIM_REMINDER_TOPIC = 'reclaim.reminders';
+/** Nightly schedule: the reminders due today, for every tenant. */
+export const RECLAIM_REMINDER_NIGHTLY = 'reclaim.reminders_nightly';
 
 /**
  * Reclaim and redistribute campaigns (086a). Finance starts a campaign; owners release all, part,
@@ -532,6 +543,15 @@ export class ReclaimService {
     const pending = new Map<string, number>();
     for (const n of notices)
       pending.set(n.budgetId, await this.controls.pendingMinor(tx, n.budgetId));
+    const reminders = await tx
+      .select({ noticeId: reclaimReminders.noticeId, kind: reclaimReminders.kind })
+      .from(reclaimReminders)
+      .where(
+        inArray(
+          reclaimReminders.noticeId,
+          notices.map((n) => n.id),
+        ),
+      );
     return notices.map((n) => {
       const row = rows.get(n.budgetId)!;
       const parent = row.parentId ? parents.get(row.parentId) : undefined;
@@ -578,6 +598,9 @@ export class ReclaimService {
         floor: m(reductionFloor(b, false)),
         maxReclaimable: m(maxReclaimable(b)),
         pendingRequests: m(pending.get(n.budgetId) ?? 0),
+        remindersSent: (['two_days', 'one_day'] as const).filter((k) =>
+          reminders.some((r) => r.noticeId === n.id && r.kind === k),
+        ),
         canRespond,
         canEscalate: open && overdue && manage,
       };
@@ -1409,5 +1432,125 @@ export class ReclaimService {
         return view;
       },
     );
+  }
+
+  // Deadline reminders (086a: 2 days and 1 day before the response date) ---------------------
+
+  private readonly log = new Logger('ReclaimReminders');
+
+  /** Queues the reminders due on a day; the worker sends them. */
+  requestReminders(actor: RequestActor, req: RunReclaimRemindersRequest, ctx: CommandContext) {
+    this.assert(actor, 'reclaim.manage');
+    return this.commands.run(
+      actor,
+      {
+        idempotencyKey: ctx.idempotencyKey,
+        operation: 'reclaim.reminders',
+        request: req,
+        status: 202,
+      },
+      async (tx): Promise<ReclaimReminderRun> => {
+        const asOf = req.asOf ?? todayUtc();
+        await tx
+          .insert(outboxMessages)
+          .values({ tenantId: actor.tenantId, topic: RECLAIM_REMINDER_TOPIC, payload: { asOf } });
+        await this.audit.append(tx, {
+          tenantId: actor.tenantId,
+          actorPersonId: actor.personId,
+          actorSubject: actor.subject,
+          action: 'reclaim.reminders_requested',
+          resourceType: 'reclaim_reminder_run',
+          resourceId: randomUUID(),
+          legalEntityId: null,
+          requestId: ctx.requestId,
+          reason: `Reclaim deadline reminders for ${asOf}`,
+          changes: { asOf: { from: null, to: asOf } },
+        });
+        return { asOf, queued: true };
+      },
+    );
+  }
+
+  /**
+   * Worker side: sends each unanswered notice the reminder due on `asOf`, at most once per notice
+   * and kind (the unique index makes a rerun a no-op). Notices in a completed campaign or in a pool
+   * already posted are closed and get none. Returns how many reminders went out.
+   */
+  async sendReminders(tenantId: string, asOf: string): Promise<number> {
+    return withTenant(this.db, { tenantId, subject: 'system:worker' }, async (tx) => {
+      const rows = await tx
+        .select({ n: reclaimNotices, c: reclaimCampaigns })
+        .from(reclaimNotices)
+        .innerJoin(reclaimCampaigns, eq(reclaimCampaigns.id, reclaimNotices.campaignId))
+        .where(
+          and(eq(reclaimNotices.status, 'sent'), sql`${reclaimCampaigns.status} <> 'completed'`),
+        )
+        .orderBy(asc(reclaimNotices.createdAt), asc(reclaimNotices.id));
+      if (!rows.length) return 0;
+      const sent = await tx
+        .select({ noticeId: reclaimReminders.noticeId, kind: reclaimReminders.kind })
+        .from(reclaimReminders)
+        .where(
+          inArray(
+            reclaimReminders.noticeId,
+            rows.map((r) => r.n.id),
+          ),
+        );
+      const posted = await tx
+        .select({
+          c: reclaimExecutions.campaignId,
+          le: reclaimExecutions.legalEntityId,
+          ccy: reclaimExecutions.currency,
+        })
+        .from(reclaimExecutions);
+      const closed = new Set(posted.map((p) => `${p.c}:${p.le}:${p.ccy}`));
+      let count = 0;
+      for (const { n, c } of rows) {
+        if (closed.has(`${n.campaignId}:${n.legalEntityId}:${n.currency}`)) continue;
+        const kinds = sent
+          .filter((x) => x.noticeId === n.id)
+          .map((x) => x.kind as ReclaimReminderKind);
+        const due = reclaimReminderDue(c.respondBy, asOf, kinds);
+        if (!due) continue;
+        const inserted = await tx
+          .insert(reclaimReminders)
+          .values({ tenantId, noticeId: n.id, kind: due, asOf })
+          .onConflictDoNothing()
+          .returning();
+        if (!inserted.length) continue;
+        count++;
+        if (!n.ownerPersonId) continue;
+        const row = await this.views.row(tx, n.budgetId);
+        const when = due === 'one_day' ? 'tomorrow' : 'in 2 days';
+        await this.notify(tx, tenantId, n.ownerPersonId, n, {
+          title: `Reminder: answer the reclaim of ${row.name} by ${c.respondBy}`,
+          detail: `${formatMoney(money(n.proposedMinor, n.currency))} proposed; responses close ${when}.`,
+          subject: `Reminder: reclaim of ${row.name} closes ${when}`,
+          headline: `Responses to the ${c.name} close ${when} (${c.respondBy}). Release the money, release part, or tell us your plans; nothing is reclaimed without an answer, but after the deadline the decision goes to the owner of a budget above yours.`,
+          lines: [
+            ['Budget', row.name],
+            ['Proposed release', formatMoney(money(n.proposedMinor, n.currency))],
+            ['Respond by', c.respondBy],
+          ],
+          tone: 'warning',
+        });
+      }
+      this.log.log(`reclaim reminders for ${asOf}: ${count} sent`);
+      return count;
+    });
+  }
+
+  /** Nightly: the reminders due today for every tenant; one tenant failing never stops the others. */
+  async sendRemindersNightly(): Promise<number> {
+    const all = await this.db.transaction((tx) => tx.select({ id: tenants.id }).from(tenants));
+    let total = 0;
+    for (const t of all) {
+      try {
+        total += await this.sendReminders(t.id, todayUtc());
+      } catch (e) {
+        this.log.error(`reclaim reminders failed for a tenant: ${(e as Error).message}`);
+      }
+    }
+    return total;
   }
 }

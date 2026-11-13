@@ -125,9 +125,11 @@ releases all, part, or keeps it with a reason and plan, never above the floor (a
   Migration `0026`; new actions `reclaim.read`, `reclaim.manage`, `reclaim.redistribute`,
   `burn_rate.run`. Proof: `apps/api-e2e/src/close/reclaim.spec.ts` and `burn-rate.spec.ts`
   (invariants 116-120) and the reclaim journey. Evidence:
-  [`evidence/gap-b4-reclaim/`](../evidence/gap-b4-reclaim/README.md). Follow-ups: the Stitch images for
-  086a, an entry from the 086 unused report and the year-end setup, and a burn-rate panel on the
-  budget page (alerts reach owners only as notifications today).
+  [`evidence/gap-b4-reclaim/`](../evidence/gap-b4-reclaim/README.md). Built since: deadline reminders 2 days
+  and 1 day before the response date (worker, once per notice and kind; invariant 121, migration
+  `0028`) and a "Reclaim before year end" entry on the year-end page. Still open: the Stitch images
+  for 086a, an entry from the 086 unused report (it renders through the shared report frame), and a
+  burn-rate panel on the budget page (alerts reach owners only as notifications today).
 
 ## Tier C — prove what is built but thinly covered
 

@@ -39053,6 +39053,17 @@
             "description": "Pending (pre-encumbered) requests on the budget: listed, never part of the floor.",
             "$ref": "#/components/schemas/Money"
           },
+          "remindersSent": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "two_days",
+                "one_day"
+              ]
+            },
+            "description": "Deadline reminders already sent to the owner (2 days and 1 day before)."
+          },
           "canRespond": {
             "type": "boolean"
           },
@@ -39090,6 +39101,7 @@
           "floor",
           "maxReclaimable",
           "pendingRequests",
+          "remindersSent",
           "canRespond",
           "canEscalate"
         ],
@@ -39258,6 +39270,26 @@
           "legalEntityId",
           "currency",
           "targets"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimReminderRun": {
+        "type": "object",
+        "properties": {
+          "asOf": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "queued": {
+            "type": "boolean",
+            "description": "The worker sends the reminders that are due on this day."
+          }
+        },
+        "required": [
+          "asOf",
+          "queued"
         ],
         "additionalProperties": false
       },
@@ -44861,6 +44893,18 @@
           "createdAt",
           "matchCount30d"
         ],
+        "additionalProperties": false
+      },
+      "RunReclaimRemindersRequest": {
+        "type": "object",
+        "properties": {
+          "asOf": {
+            "description": "The day to send reminders for; today when omitted.",
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          }
+        },
         "additionalProperties": false
       },
       "RunSyncRequest": {
@@ -107599,6 +107643,95 @@
             }
           },
           "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/reminder-runs": {
+      "post": {
+        "operationId": "runReclaimReminders",
+        "summary": "Queue the deadline reminders due on a day (the worker also runs them nightly)",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunReclaimRemindersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimReminderRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {

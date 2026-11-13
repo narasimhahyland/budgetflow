@@ -281,3 +281,25 @@ export function planPoolRedistribution(
       });
   return ok({ poolMinor: pool, allocatedMinor: allocated, remainderMinor: pool - allocated, legs });
 }
+
+export const RECLAIM_REMINDER_KINDS = ['two_days', 'one_day'] as const;
+export type ReclaimReminderKind = (typeof RECLAIM_REMINDER_KINDS)[number];
+
+const dayNumber = (d: string) => Math.round(Date.parse(`${d}T00:00:00Z`) / 86_400_000);
+
+/**
+ * Which deadline reminder (086a: 2 days and 1 day before the response date) is due for an
+ * unanswered notice on `today`, if any. From one day before, the 1-day reminder replaces the
+ * 2-day one, so a missed run never sends both; on and after the deadline nothing is due (finance
+ * decides what happens next). `sent` holds the kinds already sent for the notice.
+ */
+export function reclaimReminderDue(
+  respondBy: string,
+  today: string,
+  sent: readonly ReclaimReminderKind[],
+): ReclaimReminderKind | null {
+  const left = dayNumber(respondBy) - dayNumber(today);
+  const kind: ReclaimReminderKind | null = left === 1 ? 'one_day' : left === 2 ? 'two_days' : null;
+  if (!kind || sent.includes(kind)) return null;
+  return kind;
+}

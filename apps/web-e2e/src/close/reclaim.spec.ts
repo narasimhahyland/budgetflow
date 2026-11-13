@@ -9,6 +9,20 @@ import { authFile } from '../support/roles';
 
 const CAMPAIGN = `/finance/reclaim/${RECLAIM_IDS.campaign}`;
 
+test.describe('reclaim entry from year end', () => {
+  test.use({ storageState: authFile('finance-admin') });
+
+  test('the year-end page offers a reclaim before the run sweeps unused money', async ({
+    page,
+  }) => {
+    await page.goto('/finance/year-end');
+    await expectShell(page);
+    await page.getByRole('link', { name: 'Reclaim before year end' }).click();
+    await expect(page).toHaveURL(/\/finance\/reclaim$/);
+    await expect(page.getByRole('heading', { name: 'Reclaim campaigns' })).toBeVisible();
+  });
+});
+
 test.describe('reclaim campaign', () => {
   test('finance reads the answers, an owner releases part, and finance redistributes the pool', async ({
     browser,
