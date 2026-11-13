@@ -1,0 +1,12 @@
+{
+  "request": "GET /api/analytics/kpis as regional-manager",
+  "status": 403,
+  "body": {
+    "type": "urn:budgetflow:problem:forbidden",
+    "title": "Forbidden",
+    "status": 403,
+    "code": "FORBIDDEN",
+    "detail": "Product analytics are for administrators and finance leaders.",
+    "instance": "/api/analytics/kpis"
+  }
+}

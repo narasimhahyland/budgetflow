@@ -144,3 +144,42 @@ export const boardPackGenerations = pgTable(
   },
   (t) => [index('board_pack_generations_tenant').on(t.tenantId, t.requestedAt)],
 );
+
+/**
+ * One-click evidence pack (088a): everything about one event or budget in a single ZIP, assembled
+ * by the worker from the same reads the screens use and stored in the DocumentStore under
+ * `tenants/<id>/evidence-packs/`. The row records what was asked for, how far the job got, the
+ * manifest (file, size, SHA-256) and the audit-chain verification; it never holds the data itself.
+ */
+export const evidencePacks = pgTable(
+  'evidence_packs',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    subjectType: varchar('subject_type', { length: 20 }).notNull(),
+    subjectId: uuid('subject_id').notNull(),
+    subjectLabel: text('subject_label').notNull(),
+    contents: text('contents').array().notNull().default([]),
+    includeAttendees: boolean('include_attendees').notNull().default(false),
+    /** `queued`, `running`, `ready`, `failed` or `cancelled`. Expired is derived from `expires_at`. */
+    status: varchar('status', { length: 20 }).notNull().default('queued'),
+    /** The step the job is on, or the one that failed. */
+    step: varchar('step', { length: 40 }),
+    counts: jsonb('counts').notNull().default({}),
+    storageKey: text('storage_key'),
+    fileName: text('file_name'),
+    sizeBytes: integer('size_bytes'),
+    manifest: jsonb('manifest').notNull().default([]),
+    manifestSha256: varchar('manifest_sha256', { length: 64 }),
+    chain: jsonb('chain'),
+    error: text('error'),
+    requestedByPersonId: uuid('requested_by_person_id').references(() => people.id),
+    requestedAt: ts('requested_at').notNull().default(appNow),
+    completedAt: ts('completed_at'),
+    expiresAt: ts('expires_at').notNull(),
+  },
+  (t) => [
+    index('evidence_packs_tenant').on(t.tenantId, t.requestedAt),
+    index('evidence_packs_subject').on(t.tenantId, t.subjectType, t.subjectId),
+  ],
+);
