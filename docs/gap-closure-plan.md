@@ -26,7 +26,7 @@ SoD and access reviews, and the handoff's section 5) are not repeated here.
 
 | Package                                    | What                                                                                                                                                                                                                                                                                                                                                                                                                      | Areas                                                                            | Size |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---- |
-| **A1** Report file exports                 | Reports promise "export only (CSV, XLSX, PDF)", but `POST /reports/:id/exports` only records a row and the button reads "Record an export"; scheduled deliveries carry no attachment. Produce the files through `DocumentStore`, with formula neutralisation and the export audit event, and attach them to scheduled deliveries.                                                                                         | `libs/api/reports`, worker, `libs/web/features/reports`, contracts (additive)    | M    |
+| **A1** Report file exports — **done**      | Reports promise "export only (CSV, XLSX, PDF)", but `POST /reports/:id/exports` only records a row and the button reads "Record an export"; scheduled deliveries carry no attachment. Produce the files through `DocumentStore`, with formula neutralisation and the export audit event, and attach them to scheduled deliveries.                                                                                         | `libs/api/reports`, worker, `libs/web/features/reports`, contracts (additive)    | M    |
 | **A2** Employee and gift caps — **done**   | Per-employee annual caps and the annual gift cap are saved as policy but never enforced; "employees nearest cap" is a fixture. Add the facts the rules need (employee year-to-date benefit, gift value, alcohol amount, non-employee count, intercompany flag, requester's recent total) and enforce them on requests.                                                                                                    | `libs/domain` rules evaluator, `libs/api/rules`, `libs/api/spend`; invariant map | M    |
 | **A3** Full acceptance scenario — **done** | `wave-2-core.spec.ts` covers less than the plan's ten steps. Add, through the UI: the CEO creating the budget, the headcount true-up, the attendee split by employing entity, the intercompany block or recharge, the actionable-email decision, set to zero through its dialog, the INR file import, the unmatched queue, surplus return at close, the audit-trail view, FX shown separately. Expect it to find defects. | `apps/web-e2e/src/acceptance/`                                                   | M    |
 | **A4** Catalog traceability — **done**     | Phase 17 traced every route (112/112), not the plan's ~120 feature-catalog rows. Map each row to a passing check, a package below or a recorded deferral.                                                                                                                                                                                                                                                                 | `evidence/phase-17/`, `docs/testing/`                                            | S    |
@@ -64,7 +64,7 @@ request; it now does, and every decision is recorded with its rule versions and 
 | Package                                        | What                                                                                                                                                                                                                                                                                                                                                                | Depends on      | Size |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ---- |
 | **B1** Navan live integration (16a) — **done** | The plan's Phase 16a: the real Navan Expense API in place of the placeholder adapter, inbound actuals in 93-day windows, outbound event-code options, and controls disabling options at the point of spend. Mock provider moved to the real shapes; live mode behind an env flag.                                                                                   | D4              | L    |
-| **B2** Dashboards                              | 012 finance controller, 017 alerts, 017a exceptions, 018 pending approvals, 018a approval performance (cycle time, bottlenecks), 018b product analytics, 088a one-click evidence pack. Split in two.                                                                                                                                                                | D2              | L    |
+| **B2** Dashboards — **done**                   | 012 finance controller, 017 alerts, 017a exceptions, 018 pending approvals, 018a approval performance (cycle time, bottlenecks), 018b product analytics, 088a one-click evidence pack. Split in two.                                                                                                                                                                | D2              | L    |
 | **B3** Tax and benefits — **done**             | 080g tax-aware consumption (recoverable vs non-recoverable GST/VAT) and 080h the employee benefit ledger with benefit-in-kind thresholds. The tables exist, unused. Ledger-heavy: `/ledger-change`.                                                                                                                                                                 | D2, D3          | L    |
 | **B4** Reclaim and burn rate — **done**        | 086a reclaim-and-redistribute campaigns, and burn-rate alerts.                                                                                                                                                                                                                                                                                                      | D2              | M    |
 | **B5** Finance exports                         | 094b: intercompany recharges, chargeback and reclass journals, payroll benefit data.                                                                                                                                                                                                                                                                                | B3 for benefits | M    |
@@ -118,23 +118,38 @@ follow-ups: the screens' CSV/XLSX/PDF export, employees seeing their own benefit
 
 **B4 done.** Reclaim campaigns (086a, built from the spec, D2): finance (or the CEO) previews and
 starts a campaign; every budget forecast to lapse above the criteria gets a notice; its owner
-releases all, part, or keeps it with a reason and plan, never above the floor (allocated out + held
+releases all, part, or keeps it with a reason and plan, never above the floor (allocated out, held,
+encumbered and actual as they stand when the owner answers). Reminders go out 2 days and 1 day before
+the response date. After the deadline finance can send an unanswered notice to the nearest ancestor
+owner who is not its owner; nothing is reclaimed automatically. A Finance Admin redistributes each
+legal entity's pool through a confirm dialog with the floor check per source: reductions with a
+destination to targets in the same entity and tree, the rest back to each source's parent, in one
+idempotent command under ordered locks with one audit entry. Burn-rate alerts: the worker compares
+actual spend with the amount phased to date and tells owners at 110% and 125%, once per budget,
+period and level, through the existing notifications. The year-end page links to the campaigns.
+Migrations `0026` and `0028`; new actions `reclaim.read`, `reclaim.manage`, `reclaim.redistribute`,
+`burn_rate.run`. Proof: `apps/api-e2e/src/close/reclaim.spec.ts` and `burn-rate.spec.ts`
+(invariants 116-121) and the reclaim journeys. Evidence:
+[`evidence/gap-b4-reclaim/`](../evidence/gap-b4-reclaim/README.md) and
+[`evidence/gap-b4-followups/`](../evidence/gap-b4-followups/README.md) (#127, #129). Not built: the
+Stitch images for 086a, an entry from the 086 unused report (it renders through the shared report
+frame), and a burn-rate panel on the budget page (alerts reach owners only as notifications).
 
-- encumbered + actual, as it stands when they answer). After the deadline finance can send an
-  unanswered notice to the nearest ancestor owner who is not its owner; nothing is reclaimed
-  automatically. A Finance Admin redistributes each legal entity's pool through a confirm dialog with
-  the floor check per source: reductions with a destination to targets in the same entity and tree,
-  the rest back to each source's parent, in one idempotent command under ordered locks with one audit
-  entry. Burn-rate alerts: the worker compares actual spend with the amount phased to date and tells
-  owners at 110% and 125%, once per budget, period and level, through the existing notifications.
-  Migration `0026`; new actions `reclaim.read`, `reclaim.manage`, `reclaim.redistribute`,
-  `burn_rate.run`. Proof: `apps/api-e2e/src/close/reclaim.spec.ts` and `burn-rate.spec.ts`
-  (invariants 116-120) and the reclaim journey. Evidence:
-  [`evidence/gap-b4-reclaim/`](../evidence/gap-b4-reclaim/README.md). Built since: deadline reminders 2 days
-  and 1 day before the response date (worker, once per notice and kind; invariant 121, migration
-  `0028`) and a "Reclaim before year end" entry on the year-end page. Still open: the Stitch images
-  for 086a, an entry from the 086 unused report (it renders through the shared report frame), and a
-  burn-rate panel on the budget page (alerts reach owners only as notifications today).
+## What next (13 November 2026)
+
+Done and merged: A1-A4, B1, B2 (#117, #130), B3, B4 (#127, #129), D7 offline AI tests (#126), the
+date-only fix (#128). Open, in the D6 order:
+
+1. **B5 finance exports**: built in its own worktree, no PR yet; its session waits for a decision.
+   It claims migration `0025` and must start its invariant rows at **122** (121 is B4's on `main`).
+2. **B7 integration completeness**: in its own worktree, no PR yet; waits for a decision. Migration
+   `0027`, invariant rows 130-136.
+3. **B8 installable app and push**, **B9 AI jobs**, **B10 experience** (split by area), then **B6
+   developer portal** (scope the sandbox first). Not started. The next free migration number is
+   `0029`; the next free invariant row after B5 is 126 (B7 holds 130-136).
+4. **Bugs** below, which are small and can run alongside: the notification feed paging first, since
+   it shows wrong counts to real users.
+5. **Tier C** proof gaps, alongside.
 
 ## Tier C — prove what is built but thinly covered
 
@@ -156,11 +171,25 @@ releases all, part, or keeps it with a reason and plan, never above the floor (a
 - Performance at the plan's scale (50,000 budgets, 500,000 ledger entries); Phase 17 measured about
   20,000 lines.
 
-## Carried defects
+## Bugs and carried defects
 
-#82 (blank renders), the AI-caption id wrap (in progress in its own session), the board pack's zeros
-(the seed closes a period without close snapshots), the monospace style stylelint misses, and the
-"Nadia Farouk" fallback name.
+Checked against `main` on 13 November 2026.
+
+| Bug                                                           | Where                                                            | Effect                                                                                                                                                                                                                                                                                                 | Status    |
+| ------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| Notification feed ignores its cursor                          | `ChannelsService` list (`GET /api/notifications`)                | Loads the newest 200 rows and filters them in memory; `nextCursor` is always null, so older notifications are unreachable, and the unread, mentions and following counts are wrong past 200. Breaks the rule that lists page by cursor and filter in SQL. Found when B4's CI saw one of two reminders. | Open      |
+| API and worker database sessions are not pinned               | `withTenant` (no `app.fixed_now`); the worker has no `FIXED_NOW` | On a pinned stack, rows they write get today's real date while the API reasons as of the pinned day (B2's finding). Test stacks only.                                                                                                                                                                  | Open      |
+| Reclaim notices keep the owner from when the campaign started | `ReclaimService.respond`                                         | After a budget changes owner, the new owner cannot answer and the old one is refused, until finance escalates after the deadline.                                                                                                                                                                      | Open, low |
+| A reclaim pool's remainder can leave its legal entity         | `ReclaimService` pool legs to each source's parent               | When a source's parent is in another legal entity, the remainder moves across entities without intercompany handling (the same as the existing reduce to parent).                                                                                                                                      | Open, low |
+| A burn-rate run accepts any as-of date                        | `BurnRateService.request`                                        | A back- or forward-dated run uses up the once-per-period alert for that period.                                                                                                                                                                                                                        | Open, low |
+| One set-to-zero source fails a whole reclaim pool             | `ControlsService.reclaimInTx`                                    | A source set to zero after releasing makes the pool's execution fail for every source, instead of skipping that source.                                                                                                                                                                                | Open, low |
+| #82 blank renders                                             | visual suite                                                     | About one state per run renders blank, fails its readiness wait and passes on retry.                                                                                                                                                                                                                   | Open      |
+| Board pack zeros                                              | seed                                                             | The seed closes a period without close snapshots.                                                                                                                                                                                                                                                      | Open      |
+| Monospace style                                               | stylelint                                                        | A monospace style stylelint does not catch.                                                                                                                                                                                                                                                            | Open      |
+| "Nadia Farouk" fallback name                                  | `ChannelsService` chat installations                             | A hard-coded installer name when none is recorded.                                                                                                                                                                                                                                                     | Open      |
+
+Fixed since the last revision: the AI-caption id wrap (#114), the seeded API key's real-clock expiry
+(#123), date-only fields a day early west of UTC (#128).
 
 ## How to run it
 
@@ -168,5 +197,5 @@ releases all, part, or keeps it with a reason and plan, never above the floor (a
   At most three or four at once on one machine: every package runs the full gate, and heavy runs
   disturb each other (handoff section 7).
 - Shared surfaces (`libs/contracts`, `libs/api/db`, `infra/`) change only inside a package that owns
-  them, one migration at a time, numbered from `0022`.
+  them, one migration at a time. Taken: `0022`-`0028` (`0025` B5, `0027` B7 unmerged); next `0029`.
 - Each package updates the invariant map and its evidence, and this page, when it merges.
