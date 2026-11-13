@@ -33,6 +33,7 @@ import {
   memberships,
   notificationPreferences,
   notifications,
+  reclaimNotices,
   orgUnits,
   outboxMessages,
   people,
@@ -181,6 +182,7 @@ export class ChannelsService {
     if (itemType === 'event') return `/events/${itemId}${suffix}`;
     if (itemType === 'request') return `/requests/${itemId}${suffix}`;
     if (itemType === 'contribution') return `/contributions/${itemId}`;
+    if (itemType === 'reclaim_notice') return `/reclaim/${itemId}`;
     return null;
   }
 
@@ -191,6 +193,17 @@ export class ChannelsService {
     itemId: string | null,
   ): Promise<boolean> {
     if (!itemType || !itemId) return true;
+    if (itemType === 'reclaim_notice') {
+      // Reclaim notices (086a) reach only their owner, the parent owner they were sent to, and finance.
+      const [n] = await tx.select().from(reclaimNotices).where(eq(reclaimNotices.id, itemId));
+      return Boolean(
+        n &&
+          (n.ownerPersonId === actor.personId ||
+            n.parentOwnerPersonId === actor.personId ||
+            this.policy.can(actor, 'reclaim.read', { kind: 'tenant', tenantId: actor.tenantId })
+              .allowed),
+      );
+    }
     if (itemType === 'budget') {
       const [b] = await tx.select().from(budgets).where(eq(budgets.id, itemId));
       return Boolean(b && this.policy.can(actor, 'budget.read', budgetResourceOf(b)).allowed);

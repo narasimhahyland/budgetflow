@@ -34,7 +34,7 @@ export const NotificationItem = named(
       tone: NotificationTone,
       title: z.string(),
       detail: z.string(),
-      itemType: z.enum(['budget', 'event', 'request', 'contribution']).nullable(),
+      itemType: z.enum(['budget', 'event', 'request', 'contribution', 'reclaim_notice']).nullable(),
       itemId: Id.nullable(),
       itemRef: z.string().nullable(),
       itemLink: z.string().nullable(),

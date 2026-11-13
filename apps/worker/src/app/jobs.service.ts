@@ -1,6 +1,7 @@
 import { OWNER_INVITED_TOPIC, RETENTION_SWEEP_TOPIC, RetentionService } from '@bf/api/admin';
 import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
+import { BURN_RATE_NIGHTLY, BURN_RATE_TOPIC, BurnRateService } from '@bf/api/close';
 import { CHANNEL_DELIVER_TOPIC, ChannelsService, type ChannelDeliverJob } from '@bf/api/channels';
 import { DB } from '@bf/api/core';
 import {
@@ -74,6 +75,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly retention: RetentionService,
     private readonly documents: S3DocumentStore,
     private readonly navan: NavanSyncService,
+    private readonly burnRate: BurnRateService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -213,6 +215,38 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       RETENTION_SWEEP_TOPIC,
       process.env.RETENTION_SWEEP_CRON ?? '0 1 * * *',
     );
+    // Burn-rate alerts (gap B4): a run requested through the API (or nightly) is measured here at
+    // its fixed as-of date. A run that is no longer queued was executed before, so a redelivered job
+    // is a no-op, and alerts are unique per budget, period and level. After the last retry the run
+    // is marked failed so finance sees it.
+    await boss.createQueue(BURN_RATE_TOPIC, {
+      retryLimit: 3,
+      retryDelay: 5,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work<{ tenantId: string; runId: string }>(BURN_RATE_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) {
+        try {
+          await this.burnRate.execute(job.data.tenantId, job.data.runId);
+        } catch (e) {
+          if (job.retryCount >= 3)
+            await this.burnRate.fail(job.data.tenantId, job.data.runId, (e as Error).message);
+          throw e;
+        }
+      }
+    });
+    await boss.createQueue(BURN_RATE_NIGHTLY, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(BURN_RATE_NIGHTLY, async () => {
+      const n = await this.burnRate.runNightly();
+      this.log.log(`nightly burn-rate check raised ${n} alert(s)`);
+    });
+    await this.schedule(boss, BURN_RATE_NIGHTLY, process.env.BURN_RATE_SWEEP_CRON ?? '0 5 * * *');
     // Bulk owner invitations (103a): the invitation itself grants nothing.
     await boss.createQueue(OWNER_INVITED_TOPIC, {
       retryLimit: 5,
