@@ -13,6 +13,7 @@ import {
   ExecuteReclaimPoolRequest,
   ReclaimPoolPreviewRequest,
   RespondReclaimNoticeRequest,
+  RunReclaimRemindersRequest,
 } from '@bf/contracts';
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Res } from '@nestjs/common';
 import { z } from 'zod';
@@ -162,6 +163,25 @@ export class ReclaimController {
         actor,
         id(noticeId),
         parseWith(EscalateReclaimNoticeRequest, body),
+        ctx(key, rid),
+      ),
+    );
+  }
+
+  @Post('reclaim/reminder-runs')
+  @HttpCode(202)
+  async reminders(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.reclaim.requestReminders(
+        actor,
+        parseWith(RunReclaimRemindersRequest, body ?? {}),
         ctx(key, rid),
       ),
     );

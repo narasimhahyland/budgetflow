@@ -1,7 +1,14 @@
 import { OWNER_INVITED_TOPIC, RETENTION_SWEEP_TOPIC, RetentionService } from '@bf/api/admin';
 import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
-import { BURN_RATE_NIGHTLY, BURN_RATE_TOPIC, BurnRateService } from '@bf/api/close';
+import {
+  BURN_RATE_NIGHTLY,
+  BURN_RATE_TOPIC,
+  BurnRateService,
+  RECLAIM_REMINDER_NIGHTLY,
+  RECLAIM_REMINDER_TOPIC,
+  ReclaimService,
+} from '@bf/api/close';
 import { CHANNEL_DELIVER_TOPIC, ChannelsService, type ChannelDeliverJob } from '@bf/api/channels';
 import { DB } from '@bf/api/core';
 import {
@@ -80,6 +87,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly documents: S3DocumentStore,
     private readonly navan: NavanSyncService,
     private readonly burnRate: BurnRateService,
+    private readonly reclaim: ReclaimService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -256,6 +264,36 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       this.log.log(`nightly burn-rate check raised ${n} alert(s)`);
     });
     await this.schedule(boss, BURN_RATE_NIGHTLY, process.env.BURN_RATE_SWEEP_CRON ?? '0 5 * * *');
+    // Reclaim deadline reminders (086a): 2 days and 1 day before the response date. Each notice
+    // gets each kind at most once (unique index), so a redelivered job or a rerun sends nothing new.
+    await boss.createQueue(RECLAIM_REMINDER_TOPIC, {
+      retryLimit: 3,
+      retryDelay: 5,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work<{ tenantId: string; asOf: string }>(
+      RECLAIM_REMINDER_TOPIC,
+      fast,
+      async (jobs) => {
+        for (const job of jobs) await this.reclaim.sendReminders(job.data.tenantId, job.data.asOf);
+      },
+    );
+    await boss.createQueue(RECLAIM_REMINDER_NIGHTLY, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(RECLAIM_REMINDER_NIGHTLY, async () => {
+      const n = await this.reclaim.sendRemindersNightly();
+      this.log.log(`nightly reclaim reminders sent ${n}`);
+    });
+    await this.schedule(
+      boss,
+      RECLAIM_REMINDER_NIGHTLY,
+      process.env.RECLAIM_REMINDER_CRON ?? '0 7 * * *',
+    );
     // Bulk owner invitations (103a): the invitation itself grants nothing.
     await boss.createQueue(OWNER_INVITED_TOPIC, {
       retryLimit: 5,

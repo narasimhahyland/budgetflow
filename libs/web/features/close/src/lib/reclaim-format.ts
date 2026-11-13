@@ -42,10 +42,14 @@ export function responseText(n: ReclaimNotice): string {
     n.respondedAs === 'parent_owner'
       ? ` (decided by ${n.respondedByName ?? 'the parent owner'})`
       : '';
-  if (n.status === 'sent')
+  if (n.status === 'sent') {
+    const reminded = n.remindersSent.length
+      ? ` · reminded ${n.remindersSent.includes('one_day') ? '1 day' : '2 days'} before`
+      : '';
     return n.overdue
-      ? `No response (was due ${formatDate(n.respondBy, 'd MMM', 'en')})`
-      : `No response yet (due ${formatDate(n.respondBy, 'd MMM', 'en')})`;
+      ? `No response (was due ${formatDate(n.respondBy, 'd MMM', 'en')})${reminded}`
+      : `No response yet (due ${formatDate(n.respondBy, 'd MMM', 'en')})${reminded}`;
+  }
   if (n.status === 'parent_review')
     return `Sent to ${n.parentOwnerName ?? 'the parent owner'} for a decision`;
   if (n.choice === 'keep')

@@ -182,3 +182,23 @@ export const burnRateAlerts = pgTable(
     index('burn_rate_alerts_run').on(t.tenantId, t.runId),
   ],
 );
+
+/**
+ * A deadline reminder sent to a notice's owner (086a: 2 days and 1 day before the response date).
+ * One per notice and kind, so a rerun of the reminder job sends nothing twice.
+ */
+export const reclaimReminders = pgTable(
+  'reclaim_reminders',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    noticeId: uuid('notice_id')
+      .notNull()
+      .references(() => reclaimNotices.id),
+    /** two_days or one_day. */
+    kind: varchar('kind', { length: 20 }).notNull(),
+    asOf: day('as_of').notNull(),
+    sentAt: createdAt(),
+  },
+  (t) => [uniqueIndex('reclaim_reminders_once').on(t.tenantId, t.noticeId, t.kind)],
+);

@@ -144,6 +144,9 @@ export const ReclaimNotice = named(
       pendingRequests: Money.describe(
         'Pending (pre-encumbered) requests on the budget: listed, never part of the floor.',
       ),
+      remindersSent: z
+        .array(z.enum(['two_days', 'one_day']))
+        .describe('Deadline reminders already sent to the owner (2 days and 1 day before).'),
       canRespond: z.boolean(),
       canEscalate: z.boolean(),
     })
@@ -358,6 +361,27 @@ export const ExecuteReclaimPoolRequest = named(
 );
 export type ExecuteReclaimPoolRequest = z.infer<typeof ExecuteReclaimPoolRequest>;
 
+export const RunReclaimRemindersRequest = named(
+  'RunReclaimRemindersRequest',
+  z
+    .object({
+      asOf: IsoDate.optional().describe('The day to send reminders for; today when omitted.'),
+    })
+    .strict(),
+);
+export type RunReclaimRemindersRequest = z.infer<typeof RunReclaimRemindersRequest>;
+
+export const ReclaimReminderRun = named(
+  'ReclaimReminderRun',
+  z
+    .object({
+      asOf: IsoDate,
+      queued: z.boolean().describe('The worker sends the reminders that are due on this day.'),
+    })
+    .strict(),
+);
+export type ReclaimReminderRun = z.infer<typeof ReclaimReminderRun>;
+
 // Burn-rate alerts ------------------------------------------------------------------------------
 
 export const BurnRateLevel = z
@@ -538,6 +562,18 @@ export const reclaimEndpoints = {
     body: EscalateReclaimNoticeRequest,
     response: { status: 200, schema: ReclaimNotice },
     errors: [400, 401, 403, 404, 409, 422],
+  },
+  runReclaimReminders: {
+    operationId: 'runReclaimReminders',
+    method: 'post',
+    path: '/api/reclaim/reminder-runs',
+    summary: 'Queue the deadline reminders due on a day (the worker also runs them nightly)',
+    tags: ['reclaim'],
+    auth: true,
+    idempotent: true,
+    body: RunReclaimRemindersRequest,
+    response: { status: 202, schema: ReclaimReminderRun },
+    errors: [400, 401, 403],
   },
   createBurnRateRun: {
     operationId: 'createBurnRateRun',

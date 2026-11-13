@@ -53,6 +53,13 @@ import { CloseTag } from './close-tag';
           undone.
         </p>
       </div>
+      @if (canReclaim()) {
+        <div class="bf-page__actions">
+          <a mat-stroked-button routerLink="/finance/reclaim" data-testid="reclaim-before-year-end"
+            >Reclaim before year end</a
+          >
+        </div>
+      }
     </header>
     <bf-close-tabs />
     @if (failure()) {
@@ -191,6 +198,8 @@ export class YearEndPage {
   protected readonly valueOf = valueOf;
   protected readonly columns = ['years', 'status', 'carry', 'lapse', 'freeze'];
   protected readonly canRun = computed(() => this.session.can('yearend.run'));
+  /** 086a entry: ask owners to release money that would lapse before the run sweeps it. */
+  protected readonly canReclaim = computed(() => this.session.can('reclaim.manage'));
   protected readonly fiscalYears = computed(() => this.session.me()?.fiscalYears ?? []);
   protected readonly runs = resource({
     loader: () => data(this.api.listYearEndRuns({ query: {} })),

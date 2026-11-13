@@ -9,16 +9,17 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import {
   ReclaimCampaignDetail,
+  ReclaimReminderRun,
   ReclaimCandidateList,
   ReclaimExecution,
   ReclaimNotice,
   ReclaimNoticeList,
   ReclaimPoolPreview,
 } from '@bf/contracts';
-import { RECLAIM_IDS, SEED } from '@bf/seed';
+import { RECLAIM_IDS, SEED, userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
-import { todayUtc } from '../support/clock';
+import { daysFromToday, todayUtc } from '../support/clock';
 import { expectContract, expectProblem } from '../support/contract';
 import { allocateOk, createChild, createRoot } from '../support/factory';
 import { asOwner } from '../support/db';
@@ -546,5 +547,102 @@ test.describe('reclaim and redistribute campaigns (086a)', () => {
     expect(bal(await budget(request, t.a.id)).authorized).toBe(1_000_000);
     expect(bal(await budget(request, t.b.id)).authorized).toBe(bBefore);
     expect(await auditCount(created.campaign.id, 'reclaim.pool_executed')).toBe(0);
+  });
+
+  test('deadline reminders go out 2 days and 1 day before, once each, only to owners who have not answered', async ({
+    request,
+  }) => {
+    const t = await reclaimTree(request);
+    const created = await expectContract(
+      await request.post('/api/reclaim/campaigns', {
+        headers: await mutate('finance-admin'),
+        data: { ...(await campaignBody('Scenario reminders')), respondBy: daysFromToday(2) },
+      }),
+      201,
+      ReclaimCampaignDetail,
+    );
+    const na = noticeFor(created, t.a.id);
+    const nb = noticeFor(created, t.b.id);
+    // B answers straight away, so it is never reminded.
+    await expectContract(
+      await respond(request, nb.id, { choice: 'release_all' }),
+      200,
+      ReclaimNotice,
+    );
+    const run = async (asOf?: string, user: Parameters<typeof mutate>[0] = 'finance-admin') =>
+      request.post('/api/reclaim/reminder-runs', {
+        headers: await mutate(user),
+        data: asOf ? { asOf } : {},
+      });
+    await expectProblem(await run(undefined, 'budget-owner'), 403, 'FORBIDDEN');
+    const reminded = async (budgetId: string) =>
+      noticeFor(await notices(request, created.campaign.id), budgetId).remindersSent;
+
+    // Two days before: the 2-day reminder.
+    const first = await expectContract(await run(), 202, ReclaimReminderRun);
+    expect(first.asOf).toBe(todayUtc());
+    await expect
+      .poll(() => reminded(t.a.id), { timeout: 30_000, intervals: [250, 500, 1000] })
+      .toEqual(['two_days']);
+    // Again the same day, then one day before: the 1-day reminder, and still one 2-day reminder.
+    await expectContract(await run(), 202, ReclaimReminderRun);
+    await expectContract(await run(daysFromToday(1)), 202, ReclaimReminderRun);
+    await expect
+      .poll(() => reminded(t.a.id), { timeout: 30_000, intervals: [250, 500, 1000] })
+      .toEqual(['two_days', 'one_day']);
+    // On the deadline nothing more is due.
+    await expectContract(await run(daysFromToday(2)), 202, ReclaimReminderRun);
+    const count = async (noticeId: string) =>
+      asOwner(async (c) =>
+        Number(
+          (
+            await c.query<{ n: string }>(
+              'select count(*)::text as n from reclaim_reminders where notice_id = $1',
+              [noticeId],
+            )
+          ).rows[0].n,
+        ),
+      );
+    // Every queued run has been published and finished by the worker before counting.
+    const outstanding = () =>
+      asOwner(async (c) =>
+        Number(
+          (
+            await c.query<{ n: string }>(
+              `select (select count(*) from outbox_messages
+                          where topic = 'reclaim.reminders' and published_at is null)
+                      + (select count(*) from pgboss.job
+                          where name = 'reclaim.reminders' and state not in ('completed', 'failed', 'cancelled'))
+                   as n`,
+            )
+          ).rows[0].n,
+        ),
+      );
+    await expect.poll(outstanding, { timeout: 30_000, intervals: [250, 500, 1000] }).toBe(0);
+    expect(await count(na.id)).toBe(2);
+    expect(await count(nb.id)).toBe(0);
+    expect(await reminded(t.b.id)).toEqual([]);
+
+    // The owner was told through the existing notifications, once per reminder.
+    // Counted from the owner's notification rows rather than the feed: the feed returns only the
+    // newest notifications, and in a full suite the owner receives many more (every campaign
+    // notifies every candidate's owner), which pushes an older one off the page.
+    await expect
+      .poll(
+        () =>
+          asOwner(async (c) =>
+            Number(
+              (
+                await c.query<{ n: string }>(
+                  `select count(*)::text as n from notifications
+                      where recipient_person_id = $1 and item_id = $2 and title like 'Reminder:%'`,
+                  [userById('budget-owner').personId, na.id],
+                )
+              ).rows[0].n,
+            ),
+          ),
+        { timeout: 30_000, intervals: [500, 1000] },
+      )
+      .toBe(2);
   });
 });
