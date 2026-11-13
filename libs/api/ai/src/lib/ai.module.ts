@@ -15,16 +15,24 @@ import { AiOutlookService } from './features/outlook.service';
 import { AiPolicyAssistantService } from './features/policy-assistant.service';
 import { AiProvider } from './provider/ai-provider';
 import { BedrockAiProvider } from './provider/bedrock-provider';
-
+import { RecordedAiProvider } from './provider/recorded-provider';
 import { AiQueryLogService } from './query-log.service';
 import { AiRetrieval } from './retrieval.service';
 import { AiSettingsService } from './settings.service';
 import { AiSuggestionsService } from './suggestions.service';
 
-/** The provider behind `AiProvider` is Amazon Bedrock; credentials come from the server environment. */
+/**
+ * The provider behind `AiProvider`, chosen by `AI_PROVIDER` (validated in `@bf/api/core` config):
+ * `recorded` (the default) answers offline from committed recordings and is what the local stack,
+ * functional runs and CI use; `bedrock` calls Amazon Bedrock with credentials from the server
+ * environment. Nothing in the database or in code holds a credential.
+ */
 const provider = {
   provide: AiProvider,
-  useClass: BedrockAiProvider,
+  useFactory: (): AiProvider =>
+    (process.env['AI_PROVIDER'] ?? 'recorded') === 'bedrock'
+      ? new BedrockAiProvider()
+      : new RecordedAiProvider(),
 };
 
 const SERVICES = [

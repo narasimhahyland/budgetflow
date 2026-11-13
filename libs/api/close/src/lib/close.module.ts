@@ -1,12 +1,16 @@
 import { AuditModule } from '@bf/api/audit';
 import { BudgetsModule } from '@bf/api/budgets';
 import { LedgerModule } from '@bf/api/ledger';
+import { NotificationsModule } from '@bf/api/notifications';
 import { SpendModule } from '@bf/api/spend';
 import { Module } from '@nestjs/common';
+import { BurnRateService } from './burn-rate.service';
 import { CloseController } from './close.controller';
 import { CloseReads } from './close-reads';
 import { ForecastCyclesService } from './forecast-cycles.service';
 import { PeriodCloseService } from './period-close.service';
+import { ReclaimController } from './reclaim.controller';
+import { ReclaimService } from './reclaim.service';
 import { PeriodCloseChecks, STANDARD_PERIOD_CHECKS } from './period-close-checks';
 import { RolloverPoliciesService } from './rollover-policies.service';
 import { YearEndService } from './year-end.service';
@@ -27,16 +31,18 @@ const SERVICES = [
   RolloverPoliciesService,
   YearEndService,
   ForecastCyclesService,
+  ReclaimService,
+  BurnRateService,
 ];
 
 /** Period close, year end and roll-forward services (also used by the seed). */
 @Module({
-  imports: [AuditModule, BudgetsModule, LedgerModule, SpendModule],
+  imports: [AuditModule, BudgetsModule, LedgerModule, SpendModule, NotificationsModule],
   providers: [periodCloseChecks, ...SERVICES],
   exports: [PeriodCloseChecks, ...SERVICES],
 })
 export class CloseModule {}
 
 /** Period close and year-end HTTP endpoints. */
-@Module({ imports: [CloseModule], controllers: [CloseController] })
+@Module({ imports: [CloseModule], controllers: [CloseController, ReclaimController] })
 export class CloseApiModule {}

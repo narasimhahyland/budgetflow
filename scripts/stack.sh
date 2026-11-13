@@ -87,7 +87,7 @@ up() { build && dc up -d --build --wait; }
 # seeded rows carry the same times on every run and every real date:
 #   - JavaScript: the seed stamps records through the application services, which read Date, so it
 #     runs with a preload that reads FIXED_NOW instead, a millisecond per read
-#     (scripts/lib/pinned-clock.cjs). Values the API checks against real time read its real clock.
+#     (scripts/lib/pinned-clock.cjs). Seeded credential expiry is a fixed far-future instant instead.
 #   - Postgres: timestamp defaults call app_now() (migration 0020), which follows app.fixed_now; the
 #     seed's connections carry it as a startup option (seed_db_url).
 # Only the seed is pinned. The running API and worker stay on real time for both clocks, so a record

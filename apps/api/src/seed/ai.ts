@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm';
 
 /**
  * Phase 13 fixtures: the AI feature switches and settings of 113a, the receipt and quote files the
- * deterministic fake provider has recorded answers for, and one evaluation run per feature so the
+ * offline recorded provider has recorded answers for, and one evaluation run per feature so the
  * accuracy tab has figures the moment the stack comes up. Idempotent.
  *
  * Switches are seeded for Hyland and the two scenario tenants so cross-tenant checks can ask as a

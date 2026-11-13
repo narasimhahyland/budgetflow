@@ -2,20 +2,81 @@
 // move budget or change a control, and nothing the model writes is shown unless it survives the
 // schema check and the figure check. These scenarios fail if any of those guards is weakened.
 import { expect, test } from '@playwright/test';
-import { AiSettingsView, AskAnswer, RequestDetail } from '@bf/contracts';
+import { AiQueryLogList, AiSettingsView, AskAnswer, RequestDetail } from '@bf/contracts';
 import { P5_IDS } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
-import { relaxAskLimit } from './support';
+import { aiProvider, RECORDED_ONLY, relaxAskLimit } from './support';
 import { SEED } from '@bf/seed';
 import { asAppRole } from '../support/db';
-import { AI_LIVE, AI_LIVE_REASON } from './support';
-
-test.skip(!AI_LIVE, AI_LIVE_REASON);
+/**
+ * Recorded guardrail fixtures of the offline provider (`recordings/guardrail-fixtures.ts`). They exist
+ * so the guards can be exercised end to end: a real model produces these failures now and then, the
+ * recordings do so on demand.
+ */
+const INVENTED_FIGURE = '__eval:invent-figure';
+const BROKEN_SHAPE = '__eval:schema-invalid';
 
 test.beforeAll(async ({ request }) => {
   await relaxAskLimit(request);
+});
+
+test.describe('guards on recorded model failures', () => {
+  test.beforeEach(async ({ request }) => {
+    test.skip((await aiProvider(request)) !== 'recorded', RECORDED_ONLY);
+  });
+
+  test('an answer containing a figure the ledger did not produce is discarded', async ({
+    request,
+  }) => {
+    const answer = await expectContract(
+      await request.post('/api/ai/ask', {
+        headers: await as('location-manager'),
+        data: { question: INVENTED_FIGURE },
+      }),
+      200,
+      AskAnswer,
+    );
+    expect(answer.outcome).toBe('discarded_unreliable');
+    expect(answer.answer, 'nothing the model wrote reaches the user').toBeNull();
+    expect(answer.figures).toEqual([]);
+    expect(answer.refusal?.kind).toBe('unreliable');
+  });
+
+  test('model output that fails its schema is discarded', async ({ request }) => {
+    const answer = await expectContract(
+      await request.post('/api/ai/ask', {
+        headers: await as('location-manager'),
+        data: { question: BROKEN_SHAPE },
+      }),
+      200,
+      AskAnswer,
+    );
+    expect(answer.outcome).toBe('discarded_unreliable');
+    expect(answer.answer).toBeNull();
+  });
+
+  test('a discarded answer is still recorded, so an auditor sees that the guard fired', async ({
+    request,
+  }) => {
+    const answer = await expectContract(
+      await request.post('/api/ai/ask', {
+        headers: await as('location-manager'),
+        data: { question: INVENTED_FIGURE },
+      }),
+      200,
+      AskAnswer,
+    );
+    const log = await expectContract(
+      await request.get('/api/ai/query-log?outcome=discarded_unreliable&limit=20', {
+        headers: await as('auditor'),
+      }),
+      200,
+      AiQueryLogList,
+    );
+    expect(log.items.map((i) => i.id)).toContain(answer.provenance.queryLogId);
+  });
 });
 
 test('asking the assistant to approve a request refuses and leaves the request untouched', async ({

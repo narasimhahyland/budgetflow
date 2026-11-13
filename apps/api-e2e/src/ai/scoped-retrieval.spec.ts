@@ -8,10 +8,6 @@ import { SEED } from '@bf/seed';
 import { as } from '../support/auth';
 import { expectContract } from '../support/contract';
 import { relaxAskLimit } from './support';
-import { AI_LIVE, AI_LIVE_REASON } from './support';
-
-test.skip(!AI_LIVE, AI_LIVE_REASON);
-
 const BENGALURU = SEED.budgets.bengaluru;
 const EUROPE = SEED.budgets.europe;
 

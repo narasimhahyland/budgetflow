@@ -10099,6 +10099,171 @@
         ],
         "additionalProperties": false
       },
+      "BurnRateAlert": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetName": {
+            "type": "string"
+          },
+          "fiscalPeriodId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "ahead",
+              "well_ahead"
+            ],
+            "description": "ahead: spend at or above 110% of phased to date; well_ahead: at or above 125%."
+          },
+          "burnBps": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Actual spend against phased to date, in basis points."
+          },
+          "spent": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "phased": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "id",
+          "budgetId",
+          "budgetName",
+          "fiscalPeriodId",
+          "level",
+          "burnBps",
+          "spent",
+          "phased",
+          "asOf",
+          "runId",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "BurnRateAlertList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BurnRateAlert"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "BurnRateRun": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "completed",
+              "failed"
+            ]
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "nightly"
+            ]
+          },
+          "evaluatedCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "alertsRaised": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "completedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "asOf",
+          "status",
+          "trigger",
+          "evaluatedCount",
+          "alertsRaised",
+          "createdAt",
+          "completedAt"
+        ],
+        "additionalProperties": false
+      },
       "CalendarDefinition": {
         "type": "object",
         "properties": {
@@ -14781,6 +14946,18 @@
         "additionalProperties": false,
         "description": "Create a root budget (posts the original budget journal) or an empty child budget."
       },
+      "CreateBurnRateRunRequest": {
+        "type": "object",
+        "properties": {
+          "asOf": {
+            "description": "The date to measure spend at; today when omitted.",
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          }
+        },
+        "additionalProperties": false
+      },
       "CreateChatLinkIntentRequest": {
         "type": "object",
         "properties": {
@@ -16233,6 +16410,38 @@
           "category",
           "code",
           "label"
+        ],
+        "additionalProperties": false
+      },
+      "CreateReclaimCampaignRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "fiscalYearId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "criteria": {
+            "$ref": "#/components/schemas/ReclaimCriteria"
+          },
+          "respondBy": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Last day owners can answer."
+          }
+        },
+        "required": [
+          "name",
+          "fiscalYearId",
+          "criteria",
+          "respondBy"
         ],
         "additionalProperties": false
       },
@@ -19370,6 +19579,20 @@
           "needsSubmitted",
           "needs",
           "visibleAgenda"
+        ],
+        "additionalProperties": false
+      },
+      "EscalateReclaimNoticeRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
         ],
         "additionalProperties": false
       },
@@ -24213,6 +24436,89 @@
         ],
         "additionalProperties": false,
         "description": "Mark the line not budget-relevant."
+      },
+      "ExecuteReclaimPoolRequest": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "targets": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "budgetId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "description": "Opaque identifier (UUID)."
+                },
+                "amountMinor": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "budgetId",
+                "amountMinor"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "reasonCode": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,49}$",
+            "description": "Reason code: letters, digits, dot, dash or underscore (up to 50)."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "confirmedFloors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "budgetId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "description": "Opaque identifier (UUID)."
+                },
+                "floorMinor": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "budgetId",
+                "floorMinor"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The floor of each source from the preview the user confirmed."
+          }
+        },
+        "required": [
+          "legalEntityId",
+          "currency",
+          "targets",
+          "reasonCode",
+          "reason",
+          "confirmedFloors"
+        ],
+        "additionalProperties": false
       },
       "ExecuteYearEndRequest": {
         "type": "object",
@@ -32160,7 +32466,8 @@
                   "budget",
                   "event",
                   "request",
-                  "contribution"
+                  "contribution",
+                  "reclaim_notice"
                 ]
               },
               {
@@ -37901,7 +38208,13 @@
               "WIDGET_PAUSED",
               "PARTNER_PAUSED",
               "PARTNER_VENDOR_NOT_APPROVED",
-              "OFFER_NOT_AVAILABLE"
+              "OFFER_NOT_AVAILABLE",
+              "RECLAIM_NO_CANDIDATES",
+              "RECLAIM_NOTICE_ANSWERED",
+              "RECLAIM_NOT_OVERDUE",
+              "RECLAIM_POOL_EXECUTED",
+              "RECLAIM_POOL_EMPTY",
+              "RECLAIM_CAMPAIGN_CLOSED"
             ],
             "description": "Stable machine-readable code; the UI branches on it."
           },
@@ -39466,6 +39779,880 @@
         ],
         "additionalProperties": false,
         "description": "Intercompany recharge schedule line for a cross-entity contribution."
+      },
+      "ReclaimCampaign": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "fiscalYearId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "collecting",
+              "redistributing",
+              "completed"
+            ],
+            "description": "Collecting responses, redistributing released money, or completed."
+          },
+          "startedOn": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "respondBy": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "criteria": {
+            "$ref": "#/components/schemas/ReclaimCriteria"
+          },
+          "candidates": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "answered": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "released": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Money"
+            },
+            "description": "Released so far, one amount per currency."
+          },
+          "redistributed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Money"
+            },
+            "description": "Moved by pool executions, one amount per currency."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "fiscalYearId",
+          "status",
+          "startedOn",
+          "respondBy",
+          "criteria",
+          "candidates",
+          "answered",
+          "released",
+          "redistributed"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimCampaignDetail": {
+        "type": "object",
+        "properties": {
+          "campaign": {
+            "$ref": "#/components/schemas/ReclaimCampaign"
+          },
+          "notices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimNotice"
+            }
+          },
+          "pools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimPool"
+            }
+          },
+          "executions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimExecution"
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "canRedistribute": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "campaign",
+          "notices",
+          "pools",
+          "executions",
+          "canManage",
+          "canRedistribute"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimCampaignList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimCampaign"
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "canManage"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimCandidate": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetName": {
+            "type": "string"
+          },
+          "budgetCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ownerName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "authorized": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "available": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "forecastUnused": {
+            "description": "Run-rate forecast of what lapses at year end.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "proposed": {
+            "description": "What the notice asks the owner to release.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "floor": {
+            "description": "Allocated out + held + encumbered + actual.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "maxReclaimable": {
+            "description": "Authorized minus the floor.",
+            "$ref": "#/components/schemas/Money"
+          }
+        },
+        "required": [
+          "budgetId",
+          "budgetName",
+          "budgetCode",
+          "ownerName",
+          "legalEntityId",
+          "legalEntityCode",
+          "authorized",
+          "available",
+          "forecastUnused",
+          "proposed",
+          "floor",
+          "maxReclaimable"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimCandidateList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimCandidate"
+            }
+          },
+          "daysLeft": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "excludedFrozenOrZero": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "excludedPendingCarry": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "items",
+          "daysLeft",
+          "excludedFrozenOrZero",
+          "excludedPendingCarry"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimCriteria": {
+        "type": "object",
+        "properties": {
+          "minUnusedBps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Forecast unused must be above this share of authorized (basis points)."
+          },
+          "minUnused": {
+            "description": "Forecast unused must also be above this amount, in the reporting currency.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "maxDaysLeft": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 366,
+            "description": "Fewer than this many days left in the year."
+          }
+        },
+        "required": [
+          "minUnusedBps",
+          "minUnused",
+          "maxDaysLeft"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimExecution": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "campaignId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "pool": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "allocated": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "remainder": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "legs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimLeg"
+            }
+          },
+          "journalIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "executedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "executedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "id",
+          "campaignId",
+          "legalEntityId",
+          "legalEntityCode",
+          "pool",
+          "allocated",
+          "remainder",
+          "legs",
+          "journalIds",
+          "reasonCode",
+          "reason",
+          "executedByName",
+          "executedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimLeg": {
+        "type": "object",
+        "properties": {
+          "sourceBudgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "sourceBudgetName": {
+            "type": "string"
+          },
+          "destination": {
+            "type": "string",
+            "enum": [
+              "reallocation",
+              "parent"
+            ]
+          },
+          "targetBudgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "targetBudgetName": {
+            "type": "string"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "journalId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "sourceBudgetId",
+          "sourceBudgetName",
+          "destination",
+          "targetBudgetId",
+          "targetBudgetName",
+          "amount",
+          "journalId"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimNotice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "campaignId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "campaignName": {
+            "type": "string"
+          },
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetName": {
+            "type": "string"
+          },
+          "budgetCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ownerName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parentBudgetName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parentOwnerName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "forecastUnused": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "proposed": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "released": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "kept": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "sent",
+              "released",
+              "kept",
+              "parent_review",
+              "reclaimed"
+            ],
+            "description": "sent: waiting for the owner; released / kept: answered; parent_review: sent to the parent owner after the deadline; reclaimed: the released money moved."
+          },
+          "choice": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "release_all",
+                  "release_part",
+                  "keep"
+                ],
+                "description": "Release the proposed amount, release a different amount, or keep it with a reason."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "plan": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "respondedAs": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "owner",
+                  "parent_owner"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "respondedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "respondedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "respondBy": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "The deadline passed with no answer."
+          },
+          "yearEnd": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "available": {
+            "description": "Available now, under the budget rules.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "floor": {
+            "description": "The floor now: allocated out + held + encumbered + actual.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "maxReclaimable": {
+            "description": "The most that can be reclaimed now.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "pendingRequests": {
+            "description": "Pending (pre-encumbered) requests on the budget: listed, never part of the floor.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "canRespond": {
+            "type": "boolean"
+          },
+          "canEscalate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "campaignId",
+          "campaignName",
+          "budgetId",
+          "budgetName",
+          "budgetCode",
+          "ownerName",
+          "parentBudgetName",
+          "parentOwnerName",
+          "legalEntityId",
+          "legalEntityCode",
+          "forecastUnused",
+          "proposed",
+          "released",
+          "kept",
+          "status",
+          "choice",
+          "reason",
+          "plan",
+          "respondedAs",
+          "respondedByName",
+          "respondedAt",
+          "respondBy",
+          "overdue",
+          "yearEnd",
+          "available",
+          "floor",
+          "maxReclaimable",
+          "pendingRequests",
+          "canRespond",
+          "canEscalate"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimNoticeList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimNotice"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimPool": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "released": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "sourceCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "executionId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "suggestedTargets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimTargetSuggestion"
+            }
+          }
+        },
+        "required": [
+          "legalEntityId",
+          "legalEntityCode",
+          "released",
+          "sourceCount",
+          "executionId",
+          "suggestedTargets"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimPoolPreview": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "pool": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "allocated": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "remainder": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "legs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimLeg"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReclaimSourceImpact"
+            }
+          },
+          "canConfirm": {
+            "type": "boolean"
+          },
+          "blockedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "legalEntityId",
+          "legalEntityCode",
+          "pool",
+          "allocated",
+          "remainder",
+          "legs",
+          "sources",
+          "canConfirm",
+          "blockedReason"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimPoolPreviewRequest": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "targets": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "budgetId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "description": "Opaque identifier (UUID)."
+                },
+                "amountMinor": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "budgetId",
+                "amountMinor"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "legalEntityId",
+          "currency",
+          "targets"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimSourceImpact": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetName": {
+            "type": "string"
+          },
+          "released": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "authorizedBefore": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "authorizedAfter": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "floor": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "maxReclaimable": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "pendingRequests": {
+            "description": "Pre-encumbered requests: listed, never part of the floor.",
+            "$ref": "#/components/schemas/Money"
+          },
+          "withinFloor": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "budgetId",
+          "budgetName",
+          "released",
+          "authorizedBefore",
+          "authorizedAfter",
+          "floor",
+          "maxReclaimable",
+          "pendingRequests",
+          "withinFloor"
+        ],
+        "additionalProperties": false
+      },
+      "ReclaimTargetSuggestion": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "budgetName": {
+            "type": "string"
+          },
+          "need": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why it needs money, in one sentence."
+          }
+        },
+        "required": [
+          "budgetId",
+          "budgetName",
+          "need",
+          "reason"
+        ],
+        "additionalProperties": false
       },
       "RecognitionAllowance": {
         "type": "object",
@@ -43000,6 +44187,42 @@
         "required": [
           "action",
           "reason"
+        ],
+        "additionalProperties": false
+      },
+      "RespondReclaimNoticeRequest": {
+        "type": "object",
+        "properties": {
+          "choice": {
+            "type": "string",
+            "enum": [
+              "release_all",
+              "release_part",
+              "keep"
+            ],
+            "description": "Release the proposed amount, release a different amount, or keep it with a reason."
+          },
+          "amountMinor": {
+            "description": "For release_part: the amount released, in the budget currency.",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "reason": {
+            "description": "Required to keep the money.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "plan": {
+            "description": "Required to keep the money: what it is planned for.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "choice"
         ],
         "additionalProperties": false
       },
@@ -107418,6 +108641,1282 @@
             }
           },
           "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/campaigns": {
+      "get": {
+        "operationId": "listReclaimCampaigns",
+        "summary": "Reclaim campaigns, newest first",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimCampaignList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createReclaimCampaign",
+        "summary": "Start a campaign and send a notice to the owner of every candidate (audited)",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReclaimCampaignRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimCampaignDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/campaigns/preview": {
+      "post": {
+        "operationId": "previewReclaimCampaign",
+        "summary": "Budgets that meet the criteria, with the proposed amounts (writes nothing)",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReclaimCampaignRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimCandidateList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/campaigns/{campaignId}": {
+      "get": {
+        "operationId": "getReclaimCampaign",
+        "summary": "A campaign with its notices, released pools per legal entity and executions",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimCampaignDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/campaigns/{campaignId}/pools/preview": {
+      "post": {
+        "operationId": "previewReclaimPool",
+        "summary": "Impact preview of redistributing one legal entity pool (writes nothing)",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReclaimPoolPreviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimPoolPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/campaigns/{campaignId}/pools/execution": {
+      "post": {
+        "operationId": "executeReclaimPool",
+        "summary": "Post one legal entity pool: reductions to the targets and the remainder to parents",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteReclaimPoolRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimExecution"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/notices": {
+      "get": {
+        "operationId": "listMyReclaimNotices",
+        "summary": "Notices waiting for me, as the owner or (after the deadline) the parent owner",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimNoticeList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/notices/{noticeId}": {
+      "get": {
+        "operationId": "getReclaimNotice",
+        "summary": "One notice with the budget figures as they stand now",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "noticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimNotice"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/notices/{noticeId}/response": {
+      "post": {
+        "operationId": "respondReclaimNotice",
+        "summary": "Release all, release part or keep the money (owner; parent owner after escalation)",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "noticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondReclaimNoticeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimNotice"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reclaim/notices/{noticeId}/escalation": {
+      "post": {
+        "operationId": "escalateReclaimNotice",
+        "summary": "After the deadline, send an unanswered notice to the parent owner for a decision",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "noticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscalateReclaimNoticeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReclaimNotice"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/burn-rate/runs": {
+      "post": {
+        "operationId": "createBurnRateRun",
+        "summary": "Queue a burn-rate check; the worker alerts owners whose spend runs ahead of phasing",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBurnRateRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BurnRateRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/burn-rate/runs/{runId}": {
+      "get": {
+        "operationId": "getBurnRateRun",
+        "summary": "A burn-rate run and how many alerts it raised",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BurnRateRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/burn-rate/alerts": {
+      "get": {
+        "operationId": "listBurnRateAlerts",
+        "summary": "Burn-rate alerts on the budgets I can read, newest first",
+        "tags": [
+          "reclaim"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BurnRateAlertList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {

@@ -26,6 +26,7 @@ import { extendedEndpoints } from './domains/extended';
 import { ecosystemEndpoints } from './domains/ecosystem';
 import { rulesEndpoints } from './domains/rules';
 import { taxEndpoints } from './domains/tax';
+import { reclaimEndpoints } from './domains/reclaim';
 
 export type { Endpoint } from './endpoint';
 
@@ -61,6 +62,7 @@ export const endpoints = {
   ...ecosystemEndpoints,
   ...taxEndpoints,
   ...dashboardEndpoints,
+  ...reclaimEndpoints,
 } as const;
 
 export type Endpoints = typeof endpoints;
