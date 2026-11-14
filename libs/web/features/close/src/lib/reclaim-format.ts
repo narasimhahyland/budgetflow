@@ -26,6 +26,7 @@ export function noticeTag(n: ReclaimNotice): Tag {
     case 'kept':
       return { tone: 'neutral-quiet', text: 'Kept', icon: 'shield' };
     case 'released':
+      if (n.leftOut) return { tone: 'neutral-quiet', text: 'Left out', icon: 'circle_minus' };
       return n.choice === 'release_part'
         ? { tone: 'success', text: 'Released part', icon: 'circle_check' }
         : { tone: 'success', text: 'Released all', icon: 'circle_check' };
@@ -52,6 +53,8 @@ export function responseText(n: ReclaimNotice): string {
   }
   if (n.status === 'parent_review')
     return `Sent to ${n.parentOwnerName ?? 'the parent owner'} for a decision`;
+  if (n.leftOut)
+    return `Released ${m(n.released)}, left out of the redistribution: the money stayed with the budget${by}.`;
   if (n.choice === 'keep')
     return `Keep it: ${n.reason ?? ''}${n.plan ? ` (${n.plan})` : ''}${by}. Nothing reclaimed.`;
   if (n.choice === 'release_part')

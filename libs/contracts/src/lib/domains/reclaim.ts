@@ -144,6 +144,11 @@ export const ReclaimNotice = named(
       pendingRequests: Money.describe(
         'Pending (pre-encumbered) requests on the budget: listed, never part of the floor.',
       ),
+      leftOut: z
+        .boolean()
+        .describe(
+          'Released, but left out when its legal entity was redistributed: the money stayed with the budget.',
+        ),
       remindersSent: z
         .array(z.enum(['two_days', 'one_day']))
         .describe('Deadline reminders already sent to the owner (2 days and 1 day before).'),
@@ -303,6 +308,13 @@ export const ReclaimPoolPreviewRequest = named(
       legalEntityId: Id,
       currency: CurrencyCode,
       targets: z.array(PoolTarget).max(50),
+      excludeBudgetIds: z
+        .array(Id)
+        .max(50)
+        .optional()
+        .describe(
+          'Released budgets to leave out of this redistribution (for example one set to zero since): nothing moves for them.',
+        ),
     })
     .strict(),
 );
@@ -337,6 +349,9 @@ export const ReclaimPoolPreview = named(
       remainder: Money,
       legs: z.array(ReclaimLeg),
       sources: z.array(ReclaimSourceImpact),
+      excluded: z
+        .array(z.object({ budgetId: Id, budgetName: z.string(), released: Money }).strict())
+        .describe('Released budgets left out of this redistribution.'),
       canConfirm: z.boolean(),
       blockedReason: z.string().nullable(),
     })
@@ -351,6 +366,13 @@ export const ExecuteReclaimPoolRequest = named(
       legalEntityId: Id,
       currency: CurrencyCode,
       targets: z.array(PoolTarget).max(50),
+      excludeBudgetIds: z
+        .array(Id)
+        .max(50)
+        .optional()
+        .describe(
+          'Released budgets to leave out of this redistribution (for example one set to zero since): nothing moves for them.',
+        ),
       reasonCode: ReasonCode,
       reason: Reason,
       confirmedFloors: z

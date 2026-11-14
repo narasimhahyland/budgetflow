@@ -531,7 +531,11 @@ export class ReclaimService {
     const balances = await this.reads.balances(tx, ids);
     const names = await this.names(
       tx,
-      notices.flatMap((n) => [n.ownerPersonId, n.parentOwnerPersonId, n.respondedBy]),
+      notices.flatMap((n) => [
+        rows.get(n.budgetId)?.ownerPersonId ?? null,
+        n.parentOwnerPersonId,
+        n.respondedBy,
+      ]),
     );
     const codes = await this.entityCodes(
       tx,
@@ -561,7 +565,7 @@ export class ReclaimService {
       const canRespond =
         open &&
         ((n.status === 'sent' &&
-          n.ownerPersonId === actor.personId &&
+          row.ownerPersonId === actor.personId &&
           this.policy.can(actor, 'budget.control', budgetRes(row)).allowed) ||
           (n.status === 'parent_review' &&
             Boolean(parent) &&
@@ -575,7 +579,7 @@ export class ReclaimService {
         budgetId: n.budgetId,
         budgetName: row.name,
         budgetCode: row.code,
-        ownerName: n.ownerPersonId ? (names.get(n.ownerPersonId) ?? null) : null,
+        ownerName: row.ownerPersonId ? (names.get(row.ownerPersonId) ?? null) : null,
         parentBudgetName: parent?.name ?? null,
         parentOwnerName: n.parentOwnerPersonId ? (names.get(n.parentOwnerPersonId) ?? null) : null,
         legalEntityId: n.legalEntityId,
@@ -585,6 +589,7 @@ export class ReclaimService {
         released: m(n.releasedMinor),
         kept: m(n.keptMinor),
         status: n.status as ReclaimNotice['status'],
+        leftOut: n.status === 'released' && n.executionId !== null,
         choice: (n.choice as ReclaimNotice['choice']) ?? null,
         reason: n.reason,
         plan: n.plan,
@@ -805,10 +810,15 @@ export class ReclaimService {
   }
 
   /** Finance and auditors see every notice; owners their own; a parent owner the ones sent to them. */
-  private visible(actor: RequestActor, n: NoticeRow): boolean {
+  /**
+   * Finance and auditors see every notice; the budget's owner sees it (the current owner, so a
+   * budget that changes hands mid-campaign is answered by its new owner); a parent owner sees the
+   * ones sent to them.
+   */
+  private visible(actor: RequestActor, n: NoticeRow, currentOwnerId: string | null): boolean {
     return (
       this.can(actor, 'reclaim.read') ||
-      n.ownerPersonId === actor.personId ||
+      currentOwnerId === actor.personId ||
       (n.parentOwnerPersonId === actor.personId &&
         (n.status === 'parent_review' || n.respondedAs === 'parent_owner'))
     );
@@ -821,7 +831,8 @@ export class ReclaimService {
         .select()
         .from(reclaimNotices)
         .where(
-          sql`${reclaimNotices.ownerPersonId} = ${actor.personId}::uuid
+          sql`exists (select 1 from budgets b where b.id = ${reclaimNotices.budgetId}
+                        and b.owner_person_id = ${actor.personId}::uuid)
             or (${reclaimNotices.parentOwnerPersonId} = ${actor.personId}::uuid
                 and (${reclaimNotices.status} = 'parent_review' or ${reclaimNotices.respondedAs} = 'parent_owner'))`,
         )
@@ -845,7 +856,9 @@ export class ReclaimService {
   getNotice(actor: RequestActor, noticeId: string): Promise<ReclaimNotice> {
     return this.tx(actor, async (tx) => {
       const { n, c } = await this.noticeRow(tx, noticeId);
-      if (!this.visible(actor, n)) throw ApiProblem.notFound('reclaim notice');
+      const current = (await this.reads.budgetRows(tx, [n.budgetId])).get(n.budgetId);
+      if (!this.visible(actor, n, current?.ownerPersonId ?? null))
+        throw ApiProblem.notFound('reclaim notice');
       const [view] = await this.noticeViews(tx, actor, c, [n]);
       return view;
     });
@@ -867,7 +880,11 @@ export class ReclaimService {
       },
       async (tx) => {
         const { n: unlocked } = await this.noticeRow(tx, noticeId);
-        if (!this.visible(actor, unlocked)) throw ApiProblem.notFound('reclaim notice');
+        const current = (await this.reads.budgetRows(tx, [unlocked.budgetId])).get(
+          unlocked.budgetId,
+        );
+        if (!this.visible(actor, unlocked, current?.ownerPersonId ?? null))
+          throw ApiProblem.notFound('reclaim notice');
         // Ordered locks: the budget row first (as every money command does), then the notice.
         await this.reads.lockBudgets(tx, [unlocked.budgetId]);
         const { n, c } = await this.noticeRow(tx, noticeId, true);
@@ -878,7 +895,7 @@ export class ReclaimService {
         let respondedAs: 'owner' | 'parent_owner';
         if (n.status === 'sent') {
           if (
-            n.ownerPersonId !== actor.personId ||
+            row.ownerPersonId !== actor.personId ||
             !this.policy.can(actor, 'budget.control', budgetRes(row)).allowed
           )
             throw ApiProblem.forbidden('Only the owner of the budget can answer this notice.');
@@ -985,15 +1002,24 @@ export class ReclaimService {
             `The owner has until ${c.respondBy} to answer.`,
             { respondBy: c.respondBy },
           );
-        if (!n.parentOwnerPersonId)
+        // Who decides is worked out now, from the budget's owners today: ownership may have
+        // changed since the campaign started.
+        const budgetRow = await this.views.row(tx, n.budgetId);
+        const decider = await this.decider(tx, budgetRow);
+        if (!decider)
           throw new ApiProblem(
             422,
             'VALIDATION_FAILED',
-            'The parent budget has no owner to decide this notice.',
+            'No budget above this one has an owner to decide this notice.',
           );
         const [updated] = await tx
           .update(reclaimNotices)
-          .set({ status: 'parent_review', escalatedBy: actor.personId, escalatedAt: new Date() })
+          .set({
+            status: 'parent_review',
+            parentOwnerPersonId: decider,
+            escalatedBy: actor.personId,
+            escalatedAt: new Date(),
+          })
           .where(eq(reclaimNotices.id, n.id))
           .returning();
         await this.audit.append(tx, {
@@ -1008,11 +1034,11 @@ export class ReclaimService {
           reason: req.reason,
           changes: {
             status: { from: 'sent', to: 'parent_review' },
-            decidedBy: { from: n.ownerPersonId, to: n.parentOwnerPersonId },
+            decidedBy: { from: budgetRow.ownerPersonId, to: decider },
           },
         });
         const row = await this.views.row(tx, n.budgetId);
-        await this.notify(tx, actor.tenantId, n.parentOwnerPersonId, updated, {
+        await this.notify(tx, actor.tenantId, decider, updated, {
           title: `Decide the reclaim of ${row.name}: no answer from its owner`,
           detail: `${formatMoney(money(n.proposedMinor, n.currency))} proposed; the owner did not answer by ${c.respondBy}.`,
           subject: `Reclaim: decide for ${row.name}`,
@@ -1061,6 +1087,7 @@ export class ReclaimService {
     legalEntityId: string,
     currency: string,
     lock: boolean,
+    exclude: readonly string[] = [],
   ) {
     const [c] = await tx.select().from(reclaimCampaigns).where(eq(reclaimCampaigns.id, campaignId));
     if (!c) throw ApiProblem.notFound('reclaim campaign');
@@ -1093,14 +1120,26 @@ export class ReclaimService {
         ),
       )
       .orderBy(asc(reclaimNotices.budgetId));
-    const notices = lock ? await q.for('update') : await q;
-    if (!notices.length)
+    const released = lock ? await q.for('update') : await q;
+    if (!released.length)
       throw new ApiProblem(
         409,
         'RECLAIM_POOL_EMPTY',
         'No money has been released in this legal entity yet.',
       );
-    return { c, notices };
+    const unknown = exclude.filter((id) => !released.some((n) => n.budgetId === id));
+    if (unknown.length)
+      throw new ApiProblem(
+        422,
+        'VALIDATION_FAILED',
+        'Only budgets that released money into this pool can be left out of it.',
+        { field: 'excludeBudgetIds', budgetId: unknown[0] },
+      );
+    // Left out (for example set to zero after releasing): nothing moves for them, and when the pool
+    // is posted their notices close with it, the owner's answer kept on record.
+    const left = released.filter((n) => exclude.includes(n.budgetId));
+    const notices = released.filter((n) => !exclude.includes(n.budgetId));
+    return { c, notices, left };
   }
 
   /** Resolves the legs to budget rows and checks every target against the pool's entity and tree. */
@@ -1190,14 +1229,19 @@ export class ReclaimService {
   ): Promise<ReclaimPoolPreview> {
     this.assert(actor, 'reclaim.redistribute');
     return this.tx(actor, async (tx) => {
-      const { c, notices } = await this.poolSources(
+      const { c, notices, left } = await this.poolSources(
         tx,
         campaignId,
         req.legalEntityId,
         req.currency,
         false,
+        req.excludeBudgetIds ?? [],
       );
       const { plan, sourceRows, destOf } = await this.resolve(tx, c, notices, req);
+      const leftRows = await this.reads.budgetRows(
+        tx,
+        left.map((n) => n.budgetId),
+      );
       const balances = await this.reads.balances(
         tx,
         notices.map((n) => n.budgetId),
@@ -1233,6 +1277,11 @@ export class ReclaimService {
         remainder: m(plan.remainderMinor),
         legs: this.legViews(plan, sourceRows, destOf, req.currency),
         sources,
+        excluded: left.map((n) => ({
+          budgetId: n.budgetId,
+          budgetName: leftRows.get(n.budgetId)?.name ?? '',
+          released: m(n.releasedMinor),
+        })),
         canConfirm: blocked === null && this.can(actor, 'reclaim.redistribute'),
         blockedReason: blocked,
       };
@@ -1266,12 +1315,14 @@ export class ReclaimService {
             'Choose one of the reason codes for this change.',
             { field: 'reasonCode' },
           );
+        const exclude = req.excludeBudgetIds ?? [];
         const first = await this.poolSources(
           tx,
           campaignId,
           req.legalEntityId,
           req.currency,
           false,
+          exclude,
         );
         const pre = await this.resolve(tx, first.c, first.notices, req);
         // Ordered locks over every chain involved (sources, their parents, targets and ancestors),
@@ -1282,17 +1333,18 @@ export class ReclaimService {
         for (const l of pre.plan.legs)
           for (const i of pre.destOf(l).path.split('/').filter(Boolean)) lockIds.add(i);
         await this.reads.lockBudgets(tx, [...lockIds]);
-        const { c, notices } = await this.poolSources(
+        const { c, notices, left } = await this.poolSources(
           tx,
           campaignId,
           req.legalEntityId,
           req.currency,
           true,
+          exclude,
         );
         // An answer committed between the first read and the locks would add a source whose chain
         // was never locked: refuse rather than post on it, and let the caller retry.
         const key = (list: NoticeRow[]) => list.map((x) => `${x.id}:${x.releasedMinor}`).join(',');
-        if (key(notices) !== key(first.notices))
+        if (key([...notices, ...left]) !== key([...first.notices, ...first.left]))
           throw new ApiProblem(
             409,
             'VERSION_CONFLICT',
@@ -1363,6 +1415,16 @@ export class ReclaimService {
               notices.map((n) => n.id),
             ),
           );
+        if (left.length)
+          await tx
+            .update(reclaimNotices)
+            .set({ executionId: exec.id })
+            .where(
+              inArray(
+                reclaimNotices.id,
+                left.map((n) => n.id),
+              ),
+            );
         const all = await tx
           .select()
           .from(reclaimNotices)
@@ -1405,17 +1467,25 @@ export class ReclaimService {
             remainderMinor: { from: null, to: plan.remainderMinor },
             legs: { from: null, to: stored },
             authorized: { from: null, to: perSource },
+            ...(left.length
+              ? {
+                  leftOut: {
+                    from: null,
+                    to: left.map((n) => ({ budgetId: n.budgetId, releasedMinor: n.releasedMinor })),
+                  },
+                }
+              : {}),
           },
         });
         for (const n of notices) {
-          if (!n.ownerPersonId) continue;
           const row = sourceRows.get(n.budgetId)!;
+          if (!row.ownerPersonId) continue;
           const to = [
             ...new Set(
               plan.legs.filter((l) => l.sourceBudgetId === n.budgetId).map((l) => destOf(l).name),
             ),
           ].join(', ');
-          await this.notify(tx, actor.tenantId, n.ownerPersonId, n, {
+          await this.notify(tx, actor.tenantId, row.ownerPersonId, n, {
             title: `${formatMoney(money(n.releasedMinor, n.currency))} released from ${row.name} was redistributed`,
             detail: `Moved to ${to}.`,
             subject: `Reclaim completed for ${row.name}`,
@@ -1519,10 +1589,10 @@ export class ReclaimService {
           .returning();
         if (!inserted.length) continue;
         count++;
-        if (!n.ownerPersonId) continue;
         const row = await this.views.row(tx, n.budgetId);
+        if (!row.ownerPersonId) continue;
         const when = due === 'one_day' ? 'tomorrow' : 'in 2 days';
-        await this.notify(tx, tenantId, n.ownerPersonId, n, {
+        await this.notify(tx, tenantId, row.ownerPersonId, n, {
           title: `Reminder: answer the reclaim of ${row.name} by ${c.respondBy}`,
           detail: `${formatMoney(money(n.proposedMinor, n.currency))} proposed; responses close ${when}.`,
           subject: `Reminder: reclaim of ${row.name} closes ${when}`,
