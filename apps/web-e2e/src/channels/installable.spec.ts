@@ -33,8 +33,9 @@ test.describe('installable app and offline (059a)', () => {
   test('the app is installable: a manifest with icons and a service worker in control', async ({
     page,
   }) => {
+    // The page itself, whatever is waiting: this test owns no approvals.
     await page.goto('/m/approvals');
-    await expect(page.getByTestId('mobile-approval-cards')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Mobile approvals', level: 1 })).toBeVisible();
 
     const href = await page.locator('link[rel="manifest"]').getAttribute('href');
     expect(href).toBe('manifest.webmanifest');
@@ -130,7 +131,7 @@ test.describe('installable app and offline (059a)', () => {
     context,
   }) => {
     await page.goto('/m/approvals');
-    await expect(page.getByTestId('mobile-approval-cards')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Mobile approvals', level: 1 })).toBeVisible();
     await controlledBySw(page);
 
     // Headless Chromium refuses notification permission, so the worker's showNotification is
