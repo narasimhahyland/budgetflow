@@ -1,0 +1,28 @@
+# Gap B4 review fixes
+
+These are three findings from the B4 domain-invariant review, recorded in the bug table of
+[`docs/gap-closure-plan.md`](../../docs/gap-closure-plan.md), plus one finding recorded as by design. Everything here
+ran on the local stack `bf-gap-b4` with the deterministic seed.
+
+| Finding                                                           | Change                                                                                                                                                                                                                                                                                                                                    | Proof                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Notices kept the owner from when the campaign started             | Visibility, answers, "my notices", reminders and execution notices follow the budget's current owner, and an escalation works out its decider when it happens.                                                                                                                                                                            | `close/reclaim.spec.ts`: after a handover the old owner gets 404 reading and answering; the new owner finds the notice with `canRespond` and answers as the owner (invariant 127).                                                                                                                                                                  |
+| One source that can no longer be reduced blocked its whole pool   | `excludeBudgetIds` (additive) on the pool preview and execution, with `ReclaimPoolPreview.excluded` and `ReclaimNotice.leftOut` (additive). Nothing moves for a source left out; its notice closes with the pool; the one execution audit entry names it. The confirm dialog shows "Leave out of this redistribution" on blocked sources. | `close/reclaim.spec.ts`: blocked, then a budget that did not release is refused (422), then leaving the source out unblocks the rest; the legs cover the other source only; authorized is unchanged for the source left out; its notice is `leftOut`; the audit entry lists it (invariant 128). UI checked on a scenario-built campaign, see below. |
+| A burn-rate run accepted any as-of date                           | Dates in the future are refused, because they would use up the alert of a period that has not started. Past dates still measure the period they fall in.                                                                                                                                                                                  | `close/burn-rate.spec.ts`: a run dated tomorrow is 422 `VALIDATION_FAILED` (invariant 120).                                                                                                                                                                                                                                                         |
+| A pool's remainder can return to a parent in another legal entity | None. This is the 086a spec's stated behaviour: cross-entity money returns to the common parent, so a reallocation creates no intercompany effect.                                                                                                                                                                                        | Recorded as by design in the bug table.                                                                                                                                                                                                                                                                                                             |
+
+## Runs
+
+- The reclaim and burn-rate scenarios pass, 7 of 7 ([`targeted-runs.txt`](targeted-runs.txt)).
+- [`gate-summary.txt`](gate-summary.txt) is `scripts/gate.sh all`. Every mode passes, visual included, and no
+  baselines changed.
+- UI check of "Leave out" on a campaign built by the "commitment landing" scenario:
+  - Confirm is disabled while a source is blocked ([`pool-blocked--desktop.png`](screens/pool-blocked--desktop.png)).
+  - "Leave out of this redistribution" removes that source from the moves and the floor check, and says its money
+    stays with the budget. Confirm then enables ([`pool-leave-out--desktop.png`](screens/pool-leave-out--desktop.png)).
+  - After posting, the row reads "Left out" ([`after-leave-out--desktop.png`](screens/after-leave-out--desktop.png)).
+
+## Not covered
+
+The seed has no blocked source, so the "Leave out" button has no visual baseline and no journey. It is proved by
+the API scenario and the UI check above.
