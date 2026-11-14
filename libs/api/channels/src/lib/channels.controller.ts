@@ -42,6 +42,7 @@ import {
   type NotificationsFeed,
   type NotificationSettingsView,
   type PushDevice,
+  type PushVapidKey,
   type TestChannelResponse,
 } from '@bf/contracts';
 import {
@@ -70,6 +71,7 @@ const TokenParam = z.string().min(10).max(500);
 const DeliveriesQuery = z
   .object({
     channel: NotificationChannel.optional(),
+    pushSubscriptionId: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(100).optional(),
   })
   .strict();
@@ -148,6 +150,11 @@ export class ChannelsController {
     );
     if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
     return r.body;
+  }
+
+  @Get('me/push-devices/vapid-key')
+  getPushVapidKey(@CurrentActor() actor: RequestActor): PushVapidKey {
+    return this.channels.getPushVapidKey(actor);
   }
 
   @Delete('me/push-devices/:id')

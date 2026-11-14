@@ -1678,6 +1678,16 @@
           "state": "alerts",
           "path": "/m/alerts",
           "waitFor": "[data-testid=notifications-list]"
+        },
+        {
+          "state": "install",
+          "path": "/m/approvals?install=1",
+          "waitFor": "[data-testid=mobile-install-prompt]"
+        },
+        {
+          "state": "offline",
+          "path": "/m/approvals?offline=1",
+          "waitFor": "[data-testid=mobile-offline-banner]"
         }
       ]
     },

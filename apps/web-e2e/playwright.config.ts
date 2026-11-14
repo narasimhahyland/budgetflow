@@ -57,6 +57,10 @@ export default defineConfig({
     // diagnose #82); then failing tests keep theirs. Local runs keep them under dist/ and tmp/.
     trace: process.env['CI'] && process.env['BF_CI_TRACES'] !== '1' ? 'off' : 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // The installable app's service worker (B8) caches the app shell. Journeys and baselines run
+    // without it, so each page load is the same fresh load it always was; the installable-app
+    // journeys (src/channels/installable.spec.ts) turn it on for themselves.
+    serviceWorkers: 'block',
   },
   projects: [
     { name: 'setup', testMatch: /auth\.setup\.ts/, workers: 1 },

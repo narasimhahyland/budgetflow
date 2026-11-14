@@ -3,3 +3,4 @@ export * from './lib/defaults';
 export * from './lib/channels.service';
 export * from './lib/channels.controller';
 export * from './lib/channels.module';
+export * from './lib/web-push';

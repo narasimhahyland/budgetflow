@@ -10646,8 +10646,11 @@
               "sent",
               "updated",
               "retried",
-              "failed"
-            ]
+              "failed",
+              "gone",
+              "dead_letter"
+            ],
+            "description": "queued: waiting to send; retried: a transient failure, another attempt is scheduled; failed: will not be retried; gone: the push service no longer knows the subscription, which was removed; dead_letter: every retry failed"
           },
           "attempts": {
             "type": "integer",
@@ -10672,6 +10675,20 @@
               "type": "string"
             },
             "additionalProperties": {}
+          },
+          "pushSubscriptionId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The push device a push delivery targets"
           },
           "createdAt": {
             "type": "string",
@@ -10699,6 +10716,7 @@
           "externalMessageId",
           "errorMessage",
           "payload",
+          "pushSubscriptionId",
           "createdAt",
           "updatedAt"
         ],
@@ -38076,6 +38094,7 @@
               "CHAT_LINK_EMAIL_MISMATCH",
               "CHAT_LINK_INVALID",
               "CHAT_ACCOUNT_NOT_LINKED",
+              "PUSH_DEVICE_NOT_REGISTERED",
               "CHAT_SIGNATURE_INVALID",
               "CHAT_TIMESTAMP_EXPIRED",
               "CHAT_STEP_UP_REQUIRED",
@@ -39285,6 +39304,19 @@
           "externalId",
           "lastError",
           "pushedAt"
+        ],
+        "additionalProperties": false
+      },
+      "PushVapidKey": {
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "type": "string",
+            "description": "Base64url VAPID application server key for PushManager.subscribe (RFC 8292). Public by design."
+          }
+        },
+        "required": [
+          "publicKey"
         ],
         "additionalProperties": false
       },
@@ -50477,8 +50509,10 @@
             "type": "string",
             "enum": [
               "sent",
+              "queued",
               "failed"
-            ]
+            ],
+            "description": "queued: a push test waits for the worker to send it to each device"
           },
           "message": {
             "type": "string"
@@ -79506,6 +79540,54 @@
         }
       }
     },
+    "/api/me/push-devices/vapid-key": {
+      "get": {
+        "operationId": "getPushVapidKey",
+        "summary": "The application server key a browser subscribes to Web Push with",
+        "tags": [
+          "channels"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushVapidKey"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/me/push-devices/{id}": {
       "delete": {
         "operationId": "removePushDevice",
@@ -81049,6 +81131,17 @@
                 "slack",
                 "teams"
               ]
+            }
+          },
+          {
+            "name": "pushSubscriptionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
             }
           },
           {

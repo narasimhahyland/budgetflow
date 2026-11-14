@@ -9,7 +9,13 @@
 //   POST /_control/reset                     forget armed failures and received webhooks
 //   POST /_control/arm {path, status, times} make the next `times` calls to `path` fail with `status`
 //   GET  /_control/received?path=/receiver/hook   webhook deliveries this server received
-import { createHmac, timingSafeEqual } from 'node:crypto';
+//   GET  /_control/push/received?subscription=<id> Web Push messages a mock subscription received
+//
+// Web Push service (B8): POST /push/v1/<mode>/<subscription id>, modes `ok` (201), `gone` (410),
+// `missing` (404) and `down` (503 every time). Each message is recorded with its encrypted body and
+// whether its VAPID header (RFC 8292) verifies, so a scenario can decrypt and check what was sent.
+// Push records survive /_control/reset: scenarios own their subscription ids.
+import { createHmac, createPublicKey, timingSafeEqual, verify } from 'node:crypto';
 import { createServer } from 'node:http';
 import { handleNavan, resetNavan } from './navan.mjs';
 
@@ -19,6 +25,53 @@ const PORT = Number(process.env.PORT ?? 4010);
 const armed = new Map();
 /** Webhook deliveries this server received, newest last. */
 const received = [];
+/** Web Push messages received, newest last (capped so a long run cannot grow it without bound). */
+const pushReceived = [];
+const PUSH_STATUS = { ok: 201, gone: 410, missing: 404, down: 503 };
+
+/** RFC 8292: `vapid t=<ES256 JWT>, k=<raw P-256 key>`, audience = this origin, expiry within 24 h. */
+const verifyVapid = (header, origin) => {
+  const m = /^vapid t=([^,\s]+),\s*k=([A-Za-z0-9_-]+)$/.exec(header ?? '');
+  if (!m) return { valid: false, error: 'missing or malformed vapid authorization' };
+  const [h, c, sig] = m[1].split('.');
+  try {
+    const key = Buffer.from(m[2], 'base64url');
+    if (key.length !== 65 || key[0] !== 4) return { valid: false, error: 'k is not a P-256 key' };
+    const publicKey = createPublicKey({
+      key: {
+        kty: 'EC',
+        crv: 'P-256',
+        x: key.subarray(1, 33).toString('base64url'),
+        y: key.subarray(33).toString('base64url'),
+      },
+      format: 'jwk',
+    });
+    const head = JSON.parse(Buffer.from(h, 'base64url').toString());
+    const claims = JSON.parse(Buffer.from(c, 'base64url').toString());
+    if (head.alg !== 'ES256') return { valid: false, error: 'alg is not ES256' };
+    const ok = verify(
+      'sha256',
+      Buffer.from(`${h}.${c}`),
+      { key: publicKey, dsaEncoding: 'ieee-p1363' },
+      Buffer.from(sig, 'base64url'),
+    );
+    if (!ok) return { valid: false, error: 'signature does not verify' };
+    const now = Math.floor(Date.now() / 1000);
+    if (claims.aud !== origin) return { valid: false, error: `aud ${claims.aud} is not ${origin}` };
+    if (!(claims.exp > now && claims.exp <= now + 86400))
+      return { valid: false, error: 'exp is not within 24 hours' };
+    return { valid: true, error: null, subject: claims.sub, publicKey: m[2] };
+  } catch (e) {
+    return { valid: false, error: `unreadable vapid header: ${e.message}` };
+  }
+};
+
+const readRaw = (req) =>
+  new Promise((resolve) => {
+    const chunks = [];
+    req.on('data', (c) => chunks.push(c));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+  });
 
 const json = (res, status, body, headers = {}) => {
   const payload = JSON.stringify(body);
@@ -480,6 +533,45 @@ const server = createServer(async (req, res) => {
     return json(res, 200, {
       items: want ? received.filter((r) => r.path === want) : received,
     });
+  }
+
+  // Web Push service (B8) --------------------------------------------------------------------
+  if (path === '/_control/push/received') {
+    const sub = url.searchParams.get('subscription');
+    return json(res, 200, {
+      items: sub ? pushReceived.filter((r) => r.subscription === sub) : pushReceived.slice(-50),
+    });
+  }
+  const pushRoute = /^\/push\/v1\/(ok|gone|missing|down)\/([A-Za-z0-9_-]{1,80})$/.exec(path);
+  if (pushRoute && req.method === 'POST') {
+    const body = await readRaw(req);
+    const vapid = verifyVapid(req.headers['authorization'], `http://${req.headers.host}`);
+    const status = PUSH_STATUS[pushRoute[1]];
+    pushReceived.push({
+      subscription: pushRoute[2],
+      mode: pushRoute[1],
+      at: new Date().toISOString(),
+      answered: status,
+      vapidValid: vapid.valid,
+      vapidError: vapid.error,
+      vapidSubject: vapid.subject ?? null,
+      vapidPublicKey: vapid.publicKey ?? null,
+      contentEncoding: req.headers['content-encoding'] ?? null,
+      ttl: req.headers['ttl'] ?? null,
+      urgency: req.headers['urgency'] ?? null,
+      body: body.toString('base64'),
+    });
+    if (pushReceived.length > 2000) pushReceived.splice(0, pushReceived.length - 2000);
+    // A real push service refuses unauthenticated or unencrypted messages.
+    if (!vapid.valid) return json(res, 403, { error: vapid.error });
+    if (req.headers['content-encoding'] !== 'aes128gcm' || !req.headers['ttl'])
+      return json(res, 400, { error: 'aes128gcm content and a TTL header are required' });
+    if (status !== 201) return json(res, status, { error: `mock push answered ${status}` });
+    res.writeHead(201, {
+      location: `http://${req.headers.host}/push/v1/messages/${pushReceived.length}`,
+      'content-length': 0,
+    });
+    return res.end();
   }
 
   // Marketplace partner catalogue: offers plus any answers to bookings it was asked about -------

@@ -299,6 +299,17 @@
       </sat-app-header>
 
       <div class="bf-content">
+        @if (!network.online()) {
+          <sat-banner variant="warning" class="bf-shell__offline" data-testid="offline-banner">
+            <sat-banner-message>
+              You're offline. Figures on this page were loaded
+              @if (network.offlineSince(); as since) {
+                before {{ since | bfDateTime: session.timezone() : 'HH:mm' }}
+              }
+              and are not updating. Changes and decisions need a connection.
+            </sat-banner-message>
+          </sat-banner>
+        }
         @if (auth.status() === 'expired') {
           <sat-401-error-state>
             <h1 satErrorStateHeadline>Your session has ended</h1>

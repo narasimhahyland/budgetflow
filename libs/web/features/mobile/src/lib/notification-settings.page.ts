@@ -23,6 +23,7 @@ import type {
   NotificationMatrixRow,
   NotificationPreferenceType,
 } from '@bf/contracts';
+import { PushSubscriber } from '@bf/web/data-access';
 import { DateTimePipe, LoadState, MobileTabBar } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
@@ -84,6 +85,18 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
         <sat-banner-message>
           Your browser blocks notifications from BudgetFlow. Allow notifications in your browser
           site settings, then try again.
+        </sat-banner-message>
+      </sat-banner>
+    }
+    @if (pushState() === 'needs-install' || pushState() === 'unsupported') {
+      <sat-banner variant="info" data-testid="push-unsupported-banner">
+        <sat-banner-message>
+          @if (pushState() === 'needs-install') {
+            Install BudgetFlow to your home screen to get push on this phone.
+          } @else {
+            This browser cannot receive push notifications. Email and in-app notifications still
+            reach you.
+          }
         </sat-banner-message>
       </sat-banner>
     }
@@ -165,7 +178,7 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                         mat-button
                         type="button"
                         [disabled]="busy()"
-                        (click)="removeDevice(d.id)"
+                        (click)="removeDevice(d.id, d.endpoint)"
                         [attr.data-testid]="'remove-push-' + d.id"
                       >
                         Remove
@@ -180,7 +193,7 @@ const AREA_TITLES: Record<NotificationMatrixRow['area'], string> = {
                   <button
                     mat-stroked-button
                     type="button"
-                    [disabled]="busy() || pushState() === 'blocked'"
+                    [disabled]="busy() || pushState() !== 'default'"
                     (click)="turnOnPush()"
                     data-testid="turn-on-push"
                   >
@@ -561,7 +574,10 @@ export class NotificationSettingsPage {
 
   protected readonly busy = signal(false);
   protected readonly failure = signal('');
-  protected readonly pushState = signal<'default' | 'blocked'>('default');
+  protected readonly pushState = signal<'default' | 'blocked' | 'needs-install' | 'unsupported'>(
+    'default',
+  );
+  private readonly pushSubscriber = inject(PushSubscriber);
 
   protected readonly settings = resource({
     loader: () => data(this.api.getNotificationSettings({})),
@@ -625,30 +641,46 @@ export class NotificationSettingsPage {
     );
   }
 
+  /**
+   * 059c "Push permission": the browser asks, the subscription made with the API's VAPID key is
+   * registered as this device, and a test push follows so the person sees it work.
+   */
   protected turnOnPush(): void {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
-      this.pushState.set('blocked');
+    const support = this.pushSubscriber.support();
+    if (support !== 'supported') {
+      this.pushState.set(support);
       return;
     }
-    void this.run(
-      () =>
-        data(
-          this.api.registerPushDevice({
-            body: {
-              deviceLabel: 'Chrome on this device',
-              userAgentFamily: 'Desktop, Chrome',
-              endpoint: `https://push.budgetflow.example.test/sub/${Date.now()}`,
-              p256dh: 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFg',
-              authKey: 'UUQM145_auth_browser_key',
-            },
-          }),
-        ),
-      'Push notifications turned on for this device',
-    );
+    void this.run(async () => {
+      const { publicKey } = await data(this.api.getPushVapidKey({}));
+      let sub;
+      try {
+        sub = await this.pushSubscriber.subscribe(publicKey);
+      } catch {
+        this.failure.set(
+          'This browser could not set up push right now. Reload the page and try again.',
+        );
+        return;
+      }
+      if (!sub) {
+        this.pushState.set('blocked');
+        return;
+      }
+      await data(this.api.registerPushDevice({ body: sub }));
+      this.snack.open('Push notifications turned on for this device', undefined, {
+        duration: 3000,
+      });
+      await data(this.api.sendTestNotification({ body: { channel: 'push' } })).catch(
+        () => undefined,
+      );
+    }, '');
   }
 
-  protected removeDevice(id: string): void {
-    void this.run(() => data(this.api.removePushDevice({ params: { id } })), 'Device removed');
+  protected removeDevice(id: string, endpoint: string): void {
+    void this.run(async () => {
+      await data(this.api.removePushDevice({ params: { id } }));
+      await this.pushSubscriber.unsubscribeIf(endpoint).catch(() => undefined);
+    }, 'Device removed');
   }
 
   protected sendTest(channel: NotificationChannel): void {

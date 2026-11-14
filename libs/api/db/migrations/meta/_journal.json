@@ -190,6 +190,13 @@
       "when": 1794547525429,
       "tag": "0028_b4_reclaim_reminders",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1794670959604,
+      "tag": "0029_b8_web_push",
+      "breakpoints": true
     }
   ]
 }
