@@ -24474,6 +24474,17 @@
               "additionalProperties": false
             }
           },
+          "excludeBudgetIds": {
+            "description": "Released budgets to leave out of this redistribution (for example one set to zero since): nothing moves for them.",
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
           "reasonCode": {
             "type": "string",
             "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,49}$",
@@ -40370,6 +40381,10 @@
             "description": "Pending (pre-encumbered) requests on the budget: listed, never part of the floor.",
             "$ref": "#/components/schemas/Money"
           },
+          "leftOut": {
+            "type": "boolean",
+            "description": "Released, but left out when its legal entity was redistributed: the money stayed with the budget."
+          },
           "remindersSent": {
             "type": "array",
             "items": {
@@ -40418,6 +40433,7 @@
           "floor",
           "maxReclaimable",
           "pendingRequests",
+          "leftOut",
           "remindersSent",
           "canRespond",
           "canEscalate"
@@ -40522,6 +40538,33 @@
               "$ref": "#/components/schemas/ReclaimSourceImpact"
             }
           },
+          "excluded": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "budgetId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "description": "Opaque identifier (UUID)."
+                },
+                "budgetName": {
+                  "type": "string"
+                },
+                "released": {
+                  "$ref": "#/components/schemas/Money"
+                }
+              },
+              "required": [
+                "budgetId",
+                "budgetName",
+                "released"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Released budgets left out of this redistribution."
+          },
           "canConfirm": {
             "type": "boolean"
           },
@@ -40540,6 +40583,7 @@
           "remainder",
           "legs",
           "sources",
+          "excluded",
           "canConfirm",
           "blockedReason"
         ],
@@ -40580,6 +40624,17 @@
                 "amountMinor"
               ],
               "additionalProperties": false
+            }
+          },
+          "excludeBudgetIds": {
+            "description": "Released budgets to leave out of this redistribution (for example one set to zero since): nothing moves for them.",
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
             }
           }
         },

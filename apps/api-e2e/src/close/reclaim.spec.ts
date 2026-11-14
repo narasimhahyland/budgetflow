@@ -645,4 +645,152 @@ test.describe('reclaim and redistribute campaigns (086a)', () => {
       )
       .toBe(2);
   });
+
+  test('a budget that changes owner mid-campaign is answered by its new owner, never the old one', async ({
+    request,
+  }) => {
+    const t = await reclaimTree(request);
+    const created = await expectContract(
+      await request.post('/api/reclaim/campaigns', {
+        headers: await mutate('finance-admin'),
+        data: await campaignBody('Scenario owner change'),
+      }),
+      201,
+      ReclaimCampaignDetail,
+    );
+    const na = noticeFor(created, t.a.id);
+    // The budget moves from the budget owner to the regional manager.
+    const before = await budget(request, t.a.id);
+    expect(
+      (
+        await request.put(`/api/budgets/${t.a.id}/settings`, {
+          headers: await mutate('finance-admin'),
+          data: {
+            expectedVersion: before.version,
+            ownerPersonId: userById('regional-manager').personId,
+            reason: 'Handover',
+          },
+        })
+      ).status(),
+    ).toBe(200);
+    // The old owner no longer sees or answers the notice.
+    await expectProblem(
+      await request.get(`/api/reclaim/notices/${na.id}`, { headers: await as('budget-owner') }),
+      404,
+      'NOT_FOUND',
+    );
+    await expectProblem(
+      await respond(request, na.id, { choice: 'release_all' }, 'budget-owner'),
+      404,
+      'NOT_FOUND',
+    );
+    // The new owner finds it among their notices and answers it as the owner.
+    const mine = await expectContract(
+      await request.get('/api/reclaim/notices', { headers: await as('regional-manager') }),
+      200,
+      ReclaimNoticeList,
+    );
+    const theirs = mine.items.find((n) => n.id === na.id);
+    expect(theirs?.canRespond).toBe(true);
+    expect(theirs?.ownerName).toBe('Ananya Iyer');
+    const answered = await expectContract(
+      await respond(request, na.id, { choice: 'release_all' }, 'regional-manager'),
+      200,
+      ReclaimNotice,
+    );
+    expect(answered.status).toBe('released');
+    expect(answered.respondedAs).toBe('owner');
+    expect(answered.respondedByName).toBe('Ananya Iyer');
+  });
+
+  test('a source that can no longer be reduced can be left out: the rest of the pool moves, nothing moves for it', async ({
+    request,
+  }) => {
+    const t = await reclaimTree(request);
+    const created = await expectContract(
+      await request.post('/api/reclaim/campaigns', {
+        headers: await mutate('finance-admin'),
+        data: await campaignBody('Scenario leave out'),
+      }),
+      201,
+      ReclaimCampaignDetail,
+    );
+    const campaignId = created.campaign.id;
+    const na = noticeFor(created, t.a.id);
+    const nb = noticeFor(created, t.b.id);
+    await expectContract(
+      await respond(request, na.id, { choice: 'release_part', amountMinor: 700_000 }),
+      200,
+      ReclaimNotice,
+    );
+    await expectContract(
+      await respond(request, nb.id, { choice: 'release_all' }),
+      200,
+      ReclaimNotice,
+    );
+    // A commitment lands on A after it released: A can no longer give up what it released.
+    await openingBalance(request, t.a.id, 'encumbered', 1);
+    const pool = { legalEntityId: SEED.legalEntities.acmeUs, currency: 'USD', targets: [] };
+    const look = async (data: Record<string, unknown>) =>
+      request.post(`/api/reclaim/campaigns/${campaignId}/pools/preview`, {
+        headers: await as('finance-admin'),
+        data,
+      });
+    // Only budgets that released into this pool can be left out of it.
+    await expectProblem(
+      await look({ ...pool, excludeBudgetIds: [t.c.id] }),
+      422,
+      'VALIDATION_FAILED',
+    );
+    const blocked = await expectContract(await look(pool), 200, ReclaimPoolPreview);
+    expect(blocked.canConfirm).toBe(false);
+    const impact = await expectContract(
+      await look({ ...pool, excludeBudgetIds: [t.a.id] }),
+      200,
+      ReclaimPoolPreview,
+    );
+    expect(impact.canConfirm).toBe(true);
+    expect(impact.excluded).toEqual([
+      { budgetId: t.a.id, budgetName: expect.any(String), released: USD(700_000) },
+    ]);
+    expect(impact.sources.map((x) => x.budgetId)).toEqual([t.b.id]);
+    expect(impact.pool).toEqual(nb.proposed);
+    const aBefore = bal(await budget(request, t.a.id)).authorized;
+    const bBefore = bal(await budget(request, t.b.id)).authorized;
+    const exec = await expectContract(
+      await request.post(`/api/reclaim/campaigns/${campaignId}/pools/execution`, {
+        headers: await mutate('finance-admin'),
+        data: {
+          ...pool,
+          excludeBudgetIds: [t.a.id],
+          reasonCode: 'RED-YEAR-END-RECLAIM',
+          reason: 'Year-end reclaim',
+          confirmedFloors: impact.sources.map((x) => ({
+            budgetId: x.budgetId,
+            floorMinor: x.floor.amountMinor,
+          })),
+        },
+      }),
+      201,
+      ReclaimExecution,
+    );
+    expect(exec.legs.every((l) => l.sourceBudgetId === t.b.id)).toBe(true);
+    // Nothing moved for A; B gave up what it released.
+    expect(bal(await budget(request, t.a.id)).authorized).toBe(aBefore);
+    expect(bal(await budget(request, t.b.id)).authorized).toBe(bBefore - nb.proposed.amountMinor);
+    const after = await notices(request, campaignId);
+    expect(noticeFor(after, t.a.id)).toMatchObject({ status: 'released', leftOut: true });
+    expect(noticeFor(after, t.b.id)).toMatchObject({ status: 'reclaimed', leftOut: false });
+    // The one audit entry for the execution names what was left out.
+    const leftOut = await asOwner(
+      async (c) =>
+        (
+          await c.query<{ left: { budgetId: string; releasedMinor: number }[] }>(
+            "select changes->'leftOut'->'to' as left from audit_events where resource_id = $1 and action = 'reclaim.pool_executed'",
+            [campaignId],
+          )
+        ).rows,
+    );
+    expect(leftOut).toEqual([{ left: [{ budgetId: t.a.id, releasedMinor: 700_000 }] }]);
+  });
 });

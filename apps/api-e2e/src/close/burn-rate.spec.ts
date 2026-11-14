@@ -7,7 +7,7 @@ import { BudgetPhasing, BurnRateAlertList, BurnRateRun } from '@bf/contracts';
 import { userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
-import { todayUtc } from '../support/clock';
+import { daysFromToday, todayUtc } from '../support/clock';
 import { expectContract, expectProblem } from '../support/contract';
 import { allocateOk, createChild, createRoot } from '../support/factory';
 import { openingBalance, USD } from '../budgets/p4';
@@ -88,6 +88,16 @@ test.describe('burn-rate alerts', () => {
       }),
       403,
       'FORBIDDEN',
+    );
+
+    // A run cannot be dated in the future: it would use up the alert of a period not yet started.
+    await expectProblem(
+      await request.post('/api/burn-rate/runs', {
+        headers: await mutate('finance-admin'),
+        data: { asOf: daysFromToday(1) },
+      }),
+      422,
+      'VALIDATION_FAILED',
     );
 
     // One minor unit under 110%: no alert.

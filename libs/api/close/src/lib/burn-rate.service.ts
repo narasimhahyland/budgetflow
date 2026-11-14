@@ -92,6 +92,12 @@ export class BurnRateService {
       { idempotencyKey: ctx.idempotencyKey, operation: 'burn_rate.run', request: req, status: 202 },
       async (tx) => {
         const asOf = req.asOf ?? todayUtc();
+        // A future date would measure spend that has not happened and use up the once-per-period
+        // alert of a period that has not started; a past date measures a period that did happen.
+        if (asOf > todayUtc())
+          throw new ApiProblem(422, 'VALIDATION_FAILED', 'Choose today or an earlier date.', {
+            field: 'asOf',
+          });
         const [run] = await tx
           .insert(burnRateRuns)
           .values({

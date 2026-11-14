@@ -343,12 +343,36 @@ export interface ConfirmPoolData {
                 · pending requests {{ money(s.pendingRequests) }} are not floored and may go back to
                 their requesters
               }
+              @if (!s.withinFloor) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="bf-reclaim__row-action"
+                  (click)="leaveOut(s.budgetId)"
+                  [attr.data-testid]="'leave-out-' + s.budgetId"
+                >
+                  Leave out of this redistribution
+                </button>
+              }
             </li>
           }
         </ul>
+        @if (p.excluded.length) {
+          <p class="bf-note" data-testid="left-out">
+            Left out:
+            @for (x of p.excluded; track x.budgetId) {
+              {{ x.budgetName }} ({{ money(x.released) }} stays with the budget; nothing moves){{
+                $last ? '.' : ';'
+              }}
+            }
+            The owner's answer stays on record.
+          </p>
+        }
         @if (p.blockedReason) {
           <sat-banner variant="important"
-            ><sat-banner-message>{{ p.blockedReason }}</sat-banner-message></sat-banner
+            ><sat-banner-message
+              >{{ p.blockedReason }} Leave it out to redistribute the rest.</sat-banner-message
+            ></sat-banner
           >
         }
         <mat-form-field class="bf-field">
@@ -411,8 +435,11 @@ export class ConfirmReclaimPoolDialog {
   protected readonly money = (m: { amountMinor: number; currency: string }) =>
     formatMoney(m.amountMinor, m.currency);
 
+  /** Sources finance chose to leave out (for example one set to zero after releasing). */
+  protected readonly excluded = signal<string[]>([]);
   protected readonly preview = resource({
-    loader: () =>
+    params: () => this.excluded(),
+    loader: ({ params }) =>
       data(
         this.api.previewReclaimPool({
           params: { campaignId: this.d.campaignId },
@@ -420,10 +447,15 @@ export class ConfirmReclaimPoolDialog {
             legalEntityId: this.d.legalEntityId,
             currency: this.d.currency,
             targets: this.d.targets,
+            ...(params.length ? { excludeBudgetIds: params } : {}),
           },
         }),
       ),
   });
+
+  protected leaveOut(budgetId: string): void {
+    this.excluded.update((list) => (list.includes(budgetId) ? list : [...list, budgetId]));
+  }
   protected readonly p = computed<ReclaimPoolPreview | undefined>(() => valueOf(this.preview));
   private readonly codes = resource({
     loader: () => data(this.api.listReasonCodes({ query: { category: 'reduction' } })),
@@ -450,6 +482,7 @@ export class ConfirmReclaimPoolDialog {
               legalEntityId: this.d.legalEntityId,
               currency: this.d.currency,
               targets: this.d.targets,
+              ...(this.excluded().length ? { excludeBudgetIds: this.excluded() } : {}),
               reasonCode: this.reasonCode(),
               reason: this.reason().trim(),
               confirmedFloors: p.sources.map((s) => ({
