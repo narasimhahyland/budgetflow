@@ -131,6 +131,33 @@ const ROLE_LABELS: Record<string, string> = {
 const EDIT_WINDOW_MS = 15 * 60 * 1000;
 const CLOSED_THREAD_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const ARCHIVE_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+
+const CURSOR_TS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/;
+const CURSOR_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Notification feed cursor: opaque base64url of `<created_at, UTC, microseconds>|<id>` of the last
+ * item on the page. The next page starts strictly after that (created_at, id) pair, newest first.
+ */
+function encodeNotificationCursor(createdAt: string, id: string): string {
+  return Buffer.from(`${createdAt}|${id}`, 'utf8').toString('base64url');
+}
+
+function decodeNotificationCursor(cursor: string): { createdAt: string; id: string } {
+  const [createdAt = '', id = '', ...rest] = Buffer.from(cursor, 'base64url')
+    .toString('utf8')
+    .split('|');
+  if (rest.length || !CURSOR_TS.test(createdAt) || !CURSOR_ID.test(id)) {
+    throw new ApiProblem(
+      400,
+      'VALIDATION_FAILED',
+      'That page link is not valid. Reload the notifications and try again.',
+      undefined,
+      [{ path: 'cursor', message: 'Not a notifications cursor.' }],
+    );
+  }
+  return { createdAt, id };
+}
 const DELIVERY_WINDOW_MS = 24 * 60 * 60 * 1000;
 const STEP_UP_THRESHOLD_MINOR = 2_500_000; // USD 25,000.00 requires web app step-up
 
@@ -397,6 +424,7 @@ export class ChannelsService {
       unreadOnly?: boolean;
       periodDays?: number;
       limit?: number;
+      cursor?: string;
     },
   ): Promise<NotificationsFeed> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
@@ -410,37 +438,60 @@ export class ChannelsService {
       }
       const cutoff = new Date(Date.now() - Math.min(q.periodDays ?? 90, 90) * 24 * 60 * 60 * 1000);
       const archiveCutoff = new Date(Date.now() - ARCHIVE_DAYS_MS);
-      const allRows = await tx
-        .select()
+      const limit = Math.min(q.limit ?? 50, 200);
+      const after = q.cursor ? decodeNotificationCursor(q.cursor) : null;
+      const mine = and(
+        eq(notifications.recipientPersonId, actor.personId),
+        gte(notifications.createdAt, archiveCutoff),
+      );
+
+      // Filters, order and cursor all run in SQL so every notification in the window is reachable.
+      const tabType =
+        q.tab === 'mentions'
+          ? 'discussion.mentioned'
+          : q.tab === 'following'
+            ? 'discussion.followed_activity'
+            : null;
+      const rows = await tx
+        .select({
+          row: notifications,
+          // Microsecond text, so the cursor compares exactly with the stored timestamptz.
+          cursorTs: sql<string>`to_char(${notifications.createdAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+        })
         .from(notifications)
         .where(
           and(
-            eq(notifications.recipientPersonId, actor.personId),
-            gte(notifications.createdAt, archiveCutoff),
+            mine,
+            gte(notifications.createdAt, cutoff),
+            tabType ? eq(notifications.type, tabType) : undefined,
+            q.area ? eq(notifications.area, q.area) : undefined,
+            q.unreadOnly ? isNull(notifications.readAt) : undefined,
+            after
+              ? sql`(${notifications.createdAt}, ${notifications.id}) < (${after.createdAt}::timestamptz, ${after.id}::uuid)`
+              : undefined,
           ),
         )
         // Id breaks ties so notifications created in the same transaction keep a stable order.
         .orderBy(desc(notifications.createdAt), desc(notifications.id))
-        .limit(200);
+        .limit(limit + 1);
+      const page = rows.slice(0, limit);
+      const last = page[page.length - 1];
+      const nextCursor =
+        rows.length > limit && last ? encodeNotificationCursor(last.cursorTs, last.row.id) : null;
+
+      const [agg] = await tx
+        .select({
+          unread: sql<number>`count(*) filter (where ${notifications.readAt} is null)::int`,
+          mentions: sql<number>`count(*) filter (where ${notifications.type} = 'discussion.mentioned')::int`,
+          following: sql<number>`count(*) filter (where ${notifications.type} = 'discussion.followed_activity')::int`,
+        })
+        .from(notifications)
+        .where(mine);
 
       const tasks = await this.deriveTasks(tx, actor);
-      const unreadCount = allRows.filter((n) => !n.readAt).length;
-      const mentionsCount = allRows.filter((n) => n.type === 'discussion.mentioned').length;
-      const followingCount = allRows.filter(
-        (n) => n.type === 'discussion.followed_activity',
-      ).length;
-
-      let filtered = allRows.filter((n) => n.createdAt >= cutoff);
-      if (q.tab === 'mentions') {
-        filtered = filtered.filter((n) => n.type === 'discussion.mentioned');
-      } else if (q.tab === 'following') {
-        filtered = filtered.filter((n) => n.type === 'discussion.followed_activity');
-      }
-      if (q.area) filtered = filtered.filter((n) => n.area === q.area);
-      if (q.unreadOnly) filtered = filtered.filter((n) => !n.readAt);
 
       const items: NotificationItem[] = [];
-      for (const r of filtered.slice(0, q.limit ?? 50)) {
+      for (const { row: r } of page) {
         const available = await this.isItemAvailable(tx, actor, r.itemType, r.itemId);
         items.push({
           id: r.id,
@@ -465,12 +516,12 @@ export class ChannelsService {
         items,
         tasks,
         counts: {
-          unread: unreadCount,
+          unread: Number(agg?.unread ?? 0),
           tasks: tasks.length,
-          mentions: mentionsCount,
-          following: followingCount,
+          mentions: Number(agg?.mentions ?? 0),
+          following: Number(agg?.following ?? 0),
         },
-        nextCursor: null,
+        nextCursor,
       };
     });
   }
