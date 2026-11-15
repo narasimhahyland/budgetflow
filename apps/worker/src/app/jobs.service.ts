@@ -9,7 +9,14 @@ import {
   RECLAIM_REMINDER_TOPIC,
   ReclaimService,
 } from '@bf/api/close';
-import { CHANNEL_DELIVER_TOPIC, ChannelsService, type ChannelDeliverJob } from '@bf/api/channels';
+import {
+  CHANNEL_DELIVER_TOPIC,
+  ChannelsService,
+  PUSH_RETRY_LIMIT,
+  PUSH_SEND_TOPIC,
+  type ChannelDeliverJob,
+  type PushSendJob,
+} from '@bf/api/channels';
 import { DB } from '@bf/api/core';
 import {
   NAVAN_RUN_TOPIC,
@@ -173,6 +180,25 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     await boss.work<ChannelDeliverJob>(CHANNEL_DELIVER_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.channels.deliverChannelJob(job.data);
     });
+    // Web Push (B8): one job per device, so one failing device never holds back another. Transient
+    // push-service failures retry with exponential backoff and jitter (2, 4, 8 s), then the job
+    // moves to the dead letter and the delivery log shows `dead_letter`. A settled delivery is a
+    // no-op, so a redelivered job sends nothing.
+    await boss.createQueue(PUSH_SEND_TOPIC, {
+      retryLimit: PUSH_RETRY_LIMIT,
+      retryDelay: Number(process.env.PUSH_RETRY_DELAY_SECONDS ?? 2),
+      retryBackoff: true,
+      retryDelayMax: 600,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work<PushSendJob>(
+      PUSH_SEND_TOPIC,
+      { batchSize: 1, pollingIntervalSeconds: 0.5 },
+      async ([job]) => {
+        const outcome = await this.channels.sendPushDelivery(job.data, job.retryCount);
+        if (outcome !== 'sent') this.log.log(`push delivery ${job.data.deliveryId}: ${outcome}`);
+      },
+    );
     // Scheduled report delivery (screen 091): render with the owner's scope, email the recipients
     // who may see the same data, post headline figures to the allowed channels.
     await boss.work<ReportDeliverJob>(REPORT_DELIVER_TOPIC, fast, async (jobs) => {

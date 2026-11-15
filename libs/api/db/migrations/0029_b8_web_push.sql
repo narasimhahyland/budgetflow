@@ -1,0 +1,2 @@
+ALTER TABLE "channel_deliveries" ADD COLUMN "push_subscription_id" uuid;--> statement-breakpoint
+CREATE INDEX "channel_deliveries_push_subscription" ON "channel_deliveries" USING btree ("tenant_id","push_subscription_id");

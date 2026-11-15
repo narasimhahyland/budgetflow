@@ -161,6 +161,10 @@ services:
       INTEGRATIONS_MOCK_BASE_URL: http://mock-providers:4010
       INTEGRATIONS_ALLOWED_HOSTS: mock-providers,localhost,127.0.0.1
       INTEGRATIONS_SECRET_KEY: ${BF_INTEGRATIONS_SECRET_KEY:-}
+      # B8 Web Push: unset means the public development VAPID key (allowed only with
+      # BF_ALLOW_DEV_SECRETS). Pushes reach the browsers' push services and the local mock only.
+      VAPID_PRIVATE_KEY: ${BF_VAPID_PRIVATE_KEY:-}
+      PUSH_ALLOWED_HOSTS: mock-providers,fcm.googleapis.com,updates.push.services.mozilla.com,*.push.apple.com,*.notify.windows.com
     depends_on:
       postgres:
         condition: service_healthy
@@ -209,6 +213,10 @@ services:
       INTEGRATIONS_MOCK_BASE_URL: http://mock-providers:4010
       INTEGRATIONS_ALLOWED_HOSTS: mock-providers,localhost,127.0.0.1
       INTEGRATIONS_SECRET_KEY: ${BF_INTEGRATIONS_SECRET_KEY:-}
+      # B8 Web Push: unset means the public development VAPID key (allowed only with
+      # BF_ALLOW_DEV_SECRETS). Pushes reach the browsers' push services and the local mock only.
+      VAPID_PRIVATE_KEY: ${BF_VAPID_PRIVATE_KEY:-}
+      PUSH_ALLOWED_HOSTS: mock-providers,fcm.googleapis.com,updates.push.services.mozilla.com,*.push.apple.com,*.notify.windows.com
       # The worker renders the board and FP&A pack (16a) into the DocumentStore, so it needs the
       # same store as the API: the internal endpoint to write, the public one to sign download links.
       DOCUMENT_STORE_ENDPOINT: http://minio:9000
