@@ -73,6 +73,8 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `tax.publish`            |  –  |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `benefits.read`          |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  –  |  –  |
 | `benefits.manage`        |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `finance_export.read`    |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  T  |  –  |
+| `finance_export.manage`  |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 
 Phase 1 enforces `tenant.read`, `budget.*`, `ledger.*`, `audit.read` and `integrity.*` through the API and proves them with API scenarios (`scope/director-isolation.spec.ts`, `budgets/over-allocation.spec.ts`, `ledger/reversal.spec.ts`, `audit/hash-chain.spec.ts`, `ledger/rebuild-check.spec.ts`). Phase 3 enforces `org.read`, `org.manage`, `headcount.import`, `master_data.manage`, `period.manage`, `fx.manage` and `doa.read` on the org and finance endpoints (`org/scope-visibility.spec.ts`, `org/effective-dating.spec.ts`, `org/imports.spec.ts`, `finance/*.spec.ts`); org and finance reference data (cost centers, legal entities, calendars, rates, GL, reason codes, vendors) is readable with `tenant.read`. Phase 6 enforces `actuals.manage` (imports, matching, mapping rules, commitment hygiene, accruals, prepaids, tie-out preparation and explanations, event close), `actuals.read` (finance and auditors read actuals, tie-outs, accruals and reconciliations) and `gl.sign_off` (finance admins sign off a tie-out they did not prepare); over-budget request decisions use `request.approve` on the budget plus the DoA limit and approval hygiene (`actuals/*.spec.ts`). Phase 7 adds three actions. `rules.read` opens the rules and policies section (`/admin/rules`) to Finance, the CEO and auditors; `rules.manage` lets Finance Admins create, edit, publish, retire and reorder rules and publish policy sections and approval routes; `exception.resolve` lets Finance Admins and Finance Controllers settle post-spend exceptions, with a reclassification additionally needing `ledger.reverse`. The CEO gains `doa.manage` because approving a delegation-of-authority version needs a second person who is not the Finance Admin who submitted it (`rules/workflows-authority.spec.ts`). Phase 12 adds two read actions. `integration.read` opens the integrations area (092-101) to the Integration Admin, Finance, the CEO and auditors, while only `integration.manage` connects, configures, synchronises, retries, pushes, issues API keys and SCIM tokens and manages webhook endpoints (`integrations/*.spec.ts`). `event.read` exists so a public API key can read events without holding `event.manage`, which writes. A public API key authorizes as a **service identity**: `Actor.serviceScopes` lists the actions its scopes grant at tenant scope and replaces role grants entirely, so a key can only do what its scopes name and there is no scope for approving, applying controls or moving money. The other actions are reserved for their phases; a phase that needs a new action adds it to `ACTIONS` and `ROLE_GRANTS` (shared surface, integrator) and regenerates this table.
 
@@ -86,6 +88,13 @@ Admin, Finance Admin, Finance Controller, Auditor). Retention policies stay read
 Phase 18 found and closed two operator reads (event templates and headcount); a sweep scenario keeps
 every parameter-free GET endpoint closed to a platform operator without a grant
 (`apps/api-e2e/src/scope/operator-isolation.spec.ts`).
+
+Gap B5 adds two actions for finance and payroll exports (094b). `finance_export.read` lists exports and
+their delivery status (Finance Admin, Finance Controller, Auditor, Integration Admin); opening an
+export's lines or files also needs `actuals.read` for journal exports or `benefits.read` for payroll
+exports, which carry personal data, so the Integration Admin sees the list and statuses but no lines.
+`finance_export.manage` (Finance Admin only) creates, re-sends and marks exports posted
+(`finance/finance-exports.spec.ts`).
 
 ## Ownership is not authority
 

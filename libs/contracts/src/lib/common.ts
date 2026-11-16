@@ -343,6 +343,11 @@ export const PROBLEM_CODES = [
   'REPORT_EXPORT_NO_FILE',
   'REPORT_EXPORT_EXPIRED',
   'BOARD_PACK_NO_SNAPSHOT',
+  // Finance and payroll exports (094b, gap B5)
+  'FINANCE_EXPORT_NOT_BALANCED',
+  'FINANCE_EXPORT_NOTHING_TO_EXPORT',
+  'FINANCE_EXPORT_REASON_REQUIRED',
+  'FINANCE_EXPORT_ALREADY_POSTED',
   // AI layer (P13). AI suggests; people decide: none of these ever authorize a financial action.
   'AI_FEATURE_DISABLED',
   'AI_PROVIDER_NOT_CONFIGURED',

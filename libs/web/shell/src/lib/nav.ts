@@ -300,6 +300,12 @@ export const NAV: NavGroup[] = [
         icon: 'user_group',
         permission: 'benefits.read',
       },
+      {
+        label: 'Finance exports',
+        path: '/finance/exports',
+        icon: 'download',
+        permission: 'finance_export.read',
+      },
     ],
   },
   {
