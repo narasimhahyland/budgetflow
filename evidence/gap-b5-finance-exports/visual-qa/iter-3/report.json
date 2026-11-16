@@ -1,0 +1,86 @@
+{
+  "generatedAt": "2026-11-12T13:34:43.690Z",
+  "base": "http://localhost:41200",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 9,
+  "blocking": 0,
+  "warnings": 0,
+  "results": [
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "new-export",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--new-export--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "new-export",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--new-export--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "new-export",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--new-export--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "forbidden",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--forbidden--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "forbidden",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--forbidden--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "094b-finance-payroll-exports",
+      "state": "forbidden",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b5-finance-exports/visual-qa/iter-3/screens/094b-finance-payroll-exports--forbidden--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "request": "GET /api/finance/exports (as super-admin without a grant; token redacted)",
+  "status": 404,
+  "body": {
+    "type": "urn:budgetflow:problem:not-found",
+    "title": "Not found",
+    "status": 404,
+    "code": "NOT_FOUND",
+    "detail": "The finance exports does not exist or you cannot see it.",
+    "instance": "/api/finance/exports"
+  }
+}
