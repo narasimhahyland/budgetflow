@@ -64,7 +64,7 @@ request; it now does, and every decision is recorded with its rule versions and 
 | **B4** Reclaim and burn rate                   | 086a reclaim-and-redistribute campaigns, and burn-rate alerts.                                                                                                                                                                                                                    | D2              | M    |
 | **B5** Finance exports                         | 094b: intercompany recharges, chargeback and reclass journals, payroll benefit data.                                                                                                                                                                                              | B3 for benefits | M    |
 | **B6** Developer portal                        | 101a public API docs and sandbox (only `/api/openapi.json` exists). The sandbox overlaps the deferred demo environment, so scope it first.                                                                                                                                        | D2              | M    |
-| **B7** Integration completeness                | Apply an Adaptive Planning import (plan to root budgets; today preview only), Outlook and Google RSVP sync, vendor master from the ERP (both read and reported only), Workday `runBudgetCheck`, 117a hand-off to a prefilled expense.                                             | —               | M–L  |
+| **B7** Integration completeness — **done**     | Apply an Adaptive Planning import (plan to root budgets; today preview only), Outlook and Google RSVP sync, vendor master from the ERP (both read and reported only), Workday `runBudgetCheck`, 117a hand-off to a prefilled expense.                                             | —               | M–L  |
 | **B8** Installable app and push                | 059a's installable mobile web app (web manifest, service worker) and real push delivery (today a row is recorded, nothing is sent).                                                                                                                                               | D5              | M    |
 | **B9** AI jobs                                 | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                     | —               | S–M  |
 | **B10** Experience                             | Onboarding wizard (005, 008, 010), 104 permission matrix, 124 profile and preferences, global search, 106 categories and custom fields (read-only today), 116a team budget card, 113 integrity-checks tab. Split by area.                                                         | D2              | L    |
@@ -106,10 +106,28 @@ payroll export tab and batches (the ledger shows the reportable amounts B5 expor
 follow-ups: the screens' CSV/XLSX/PDF export, employees seeing their own benefits (122), and the
 071 cap reading the benefit ledger instead of live request consumption.
 
+**B7 done.** Connector imports are applied, not only reported, each through the service a person
+would use. Adaptive Planning (094a): the plan becomes a Draft plan version through the P4 plan
+import, carrying unmentioned roots over, refusing the whole import with each row's reason (unmapped,
+bad amount, duplicate, other currency, unknown year, below the floor) and flagging a plan effective
+in a closed period as late; it posts only once approved and applied. ERP suppliers enter the vendor
+master as Unknown for review (106c); Outlook and Google Calendar responses become RSVPs by the event
+rules, last answer wins. The connector identity holds two new actions, `vendor.import` and
+`event.rsvp_sync`. Workday Financials `runBudgetCheck` (094) runs before approval: Warn shows and
+records it, Block refuses with the ERP's reason. 117a hands an approved request to a prefilled
+Concur draft once, with progress synced back. Migration `0027` (expense hand-offs). Proof:
+`apps/api-e2e/src/integrations/applied-imports.spec.ts`, `budget-check-and-handoff.spec.ts` and
+`connector-coverage.spec.ts` (invariants 130-136), journeys in
+`apps/web-e2e/src/integrations/applied-imports.spec.ts`. Evidence:
+[`evidence/gap-b7-integrations/`](../evidence/gap-b7-integrations/README.md). Left as follow-ups:
+the decision form does not yet disable Approve in Block mode (the API refuses and the card says
+why), email and chat decisions skip the ERP check, the hand-off sends no receipt, and unique indexes
+on plan version labels per year and vendor ERP ids.
+
 ## Tier C — prove what is built but thinly covered
 
-- Connector scenarios for Odoo, Workday (HCM and Financials), NetSuite, Brex, Coupa and Google
-  Calendar: each has a definition and no API scenario (Navan comes with B1).
+- ~~Connector scenarios for Odoo, Workday (HCM and Financials), NetSuite, Brex, Coupa and Google
+  Calendar~~ — **done with B7** (`integrations/connector-coverage.spec.ts`, invariant 136).
 - The board pack's constant-currency variance: no scenario or journey.
 - The approval routing workflow builder (070): no journey.
 - Intercompany markup and the tax approver, cancellation fees, period and seasonal phasing, cascade:
