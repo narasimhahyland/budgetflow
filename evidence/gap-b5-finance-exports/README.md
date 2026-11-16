@@ -108,9 +108,9 @@ The full visual suite in the first gate run failed broadly: 739 failed and 258 p
 with browser crashes and 15-second waits failing on every screen while seven stacks shared the
 machine. The re-runs ([`visual-rerun.txt`](visual-rerun.txt)) pass every non-AI screen, 094b included.
 The AI screens differ because this worktree's stack has no Bedrock credentials, so the seed skips
-their data, and `101-api-keys` fails on main too. One baseline outside 094b was updated on purpose:
-`092-integrations-hub--read-only--tablet.png`, because the auditor's navigation rail gains "Finance
-exports".
+their data, and `101-api-keys` fails on main too. After merging main (B4 and B8 added navigation items), a tablet visual run passes every screen
+except `113a` (AI data): the "Finance exports" item no longer changes any baseline outside 094b, so the
+interim `092` tablet baseline update was dropped in favour of main's.
 
 ## Migration and shared surfaces
 

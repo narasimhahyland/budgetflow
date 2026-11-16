@@ -22,3 +22,7 @@ Visual re-runs after the first full gate (12-13 November), on a machine running 
 4. Intentional baseline update: 092-integrations-hub--read-only--tablet.png, recreated with
    `--update-snapshots -g "092-integrations-hub read-only"` in the pinned image (desktop and mobile
    unchanged). Reason: the Finance exports navigation item for roles with finance_export.read.
+
+5. After merging origin/main (B2 part 2, B4, B8), 16 November: tablet visual run in the pinned image,
+   363 passed, 1 failed (113a query-log, AI data as in 3). 094b and 092 read-only tablet pass against
+   their baselines, so the interim 092 update in 4 is superseded by main's baseline.
