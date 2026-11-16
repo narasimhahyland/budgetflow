@@ -183,9 +183,15 @@ export class AiOutlookService {
             highMinor: computed.highMinor,
             gapMinor: computed.gapMinor,
             category: computed.category,
-            confidence: result?.output?.confidence ?? null,
-            drivers: (result?.output?.drivers ?? []) as unknown as object,
-            suggestionId: suggestion?.id ?? null,
+            // A model call that failed keeps the drivers and nudge an earlier run wrote for the
+            // same day: an outage never wipes what the screen already shows.
+            ...(result?.outcome === 'failed'
+              ? {}
+              : {
+                  confidence: result?.output?.confidence ?? null,
+                  drivers: (result?.output?.drivers ?? []) as unknown as object,
+                  suggestionId: suggestion?.id ?? null,
+                }),
           },
         });
       stats.results++;

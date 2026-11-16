@@ -127,12 +127,6 @@ async function setFeature(request: APIRequestContext, feature: string, enabled: 
   expect(view.features.find((f) => f.feature === feature)?.enabled).toBe(enabled);
 }
 
-/** A past date no other run of this tenant uses, so the scenario owns its night. */
-const freshPastDate = () => {
-  const day = 1 + (parseInt(randomUUID().slice(0, 6), 16) % 2000);
-  return new Date(Date.UTC(2020, 0, 1) + day * 86_400_000).toISOString().slice(0, 10);
-};
-
 test.describe.configure({ mode: 'serial' });
 
 test.describe('nightly AI scans', () => {
@@ -224,10 +218,10 @@ test.describe('nightly AI scans', () => {
 
     // A second sweep, and the run's own job delivered again.
     await runNightlyAndSettle(tonight);
-    const scansBefore = await completedJobs('ai.scan');
+    const scansBefore = await completedJobs('ai.scan.execute');
     await publish('ai.scan', { runId: acmeOutlook.id });
     await expect
-      .poll(() => completedJobs('ai.scan'), { timeout: 30_000 })
+      .poll(() => completedJobs('ai.scan.execute'), { timeout: 30_000 })
       .toBeGreaterThan(scansBefore);
 
     const after = await nightlyRuns(tonight);
@@ -295,7 +289,6 @@ test.describe('nightly AI scans', () => {
   });
 
   test('a switched-off feature skips its run without calling the model', async ({ request }) => {
-    const night = freshPastDate();
     await setFeature(request, 'outlook', false);
     try {
       const logBefore = await count(
@@ -305,7 +298,7 @@ test.describe('nightly AI scans', () => {
       const queued = await expectContract(
         await request.post('/api/ai/scan-runs', {
           headers: await mutate('org-admin'),
-          data: { feature: 'outlook', runDate: night },
+          data: { feature: 'outlook', budgetIds: [SEED.budgets.bengaluru] },
         }),
         202,
         AiScanRun,
@@ -323,28 +316,35 @@ test.describe('nightly AI scans', () => {
           `select count(*)::text as n from ai_query_log where feature = 'outlook' and tenant_id = $1`,
           [ACME],
         ),
+        'no model call while the switch is off',
       ).toBe(logBefore);
+      // A skipped run is final: delivering its job again changes nothing.
+      await publish('ai.scan', { runId: queued.id });
+      const scansBefore = await completedJobs('ai.scan.execute');
+      await expect
+        .poll(() => completedJobs('ai.scan.execute'), { timeout: 30_000 })
+        .toBeGreaterThan(scansBefore);
       expect(
-        await count(
-          `select count(*)::text as n from ai_outlook_snapshots where tenant_id = $1 and as_of_date = $2`,
-          [ACME, night],
+        await expectContract(
+          await request.get(`/api/ai/scan-runs/${queued.id}`, { headers: await as('org-admin') }),
+          200,
+          AiScanRun,
         ),
-      ).toBe(0);
-
-      // Turning the feature back on does not reopen a night that was skipped: it is final.
-      await setFeature(request, 'outlook', true);
-      const again = await expectContract(
-        await request.post('/api/ai/scan-runs', {
-          headers: await mutate('org-admin'),
-          data: { feature: 'outlook', runDate: night },
-        }),
-        202,
-        AiScanRun,
-      );
-      expect(again).toMatchObject({ id: queued.id, status: 'skipped' });
+      ).toMatchObject({ status: 'skipped', attempts: 1 });
     } finally {
       await setFeature(request, 'outlook', true);
     }
+    // Switched back on, the same scan calls the model again.
+    const again = await expectContract(
+      await request.post('/api/ai/scan-runs', {
+        headers: await mutate('org-admin'),
+        data: { feature: 'outlook', budgetIds: [SEED.budgets.bengaluru] },
+      }),
+      202,
+      AiScanRun,
+    );
+    const done = await waitForRun(request, again.id, (r) => r.status === 'completed');
+    expect(done.modelCalls).toBe(1);
   });
 
   test('a model outage retries with backoff, then the run fails and the job is dead-lettered', async ({
@@ -374,6 +374,13 @@ test.describe('nightly AI scans', () => {
       AiScanRun,
     );
     expect(queued).toMatchObject({ trigger: 'manual', scopeCount: 1, status: 'queued' });
+
+    // While the run waits for a retry, the request's job delivered again and a nightly sweep must
+    // not start a second execution: the execution queue holds one live job per run.
+    await waitForRun(request, queued.id, (r) => r.status === 'retrying');
+    await publish('ai.scan', { runId: queued.id });
+    await publish('ai.scan', { runId: queued.id });
+    await publish('ai.scan_nightly', {});
 
     const failed = await waitForRun(request, queued.id, (r) => r.status === 'failed', 90_000);
     // The first attempt and three retries, each calling the model once and failing.
@@ -462,20 +469,20 @@ test.describe('nightly AI scans', () => {
       403,
       'FORBIDDEN',
     );
-    // A night that has not happened cannot be scanned.
+    // A scan is always for tonight: no other night can be asked for (it would rewrite history).
     await expectProblem(
       await request.post('/api/ai/scan-runs', {
         headers: await mutate('finance-admin'),
-        data: { feature: 'outlook', runDate: '2099-01-01' },
+        data: { feature: 'outlook', runDate: '2026-01-01' },
       }),
-      422,
+      400,
       'VALIDATION_FAILED',
     );
     // Queuing writes one audit entry naming the person; the scan itself writes none.
     const queued = await expectContract(
       await request.post('/api/ai/scan-runs', {
         headers: await mutate('finance-admin'),
-        data: { feature: 'anomaly_flags', runDate: freshPastDate() },
+        data: { feature: 'anomaly_flags', budgetIds: [SEED.budgets.bengaluru] },
       }),
       202,
       AiScanRun,

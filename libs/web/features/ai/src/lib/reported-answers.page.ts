@@ -307,7 +307,8 @@ export class ReviewReportDialog {
     <sat-banner variant="info" data-testid="reported-retention">
       <sat-banner-message>
         Question and answer text is kept 90 days, and only when the person chose "Include my
-        question and the answer". The report, its reason and the review note stay.
+        question and the answer". The reporter's note goes after 90 days too; the report, its reason
+        and the review note stay.
       </sat-banner-message>
     </sat-banner>
   `,

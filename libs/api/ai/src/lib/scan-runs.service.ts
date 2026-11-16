@@ -28,8 +28,15 @@ import { AiOutlookService, type ScanStats } from './features/outlook.service';
 import type { CommandContext } from './settings.service';
 import { AiSettingsService } from './settings.service';
 
-/** Worker queue for one scan run; the outbox drain and the nightly sweep both feed it. */
+/**
+ * Outbox topic for a requested run. Its worker only hands the run to `AI_SCAN_EXECUTE`, keyed by
+ * the run id, so however a run is queued (API, sweep, redelivery) it has one live job at a time.
+ */
 export const AI_SCAN_TOPIC = 'ai.scan';
+/** The execution queue: `exclusive` policy, singleton key = run id, retries, dead letter. */
+export const AI_SCAN_EXECUTE = 'ai.scan.execute';
+/** Nightly removal of reported-answer text past its 90 days (gap B9), separate from the scans. */
+export const AI_REPORT_TEXT_NIGHTLY = 'ai.report_text_retention';
 /** Nightly schedule: creates each tenant's runs for the night and queues them. */
 export const AI_SCAN_NIGHTLY = 'ai.scan_nightly';
 /** Retries after the first attempt before the job moves to the dead-letter queue. */
@@ -161,7 +168,13 @@ export class AiScanRunsService {
         const [row] = await tx
           .select()
           .from(aiScanRuns)
-          .where(and(eq(aiScanRuns.feature, feature), eq(aiScanRuns.status, 'completed')))
+          .where(
+            and(
+              eq(aiScanRuns.feature, feature),
+              eq(aiScanRuns.trigger, 'nightly'),
+              eq(aiScanRuns.status, 'completed'),
+            ),
+          )
           .orderBy(desc(aiScanRuns.runDate), desc(aiScanRuns.completedAt), desc(aiScanRuns.id))
           .limit(1);
         if (row) latest.push(row);
@@ -195,11 +208,9 @@ export class AiScanRunsService {
         status: 202,
       },
       async (tx) => {
-        const runDate = req.runDate ?? todayUtc();
-        if (runDate > todayUtc())
-          throw new ApiProblem(422, 'VALIDATION_FAILED', 'Choose today or an earlier date.', {
-            field: 'runDate',
-          });
+        // Always tonight: a scan reads today's ledger, so a past night would be rewritten with
+        // figures it never had.
+        const runDate = todayUtc();
         let run: RunRow;
         let changed: { from: string | null; to: string } | null = null;
         if (req.budgetIds) {
@@ -226,12 +237,18 @@ export class AiScanRunsService {
           run = ensured.run;
           if (ensured.created) changed = { from: null, to: 'queued' };
           else if (run.status === 'failed') {
-            [run] = await tx
+            // Conditional, so two requests racing on one failed run requeue it (and audit it) once.
+            const [requeued] = await tx
               .update(aiScanRuns)
               .set({ status: 'queued', error: null, completedAt: null })
-              .where(eq(aiScanRuns.id, run.id))
+              .where(and(eq(aiScanRuns.id, run.id), eq(aiScanRuns.status, 'failed')))
               .returning();
-            changed = { from: 'failed', to: 'queued' };
+            if (requeued) {
+              run = requeued;
+              changed = { from: 'failed', to: 'queued' };
+            } else {
+              [run] = await tx.select().from(aiScanRuns).where(eq(aiScanRuns.id, run.id));
+            }
           }
         }
         if (changed) {
@@ -295,13 +312,18 @@ export class AiScanRunsService {
     );
     const due: { tenantId: string; runId: string }[] = [];
     for (const t of all) {
-      await withTenant(this.db, { tenantId: t.id, subject: SCAN_SUBJECT }, async (tx) => {
-        for (const feature of AI_SCAN_FEATURES) {
-          const { run } = await this.ensureNightly(tx, t.id, feature, runDate, null);
-          if (run.status === 'queued' || run.status === 'retrying')
-            due.push({ tenantId: t.id, runId: run.id });
-        }
-      });
+      // One tenant failing never stops the others; its runs are picked up by the next sweep.
+      try {
+        await withTenant(this.db, { tenantId: t.id, subject: SCAN_SUBJECT }, async (tx) => {
+          for (const feature of AI_SCAN_FEATURES) {
+            const { run } = await this.ensureNightly(tx, t.id, feature, runDate, null);
+            if (run.status === 'queued' || run.status === 'retrying')
+              due.push({ tenantId: t.id, runId: run.id });
+          }
+        });
+      } catch (e) {
+        this.log.error(`nightly AI scan sweep failed for a tenant: ${(e as Error).message}`);
+      }
     }
     return due;
   }

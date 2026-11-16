@@ -141,6 +141,8 @@ test('reading reported answers follows the query log; reviewing needs AI adminis
   );
   const audit = await auditEvents(request, created.id);
   expect(audit.map((e) => e.action).sort()).toEqual(['ai.answer.reported', 'ai.answer.reviewed']);
+  // The review note stays on the report, never in the immutable audit chain.
+  expect(JSON.stringify(audit)).not.toContain('Figure matches the ledger');
 
   // The status filter narrows in SQL; counts cover the whole tenant.
   const onlyNew = await expectContract(
@@ -169,30 +171,38 @@ test('the nightly job removes report text after 90 days and keeps the report', a
     201,
     AiReportedAnswer,
   );
-  // Age the scenario's own report past its 90 days, then let the nightly job run.
+  // Age the scenario's own report past its 90 days: the text is hidden at once, before any job.
   await asOwner((c) =>
     c.query(
       `update ai_reported_answers set text_expires_at = '2026-01-01T00:00:00Z' where id = $1`,
       [created.id],
     ),
   );
+  const hidden = (await list(request, 'auditor')).items.find((r) => r.id === created.id)!;
+  expect(hidden).toMatchObject({ question: null, answer: null, note: null, status: 'new' });
+
+  // The nightly removal then clears it in the database; the report itself stays.
   await asOwner((c) =>
     c.query(
-      `insert into outbox_messages (tenant_id, topic, payload) values ($1, 'ai.scan_nightly', '{}')`,
+      `insert into outbox_messages (tenant_id, topic, payload) values ($1, 'ai.report_text_retention', '{}')`,
       [SEED.tenants.acme],
     ),
   );
+  const stored = () =>
+    asOwner(
+      async (c) =>
+        (
+          await c.query<{ question: string | null; note: string | null; removed: boolean }>(
+            `select question, note, text_removed_at is not null as removed
+               from ai_reported_answers where id = $1`,
+            [created.id],
+          )
+        ).rows[0],
+    );
   await expect
-    .poll(
-      async () => (await list(request, 'auditor')).items.find((r) => r.id === created.id)?.question,
-      { timeout: 60_000, intervals: [500, 1000, 2000] },
-    )
-    .toBeNull();
+    .poll(async () => (await stored()).removed, { timeout: 60_000, intervals: [500, 1000, 2000] })
+    .toBe(true);
+  expect(await stored()).toMatchObject({ question: null, note: null });
   const after = (await list(request, 'auditor')).items.find((r) => r.id === created.id)!;
-  expect(after).toMatchObject({
-    includesText: true,
-    answer: null,
-    reason: 'wrong_figure',
-    status: 'new',
-  });
+  expect(after).toMatchObject({ includesText: true, reason: 'wrong_figure', status: 'new' });
 });

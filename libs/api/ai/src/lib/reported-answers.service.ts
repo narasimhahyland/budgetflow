@@ -89,8 +89,11 @@ export class AiReportedAnswersService {
           ]),
         )
       : new Map<string, typeof aiQueryLog.$inferSelect>();
+    // Text past its 90 days is never shown, even before the nightly removal has run.
+    const now = nowUtc();
     return rows.map((r) => {
       const log = r.queryLogId ? logs.get(r.queryLogId) : undefined;
+      const expired = r.textExpiresAt <= now;
       return {
         id: r.id,
         reportedAt: iso(r.reportedAt)!,
@@ -98,10 +101,10 @@ export class AiReportedAnswersService {
         feature: r.feature as AiFeature,
         channel: r.channel as AiChannel,
         reason: r.reason as AiReportedAnswer['reason'],
-        note: r.note,
+        note: expired ? null : r.note,
         includesText: r.includesText,
-        question: r.question,
-        answer: r.answer,
+        question: expired ? null : r.question,
+        answer: expired ? null : r.answer,
         recordsUsed: ((log?.factRefs as AiSourceRef[] | undefined) ?? []).length,
         queryLogId: r.queryLogId,
         modelId: log?.modelId ?? null,
@@ -253,7 +256,8 @@ export class AiReportedAnswersService {
           resourceType: 'ai_reported_answer',
           resourceId: row.id,
           requestId: ctx.requestId,
-          reason: req.note,
+          // The review note stays on the report; free text never enters the immutable audit chain.
+          reason: 'Reported answer reviewed',
           changes: { status: { from: 'new', to: 'reviewed' } },
         });
         return (await this.view(tx, [updated]))[0];
@@ -269,19 +273,15 @@ export class AiReportedAnswersService {
     return removed;
   }
 
-  /** Nightly (worker): removes question and answer text past its 90 days; the report stays. */
+  /** Nightly (worker): removes question, answer and note text past its 90 days; the report stays. */
   async removeExpiredText(tenantId: string): Promise<number> {
     return withTenant(this.db, { tenantId, subject: 'system:ai-scan' }, async (tx) => {
       const now = nowUtc();
       const rows = await tx
         .update(aiReportedAnswers)
-        .set({ question: null, answer: null, textRemovedAt: now })
+        .set({ question: null, answer: null, note: null, textRemovedAt: now })
         .where(
-          and(
-            eq(aiReportedAnswers.includesText, true),
-            isNull(aiReportedAnswers.textRemovedAt),
-            lte(aiReportedAnswers.textExpiresAt, now),
-          ),
+          and(isNull(aiReportedAnswers.textRemovedAt), lte(aiReportedAnswers.textExpiresAt, now)),
         )
         .returning({ id: aiReportedAnswers.id });
       return rows.length;

@@ -3356,14 +3356,8 @@
             ],
             "description": "An AI feature that also runs as a nightly scan in the worker."
           },
-          "runDate": {
-            "description": "Defaults to today (UTC); never a future date.",
-            "type": "string",
-            "format": "date",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
-          },
           "budgetIds": {
-            "description": "Limit a manual run to these budgets. Without it the request queues (or returns) the nightly run of the date.",
+            "description": "Limit a manual run to these budgets. Without it the request queues (or returns) the nightly run of tonight. Runs are always for today (UTC).",
             "minItems": 1,
             "maxItems": 50,
             "type": "array",

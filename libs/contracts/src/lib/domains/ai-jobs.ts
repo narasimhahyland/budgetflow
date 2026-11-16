@@ -87,14 +87,13 @@ export const AiScanRunRequest = named(
   z
     .object({
       feature: AiScanFeature,
-      runDate: IsoDate.optional().describe('Defaults to today (UTC); never a future date.'),
       budgetIds: z
         .array(Id)
         .min(1)
         .max(50)
         .optional()
         .describe(
-          'Limit a manual run to these budgets. Without it the request queues (or returns) the nightly run of the date.',
+          'Limit a manual run to these budgets. Without it the request queues (or returns) the nightly run of tonight. Runs are always for today (UTC).',
         ),
     })
     .strict(),

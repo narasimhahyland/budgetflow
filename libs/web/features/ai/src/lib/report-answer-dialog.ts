@@ -56,8 +56,8 @@ export const REPORT_REASON_LABELS: Record<AiReportReason, string> = {
         Include my question and the answer
       </mat-slide-toggle>
       <p class="bf-dialog__hint">
-        AI administrators see the text for 90 days. Without it they see only the reason and your
-        note.
+        AI administrators see your note, and the text if you include it, for 90 days. Without the
+        text they see only the reason and your note.
       </p>
       @if (error(); as e) {
         <p class="bf-dialog__error" role="alert">{{ e }}</p>
