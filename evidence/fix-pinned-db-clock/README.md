@@ -94,10 +94,12 @@ whole API suite).
 
 ## Gates
 
-- `scripts/gate.sh` (all modes): every step passed ([`gate-summary.txt`](gate-summary.txt)): lint,
-  typecheck, build, functional-api, functional-e2e, visual (1,049 passed).
-- After tightening the scenario: `scripts/gate.sh static functional-api` passed
-  ([`gate-summary-rerun.txt`](gate-summary-rerun.txt)).
+- Final, on the branch with `main` (B8) merged: `scripts/gate.sh` (all modes) passed every step
+  ([`gate-summary-final.txt`](gate-summary-final.txt)): lint, typecheck, build, functional-api,
+  functional-e2e, visual (1,055 passed). The scenario on its own afterwards:
+  [`functional/pinned-clock-scenario.txt`](functional/pinned-clock-scenario.txt) (2 passed).
+- Earlier iterations: [`gate-summary.txt`](gate-summary.txt) (all modes, before the merge) and
+  [`gate-summary-rerun.txt`](gate-summary-rerun.txt) (static and functional-api after tightening).
 - Visual baselines: none changed. The one state that moved in iteration 1 (`066-rules-overview`) was
   caused by the advancing `nowUtc()`, which was reverted; no baseline was updated.
 
