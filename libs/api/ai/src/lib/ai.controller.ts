@@ -10,6 +10,10 @@ import {
   AiFeature,
   AiFeedbackRequest,
   AiMatchSuggestionRunRequest,
+  AiReportAnswerRequest,
+  AiReviewReportRequest,
+  AiScanFeature,
+  AiScanRunRequest,
   AiSettings,
   AiSuggestionDecisionRequest,
   AiFeatureSwitchRequest,
@@ -43,6 +47,8 @@ import { AiOutlookService } from './features/outlook.service';
 import { AiPolicyAssistantService } from './features/policy-assistant.service';
 import { AiQueryLogService } from './query-log.service';
 import { AiSettingsService, type CommandContext } from './settings.service';
+import { AiReportedAnswersService } from './reported-answers.service';
+import { AiScanRunsService } from './scan-runs.service';
 import { AiSuggestionsService } from './suggestions.service';
 
 const Uuid = z.uuid();
@@ -84,6 +90,13 @@ const FlagQuery = z
       .optional(),
   })
   .strict();
+const ScanRunQuery = z
+  .object({
+    feature: AiScanFeature.optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+  })
+  .strict();
+const ReportedQuery = z.object({ status: z.enum(['new', 'reviewed']).optional() }).strict();
 const LogQuery = z
   .object({
     feature: AiFeature.optional(),
@@ -127,6 +140,8 @@ export class AiController {
     private readonly settings: AiSettingsService,
     private readonly log: AiQueryLogService,
     private readonly evaluations: AiEvaluationsService,
+    private readonly scanRuns: AiScanRunsService,
+    private readonly reported: AiReportedAnswersService,
   ) {}
 
   @Post('ask')
@@ -314,5 +329,73 @@ export class AiController {
   @Get('accuracy')
   accuracy(@CurrentActor() actor: RequestActor) {
     return this.evaluations.accuracy(actor);
+  }
+
+  // Gap B9: nightly scans and reported answers ----------------------------------------------------
+
+  @Get('scan-runs')
+  scanRunList(@CurrentActor() actor: RequestActor, @Query() query: unknown) {
+    return this.scanRuns.list(actor, parseWith(ScanRunQuery, query));
+  }
+
+  @Post('scan-runs')
+  @HttpCode(202)
+  async requestScanRun(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.scanRuns.request(actor, parseWith(AiScanRunRequest, body), ctx(key, rid)),
+    );
+  }
+
+  @Get('scan-runs/:runId')
+  scanRun(@CurrentActor() actor: RequestActor, @Param('runId') runId: string) {
+    return this.scanRuns.get(actor, id(runId));
+  }
+
+  @Post('reported-answers')
+  @HttpCode(201)
+  async reportAnswer(
+    @CurrentActor() actor: RequestActor,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.reported.report(actor, parseWith(AiReportAnswerRequest, body), ctx(key, rid)),
+    );
+  }
+
+  @Get('reported-answers')
+  reportedAnswers(@CurrentActor() actor: RequestActor, @Query() query: unknown) {
+    return this.reported.list(actor, parseWith(ReportedQuery, query));
+  }
+
+  @Post('reported-answers/:reportId/review')
+  @HttpCode(200)
+  async reviewReported(
+    @CurrentActor() actor: RequestActor,
+    @Param('reportId') reportId: string,
+    @IdempotencyKey() key: string,
+    @RequestId() rid: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ) {
+    return replayed(
+      res,
+      await this.reported.review(
+        actor,
+        id(reportId),
+        parseWith(AiReviewReportRequest, body),
+        ctx(key, rid),
+      ),
+    );
   }
 }

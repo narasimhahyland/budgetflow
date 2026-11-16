@@ -8,6 +8,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { budgets } from './budgets';
 import { appNow, ccy, createdAt, day, minor, pk, tenantRef, ts, updatedAt } from './_columns';
 import { people } from './org';
@@ -187,4 +188,75 @@ export const aiEvaluationRuns = pgTable(
     runAt: ts('run_at').notNull().default(appNow),
   },
   (t) => [index('ai_evaluation_runs_feature').on(t.tenantId, t.feature, t.metric, t.runAt)],
+);
+
+/**
+ * Gap B9: one AI scan run executed by the worker (016b outlook, 017c anomaly flags). The nightly run
+ * is unique per tenant, feature and date, so a redelivered or replayed job finds its run and does
+ * nothing more. A run only writes suggestions and snapshots; never a ledger line, approval or rule.
+ */
+export const aiScanRuns = pgTable(
+  'ai_scan_runs',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    feature: text('feature').notNull(),
+    runDate: day('run_date').notNull(),
+    trigger: text('trigger').notNull(),
+    status: text('status').notNull().default('queued'),
+    skipReason: text('skip_reason'),
+    /** Manual runs limited to some budgets; null scans every budget of the tenant. */
+    budgetIds: uuid('budget_ids').array(),
+    evaluatedCount: integer('evaluated_count').notNull().default(0),
+    resultCount: integer('result_count').notNull().default(0),
+    modelCalls: integer('model_calls').notNull().default(0),
+    failedModelCalls: integer('failed_model_calls').notNull().default(0),
+    attempts: integer('attempts').notNull().default(0),
+    error: text('error'),
+    requestedByPersonId: uuid('requested_by_person_id').references(() => people.id),
+    createdAt: createdAt(),
+    startedAt: ts('started_at'),
+    completedAt: ts('completed_at'),
+  },
+  (t) => [
+    uniqueIndex('ai_scan_runs_nightly')
+      .on(t.tenantId, t.feature, t.runDate)
+      .where(sql`${t.trigger} = 'nightly'`),
+    index('ai_scan_runs_tenant').on(t.tenantId, t.feature, t.runDate, t.createdAt),
+  ],
+);
+
+/**
+ * Answers people reported from 011a with "Report a problem" (113a, Query log > Reported answers).
+ * Text is kept only when the reporter chose "Include my question and the answer", and the nightly
+ * job removes it after 90 days; the report itself (reason, status, review note) stays.
+ */
+export const aiReportedAnswers = pgTable(
+  'ai_reported_answers',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    reportedAt: ts('reported_at').notNull().default(appNow),
+    reporterPersonId: uuid('reporter_person_id').references(() => people.id),
+    reporterSubject: text('reporter_subject').notNull(),
+    turnId: uuid('turn_id').notNull(),
+    queryLogId: uuid('query_log_id'),
+    feature: text('feature').notNull(),
+    channel: text('channel').notNull(),
+    reason: text('reason').notNull(),
+    note: text('note'),
+    includesText: boolean('includes_text').notNull(),
+    question: text('question'),
+    answer: text('answer'),
+    textExpiresAt: ts('text_expires_at').notNull(),
+    textRemovedAt: ts('text_removed_at'),
+    status: text('status').notNull().default('new'),
+    reviewNote: text('review_note'),
+    reviewedByPersonId: uuid('reviewed_by_person_id').references(() => people.id),
+    reviewedAt: ts('reviewed_at'),
+  },
+  (t) => [
+    uniqueIndex('ai_reported_answers_turn').on(t.tenantId, t.turnId),
+    index('ai_reported_answers_status').on(t.tenantId, t.status, t.reportedAt),
+  ],
 );

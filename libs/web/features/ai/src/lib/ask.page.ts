@@ -8,12 +8,13 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import type { AskAnswer, AskRequest } from '@bf/contracts';
+import type { AiReportedAnswer, AskAnswer, AskRequest } from '@bf/contracts';
 import { SessionStore } from '@bf/web/data-access';
 import { DateTimePipe, LoadState } from '@bf/web/ui';
 import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
@@ -22,6 +23,7 @@ import { SatInlineChip } from '@hylandsoftware/satori-ui/inline-chip';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { aiChannelLabel } from './ai-labels';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
+import { ReportAnswerDialog } from './report-answer-dialog';
 import { data, errorMessage, errorStatus, injectApi, problemCode, valueOf } from './api';
 
 /**
@@ -217,6 +219,21 @@ import { data, errorMessage, errorStatus, injectApi, problemCode, valueOf } from
                   @if (turn.answer.provenance.suggestionId) {
                     <bf-ai-feedback [rated]="turn.rated" (rating)="rate(turn.answer, $event)" />
                   }
+                  @if (turn.reported) {
+                    <span class="bf-cell__secondary" data-testid="answer-reported"
+                      >Reported. Thank you.</span
+                    >
+                  } @else {
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="report(turn.question, turn.answer, $event)"
+                      [attr.aria-label]="'Report a problem with the answer to: ' + turn.question"
+                      data-testid="report-answer"
+                    >
+                      Report a problem
+                    </button>
+                  }
                 </div>
               </div>
             </section>
@@ -368,6 +385,7 @@ export class AskPage {
   private readonly api = injectApi();
   private readonly route = inject(ActivatedRoute);
   private readonly snack = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
   protected readonly session = inject(SessionStore);
 
   private readonly query = this.route.snapshot.queryParamMap;
@@ -381,12 +399,38 @@ export class AskPage {
   protected readonly channelLabel = aiChannelLabel;
 
   /** Every AI output can be dismissed (ai-features); this only hides it from the page. */
+  /** 011a "Report a problem": the report is feedback for AI administrators, never an action. */
+  protected report(question: string, answer: AskAnswer, event: Event): void {
+    const trigger = event.currentTarget as HTMLElement | null;
+    this.dialog
+      .open<ReportAnswerDialog, { turnId: string; question: string }, AiReportedAnswer | null>(
+        ReportAnswerDialog,
+        { data: { turnId: answer.turnId, question }, width: '520px' },
+      )
+      .afterClosed()
+      .subscribe((report) => {
+        if (!report) {
+          trigger?.focus();
+          return;
+        }
+        this.turns.update((turns) =>
+          turns.map((t) => (t.answer.turnId === answer.turnId ? { ...t, reported: true } : t)),
+        );
+        this.snack.open('Report sent to your AI administrators.', 'Dismiss', { duration: 4000 });
+      });
+  }
+
   protected dismiss(turnId: string): void {
     this.turns.update((turns) => turns.filter((t) => t.answer.turnId !== turnId));
   }
 
   protected readonly turns = signal<
-    { question: string; answer: AskAnswer; rated: 'helpful' | 'not_helpful' | null }[]
+    {
+      question: string;
+      answer: AskAnswer;
+      rated: 'helpful' | 'not_helpful' | null;
+      reported?: boolean;
+    }[]
   >([]);
 
   protected readonly context = signal<AskRequest['context'] | undefined>(contextOf(this.query));

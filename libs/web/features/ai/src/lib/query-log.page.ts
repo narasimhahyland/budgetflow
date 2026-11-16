@@ -21,6 +21,7 @@ import { AiLabel, OUTCOME_LABELS, outcomeTone } from './ai-output';
 import { aiChannelLabel, aiFeatureLabel, fieldName, permissionLabel } from './ai-labels';
 import { AiTabs } from './ai-tabs';
 import { data, injectApi, valueOf } from './api';
+import { QueryLogTabs } from './query-log-tabs';
 
 /**
  * Screen 113a, Query log tab: the append-only record of who used which AI feature over which
@@ -39,6 +40,7 @@ import { data, injectApi, valueOf } from './api';
     MatFormFieldModule,
     MatSelectModule,
     MatTooltipModule,
+    QueryLogTabs,
     SAT_BANNER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
     SatStatusTag,
@@ -58,6 +60,7 @@ import { data, injectApi, valueOf } from './api';
     </header>
 
     <bf-ai-tabs class="bf-tabs" />
+    <bf-query-log-tabs class="bf-tabs" />
 
     <section class="bf-card" aria-labelledby="log-title">
       <div class="bf-card__header">

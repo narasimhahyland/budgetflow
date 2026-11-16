@@ -2995,6 +2995,27 @@
           "fullPage": false
         },
         {
+          "state": "report-dialog",
+          "actions": [
+            {
+              "fill": ["[data-testid=question]", "How much is left in Bengaluru Events?"]
+            },
+            {
+              "click": "[data-testid=send]"
+            },
+            {
+              "waitFor": "[data-testid=ai-prose]"
+            },
+            {
+              "click": "[data-testid=report-answer]"
+            },
+            {
+              "waitFor": "[data-testid=include-text]"
+            }
+          ],
+          "fullPage": false
+        },
+        {
           "state": "refused-out-of-scope",
           "actions": [
             {
@@ -3369,6 +3390,35 @@
             }
           ],
           "mask": ["[data-testid=log-rows]"]
+        },
+        {
+          "state": "reported-answers",
+          "role": "org-admin",
+          "path": "/admin/ai/log/reported",
+          "waitFor": "role=heading[name=\"Reported answers, newest first\"]",
+          "actions": [
+            {
+              "waitFor": "[data-testid=reported-rows]"
+            },
+            {
+              "scrollTop": true
+            }
+          ]
+        },
+        {
+          "state": "review-dialog",
+          "role": "org-admin",
+          "path": "/admin/ai/log/reported",
+          "waitFor": "role=heading[name=\"Reported answers, newest first\"]",
+          "actions": [
+            {
+              "click": "role=button[name=\"Mark the report from Jordan Smith reviewed\"]"
+            },
+            {
+              "waitFor": "[data-testid=review-note]"
+            }
+          ],
+          "fullPage": false
         },
         {
           "state": "accuracy",

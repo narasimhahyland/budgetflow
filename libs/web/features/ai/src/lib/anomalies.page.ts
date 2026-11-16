@@ -22,6 +22,7 @@ import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
+import { ScanRunNote } from './scan-run-note';
 import { data, errorMessage, injectApi, valueOf } from './api';
 
 const KIND_LABELS: Record<AnomalyKind, string> = {
@@ -49,6 +50,7 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
 @Component({
   selector: 'bf-anomalies-page',
   imports: [
+    ScanRunNote,
     AI_OUTPUT_IMPORTS,
     FormsModule,
     DateTimePipe,
@@ -89,6 +91,8 @@ const STATUSES = ['open', 'acknowledged', 'resolved'] as const;
         </button>
       </div>
     </header>
+
+    <bf-scan-run-note feature="anomaly_flags" />
 
     @if (disabled(); as detail) {
       <bf-ai-disabled
