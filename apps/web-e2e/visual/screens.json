@@ -2998,13 +2998,13 @@
           "state": "report-dialog",
           "actions": [
             {
-              "fill": ["[data-testid=question]", "How much is left in Bengaluru Events?"]
+              "fill": ["[data-testid=question]", "How much is left in Europe Region?"]
             },
             {
               "click": "[data-testid=send]"
             },
             {
-              "waitFor": "[data-testid=ai-prose]"
+              "waitFor": "[data-testid=refusal-refused_out_of_scope]"
             },
             {
               "click": "[data-testid=report-answer]"

@@ -1,0 +1,422 @@
+{
+  "generatedAt": "2026-11-16T05:02:47.640Z",
+  "base": "http://localhost:38200",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 51,
+  "blocking": 0,
+  "warnings": 0,
+  "results": [
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "answer",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--answer--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "answer",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--answer--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "answer",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--answer--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "report-dialog",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--report-dialog--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "report-dialog",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--report-dialog--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "report-dialog",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--report-dialog--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "refused-out-of-scope",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--refused-out-of-scope--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "refused-out-of-scope",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--refused-out-of-scope--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "refused-out-of-scope",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--refused-out-of-scope--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "action-redirect",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--action-redirect--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "action-redirect",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--action-redirect--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "011a-ai-assistant-panel",
+      "state": "action-redirect",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/011a-ai-assistant-panel--action-redirect--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "016b-spending-outlook-nudges",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/016b-spending-outlook-nudges--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "016b-spending-outlook-nudges",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/016b-spending-outlook-nudges--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "016b-spending-outlook-nudges",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/016b-spending-outlook-nudges--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "016b-spending-outlook-nudges",
+      "state": "budget-outlook",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/016b-spending-outlook-nudges--budget-outlook--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "016b-spending-outlook-nudges",
+      "state": "budget-outlook",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/016b-spending-outlook-nudges--budget-outlook--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "016b-spending-outlook-nudges",
+      "state": "budget-outlook",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/016b-spending-outlook-nudges--budget-outlook--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "detail",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--detail--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "detail",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--detail--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "detail",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--detail--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "empty",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--empty--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "empty",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--empty--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "empty",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--empty--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "empty-with-action",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--empty-with-action--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "empty-with-action",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--empty-with-action--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "017c-anomaly-flags",
+      "state": "empty-with-action",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/017c-anomaly-flags--empty-with-action--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "features",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--features--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "features",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--features--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "features",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--features--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "turn-on-dialog",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--turn-on-dialog--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "turn-on-dialog",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--turn-on-dialog--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "turn-on-dialog",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--turn-on-dialog--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "query-log",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--query-log--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "query-log",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--query-log--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "query-log",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--query-log--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "reported-answers",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--reported-answers--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "reported-answers",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--reported-answers--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "reported-answers",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--reported-answers--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "review-dialog",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--review-dialog--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "review-dialog",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--review-dialog--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "review-dialog",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--review-dialog--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "accuracy",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--accuracy--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "accuracy",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--accuracy--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "113a-ai-settings-query-log",
+      "state": "accuracy",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b9-ai-jobs/visual-qa/iter-2/screens/113a-ai-settings-query-log--accuracy--mobile--light.png",
+      "findings": []
+    }
+  ]
+}
