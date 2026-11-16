@@ -100,6 +100,10 @@ check; the hand-off sends no receipt.
 
 ## Gates
 
+After merging `main` (B4, B8), on the final tree: static, `functional-api` and `functional-e2e`
+**pass** ([`gate-summary-after-merge.txt`](gate-summary-after-merge.txt)). The runs below are from
+before the merge.
+
 - Static (lint, styles, Satori, typecheck, build, OpenAPI, db check): **pass**
   ([`gate-summary.txt`](gate-summary.txt)).
 - `functional-api`: **pass** on the second run ([`gate-summary.txt`](gate-summary.txt)).
