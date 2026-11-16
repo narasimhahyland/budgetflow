@@ -145,12 +145,18 @@ export const channelDeliveries = pgTable(
     externalMessageId: varchar('external_message_id', { length: 120 }),
     errorMessage: text('error_message'),
     payload: jsonb('payload').notNull().default({}),
+    /**
+     * B8: the Web Push subscription a push delivery targets. No foreign key: a subscription the push
+     * service reports gone is deleted, and its delivery history stays.
+     */
+    pushSubscriptionId: uuid('push_subscription_id'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
     index('channel_deliveries_tenant_created').on(t.tenantId, t.createdAt),
     index('channel_deliveries_subject').on(t.tenantId, t.subjectType, t.subjectId),
+    index('channel_deliveries_push_subscription').on(t.tenantId, t.pushSubscriptionId),
   ],
 );
 

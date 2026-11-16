@@ -5,3 +5,4 @@ export * from './lib/guards';
 export * from './lib/analytics.tracker';
 export * from './lib/visible-budgets.store';
 export * from './lib/overview.store';
+export * from './lib/installable-app';

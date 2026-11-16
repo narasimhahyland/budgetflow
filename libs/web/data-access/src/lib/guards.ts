@@ -9,7 +9,9 @@ export const authGuard: CanActivateFn = async (_route, state) => {
   const status = auth.status();
   if (status === 'signed-in') return true;
   if (status === 'unavailable' || status === 'failed') {
-    return inject(Router).parseUrl(SIGN_IN_PROBLEM_PATH);
+    // The page asked for comes along, so a retry (or the connection coming back) returns to it.
+    const router = inject(Router);
+    return router.createUrlTree([SIGN_IN_PROBLEM_PATH], { queryParams: { returnUrl: state.url } });
   }
   await auth.signIn(state.url);
   return false;

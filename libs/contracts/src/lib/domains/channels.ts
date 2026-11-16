@@ -310,6 +310,20 @@ export const CreatePushDeviceRequest = named(
 );
 export type CreatePushDeviceRequest = z.infer<typeof CreatePushDeviceRequest>;
 
+export const PushVapidKey = named(
+  'PushVapidKey',
+  z
+    .object({
+      publicKey: z
+        .string()
+        .describe(
+          'Base64url VAPID application server key for PushManager.subscribe (RFC 8292). Public by design.',
+        ),
+    })
+    .strict(),
+);
+export type PushVapidKey = z.infer<typeof PushVapidKey>;
+
 export const TestChannelRequest = named(
   'TestChannelRequest',
   z.object({ channel: NotificationChannel }).strict(),
@@ -319,7 +333,9 @@ export const TestChannelResponse = named(
   z
     .object({
       channel: NotificationChannel,
-      status: z.enum(['sent', 'failed']),
+      status: z
+        .enum(['sent', 'queued', 'failed'])
+        .describe('queued: a push test waits for the worker to send it to each device'),
       message: z.string(),
       deliveryId: Id,
     })
@@ -547,11 +563,18 @@ export const ChannelDeliveryLogView = named(
       kind: z.string(),
       subjectType: z.string().nullable(),
       subjectId: Id.nullable(),
-      status: z.enum(['queued', 'sent', 'updated', 'retried', 'failed']),
+      status: z
+        .enum(['queued', 'sent', 'updated', 'retried', 'failed', 'gone', 'dead_letter'])
+        .describe(
+          'queued: waiting to send; retried: a transient failure, another attempt is scheduled; ' +
+            'failed: will not be retried; gone: the push service no longer knows the subscription, ' +
+            'which was removed; dead_letter: every retry failed',
+        ),
       attempts: z.int(),
       externalMessageId: z.string().nullable(),
       errorMessage: z.string().nullable(),
       payload: z.record(z.string(), z.unknown()),
+      pushSubscriptionId: Id.nullable().describe('The push device a push delivery targets'),
       createdAt: IsoDateTime,
       updatedAt: IsoDateTime,
     })
@@ -927,6 +950,7 @@ const LinkTokenQuery = z.object({ token: z.string().min(10).max(500) }).strict()
 const DeliveriesQuery = z
   .object({
     channel: NotificationChannel.optional(),
+    pushSubscriptionId: Id.optional(),
     limit: z.coerce.number().int().min(1).max(100).optional(),
   })
   .strict();
@@ -988,6 +1012,16 @@ export const channelEndpoints = {
     body: CreatePushDeviceRequest,
     response: { status: 201, schema: PushDevice },
     errors: [400, 401],
+  },
+  getPushVapidKey: {
+    operationId: 'getPushVapidKey',
+    method: 'get',
+    path: '/api/me/push-devices/vapid-key',
+    summary: 'The application server key a browser subscribes to Web Push with',
+    tags: ['channels'],
+    auth: true,
+    response: { status: 200, schema: PushVapidKey },
+    errors: [401],
   },
   removePushDevice: {
     operationId: 'removePushDevice',

@@ -20,6 +20,8 @@ export const DELIVERY_STATUS: Record<ChannelDeliveryLogView['status'], StatusVie
   updated: { label: 'Updated', tone: 'info', icon: 'sync' },
   retried: { label: 'Retried', tone: 'warning', icon: 'refresh' },
   failed: { label: 'Failed', tone: 'important', icon: 'error' },
+  gone: { label: 'Device gone, removed', tone: 'neutral', icon: 'bell_off' },
+  dead_letter: { label: 'Dead letter', tone: 'important', icon: 'error' },
 };
 
 // Display names for role ids (labels only; authorization never uses them). Mirrors the shell's
