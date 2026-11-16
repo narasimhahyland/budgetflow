@@ -1,4 +1,5 @@
 import { seedId } from './ids';
+import { SEED_CREDENTIAL_EXPIRES_AT } from './integrations';
 
 /**
  * Phase 16 seed (prefix 93): the ecosystem surfaces as a company that has started using them would
@@ -8,7 +9,7 @@ import { seedId } from './ids';
  *
  * Everything is fictional. No connection token is written here: the seed generates one at run time
  * and keeps only its hash, exactly as the API does, so nothing in this repository is a usable
- * credential. Dates are relative to the seed run, so the data never drifts into the past.
+ * credential. Connection expiry is a fixed far-future instant (SEED_CREDENTIAL_EXPIRES_AT).
  */
 export const P16_IDS = {
   vendors: {
@@ -166,7 +167,8 @@ export interface SeedEcosystemConnection {
   label: string;
   grants: string[];
   consentText: string;
-  lifetimeDays: number;
+  /** ISO 8601; fixed, see SEED_CREDENTIAL_EXPIRES_AT. */
+  expiresAt: string;
 }
 
 export const P16_CONNECTIONS: SeedEcosystemConnection[] = [
@@ -178,7 +180,7 @@ export const P16_CONNECTIONS: SeedEcosystemConnection[] = [
     label: 'Finance modelling workbook',
     grants: ['budgets', 'company_rollup'],
     consentText: 'Power BI reads the datasets you chose, with your own access.',
-    lifetimeDays: 90,
+    expiresAt: SEED_CREDENTIAL_EXPIRES_AT,
   },
   {
     id: P16_IDS.connections.organizerAssistant,
@@ -189,7 +191,7 @@ export const P16_CONNECTIONS: SeedEcosystemConnection[] = [
     grants: ['list_my_budgets', 'get_budget_balance', 'list_waiting_approvals', 'search_events'],
     consentText:
       'Your AI assistant wants to read budgets, requests, approvals and events you can see in BudgetFlow. It cannot approve or change anything.',
-    lifetimeDays: 30,
+    expiresAt: SEED_CREDENTIAL_EXPIRES_AT,
   },
   {
     id: P16_IDS.connections.organizerAutomation,
@@ -200,6 +202,6 @@ export const P16_CONNECTIONS: SeedEcosystemConnection[] = [
     grants: ['budget.balance.read', 'request.draft.create'],
     consentText:
       'The platform wants to read budgets you can see and create drafts as you. It cannot approve, submit or move money.',
-    lifetimeDays: 90,
+    expiresAt: SEED_CREDENTIAL_EXPIRES_AT,
   },
 ];

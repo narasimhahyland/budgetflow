@@ -17,7 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ApprovalTaskSummary } from '@bf/contracts';
-import { SessionStore } from '@bf/web/data-access';
+import { InstallPrompt, NetworkStatus, SessionStore } from '@bf/web/data-access';
 import {
   ApprovalRoute,
   BudgetImpactCard,
@@ -75,7 +75,8 @@ const REASONS = [
   ],
   template: `
     <div class="bf-mobile-page">
-      @if (offline()) {
+      <!-- A real loss of connection shows the shell's offline banner; this one is the preview. -->
+      @if (offline() && network.online()) {
         <sat-banner variant="warning" data-testid="mobile-offline-banner">
           <sat-banner-message>
             You're offline. You can read waiting approvals; decisions need a connection.
@@ -88,25 +89,36 @@ const REASONS = [
           <div class="bf-list__row">
             <div>
               <strong>Add BudgetFlow to your home screen</strong>
-              <p class="bf-cell__secondary">Get push alerts and one-tap approvals on your phone.</p>
+              @if (iosInstall()) {
+                <p class="bf-cell__secondary" data-testid="ios-install-steps">
+                  For push alerts and one-tap approvals, tap Share in Safari, then Add to Home
+                  Screen.
+                </p>
+              } @else {
+                <p class="bf-cell__secondary">
+                  Get push alerts and one-tap approvals on your phone.
+                </p>
+              }
             </div>
             <div class="bf-mobile__install-actions">
               <button
                 mat-button
                 type="button"
-                (click)="showInstallPrompt.set(false)"
+                (click)="dismissInstall()"
                 data-testid="dismiss-install"
               >
                 Not now
               </button>
-              <button
-                mat-flat-button
-                type="button"
-                (click)="installApp()"
-                data-testid="accept-install"
-              >
-                Install
-              </button>
+              @if (!iosInstall()) {
+                <button
+                  mat-flat-button
+                  type="button"
+                  (click)="installApp()"
+                  data-testid="accept-install"
+                >
+                  Install
+                </button>
+              }
             </div>
           </div>
         </section>
@@ -131,7 +143,7 @@ const REASONS = [
             <button
               mat-stroked-button
               type="button"
-              (click)="showInstallPrompt.set(!showInstallPrompt())"
+              (click)="previewInstall.set(!previewInstall())"
               data-testid="toggle-install-prompt"
             >
               Install app
@@ -504,8 +516,10 @@ const REASONS = [
     }
     .bf-mobile__install-actions {
       display: flex;
+      flex-shrink: 0;
       gap: 8px;
       align-items: center;
+      white-space: nowrap;
     }
   `,
   host: { class: 'bf-page-layout' },
@@ -517,6 +531,8 @@ export class MobileApprovalsPage {
   private readonly router = inject(Router);
   private readonly snack = inject(MatSnackBar);
   protected readonly session = inject(SessionStore);
+  protected readonly network = inject(NetworkStatus);
+  protected readonly installer = inject(InstallPrompt);
   protected readonly valueOf = valueOf;
 
   /** "Overdue" or "Due soon" (within a day) for a pending task; nothing when it is not urgent. */
@@ -537,10 +553,17 @@ export class MobileApprovalsPage {
   protected readonly pickedTaskId = signal<string | null>(null);
   protected readonly rejectSheetOpen = signal(false);
   protected readonly rejectSubmitted = signal(false);
-  protected readonly showInstallPrompt = signal(
+  /** `?install=1` and `?offline=1` show those states for review and visual baselines. */
+  protected readonly previewInstall = signal(
     this.route.snapshot.queryParamMap.get('install') === '1',
   );
-  protected readonly offline = signal(this.route.snapshot.queryParamMap.get('offline') === '1');
+  protected readonly showInstallPrompt = computed(
+    () => this.previewInstall() || this.installer.offer() !== null,
+  );
+  protected readonly iosInstall = computed(() => this.installer.offer() === 'ios');
+  private readonly previewOffline = this.route.snapshot.queryParamMap.get('offline') === '1';
+  // Decisions are never queued offline (059a): the budget is checked at the moment of approval.
+  protected readonly offline = computed(() => this.previewOffline || !this.network.online());
   protected readonly busy = signal(false);
   protected readonly failure = signal('');
   protected rejectCode = '';
@@ -599,9 +622,15 @@ export class MobileApprovalsPage {
     this.rejectSheetOpen.set(true);
   }
 
-  protected installApp(): void {
-    this.showInstallPrompt.set(false);
-    this.snack.open('BudgetFlow added to home screen', undefined, { duration: 3000 });
+  protected dismissInstall(): void {
+    this.previewInstall.set(false);
+    this.installer.dismiss();
+  }
+
+  protected async installApp(): Promise<void> {
+    this.previewInstall.set(false);
+    if (await this.installer.install())
+      this.snack.open('BudgetFlow added to home screen', undefined, { duration: 3000 });
   }
 
   protected async approve(id: string, ref: string): Promise<void> {

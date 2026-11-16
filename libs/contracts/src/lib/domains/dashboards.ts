@@ -6,7 +6,7 @@ import { CloseEntityChecklist, ClosePeriodSummary } from './close';
 import { ReportScope } from './reports';
 
 /**
- * Gap package B2: the dashboards the plan lists (012, 017, 017a). Every figure is computed by the
+ * Gap package B2: the dashboards the plan lists (012, 017, 017a, 018, 018a, 018b, 088a). Every figure is computed by the
  * API from the ledger, the queues and the integrity runs; the pages only arrange them. Each read
  * asks `PolicyService` first and filters in SQL under RLS.
  */
@@ -323,6 +323,379 @@ export type ExceptionsOverview = z.infer<typeof ExceptionsOverview>;
 
 export const ExceptionsQuery = z.object({ type: ControlExceptionType.optional() }).strict();
 
+// 018 Pending approvals dashboard -----------------------------------------------------------------
+
+export const SLA_STATES = ['within', 'due_today', 'breached'] as const;
+export const SlaState = z.enum(SLA_STATES);
+export type SlaState = z.infer<typeof SlaState>;
+export const PENDING_KINDS = [
+  'spending',
+  'additional_fund',
+  'over_budget',
+  'budget',
+  'exception',
+  'co_funding',
+] as const;
+export const PendingKind = z.enum(PENDING_KINDS);
+export type PendingKind = z.infer<typeof PendingKind>;
+
+export const PendingApprovalItem = named(
+  'PendingApprovalItem',
+  z
+    .object({
+      taskId: Id,
+      subjectType: z.enum(['request', 'contribution']),
+      subjectId: Id,
+      reference: z.string(),
+      title: z.string(),
+      kind: PendingKind,
+      requesterName: z.string().nullable(),
+      budgetId: Id.nullable(),
+      budgetName: z.string().nullable(),
+      amount: Money.nullable().describe(
+        'Held amount in the reporting currency (pre-encumbered), or the requested amount when it is in the reporting currency.',
+      ),
+      transactionAmount: Money.nullable(),
+      held: z
+        .boolean()
+        .describe('Pre-encumbered on the budget (requests); co-funding requests are not yet held.'),
+      step: z.string(),
+      stepNo: z.int(),
+      approverPersonId: Id,
+      approverName: z.string(),
+      delegateName: z.string().nullable(),
+      waitingHours: z.number(),
+      dueAt: IsoDateTime.nullable(),
+      sla: SlaState,
+      slaText: z.string(),
+      lastNotifiedChannel: z.string().nullable(),
+      lastNudgedAt: IsoDateTime.nullable(),
+      canNudge: z
+        .boolean()
+        .describe('False within 4 hours of the last nudge, or without permission.'),
+    })
+    .strict(),
+);
+export type PendingApprovalItem = z.infer<typeof PendingApprovalItem>;
+
+export const PendingApprovalsOverview = named(
+  'PendingApprovalsOverview',
+  z
+    .object({
+      generatedAt: IsoDateTime,
+      currency: CurrencyCode,
+      scope: ReportScope,
+      kpis: z
+        .object({
+          pending: z.int(),
+          preEncumbered: Money.describe('Pending requests, held on their budgets.'),
+          coFundingRequested: Money.describe('Co-funding requests: requested, not yet held.'),
+          pastSla: z.int(),
+          medianWaitHours: z.number().nullable(),
+        })
+        .strict(),
+      bySteps: z.array(
+        z
+          .object({
+            step: z.string(),
+            within: z.int(),
+            dueToday: z.int(),
+            breached: z.int(),
+          })
+          .strict(),
+      ),
+      aging: z.array(
+        z
+          .object({
+            approverPersonId: Id,
+            approverName: z.string(),
+            bands: z.array(z.object({ count: z.int(), amount: Money }).strict()).length(4),
+            pastSla: z.int(),
+          })
+          .strict(),
+      ),
+      items: z.array(PendingApprovalItem),
+    })
+    .strict(),
+);
+export type PendingApprovalsOverview = z.infer<typeof PendingApprovalsOverview>;
+
+export const PendingApprovalsQuery = z
+  .object({
+    kind: PendingKind.optional(),
+    sla: SlaState.optional(),
+    approverPersonId: Id.optional(),
+  })
+  .strict();
+
+export const NudgeResponse = named(
+  'NudgeResponse',
+  z
+    .object({
+      taskId: Id,
+      approverName: z.string(),
+      channels: z.array(z.string()),
+      nudgedAt: IsoDateTime,
+      nextNudgeAt: IsoDateTime,
+    })
+    .strict(),
+);
+export type NudgeResponse = z.infer<typeof NudgeResponse>;
+
+// 018a Approval performance -------------------------------------------------------------------
+
+export const ApproverPerformance = named(
+  'ApproverPerformance',
+  z
+    .object({
+      approverPersonId: Id.nullable().describe('Null for the "Others" group.'),
+      approverName: z.string(),
+      step: z.string(),
+      decisions: z.int(),
+      medianHours: z.number().nullable(),
+      p90Hours: z.number().nullable(),
+      pastSla: z.int(),
+      delegationsUsed: z.int(),
+    })
+    .strict(),
+);
+export type ApproverPerformance = z.infer<typeof ApproverPerformance>;
+
+export const ApprovalPerformance = named(
+  'ApprovalPerformance',
+  z
+    .object({
+      generatedAt: IsoDateTime,
+      periodDays: z.int(),
+      view: z
+        .enum(['named', 'aggregate', 'own'])
+        .describe(
+          'named: finance and the CEO; aggregate: analysts; own: an approver sees only themselves.',
+        ),
+      kpis: z
+        .object({
+          decisions: z.int(),
+          medianHours: z.number().nullable(),
+          p90Hours: z.number().nullable(),
+          slaCompliancePct: z.number().nullable(),
+          changesRequestedPct: z.number().nullable(),
+          outsideWebPct: z.number().nullable(),
+          targetHours: z.int(),
+        })
+        .strict(),
+      smallSample: z.boolean().describe('Fewer than 30 decisions: medians may move a lot.'),
+      byStep: z.array(
+        z
+          .object({
+            step: z.string(),
+            decisions: z.int(),
+            medianHours: z.number().nullable(),
+            p90Hours: z.number().nullable(),
+          })
+          .strict(),
+      ),
+      byChannel: z.array(
+        z
+          .object({
+            channel: z.string(),
+            decisions: z.int(),
+            sharePct: z.number(),
+            medianHours: z.number().nullable(),
+          })
+          .strict(),
+      ),
+      weekly: z.array(
+        z
+          .object({
+            weekStart: IsoDate,
+            decisions: z.int(),
+            medianHours: z.number().nullable(),
+            slaCompliancePct: z.number().nullable(),
+          })
+          .strict(),
+      ),
+      approvers: z
+        .array(ApproverPerformance)
+        .describe(
+          'Ranked when at least 10 decisions; others grouped. Empty in the aggregate view.',
+        ),
+      own: z
+        .object({
+          decisions: z.int(),
+          medianHours: z.number().nullable(),
+          companyMedianHours: z.number().nullable(),
+        })
+        .strict()
+        .nullable()
+        .describe('The viewer as an approver, against the company median.'),
+      suggestions: z
+        .array(z.object({ text: z.string(), link: z.string() }).strict())
+        .describe('Rules-based hints; nothing changes automatically.'),
+    })
+    .strict(),
+);
+export type ApprovalPerformance = z.infer<typeof ApprovalPerformance>;
+
+export const ApprovalPerformanceQuery = z
+  .object({ days: z.enum(['30', '90', '365']).optional() })
+  .strict();
+
+// 018b Product analytics ------------------------------------------------------------------------
+
+export const ProductKpi = named(
+  'ProductKpi',
+  z
+    .object({
+      key: z.enum([
+        'owner_activation',
+        'weekly_active_owners',
+        'time_to_first_allocation',
+        'time_to_approve',
+        'auto_match_rate',
+        'unused_at_period_end',
+      ]),
+      label: z.string(),
+      value: z.number().nullable(),
+      unit: z.enum(['percent', 'days', 'hours']),
+      detail: z.string(),
+      target: z
+        .object({
+          value: z.number(),
+          comparison: z.enum(['at_least', 'at_most']),
+          text: z.string(),
+        })
+        .strict()
+        .nullable(),
+      status: z.enum(['on_target', 'below_target', 'no_target', 'insufficient']),
+      definition: z.string(),
+      events: z.array(z.string()),
+    })
+    .strict(),
+);
+export type ProductKpi = z.infer<typeof ProductKpi>;
+
+export const ProductAnalytics = named(
+  'ProductAnalytics',
+  z
+    .object({
+      generatedAt: IsoDateTime,
+      period: z.enum(['30', '90', 'fy']),
+      from: IsoDate,
+      to: IsoDate,
+      insufficient: z
+        .boolean()
+        .describe('Fewer than 14 days or 20 owners of data: figures are shown with a warning.'),
+      owners: z.int(),
+      kpis: z.array(ProductKpi),
+      funnel: z.array(z.object({ step: z.string(), count: z.int() }).strict()),
+      weeklyActive: z.array(
+        z.object({ weekStart: IsoDate, owners: z.int(), employees: z.int() }).strict(),
+      ),
+      decisionsByChannel: z.array(z.object({ channel: z.string(), decisions: z.int() }).strict()),
+      autoMatchBySource: z.array(
+        z.object({ source: z.string(), matched: z.int(), automatic: z.int() }).strict(),
+      ),
+    })
+    .strict(),
+);
+export type ProductAnalytics = z.infer<typeof ProductAnalytics>;
+
+export const ProductAnalyticsQuery = z
+  .object({ period: z.enum(['30', '90', 'fy']).optional() })
+  .strict();
+
+// 088a Evidence pack ----------------------------------------------------------------------------
+
+export const EVIDENCE_CONTENTS = [
+  'summary',
+  'approvals',
+  'audit_trail',
+  'contributions',
+  'commitments',
+  'actuals',
+  'reconciliation',
+  'exceptions',
+  'comments',
+] as const;
+export const EvidenceContent = z.enum(EVIDENCE_CONTENTS);
+export type EvidenceContent = z.infer<typeof EvidenceContent>;
+
+export const CreateEvidencePackRequest = named(
+  'CreateEvidencePackRequest',
+  z
+    .object({
+      subjectType: z.enum(['event', 'budget']),
+      subjectId: Id,
+      contents: z
+        .array(EvidenceContent)
+        .min(1)
+        .describe('Defaults on the screen: everything except comments.'),
+      includeAttendees: z
+        .boolean()
+        .describe(
+          'Off: attendee counts only. On: names, entities and cost centers; never needs or survey answers.',
+        ),
+    })
+    .strict(),
+);
+export type CreateEvidencePackRequest = z.infer<typeof CreateEvidencePackRequest>;
+
+export const EvidencePackFile = named(
+  'EvidencePackFile',
+  z.object({ name: z.string(), sizeBytes: z.int(), sha256: z.string().length(64) }).strict(),
+);
+export type EvidencePackFile = z.infer<typeof EvidencePackFile>;
+
+export const EvidencePack = named(
+  'EvidencePack',
+  z
+    .object({
+      id: Id,
+      subjectType: z.enum(['event', 'budget']),
+      subjectId: Id,
+      subjectLabel: z.string(),
+      contents: z.array(EvidenceContent),
+      includeAttendees: z.boolean(),
+      status: z.enum(['queued', 'running', 'ready', 'failed', 'cancelled', 'expired']),
+      step: z.string().nullable(),
+      counts: z.record(z.string(), z.int()),
+      requestedByName: z.string().nullable(),
+      requestedAt: IsoDateTime,
+      completedAt: IsoDateTime.nullable(),
+      expiresAt: IsoDateTime,
+      fileName: z.string().nullable(),
+      sizeBytes: z.int().nullable(),
+      manifest: z.array(EvidencePackFile),
+      manifestSha256: z.string().nullable(),
+      chain: z
+        .object({
+          valid: z.boolean(),
+          fromSeq: z.int().nullable(),
+          toSeq: z.int().nullable(),
+          brokenAt: z.int().nullable(),
+          checked: z.int(),
+        })
+        .strict()
+        .nullable(),
+      error: z.string().nullable(),
+      canDownload: z.boolean(),
+    })
+    .strict(),
+);
+export type EvidencePack = z.infer<typeof EvidencePack>;
+
+export const EvidencePackList = named(
+  'EvidencePackList',
+  z.object({ items: z.array(EvidencePack), canGenerate: z.boolean() }).strict(),
+);
+export type EvidencePackList = z.infer<typeof EvidencePackList>;
+
+export const EvidencePackDownload = named(
+  'EvidencePackDownload',
+  z.object({ url: z.string(), fileName: z.string(), expiresAt: IsoDateTime }).strict(),
+);
+export type EvidencePackDownload = z.infer<typeof EvidencePackDownload>;
+
 export const dashboardEndpoints = {
   getFinanceOverview: {
     operationId: 'getFinanceOverview',
@@ -367,5 +740,94 @@ export const dashboardEndpoints = {
     query: ExceptionsQuery,
     response: { status: 200, schema: ExceptionsOverview },
     errors: [400, 401, 403],
+  },
+  getPendingApprovals: {
+    operationId: 'getPendingApprovals',
+    method: 'get',
+    path: '/api/dashboards/pending-approvals',
+    summary: 'What is waiting for approval, at which step, with whom and how old',
+    tags: ['dashboards'],
+    auth: true,
+    query: PendingApprovalsQuery,
+    response: { status: 200, schema: PendingApprovalsOverview },
+    errors: [400, 401, 403],
+  },
+  nudgeApprover: {
+    operationId: 'nudgeApprover',
+    method: 'post',
+    path: '/api/dashboards/pending-approvals/{taskId}/nudge',
+    summary: 'Remind the approver of one pending task (once per 4 hours); never decides',
+    tags: ['dashboards'],
+    auth: true,
+    idempotent: true,
+    params: z.object({ taskId: Id }).strict(),
+    response: { status: 200, schema: NudgeResponse },
+    errors: [400, 401, 403, 404, 409],
+  },
+  getApprovalPerformance: {
+    operationId: 'getApprovalPerformance',
+    method: 'get',
+    path: '/api/dashboards/approval-performance',
+    summary: 'Approval cycle time, SLA compliance, channel mix and bottlenecks',
+    tags: ['dashboards'],
+    auth: true,
+    query: ApprovalPerformanceQuery,
+    response: { status: 200, schema: ApprovalPerformance },
+    errors: [400, 401, 403],
+  },
+  getProductAnalytics: {
+    operationId: 'getProductAnalytics',
+    method: 'get',
+    path: '/api/analytics/kpis',
+    summary: 'Product KPIs against targets from the analytics events (counts only)',
+    tags: ['dashboards'],
+    auth: true,
+    query: ProductAnalyticsQuery,
+    response: { status: 200, schema: ProductAnalytics },
+    errors: [400, 401, 403],
+  },
+  listEvidencePacks: {
+    operationId: 'listEvidencePacks',
+    method: 'get',
+    path: '/api/evidence-packs',
+    summary: 'Evidence packs the viewer may see, newest first',
+    tags: ['dashboards'],
+    auth: true,
+    response: { status: 200, schema: EvidencePackList },
+    errors: [401, 403],
+  },
+  createEvidencePack: {
+    operationId: 'createEvidencePack',
+    method: 'post',
+    path: '/api/evidence-packs',
+    summary: 'Generate an evidence pack for an event or budget (worker job)',
+    tags: ['dashboards'],
+    auth: true,
+    idempotent: true,
+    body: CreateEvidencePackRequest,
+    response: { status: 202, schema: EvidencePack },
+    errors: [400, 401, 403, 404, 422],
+  },
+  getEvidencePack: {
+    operationId: 'getEvidencePack',
+    method: 'get',
+    path: '/api/evidence-packs/{packId}',
+    summary: 'One evidence pack with its progress, manifest and chain verification',
+    tags: ['dashboards'],
+    auth: true,
+    params: z.object({ packId: Id }).strict(),
+    response: { status: 200, schema: EvidencePack },
+    errors: [400, 401, 403, 404],
+  },
+  downloadEvidencePack: {
+    operationId: 'downloadEvidencePack',
+    method: 'get',
+    path: '/api/evidence-packs/{packId}/download',
+    summary: 'A short-lived signed URL for a ready pack (audited)',
+    tags: ['dashboards'],
+    auth: true,
+    params: z.object({ packId: Id }).strict(),
+    response: { status: 200, schema: EvidencePackDownload },
+    errors: [400, 401, 403, 404, 409],
   },
 } as const satisfies Record<string, Endpoint>;

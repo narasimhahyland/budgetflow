@@ -165,8 +165,7 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
           <h2 class="bf-card__title" id="doa-title">Matrix</h2>
           @if (valueOf(matrix)?.version; as v) {
             <p class="bf-card__hint">
-              Version {{ v.version }} · {{ v.status }} since
-              {{ v.validFrom | date: 'd MMM y' : 'UTC'
+              Version {{ v.version }} · {{ v.status }} since {{ v.validFrom | date: 'd MMM y'
               }}{{ v.approvedByName ? ' · approved by ' + v.approvedByName : '' }}
             </p>
           }
@@ -219,8 +218,8 @@ const ROLE_LABEL: Partial<Record<RoleId, string>> = {
               <ng-container matColumnDef="from">
                 <th mat-header-cell *matHeaderCellDef>Effective</th>
                 <td mat-cell *matCellDef="let l" data-label="Effective">
-                  {{ l.validFrom | date: 'd MMM y' : 'UTC'
-                  }}{{ l.validTo ? ' – ' + (l.validTo | date: 'd MMM y' : 'UTC') : '' }}
+                  {{ l.validFrom | date: 'd MMM y'
+                  }}{{ l.validTo ? ' – ' + (l.validTo | date: 'd MMM y') : '' }}
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="columns"></tr>

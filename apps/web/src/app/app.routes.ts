@@ -58,6 +58,12 @@ export const appRoutes: Route[] = [
       ...financeAdminRoutes,
       // Before the lazily loaded `my` and `admin/*` areas: `my/activity` and the administration
       // screens are plain routes here and a lazy area would otherwise swallow the path.
+      // 018b, before the administration screens so `admin/*` there cannot swallow it.
+      {
+        path: 'admin/product-analytics',
+        loadChildren: () =>
+          import('@bf/web/features/reports').then((m) => m.productAnalyticsRoutes),
+      },
       ...adminRoutes,
       {
         path: 'events',
@@ -152,6 +158,20 @@ export const appRoutes: Route[] = [
       {
         path: 'dashboards/alerts',
         loadChildren: () => import('@bf/web/features/reports').then((m) => m.alertsDashboardRoutes),
+      },
+      {
+        path: 'dashboards/pending-approvals',
+        loadChildren: () =>
+          import('@bf/web/features/reports').then((m) => m.pendingApprovalsDashboardRoutes),
+      },
+      {
+        path: 'dashboards/approval-performance',
+        loadChildren: () =>
+          import('@bf/web/features/reports').then((m) => m.approvalPerformanceRoutes),
+      },
+      {
+        path: 'audit/evidence-packs',
+        loadChildren: () => import('@bf/web/features/reports').then((m) => m.evidencePackRoutes),
       },
       {
         path: 'dashboards/exceptions',

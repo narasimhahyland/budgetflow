@@ -1,0 +1,278 @@
+{
+  "generatedAt": "2026-11-12T08:03:17.936Z",
+  "base": "http://localhost:64200",
+  "screensFile": "apps/web-e2e/visual/screens.json",
+  "matrix": {
+    "viewports": ["desktop", "tablet", "mobile"],
+    "themes": ["light"]
+  },
+  "captures": 33,
+  "blocking": 0,
+  "warnings": 0,
+  "results": [
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "owner-scope",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--owner-scope--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "owner-scope",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--owner-scope--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "owner-scope",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--owner-scope--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "forbidden",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--forbidden--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "forbidden",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--forbidden--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "018-pending-approvals-dashboard",
+      "state": "forbidden",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018-pending-approvals-dashboard--forbidden--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "analyst-aggregate",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--analyst-aggregate--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "analyst-aggregate",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--analyst-aggregate--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "analyst-aggregate",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--analyst-aggregate--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "own-view",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--own-view--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "own-view",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--own-view--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "018a-approval-performance",
+      "state": "own-view",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018a-approval-performance--own-view--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "018b-product-analytics",
+      "state": "default",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018b-product-analytics--default--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "018b-product-analytics",
+      "state": "default",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018b-product-analytics--default--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "018b-product-analytics",
+      "state": "default",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018b-product-analytics--default--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "018b-product-analytics",
+      "state": "forbidden-owner",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018b-product-analytics--forbidden-owner--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "018b-product-analytics",
+      "state": "forbidden-owner",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018b-product-analytics--forbidden-owner--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "018b-product-analytics",
+      "state": "forbidden-owner",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/018b-product-analytics--forbidden-owner--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "list-empty",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--list-empty--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "list-empty",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--list-empty--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "list-empty",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--list-empty--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "ceo-download-only",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--ceo-download-only--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "ceo-download-only",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--ceo-download-only--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "ceo-download-only",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--ceo-download-only--mobile--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "forbidden",
+      "viewport": "desktop",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--forbidden--desktop--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "forbidden",
+      "viewport": "tablet",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--forbidden--tablet--light.png",
+      "findings": []
+    },
+    {
+      "id": "088a-evidence-pack",
+      "state": "forbidden",
+      "viewport": "mobile",
+      "theme": "light",
+      "file": "evidence/gap-b2-dashboards/visual-qa/part-2/iter-3/screens/088a-evidence-pack--forbidden--mobile--light.png",
+      "findings": []
+    }
+  ]
+}

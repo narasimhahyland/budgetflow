@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  linkedSignal,
   resource,
   signal,
 } from '@angular/core';
@@ -362,6 +363,19 @@ const AREAS: { id: NotificationArea; label: string }[] = [
                 </li>
               }
             </ul>
+            @if (nextCursor()) {
+              <div class="bf-notif__more">
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="loadingMore()"
+                  (click)="loadMore()"
+                  data-testid="load-more-notifications"
+                >
+                  {{ loadingMore() ? 'Loading older notifications…' : 'Show older notifications' }}
+                </button>
+              </div>
+            }
           </section>
         }
       }
@@ -456,6 +470,11 @@ const AREAS: { id: NotificationArea; label: string }[] = [
       color: var(--mat-sys-on-surface-variant);
       font: var(--mat-sys-body-small);
     }
+    .bf-notif__more {
+      display: flex;
+      justify-content: center;
+      padding: 12px 16px;
+    }
     .bf-notif__actions {
       display: flex;
       flex-wrap: wrap;
@@ -488,17 +507,39 @@ export class NotificationsPage {
   protected readonly busy = signal(false);
   protected readonly failure = signal('');
 
+  private readonly query = computed(() => ({
+    tab: this.tab(),
+    area: this.areaFilter(),
+    unreadOnly: this.unreadOnly() ? true : undefined,
+    periodDays: this.periodDays(),
+  }));
+
   protected readonly feed = resource({
-    params: () => ({
-      tab: this.tab(),
-      area: this.areaFilter(),
-      unreadOnly: this.unreadOnly() ? true : undefined,
-      periodDays: this.periodDays(),
-    }),
+    params: () => this.query(),
     loader: ({ params }) => data(this.api.listNotifications({ query: params })),
   });
 
-  protected readonly items = computed<NotificationItem[]>(() => valueOf(this.feed)?.items ?? []);
+  /** Older pages loaded with "Show older notifications"; a filter change starts again from page one. */
+  private readonly olderItems = linkedSignal<unknown, NotificationItem[]>({
+    source: this.query,
+    computation: () => [],
+  });
+  /** Cursor after the last older page; undefined until one is loaded, so page one's cursor applies. */
+  private readonly olderCursor = linkedSignal<unknown, string | null | undefined>({
+    source: this.query,
+    computation: () => undefined,
+  });
+  protected readonly loadingMore = signal(false);
+  protected readonly nextCursor = computed(() => {
+    const older = this.olderCursor();
+    return older === undefined ? (valueOf(this.feed)?.nextCursor ?? null) : older;
+  });
+
+  protected readonly items = computed<NotificationItem[]>(() => {
+    const first = valueOf(this.feed)?.items ?? [];
+    const seen = new Set(first.map((n) => n.id));
+    return [...first, ...this.olderItems().filter((n) => !seen.has(n.id))];
+  });
   protected readonly tasks = computed<TaskItem[]>(() => valueOf(this.feed)?.tasks ?? []);
   protected readonly counts = computed(
     () =>
@@ -509,6 +550,34 @@ export class NotificationsPage {
         following: 0,
       },
   );
+
+  protected async loadMore(): Promise<void> {
+    const cursor = this.nextCursor();
+    if (!cursor || this.loadingMore()) return;
+    const query = this.query();
+    this.loadingMore.set(true);
+    try {
+      const page = await data(this.api.listNotifications({ query: { ...query, cursor } }));
+      // Drop a page that arrives after the filters changed.
+      if (this.query() !== query) return;
+      this.olderItems.set([...this.olderItems(), ...page.items]);
+      this.olderCursor.set(page.nextCursor);
+    } catch (e) {
+      this.failure.set(errorMessage(e));
+    } finally {
+      this.loadingMore.set(false);
+    }
+  }
+
+  /** Keeps read state on already loaded older pages in step with a mark action. */
+  private patchOlder(ids: Set<string> | 'all', read: boolean): void {
+    const readAt = read ? new Date().toISOString() : null;
+    this.olderItems.set(
+      this.olderItems().map((n) =>
+        ids === 'all' || ids.has(n.id) ? { ...n, readAt: read ? (n.readAt ?? readAt) : null } : n,
+      ),
+    );
+  }
 
   protected setTab(t: Tab): void {
     this.tab.set(t);
@@ -575,6 +644,7 @@ export class NotificationsPage {
     this.busy.set(true);
     try {
       await data(this.api.markNotifications({ body: { ids: [n.id], read } }));
+      this.patchOlder(new Set([n.id]), read);
       this.feed.reload();
     } catch (e) {
       this.failure.set(errorMessage(e));
@@ -589,6 +659,7 @@ export class NotificationsPage {
     this.busy.set(true);
     try {
       await data(this.api.markNotifications({ body: { ids, read } }));
+      this.patchOlder(new Set(ids), read);
       this.snack.open(read ? 'Marked as read' : 'Marked as unread', undefined, { duration: 3000 });
       this.clearSelection();
       this.feed.reload();
@@ -603,6 +674,7 @@ export class NotificationsPage {
     this.busy.set(true);
     try {
       await data(this.api.markNotifications({ body: { markAll: true, read } }));
+      this.patchOlder('all', read);
       this.snack.open('All notifications marked as read', undefined, { duration: 3000 });
       this.feed.reload();
     } catch (e) {

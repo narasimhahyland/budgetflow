@@ -148,10 +148,22 @@ export async function suggestionFor(
   return suggestion!;
 }
 
-/** AI scenarios call Amazon Bedrock through the running API, so they only run when asked to. */
-export const AI_LIVE = Boolean(process.env['BF_AI_LIVE']);
-export const AI_LIVE_REASON =
-  'AI scenarios call Amazon Bedrock. Set BF_AI_LIVE=1 with AWS credentials in the API environment to run them.';
+/**
+ * The provider the stack under test runs, as the API reports it: `recorded` (offline, the default for
+ * the local stack, functional runs and CI) or `bedrock` (selected with AI_PROVIDER=bedrock). Every AI
+ * scenario runs on either; the few that replay a recorded guardrail fixture skip on a live provider.
+ */
+export async function aiProvider(request: APIRequestContext): Promise<string> {
+  const view = await expectContract(
+    await request.get('/api/ai/settings', { headers: await as('org-admin') }),
+    200,
+    AiSettingsView,
+  );
+  return view.provider.provider;
+}
+
+export const RECORDED_ONLY =
+  'Replays a recorded guardrail fixture, so it runs on the recorded provider (the default) only.';
 
 /** A one-page PDF with real text, so the model has an actual receipt to read. */
 export function receiptPdf(lines: readonly string[]): Buffer {

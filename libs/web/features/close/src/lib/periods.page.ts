@@ -109,8 +109,7 @@ import { CloseTag } from './close-tag';
                   p.label
                 }}</a>
                 <span class="bf-cell__secondary"
-                  >{{ p.startDate | date: 'd MMM' : 'UTC' }} –
-                  {{ p.endDate | date: 'd MMM y' : 'UTC' }}</span
+                  >{{ p.startDate | date: 'd MMM' }} – {{ p.endDate | date: 'd MMM y' }}</span
                 >
               </td>
             </ng-container>
@@ -126,7 +125,7 @@ import { CloseTag } from './close-tag';
             <ng-container matColumnDef="target">
               <th mat-header-cell *matHeaderCellDef>Target close</th>
               <td mat-cell *matCellDef="let p">
-                {{ p.targetCloseDate ? (p.targetCloseDate | date: 'd MMM y' : 'UTC') : '—' }}
+                {{ p.targetCloseDate ? (p.targetCloseDate | date: 'd MMM y') : '—' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="snapshots">

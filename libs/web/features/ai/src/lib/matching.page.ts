@@ -170,7 +170,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
                 <tbody>
                   @for (s of rows(); track s.id) {
                     <tr [attr.data-testid]="'suggestion-row-' + s.actualId">
-                      <td class="bf-nowrap">{{ s.postedDate | date: 'd MMM y' : 'UTC' }}</td>
+                      <td class="bf-nowrap">{{ s.postedDate | date: 'd MMM y' }}</td>
                       <td class="bf-nowrap" data-label="Source">{{ sourceLabel(s.source) }}</td>
                       <td data-label="Merchant and memo">
                         <button
@@ -224,7 +224,7 @@ const STATUSES = ['open', 'accepted', 'rejected', 'dismissed', 'stale'] as const
             <div class="bf-card__header">
               <div class="bf-title-row">
                 <h2 class="bf-card__title" id="match-detail-title">
-                  {{ lineLabel(s) }} on {{ s.postedDate | date: 'd MMM y' : 'UTC' }}
+                  {{ lineLabel(s) }} on {{ s.postedDate | date: 'd MMM y' }}
                 </h2>
                 <bf-ai-label text="AI suggestion" />
               </div>

@@ -48,7 +48,7 @@ named generically in fixtures; all data is fictional.
 
 Permissions: two new actions held by the connector's service identity, `vendor.import` (also
 Finance Admin) and `event.rsvp_sync` (no role) — [authorization matrix](../../docs/architecture/authorization.md).
-Migration `0027_b7_expense_handoffs` (RLS forced; 0024 is B2 part 2, 0025/0026 B4 and B5).
+Migration `0030_b7_expense_handoffs` (RLS forced), regenerated on `main` after B4 (`0026`, `0028`) and B8 (`0029`); `0025` stays with B5. The snapshot is `meta/0028_snapshot.json`, by journal index.
 
 Outbound calls: the plan read, the budget check and the draft creation run synchronously in the API
 with timeouts and retries (`OutboundHttp`), like the existing preview, test-connection and push
@@ -105,7 +105,7 @@ check; the hand-off sends no receipt.
 - `functional-api`: **pass** on the second run ([`gate-summary.txt`](gate-summary.txt)).
   The first run ([`gate-summary-first-run.txt`](gate-summary-first-run.txt)) failed the migrations
   scenario, which reads snapshots by journal index: the snapshot keeps index 24 while the SQL is
-  `0027_b7_expense_handoffs`.
+  `0027_b7_expense_handoffs` at the time (now `0030`).
 - `functional-e2e`: **pass** ([`gate-summary-e2e-visual-final.txt`](gate-summary-e2e-visual-final.txt)).
   The earlier runs failed because the plan-import journey replaced the seeded Adaptive Planning
   credential while the hub journeys in other workers read it in "Needs attention"

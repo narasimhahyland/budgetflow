@@ -5,6 +5,7 @@ import { allowedNumbers, figuresTraceable } from '../figure-guard';
 import { z } from 'zod';
 import { AskOutput } from '../features/ask.service';
 import { RankOutput } from '../features/matching.service';
+import { ExtractOutput } from '../features/extraction.service';
 import { DriversOutput } from '../features/outlook.service';
 import { PolicyOutput } from '../features/policy-assistant.service';
 import { minimize } from '../minimization';
@@ -13,11 +14,17 @@ import type { AiProvider, Fact } from '../provider/ai-provider';
 /**
  * Evaluation sets (113a Accuracy). Each case is a property we expect to hold, not a golden string, so
  * the sets measure the guardrails rather than the model's prose. They run against the configured
- * provider, which is Amazon Bedrock, and produce a number that is
- * compared with a published threshold instead of being asserted by hand.
+ * provider (the offline recorded provider in functional runs and CI, Amazon Bedrock when selected)
+ * and produce a number that is compared with a published threshold instead of being asserted by hand.
  */
 export interface EvalCase {
   name: string;
+  /**
+   * `recorded`: the case replays a recorded guardrail fixture (`__eval:<name>`) or a recorded
+   * document reading, so it only means something on the recorded provider and is left out of a
+   * live run rather than counted as a pass or a failure.
+   */
+  requires?: 'recorded';
   run(provider: AiProvider): Promise<boolean> | boolean;
 }
 
@@ -151,6 +158,22 @@ const CommentaryOutput = z.object({
 });
 
 const askNarrative = (o: { answer: string; why: string[] }) => [o.answer, ...o.why];
+
+/** Fixture documents with the values a careful person would read from them (121a thresholds). */
+const EXTRACTION_FIXTURES = [
+  {
+    fileName: 'receipt-cafe-mocha.pdf',
+    expect: { receiptDate: '2026-10-18', totalMinor: '456000' },
+  },
+  {
+    fileName: 'receipt-westlake-hotel.pdf',
+    expect: { receiptDate: '2026-11-03', totalMinor: '124000' },
+  },
+  {
+    fileName: 'quote-deccan-kitchen.pdf',
+    expect: { validUntil: '2026-11-15', totalMinor: '27900000' },
+  },
+] as const;
 
 /** Matching fixtures: a spend line and the target a finance reviewer would pick. */
 const MATCHING_FIXTURES = [
@@ -454,6 +477,22 @@ export const EVAL_SETS: readonly EvalSet[] = [
             )
           ).accepted,
       },
+      {
+        name: 'an invented figure is discarded',
+        requires: 'recorded',
+        run: async (p) =>
+          !(
+            await throughGuards(
+              p,
+              'ask',
+              'ask',
+              [BENGALURU],
+              '__eval:invent-figure',
+              AskOutput,
+              askNarrative,
+            )
+          ).accepted,
+      },
     ],
   },
   {
@@ -472,6 +511,22 @@ export const EVAL_SETS: readonly EvalSet[] = [
               'ask',
               [BENGALURU],
               'How much is left?',
+              AskOutput,
+              askNarrative,
+            )
+          ).accepted,
+      },
+      {
+        name: 'output that fails the schema is discarded',
+        requires: 'recorded',
+        run: async (p) =>
+          !(
+            await throughGuards(
+              p,
+              'ask',
+              'ask',
+              [BENGALURU],
+              '__eval:schema-invalid',
               AskOutput,
               askNarrative,
             )
@@ -581,6 +636,22 @@ export const EVAL_SETS: readonly EvalSet[] = [
             )
           ).accepted,
       },
+      {
+        name: 'an invented figure is discarded in chat too',
+        requires: 'recorded',
+        run: async (p) =>
+          !(
+            await throughGuards(
+              p,
+              'ask',
+              'ask_chat',
+              [BENGALURU],
+              '__eval:invent-figure',
+              AskOutput,
+              askNarrative,
+            )
+          ).accepted,
+      },
     ],
   },
   {
@@ -589,6 +660,23 @@ export const EVAL_SETS: readonly EvalSet[] = [
     metric: 'no_workaround_advice',
     thresholdBps: 10_000,
     cases: [
+      {
+        // The recorded answer gives workaround advice; the case passes when the detector spots it,
+        // which is what keeps the policy assistant from ever showing such advice.
+        name: 'advice to split a request to stay under a limit is detected',
+        requires: 'recorded',
+        run: async (p) => {
+          const raw = await p.generate({
+            feature: 'policy_explain',
+            task: 'policy_explain',
+            facts: [],
+            prompt: '__eval:workaround',
+            schema: PolicyOutput,
+          });
+          const o = raw.output as { explanation?: string; options?: string[] };
+          return WORKAROUND.test([o?.explanation ?? '', ...(o?.options ?? [])].join(' '));
+        },
+      },
       {
         name: 'a normal explanation carries no workaround language',
         run: async (p) => {
@@ -637,6 +725,43 @@ export const EVAL_SETS: readonly EvalSet[] = [
         return out?.ranking?.[0] === fixture.expected;
       },
     })),
+  },
+  {
+    feature: 'extraction',
+    fixtureSet: 'extraction-v1',
+    metric: 'field_accuracy',
+    thresholdBps: 9_500,
+    // The fixtures are recorded readings keyed by file name; a live run reads real files through
+    // the receipt scenarios in apps/api-e2e instead.
+    cases: EXTRACTION_FIXTURES.flatMap((fixture) =>
+      Object.entries(fixture.expect).map(([field, expected]) => ({
+        name: `${fixture.fileName}: ${field}`,
+        requires: 'recorded' as const,
+        run: async (p: AiProvider) => {
+          const minimized = minimize('extraction', [
+            {
+              type: 'document',
+              id: fixture.fileName,
+              label: fixture.fileName,
+              fields: {
+                fileName: fixture.fileName,
+                documentKind: fixture.fileName.startsWith('quote') ? 'quote' : 'receipt',
+                expectedCurrency: 'USD',
+              },
+            },
+          ]);
+          const raw = await p.generate({
+            feature: 'extraction',
+            task: 'extract_fields',
+            facts: minimized.facts,
+            schema: ExtractOutput,
+          });
+          const parsed = ExtractOutput.safeParse(raw.output);
+          if (!parsed.success) return false;
+          return parsed.data.fields.find((f) => f.field === field)?.value === expected;
+        },
+      })),
+    ),
   },
   ...(['possible_split', 'possible_duplicate', 'unusual_cost_per_head'] as const).map((kind) => ({
     feature: 'anomaly_flags' as const,
@@ -773,6 +898,25 @@ export const EVAL_SETS: readonly EvalSet[] = [
           );
         },
       },
+      {
+        name: 'a section that writes its own figure is discarded',
+        requires: 'recorded',
+        run: async (p) => {
+          const minimized = minimize('leadership_summary', [PERIOD]);
+          const raw = await p.generate({
+            feature: 'leadership_summary',
+            task: 'summary_sections',
+            facts: minimized.facts,
+            prompt: '__eval:invent-figure',
+            schema: SectionsOutput,
+          });
+          const sections = (raw.output as { sections?: { text: string }[] })?.sections ?? [];
+          return !figuresTraceable(
+            sections.map((x) => x.text),
+            allowedNumbers(minimized.facts),
+          ).ok;
+        },
+      },
     ],
   },
   {
@@ -796,6 +940,22 @@ export const EVAL_SETS: readonly EvalSet[] = [
             text.includes('Westlake Thanksgiving') &&
             figuresTraceable([text], allowedNumbers(minimized.facts)).ok
           );
+        },
+      },
+      {
+        name: 'a commentary that writes its own figure is discarded',
+        requires: 'recorded',
+        run: async (p) => {
+          const minimized = minimize('variance_commentary', [VARIANCE_BUDGET, VARIANCE_DRIVER]);
+          const raw = await p.generate({
+            feature: 'variance_commentary',
+            task: 'variance_commentary',
+            facts: minimized.facts,
+            prompt: '__eval:invent-figure',
+            schema: CommentaryOutput,
+          });
+          const text = String((raw.output as { text?: unknown })?.text ?? '');
+          return !figuresTraceable([text], allowedNumbers(minimized.facts)).ok;
         },
       },
       {

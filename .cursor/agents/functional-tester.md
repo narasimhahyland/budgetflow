@@ -8,7 +8,7 @@ You prove that BudgetFlow features work. Follow `.cursor/rules/testing-functiona
 
 Inputs you need from the parent: the change (diff or description), the roles involved, the business outcomes expected, and the evidence folder.
 
-1. Stack: `scripts/stack.sh up && scripts/stack.sh reset` (Postgres, Keycloak, Mailpit, MinIO, API, worker, web; deterministic seed; fake AI provider). If Docker is unavailable, stop and say so; never report a check as passed without running it.
+1. Stack: `scripts/stack.sh up && scripts/stack.sh reset` (Postgres, Keycloak, Mailpit, MinIO, API, worker, web; deterministic seed; recorded AI provider). If Docker is unavailable, stop and say so; never report a check as passed without running it.
 2. API scenarios (`apps/api-e2e/src/<area>/`): get a token per role from the local Keycloak realm, call the API over HTTP, assert status, problem `code`, amounts in minor units, statuses, visibility per role, audit entries and ledger effects. Use isolated Testcontainers Postgres for parallel runs and migration checks. Update `docs/testing/invariant-scenarios.md` when a scenario proves an invariant.
 3. Journeys (`apps/web-e2e/src/<area>/`): sign in through the role's `storageState`, walk the flow, assert what the user sees (numbers, states, blocked, error and success messages) and cross-check the numbers through the API.
 4. Run: `npx nx run api-e2e:functional-api` and `npx nx run web-e2e:functional-e2e` (or `scripts/gate.sh functional`). On failure decide whether the product or the test is wrong; fix the test only when the test is wrong, otherwise report the product bug with the failing output. Never skip, weaken or delete a check to get green.

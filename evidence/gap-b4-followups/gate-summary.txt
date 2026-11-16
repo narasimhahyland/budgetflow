@@ -1,0 +1,16 @@
+scripts/gate.sh lint typecheck build functional-api functional-e2e visual — 2026-11-13T06:13:46Z — commit 8574e04d
+PASS|secrets|2s
+PASS|lint|1s
+PASS|styles|1s
+PASS|satori|41s
+PASS|typecheck|1s
+PASS|build|1s
+PASS|openapi|1s
+PASS|db|1s
+PASS|stack|67s
+PASS|functional-api|323s
+PASS|reseed-e2e|51s
+PASS|functional-e2e|772s
+PASS|reseed-visual|79s
+PASS|visual|1057s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report

@@ -55,6 +55,7 @@ const NEEDS: Record<string, string> = {
   'Period close': 'period.manage',
   'Rollover policies': 'period.manage',
   'Year-end': 'period.manage',
+  'Reclaim campaigns': 'reclaim.read',
   'Exchange rates': 'fx.manage',
   'Legal entities': 'master_data.manage',
   'GL accounts': 'master_data.manage',
@@ -121,7 +122,7 @@ const TENANT_ADMIN = [
   'Set up BudgetFlow',
   'Embeddable widgets',
 ];
-const CLOSE = ['Period close', 'Rollover policies', 'Year-end'];
+const CLOSE = ['Period close', 'Rollover policies', 'Year-end', 'Reclaim campaigns'];
 // The Insights entries report.read alone opens, then 016b, which follows budget.read: no role holds
 // one without the other. 016a needs report.board_pack and is listed per role.
 const INSIGHTS_READ = ['Reports', 'Utilization', 'Forecast and variance', 'Spending outlook'];
@@ -171,6 +172,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Approval inbox',
     ...REQUESTS,
     ...ORG,
+    'Reclaim campaigns',
     'Delegation of authority',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
@@ -270,6 +272,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     ...PERSONAL,
     ...ORG,
     ...AI_QUEUES,
+    'Reclaim campaigns',
     'Delegation of authority',
     'Tax recoverability',
     'Employee benefits',

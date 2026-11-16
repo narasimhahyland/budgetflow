@@ -1,0 +1,91 @@
+
+Running 20 tests using 2 workers
+
+  ✓  15 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:20:9 › calendar dates in Asia/Kolkata › the browser really runs in that timezone (892ms)
+  ✘  16 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in Asia/Kolkata › the November period reads 1 Nov to 30 Nov 2026 (15.7s)
+  ✘  17 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in Asia/Kolkata › the calendar year runs from 1 Jan to 31 Dec 2026 (15.6s)
+  ✓  18 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:20:9 › calendar dates in America/New_York › the browser really runs in that timezone (601ms)
+  ✓  19 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in America/New_York › the calendar year runs from 1 Jan to 31 Dec 2026 (500ms)
+  ✓  20 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in America/New_York › the November period reads 1 Nov to 30 Nov 2026 (851ms)
+
+
+  1) [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in Asia/Kolkata › the November period reads 1 Nov to 30 Nov 2026 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/1 Nov\s+–\s+30 Nov 2026/)
+    Expected: visible
+    Timeout: 15000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/1 Nov\s+–\s+30 Nov 2026/) with timeout 15000ms
+      - waiting for getByText(/1 Nov\s+–\s+30 Nov 2026/)
+
+
+      32 |       await expectShell(page);
+      33 |       await expect(page.getByRole('heading', { name: 'Nov 2026' })).toBeVisible();
+    > 34 |       await expect(page.getByText(/1 Nov\s+–\s+30 Nov 2026/)).toBeVisible();
+         |                                                               ^
+      35 |
+      36 |       await page.goto('/finance/close');
+      37 |       await expectShell(page);
+        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control/.claude/worktrees/goofy-kalam-8ec8eb/apps/web-e2e/src/dates/calendar-dates.spec.ts:34:63
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    dist/.playwright/apps/web-e2e/test-results/dates-calendar-dates-calen-05bca--reads-1-Nov-to-30-Nov-2026-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: dist/.playwright/apps/web-e2e/test-results/dates-calendar-dates-calen-05bca--reads-1-Nov-to-30-Nov-2026-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    dist/.playwright/apps/web-e2e/test-results/dates-calendar-dates-calen-05bca--reads-1-Nov-to-30-Nov-2026-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/dates-calendar-dates-calen-05bca--reads-1-Nov-to-30-Nov-2026-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in Asia/Kolkata › the calendar year runs from 1 Jan to 31 Dec 2026 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('year-summary')
+    Expected substring: "runs 1 Jan 2026 to 31 Dec 2026"
+    Received string:    " FY2026 runs 31 Dec 2025 to 30 Dec 2026 (365 days)  "
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toContainText" getByTestId('year-summary') with timeout 15000ms
+      - waiting for getByTestId('year-summary')
+        34 × locator resolved to <p data-testid="year-summary" _ngcontent-ng-c832566293="" class="bf-card__hint bf-year-hint"> FY2026 runs 31 Dec 2025 to 30 Dec 2026 (365 days…</p>
+           - unexpected value " FY2026 runs 31 Dec 2025 to 30 Dec 2026 (365 days)  "
+
+
+      44 |       await page.goto('/finance/periods');
+      45 |       await expectShell(page);
+    > 46 |       await expect(page.getByTestId('year-summary')).toContainText(
+         |                                                      ^
+      47 |         'runs 1 Jan 2026 to 31 Dec 2026',
+      48 |       );
+      49 |       await expect(page.getByText(/Jan 2026\s+–\s+Dec 2026/)).toBeVisible();
+        at /Users/narasimha.koppula/Desktop/Projects/budget-delegation-and-control/.claude/worktrees/goofy-kalam-8ec8eb/apps/web-e2e/src/dates/calendar-dates.spec.ts:46:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    dist/.playwright/apps/web-e2e/test-results/dates-calendar-dates-calen-37d95-s-from-1-Jan-to-31-Dec-2026-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: dist/.playwright/apps/web-e2e/test-results/dates-calendar-dates-calen-37d95-s-from-1-Jan-to-31-Dec-2026-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    dist/.playwright/apps/web-e2e/test-results/dates-calendar-dates-calen-37d95-s-from-1-Jan-to-31-Dec-2026-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace dist/.playwright/apps/web-e2e/test-results/dates-calendar-dates-calen-37d95-s-from-1-Jan-to-31-Dec-2026-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in Asia/Kolkata › the November period reads 1 Nov to 30 Nov 2026 
+    [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in Asia/Kolkata › the calendar year runs from 1 Jan to 31 Dec 2026 
+  18 passed (36.7s)

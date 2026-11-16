@@ -76,7 +76,7 @@ import { data, errorMessage, injectApi, valueOf } from './api';
             <ng-container matColumnDef="date">
               <th mat-header-cell *matHeaderCellDef>Date</th>
               <td mat-cell *matCellDef="let a">
-                {{ a.transactionDate | date: 'd MMM y' : 'UTC' }}
+                {{ a.transactionDate | date: 'd MMM y' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="line">

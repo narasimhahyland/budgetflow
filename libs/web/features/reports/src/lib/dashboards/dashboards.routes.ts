@@ -35,3 +35,49 @@ export const exceptionsDashboardRoutes: Routes = [
     loadComponent: () => import('./exceptions.page').then((m) => m.ExceptionsDashboardPage),
   },
 ];
+
+export const pendingApprovalsDashboardRoutes: Routes = [
+  {
+    path: '',
+    title: 'Pending approvals',
+    data: { pageTitle: 'Pending approvals', section: 'Insights' },
+    canActivate: [requirePermission('report.read', 'Pending approvals')],
+    loadComponent: () => import('./pending-approvals.page').then((m) => m.PendingApprovalsPage),
+  },
+];
+
+export const approvalPerformanceRoutes: Routes = [
+  {
+    path: '',
+    title: 'Approval performance',
+    data: { pageTitle: 'Approval performance', section: 'Insights' },
+    canActivate: [requirePermission('report.read', 'Approval performance')],
+    loadComponent: () =>
+      import('./approval-performance.page').then((m) => m.ApprovalPerformancePage),
+  },
+];
+
+/**
+ * 018b sits under Admin. The API admits `tenant.settings.manage` or `report.read` at tenant scope,
+ * two actions the guard cannot combine, so the guard only asks for tenant membership and a refused
+ * role sees the API's 403 as `sat-403-error-state`.
+ */
+export const productAnalyticsRoutes: Routes = [
+  {
+    path: '',
+    title: 'Product analytics',
+    data: { pageTitle: 'Product analytics', section: 'Administration' },
+    canActivate: [requirePermission('tenant.read', 'Product analytics')],
+    loadComponent: () => import('./product-analytics.page').then((m) => m.ProductAnalyticsPage),
+  },
+];
+
+export const evidencePackRoutes: Routes = [
+  {
+    path: '',
+    title: 'Evidence packs',
+    data: { pageTitle: 'Evidence packs', section: 'Insights' },
+    canActivate: [requirePermission('audit.read', 'Evidence packs')],
+    loadComponent: () => import('./evidence-packs.page').then((m) => m.EvidencePacksPage),
+  },
+];

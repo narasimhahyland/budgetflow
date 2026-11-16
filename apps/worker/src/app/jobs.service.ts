@@ -1,7 +1,22 @@
 import { OWNER_INVITED_TOPIC, RETENTION_SWEEP_TOPIC, RetentionService } from '@bf/api/admin';
 import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
-import { CHANNEL_DELIVER_TOPIC, ChannelsService, type ChannelDeliverJob } from '@bf/api/channels';
+import {
+  BURN_RATE_NIGHTLY,
+  BURN_RATE_TOPIC,
+  BurnRateService,
+  RECLAIM_REMINDER_NIGHTLY,
+  RECLAIM_REMINDER_TOPIC,
+  ReclaimService,
+} from '@bf/api/close';
+import {
+  CHANNEL_DELIVER_TOPIC,
+  ChannelsService,
+  PUSH_RETRY_LIMIT,
+  PUSH_SEND_TOPIC,
+  type ChannelDeliverJob,
+  type PushSendJob,
+} from '@bf/api/channels';
 import { DB } from '@bf/api/core';
 import {
   NAVAN_RUN_TOPIC,
@@ -16,10 +31,13 @@ import { EMAIL_TOPIC, NotificationsService, type EmailPayload } from '@bf/api/no
 import {
   BOARD_PACK_TOPIC,
   BoardPackService,
+  EVIDENCE_PACK_TOPIC,
+  EvidencePacksService,
   REPORT_DELIVER_TOPIC,
   REPORT_SWEEP_TOPIC,
   ReportDeliveryService,
   type BoardPackJob,
+  type EvidencePackJob,
   type ReportDeliverJob,
 } from '@bf/api/reports';
 import { BUDGET_THRESHOLD_TOPIC, BudgetAlertsConsumer, type ThresholdCrossed } from '@bf/api/spend';
@@ -70,10 +88,13 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly slaSweep: SlaSweepService,
     private readonly reportDelivery: ReportDeliveryService,
     private readonly boardPacks: BoardPackService,
+    private readonly evidencePacks: EvidencePacksService,
     private readonly webhooks: WebhooksService,
     private readonly retention: RetentionService,
     private readonly documents: S3DocumentStore,
     private readonly navan: NavanSyncService,
+    private readonly burnRate: BurnRateService,
+    private readonly reclaim: ReclaimService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -109,6 +130,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       CHANNEL_DELIVER_TOPIC,
       REPORT_DELIVER_TOPIC,
       BOARD_PACK_TOPIC,
+      EVIDENCE_PACK_TOPIC,
     ]) {
       await boss.createQueue(topic, {
         retryLimit: 5,
@@ -158,6 +180,25 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     await boss.work<ChannelDeliverJob>(CHANNEL_DELIVER_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.channels.deliverChannelJob(job.data);
     });
+    // Web Push (B8): one job per device, so one failing device never holds back another. Transient
+    // push-service failures retry with exponential backoff and jitter (2, 4, 8 s), then the job
+    // moves to the dead letter and the delivery log shows `dead_letter`. A settled delivery is a
+    // no-op, so a redelivered job sends nothing.
+    await boss.createQueue(PUSH_SEND_TOPIC, {
+      retryLimit: PUSH_RETRY_LIMIT,
+      retryDelay: Number(process.env.PUSH_RETRY_DELAY_SECONDS ?? 2),
+      retryBackoff: true,
+      retryDelayMax: 600,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work<PushSendJob>(
+      PUSH_SEND_TOPIC,
+      { batchSize: 1, pollingIntervalSeconds: 0.5 },
+      async ([job]) => {
+        const outcome = await this.channels.sendPushDelivery(job.data, job.retryCount);
+        if (outcome !== 'sent') this.log.log(`push delivery ${job.data.deliveryId}: ${outcome}`);
+      },
+    );
     // Scheduled report delivery (screen 091): render with the owner's scope, email the recipients
     // who may see the same data, post headline figures to the allowed channels.
     await boss.work<ReportDeliverJob>(REPORT_DELIVER_TOPIC, fast, async (jobs) => {
@@ -167,6 +208,10 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     // generation id, and a generation already `ready` is left alone, so a replay is a no-op.
     await boss.work<BoardPackJob>(BOARD_PACK_TOPIC, fast, async (jobs) => {
       for (const job of jobs) await this.boardPacks.render(job.data);
+    });
+    // One-click evidence pack (088a): keyed by the pack id; a pack past `queued` is left alone.
+    await boss.work<EvidencePackJob>(EVIDENCE_PACK_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) await this.evidencePacks.render(job.data);
     });
     await boss.work(NIGHTLY, async () => {
       const n = await this.rebuild.runNightly();
@@ -212,6 +257,68 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       boss,
       RETENTION_SWEEP_TOPIC,
       process.env.RETENTION_SWEEP_CRON ?? '0 1 * * *',
+    );
+    // Burn-rate alerts (gap B4): a run requested through the API (or nightly) is measured here at
+    // its fixed as-of date. A run that is no longer queued was executed before, so a redelivered job
+    // is a no-op, and alerts are unique per budget, period and level. After the last retry the run
+    // is marked failed so finance sees it.
+    await boss.createQueue(BURN_RATE_TOPIC, {
+      retryLimit: 3,
+      retryDelay: 5,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work<{ tenantId: string; runId: string }>(BURN_RATE_TOPIC, fast, async (jobs) => {
+      for (const job of jobs) {
+        try {
+          await this.burnRate.execute(job.data.tenantId, job.data.runId);
+        } catch (e) {
+          if (job.retryCount >= 3)
+            await this.burnRate.fail(job.data.tenantId, job.data.runId, (e as Error).message);
+          throw e;
+        }
+      }
+    });
+    await boss.createQueue(BURN_RATE_NIGHTLY, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(BURN_RATE_NIGHTLY, async () => {
+      const n = await this.burnRate.runNightly();
+      this.log.log(`nightly burn-rate check raised ${n} alert(s)`);
+    });
+    await this.schedule(boss, BURN_RATE_NIGHTLY, process.env.BURN_RATE_SWEEP_CRON ?? '0 5 * * *');
+    // Reclaim deadline reminders (086a): 2 days and 1 day before the response date. Each notice
+    // gets each kind at most once (unique index), so a redelivered job or a rerun sends nothing new.
+    await boss.createQueue(RECLAIM_REMINDER_TOPIC, {
+      retryLimit: 3,
+      retryDelay: 5,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work<{ tenantId: string; asOf: string }>(
+      RECLAIM_REMINDER_TOPIC,
+      fast,
+      async (jobs) => {
+        for (const job of jobs) await this.reclaim.sendReminders(job.data.tenantId, job.data.asOf);
+      },
+    );
+    await boss.createQueue(RECLAIM_REMINDER_NIGHTLY, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(RECLAIM_REMINDER_NIGHTLY, async () => {
+      const n = await this.reclaim.sendRemindersNightly();
+      this.log.log(`nightly reclaim reminders sent ${n}`);
+    });
+    await this.schedule(
+      boss,
+      RECLAIM_REMINDER_NIGHTLY,
+      process.env.RECLAIM_REMINDER_CRON ?? '0 7 * * *',
     );
     // Bulk owner invitations (103a): the invitation itself grants nothing.
     await boss.createQueue(OWNER_INVITED_TOPIC, {

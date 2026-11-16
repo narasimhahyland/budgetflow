@@ -9,7 +9,7 @@
     "functional-e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "playwright test -c apps/web-e2e/playwright.config.ts --project=desktop --project=tablet --project=mobile"
+        "command": "playwright test -c apps/web-e2e/playwright.config.ts --project=desktop --project=tablet --project=mobile --project=tenant-switches"
       }
     },
     "typecheck": {

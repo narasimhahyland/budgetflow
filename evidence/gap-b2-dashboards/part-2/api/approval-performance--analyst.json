@@ -1,0 +1,52 @@
+{
+  "request": "GET /api/dashboards/approval-performance as analyst",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-16T09:00:00.000Z",
+    "periodDays": 90,
+    "view": "aggregate",
+    "kpis": {
+      "decisions": 7,
+      "medianHours": 0,
+      "p90Hours": 0,
+      "slaCompliancePct": 100,
+      "changesRequestedPct": 14.3,
+      "outsideWebPct": 0,
+      "targetHours": 24
+    },
+    "smallSample": true,
+    "byStep": [
+      {
+        "step": "Budget owner",
+        "decisions": 5,
+        "medianHours": 0,
+        "p90Hours": 0
+      },
+      {
+        "step": "Giving director (co-funding)",
+        "decisions": 2,
+        "medianHours": 0,
+        "p90Hours": 0
+      }
+    ],
+    "byChannel": [
+      {
+        "channel": "web",
+        "decisions": 7,
+        "sharePct": 100,
+        "medianHours": 0
+      }
+    ],
+    "weekly": [
+      {
+        "weekStart": "2026-11-16",
+        "decisions": 7,
+        "medianHours": 0,
+        "slaCompliancePct": 100
+      }
+    ],
+    "approvers": [],
+    "own": null,
+    "suggestions": []
+  }
+}

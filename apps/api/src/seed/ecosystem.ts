@@ -14,12 +14,9 @@ import {
 import { Module, type INestApplicationContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { eq } from 'drizzle-orm';
-import { realNow } from './real-clock';
 
 @Module({ imports: [CoreModule] })
 class EcosystemSeedModule {}
-
-const DAY_MS = 86_400_000;
 
 /**
  * Phase 16 deterministic seed: the BI connector and the connector for AI assistants on, Zapier
@@ -135,10 +132,7 @@ export async function seedEcosystem(_app: INestApplicationContext): Promise<void
           tokenHash: sha256Hex(secret),
           grants: c.grants,
           consentText: c.consentText,
-          // Real time on purpose, even under the pinned seed clock: key and connection expiry are
-          // checked against Date.now() and SQL now(),
-          // so a pinned expiry would make every seeded credential lapse on one fixed real date.
-          expiresAt: new Date(realNow() + c.lifetimeDays * DAY_MS),
+          expiresAt: new Date(c.expiresAt),
         });
       }
     });

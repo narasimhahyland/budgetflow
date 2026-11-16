@@ -233,7 +233,7 @@
                           <span class="bf-cell__primary">{{ roleLabel[g.role] ?? g.role }}</span>
                           <span class="bf-cell__secondary">
                             {{ g.scopeOrgUnitName ?? 'Company-wide' }} · from
-                            {{ g.validFrom | date: 'd MMM y' : 'UTC' }}
+                            {{ g.validFrom | date: 'd MMM y' }}
                           </span>
                           <button
                             mat-button

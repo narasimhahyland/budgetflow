@@ -68,6 +68,12 @@ export const ACTIONS = [
    */
   'report.board_pack',
   'audit.read',
+  /**
+   * Generate a one-click evidence pack for an event or budget (088a). Held only at tenant scope by
+   * the Auditor, Finance Controller and Finance Admin: a pack bundles documents and decisions across
+   * several owners. Downloading a ready pack needs `audit.read`.
+   */
+  'evidence.generate',
   'integrity.run',
   'integrity.read',
   'integration.manage',
@@ -99,6 +105,15 @@ export const ACTIONS = [
   'tax.publish',
   'benefits.read',
   'benefits.manage',
+  /**
+   * Reclaim and redistribute campaigns (086a) and burn-rate alerts. Held only at tenant scope, like
+   * `report.board_pack`: an owner's `owned` scope would otherwise cover a tenant resource. Owners
+   * answer their own notices through `budget.control` on the budget, never through these.
+   */
+  'reclaim.read',
+  'reclaim.manage',
+  'reclaim.redistribute',
+  'burn_rate.run',
   /**
    * Applied connector imports (B7). The connector identity holds these, never a person's role grant
    * beyond Finance: ERP suppliers enter the vendor master for review (never approved by the import),
@@ -178,6 +193,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     // The CEO approves submitted DoA matrix versions; Finance drafts them.
     'doa.manage': 'tenant',
     'rules.read': 'tenant',
+    'reclaim.read': 'tenant',
+    'reclaim.manage': 'tenant',
   },
   'finance-admin': {
     'break_glass.read': 'tenant',
@@ -209,6 +226,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
+    'evidence.generate': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
     'integration.read': 'tenant',
@@ -220,6 +238,10 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'tax.read': 'tenant',
     'benefits.read': 'tenant',
     'benefits.manage': 'tenant',
+    'reclaim.read': 'tenant',
+    'reclaim.manage': 'tenant',
+    'reclaim.redistribute': 'tenant',
+    'burn_rate.run': 'tenant',
     'vendor.import': 'tenant',
   },
   'finance-controller': {
@@ -238,6 +260,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
+    'evidence.generate': 'tenant',
     'integrity.run': 'tenant',
     'integrity.read': 'tenant',
     'integration.read': 'tenant',
@@ -255,6 +278,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'tax.publish': 'tenant',
     'benefits.read': 'tenant',
     'benefits.manage': 'tenant',
+    'reclaim.read': 'tenant',
+    'burn_rate.run': 'tenant',
   },
   'budget-owner': OWNER,
   'department-head': OWNER,
@@ -284,6 +309,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'report.board_pack': 'tenant',
     'event.read': 'tenant',
     'audit.read': 'tenant',
+    'evidence.generate': 'tenant',
     'integrity.read': 'tenant',
     'integration.read': 'tenant',
     'org.read': 'tenant',
@@ -294,6 +320,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'legal_hold.manage': 'tenant',
     'tax.read': 'tenant',
     'benefits.read': 'tenant',
+    'reclaim.read': 'tenant',
   },
   'integration-admin': {
     'tenant.read': 'tenant',

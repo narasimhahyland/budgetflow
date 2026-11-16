@@ -27,6 +27,7 @@ export * from './lib/domains/extended';
 export * from './lib/domains/ecosystem';
 export * from './lib/domains/tax';
 export * from './lib/domains/dashboards';
+export * from './lib/domains/reclaim';
 export * from './lib/endpoints';
 export * from './lib/openapi';
 export * from './lib/client';

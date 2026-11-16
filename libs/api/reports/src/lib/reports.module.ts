@@ -7,6 +7,10 @@ import { Module } from '@nestjs/common';
 import { BoardPackService } from './board-pack.service';
 import { DashboardsController } from './dashboards.controller';
 import { DashboardsService } from './dashboards.service';
+import { ApprovalsDashboardsService } from './approvals-dashboards.service';
+import { EvidencePacksService } from './evidence-packs.service';
+import { InsightsController } from './insights.controller';
+import { ProductAnalyticsService } from './product-analytics.service';
 import { HealthService } from './health.service';
 import { ReportDeliveryService } from './report-delivery.service';
 import { ReportExtrasReads } from './report-extras.service';
@@ -29,6 +33,9 @@ import { SchedulesService } from './schedules.service';
     ReportDeliveryService,
     BoardPackService,
     DashboardsService,
+    ApprovalsDashboardsService,
+    ProductAnalyticsService,
+    EvidencePacksService,
   ],
   exports: [
     ReportsService,
@@ -38,9 +45,15 @@ import { SchedulesService } from './schedules.service';
     ReportDeliveryService,
     BoardPackService,
     DashboardsService,
+    ApprovalsDashboardsService,
+    ProductAnalyticsService,
+    EvidencePacksService,
   ],
 })
 export class ReportsModule {}
 
-@Module({ imports: [ReportsModule], controllers: [ReportsController, DashboardsController] })
+@Module({
+  imports: [ReportsModule],
+  controllers: [ReportsController, DashboardsController, InsightsController],
+})
 export class ReportsApiModule {}

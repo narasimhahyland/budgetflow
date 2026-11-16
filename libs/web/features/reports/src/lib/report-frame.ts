@@ -343,7 +343,7 @@ export class Reconciliation {
             @if (cell.text) {
               <!-- A calendar date (service end, period start) is not a moment: never shift it by timezone. -->
               @if (isDateOnly(cell.text)) {
-                <span data-testid="relative-time">{{ cell.text | date: 'd MMM y' : 'UTC' }}</span>
+                <span data-testid="relative-time">{{ cell.text | date: 'd MMM y' }}</span>
               } @else {
                 <span data-testid="relative-time">{{ cell.text | bfDateTime: timezone() }}</span>
               }

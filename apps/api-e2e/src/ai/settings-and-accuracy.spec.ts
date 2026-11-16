@@ -6,10 +6,7 @@ import { AI_FEATURES, AiAccuracyView, AiSettings, AiSettingsView } from '@bf/con
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
-import { AI_LIVE, AI_LIVE_REASON } from './support';
-
-test.skip(!AI_LIVE, AI_LIVE_REASON);
-
+import { aiProvider } from './support';
 test('a finance-affecting feature turned on by the Org Admin stays off until Finance confirms', async ({
   request,
 }) => {
@@ -86,9 +83,19 @@ test('an employee cannot read the AI query log; an auditor can', async ({ reques
   expect(allowed.status()).toBe(200);
 });
 
-test('every AI feature meets its published accuracy threshold against Amazon Bedrock', async ({
+test('CI never calls a live model: the stack runs the offline recorded provider', async ({
   request,
 }) => {
+  test.skip(!process.env['CI'], 'Locally the provider is whatever the stack was started with.');
+  expect(await aiProvider(request)).toBe('recorded');
+});
+
+test('every AI feature meets its published accuracy threshold against the configured provider', async ({
+  request,
+}) => {
+  // The recorded provider in functional runs and CI (never a live model there); Bedrock when the
+  // stack was started with AI_PROVIDER=bedrock.
+  const provider = await aiProvider(request);
   const run = await expectContract(
     await request.post('/api/ai/evaluations/run', {
       headers: await as('org-admin'),
@@ -102,7 +109,7 @@ test('every AI feature meets its published accuracy threshold against Amazon Bed
     'every feature has at least one evaluation set',
   ).toBeGreaterThanOrEqual(10);
   for (const result of run.results) {
-    expect(result.provider).toBe('bedrock');
+    expect(result.provider).toBe(provider);
     expect(result.cases, `${result.feature}/${result.metric} has fixtures`).toBeGreaterThan(0);
     expect(
       result.resultBps,
@@ -114,6 +121,13 @@ test('every AI feature meets its published accuracy threshold against Amazon Bed
   // The thresholds published in 113a are the ones that were measured.
   const byMetric = new Map(run.results.map((r) => [`${r.feature}|${r.metric}|${r.kind ?? ''}`, r]));
   expect(byMetric.get('matching|high_confidence_precision|')?.thresholdBps).toBe(9_500);
+  if (provider === 'recorded') {
+    expect(byMetric.get('extraction|field_accuracy|')?.thresholdBps).toBe(9_500);
+    // The recorded guardrail fixtures are measured too: invented figures and broken shapes.
+    expect(byMetric.get('ask|figures_traceable|')?.cases).toBe(3);
+    expect(byMetric.get('ask|schema_valid|')?.cases).toBe(2);
+    expect(byMetric.get('ask_chat|figures_traceable|')?.cases).toBe(2);
+  }
   expect(byMetric.get('anomaly_flags|flag_precision|possible_split')?.thresholdBps).toBe(8_000);
   expect(byMetric.get('ask|cites_only_permitted_records|')?.thresholdBps).toBe(10_000);
   expect(byMetric.get('ask|refuses_out_of_scope|')?.thresholdBps).toBe(10_000);

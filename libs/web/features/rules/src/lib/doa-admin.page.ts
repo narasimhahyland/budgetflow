@@ -138,8 +138,8 @@ const VERSION_LOOKS: Record<string, StatusView> = {
             Limits in version {{ v.selectedVersion.version }}
           </h2>
           <p class="bf-card__hint">
-            Starts {{ v.selectedVersion.validFrom | date: 'd MMM y' : 'UTC' }}. The most specific
-            row wins: a named person beats a role, an exact spend type beats any spend type.
+            Starts {{ v.selectedVersion.validFrom | date: 'd MMM y' }}. The most specific row wins:
+            a named person beats a role, an exact spend type beats any spend type.
           </p>
         </div>
         <div class="bf-table-scroll">
@@ -238,9 +238,9 @@ const VERSION_LOOKS: Record<string, StatusView> = {
                     >
                   </td>
                   <td class="bf-nowrap" data-label="In force">
-                    {{ ver.validFrom | date: 'd MMM y' : 'UTC' }}
+                    {{ ver.validFrom | date: 'd MMM y' }}
                     @if (ver.validTo) {
-                      to {{ ver.validTo | date: 'd MMM y' : 'UTC' }}
+                      to {{ ver.validTo | date: 'd MMM y' }}
                     } @else {
                       onwards
                     }
