@@ -7,6 +7,9 @@ import { MAX_DIFF_PIXEL_RATIO } from './src/support/visual-allowance';
 
 // Journeys that sign in fresh sessions, change a password or trip lockout counters run once, on desktop.
 const SESSION_JOURNEYS = [/src\/auth\//, /src\/shell\/analytics\.spec\.ts/];
+// Journeys that flip tenant-wide AI feature switches run in their own project after every other
+// journey, so no parallel worker sees a switch mid-change.
+const TENANT_SWITCHES = /src\/ai\/switches\.spec\.ts/;
 
 // Port from the shell, then .env (worktrees run their own stack), then infra/.env.example.
 const baseURL = process.env.BASE_URL ?? `http://localhost:${env('BF_WEB_PORT')}`;
@@ -54,26 +57,37 @@ export default defineConfig({
     // diagnose #82); then failing tests keep theirs. Local runs keep them under dist/ and tmp/.
     trace: process.env['CI'] && process.env['BF_CI_TRACES'] !== '1' ? 'off' : 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // The installable app's service worker (B8) caches the app shell. Journeys and baselines run
+    // without it, so each page load is the same fresh load it always was; the installable-app
+    // journeys (src/channels/installable.spec.ts) turn it on for themselves.
+    serviceWorkers: 'block',
   },
   projects: [
     { name: 'setup', testMatch: /auth\.setup\.ts/, workers: 1 },
     {
       name: 'desktop',
       dependencies: ['setup'],
-      testIgnore: /visual\//,
+      testIgnore: [/visual\//, TENANT_SWITCHES],
       use: { viewport: { width: 1440, height: 900 } },
     },
     {
       name: 'tablet',
       dependencies: ['setup'],
-      testIgnore: [/visual\//, ...SESSION_JOURNEYS],
+      testIgnore: [/visual\//, TENANT_SWITCHES, ...SESSION_JOURNEYS],
       use: { viewport: { width: 834, height: 1112 }, hasTouch: true },
     },
     {
       name: 'mobile',
       dependencies: ['setup'],
-      testIgnore: [/visual\//, ...SESSION_JOURNEYS],
+      testIgnore: [/visual\//, TENANT_SWITCHES, ...SESSION_JOURNEYS],
       use: { ...devices['Pixel 7'] },
+    },
+    {
+      name: 'tenant-switches',
+      dependencies: ['desktop', 'tablet', 'mobile'],
+      testMatch: TENANT_SWITCHES,
+      workers: 1,
+      use: { viewport: { width: 1440, height: 900 } },
     },
     {
       name: 'visual-light',

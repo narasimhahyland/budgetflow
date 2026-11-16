@@ -1,4 +1,4 @@
-// Gap B5 (094b), invariants 121-124: finance and payroll exports describe what is already posted and
+// Gap B5 (094b), invariants 122-125: finance and payroll exports describe what is already posted and
 // never change a balance. Each export balances (debits equal credits in the reporting currency, every
 // line mapped to an ERP account) before it is created; intercompany due-from / due-to pairs net to zero;
 // payroll exports carry each person's reportable benefit as the benefit ledger states it; every source

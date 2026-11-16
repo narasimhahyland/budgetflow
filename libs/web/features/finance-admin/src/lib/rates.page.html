@@ -234,11 +234,7 @@
         </ng-container>
         <ng-container matColumnDef="monthEnd">
           <th mat-header-cell *matHeaderCellDef class="bf-num">
-            {{
-              monthEndLabel()
-                ? (monthEndLabel() | date: 'MMM y' : 'UTC') + ' month-end'
-                : 'Month-end'
-            }}
+            {{ monthEndLabel() ? (monthEndLabel() | date: 'MMM y') + ' month-end' : 'Month-end' }}
           </th>
           <td mat-cell *matCellDef="let r" class="bf-num">
             {{ r.monthEnd ? rateText(r.monthEnd.rate) : '—' }}
@@ -246,11 +242,7 @@
         </ng-container>
         <ng-container matColumnDef="average">
           <th mat-header-cell *matHeaderCellDef class="bf-num">
-            {{
-              averageLabel()
-                ? (averageLabel() | date: 'MMM y' : 'UTC') + ' average'
-                : 'Monthly average'
-            }}
+            {{ averageLabel() ? (averageLabel() | date: 'MMM y') + ' average' : 'Monthly average' }}
           </th>
           <td mat-cell *matCellDef="let r" class="bf-num">
             {{ r.average ? rateText(r.average.rate) : '—' }}
@@ -265,7 +257,7 @@
         <ng-container matColumnDef="updated">
           <th mat-header-cell *matHeaderCellDef>Updated</th>
           <td mat-cell *matCellDef="let r" data-label="Updated">
-            {{ r.updated ? (r.updated | date: 'd MMM y' : 'UTC') : '—' }}
+            {{ r.updated ? (r.updated | date: 'd MMM y') : '—' }}
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="matrixColumns"></tr>
@@ -387,7 +379,7 @@
             </p>
             <p class="bf-kpi__delta">
               @for (s of v.sources; track s.rateId) {
-                Rate {{ rateText(s.rate) }} from {{ s.effectiveDate | date: 'd MMM y' : 'UTC' }}
+                Rate {{ rateText(s.rate) }} from {{ s.effectiveDate | date: 'd MMM y' }}
               }
             </p>
           }
@@ -551,7 +543,7 @@
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>Effective</th>
             <td mat-cell *matCellDef="let x" data-label="Effective">
-              {{ x.effectiveDate | date: 'd MMM y' : 'UTC' }}
+              {{ x.effectiveDate | date: 'd MMM y' }}
             </td>
           </ng-container>
           <ng-container matColumnDef="year">

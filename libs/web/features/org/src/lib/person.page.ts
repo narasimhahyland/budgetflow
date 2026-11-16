@@ -159,7 +159,7 @@ import { data, errorMessage, initialsOf, injectApi, todayIso, valueOf } from './
           </div>
           <div>
             <dt>Start date</dt>
-            <dd>{{ p.startDate ? (p.startDate | date: 'd MMM y' : 'UTC') : '—' }}</dd>
+            <dd>{{ p.startDate ? (p.startDate | date: 'd MMM y') : '—' }}</dd>
           </div>
         </dl>
       }
@@ -189,13 +189,13 @@ import { data, errorMessage, initialsOf, injectApi, todayIso, valueOf } from './
             <ng-container matColumnDef="from">
               <th mat-header-cell *matHeaderCellDef>From</th>
               <td mat-cell *matCellDef="let l" data-label="From">
-                {{ l.validFrom | date: 'd MMM y' : 'UTC' }}
+                {{ l.validFrom | date: 'd MMM y' }}
               </td>
             </ng-container>
             <ng-container matColumnDef="to">
               <th mat-header-cell *matHeaderCellDef>To</th>
               <td mat-cell *matCellDef="let l" data-label="To">
-                {{ l.validTo ? (l.validTo | date: 'd MMM y' : 'UTC') : 'Open' }}
+                {{ l.validTo ? (l.validTo | date: 'd MMM y') : 'Open' }}
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="lineColumns"></tr>

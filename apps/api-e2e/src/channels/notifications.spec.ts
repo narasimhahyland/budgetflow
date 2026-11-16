@@ -20,6 +20,7 @@ import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
 import { auditEvents, patchSettings, settings } from '../support/p8';
+import { MOCK_INTERNAL_BASE } from '../support/p12';
 import {
   auditFor,
   directorTree,
@@ -129,7 +130,8 @@ test.describe('notifications, preferences and push devices', () => {
   });
 
   test('registering and removing a push device is audited', async ({ request }) => {
-    const endpoint = `https://push.budgetflow.example.test/sub/${randomUUID()}`;
+    // Endpoints must be on a push service the API sends to (B8); the local mock stands in for one.
+    const endpoint = `${MOCK_INTERNAL_BASE}/push/v1/ok/${randomUUID()}`;
     const device = await expectContract(
       await request.post('/api/me/push-devices', {
         headers: await mutate('regional-manager'),

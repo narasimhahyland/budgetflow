@@ -31,11 +31,13 @@ import {
   AnalyticsTracker,
   ApiService,
   AuthService,
+  NetworkStatus,
   SessionStore,
 } from '@bf/web/data-access';
 import { DateTimePipe, Money } from '@bf/web/ui';
 import { SAT_APP_HEADER_IMPORTS } from '@hylandsoftware/satori-ui/app-header';
 import { SatAvatar } from '@hylandsoftware/satori-ui/avatar';
+import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SatBreadcrumbs } from '@hylandsoftware/satori-ui/breadcrumbs';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatGhost } from '@hylandsoftware/satori-ui/ghost';
@@ -72,6 +74,7 @@ const TONE_ICON: Record<NotificationItem['tone'], string> = {
     SAT_PLATFORM_NAV_IMPORTS,
     SAT_APP_HEADER_IMPORTS,
     SAT_EMPTY_STATE_IMPORTS,
+    SAT_BANNER_IMPORTS,
     SatAvatar,
     SatBreadcrumbs,
     SatCategoryTag,
@@ -90,6 +93,8 @@ const TONE_ICON: Record<NotificationItem['tone'], string> = {
 export class Shell {
   protected readonly session = inject(SessionStore);
   protected readonly auth = inject(AuthService);
+  /** Offline (059a): loaded figures stay visible but are labelled as not updating. */
+  protected readonly network = inject(NetworkStatus);
   protected readonly navState = inject(SatPlatformNavState);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);

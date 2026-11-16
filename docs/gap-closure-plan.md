@@ -12,25 +12,30 @@ SoD and access reviews, and the handoff's section 5) are not repeated here.
 
 ## Decisions (taken 12 November 2026)
 
-| #   | Question                                                                                         | Decision                                                                                                                                                                                                                                       |
-| --- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | The plan's undefined "17-step core workflow", "16 critical scenarios" and "four required tables" | **Dropped.** The criteria are the full ten-step acceptance scenario (A3) and the feature-catalog traceability table (A4).                                                                                                                      |
-| D2  | Designs for the 19 gap screens (none has an approved Stitch design)                              | **Build from the written specs** in `docs/ux/screens/` with the shared Satori components, as screen 112 was. `/visual-qa` still applies.                                                                                                       |
-| D3  | Tax and benefit-in-kind rules (B3)                                                               | **Fictional seed rules**: configurable rates and thresholds in the seed, so the mechanism is complete; finance enters real ones later.                                                                                                         |
-| D4  | Navan access (B1)                                                                                | **Build against the mock now**, to the public API shapes, with polling as the baseline; live mode behind an env flag, verified later against a test tenant.                                                                                    |
-| D5  | Web Push keys (B8)                                                                               | Follow the Phase 18 pattern: a development key pair locally, refusal to start in production without real keys (`secretOrDev`).                                                                                                                 |
-| D6  | Order                                                                                            | **A4 last in Tier A**; then **B2 dashboards, B3 tax and benefits, B1 Navan** in parallel (three sessions); then B5 finance exports (needs B3), B4, B7, B8, B9, B10, B6; Tier C alongside. At most three heavy sessions at once on one machine. |
+| #   | Question                                                                                                                         | Decision                                                                                                                                                                                                                                                                                                                               |
+| --- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | The plan's undefined "17-step core workflow", "16 critical scenarios" and "four required tables"                                 | **Dropped.** The criteria are the full ten-step acceptance scenario (A3) and the feature-catalog traceability table (A4).                                                                                                                                                                                                              |
+| D2  | Designs for the 19 gap screens (none has an approved Stitch design)                                                              | **Build from the written specs** in `docs/ux/screens/` with the shared Satori components, as screen 112 was. `/visual-qa` still applies.                                                                                                                                                                                               |
+| D3  | Tax and benefit-in-kind rules (B3)                                                                                               | **Fictional seed rules**: configurable rates and thresholds in the seed, so the mechanism is complete; finance enters real ones later.                                                                                                                                                                                                 |
+| D4  | Navan access (B1)                                                                                                                | **Build against the mock now**, to the public API shapes, with polling as the baseline; live mode behind an env flag, verified later against a test tenant.                                                                                                                                                                            |
+| D5  | Web Push keys (B8)                                                                                                               | Follow the Phase 18 pattern: a development key pair locally, refusal to start in production without real keys (`secretOrDev`).                                                                                                                                                                                                         |
+| D6  | Order                                                                                                                            | **A4 last in Tier A**; then **B2 dashboards, B3 tax and benefits, B1 Navan** in parallel (three sessions); then B5 finance exports (needs B3), B4, B7, B8, B9, B10, B6; Tier C alongside. At most three heavy sessions at once on one machine.                                                                                         |
+| D7  | AI provider after [#119](https://github.com/narasimhahyland/budgetflow/pull/119) moved AI to Amazon Bedrock and removed the fake | **Keep Bedrock in the product and add back an offline recorded provider for tests** (`AI_PROVIDER=recorded`, the default for the stack, functional runs and CI; `bedrock` selected explicitly). Restores the guardrail and extraction evals and the figure-guard and schema-discard scenarios. **Done**: `evidence/ai-offline-tests/`. |
 
 ## Tier A — make what is claimed true (do first)
 
 | Package                                    | What                                                                                                                                                                                                                                                                                                                                                                                                                      | Areas                                                                            | Size |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---- |
-| **A1** Report file exports                 | Reports promise "export only (CSV, XLSX, PDF)", but `POST /reports/:id/exports` only records a row and the button reads "Record an export"; scheduled deliveries carry no attachment. Produce the files through `DocumentStore`, with formula neutralisation and the export audit event, and attach them to scheduled deliveries.                                                                                         | `libs/api/reports`, worker, `libs/web/features/reports`, contracts (additive)    | M    |
+| **A1** Report file exports — **done**      | Reports promise "export only (CSV, XLSX, PDF)", but `POST /reports/:id/exports` only records a row and the button reads "Record an export"; scheduled deliveries carry no attachment. Produce the files through `DocumentStore`, with formula neutralisation and the export audit event, and attach them to scheduled deliveries.                                                                                         | `libs/api/reports`, worker, `libs/web/features/reports`, contracts (additive)    | M    |
 | **A2** Employee and gift caps — **done**   | Per-employee annual caps and the annual gift cap are saved as policy but never enforced; "employees nearest cap" is a fixture. Add the facts the rules need (employee year-to-date benefit, gift value, alcohol amount, non-employee count, intercompany flag, requester's recent total) and enforce them on requests.                                                                                                    | `libs/domain` rules evaluator, `libs/api/rules`, `libs/api/spend`; invariant map | M    |
 | **A3** Full acceptance scenario — **done** | `wave-2-core.spec.ts` covers less than the plan's ten steps. Add, through the UI: the CEO creating the budget, the headcount true-up, the attendee split by employing entity, the intercompany block or recharge, the actionable-email decision, set to zero through its dialog, the INR file import, the unmatched queue, surplus return at close, the audit-trail view, FX shown separately. Expect it to find defects. | `apps/web-e2e/src/acceptance/`                                                   | M    |
-| **A4** Catalog traceability                | Phase 17 traced every route (112/112), not the plan's ~120 feature-catalog rows. Map each row to a passing check, a package below or a recorded deferral.                                                                                                                                                                                                                                                                 | `evidence/phase-17/`, `docs/testing/`                                            | S    |
+| **A4** Catalog traceability — **done**     | Phase 17 traced every route (112/112), not the plan's ~120 feature-catalog rows. Map each row to a passing check, a package below or a recorded deferral.                                                                                                                                                                                                                                                                 | `evidence/phase-17/`, `docs/testing/`                                            | S    |
 
 A1, A2 and A3 touch different files and can run in parallel; A4 closes after the others report.
+
+**A4 is done:** all 119 catalog features mapped in
+[`evidence/gap-a4-traceability/`](../evidence/gap-a4-traceability/README.md): 72 proven, 14 built but
+unproven (now in Tier C), 19 gaps (17 in packages below, 2 new ones added to B10), 14 deferred.
 
 **A1 is done.** Exports render the screen's own run (filters and scope) into CSV, XLSX or PDF in the
 `DocumentStore` under `tenants/<id>/report-exports/`, download through a five-minute signed link,
@@ -56,18 +61,18 @@ request; it now does, and every decision is recorded with its rule versions and 
 
 ## Tier B — build what is missing
 
-| Package                                        | What                                                                                                                                                                                                                                                                              | Depends on      | Size |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ---- |
-| **B1** Navan live integration (16a) — **done** | The plan's Phase 16a: the real Navan Expense API in place of the placeholder adapter, inbound actuals in 93-day windows, outbound event-code options, and controls disabling options at the point of spend. Mock provider moved to the real shapes; live mode behind an env flag. | D4              | L    |
-| **B2** Dashboards                              | 012 finance controller, 017 alerts, 017a exceptions, 018 pending approvals, 018a approval performance (cycle time, bottlenecks), 018b product analytics, 088a one-click evidence pack. Split in two.                                                                              | D2              | L    |
-| **B3** Tax and benefits — **done**             | 080g tax-aware consumption (recoverable vs non-recoverable GST/VAT) and 080h the employee benefit ledger with benefit-in-kind thresholds. The tables exist, unused. Ledger-heavy: `/ledger-change`.                                                                               | D2, D3          | L    |
-| **B4** Reclaim and burn rate                   | 086a reclaim-and-redistribute campaigns, and burn-rate alerts.                                                                                                                                                                                                                    | D2              | M    |
-| **B5** Finance exports — **done**              | 094b: intercompany recharges, chargeback and reclass journals, payroll benefit data.                                                                                                                                                                                              | B3 for benefits | M    |
-| **B6** Developer portal                        | 101a public API docs and sandbox (only `/api/openapi.json` exists). The sandbox overlaps the deferred demo environment, so scope it first.                                                                                                                                        | D2              | M    |
-| **B7** Integration completeness                | Apply an Adaptive Planning import (plan to root budgets; today preview only), Outlook and Google RSVP sync, vendor master from the ERP (both read and reported only), Workday `runBudgetCheck`, 117a hand-off to a prefilled expense.                                             | —               | M–L  |
-| **B8** Installable app and push                | 059a's installable mobile web app (web manifest, service worker) and real push delivery (today a row is recorded, nothing is sent).                                                                                                                                               | D5              | M    |
-| **B9** AI jobs                                 | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                     | —               | S–M  |
-| **B10** Experience                             | Onboarding wizard (005, 008, 010), 104 permission matrix, 124 profile and preferences, global search, 106 categories and custom fields (read-only today), 116a team budget card, 113 integrity-checks tab. Split by area.                                                         | D2              | L    |
+| Package                                        | What                                                                                                                                                                                                                                                                                                                                                                | Depends on      | Size |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ---- |
+| **B1** Navan live integration (16a) — **done** | The plan's Phase 16a: the real Navan Expense API in place of the placeholder adapter, inbound actuals in 93-day windows, outbound event-code options, and controls disabling options at the point of spend. Mock provider moved to the real shapes; live mode behind an env flag.                                                                                   | D4              | L    |
+| **B2** Dashboards — **done**                   | 012 finance controller, 017 alerts, 017a exceptions, 018 pending approvals, 018a approval performance (cycle time, bottlenecks), 018b product analytics, 088a one-click evidence pack. Split in two.                                                                                                                                                                | D2              | L    |
+| **B3** Tax and benefits — **done**             | 080g tax-aware consumption (recoverable vs non-recoverable GST/VAT) and 080h the employee benefit ledger with benefit-in-kind thresholds. The tables exist, unused. Ledger-heavy: `/ledger-change`.                                                                                                                                                                 | D2, D3          | L    |
+| **B4** Reclaim and burn rate — **done**        | 086a reclaim-and-redistribute campaigns, and burn-rate alerts.                                                                                                                                                                                                                                                                                                      | D2              | M    |
+| **B5** Finance exports — **done**              | 094b: intercompany recharges, chargeback and reclass journals, payroll benefit data.                                                                                                                                                                                                                                                                                | B3 for benefits | M    |
+| **B6** Developer portal                        | 101a public API docs and sandbox (only `/api/openapi.json` exists). The sandbox overlaps the deferred demo environment, so scope it first.                                                                                                                                                                                                                          | D2              | M    |
+| **B7** Integration completeness                | Apply an Adaptive Planning import (plan to root budgets; today preview only), Outlook and Google RSVP sync, vendor master from the ERP (both read and reported only), Workday `runBudgetCheck`, 117a hand-off to a prefilled expense.                                                                                                                               | —               | M–L  |
+| **B8** Installable app and push — **done**     | 059a's installable mobile web app (web manifest, service worker) and real push delivery (today a row is recorded, nothing is sent).                                                                                                                                                                                                                                 | D5              | M    |
+| **B9** AI jobs                                 | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                                                                                                       | —               | S–M  |
+| **B10** Experience                             | "Load sample data" on the setup checklist; a role suggested from the job title on bulk invites; a program logo in branding (found by A4); onboarding wizard (005, 008, 010), 104 permission matrix, 124 profile and preferences, global search, 106 categories and custom fields (read-only today), 116a team budget card, 113 integrity-checks tab. Split by area. | D2              | L    |
 
 **B1 done.** Navan runs on its documented paths and shapes against the mock provider (D4): OAuth
 client credentials without a scope parameter, a worker-cached token, the EU region header, 93-day
@@ -79,13 +84,18 @@ Design and values to confirm before live use: [`navan-integration.md`](architect
 Proof: `apps/api-e2e/src/integrations/navan.spec.ts` (invariants 106-108) and the Navan journeys;
 evidence in [`evidence/gap-b1-navan/`](../evidence/gap-b1-navan/README.md).
 
-**B2 part 1 done** (012, 017, 017a). The finance controller dashboard shows the close checklist per
-entity, the queues that block the close, the ledger check, feeds and the FX effect; alerts are derived
-on every read from the health checks, owner thresholds and controls, and acknowledging or snoozing is
-per person; the exceptions dashboard counts control exceptions by type and age and links each to its
-queue. Proof: `apps/api-e2e/src/dashboards/dashboards.spec.ts` (invariants 103–105) and the
-dashboards journeys; evidence in [`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md).
-Part 2 (018, 018a, 018b, 088a) follows.
+**B2 done.** 012 finance controller (close checklist per entity, blocking queues, ledger check,
+feeds, FX effect), 017 alerts (derived on every read from health checks, owner thresholds and
+controls; acknowledge and snooze per person), 017a exceptions (by type and age, each linked to its
+queue), 018 pending approvals (held versus not yet held, SLA, a four-hourly nudge that decides
+nothing), 018a approval performance (names only for finance, aggregates for analysts, own figures for
+approvers), 018b product analytics (`GET /api/analytics/kpis`, counts only, against the plan targets)
+and 088a evidence packs (new action `evidence.generate`, migration 0024, worker-built ZIP with a
+SHA-256 manifest and a verified audit chain). Proof: `apps/api-e2e/src/dashboards/` (invariants
+103–105 and 113–115) and the dashboards journeys; evidence in
+[`evidence/gap-b2-dashboards/`](../evidence/gap-b2-dashboards/README.md). Not built: the Export and
+Schedule menus of these dashboards, sidebar entries, and the evidence-pack entry on event and budget
+details.
 
 **B3 done.** Tax-aware consumption (080g): a request's amount is net of tax, and on submission its
 GST/VAT splits by the published rule in force (legal entity × spend category × attendee type, mixed
@@ -117,14 +127,71 @@ send. Files are CSV and XLSX in the `DocumentStore` under `tenants/<id>/finance-
 through five-minute signed links with CSV formulas neutralised; creation, re-sends, downloads and Mark
 posted are audited, and exporting moves the 053a recharge to Exported, then Posted. New actions
 `finance_export.read` and `finance_export.manage`. Migration `0025`. Proof:
-`apps/api-e2e/src/finance/finance-exports.spec.ts` (invariants 121-124) and the
+`apps/api-e2e/src/finance/finance-exports.spec.ts` (invariants 122-125) and the
 `finance-admin/finance-exports` journeys; evidence in
 [`evidence/gap-b5-finance-exports/`](../evidence/gap-b5-finance-exports/README.md). Not built:
 delivery by ERP connector (the target is a file; Acknowledged and Failed are reserved for it), the
 accruals and prepaid types (accruals keep their own export on 080d), and a read-only mobile list.
 
+**B4 done.** Reclaim campaigns (086a, built from the spec, D2): finance (or the CEO) previews and
+starts a campaign; every budget forecast to lapse above the criteria gets a notice; its owner
+releases all, part, or keeps it with a reason and plan, never above the floor (allocated out, held,
+encumbered and actual as they stand when the owner answers). Reminders go out 2 days and 1 day before
+the response date. After the deadline finance can send an unanswered notice to the nearest ancestor
+owner who is not its owner; nothing is reclaimed automatically. A Finance Admin redistributes each
+legal entity's pool through a confirm dialog with the floor check per source: reductions with a
+destination to targets in the same entity and tree, the rest back to each source's parent, in one
+idempotent command under ordered locks with one audit entry. Burn-rate alerts: the worker compares
+actual spend with the amount phased to date and tells owners at 110% and 125%, once per budget,
+period and level, through the existing notifications. The year-end page links to the campaigns.
+Migrations `0026` and `0028`; new actions `reclaim.read`, `reclaim.manage`, `reclaim.redistribute`,
+`burn_rate.run`. Proof: `apps/api-e2e/src/close/reclaim.spec.ts` and `burn-rate.spec.ts`
+(invariants 116-121) and the reclaim journeys. Evidence:
+[`evidence/gap-b4-reclaim/`](../evidence/gap-b4-reclaim/README.md) and
+[`evidence/gap-b4-followups/`](../evidence/gap-b4-followups/README.md) (#127, #129). Not built: the
+Stitch images for 086a, an entry from the 086 unused report (it renders through the shared report
+frame), and a burn-rate panel on the budget page (alerts reach owners only as notifications).
+
+**B8 done.** The web app is installable (059a): a web app manifest with icons and a service worker
+that caches the app shell only, never an API answer. Started offline it says "You're offline" and shows
+no amount; a page already open says its figures stopped updating, and mobile decisions wait for the
+connection. The install prompt appears from the second visit, and "Not now" hides it for 30 days. Push
+is real Web Push (059c): each registered device gets a delivery that the worker encrypts (RFC 8291) and
+signs with VAPID (RFC 8292) on `node:crypto` (no new dependency). The lock screen shows no amount
+unless the person opted in. A subscription the push service reports gone is removed and audited. A
+failing push service is retried with backoff and jitter, then dead-lettered. A re-run sends once.
+Locally a public development VAPID key is used; production refuses to start without
+`VAPID_PRIVATE_KEY` (D5). Migration `0029`. Proof: `apps/api-e2e/src/channels/push-delivery.spec.ts`
+(invariants 129, 137-140) and the installable-app journeys (141). Design:
+[`web-push.md`](architecture/web-push.md). Evidence:
+[`evidence/gap-b8-push/`](../evidence/gap-b8-push/README.md). Not built: quiet hours and the matrix's
+Push column do not gate sending yet, and there is no offline read-only approvals list (tokens live in
+memory, so an offline start has no session).
+
+## What next (13 November 2026)
+
+Done and merged: A1-A4, B1, B2 (#117, #130), B3, B4 (#127, #129), D7 offline AI tests (#126), the
+date-only fix (#128). Open, in the D6 order:
+
+1. **B5 finance exports**: done in PR #136 (migration `0025`, invariant rows 122-125).
+2. **B7 integration completeness**: in its own worktree, no PR yet; waits for a decision. Migration
+   `0027`, invariant rows 130-136.
+3. **B9 AI jobs**, **B10 experience** (split by area), then **B6 developer portal** (scope the
+   sandbox first). Not started. B8 is done (migration `0029`, invariant rows 129 and 137-141), so the
+   next free migration number is `0030` and the next free invariant row is 142.
+4. **Bugs** below, which are small and can run alongside: the notification feed paging first, since
+   it shows wrong counts to real users.
+5. **Tier C** proof gaps, alongside.
+
 ## Tier C — prove what is built but thinly covered
 
+- Features A4 found built but with no test naming them: program templates (020b), the per-head
+  limit on actual attendance, the event photo gallery, card-limit push when enabled, an INR
+  per-head rate, forecast at completion per event, asking questions in Slack and Teams, quote
+  extraction, the fairness and participation-reach reports (only a generic tie-out loop), posting
+  scheduled reports to channels, chart table alternatives and the keyboard grid.
+- Red-flag analytics (017b) is blocked on a schema change to approval tasks (handoff section 5)
+  and has no package: it needs a decision.
 - Connector scenarios for Odoo, Workday (HCM and Financials), NetSuite, Brex, Coupa and Google
   Calendar: each has a definition and no API scenario (Navan comes with B1).
 - The board pack's constant-currency variance: no scenario or journey.
@@ -136,11 +203,25 @@ accruals and prepaid types (accruals keep their own export on 080d), and a read-
 - Performance at the plan's scale (50,000 budgets, 500,000 ledger entries); Phase 17 measured about
   20,000 lines.
 
-## Carried defects
+## Bugs and carried defects
 
-#82 (blank renders), the AI-caption id wrap (in progress in its own session), the board pack's zeros
-(the seed closes a period without close snapshots), the monospace style stylelint misses, and the
-"Nadia Farouk" fallback name.
+Checked against `main` on 13 November 2026.
+
+| Bug                                                           | Where                                                            | Effect                                                                                                                                                                                                                                                       | Status                                                                                                                     |
+| ------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Notification feed ignores its cursor                          | `ChannelsService` list (`GET /api/notifications`)                | Loaded the newest 200 rows and filtered them in memory with `nextCursor` always null. Now filters, a (created_at, id) cursor and the counts run in SQL, and the feed has "Show older notifications" (invariant 126, `channels/notification-paging.spec.ts`). | Fixed                                                                                                                      |
+| API and worker database sessions are not pinned               | `withTenant` (no `app.fixed_now`); the worker has no `FIXED_NOW` | On a pinned stack, rows they write get today's real date while the API reasons as of the pinned day (B2's finding). Test stacks only.                                                                                                                        | Open                                                                                                                       |
+| Reclaim notices keep the owner from when the campaign started | `ReclaimService.respond`                                         | Notices followed the owner at campaign start, so after a handover the new owner could not answer. Now the current owner answers, and an escalation picks its decider when it happens (invariant 127).                                                        | Fixed (B4 review follow-up)                                                                                                |
+| A reclaim pool's remainder can leave its legal entity         | `ReclaimService` pool legs to each source's parent               | When a source's parent is in another legal entity, the remainder moves across entities without intercompany handling (the same as the existing reduce to parent).                                                                                            | By design: the 086a spec returns cross-entity money to the common parent, so a reallocation creates no intercompany effect |
+| A burn-rate run accepts any as-of date                        | `BurnRateService.request`                                        | A run dated in the future would use up the alert of a period not yet started; such runs are now refused. Past dates still measure the period they fall in (invariant 120).                                                                                   | Fixed (B4 review follow-up)                                                                                                |
+| One set-to-zero source fails a whole reclaim pool             | `ControlsService.reclaimInTx`                                    | A source that can no longer be reduced (set to zero, or a commitment landed after it released) blocked its whole pool. Finance can now leave it out: the rest moves and its notice closes as left out (invariant 128).                                       | Fixed (B4 review follow-up)                                                                                                |
+| #82 blank renders                                             | visual suite                                                     | About one state per run renders blank, fails its readiness wait and passes on retry.                                                                                                                                                                         | Open                                                                                                                       |
+| Board pack zeros                                              | seed                                                             | The seed closes a period without close snapshots.                                                                                                                                                                                                            | Open                                                                                                                       |
+| Monospace style                                               | stylelint                                                        | A monospace style stylelint does not catch.                                                                                                                                                                                                                  | Open                                                                                                                       |
+| "Nadia Farouk" fallback name                                  | `ChannelsService` chat installations                             | A hard-coded installer name when none is recorded.                                                                                                                                                                                                           | Open                                                                                                                       |
+
+Fixed since the last revision: the AI-caption id wrap (#114), the seeded API key's real-clock expiry
+(#123), date-only fields a day early west of UTC (#128).
 
 ## How to run it
 
@@ -148,5 +229,5 @@ accruals and prepaid types (accruals keep their own export on 080d), and a read-
   At most three or four at once on one machine: every package runs the full gate, and heavy runs
   disturb each other (handoff section 7).
 - Shared surfaces (`libs/contracts`, `libs/api/db`, `infra/`) change only inside a package that owns
-  them, one migration at a time, numbered from `0022`.
+  them, one migration at a time. Taken: `0022`-`0028` (`0025` B5, `0027` B7 unmerged); next `0029`.
 - Each package updates the invariant map and its evidence, and this page, when it merges.

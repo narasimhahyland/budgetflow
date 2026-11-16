@@ -96,7 +96,7 @@ seeded stack, as `scripts/gate.sh` provides between suites.
   list, the integration admin's 403 and the operator's 404.
 - Screenshots: [`functional/screens/`](functional/screens/): the populated list after the journey,
   the payroll lines dialog, and the integration admin's view.
-- Invariants 121-124 in [`docs/testing/invariant-scenarios.md`](../../docs/testing/invariant-scenarios.md).
+- Invariants 122-125 in [`docs/testing/invariant-scenarios.md`](../../docs/testing/invariant-scenarios.md).
 
 ## Visual
 
@@ -116,7 +116,7 @@ exports".
 
 - Migration `0025_b5_finance_exports` adds `finance_export_batches` and `finance_export_lines`, with
   RLS forced, a tenant isolation policy and append-only lines. 0024 is B2 part 2's, which is not yet
-  on main; the drizzle journal has this migration at index 24 until the integrator renumbers.
+  on main; after merging main (0024, 0026, 0028, 0029) it sits at journal index 28.
 - Contracts (additive): `domains/finance-exports.ts`, and problem codes `FINANCE_EXPORT_*` in
   `common.ts`. OpenAPI is regenerated.
 - Policy: `finance_export.read` and `finance_export.manage`, with their rows in

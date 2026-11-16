@@ -49,12 +49,12 @@ flowchart LR
 
 ## CI
 
-| Job                                  | Runs when                                                       | What                                                                                                                      |
-| ------------------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Harness (token-free)                 | always                                                          | secret scan, harness structure, shellcheck, hook tests, visual tooling self-test, visual-baseline reason check on PRs     |
-| Lint, typecheck, build, Satori check | secret + workspace                                              | `scripts/gate.sh static`                                                                                                  |
-| Functional                           | secret + workspace + `infra/compose.yaml`                       | `scripts/gate.sh functional` on the Compose stack (MinIO, fake AI provider); uploads API and journey reports and evidence |
-| Visual regression                    | secret + workspace + stack + `apps/web-e2e/visual/screens.json` | `scripts/gate.sh visual` in `mcr.microsoft.com/playwright:v1.64.1-noble`; uploads screenshots, diffs and the HTML report  |
+| Job                                  | Runs when                                                       | What                                                                                                                          |
+| ------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Harness (token-free)                 | always                                                          | secret scan, harness structure, shellcheck, hook tests, visual tooling self-test, visual-baseline reason check on PRs         |
+| Lint, typecheck, build, Satori check | secret + workspace                                              | `scripts/gate.sh static`                                                                                                      |
+| Functional                           | secret + workspace + `infra/compose.yaml`                       | `scripts/gate.sh functional` on the Compose stack (MinIO, recorded AI provider); uploads API and journey reports and evidence |
+| Visual regression                    | secret + workspace + stack + `apps/web-e2e/visual/screens.json` | `scripts/gate.sh visual` in `mcr.microsoft.com/playwright:v1.64.1-noble`; uploads screenshots, diffs and the HTML report      |
 
 Jobs whose conditions are not met show as skipped, never failed.
 

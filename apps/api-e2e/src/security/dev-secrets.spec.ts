@@ -5,6 +5,7 @@
 // with only the variables it needs and reads what the process says before it would reach the database.
 import { expect, test } from '@playwright/test';
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -15,6 +16,8 @@ const SECRETS = {
   CHAT_LINK_SECRET: 'scenario-chat-link-secret-0001',
   INTEGRATIONS_SECRET_KEY: 'scenario-integrations-key-0001',
   APPROVAL_LINK_SECRET: 'scenario-approval-link-secret-0001',
+  // B8 Web Push: a P-256 private key (32 bytes, base64url), derived here so no key is written down.
+  VAPID_PRIVATE_KEY: createHash('sha256').update('scenario-vapid-key-0001').digest('base64url'),
 };
 const REFUSAL = /is not set\. Set it to a random value of at least 16 characters/;
 
@@ -77,6 +80,13 @@ for (const app of ['api', 'worker'] as const) {
     const r = await start(app, { NODE_ENV: 'production', ...others });
     expect(r.out).toMatch(REFUSAL);
     expect(r.out).toContain('CHAT_LINK_SECRET is not set');
+  });
+
+  test(`${app}: production without a VAPID key for Web Push refuses to start (D5)`, async () => {
+    const { VAPID_PRIVATE_KEY: _omitted, ...others } = SECRETS;
+    const r = await start(app, { NODE_ENV: 'production', ...others });
+    expect(r.out).toMatch(REFUSAL);
+    expect(r.out).toContain('VAPID_PRIVATE_KEY is not set');
   });
 
   test(`${app}: real secrets, or the local stack's opt-in, pass the check`, async () => {

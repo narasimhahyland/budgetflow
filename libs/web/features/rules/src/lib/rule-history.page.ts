@@ -86,9 +86,9 @@ import { RulesTabs } from './rules-tabs';
                   </td>
                   <td class="bf-num" data-label="Priority">{{ v.priority }}</td>
                   <td class="bf-nowrap" data-label="In force">
-                    {{ v.validFrom | date: 'd MMM y' : 'UTC' }}
+                    {{ v.validFrom | date: 'd MMM y' }}
                     @if (v.validTo) {
-                      to {{ v.validTo | date: 'd MMM y' : 'UTC' }}
+                      to {{ v.validTo | date: 'd MMM y' }}
                     } @else {
                       onwards
                     }

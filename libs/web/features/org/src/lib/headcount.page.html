@@ -41,8 +41,8 @@
       <ul class="bf-history">
         @for (item of h.items; track item.id) {
           <li>
-            As of {{ item.asOfDate | date: 'd MMM y' : 'UTC' }} ·
-            {{ item.totalHeadcount | number }} people on {{ item.lineCount }} lines · imported
+            As of {{ item.asOfDate | date: 'd MMM y' }} · {{ item.totalHeadcount | number }} people
+            on {{ item.lineCount }} lines · imported
             {{ item.createdAt | date: 'd MMM y, HH:mm' }} ({{ item.source }})
           </li>
         }
@@ -117,7 +117,7 @@
       <div class="bf-card__body">
         <p class="bf-file" data-testid="file-summary">
           {{ fileName() ?? 'Pasted CSV' }} · {{ p.rowsRead | number }} rows · effective date
-          {{ p.asOfDate | date: 'd MMM y' : 'UTC' }}
+          {{ p.asOfDate | date: 'd MMM y' }}
         </p>
         <div class="bf-kpis" aria-label="File summary">
           <div class="bf-kpi">
@@ -334,7 +334,7 @@
           <h2 class="bf-card__title" id="hc-title">By location and team</h2>
           <p class="bf-card__hint">
             Imported {{ s.snapshot.createdAt | date: 'd MMM y' }} · as of
-            {{ s.snapshot.asOfDate | date: 'd MMM y' : 'UTC' }} · {{ s.snapshot.lineCount }} lines
+            {{ s.snapshot.asOfDate | date: 'd MMM y' }} · {{ s.snapshot.lineCount }} lines
           </p>
         </div>
       </div>

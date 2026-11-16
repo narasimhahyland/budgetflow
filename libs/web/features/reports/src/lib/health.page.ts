@@ -63,7 +63,7 @@ const LEVEL_LABELS: Record<HealthLevel, string> = {
           @if (overview(); as o) {
             In {{ o.currency }} as of
             <span data-testid="relative-time"
-              >{{ o.asOf | date: 'd MMM y' : 'UTC' }} ·
+              >{{ o.asOf | date: 'd MMM y' }} ·
               {{ o.generatedAt | bfDateTime: session.timezone() }}</span
             >
           }

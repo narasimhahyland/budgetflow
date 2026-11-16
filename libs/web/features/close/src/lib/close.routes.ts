@@ -62,4 +62,25 @@ export const closeRoutes: Routes = [
     canActivate: [read],
     loadComponent: () => import('./year-end-run.page').then((m) => m.YearEndRunPage),
   },
+  {
+    path: 'finance/reclaim',
+    title: 'Reclaim campaigns',
+    data: area('Reclaim campaigns'),
+    canActivate: [requirePermission('reclaim.read', 'Reclaim campaigns')],
+    loadComponent: () => import('./reclaim-campaigns.page').then((m) => m.ReclaimCampaignsPage),
+  },
+  {
+    path: 'finance/reclaim/:campaignId',
+    title: 'Reclaim campaign',
+    data: area('Reclaim campaigns'),
+    canActivate: [requirePermission('reclaim.read', 'Reclaim campaigns')],
+    loadComponent: () => import('./reclaim-campaign.page').then((m) => m.ReclaimCampaignPage),
+  },
+  // Owners answer their notice here (email, task and notification links); the API decides who may.
+  {
+    path: 'reclaim/:noticeId',
+    title: 'Reclaim notice',
+    data: { pageTitle: 'Reclaim notice', section: 'Budgets' },
+    loadComponent: () => import('./reclaim-notice.page').then((m) => m.ReclaimNoticePage),
+  },
 ];

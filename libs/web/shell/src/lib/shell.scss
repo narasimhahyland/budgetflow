@@ -375,3 +375,9 @@
     display: block;
   }
 }
+
+// Offline (059a): above the page, so the notice is read before any figure.
+.bf-shell__offline {
+  display: block;
+  margin-bottom: 16px;
+}

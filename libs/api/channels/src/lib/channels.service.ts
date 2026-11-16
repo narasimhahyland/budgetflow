@@ -33,6 +33,7 @@ import {
   memberships,
   notificationPreferences,
   notifications,
+  reclaimNotices,
   orgUnits,
   outboxMessages,
   people,
@@ -79,6 +80,7 @@ import type {
   NotificationSettingsView,
   ProblemCode,
   PushDevice,
+  PushVapidKey,
   RoleId,
   TaskItem,
   TestChannelResponse,
@@ -107,8 +109,27 @@ import {
   isQuietHoursValid,
   NOTIFICATION_MATRIX_SPECS,
 } from './defaults';
+import { hideAmounts, pushConfig, pushHostAllowed, sendWebPush, type PushConfig } from './web-push';
 
 export const CHANNEL_DELIVER_TOPIC = 'channel.deliver';
+/** B8: one Web Push message to one device; retried with backoff, then the dead letter. */
+export const PUSH_SEND_TOPIC = 'channels.push.send';
+/** Retries after the first attempt; the last failure marks the delivery `dead_letter`. */
+export const PUSH_RETRY_LIMIT = 3;
+
+export interface PushSendJob {
+  tenantId: string;
+  deliveryId: string;
+}
+
+export type PushDeliveryOutcome =
+  | 'sent'
+  | 'gone'
+  | 'failed'
+  | 'retried'
+  | 'dead_letter'
+  | 'already_settled'
+  | 'missing';
 
 const ROLE_LABELS: Record<string, string> = {
   'super-admin': 'Super admin',
@@ -130,6 +151,33 @@ const ROLE_LABELS: Record<string, string> = {
 const EDIT_WINDOW_MS = 15 * 60 * 1000;
 const CLOSED_THREAD_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const ARCHIVE_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+
+const CURSOR_TS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/;
+const CURSOR_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Notification feed cursor: opaque base64url of `<created_at, UTC, microseconds>|<id>` of the last
+ * item on the page. The next page starts strictly after that (created_at, id) pair, newest first.
+ */
+function encodeNotificationCursor(createdAt: string, id: string): string {
+  return Buffer.from(`${createdAt}|${id}`, 'utf8').toString('base64url');
+}
+
+function decodeNotificationCursor(cursor: string): { createdAt: string; id: string } {
+  const [createdAt = '', id = '', ...rest] = Buffer.from(cursor, 'base64url')
+    .toString('utf8')
+    .split('|');
+  if (rest.length || !CURSOR_TS.test(createdAt) || !CURSOR_ID.test(id)) {
+    throw new ApiProblem(
+      400,
+      'VALIDATION_FAILED',
+      'That page link is not valid. Reload the notifications and try again.',
+      undefined,
+      [{ path: 'cursor', message: 'Not a notifications cursor.' }],
+    );
+  }
+  return { createdAt, id };
+}
 const DELIVERY_WINDOW_MS = 24 * 60 * 60 * 1000;
 const STEP_UP_THRESHOLD_MINOR = 2_500_000; // USD 25,000.00 requires web app step-up
 
@@ -153,6 +201,8 @@ export interface ChannelDeliverJob {
 @Injectable()
 export class ChannelsService {
   private readonly log = new Logger('Channels');
+  /** Built at startup, so production refuses to start without a real VAPID key (decision D5). */
+  private readonly push: PushConfig = pushConfig();
 
   constructor(
     @Inject(DB) private readonly db: Db,
@@ -181,6 +231,7 @@ export class ChannelsService {
     if (itemType === 'event') return `/events/${itemId}${suffix}`;
     if (itemType === 'request') return `/requests/${itemId}${suffix}`;
     if (itemType === 'contribution') return `/contributions/${itemId}`;
+    if (itemType === 'reclaim_notice') return `/reclaim/${itemId}`;
     return null;
   }
 
@@ -191,6 +242,17 @@ export class ChannelsService {
     itemId: string | null,
   ): Promise<boolean> {
     if (!itemType || !itemId) return true;
+    if (itemType === 'reclaim_notice') {
+      // Reclaim notices (086a) reach only their owner, the parent owner they were sent to, and finance.
+      const [n] = await tx.select().from(reclaimNotices).where(eq(reclaimNotices.id, itemId));
+      return Boolean(
+        n &&
+          (n.ownerPersonId === actor.personId ||
+            n.parentOwnerPersonId === actor.personId ||
+            this.policy.can(actor, 'reclaim.read', { kind: 'tenant', tenantId: actor.tenantId })
+              .allowed),
+      );
+    }
     if (itemType === 'budget') {
       const [b] = await tx.select().from(budgets).where(eq(budgets.id, itemId));
       return Boolean(b && this.policy.can(actor, 'budget.read', budgetResourceOf(b)).allowed);
@@ -384,6 +446,7 @@ export class ChannelsService {
       unreadOnly?: boolean;
       periodDays?: number;
       limit?: number;
+      cursor?: string;
     },
   ): Promise<NotificationsFeed> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
@@ -397,37 +460,60 @@ export class ChannelsService {
       }
       const cutoff = new Date(Date.now() - Math.min(q.periodDays ?? 90, 90) * 24 * 60 * 60 * 1000);
       const archiveCutoff = new Date(Date.now() - ARCHIVE_DAYS_MS);
-      const allRows = await tx
-        .select()
+      const limit = Math.min(q.limit ?? 50, 200);
+      const after = q.cursor ? decodeNotificationCursor(q.cursor) : null;
+      const mine = and(
+        eq(notifications.recipientPersonId, actor.personId),
+        gte(notifications.createdAt, archiveCutoff),
+      );
+
+      // Filters, order and cursor all run in SQL so every notification in the window is reachable.
+      const tabType =
+        q.tab === 'mentions'
+          ? 'discussion.mentioned'
+          : q.tab === 'following'
+            ? 'discussion.followed_activity'
+            : null;
+      const rows = await tx
+        .select({
+          row: notifications,
+          // Microsecond text, so the cursor compares exactly with the stored timestamptz.
+          cursorTs: sql<string>`to_char(${notifications.createdAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+        })
         .from(notifications)
         .where(
           and(
-            eq(notifications.recipientPersonId, actor.personId),
-            gte(notifications.createdAt, archiveCutoff),
+            mine,
+            gte(notifications.createdAt, cutoff),
+            tabType ? eq(notifications.type, tabType) : undefined,
+            q.area ? eq(notifications.area, q.area) : undefined,
+            q.unreadOnly ? isNull(notifications.readAt) : undefined,
+            after
+              ? sql`(${notifications.createdAt}, ${notifications.id}) < (${after.createdAt}::timestamptz, ${after.id}::uuid)`
+              : undefined,
           ),
         )
         // Id breaks ties so notifications created in the same transaction keep a stable order.
         .orderBy(desc(notifications.createdAt), desc(notifications.id))
-        .limit(200);
+        .limit(limit + 1);
+      const page = rows.slice(0, limit);
+      const last = page[page.length - 1];
+      const nextCursor =
+        rows.length > limit && last ? encodeNotificationCursor(last.cursorTs, last.row.id) : null;
+
+      const [agg] = await tx
+        .select({
+          unread: sql<number>`count(*) filter (where ${notifications.readAt} is null)::int`,
+          mentions: sql<number>`count(*) filter (where ${notifications.type} = 'discussion.mentioned')::int`,
+          following: sql<number>`count(*) filter (where ${notifications.type} = 'discussion.followed_activity')::int`,
+        })
+        .from(notifications)
+        .where(mine);
 
       const tasks = await this.deriveTasks(tx, actor);
-      const unreadCount = allRows.filter((n) => !n.readAt).length;
-      const mentionsCount = allRows.filter((n) => n.type === 'discussion.mentioned').length;
-      const followingCount = allRows.filter(
-        (n) => n.type === 'discussion.followed_activity',
-      ).length;
-
-      let filtered = allRows.filter((n) => n.createdAt >= cutoff);
-      if (q.tab === 'mentions') {
-        filtered = filtered.filter((n) => n.type === 'discussion.mentioned');
-      } else if (q.tab === 'following') {
-        filtered = filtered.filter((n) => n.type === 'discussion.followed_activity');
-      }
-      if (q.area) filtered = filtered.filter((n) => n.area === q.area);
-      if (q.unreadOnly) filtered = filtered.filter((n) => !n.readAt);
 
       const items: NotificationItem[] = [];
-      for (const r of filtered.slice(0, q.limit ?? 50)) {
+      for (const { row: r } of page) {
         const available = await this.isItemAvailable(tx, actor, r.itemType, r.itemId);
         items.push({
           id: r.id,
@@ -452,12 +538,12 @@ export class ChannelsService {
         items,
         tasks,
         counts: {
-          unread: unreadCount,
+          unread: Number(agg?.unread ?? 0),
           tasks: tasks.length,
-          mentions: mentionsCount,
-          following: followingCount,
+          mentions: Number(agg?.mentions ?? 0),
+          following: Number(agg?.following ?? 0),
         },
-        nextCursor: null,
+        nextCursor,
       };
     });
   }
@@ -749,6 +835,51 @@ export class ChannelsService {
       },
       async (tx) => {
         if (!actor.personId) throw ApiProblem.forbidden();
+        if (!pushHostAllowed(req.endpoint, this.push.allowedHosts))
+          throw new ApiProblem(
+            422,
+            'OUTBOUND_HOST_NOT_ALLOWED',
+            'This browser uses a push service BudgetFlow does not send to. Try another browser.',
+          );
+        // The same browser subscribing again refreshes its keys instead of adding a second device,
+        // so one phone never gets every notification twice.
+        const [existing] = await tx
+          .select()
+          .from(pushSubscriptions)
+          .where(
+            and(
+              eq(pushSubscriptions.personId, actor.personId),
+              eq(pushSubscriptions.endpoint, req.endpoint),
+            ),
+          );
+        if (existing) {
+          await tx
+            .update(pushSubscriptions)
+            .set({
+              p256dh: req.p256dh,
+              authKey: req.authKey,
+              deviceLabel: req.deviceLabel,
+              userAgentFamily: req.userAgentFamily,
+            })
+            .where(eq(pushSubscriptions.id, existing.id));
+          await this.audit.append(tx, {
+            tenantId: actor.tenantId,
+            actorPersonId: actor.personId,
+            actorSubject: actor.subject,
+            action: 'channel.push_device_refreshed',
+            resourceType: 'push_subscription',
+            resourceId: existing.id,
+            requestId: ctx.requestId,
+            changes: { keys: { from: 'previous', to: 'refreshed' } },
+          });
+          return {
+            id: existing.id,
+            deviceLabel: req.deviceLabel,
+            userAgentFamily: req.userAgentFamily,
+            endpoint: existing.endpoint,
+            createdAt: existing.createdAt.toISOString(),
+          };
+        }
         const [d] = await tx
           .insert(pushSubscriptions)
           .values({
@@ -783,6 +914,12 @@ export class ChannelsService {
         };
       },
     );
+  }
+
+  /** The VAPID application server key; public by design (RFC 8292). */
+  getPushVapidKey(actor: RequestActor): PushVapidKey {
+    if (!actor.personId) throw ApiProblem.forbidden();
+    return { publicKey: this.push.publicKey };
   }
 
   removePushDevice(
@@ -856,6 +993,48 @@ export class ChannelsService {
             );
           }
         }
+        if (channel === 'push') {
+          const devices = await tx
+            .select()
+            .from(pushSubscriptions)
+            .where(eq(pushSubscriptions.personId, actor.personId))
+            .orderBy(asc(pushSubscriptions.createdAt));
+          if (devices.length === 0)
+            throw new ApiProblem(
+              409,
+              'PUSH_DEVICE_NOT_REGISTERED',
+              'Turn on push on this device first, then send a test.',
+            );
+          await tx.insert(notifications).values({
+            tenantId: actor.tenantId,
+            recipientPersonId: actor.personId,
+            area: 'approvals',
+            type: 'channel.test',
+            tone: 'info',
+            title: 'Test notification (push)',
+            detail: 'Sent from your notification settings.',
+            channelsDelivered: ['push'],
+          });
+          const ids = await this.queuePushTx(
+            tx,
+            actor.tenantId,
+            actor.personId,
+            devices,
+            { kind: 'channel.test', subjectType: null, subjectId: null },
+            {
+              title: 'BudgetFlow test notification',
+              body: 'Push on this device is working.',
+              url: '/me/notifications',
+              tag: 'channel.test',
+            },
+          );
+          return {
+            channel,
+            status: 'queued',
+            message: `Test sent to push on ${devices.length === 1 ? 'this device' : `${devices.length} devices`}`,
+            deliveryId: ids[0],
+          };
+        }
         if (channel === 'email') {
           const recipient = await this.notifications.personEmail(tx, actor.personId);
           if (recipient) {
@@ -905,11 +1084,9 @@ export class ChannelsService {
             ? 'Slack'
             : channel === 'teams'
               ? 'Microsoft Teams'
-              : channel === 'push'
-                ? 'push on this device'
-                : channel === 'email'
-                  ? 'your email'
-                  : 'in-app notifications';
+              : channel === 'email'
+                ? 'your email'
+                : 'in-app notifications';
         return {
           channel,
           status: 'sent',
@@ -1751,6 +1928,7 @@ export class ChannelsService {
       externalMessageId: d.externalMessageId,
       errorMessage: d.errorMessage,
       payload: (d.payload ?? {}) as Record<string, unknown>,
+      pushSubscriptionId: d.pushSubscriptionId,
       createdAt: d.createdAt.toISOString(),
       updatedAt: d.updatedAt.toISOString(),
     }));
@@ -2215,7 +2393,7 @@ export class ChannelsService {
 
   listChannelDeliveries(
     actor: RequestActor,
-    q: { channel?: NotificationChannel; limit?: number },
+    q: { channel?: NotificationChannel; pushSubscriptionId?: string; limit?: number },
   ): Promise<{ items: ChannelDeliveryLogView[] }> {
     this.policy.assert(
       actor,
@@ -2230,6 +2408,9 @@ export class ChannelsService {
         .where(
           and(
             ...(q.channel ? [eq(channelDeliveries.channel, q.channel)] : []),
+            ...(q.pushSubscriptionId
+              ? [eq(channelDeliveries.pushSubscriptionId, q.pushSubscriptionId)]
+              : []),
             ...(actor.personId &&
             !this.policy.can(actor, 'integration.manage', {
               kind: 'tenant',
@@ -3396,22 +3577,30 @@ export class ChannelsService {
           .select()
           .from(notificationPreferences)
           .where(eq(notificationPreferences.personId, job.recipientPersonId));
+        // Lock screens show the request and the person, not the amount, unless the person opted in.
         const showAmounts = pref?.showAmountsInPush ?? false;
-        const pushTitle = showAmounts
-          ? job.title
-          : job.title.replace(/,\s*[A-Z]{3}\s*[\d,.]+/g, '');
-        await tx.insert(channelDeliveries).values({
-          tenantId: job.tenantId,
-          channel: 'push',
-          recipientPersonId: job.recipientPersonId,
-          kind: job.kind,
-          subjectType: job.subjectType ?? null,
-          subjectId: job.subjectId ?? null,
-          status: 'sent',
-          attempts: 1,
-          externalMessageId: `push-${randomUUID().slice(0, 8)}`,
-          payload: { title: pushTitle, detail: job.detail, showAmounts },
-        });
+        const known =
+          job.amountMinor != null && job.currency
+            ? [formatMoney({ amountMinor: job.amountMinor, currency: job.currency })]
+            : [];
+        await this.queuePushTx(
+          tx,
+          job.tenantId,
+          job.recipientPersonId,
+          pushDevs,
+          {
+            kind: job.kind,
+            subjectType: job.subjectType ?? null,
+            subjectId: job.subjectId ?? null,
+          },
+          {
+            title: showAmounts ? job.title : hideAmounts(job.title, known),
+            body: showAmounts ? job.detail : hideAmounts(job.detail, known),
+            url: job.taskId ? `/m/approvals/${job.taskId}` : '/notifications',
+            tag: job.taskId ?? job.subjectId ?? job.kind,
+          },
+          showAmounts,
+        );
       }
 
       if (job.kind !== 'discussion.mentioned') {
@@ -3432,5 +3621,156 @@ export class ChannelsService {
         });
       }
     });
+  }
+
+  // B8: Web Push delivery ----------------------------------------------------------------------
+
+  /**
+   * One queued delivery per device plus an outbox message, in the caller's transaction. The worker
+   * sends each one on `channels.push.send`; the stored payload is exactly what the device receives.
+   */
+  private async queuePushTx(
+    tx: Tx,
+    tenantId: string,
+    personId: string,
+    devices: (typeof pushSubscriptions.$inferSelect)[],
+    meta: { kind: string; subjectType: string | null; subjectId: string | null },
+    message: { title: string; body: string; url: string; tag: string },
+    showAmounts = false,
+  ): Promise<string[]> {
+    const ids: string[] = [];
+    for (const d of devices) {
+      const [row] = await tx
+        .insert(channelDeliveries)
+        .values({
+          tenantId,
+          channel: 'push',
+          recipientPersonId: personId,
+          kind: meta.kind,
+          subjectType: meta.subjectType,
+          subjectId: meta.subjectId,
+          status: 'queued',
+          attempts: 0,
+          pushSubscriptionId: d.id,
+          payload: { ...message, showAmounts },
+        })
+        .returning({ id: channelDeliveries.id });
+      await tx.insert(outboxMessages).values({
+        tenantId,
+        topic: PUSH_SEND_TOPIC,
+        payload: { deliveryId: row.id },
+      });
+      ids.push(row.id);
+    }
+    return ids;
+  }
+
+  /**
+   * Worker job: sends one push delivery. The row lock makes a re-run wait for a send in flight, and
+   * a delivery that is no longer queued or retried was settled before, so a re-run sends nothing.
+   * - 2xx: sent. 404/410: the push service forgot the subscription; it is removed (audited).
+   * - 429, 5xx or unreachable: retried; throws so pg-boss backs off with jitter, and the last attempt
+   *   marks the delivery `dead_letter` before pg-boss moves the job to the dead-letter queue.
+   * - anything else (bad keys, a host not allowed, other 4xx): failed, never retried.
+   */
+  async sendPushDelivery(job: PushSendJob, retryCount: number): Promise<PushDeliveryOutcome> {
+    const outcome = await withTenant(
+      this.db,
+      { tenantId: job.tenantId, subject: 'system:worker' },
+      async (tx): Promise<{ result: PushDeliveryOutcome; error?: string }> => {
+        const [d] = await tx
+          .select()
+          .from(channelDeliveries)
+          .where(
+            and(eq(channelDeliveries.id, job.deliveryId), eq(channelDeliveries.channel, 'push')),
+          )
+          .for('update');
+        if (!d) return { result: 'missing' };
+        if (d.status !== 'queued' && d.status !== 'retried') return { result: 'already_settled' };
+        const attempts = d.attempts + 1;
+        const [device] = d.pushSubscriptionId
+          ? await tx
+              .select()
+              .from(pushSubscriptions)
+              .where(eq(pushSubscriptions.id, d.pushSubscriptionId))
+          : [];
+        if (!device) {
+          await tx
+            .update(channelDeliveries)
+            .set({
+              status: 'failed',
+              attempts,
+              errorMessage: 'The device was removed before sending',
+            })
+            .where(eq(channelDeliveries.id, d.id));
+          return { result: 'failed' };
+        }
+        const payload = (d.payload ?? {}) as Record<string, unknown>;
+        const sent = await sendWebPush(
+          device,
+          {
+            title: payload['title'],
+            body: payload['body'],
+            url: payload['url'],
+            tag: payload['tag'],
+            deliveryId: d.id,
+          },
+          this.push,
+          d.kind.startsWith('approval') ? 'high' : 'normal',
+        );
+        if (sent.kind === 'sent') {
+          await tx
+            .update(channelDeliveries)
+            .set({
+              status: 'sent',
+              attempts,
+              errorMessage: null,
+              externalMessageId: sent.messageId,
+            })
+            .where(eq(channelDeliveries.id, d.id));
+          return { result: 'sent' };
+        }
+        if (sent.kind === 'gone') {
+          await tx.delete(pushSubscriptions).where(eq(pushSubscriptions.id, device.id));
+          await this.audit.append(tx, {
+            tenantId: job.tenantId,
+            actorPersonId: null,
+            actorSubject: 'system:worker',
+            action: 'channel.push_device_removed',
+            resourceType: 'push_subscription',
+            resourceId: device.id,
+            reason: `The push service answered ${sent.status}: the subscription no longer exists`,
+            changes: { deviceLabel: { from: device.deviceLabel, to: null } },
+          });
+          await tx
+            .update(channelDeliveries)
+            .set({
+              status: 'gone',
+              attempts,
+              errorMessage: `The push service answered ${sent.status}; the device was removed`,
+            })
+            .where(eq(channelDeliveries.id, d.id));
+          return { result: 'gone' };
+        }
+        if (sent.kind === 'rejected') {
+          await tx
+            .update(channelDeliveries)
+            .set({ status: 'failed', attempts, errorMessage: sent.message })
+            .where(eq(channelDeliveries.id, d.id));
+          return { result: 'failed' };
+        }
+        const last = retryCount >= PUSH_RETRY_LIMIT;
+        await tx
+          .update(channelDeliveries)
+          .set({ status: last ? 'dead_letter' : 'retried', attempts, errorMessage: sent.message })
+          .where(eq(channelDeliveries.id, d.id));
+        return { result: last ? 'dead_letter' : 'retried', error: sent.message };
+      },
+    );
+    // Thrown after the commit, so the attempt is recorded and pg-boss schedules the next one (or,
+    // after the last, moves the job to the dead letter).
+    if (outcome.result === 'retried' || outcome.result === 'dead_letter')
+      throw new Error(`push delivery ${job.deliveryId}: ${outcome.error}`);
+    return outcome.result;
   }
 }

@@ -73,8 +73,8 @@ import { CloseTag } from './close-tag';
         </div>
         @if (cycle(); as c) {
           <p class="bf-page__subtitle">
-            As of {{ c.asOfDate | date: 'd MMM y' : 'UTC' }} · due
-            {{ c.dueDate | date: 'd MMM y' : 'UTC' }} · {{ c.scopeLabel }} · figures in
+            As of {{ c.asOfDate | date: 'd MMM y' }} · due {{ c.dueDate | date: 'd MMM y' }} ·
+            {{ c.scopeLabel }} · figures in
             {{ c.currency }}
           </p>
         }
@@ -136,8 +136,8 @@ import { CloseTag } from './close-tag';
               >{{ d.cycle.progress.overdue }}
               {{ d.cycle.progress.overdue === 1 ? 'line is' : 'lines are' }} overdue.</strong
             >
-            They were due on {{ d.cycle.dueDate | date: 'd MMM y' : 'UTC' }}. Closing the cycle
-            fills them with the system run-rate forecast.
+            They were due on {{ d.cycle.dueDate | date: 'd MMM y' }}. Closing the cycle fills them
+            with the system run-rate forecast.
           </sat-banner-message>
         </sat-banner>
       }

@@ -1,0 +1,8 @@
+[1/7] apps/api-e2e/src/close/burn-rate.spec.ts:57:7 › burn-rate alerts › alerts at exactly 110% and 125% of phased to date, never below, once per period and level, and reach the owner
+[2/7] apps/api-e2e/src/close/reclaim.spec.ts:117:7 › reclaim and redistribute campaigns (086a) › offers, owner release (full, part, keep), the floor at its exact boundary, and the money landing at its destination
+[3/7] apps/api-e2e/src/close/reclaim.spec.ts:417:7 › reclaim and redistribute campaigns (086a) › before the deadline a notice cannot go to the parent owner; after it, the parent owner decides and nothing moves on its own
+[4/7] apps/api-e2e/src/close/reclaim.spec.ts:490:7 › reclaim and redistribute campaigns (086a) › a commitment landing between the release and the redistribution blocks the whole pool, which posts nothing
+[5/7] apps/api-e2e/src/close/reclaim.spec.ts:552:7 › reclaim and redistribute campaigns (086a) › deadline reminders go out 2 days and 1 day before, once each, only to owners who have not answered
+[6/7] apps/api-e2e/src/close/reclaim.spec.ts:649:7 › reclaim and redistribute campaigns (086a) › a budget that changes owner mid-campaign is answered by its new owner, never the old one
+[7/7] apps/api-e2e/src/close/reclaim.spec.ts:706:7 › reclaim and redistribute campaigns (086a) › a source that can no longer be reduced can be left out: the rest of the pool moves, nothing moves for it
+  7 passed (21.7s)

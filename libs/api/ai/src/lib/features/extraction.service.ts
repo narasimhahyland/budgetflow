@@ -15,7 +15,7 @@ import { AiRetrieval } from '../retrieval.service';
 import { AiSettingsService } from '../settings.service';
 import { AiSuggestionsService } from '../suggestions.service';
 
-const ExtractOutput = z
+export const ExtractOutput = z
   .object({
     readable: z.boolean(),
     fields: z

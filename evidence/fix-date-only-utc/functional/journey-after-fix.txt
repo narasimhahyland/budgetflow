@@ -1,0 +1,23 @@
+
+Running 32 tests using 2 workers
+
+  ✓  15 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:20:9 › calendar dates in Asia/Kolkata › the browser really runs in that timezone (559ms)
+  ✓  16 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in Asia/Kolkata › the November period reads 1 Nov to 30 Nov 2026 (923ms)
+  ✓  17 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in Asia/Kolkata › the calendar year runs from 1 Jan to 31 Dec 2026 (574ms)
+  ✓  18 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:20:9 › calendar dates in America/New_York › the browser really runs in that timezone (541ms)
+  ✓  19 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in America/New_York › the November period reads 1 Nov to 30 Nov 2026 (780ms)
+  ✓  20 [desktop] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in America/New_York › the calendar year runs from 1 Jan to 31 Dec 2026 (598ms)
+  ✓  21 [tablet] › apps/web-e2e/src/dates/calendar-dates.spec.ts:20:9 › calendar dates in Asia/Kolkata › the browser really runs in that timezone (529ms)
+  ✓  22 [tablet] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in Asia/Kolkata › the November period reads 1 Nov to 30 Nov 2026 (926ms)
+  ✓  23 [tablet] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in Asia/Kolkata › the calendar year runs from 1 Jan to 31 Dec 2026 (537ms)
+  ✓  24 [tablet] › apps/web-e2e/src/dates/calendar-dates.spec.ts:20:9 › calendar dates in America/New_York › the browser really runs in that timezone (497ms)
+  ✓  25 [tablet] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in America/New_York › the November period reads 1 Nov to 30 Nov 2026 (853ms)
+  ✓  26 [tablet] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in America/New_York › the calendar year runs from 1 Jan to 31 Dec 2026 (512ms)
+  ✓  27 [mobile] › apps/web-e2e/src/dates/calendar-dates.spec.ts:20:9 › calendar dates in Asia/Kolkata › the browser really runs in that timezone (584ms)
+  ✓  28 [mobile] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in Asia/Kolkata › the November period reads 1 Nov to 30 Nov 2026 (917ms)
+  ✓  29 [mobile] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in Asia/Kolkata › the calendar year runs from 1 Jan to 31 Dec 2026 (584ms)
+  ✓  30 [mobile] › apps/web-e2e/src/dates/calendar-dates.spec.ts:20:9 › calendar dates in America/New_York › the browser really runs in that timezone (529ms)
+  ✓  31 [mobile] › apps/web-e2e/src/dates/calendar-dates.spec.ts:30:9 › calendar dates in America/New_York › the November period reads 1 Nov to 30 Nov 2026 (883ms)
+  ✓  32 [mobile] › apps/web-e2e/src/dates/calendar-dates.spec.ts:43:9 › calendar dates in America/New_York › the calendar year runs from 1 Jan to 31 Dec 2026 (581ms)
+
+  32 passed (24.6s)

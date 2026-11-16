@@ -1,0 +1,169 @@
+{
+  "request": "GET /api/analytics/kpis as org-admin",
+  "status": 200,
+  "body": {
+    "generatedAt": "2026-11-16T09:00:00.000Z",
+    "period": "30",
+    "from": "2026-10-17",
+    "to": "2026-11-16",
+    "insufficient": true,
+    "owners": 6,
+    "kpis": [
+      {
+        "key": "owner_activation",
+        "label": "Owner activation",
+        "value": 83.3,
+        "unit": "percent",
+        "detail": "5 of 6 budget owners allocated or decided within 14 days of getting a budget.",
+        "target": {
+          "value": 70,
+          "comparison": "at_least",
+          "text": "Target 70%"
+        },
+        "status": "insufficient",
+        "definition": "Budget owners whose first allocation or approval decision came within 14 days of their first budget.",
+        "events": ["allocation.created", "approval.decided"]
+      },
+      {
+        "key": "weekly_active_owners",
+        "label": "Weekly active owners",
+        "value": 83.3,
+        "unit": "percent",
+        "detail": "5 of 6 owners active this week; 5 in the last 30 days.",
+        "target": {
+          "value": 70,
+          "comparison": "at_least",
+          "text": "Target 70% monthly active"
+        },
+        "status": "insufficient",
+        "definition": "Owners with any recorded product event in the last 7 days (target measured over 30 days).",
+        "events": ["session.started", "page.viewed", "allocation.created", "approval.decided"]
+      },
+      {
+        "key": "time_to_first_allocation",
+        "label": "Time to first allocation",
+        "value": 0,
+        "unit": "days",
+        "detail": "Median over 4 owners who have allocated.",
+        "target": null,
+        "status": "insufficient",
+        "definition": "Days from an owner's first budget to their first allocation.",
+        "events": ["allocation.created"]
+      },
+      {
+        "key": "time_to_approve",
+        "label": "Time to approve",
+        "value": 0,
+        "unit": "hours",
+        "detail": "Median over 7 decisions in the period.",
+        "target": {
+          "value": 24,
+          "comparison": "at_most",
+          "text": "Target under 24 hours"
+        },
+        "status": "insufficient",
+        "definition": "Hours from an approval step opening to its decision.",
+        "events": ["approval.decided"]
+      },
+      {
+        "key": "auto_match_rate",
+        "label": "Auto-match rate",
+        "value": 85.7,
+        "unit": "percent",
+        "detail": "6 of 7 matched actuals were matched without a person.",
+        "target": {
+          "value": 80,
+          "comparison": "at_least",
+          "text": "Target 80%"
+        },
+        "status": "insufficient",
+        "definition": "Imported actuals matched by a rule rather than by hand.",
+        "events": ["actual.imported", "actual.matched"]
+      },
+      {
+        "key": "unused_at_period_end",
+        "label": "Unused budget at period end",
+        "value": null,
+        "unit": "percent",
+        "detail": "No budget was phased into Oct 2026.",
+        "target": null,
+        "status": "insufficient",
+        "definition": "Phased allotment of the last ended period minus actual and encumbered, from the ledger.",
+        "events": []
+      }
+    ],
+    "funnel": [
+      {
+        "step": "Invited",
+        "count": 2
+      },
+      {
+        "step": "Signed in",
+        "count": 0
+      },
+      {
+        "step": "Viewed a budget",
+        "count": 0
+      },
+      {
+        "step": "Allocated or decided",
+        "count": 0
+      }
+    ],
+    "weeklyActive": [
+      {
+        "weekStart": "2026-09-28",
+        "owners": 0,
+        "employees": 0
+      },
+      {
+        "weekStart": "2026-10-05",
+        "owners": 0,
+        "employees": 0
+      },
+      {
+        "weekStart": "2026-10-12",
+        "owners": 0,
+        "employees": 0
+      },
+      {
+        "weekStart": "2026-10-19",
+        "owners": 0,
+        "employees": 0
+      },
+      {
+        "weekStart": "2026-10-26",
+        "owners": 0,
+        "employees": 0
+      },
+      {
+        "weekStart": "2026-11-02",
+        "owners": 0,
+        "employees": 0
+      },
+      {
+        "weekStart": "2026-11-09",
+        "owners": 0,
+        "employees": 0
+      },
+      {
+        "weekStart": "2026-11-16",
+        "owners": 5,
+        "employees": 2
+      }
+    ],
+    "decisionsByChannel": [
+      {
+        "channel": "web",
+        "decisions": 7
+      }
+    ],
+    "autoMatchBySource": [
+      {
+        "source": "erp",
+        "matched": 7,
+        "automatic": 6
+      }
+    ]
+  }
+}
