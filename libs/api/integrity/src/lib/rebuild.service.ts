@@ -1,5 +1,5 @@
 import { AuditService } from '@bf/api/audit';
-import { DB } from '@bf/api/core';
+import { DB, stampUtc } from '@bf/api/core';
 import {
   exchangeRates,
   integrityCheckRuns,
@@ -87,7 +87,7 @@ export class RebuildService {
         if (flags.length) await tx.insert(integrityFlags).values(flags);
         await tx
           .update(integrityCheckRuns)
-          .set({ status, finishedAt: new Date(), summary, flagsRaised: flags.length })
+          .set({ status, finishedAt: stampUtc(), summary, flagsRaised: flags.length })
           .where(
             and(eq(integrityCheckRuns.id, checkRunId), eq(integrityCheckRuns.tenantId, tenantId)),
           );
@@ -110,7 +110,7 @@ export class RebuildService {
       await withTenant(this.db, { tenantId, subject: SYSTEM }, (tx) =>
         tx
           .update(integrityCheckRuns)
-          .set({ status: 'failed', finishedAt: new Date() })
+          .set({ status: 'failed', finishedAt: stampUtc() })
           .where(eq(integrityCheckRuns.id, checkRunId)),
       );
       throw e;

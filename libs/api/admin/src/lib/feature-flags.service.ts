@@ -1,5 +1,12 @@
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, CommandRunner, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import {
+  ApiProblem,
+  CommandRunner,
+  DB,
+  PolicyService,
+  type RequestActor,
+  stampUtc,
+} from '@bf/api/core';
 import {
   adminChangeRequests,
   chatInstallations,
@@ -265,7 +272,7 @@ export class FeatureFlagsService {
         pilotOrgUnitIds: payload.pilotOrgUnitIds,
         pilotRoleIds: payload.pilotRoleIds,
         updatedByPersonId: actorPersonId,
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .onConflictDoUpdate({
         target: [featureFlags.tenantId, featureFlags.key],
@@ -275,7 +282,7 @@ export class FeatureFlagsService {
           pilotOrgUnitIds: payload.pilotOrgUnitIds,
           pilotRoleIds: payload.pilotRoleIds,
           updatedByPersonId: actorPersonId,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         },
       });
   }
@@ -347,7 +354,7 @@ export class FeatureFlagsService {
             requestedBySubject: actor.subject,
             status: planned.plan.needsConfirmation ? 'pending' : 'applied',
             needsConfirmation: planned.plan.needsConfirmation,
-            decidedAt: planned.plan.needsConfirmation ? null : new Date(),
+            decidedAt: planned.plan.needsConfirmation ? null : stampUtc(),
           })
           .returning();
 
@@ -442,7 +449,7 @@ export class FeatureFlagsService {
           .set({
             status,
             confirmedByPersonId: req.decision === 'cancel' ? null : actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionReason: req.reason,
           })
           .where(eq(adminChangeRequests.id, change.id));

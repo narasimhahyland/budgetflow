@@ -3,6 +3,7 @@ import { rollupUtilizationBps, thresholdsReached, type SubtreeTotals } from '@bf
 import { Injectable } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
 import { LedgerReads } from './ledger-reads.service';
+import { stampUtc } from '@bf/api/core';
 
 /**
  * Owner alert thresholds on roll-up utilization. Read `utilizations` before a posting and call `emit`
@@ -90,7 +91,7 @@ export class ThresholdAlerts {
             ownerPersonId: r.ownerPersonId,
             thresholdPct: t,
             utilizationBps: util,
-            occurredAt: new Date().toISOString(),
+            occurredAt: stampUtc().toISOString(),
           },
         });
     }

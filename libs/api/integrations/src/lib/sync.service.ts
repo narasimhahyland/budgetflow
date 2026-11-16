@@ -1,6 +1,14 @@
 import { ImportsService } from '@bf/api/actuals';
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, DB, nowUtc, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
+import {
+  ApiProblem,
+  DB,
+  nowUtc,
+  PolicyService,
+  type RequestActor,
+  todayUtc,
+  stampUtc,
+} from '@bf/api/core';
 import {
   integrationConnections,
   integrationMessages,
@@ -131,7 +139,7 @@ export class SyncService {
         .where(filters.length ? and(...filters) : undefined)
         .orderBy(desc(syncRuns.startedAt))
         .limit(q.limit ?? 100);
-      const since = new Date(Date.now() - DAY_MS);
+      const since = new Date(stampUtc().getTime() - DAY_MS);
       const recent = await tx
         .select({
           status: syncRuns.status,
@@ -370,7 +378,7 @@ export class SyncService {
         .update(syncRuns)
         .set({
           status,
-          finishedAt: new Date(),
+          finishedAt: stampUtc(),
           recordsRead: read,
           recordsApplied: outcome.applied,
           recordsSkippedDuplicate: outcome.duplicates,
@@ -385,14 +393,14 @@ export class SyncService {
       await tx
         .update(integrationConnections)
         .set({
-          lastSyncAt: new Date(),
+          lastSyncAt: stampUtc(),
           cursors: {
             ...((row.cursors ?? {}) as Record<string, string>),
             [`${req.object}:${req.direction}`]: nextCursor ?? '',
           },
           status: status === 'failed' ? 'needs_attention' : row.status,
           attention: status === 'failed' ? errorSummary : row.attention,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         })
         .where(eq(integrationConnections.id, connectionId));
       await this.audit.append(tx, {
@@ -659,8 +667,8 @@ export class SyncService {
                 RETRY_BACKOFF_MINUTES[Math.min(attempts - 1, RETRY_BACKOFF_MINUTES.length - 1)] *
                   60_000,
             ),
-        movedToDeadLetterAt: exhausted ? (existing.movedToDeadLetterAt ?? new Date()) : null,
-        updatedAt: new Date(),
+        movedToDeadLetterAt: exhausted ? (existing.movedToDeadLetterAt ?? stampUtc()) : null,
+        updatedAt: stampUtc(),
       })
       .where(eq(integrationMessages.id, existing.id));
   }

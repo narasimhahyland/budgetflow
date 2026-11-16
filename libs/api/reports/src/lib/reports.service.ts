@@ -1,4 +1,4 @@
-import { ApiProblem, DB, PolicyService, todayUtc, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, todayUtc, type RequestActor, stampUtc } from '@bf/api/core';
 import { budgets, reportExports, reportSchedules, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   LedgerLine,
@@ -64,7 +64,7 @@ export class ReportsService {
       ]);
       const dataset = await this.reads.dataset(tx, actor, {}, todayUtc());
       return {
-        generatedAt: new Date().toISOString(),
+        generatedAt: stampUtc().toISOString(),
         scope: {
           tenantWide,
           label: dataset.scopeLabel,

@@ -1,6 +1,6 @@
 import { ApprovalsService, budgetResourceOf } from '@bf/api/approvals';
 import { ContributionsService } from '@bf/api/contributions';
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, type RequestActor, stampUtc } from '@bf/api/core';
 import { budgets, contributionRequests, events, orgUnits, withTenant, type Db } from '@bf/api/db';
 import { LedgerReads } from '@bf/api/ledger';
 import { FundingSourcesService, RequestsService } from '@bf/api/spend';
@@ -29,7 +29,7 @@ export class InsightsService {
         .selectDistinct({ e: contributionRequests.eventId })
         .from(contributionRequests);
       const ids = withContributions.map((r) => r.e).filter((x): x is string => Boolean(x));
-      if (!ids.length) return { generatedAt: new Date().toISOString(), events: [] };
+      if (!ids.length) return { generatedAt: stampUtc().toISOString(), events: [] };
       const rows = (
         await tx.select().from(events).where(inArray(events.id, ids)).orderBy(desc(events.startsAt))
       ).slice(0, 50);
@@ -97,7 +97,7 @@ export class InsightsService {
           })),
         });
       }
-      return { generatedAt: new Date().toISOString(), events: out };
+      return { generatedAt: stampUtc().toISOString(), events: out };
     });
   }
 
@@ -226,7 +226,7 @@ export class InsightsService {
         currency: ccy,
         rows: list.map(toRow),
         totals: toRow(total),
-        generatedAt: new Date().toISOString(),
+        generatedAt: stampUtc().toISOString(),
       };
     });
   }

@@ -22,6 +22,7 @@ import {
   type CommandResult,
   type RequestActor,
   nowUtc,
+  stampUtc,
 } from '@bf/api/core';
 import { DocumentsService } from '@bf/api/documents';
 import {
@@ -244,7 +245,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
   ): Promise<void> {
     await tx
       .update(requests)
-      .set({ ...patch, decidedAt: new Date(), updatedAt: new Date() })
+      .set({ ...patch, decidedAt: stampUtc(), updatedAt: stampUtc() })
       .where(eq(requests.id, r.id));
   }
 
@@ -465,7 +466,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       this.postCtx(ctx.actor, 'requests.request_changes', ctx),
     );
     const status = unwrap(requestMachine.next(r.status, 'request_changes'));
-    const now = new Date();
+    const now = stampUtc();
     await this.decided(tx, r, {
       status,
       reasonCode: ctx.reasonCode,
@@ -904,8 +905,8 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         budgetCurrency: budgetAmount.currency,
         commitmentId,
         overBudget,
-        submittedAt: new Date(),
-        updatedAt: new Date(),
+        submittedAt: stampUtc(),
+        updatedAt: stampUtc(),
       })
       .where(eq(requests.id, r.id));
     const subject = (await this.load(tx, r.id))!;
@@ -1021,7 +1022,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
         await this.approvals.cancelFor(tx, 'request', r.id);
         await tx
           .update(requests)
-          .set({ status, cancelReason: reason ?? null, updatedAt: new Date() })
+          .set({ status, cancelReason: reason ?? null, updatedAt: stampUtc() })
           .where(eq(requests.id, r.id));
         if (isEventFunding(r) && r.eventId)
           await this.hooks.fundingDecided(tx, actor, r.eventId, 'withdrawn', r.kind as 'budget');
@@ -1083,7 +1084,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
             counterOfferedAt: null,
             counterOfferExpiresAt: null,
             version: r.version + 1,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(requests.id, r.id));
         await this.submitTx(tx, actor, id, ctx, 'request.resubmitted');
@@ -1115,7 +1116,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
             'There is no active counter-offer on this request.',
           );
         }
-        if (r.counterOfferExpiresAt && r.counterOfferExpiresAt.getTime() < Date.now()) {
+        if (r.counterOfferExpiresAt && r.counterOfferExpiresAt.getTime() < stampUtc().getTime()) {
           throw new ApiProblem(
             409,
             'COUNTER_OFFER_EXPIRED',
@@ -1195,8 +1196,8 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
             status: 'partially_approved',
             approvedMinor: offeredMinor,
             commitmentId,
-            decidedAt: new Date(),
-            updatedAt: new Date(),
+            decidedAt: stampUtc(),
+            updatedAt: stampUtc(),
           })
           .where(eq(requests.id, r.id));
         // Accepting a counter-offer approves the offered amount: the caps are checked on it as on approval.
@@ -1319,7 +1320,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
           cancelReason: reason,
           heldAt: null,
           holdReason: null,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         })
         .where(eq(requests.id, r.id));
       if (notifyEvent && isEventFunding(r) && r.eventId)
@@ -1383,7 +1384,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
     for (const r of rows) {
       await tx
         .update(requests)
-        .set(hold ? { heldAt: new Date(), holdReason: reason } : { heldAt: null, holdReason: null })
+        .set(hold ? { heldAt: stampUtc(), holdReason: reason } : { heldAt: null, holdReason: null })
         .where(eq(requests.id, r.id));
       await this.audit.append(tx, {
         tenantId: actor.tenantId,
@@ -1590,7 +1591,7 @@ export class RequestsService implements ApprovalSubjectHandler, OnModuleInit {
       allowed.push('resubmit');
       if (
         r.counterOfferMinor !== null &&
-        (!r.counterOfferExpiresAt || r.counterOfferExpiresAt.getTime() >= Date.now())
+        (!r.counterOfferExpiresAt || r.counterOfferExpiresAt.getTime() >= stampUtc().getTime())
       ) {
         allowed.push('accept_offer');
       }

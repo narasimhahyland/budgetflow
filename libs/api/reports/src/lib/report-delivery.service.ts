@@ -1,5 +1,5 @@
 import { AuditService } from '@bf/api/audit';
-import { ActorResolver, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ActorResolver, DB, PolicyService, type RequestActor, stampUtc } from '@bf/api/core';
 import {
   budgets,
   channelDeliveries,
@@ -52,7 +52,7 @@ export class ReportDeliveryService {
   ) {}
 
   /** Queues every schedule that is due; the queued run is delivered by `deliver`. */
-  async sweepAllTenants(now = new Date()): Promise<number> {
+  async sweepAllTenants(now = stampUtc()): Promise<number> {
     const all = await this.db.transaction((tx) => tx.select({ id: tenants.id }).from(tenants));
     let queued = 0;
     for (const t of all)
@@ -327,7 +327,7 @@ export class ReportDeliveryService {
       error: string | null;
     },
   ): Promise<void> {
-    const now = new Date();
+    const now = stampUtc();
     await tx
       .update(reportScheduleRuns)
       .set({

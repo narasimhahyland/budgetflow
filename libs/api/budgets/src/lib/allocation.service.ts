@@ -5,6 +5,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import {
@@ -1010,7 +1011,7 @@ export class AllocationService {
             status: approved !== null ? 'approved' : 'rejected',
             approvedAmountMinor: approved,
             decidedBy: actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionNote: req.note ?? null,
             journalId,
           })

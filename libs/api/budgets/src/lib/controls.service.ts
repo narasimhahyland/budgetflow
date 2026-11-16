@@ -5,6 +5,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import {
@@ -381,7 +382,7 @@ export class ControlsService {
       pendingRequestPolicy: pendingRequestPolicy(action),
       currency: row.currency,
       actorPersonId: actor.personId,
-      occurredAt: new Date().toISOString(),
+      occurredAt: stampUtc().toISOString(),
       ...fields,
       unfitRequestIds: fields.unfitRequestIds ?? [],
     });

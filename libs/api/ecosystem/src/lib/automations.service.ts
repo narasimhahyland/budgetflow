@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { withTenant, type Db, type Tx } from '@bf/api/db';
 import { RequestsService } from '@bf/api/spend';
@@ -278,7 +279,7 @@ export class AutomationConnectorService {
     const { enabled, config } = await this.surfaces.automations(tx, actor.tenantId);
     const [active, runs, rows] = await Promise.all([
       this.connections.activeCount(tx, 'automation'),
-      this.connections.callsSince(tx, 'automation', new Date(Date.now() - WEEK_MS)),
+      this.connections.callsSince(tx, 'automation', new Date(stampUtc().getTime() - WEEK_MS)),
       this.connections.activeRows(tx, 'automation'),
     ]);
     const perPlatform = new Map<string, number>();

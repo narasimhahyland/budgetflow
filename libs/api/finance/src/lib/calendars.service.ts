@@ -5,6 +5,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import {
@@ -251,7 +252,7 @@ export class CalendarsService {
         const next = unwrap(changePeriodStatus(all, periodId, req.action, req.reason));
         const [updated] = await tx
           .update(fiscalPeriods)
-          .set({ status: next, statusChangedAt: new Date(), statusChangedBy: actor.personId })
+          .set({ status: next, statusChangedAt: stampUtc(), statusChangedBy: actor.personId })
           .where(eq(fiscalPeriods.id, periodId))
           .returning();
         await this.audit.append(tx, {
@@ -305,7 +306,7 @@ export class CalendarsService {
               fiscalYear: fy.label,
             },
           );
-        const now = new Date();
+        const now = stampUtc();
         await tx
           .update(fiscalYears)
           .set({ planRatesLockedAt: now })

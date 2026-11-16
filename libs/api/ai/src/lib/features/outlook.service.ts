@@ -1,5 +1,5 @@
 import { BudgetViews } from '@bf/api/budgets';
-import { ApiProblem, DB, type RequestActor, todayUtc } from '@bf/api/core';
+import { ApiProblem, DB, type RequestActor, todayUtc, stampUtc } from '@bf/api/core';
 import { aiOutlookSnapshots, budgets, fiscalYears, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   AiSourceRef,
@@ -153,7 +153,7 @@ export class AiOutlookService {
             modelId: this.gateway.modelId,
             modelVersion: this.gateway.modelVersion,
             suggestionId: suggestion?.id ?? null,
-            nudgeSentAt: suggestion ? new Date() : null,
+            nudgeSentAt: suggestion ? stampUtc() : null,
           })
           .onConflictDoUpdate({
             target: [

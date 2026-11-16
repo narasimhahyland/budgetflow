@@ -1,6 +1,13 @@
 import { AuditService } from '@bf/api/audit';
 import { BudgetViews, ControlsService, budgetResource, type BudgetRow } from '@bf/api/budgets';
-import { ApiProblem, CommandRunner, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import {
+  ApiProblem,
+  CommandRunner,
+  DB,
+  PolicyService,
+  type RequestActor,
+  stampUtc,
+} from '@bf/api/core';
 import {
   budgets,
   commitments,
@@ -148,7 +155,7 @@ export class ScenariosService {
         .filter((r): r is BudgetRow => Boolean(r))
         .sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
       return {
-        computedAt: iso(new Date()),
+        computedAt: iso(stampUtc()),
         columns: [
           { scenarioId: null, label: 'Today', status: null },
           ...loaded.map((l) => ({
@@ -272,7 +279,7 @@ export class ScenariosService {
           cascade: Boolean(req.cascade),
           position: Number(next),
         });
-        await tx.update(scenarios).set({ updatedAt: new Date() }).where(eq(scenarios.id, id));
+        await tx.update(scenarios).set({ updatedAt: stampUtc() }).where(eq(scenarios.id, id));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
@@ -312,7 +319,7 @@ export class ScenariosService {
           .where(and(eq(scenarioChanges.scenarioId, id), eq(scenarioChanges.id, changeId)))
           .returning({ id: scenarioChanges.id, kind: scenarioChanges.kind });
         if (deleted.length === 0) throw ApiProblem.notFound('scenario change');
-        await tx.update(scenarios).set({ updatedAt: new Date() }).where(eq(scenarios.id, id));
+        await tx.update(scenarios).set({ updatedAt: stampUtc() }).where(eq(scenarios.id, id));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
@@ -345,7 +352,7 @@ export class ScenariosService {
         this.assertAuthor(row, actor);
         await tx
           .update(scenarios)
-          .set({ status: 'archived', archivedAt: new Date(), updatedAt: new Date() })
+          .set({ status: 'archived', archivedAt: stampUtc(), updatedAt: stampUtc() })
           .where(eq(scenarios.id, id));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
@@ -464,7 +471,7 @@ export class ScenariosService {
         status: 201,
       },
       async (tx) => {
-        const now = new Date();
+        const now = stampUtc();
         for (const r of results)
           await tx
             .update(scenarioChanges)
@@ -726,7 +733,7 @@ export class ScenariosService {
       .select({ n: count() })
       .from(ledgerJournals)
       .where(eq(ledgerJournals.tenantId, tenantId));
-    return { at: new Date(), journalCount: Number(row?.n ?? 0) };
+    return { at: stampUtc(), journalCount: Number(row?.n ?? 0) };
   }
 
   private async views_(
@@ -879,7 +886,7 @@ export class ScenariosService {
       );
     return {
       scenarioId: row.id,
-      computedAt: iso(new Date()),
+      computedAt: iso(stampUtc()),
       baselineAt: iso(row.baselineAt),
       stale: baseline.journalCount !== row.baselineJournalCount,
       ledgerWritesSinceBaseline: Math.max(baseline.journalCount - row.baselineJournalCount, 0),

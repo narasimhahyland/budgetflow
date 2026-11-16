@@ -90,10 +90,10 @@ up() { build && dc up -d --build --wait; }
 #     (scripts/lib/pinned-clock.cjs). Seeded credential expiry is a fixed far-future instant instead.
 #   - Postgres: timestamp defaults call app_now() (migration 0020), which follows app.fixed_now; the
 #     seed's connections carry it as a startup option (seed_db_url).
-# Only the seed is pinned. The running API and worker stay on real time for both clocks, so a record
-# they create and the times they compare it with always come from one clock. Pinning the database
-# for the API while its own Date stayed real put one request on two clocks: an audit entry stamped
-# in JavaScript looked older than the database-stamped row it was recorded against.
+# The running API and worker get FIXED_NOW from compose and pin both clocks themselves: their
+# sessions open with app.fixed_now, and their JavaScript stamps (stampUtc) follow the database clock
+# (libs/api/db pinned-clock.ts), so one request never runs on two clocks. Pinning only their
+# database once put an audit entry stamped in JavaScript days before the row it was recorded against.
 seed_cmd() {
   if [ -n "${BF_SEED_CMD:-}" ]; then
     echo "$BF_SEED_CMD"

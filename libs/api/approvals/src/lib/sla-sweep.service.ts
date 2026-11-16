@@ -1,4 +1,4 @@
-import { DB, type RequestActor } from '@bf/api/core';
+import { DB, type RequestActor, stampUtc } from '@bf/api/core';
 import { tenants, withTenant, type Db } from '@bf/api/db';
 import type { CurrencyCode } from '@bf/domain';
 import { Inject, Injectable, Logger } from '@nestjs/common';
@@ -21,7 +21,7 @@ export class SlaSweepService {
   ) {}
 
   /** Sweeps every tenant; returns how many approval tasks were escalated in total. */
-  async runForAllTenants(asOf = new Date()): Promise<number> {
+  async runForAllTenants(asOf = stampUtc()): Promise<number> {
     const all = await this.db.transaction((tx) =>
       tx.select({ id: tenants.id, reportingCurrency: tenants.reportingCurrency }).from(tenants),
     );

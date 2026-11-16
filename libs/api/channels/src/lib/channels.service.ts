@@ -11,6 +11,7 @@ import {
   type RequestActor,
   nowUtc,
   todayUtc,
+  stampUtc,
 } from '@bf/api/core';
 import {
   accruals,
@@ -436,8 +437,10 @@ export class ChannelsService {
           nextCursor: null,
         };
       }
-      const cutoff = new Date(Date.now() - Math.min(q.periodDays ?? 90, 90) * 24 * 60 * 60 * 1000);
-      const archiveCutoff = new Date(Date.now() - ARCHIVE_DAYS_MS);
+      const cutoff = new Date(
+        stampUtc().getTime() - Math.min(q.periodDays ?? 90, 90) * 24 * 60 * 60 * 1000,
+      );
+      const archiveCutoff = new Date(stampUtc().getTime() - ARCHIVE_DAYS_MS);
       const limit = Math.min(q.limit ?? 50, 200);
       const after = q.cursor ? decodeNotificationCursor(q.cursor) : null;
       const mine = and(
@@ -541,7 +544,7 @@ export class ChannelsService {
       },
       async (tx) => {
         if (!actor.personId) return { updated: 0, unreadCount: 0 };
-        const readAt = req.read ? new Date() : null;
+        const readAt = req.read ? stampUtc() : null;
         let updatedRows: { id: string }[] = [];
         if (req.markAll) {
           updatedRows = await tx
@@ -776,7 +779,7 @@ export class ChannelsService {
           quietEnd,
           weekendQuiet: req.quietHours?.weekendQuiet ?? existing?.weekendQuiet ?? true,
           showAmountsInPush: req.privacy?.showAmountsInPush ?? existing?.showAmountsInPush ?? false,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
 
         if (existing) {
@@ -1108,7 +1111,7 @@ export class ChannelsService {
           .where(inArray(people.id, personIds))
       : [];
     const byId = new Map(pRows.map((p) => [p.id, p]));
-    const now = Date.now();
+    const now = stampUtc().getTime();
     return rows.map((r) => {
       const author = byId.get(r.authorPersonId);
       const isMine = viewerPersonId !== null && r.authorPersonId === viewerPersonId;
@@ -1187,7 +1190,8 @@ export class ChannelsService {
 
       const roleCheck = this.canRoleComment(actor);
       const closedExpired =
-        item.closedAt !== null && Date.now() - item.closedAt.getTime() > CLOSED_THREAD_DAYS_MS;
+        item.closedAt !== null &&
+        stampUtc().getTime() - item.closedAt.getTime() > CLOSED_THREAD_DAYS_MS;
       const canComment = roleCheck.allowed && !closedExpired;
       const readOnlyReason = !roleCheck.allowed
         ? roleCheck.reason
@@ -1282,7 +1286,7 @@ export class ChannelsService {
         }
         if (
           item.closedAt !== null &&
-          Date.now() - item.closedAt.getTime() > CLOSED_THREAD_DAYS_MS
+          stampUtc().getTime() - item.closedAt.getTime() > CLOSED_THREAD_DAYS_MS
         ) {
           throw new ApiProblem(
             409,
@@ -1425,7 +1429,7 @@ export class ChannelsService {
         if (existing.removedAt) {
           throw new ApiProblem(409, 'CONFLICT', 'Removed comments cannot be edited.');
         }
-        if (Date.now() - existing.createdAt.getTime() > EDIT_WINDOW_MS) {
+        if (stampUtc().getTime() - existing.createdAt.getTime() > EDIT_WINDOW_MS) {
           throw new ApiProblem(
             409,
             'COMMENT_EDIT_WINDOW_EXPIRED',
@@ -1457,7 +1461,7 @@ export class ChannelsService {
           .set({
             body: req.body,
             mentions: mentionedIds,
-            editedAt: new Date(),
+            editedAt: stampUtc(),
           })
           .where(eq(comments.id, commentId))
           .returning();
@@ -1514,7 +1518,7 @@ export class ChannelsService {
         const [updated] = await tx
           .update(comments)
           .set({
-            removedAt: new Date(),
+            removedAt: stampUtc(),
             removedByPersonId: actor.personId,
           })
           .where(eq(comments.id, commentId))
@@ -1580,7 +1584,7 @@ export class ChannelsService {
         if (existing) {
           await tx
             .update(follows)
-            .set({ level, updatedAt: new Date() })
+            .set({ level, updatedAt: stampUtc() })
             .where(eq(follows.id, existing.id));
         } else {
           await tx.insert(follows).values({
@@ -1759,7 +1763,7 @@ export class ChannelsService {
       : row.status === 'connected'
         ? 'Nadia Farouk'
         : null;
-    const since = new Date(Date.now() - DELIVERY_WINDOW_MS);
+    const since = new Date(stampUtc().getTime() - DELIVERY_WINDOW_MS);
     const dels = await tx
       .select()
       .from(channelDeliveries)
@@ -1944,7 +1948,7 @@ export class ChannelsService {
         } else if (req.action === 'connect' || req.action === 'check_status') {
           nextStatus = 'connected';
           nextFeatures = this.defaultFeatures();
-          installedAt = new Date();
+          installedAt = stampUtc();
           installedBy = actor.personId;
         } else if (req.action === 'configure') {
           if (req.features) {
@@ -1986,7 +1990,7 @@ export class ChannelsService {
             allowedChannels: nextChannels,
             installedAt,
             installedByPersonId: installedBy,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(chatInstallations.id, existing.id))
           .returning();
@@ -2060,7 +2064,7 @@ export class ChannelsService {
           }
           await tx
             .update(notificationPreferences)
-            .set({ matrix, updatedAt: new Date() })
+            .set({ matrix, updatedAt: stampUtc() })
             .where(eq(notificationPreferences.id, pref.id));
         }
 
@@ -2226,7 +2230,7 @@ export class ChannelsService {
               providerUserId: preview.providerUserId,
               handle: preview.handle,
               verifiedEmail: preview.chatEmail,
-              lastUsedAt: new Date(),
+              lastUsedAt: stampUtc(),
             })
             .where(eq(chatAccountLinks.id, existing.id))
             .returning();
@@ -2240,7 +2244,7 @@ export class ChannelsService {
               providerUserId: preview.providerUserId,
               handle: preview.handle,
               verifiedEmail: preview.chatEmail,
-              lastUsedAt: new Date(),
+              lastUsedAt: stampUtc(),
             })
             .returning();
         }
@@ -2514,7 +2518,7 @@ export class ChannelsService {
 
       await tx
         .update(chatAccountLinks)
-        .set({ lastUsedAt: new Date() })
+        .set({ lastUsedAt: stampUtc() })
         .where(eq(chatAccountLinks.id, link.id));
 
       const actor = await this.actorForPersonIdTx(tx, tenantId, link.personId);
@@ -3053,7 +3057,7 @@ export class ChannelsService {
             skipWhenEmpty: req.skipWhenEmpty ?? existing.skipWhenEmpty,
             status: nextStatus,
             version: nextVersion,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(digests.id, templateId))
           .returning();

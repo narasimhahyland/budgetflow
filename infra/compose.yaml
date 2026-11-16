@@ -144,8 +144,10 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
       # Local stack only: pins the clock the API computes ages, countdowns and overdue flags from, so
-      # a visual baseline describes the product and not the day it was recorded (issue #86). Unset
-      # means real time. Keep it in step with freezeTime in apps/web-e2e/visual/screens.json.
+      # a visual baseline describes the product and not the day it was recorded (issue #86). Its
+      # database sessions carry the same clock (libs/api/db pinned-clock.ts), so rows it writes are
+      # stamped on the pinned day too. Unset means real time. Keep it in step with freezeTime in
+      # apps/web-e2e/visual/screens.json.
       FIXED_NOW: ${BF_FIXED_NOW:-}
       # Phase 5: documents on MinIO (signed URLs use the browser-reachable public URL), email links
       DOCUMENT_STORE_ENDPOINT: http://minio:9000
@@ -191,6 +193,10 @@ services:
     environment:
       NODE_ENV: production
       HEALTH_PORT: '3100'
+      # Local stack only: the same pinned clock as the API, so rows the worker writes (deliveries,
+      # job results, outbox publication) carry the API's day. Safe with the sweeps below: they are
+      # off here, and pg-boss schedules on its own database clock, which this does not touch.
+      FIXED_NOW: ${BF_FIXED_NOW:-}
       DATABASE_URL: postgres://bf_worker:${BF_PG_WORKER_PASSWORD}@postgres:5432/${BF_PG_DB}
       KEYCLOAK_ISSUER: http://localhost:${BF_KEYCLOAK_PORT:-8080}/realms/budgetflow
       SMTP_URL: smtp://mailpit:1025

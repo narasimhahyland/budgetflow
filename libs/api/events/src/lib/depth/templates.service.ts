@@ -1,4 +1,4 @@
-import { ApiProblem, type CommandResult, type RequestActor } from '@bf/api/core';
+import { ApiProblem, type CommandResult, type RequestActor, stampUtc } from '@bf/api/core';
 import {
   eventAgendaItems,
   eventChecklists,
@@ -48,7 +48,7 @@ const DEFAULT_NEEDS = {
 };
 
 const eventCode = () =>
-  `EV-${new Date().getUTCFullYear()}-${randomBytes(3).toString('hex').toUpperCase()}`;
+  `EV-${stampUtc().getUTCFullYear()}-${randomBytes(3).toString('hex').toUpperCase()}`;
 
 /**
  * Event templates, recurring series and clone (45a). None of these reserve or move money: a series
@@ -275,7 +275,7 @@ export class EventTemplatesService {
             ownerPersonId:
               current.ownerPersonId ?? (body.scope === 'personal' ? actor.personId : null),
             version: current.version + 1,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(eventTemplates.id, templateId))
           .returning();
@@ -317,7 +317,7 @@ export class EventTemplatesService {
         if (current.scope === 'company') this.assertCanPublishCompany(actor);
         const [row] = await tx
           .update(eventTemplates)
-          .set({ status: 'archived', updatedAt: new Date() })
+          .set({ status: 'archived', updatedAt: stampUtc() })
           .where(eq(eventTemplates.id, templateId))
           .returning();
         await this.support.audit.append(tx, {

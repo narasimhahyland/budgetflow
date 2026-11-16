@@ -6,6 +6,7 @@ import {
   PolicyService,
   todayUtc,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   budgets,
@@ -287,7 +288,7 @@ export class BurnRateService {
           status: 'completed',
           evaluatedCount: facts.length,
           alertsRaised: raised,
-          completedAt: new Date(),
+          completedAt: stampUtc(),
         })
         .where(eq(burnRateRuns.id, runId));
       this.log.log(`burn-rate run ${runId}: ${facts.length} budget(s), ${raised} alert(s)`);
@@ -300,7 +301,7 @@ export class BurnRateService {
     await withTenant(this.db, { tenantId, subject: 'system:worker' }, (tx) =>
       tx
         .update(burnRateRuns)
-        .set({ status: 'failed', error: error.slice(0, 500), completedAt: new Date() })
+        .set({ status: 'failed', error: error.slice(0, 500), completedAt: stampUtc() })
         .where(and(eq(burnRateRuns.id, runId), eq(burnRateRuns.status, 'queued'))),
     );
   }

@@ -1,4 +1,11 @@
-import { ApiProblem, unwrap, type CommandResult, type RequestActor, todayUtc } from '@bf/api/core';
+import {
+  ApiProblem,
+  unwrap,
+  type CommandResult,
+  type RequestActor,
+  todayUtc,
+  stampUtc,
+} from '@bf/api/core';
 import { eventQuoteRequests, eventQuotes, vendors, type Tx } from '@bf/api/db';
 import { CommitmentsService, FundingSourcesService, PostingSupport } from '@bf/api/spend';
 import type {
@@ -299,7 +306,7 @@ export class EventQuotesService {
           validUntil: body.validUntil ?? null,
           includesText: body.includesText ?? null,
           documentId: body.documentId ?? null,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
         const [existing] = await tx
           .select()
@@ -427,14 +434,14 @@ export class EventQuotesService {
             commitmentId: created.commitmentId,
             selectionReason: body.reason ?? null,
             selectedByPersonId: actor.personId,
-            selectedAt: new Date(),
-            updatedAt: new Date(),
+            selectedAt: stampUtc(),
+            updatedAt: stampUtc(),
           })
           .where(eq(eventQuotes.id, quote.id));
         if (body.notifyDeclinedVendors && siblings.length > 1)
           await tx
             .update(eventQuotes)
-            .set({ status: 'declined', updatedAt: new Date() })
+            .set({ status: 'declined', updatedAt: stampUtc() })
             .where(
               and(
                 eq(eventQuotes.quoteRequestId, quote.quoteRequestId),
@@ -506,7 +513,7 @@ export class EventQuotesService {
           );
         await tx
           .update(eventQuotes)
-          .set({ status: 'declined', updatedAt: new Date() })
+          .set({ status: 'declined', updatedAt: stampUtc() })
           .where(eq(eventQuotes.id, quote.id));
         await this.support.log(
           tx,
