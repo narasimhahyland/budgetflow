@@ -32,6 +32,8 @@ So this fix moves both clocks together.
   submitted, updated, published, audited at), or measured a window over such stamps with `Date.now()`,
   now use `stampUtc()`. They all moved with real time before, so nothing could rely on them
   being frozen.
+- **Raw SQL `now()` stamps**: the rebuild run's `started_at` (and its stale-claim check), the cached ledger
+  balance `updated_at` and the AI query-log windows take `stampUtc()` as a parameter instead.
 - **Deliberately left on real time**: break-glass windows (`core/actor.ts`, `admin/break-glass.service.ts`);
   credential, API-key, token, invite, approval-link and download expiry; signed URLs
   (`documents/document-store.ts`); webhook and message retry schedules and signatures
@@ -52,16 +54,17 @@ So this fix moves both clocks together.
 Stack `bf-jovial-shamir-fccacd` on ports 47xxx, `scripts/stack.sh up && reset`, deterministic seed,
 clock pinned to 2026-11-16T09:00Z. Roles: finance admin (creates and freezes the budget, reads audit).
 
-| Scenario                                                                                       | Expected                                                              | Actual                                                                                       | Result |
-| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------ |
-| Budget created by the API: `created_at` (database default, API session)                        | within an hour after the pinned instant                               | 09:00:0x on 16 Nov                                                                           | pass   |
-| Freeze audit entry `occurredAt` (JavaScript, API), read via `/api/audit/events`                | within the hour, and no earlier than the budget's `created_at`        | as expected; every entry for the budget too                                                  | pass   |
-| Freeze outbox message published by the worker (`published_at`, JavaScript)                     | within the hour, and no earlier than the API wrote it                 | as expected                                                                                  | pass   |
-| Whole API suite on a fresh seed, then the database                                             | every audit and outbox stamp on 16 Nov, none published before created | 3,928 audit events 09:00:00.004 to 09:00:28.75; 3,175 outbox rows, 0 off-day, 0 out of order | pass   |
-| AI suggestion acceptance (`audit.occurredAt >= suggestion.createdAt`)                          | accepted after the suggestion is applied                              | `ai/` scenarios pass                                                                         | pass   |
-| Ledger rebuild check (read-only transaction) and every spec that failed on the first iteration | clean / drift detected as before                                      | 163 passed, 1 skipped (the live-model check)                                                 | pass   |
+| Scenario                                                                                                | Expected                                                              | Actual                                                                                       | Result |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------ |
+| Budget created by the API: `created_at` (database default, API session)                                 | within an hour after the pinned instant                               | 09:00:0x on 16 Nov                                                                           | pass   |
+| Freeze audit entry `occurredAt` (JavaScript, API), read via `/api/audit/events`                         | within the hour, and no earlier than the budget's `created_at`        | as expected; every entry for the budget too                                                  | pass   |
+| Freeze outbox message published by the worker (`published_at`, JavaScript)                              | within the hour, and no earlier than the API wrote it                 | as expected                                                                                  | pass   |
+| Whole API suite on a fresh seed, then the database                                                      | every audit and outbox stamp on 16 Nov, none published before created | 3,928 audit events 09:00:00.004 to 09:00:28.75; 3,175 outbox rows, 0 off-day, 0 out of order | pass   |
+| Ledger rebuild check: requested via the API, run by the worker, read via `/api/integrity/ledger-checks` | requestedAt ≤ startedAt ≤ finishedAt, all within the hour             | as expected (startedAt was the real date before: raw SQL `now()`)                            | pass   |
+| AI suggestion acceptance (`audit.occurredAt >= suggestion.createdAt`)                                   | accepted after the suggestion is applied                              | `ai/` scenarios pass                                                                         | pass   |
+| Ledger rebuild check (read-only transaction) and every spec that failed on the first iteration          | clean / drift detected as before                                      | 163 passed, 1 skipped (the live-model check)                                                 | pass   |
 
-Proof: `apps/api-e2e/src/quality/pinned-clock.spec.ts` (invariant 137 in
+Proof: `apps/api-e2e/src/quality/pinned-clock.spec.ts` (invariant 142 in
 `docs/testing/invariant-scenarios.md`). Every stamp must lie within an hour after the pinned instant,
 not just on its calendar day, so the scenario fails on the old code on any real date (a real-clock
 stamp today, 16 Nov, was 03:2x UTC, before the pinned instant).
@@ -84,6 +87,10 @@ whole API suite).
    against the real clock.
 2. Second full gate: every mode passes. The scenario was then tightened (the hour window), so
    `static` and `functional-api` were run again: pass.
+3. Merged `main` (B8, #134): B8 took invariant rows 129 and 137 to 141, so this is row 142. B8's
+   only new clock use is the VAPID JWT expiry, which stays on real time. Moved the remaining raw SQL
+   `now()` stamps to `stampUtc()` and added the rebuild-run check to the scenario, then ran the full
+   gate again on the merged branch.
 
 ## Gates
 
@@ -93,6 +100,12 @@ whole API suite).
   ([`gate-summary-rerun.txt`](gate-summary-rerun.txt)).
 - Visual baselines: none changed. The one state that moved in iteration 1 (`066-rules-overview`) was
   caused by the advancing `nowUtc()`, which was reverted; no baseline was updated.
+
+## Follow-ups (not changed here)
+
+- Reads that compare with SQL `now()` rather than the API's "now": the rules overview's
+  "Approvals past their time" (`due_at < now()`) and the system-health outbox lag. Moving them to
+  `nowUtc()` changes what a pinned stack shows, and may need a baseline update with a reason.
 
 ## Risks
 

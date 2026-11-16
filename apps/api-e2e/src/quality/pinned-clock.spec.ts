@@ -1,4 +1,4 @@
-// Invariant 137: on a pinned stack (FIXED_NOW, scripts/stack.sh), rows the running API and worker write
+// Invariant 142: on a pinned stack (FIXED_NOW, scripts/stack.sh), rows the running API and worker write
 // carry the pinned day, on both clocks, and in the order they were written.
 //
 // The API's "now" is pinned, but its database sessions used not to be: column defaults (app_now(),
@@ -9,7 +9,8 @@
 //   - API, database default: the budget's created_at.
 //   - API, JavaScript: the audit entry's occurredAt (read through the audit API), never before it.
 //   - Worker: the outbox message the freeze wrote, published by the worker (published_at), never
-//     before the API created it.
+//     before the API created it; and a ledger rebuild check run, requested through the API and run
+//     by the worker (requestedAt <= startedAt <= finishedAt), read through the integrity API.
 // Each stamp must lie within an hour after the pinned instant, not merely on its calendar day, so the
 // check fails on a real-clock stamp even when the real date happens to be the pinned one. On a stack
 // started with BF_FIXED_NOW=real only the day and the order are checked.
@@ -20,7 +21,7 @@ import { clockIsPinned, nowUtc, todayUtc } from '../support/clock';
 import { expectContract } from '../support/contract';
 import { asOwner } from '../support/db';
 import { createRoot } from '../support/factory';
-import { freeze } from '../budgets/p4';
+import { freeze, rebuildCheck } from '../budgets/p4';
 
 const day = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
 
@@ -102,5 +103,22 @@ test.describe('the API and the worker write on the pinned clock', () => {
       published!.published_at!.getTime(),
       'the worker publishes no earlier than the API wrote the message',
     ).toBeGreaterThanOrEqual(published!.created_at.getTime());
+  });
+  test('a ledger rebuild check requested through the API and run by the worker is stamped on the API day, in order', async ({
+    request,
+  }) => {
+    const run = await rebuildCheck(request);
+    expect(run.status).toBe('clean');
+    expectPinned(run.requestedAt, 'requestedAt (API)');
+    expectPinned(run.startedAt!, 'startedAt (worker)');
+    expectPinned(run.finishedAt!, 'finishedAt (worker)');
+    const t = (x: string | null | undefined) => new Date(x!).getTime();
+    expect(
+      t(run.startedAt),
+      'the worker starts no earlier than the API queued it',
+    ).toBeGreaterThanOrEqual(t(run.requestedAt));
+    expect(t(run.finishedAt), 'and finishes no earlier than it started').toBeGreaterThanOrEqual(
+      t(run.startedAt),
+    );
   });
 });

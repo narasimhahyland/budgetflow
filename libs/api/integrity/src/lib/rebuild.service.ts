@@ -66,13 +66,15 @@ export class RebuildService {
   ) {}
 
   async run(tenantId: string, checkRunId: string): Promise<'clean' | 'drift_detected' | 'skipped'> {
-    const claimed = await withTenant(this.db, { tenantId, subject: SYSTEM }, (tx) =>
-      tx.execute(
-        sql`update ${integrityCheckRuns} set status = 'running', started_at = now()
-            where id = ${checkRunId} and (status = 'queued' or (status = 'running' and started_at < now() - interval '10 minutes'))
+    const claimed = await withTenant(this.db, { tenantId, subject: SYSTEM }, (tx) => {
+      // Stamped on the API's clock, like requested_at and finished_at (a test stack pins it).
+      const at = stampUtc().toISOString();
+      return tx.execute(
+        sql`update ${integrityCheckRuns} set status = 'running', started_at = ${at}::timestamptz
+            where id = ${checkRunId} and (status = 'queued' or (status = 'running' and started_at < ${at}::timestamptz - interval '10 minutes'))
             returning id`,
-      ),
-    );
+      );
+    });
     if (claimed.rows.length === 0) return 'skipped';
     try {
       const summary = await withTenant(
