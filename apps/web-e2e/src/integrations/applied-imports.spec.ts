@@ -39,14 +39,6 @@ test.describe('the Adaptive Planning plan becomes a Draft plan version (094a)', 
     const connectionId = ADAPTIVE;
     await call(
       'integration-admin',
-      'POST',
-      `/api/integrations/connections/${connectionId}/credential`,
-      {
-        credential: 'mock-adaptive-dev-only-0003',
-      },
-    );
-    await call(
-      'integration-admin',
       'PUT',
       `/api/integrations/connections/${connectionId}/mappings`,
       {
@@ -64,6 +56,9 @@ test.describe('the Adaptive Planning plan becomes a Draft plan version (094a)', 
     const mock = await pwRequest.newContext({ baseURL: MOCK_URL });
     await mock.post('/_control/adaptive-plan', {
       data: {
+        // The seeded credential stays expired (the hub journeys running alongside read that
+        // state); the mock serves this plan to it anyway.
+        ignoreCredential: true,
         version,
         fiscalYear: 'FY2027',
         currency: 'USD',
@@ -102,29 +97,6 @@ test.describe('the Adaptive Planning plan becomes a Draft plan version (094a)', 
     const mine = versions.items.filter((v) => v.label === `${version} (Adaptive Planning)`);
     expect(mine).toEqual([expect.objectContaining({ status: 'draft' })]);
     await mock.post('/_control/reset');
-  });
-
-  // Put the connection back as the seed has it (credentials expired, "Needs attention"), which the
-  // connector-hub journeys read.
-  test.afterAll(async () => {
-    await call(
-      'integration-admin',
-      'POST',
-      `/api/integrations/connections/${ADAPTIVE}/credential`,
-      {
-        credential: 'mock-adaptive-expired-dev-only-0001',
-      },
-    );
-    const ctx = await pwRequest.newContext();
-    const res = await ctx.fetch(`${API_URL}/api/integrations/connections/${ADAPTIVE}/test`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${await apiToken('integration-admin')}`,
-        'idempotency-key': randomUUID(),
-        'x-tenant-id': SEED.tenants.acme,
-      },
-    });
-    expect(res.status()).toBe(200);
   });
 });
 

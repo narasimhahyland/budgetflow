@@ -21,6 +21,11 @@ const armed = new Map();
 const received = [];
 /** Plan the Adaptive mock returns instead of the fixture, set through the control plane. */
 let adaptivePlan = null;
+/**
+ * Lets a journey read its plan through the seeded connection, whose credential stays "expired" so
+ * the connector-hub journeys running alongside still see it in "Needs attention".
+ */
+let adaptivePlanIgnoresCredential = false;
 /** Calendar responses per provider, set through the control plane; the fixture otherwise. */
 let calendarResponses = {};
 /** Draft expenses created through the Concur mock (117a), by id; idempotency key -> id. */
@@ -516,6 +521,7 @@ const server = createServer(async (req, res) => {
     partnerAnswers.clear();
     resetNavan();
     adaptivePlan = null;
+    adaptivePlanIgnoresCredential = false;
     calendarResponses = {};
     concurDrafts.clear();
     concurDraftKeys.clear();
@@ -523,7 +529,10 @@ const server = createServer(async (req, res) => {
   }
   // What the planning system returns next (094a): a scenario sets its own version and levels.
   if (path === '/_control/adaptive-plan' && req.method === 'POST') {
-    adaptivePlan = JSON.parse((await readBody(req)) || 'null');
+    const body = JSON.parse((await readBody(req)) || 'null');
+    adaptivePlanIgnoresCredential = Boolean(body?.ignoreCredential);
+    if (body) delete body.ignoreCredential;
+    adaptivePlan = body;
     return json(res, 200, { set: true });
   }
   // Attendee responses a calendar provider reports (097), per provider.
@@ -620,6 +629,9 @@ const server = createServer(async (req, res) => {
   // Navan authenticates with its own OAuth tokens and region rules, so it routes before the shared
   // bearer check.
   if (await handleNavan(req, res, url, path, readBody)) return;
+
+  if (adaptivePlanIgnoresCredential && req.method === 'GET' && path === '/adaptive/api/v2/plan')
+    return json(res, 200, adaptivePlan ?? ADAPTIVE_PLAN);
 
   if (!authorized(req, res)) return;
 
