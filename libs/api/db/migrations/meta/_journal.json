@@ -197,6 +197,13 @@
       "when": 1794670959604,
       "tag": "0029_b8_web_push",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794805818009,
+      "tag": "0025_b5_finance_exports",
+      "breakpoints": true
     }
   ]
 }

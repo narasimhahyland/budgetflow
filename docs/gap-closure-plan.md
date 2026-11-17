@@ -67,7 +67,7 @@ request; it now does, and every decision is recorded with its rule versions and 
 | **B2** Dashboards — **done**                   | 012 finance controller, 017 alerts, 017a exceptions, 018 pending approvals, 018a approval performance (cycle time, bottlenecks), 018b product analytics, 088a one-click evidence pack. Split in two.                                                                                                                                                                | D2              | L    |
 | **B3** Tax and benefits — **done**             | 080g tax-aware consumption (recoverable vs non-recoverable GST/VAT) and 080h the employee benefit ledger with benefit-in-kind thresholds. The tables exist, unused. Ledger-heavy: `/ledger-change`.                                                                                                                                                                 | D2, D3          | L    |
 | **B4** Reclaim and burn rate — **done**        | 086a reclaim-and-redistribute campaigns, and burn-rate alerts.                                                                                                                                                                                                                                                                                                      | D2              | M    |
-| **B5** Finance exports                         | 094b: intercompany recharges, chargeback and reclass journals, payroll benefit data.                                                                                                                                                                                                                                                                                | B3 for benefits | M    |
+| **B5** Finance exports — **done**              | 094b: intercompany recharges, chargeback and reclass journals, payroll benefit data.                                                                                                                                                                                                                                                                                | B3 for benefits | M    |
 | **B6** Developer portal                        | 101a public API docs and sandbox (only `/api/openapi.json` exists). The sandbox overlaps the deferred demo environment, so scope it first.                                                                                                                                                                                                                          | D2              | M    |
 | **B7** Integration completeness                | Apply an Adaptive Planning import (plan to root budgets; today preview only), Outlook and Google RSVP sync, vendor master from the ERP (both read and reported only), Workday `runBudgetCheck`, 117a hand-off to a prefilled expense.                                                                                                                               | —               | M–L  |
 | **B8** Installable app and push — **done**     | 059a's installable mobile web app (web manifest, service worker) and real push delivery (today a row is recorded, nothing is sent).                                                                                                                                                                                                                                 | D5              | M    |
@@ -116,6 +116,23 @@ payroll export tab and batches (the ledger shows the reportable amounts B5 expor
 follow-ups: the screens' CSV/XLSX/PDF export, employees seeing their own benefits (122), and the
 071 cap reading the benefit ledger instead of live request consumption.
 
+**B5 done.** Finance and payroll exports (094b, `/finance/exports`): Finance Admins create balanced,
+period-stamped exports of intercompany recharges (each recharge's posted due-from / due-to journal once
+its tax approval is done), chargeback and reclass journals (manual journals and reversals that touch
+posted actual spend), and payroll benefits (each person's reportable benefit-in-kind per threshold and
+tax year from the B3 benefit ledger, then only what became reportable since). Lines keep their journal
+links; GL lines map to ERP accounts; an export is created only when debits equal credits (payroll:
+totals per person). Each item is exported once; re-sending needs a reason and is flagged as a duplicate
+send. Files are CSV and XLSX in the `DocumentStore` under `tenants/<id>/finance-exports/`, downloaded
+through five-minute signed links with CSV formulas neutralised; creation, re-sends, downloads and Mark
+posted are audited, and exporting moves the 053a recharge to Exported, then Posted. New actions
+`finance_export.read` and `finance_export.manage`. Migration `0025`. Proof:
+`apps/api-e2e/src/finance/finance-exports.spec.ts` (invariants 122-125) and the
+`finance-admin/finance-exports` journeys; evidence in
+[`evidence/gap-b5-finance-exports/`](../evidence/gap-b5-finance-exports/README.md). Not built:
+delivery by ERP connector (the target is a file; Acknowledged and Failed are reserved for it), the
+accruals and prepaid types (accruals keep their own export on 080d), and a read-only mobile list.
+
 **B4 done.** Reclaim campaigns (086a, built from the spec, D2): finance (or the CEO) previews and
 starts a campaign; every budget forecast to lapse above the criteria gets a notice; its owner
 releases all, part, or keeps it with a reason and plan, never above the floor (allocated out, held,
@@ -156,8 +173,7 @@ memory, so an offline start has no session).
 Done and merged: A1-A4, B1, B2 (#117, #130), B3, B4 (#127, #129), D7 offline AI tests (#126), the
 date-only fix (#128). Open, in the D6 order:
 
-1. **B5 finance exports**: built in its own worktree, no PR yet; its session waits for a decision.
-   It claims migration `0025` and must start its invariant rows at **122** (121 is B4's on `main`).
+1. **B5 finance exports**: done in PR #136 (migration `0025`, invariant rows 122-125).
 2. **B7 integration completeness**: in its own worktree, no PR yet; waits for a decision. Migration
    `0027`, invariant rows 130-136.
 3. **B9 AI jobs**, **B10 experience** (split by area), then **B6 developer portal** (scope the

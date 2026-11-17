@@ -66,4 +66,11 @@ export const financeAdminRoutes: Routes = [
     canActivate: [requirePermission('benefits.read', 'Employee benefits')],
     loadComponent: () => import('./employee-benefits.page').then((m) => m.EmployeeBenefitsPage),
   },
+  {
+    path: 'finance/exports',
+    title: 'Finance exports',
+    data: { pageTitle: 'Finance exports', section: 'Finance' },
+    canActivate: [requirePermission('finance_export.read', 'Finance exports')],
+    loadComponent: () => import('./finance-exports.page').then((m) => m.FinanceExportsPage),
+  },
 ];

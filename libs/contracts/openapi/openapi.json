@@ -15548,6 +15548,48 @@
         ],
         "additionalProperties": false
       },
+      "CreateFinanceExportRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "intercompany_recharges",
+              "chargeback_reclass",
+              "payroll_benefits"
+            ],
+            "description": "What the export carries: intercompany recharge journals, chargeback and reclass journals, or reportable employee benefits for payroll."
+          },
+          "period": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "description": "Calendar month of the accounting dates, YYYY-MM (October 2026 is 2026-10)."
+          },
+          "legalEntityId": {
+            "description": "Required for payroll exports.",
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "includeExported": {
+            "default": false,
+            "description": "Include items already exported (a duplicate send; needs a reason).",
+            "type": "boolean"
+          },
+          "reason": {
+            "description": "Why items already exported are sent again.",
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "type",
+          "period",
+          "includeExported"
+        ],
+        "additionalProperties": false
+      },
       "CreateFiscalCalendarRequest": {
         "type": "object",
         "properties": {
@@ -25038,6 +25080,788 @@
         ],
         "additionalProperties": false
       },
+      "FinanceExportDetail": {
+        "type": "object",
+        "properties": {
+          "export": {
+            "$ref": "#/components/schemas/FinanceExportSummary"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceExportLine"
+            }
+          },
+          "personTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceExportPersonTotal"
+            }
+          }
+        },
+        "required": [
+          "export",
+          "lines",
+          "personTotals"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceExportDownload": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "url",
+          "fileName",
+          "expiresAt"
+        ],
+        "additionalProperties": false,
+        "description": "A short-lived signed URL (5 minutes) for the export file."
+      },
+      "FinanceExportLine": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "ledger_line",
+              "benefit"
+            ],
+            "description": "A posted ledger line, or a person’s reportable benefit for a threshold."
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "Stable reference of the source item (exported once)."
+          },
+          "journalId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The posted journal the line comes from."
+          },
+          "journalLineNo": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accountingDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "periodLabel": {
+            "description": "The legal entity’s own fiscal period.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "account": {
+            "description": "ERP account code; null when the line has no account mapping.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "accountName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "costCenter": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "eventCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "debit": {
+            "description": "Debit in the reporting currency (zero on a credit line).",
+            "$ref": "#/components/schemas/Money"
+          },
+          "credit": {
+            "description": "Credit in the reporting currency (zero on a debit line).",
+            "$ref": "#/components/schemas/Money"
+          },
+          "transaction": {
+            "description": "Signed amount in the transaction currency (debit positive).",
+            "$ref": "#/components/schemas/Money"
+          },
+          "rate": {
+            "description": "Reporting rate used on the posted line.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "personId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "personName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "benefit": {
+            "description": "Payroll lines: the benefit threshold.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "taxYear": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "fromDate": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                    "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+                  },
+                  "toDate": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                    "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+                  }
+                },
+                "required": [
+                  "fromDate",
+                  "toDate"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Payroll lines: the threshold’s tax year."
+          },
+          "reportable": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Payroll lines: reportable amount newly due to payroll in this export."
+          },
+          "alreadyExported": {
+            "type": "boolean",
+            "description": "The item is already in an earlier export; sending it again is a duplicate."
+          },
+          "exportedIn": {
+            "description": "Number of the earlier export, when there is one.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "lineNo",
+          "sourceType",
+          "sourceRef",
+          "journalId",
+          "journalLineNo",
+          "accountingDate",
+          "periodLabel",
+          "legalEntityId",
+          "legalEntityCode",
+          "account",
+          "accountName",
+          "costCenter",
+          "eventCode",
+          "description",
+          "debit",
+          "credit",
+          "transaction",
+          "rate",
+          "personId",
+          "personName",
+          "benefit",
+          "taxYear",
+          "reportable",
+          "alreadyExported",
+          "exportedIn"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceExportList": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "description": "Calendar month of the accounting dates, YYYY-MM (October 2026 is 2026-10)."
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+                  "description": "Calendar month of the accounting dates, YYYY-MM (October 2026 is 2026-10)."
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value",
+                "label"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Months to choose from, newest first."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceExportSummary"
+            }
+          },
+          "reportingCurrency": {
+            "$ref": "#/components/schemas/CurrencyCode"
+          },
+          "canCreate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "period",
+          "periodLabel",
+          "periods",
+          "items",
+          "reportingCurrency",
+          "canCreate"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceExportPersonTotal": {
+        "type": "object",
+        "properties": {
+          "personId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "personName": {
+            "type": "string"
+          },
+          "reportable": {
+            "$ref": "#/components/schemas/Money"
+          }
+        },
+        "required": [
+          "personId",
+          "personName",
+          "reportable"
+        ],
+        "additionalProperties": false,
+        "description": "Payroll exports total per person instead of balancing debits and credits."
+      },
+      "FinanceExportPreview": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "intercompany_recharges",
+              "chargeback_reclass",
+              "payroll_benefits"
+            ],
+            "description": "What the export carries: intercompany recharge journals, chargeback and reclass journals, or reportable employee benefits for payroll."
+          },
+          "period": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "description": "Calendar month of the accounting dates, YYYY-MM (October 2026 is 2026-10)."
+          },
+          "periodLabel": {
+            "type": "string",
+            "description": "The month in words, for example October 2026."
+          },
+          "legalEntityId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "legalEntityCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "includeExported": {
+            "type": "boolean"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceExportLine"
+            }
+          },
+          "lineCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "debitTotal": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "creditTotal": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "reportableTotal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Payroll: total reportable in the entity currency."
+          },
+          "personTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceExportPersonTotal"
+            }
+          },
+          "balanced": {
+            "type": "boolean",
+            "description": "Debits equal credits and every line has an account (payroll: always true)."
+          },
+          "unmappedLines": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Lines with no account mapping."
+          },
+          "problem": {
+            "description": "Plain-English reason the export cannot be created, when it cannot.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "nothingToExport": {
+            "type": "boolean"
+          },
+          "message": {
+            "description": "Info line, for example when there is nothing new.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duplicates": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Lines already exported (only when includeExported)."
+          },
+          "previousExports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinanceExportPrevious"
+            }
+          },
+          "canCreate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "period",
+          "periodLabel",
+          "legalEntityId",
+          "legalEntityCode",
+          "includeExported",
+          "lines",
+          "lineCount",
+          "debitTotal",
+          "creditTotal",
+          "reportableTotal",
+          "personTotals",
+          "balanced",
+          "unmappedLines",
+          "problem",
+          "nothingToExport",
+          "message",
+          "duplicates",
+          "previousExports",
+          "canCreate"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceExportPrevious": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "number": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "sent",
+              "acknowledged",
+              "posted",
+              "failed"
+            ],
+            "description": "Draft, Sent (the file was produced and handed over), Acknowledged by the receiving system, Posted in the ERP (with its document number), or Failed."
+          },
+          "sentAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "acknowledgedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "postedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "status",
+          "sentAt",
+          "acknowledgedAt",
+          "postedAt"
+        ],
+        "additionalProperties": false
+      },
+      "FinanceExportSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "number": {
+            "type": "string",
+            "description": "Export number, for example EXP-2026-0141."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "intercompany_recharges",
+              "chargeback_reclass",
+              "payroll_benefits"
+            ],
+            "description": "What the export carries: intercompany recharge journals, chargeback and reclass journals, or reportable employee benefits for payroll."
+          },
+          "period": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "description": "Calendar month of the accounting dates, YYYY-MM (October 2026 is 2026-10)."
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "entityLabel": {
+            "type": "string",
+            "description": "Entity or entity pair, for example HYL-DE to HYL-IN, or All entities."
+          },
+          "lineCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "personCount": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "debitTotal": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "creditTotal": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "reportableTotal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "file"
+            ],
+            "description": "Delivered as a CSV and XLSX file. ERP connector delivery is planned."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "sent",
+              "acknowledged",
+              "posted",
+              "failed"
+            ],
+            "description": "Draft, Sent (the file was produced and handed over), Acknowledged by the receiving system, Posted in the ERP (with its document number), or Failed."
+          },
+          "duplicate": {
+            "type": "boolean",
+            "description": "A re-export: the receiving system may already hold lines."
+          },
+          "duplicateReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "erpDocumentNumber": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "acknowledgementRef": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "failureMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          },
+          "sentAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "postedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "Timestamp, ISO 8601 in UTC."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "canDownload": {
+            "type": "boolean",
+            "description": "The reader may open the lines and files (personal data needs benefits.read)."
+          },
+          "canMarkPosted": {
+            "type": "boolean"
+          },
+          "canResend": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "type",
+          "period",
+          "periodLabel",
+          "legalEntityId",
+          "entityLabel",
+          "lineCount",
+          "personCount",
+          "debitTotal",
+          "creditTotal",
+          "reportableTotal",
+          "target",
+          "status",
+          "duplicate",
+          "duplicateReason",
+          "erpDocumentNumber",
+          "acknowledgementRef",
+          "failureMessage",
+          "createdByName",
+          "createdAt",
+          "sentAt",
+          "postedAt",
+          "canDownload",
+          "canMarkPosted",
+          "canResend"
+        ],
+        "additionalProperties": false
+      },
       "FinanceFeed": {
         "type": "object",
         "properties": {
@@ -31198,6 +32022,21 @@
             "type": "boolean"
           }
         },
+        "additionalProperties": false
+      },
+      "MarkFinanceExportPostedRequest": {
+        "type": "object",
+        "properties": {
+          "erpDocumentNumber": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Document number the ERP or payroll gave the posting."
+          }
+        },
+        "required": [
+          "erpDocumentNumber"
+        ],
         "additionalProperties": false
       },
       "MarkNotificationsRequest": {
@@ -38172,6 +39011,10 @@
               "REPORT_EXPORT_NO_FILE",
               "REPORT_EXPORT_EXPIRED",
               "BOARD_PACK_NO_SNAPSHOT",
+              "FINANCE_EXPORT_NOT_BALANCED",
+              "FINANCE_EXPORT_NOTHING_TO_EXPORT",
+              "FINANCE_EXPORT_REASON_REQUIRED",
+              "FINANCE_EXPORT_ALREADY_POSTED",
               "AI_FEATURE_DISABLED",
               "AI_PROVIDER_NOT_CONFIGURED",
               "AI_UNAVAILABLE",
@@ -110198,6 +111041,632 @@
             }
           },
           "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/finance/exports": {
+      "get": {
+        "operationId": "listFinanceExports",
+        "summary": "Finance and payroll exports for a month",
+        "tags": [
+          "finance-exports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "description": "Calendar month of the accounting dates, YYYY-MM (October 2026 is 2026-10)."
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "intercompany_recharges",
+                "chargeback_reclass",
+                "payroll_benefits"
+              ],
+              "description": "What the export carries: intercompany recharge journals, chargeback and reclass journals, or reportable employee benefits for payroll."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceExportList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createFinanceExport",
+        "summary": "Create a balanced export and produce its files",
+        "tags": [
+          "finance-exports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFinanceExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceExportDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/finance/exports/preview": {
+      "get": {
+        "operationId": "previewFinanceExport",
+        "summary": "The lines a new export would carry, with the balance check",
+        "tags": [
+          "finance-exports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "intercompany_recharges",
+                "chargeback_reclass",
+                "payroll_benefits"
+              ],
+              "description": "What the export carries: intercompany recharge journals, chargeback and reclass journals, or reportable employee benefits for payroll."
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "description": "Calendar month of the accounting dates, YYYY-MM (October 2026 is 2026-10)."
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "includeExported",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "description": "true or false.",
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceExportPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/finance/exports/{exportId}": {
+      "get": {
+        "operationId": "getFinanceExport",
+        "summary": "One export with its lines",
+        "tags": [
+          "finance-exports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceExportDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/finance/exports/{exportId}/posted": {
+      "post": {
+        "operationId": "markFinanceExportPosted",
+        "summary": "Record that the ERP or payroll posted the export",
+        "tags": [
+          "finance-exports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkFinanceExportPostedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceExportSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/finance/exports/{exportId}/download": {
+      "get": {
+        "operationId": "getFinanceExportDownload",
+        "summary": "A short-lived signed link to the export file",
+        "tags": [
+          "finance-exports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv",
+                "xlsx"
+              ],
+              "description": "File format to download."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceExportDownload"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {
