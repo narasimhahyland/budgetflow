@@ -19,6 +19,7 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { clockIsPinned, nowUtc } from '../support/clock';
 
 const ROOT = resolve(__dirname, '../../../..');
 const DIST = join(ROOT, 'dist/apps/api');
@@ -77,12 +78,33 @@ function migrate(pg: StartedPostgreSqlContainer, migrationsDir: string): void {
   });
 }
 
+/**
+ * Seeds exactly as `scripts/stack.sh seed` does. The deterministic seed is written for the stack's
+ * pinned clock (freezeTime in apps/web-e2e/visual/screens.json): on the real clock it fails once the
+ * calendar passes a seeded deadline (the demo event's RSVPs close), which says nothing about the
+ * migration. So under a pinned clock the seed runs with the same two pins as the stack's: the
+ * `Date` preload (scripts/lib/pinned-clock.cjs) and `app.fixed_now` on every session it opens.
+ */
 function seed(pg: StartedPostgreSqlContainer): void {
-  execFileSync('node', [join(DIST, 'seed.js')], {
-    env: { ...process.env, DATABASE_URL_OWNER: pg.getConnectionUri() },
-    stdio: 'pipe',
-    timeout: 10 * 60_000,
-  });
+  const url = pg.getConnectionUri();
+  const pinned = clockIsPinned() ? nowUtc().toISOString() : null;
+  execFileSync(
+    'node',
+    pinned
+      ? ['--require', join(ROOT, 'scripts/lib/pinned-clock.cjs'), join(DIST, 'seed.js')]
+      : [join(DIST, 'seed.js')],
+    {
+      env: {
+        ...process.env,
+        DATABASE_URL_OWNER: pinned
+          ? `${url}?options=${encodeURIComponent(`-c app.fixed_now=${pinned}`)}`
+          : url,
+        ...(pinned ? { BF_PINNED_CLOCK: pinned } : {}),
+      },
+      stdio: 'pipe',
+      timeout: 10 * 60_000,
+    },
+  );
 }
 
 /** The committed migrations up to and including `lastIdx`, as a directory the migrator can read. */
