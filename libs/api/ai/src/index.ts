@@ -20,3 +20,5 @@ export * from './lib/features/matching.service';
 export * from './lib/features/anomaly.service';
 export * from './lib/features/extraction.service';
 export * from './lib/ai.module';
+export * from './lib/scan-runs.service';
+export * from './lib/reported-answers.service';

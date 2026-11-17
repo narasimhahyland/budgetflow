@@ -89,6 +89,13 @@ export const aiRoutes: Routes = [
     loadComponent: () => import('./query-log.page').then((m) => m.QueryLogPage),
   },
   {
+    path: 'admin/ai/log/reported',
+    title: 'Reported answers',
+    data: area('AI query log', 'Admin'),
+    canActivate: [requirePermission('tenant.read', 'Reported answers')],
+    loadComponent: () => import('./reported-answers.page').then((m) => m.ReportedAnswersPage),
+  },
+  {
     path: 'admin/ai/accuracy',
     title: 'AI accuracy',
     data: area('AI accuracy', 'Admin'),

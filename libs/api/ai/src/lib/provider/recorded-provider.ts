@@ -36,6 +36,10 @@ export class RecordedAiProvider extends AiProvider {
         a.type.localeCompare(b.type) || a.label.localeCompare(b.label) || a.id.localeCompare(b.id),
     );
     if (prompt.startsWith('__eval:')) return this.fixture(prompt, call.task, facts);
+    // Scans have no prompt: a record labelled `__eval:<name>` (a scenario's own budget) replays the
+    // fixture for that call only, e.g. an outage for the nightly-scan retry scenario (gap B9).
+    const marked = prompt ? undefined : facts.find((f) => f.label.startsWith('__eval:'));
+    if (marked) return this.fixture(marked.label, call.task, facts);
     switch (call.task) {
       case 'ask':
         return { output: this.ask(prompt, facts) };

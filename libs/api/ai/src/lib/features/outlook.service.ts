@@ -50,131 +50,153 @@ export class AiOutlookService {
 
   run(actor: RequestActor, req: OutlookRunRequest): Promise<OutlookList> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
-      await this.settings.assertEnabled(tx, actor.tenantId, 'outlook');
-      const asOfDate = req.asOfDate ?? todayUtc();
-      const scoped = await this.retrieval.budgetFacts(tx, actor, {
-        ids: req.budgetIds ?? [...(await this.retrieval.readableBudgetIds(tx, actor))],
-        limit: 200,
+      await this.runInTx(tx, actor, req);
+      return this.listInTx(tx, actor, {});
+    });
+  }
+
+  /**
+   * The scan itself, shared by the on-demand run and the nightly worker job (gap B9). Writes outlook
+   * snapshots and nudge suggestions only; returns what it measured and how the model calls went.
+   */
+  async runInTx(tx: Tx, actor: RequestActor, req: OutlookRunRequest): Promise<ScanStats> {
+    const stats: ScanStats = { evaluated: 0, results: 0, modelCalls: 0, failedModelCalls: 0 };
+    await this.settings.assertEnabled(tx, actor.tenantId, 'outlook');
+    const asOfDate = req.asOfDate ?? todayUtc();
+    const scoped = await this.retrieval.budgetFacts(tx, actor, {
+      ids: req.budgetIds ?? [...(await this.retrieval.readableBudgetIds(tx, actor))],
+      limit: 200,
+    });
+    const settings = await this.settings.settings(tx, actor.tenantId);
+    const years = await this.fiscalYears(tx, scoped.rows);
+    for (const detail of scoped.rows) {
+      const year = years.get(detail.fiscalYearId);
+      if (!year) continue;
+      stats.evaluated++;
+      const computed = computeOutlook(detail, year, asOfDate, {
+        minimumMinor: settings.nudgeMinimumAmount.amountMinor,
+        minimumPct: settings.nudgeMinimumPct,
       });
-      const settings = await this.settings.settings(tx, actor.tenantId);
-      const years = await this.fiscalYears(tx, scoped.rows);
-      for (const detail of scoped.rows) {
-        const year = years.get(detail.fiscalYearId);
-        if (!year) continue;
-        const computed = computeOutlook(detail, year, asOfDate, {
-          minimumMinor: settings.nudgeMinimumAmount.amountMinor,
-          minimumPct: settings.nudgeMinimumPct,
-        });
-        const fact: Fact = {
-          type: 'budget',
-          id: detail.id,
-          label: detail.name,
-          fields: {
-            status: detail.status,
-            currency: detail.currency,
-            authorizedMinor: computed.authorizedMinor,
-            actualMinor: computed.actualMinor,
-            encumberedMinor: computed.openCommitmentsMinor,
-            toDateMinor: computed.toDateMinor,
-            likelyMinor: computed.likelyMinor ?? 0,
-            lowMinor: computed.lowMinor ?? 0,
-            highMinor: computed.highMinor ?? 0,
-            monthsObserved: computed.monthsObserved,
-            monthlyRunRateMinor: computed.monthlyRunRateMinor,
-            openCommitmentsMinor: computed.openCommitmentsMinor,
-            pendingRequestsMinor: computed.pendingRequestsMinor,
-            monthsRemaining: computed.monthsRemaining,
-            ownerName: detail.display.ownerName,
-          },
-        };
-        const sources: AiSourceRef[] = [{ type: 'budget', id: detail.id, label: detail.name }];
-        const result =
-          computed.category === 'no_history'
-            ? null
-            : await this.gateway.run({
-                tx,
-                actor,
-                feature: 'outlook',
-                channel: 'system',
-                task: 'outlook_drivers',
-                facts: [fact],
-                sources,
-                scope: scoped.scope,
-                schema: DriversOutput,
-                successOutcome: 'suggested',
-                narrative: (out) => out.drivers.map((d) => d.detail),
-              });
-        const nudgeWorthy =
-          computed.category !== 'on_track' &&
-          computed.category !== 'no_history' &&
-          result?.output !== null &&
-          !['frozen', 'set_to_zero'].includes(detail.status);
-        const suggestion = nudgeWorthy
-          ? await this.suggestions.upsert(tx, {
-              tenantId: actor.tenantId,
+      const fact: Fact = {
+        type: 'budget',
+        id: detail.id,
+        label: detail.name,
+        fields: {
+          status: detail.status,
+          currency: detail.currency,
+          authorizedMinor: computed.authorizedMinor,
+          actualMinor: computed.actualMinor,
+          encumberedMinor: computed.openCommitmentsMinor,
+          toDateMinor: computed.toDateMinor,
+          likelyMinor: computed.likelyMinor ?? 0,
+          lowMinor: computed.lowMinor ?? 0,
+          highMinor: computed.highMinor ?? 0,
+          monthsObserved: computed.monthsObserved,
+          monthlyRunRateMinor: computed.monthlyRunRateMinor,
+          openCommitmentsMinor: computed.openCommitmentsMinor,
+          pendingRequestsMinor: computed.pendingRequestsMinor,
+          monthsRemaining: computed.monthsRemaining,
+          ownerName: detail.display.ownerName,
+        },
+      };
+      const sources: AiSourceRef[] = [{ type: 'budget', id: detail.id, label: detail.name }];
+      const result =
+        computed.category === 'no_history'
+          ? null
+          : await this.gateway.run({
+              tx,
+              actor,
               feature: 'outlook',
-              subjectType: 'budget',
-              subjectId: detail.id,
-              budgetId: detail.id,
-              confidence: result?.output?.confidence ?? 'low',
-              payload: {
-                category: computed.category,
-                gapMinor: computed.gapMinor,
-                currency: detail.currency,
-                actions:
-                  computed.category === 'likely_unused'
-                    ? ['Plan an event', 'Release to the parent budget']
-                    : ['Request an increase', 'Review phasing', 'Review open commitments'],
-              },
+              channel: 'system',
+              task: 'outlook_drivers',
+              facts: [fact],
               sources,
-              createdByPersonId: actor.personId,
-              provider: this.gateway.providerId,
-              modelId: this.gateway.modelId,
-              modelVersion: this.gateway.modelVersion,
-            })
-          : null;
-        await tx
-          .insert(aiOutlookSnapshots)
-          .values({
+              scope: scoped.scope,
+              schema: DriversOutput,
+              successOutcome: 'suggested',
+              narrative: (out) => out.drivers.map((d) => d.detail),
+            });
+      if (result) {
+        stats.modelCalls++;
+        if (result.outcome === 'failed') stats.failedModelCalls++;
+      }
+      const nudgeWorthy =
+        computed.category !== 'on_track' &&
+        computed.category !== 'no_history' &&
+        result?.output !== null &&
+        !['frozen', 'set_to_zero'].includes(detail.status);
+      const suggestion = nudgeWorthy
+        ? await this.suggestions.upsert(tx, {
             tenantId: actor.tenantId,
+            feature: 'outlook',
+            subjectType: 'budget',
+            subjectId: detail.id,
             budgetId: detail.id,
-            asOfDate,
-            currency: detail.currency,
-            authorizedMinor: computed.authorizedMinor,
-            toDateMinor: computed.toDateMinor,
+            confidence: result?.output?.confidence ?? 'low',
+            payload: {
+              category: computed.category,
+              gapMinor: computed.gapMinor,
+              currency: detail.currency,
+              actions:
+                computed.category === 'likely_unused'
+                  ? ['Plan an event', 'Release to the parent budget']
+                  : ['Request an increase', 'Review phasing', 'Review open commitments'],
+            },
+            sources,
+            createdByPersonId: actor.personId,
+            provider: this.gateway.providerId,
+            modelId: this.gateway.modelId,
+            modelVersion: this.gateway.modelVersion,
+          })
+        : null;
+      await tx
+        .insert(aiOutlookSnapshots)
+        .values({
+          tenantId: actor.tenantId,
+          budgetId: detail.id,
+          asOfDate,
+          currency: detail.currency,
+          authorizedMinor: computed.authorizedMinor,
+          toDateMinor: computed.toDateMinor,
+          likelyMinor: computed.likelyMinor,
+          lowMinor: computed.lowMinor,
+          highMinor: computed.highMinor,
+          gapMinor: computed.gapMinor,
+          category: computed.category,
+          confidence: result?.output?.confidence ?? null,
+          drivers: (result?.output?.drivers ?? []) as unknown as object,
+          sources: sources as unknown as object,
+          modelId: this.gateway.modelId,
+          modelVersion: this.gateway.modelVersion,
+          suggestionId: suggestion?.id ?? null,
+          nudgeSentAt: suggestion ? stampUtc() : null,
+        })
+        .onConflictDoUpdate({
+          target: [
+            aiOutlookSnapshots.tenantId,
+            aiOutlookSnapshots.budgetId,
+            aiOutlookSnapshots.asOfDate,
+          ],
+          set: {
             likelyMinor: computed.likelyMinor,
             lowMinor: computed.lowMinor,
             highMinor: computed.highMinor,
             gapMinor: computed.gapMinor,
             category: computed.category,
-            confidence: result?.output?.confidence ?? null,
-            drivers: (result?.output?.drivers ?? []) as unknown as object,
-            sources: sources as unknown as object,
-            modelId: this.gateway.modelId,
-            modelVersion: this.gateway.modelVersion,
-            suggestionId: suggestion?.id ?? null,
-            nudgeSentAt: suggestion ? stampUtc() : null,
-          })
-          .onConflictDoUpdate({
-            target: [
-              aiOutlookSnapshots.tenantId,
-              aiOutlookSnapshots.budgetId,
-              aiOutlookSnapshots.asOfDate,
-            ],
-            set: {
-              likelyMinor: computed.likelyMinor,
-              lowMinor: computed.lowMinor,
-              highMinor: computed.highMinor,
-              gapMinor: computed.gapMinor,
-              category: computed.category,
-              confidence: result?.output?.confidence ?? null,
-              drivers: (result?.output?.drivers ?? []) as unknown as object,
-              suggestionId: suggestion?.id ?? null,
-            },
-          });
-      }
-      return this.listInTx(tx, actor, {});
-    });
+            // A model call that failed keeps the drivers and nudge an earlier run wrote for the
+            // same day: an outage never wipes what the screen already shows.
+            ...(result?.outcome === 'failed'
+              ? {}
+              : {
+                  confidence: result?.output?.confidence ?? null,
+                  drivers: (result?.output?.drivers ?? []) as unknown as object,
+                  suggestionId: suggestion?.id ?? null,
+                }),
+          },
+        });
+      stats.results++;
+    }
+    return stats;
   }
 
   list(
@@ -333,6 +355,14 @@ export class AiOutlookService {
       .where(inArray(fiscalYears.id, ids));
     return new Map(rows.map((r) => [r.id, { startDate: r.startDate, endDate: r.endDate }]));
   }
+}
+
+/** What one scan measured, for the scan run record (gap B9). */
+export interface ScanStats {
+  evaluated: number;
+  results: number;
+  modelCalls: number;
+  failedModelCalls: number;
 }
 
 export interface ComputedOutlook {

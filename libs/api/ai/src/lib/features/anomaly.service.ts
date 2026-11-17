@@ -11,6 +11,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { AiGateway } from '../ai-gateway.service';
+import type { ScanStats } from './outlook.service';
 import { ANOMALY_THRESHOLDS } from '../anomaly-thresholds';
 import { AiEvaluationsService } from '../evals/evaluations.service';
 import type { Fact } from '../provider/ai-provider';
@@ -43,41 +44,59 @@ export class AiAnomalyService {
 
   scan(actor: RequestActor, req: AnomalyScanRequest): Promise<AnomalyFlagList> {
     return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
-      await this.settings.assertEnabled(tx, actor.tenantId, 'anomaly_flags');
-      this.policy.assert(
-        actor,
-        'integrity.read',
-        { kind: 'tenant', tenantId: actor.tenantId },
-        'anomaly flags',
-      );
-      const paused = new Set(
-        (await this.evaluations.pausedKinds(tx, actor.tenantId)).map((p) => p.kind),
-      );
-      const wanted = (
-        req.kinds ?? ['possible_split', 'possible_duplicate', 'unusual_cost_per_head']
-      )
-        .filter((k) => !paused.has(k))
-        .sort();
-      if (req.kinds?.length && wanted.length === 0)
-        throw new ApiProblem(
-          409,
-          'AI_FLAG_KIND_PAUSED',
-          'Every kind you asked for is paused because its measured precision is below its threshold.',
-        );
-      const budgetIds = [...(await this.retrieval.readableBudgetIds(tx, actor))];
-      if (budgetIds.length) {
-        if (wanted.includes('possible_split')) await this.scanSplits(tx, actor, budgetIds);
-        if (wanted.includes('unusual_cost_per_head'))
-          await this.scanCostPerHead(tx, actor, budgetIds);
-        if (wanted.includes('possible_duplicate')) await this.scanDuplicates(tx, actor, budgetIds);
-      }
+      await this.scanInTx(tx, actor, req);
       return this.listInTx(tx, actor, {});
     });
+  }
+
+  /**
+   * The scan itself, shared by the on-demand scan and the nightly worker job (gap B9). Raises
+   * advisory flags only (a flag a person already decided keeps its status); returns the counts.
+   */
+  async scanInTx(
+    tx: Tx,
+    actor: RequestActor,
+    req: AnomalyScanRequest & { budgetIds?: readonly string[] },
+  ): Promise<ScanStats> {
+    const stats: ScanStats = { evaluated: 0, results: 0, modelCalls: 0, failedModelCalls: 0 };
+    await this.settings.assertEnabled(tx, actor.tenantId, 'anomaly_flags');
+    this.policy.assert(
+      actor,
+      'integrity.read',
+      { kind: 'tenant', tenantId: actor.tenantId },
+      'anomaly flags',
+    );
+    const paused = new Set(
+      (await this.evaluations.pausedKinds(tx, actor.tenantId)).map((p) => p.kind),
+    );
+    const wanted = (req.kinds ?? ['possible_split', 'possible_duplicate', 'unusual_cost_per_head'])
+      .filter((k) => !paused.has(k))
+      .sort();
+    if (req.kinds?.length && wanted.length === 0)
+      throw new ApiProblem(
+        409,
+        'AI_FLAG_KIND_PAUSED',
+        'Every kind you asked for is paused because its measured precision is below its threshold.',
+      );
+    const readable = await this.retrieval.readableBudgetIds(tx, actor);
+    const budgetIds = req.budgetIds
+      ? req.budgetIds.filter((id) => readable.has(id))
+      : [...readable];
+    stats.evaluated = budgetIds.length;
+    if (budgetIds.length) {
+      if (wanted.includes('possible_split')) await this.scanSplits(tx, actor, budgetIds, stats);
+      if (wanted.includes('unusual_cost_per_head'))
+        await this.scanCostPerHead(tx, actor, budgetIds, stats);
+      if (wanted.includes('possible_duplicate'))
+        await this.scanDuplicates(tx, actor, budgetIds, stats);
+    }
+    return stats;
   }
 
   private async raise(
     tx: Tx,
     actor: RequestActor,
+    stats: ScanStats,
     input: {
       kind: AnomalyKind;
       subjectType: AnomalyFlag['subjectType'];
@@ -110,7 +129,10 @@ export class AiAnomalyService {
       successOutcome: 'suggested',
       narrative: (out) => [out.finding],
     });
+    stats.modelCalls++;
+    if (result.outcome === 'failed') stats.failedModelCalls++;
     if (!result.output) return;
+    stats.results++;
     await this.suggestions.upsert(tx, {
       tenantId: actor.tenantId,
       feature: 'anomaly_flags',
@@ -138,7 +160,12 @@ export class AiAnomalyService {
   }
 
   /** Two requests by the same person on the same budget, close together, that together cross a limit. */
-  private async scanSplits(tx: Tx, actor: RequestActor, budgetIds: string[]): Promise<void> {
+  private async scanSplits(
+    tx: Tx,
+    actor: RequestActor,
+    budgetIds: string[],
+    stats: ScanStats,
+  ): Promise<void> {
     const rows = await tx
       .select()
       .from(requests)
@@ -161,7 +188,7 @@ export class AiAnomalyService {
         const combined = a.amountMinor + b.amountMinor;
         if (combined < ANOMALY_THRESHOLDS.splitCombinedMinor) continue;
         const label = `${a.ref} and ${b.ref}`;
-        await this.raise(tx, actor, {
+        await this.raise(tx, actor, stats, {
           kind: 'possible_split',
           subjectType: 'request',
           subjectId: a.id,
@@ -198,7 +225,12 @@ export class AiAnomalyService {
   }
 
   /** An event whose cost per head is far above the median of its peer group in the same category. */
-  private async scanCostPerHead(tx: Tx, actor: RequestActor, budgetIds: string[]): Promise<void> {
+  private async scanCostPerHead(
+    tx: Tx,
+    actor: RequestActor,
+    budgetIds: string[],
+    stats: ScanStats,
+  ): Promise<void> {
     const rows = await tx
       .select()
       .from(events)
@@ -212,7 +244,7 @@ export class AiAnomalyService {
     const median = sorted[Math.floor(sorted.length / 2)];
     for (const { event, value } of perHead) {
       if (value < median * ANOMALY_THRESHOLDS.costPerHeadFactor) continue;
-      await this.raise(tx, actor, {
+      await this.raise(tx, actor, stats, {
         kind: 'unusual_cost_per_head',
         subjectType: 'request',
         subjectId: event.id,
@@ -246,7 +278,12 @@ export class AiAnomalyService {
   }
 
   /** The same amount requested twice on the same budget within a week. */
-  private async scanDuplicates(tx: Tx, actor: RequestActor, budgetIds: string[]): Promise<void> {
+  private async scanDuplicates(
+    tx: Tx,
+    actor: RequestActor,
+    budgetIds: string[],
+    stats: ScanStats,
+  ): Promise<void> {
     const rows = await tx
       .select()
       .from(requests)
@@ -260,7 +297,7 @@ export class AiAnomalyService {
         if (a.budgetId !== b.budgetId || a.requesterPersonId !== b.requesterPersonId) continue;
         const days = Math.round(Math.abs(a.createdAt.getTime() - b.createdAt.getTime()) / DAY_MS);
         if (days > ANOMALY_THRESHOLDS.splitWindowDays) continue;
-        await this.raise(tx, actor, {
+        await this.raise(tx, actor, stats, {
           kind: 'possible_duplicate',
           subjectType: 'request',
           subjectId: b.id,

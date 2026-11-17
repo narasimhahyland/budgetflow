@@ -358,6 +358,9 @@ export const PROBLEM_CODES = [
   'AI_SUGGESTION_NOT_APPLIED',
   'AI_FINANCE_CONFIRMATION_REQUIRED',
   'AI_FLAG_KIND_PAUSED',
+  // Gap B9: nightly AI scans and reported answers.
+  'AI_REPORT_ALREADY_REVIEWED',
+  'AI_ANSWER_ALREADY_REPORTED',
   // Administration and experience (P14)
   'FLAG_UNKNOWN',
   'FLAG_DEPENDENCY_MISSING',

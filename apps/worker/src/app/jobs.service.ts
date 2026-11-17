@@ -1,4 +1,13 @@
 import { OWNER_INVITED_TOPIC, RETENTION_SWEEP_TOPIC, RetentionService } from '@bf/api/admin';
+import {
+  AI_REPORT_TEXT_NIGHTLY,
+  AI_SCAN_EXECUTE,
+  AI_SCAN_NIGHTLY,
+  AI_SCAN_RETRY_LIMIT,
+  AI_SCAN_TOPIC,
+  AiReportedAnswersService,
+  AiScanRunsService,
+} from '@bf/api/ai';
 import { SLA_SWEEP_TOPIC, SlaSweepService } from '@bf/api/approvals';
 import { BUDGET_CONTROL_TOPIC, BudgetControlConsumer } from '@bf/api/contributions';
 import {
@@ -95,6 +104,8 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
     private readonly navan: NavanSyncService,
     private readonly burnRate: BurnRateService,
     private readonly reclaim: ReclaimService,
+    private readonly aiScans: AiScanRunsService,
+    private readonly aiReports: AiReportedAnswersService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -319,6 +330,77 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
       boss,
       RECLAIM_REMINDER_NIGHTLY,
       process.env.RECLAIM_REMINDER_CRON ?? '0 7 * * *',
+    );
+    // Nightly AI scans (gap B9): one run per tenant, feature (outlook, anomaly flags) and night,
+    // unique in the database, so a redelivered job or a second sweep executes nothing twice. A run
+    // whose every model call failed is retried with exponential backoff and jitter; after the last
+    // retry the run shows failed and the job moves to the dead letter. AI only suggests here.
+    // A requested run (outbox) only hands over to the execution queue, keyed by the run id.
+    await boss.createQueue(AI_SCAN_TOPIC, {
+      retryLimit: 5,
+      retryDelay: 5,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    // `exclusive`: at most one created, retrying or active job per run id, so a sweep, a request
+    // and a redelivery never execute (or count retries for) the same run twice.
+    await boss.createQueue(AI_SCAN_EXECUTE, {
+      policy: 'exclusive',
+      retryLimit: AI_SCAN_RETRY_LIMIT,
+      retryDelay: Number(process.env.AI_SCAN_RETRY_DELAY_SECONDS ?? 60),
+      retryBackoff: true,
+      retryDelayMax: 900,
+      deadLetter: DEAD_LETTER,
+    });
+    const executeScan = (run: { tenantId: string; runId: string }) =>
+      boss.send(AI_SCAN_EXECUTE, run, { singletonKey: run.runId });
+    await boss.work<{ tenantId: string; runId: string }>(AI_SCAN_TOPIC, fast, async (jobs) => {
+      for (const job of jobs)
+        await executeScan({ tenantId: job.data.tenantId, runId: job.data.runId });
+    });
+    await boss.work<{ tenantId: string; runId: string }>(
+      AI_SCAN_EXECUTE,
+      { batchSize: 1, pollingIntervalSeconds: 0.5 },
+      async ([job]) => {
+        try {
+          const outcome = await this.aiScans.execute(job.data.tenantId, job.data.runId);
+          if (outcome !== 'noop') this.log.log(`AI scan ${job.data.runId}: ${outcome}`);
+        } catch (e) {
+          await this.aiScans.recordError(job.data.tenantId, job.data.runId, e as Error);
+          if (job.retryCount >= AI_SCAN_RETRY_LIMIT)
+            await this.aiScans.fail(job.data.tenantId, job.data.runId);
+          throw e;
+        }
+      },
+    );
+    await boss.createQueue(AI_SCAN_NIGHTLY, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(AI_SCAN_NIGHTLY, async () => {
+      const due = await this.aiScans.ensureNightlyRuns();
+      for (const run of due) await executeScan(run);
+      this.log.log(`nightly AI scans queued ${due.length} run(s)`);
+    });
+    await this.schedule(boss, AI_SCAN_NIGHTLY, process.env.AI_SCAN_NIGHTLY_CRON ?? '0 3 * * *');
+    // Reported-answer text past its 90 days (113a), on its own schedule so switching the scans
+    // off never keeps text longer.
+    await boss.createQueue(AI_REPORT_TEXT_NIGHTLY, {
+      retryLimit: 2,
+      retryDelay: 60,
+      retryBackoff: true,
+      deadLetter: DEAD_LETTER,
+    });
+    await boss.work(AI_REPORT_TEXT_NIGHTLY, async () => {
+      const removed = await this.aiReports.removeExpiredTextAllTenants();
+      this.log.log(`removed expired text from ${removed} reported answer(s)`);
+    });
+    await this.schedule(
+      boss,
+      AI_REPORT_TEXT_NIGHTLY,
+      process.env.AI_REPORT_TEXT_CRON ?? '30 1 * * *',
     );
     // Bulk owner invitations (103a): the invitation itself grants nothing.
     await boss.createQueue(OWNER_INVITED_TOPIC, {

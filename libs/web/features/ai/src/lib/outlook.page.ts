@@ -19,6 +19,7 @@ import { SAT_BANNER_IMPORTS } from '@hylandsoftware/satori-ui/banner';
 import { SAT_EMPTY_STATE_IMPORTS } from '@hylandsoftware/satori-ui/empty-state';
 import { SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { AI_OUTPUT_IMPORTS, isFeatureDisabled } from './ai-output';
+import { ScanRunNote } from './scan-run-note';
 import { data, errorMessage, injectApi, valueOf } from './api';
 
 /** `OutlookCategory` is exported from the contract as a schema only, so the union lives here. */
@@ -48,6 +49,7 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
 @Component({
   selector: 'bf-outlook-page',
   imports: [
+    ScanRunNote,
     DatePipe,
     AI_OUTPUT_IMPORTS,
     LoadState,
@@ -87,6 +89,8 @@ const CATEGORY_LABELS: Record<OutlookCategory, string> = {
         }
       </div>
     </header>
+
+    <bf-scan-run-note feature="outlook" />
 
     @if (disabled(); as detail) {
       <bf-ai-disabled

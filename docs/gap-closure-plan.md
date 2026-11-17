@@ -71,7 +71,7 @@ request; it now does, and every decision is recorded with its rule versions and 
 | **B6** Developer portal                        | 101a public API docs and sandbox (only `/api/openapi.json` exists). The sandbox overlaps the deferred demo environment, so scope it first.                                                                                                                                                                                                                          | D2              | M    |
 | **B7** Integration completeness                | Apply an Adaptive Planning import (plan to root budgets; today preview only), Outlook and Google RSVP sync, vendor master from the ERP (both read and reported only), Workday `runBudgetCheck`, 117a hand-off to a prefilled expense.                                                                                                                               | —               | M–L  |
 | **B8** Installable app and push — **done**     | 059a's installable mobile web app (web manifest, service worker) and real push delivery (today a row is recorded, nothing is sent).                                                                                                                                                                                                                                 | D5              | M    |
-| **B9** AI jobs                                 | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                                                                                                       | —               | S–M  |
+| **B9** AI jobs — **done**                      | The nightly outlook and anomaly scans (today on demand only) and 113a's reported-answers tab.                                                                                                                                                                                                                                                                       | —               | S–M  |
 | **B10** Experience                             | "Load sample data" on the setup checklist; a role suggested from the job title on bulk invites; a program logo in branding (found by A4); onboarding wizard (005, 008, 010), 104 permission matrix, 124 profile and preferences, global search, 106 categories and custom fields (read-only today), 116a team budget card, 113 integrity-checks tab. Split by area. | D2              | L    |
 
 **B1 done.** Navan runs on its documented paths and shapes against the mock provider (D4): OAuth
@@ -168,6 +168,21 @@ Locally a public development VAPID key is used; production refuses to start with
 Push column do not gate sending yet, and there is no offline read-only approvals list (tokens live in
 memory, so an offline start has no session).
 
+**B9 done.** The outlook (016b) and anomaly (017c) scans are worker jobs. A nightly sweep
+(`AI_SCAN_NIGHTLY_CRON`, 03:00 UTC by default, off in the local stack) iterates tenants explicitly.
+It creates one run per tenant, feature and night (a unique index), so a replay, a second sweep or a
+redelivered job changes nothing. Each run sets the tenant context and skips without a model call when
+the feature's kill switch is off. It calls the same scan the on-demand path uses, as a read-only,
+tenant-wide worker identity, and writes only snapshots and advisory flags. When every model call
+fails, the run retries with backoff and then shows failed, with its job in the dead letter; the
+screens keep the last completed run and say which scan they show. 113a's Query log has a Reported
+answers sub-tab, fed by 011a's new "Report a problem" dialog. Text is kept only with the reporter's
+consent and removed after 90 days by the same nightly job. Reading needs audit or AI administration;
+marking reviewed needs AI administration. Migration `0030`. Proof:
+`apps/api-e2e/src/worker/ai-scans.spec.ts` and `apps/api-e2e/src/ai/reported-answers.spec.ts`
+(invariants 143-148) and the journey `apps/web-e2e/src/ai/reported-answers.spec.ts`. Evidence:
+[`evidence/gap-b9-ai-jobs/`](../evidence/gap-b9-ai-jobs/README.md).
+
 ## What next (13 November 2026)
 
 Done and merged: A1-A4, B1, B2 (#117, #130), B3, B4 (#127, #129), D7 offline AI tests (#126), the
@@ -176,9 +191,9 @@ date-only fix (#128). Open, in the D6 order:
 1. **B5 finance exports**: done in PR #136 (migration `0025`, invariant rows 122-125).
 2. **B7 integration completeness**: in its own worktree, no PR yet; waits for a decision. Migration
    `0027`, invariant rows 130-136.
-3. **B9 AI jobs**, **B10 experience** (split by area), then **B6 developer portal** (scope the
-   sandbox first). Not started. B8 is done (migration `0029`, invariant rows 129 and 137-141), so the
-   next free migration number is `0030` and the next free invariant row is 142.
+3. **B10 experience** (split by area), then **B6 developer portal** (scope the sandbox first). Not
+   started. B8 and B9 are done (migrations `0029`, `0030`; invariant rows up to 148), so the next free
+   migration number is `0031` and the next free invariant row is 149.
 4. **Bugs** below, which are small and can run alongside: the notification feed paging first, since
    it shows wrong counts to real users.
 5. **Tier C** proof gaps, alongside.

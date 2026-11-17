@@ -2,7 +2,14 @@ import { AiEvaluationsService } from '@bf/api/ai';
 import { DB } from '@bf/api/core';
 import * as s from '@bf/api/db';
 import { withTenant, type Db } from '@bf/api/db';
-import { AI_SEED_DOCUMENTS, AI_SEED_FEATURES, AI_SEED_SETTINGS, TENANTS, userById } from '@bf/seed';
+import {
+  AI_SEED_DOCUMENTS,
+  AI_SEED_FEATURES,
+  AI_SEED_REPORTED_ANSWERS,
+  AI_SEED_SETTINGS,
+  TENANTS,
+  userById,
+} from '@bf/seed';
 import type { INestApplicationContext } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
@@ -55,5 +62,59 @@ export async function seedAi(app: INestApplicationContext): Promise<void> {
       )
       .onConflictDoNothing();
     await evaluations.seedRun(tx, TENANTS.acme);
+    // Gap B9: the reported answers of 113a, each on its own one-turn conversation.
+    for (const r of AI_SEED_REPORTED_ANSWERS) {
+      const reporter = userById(r.reporter);
+      const reportedAt = new Date(r.reportedAt);
+      await tx
+        .insert(s.aiConversations)
+        .values({
+          id: r.conversationId,
+          tenantId: TENANTS.acme,
+          personId: reporter.personId,
+          actorSubject: reporter.subject,
+          title: r.question,
+          channel: 'web',
+          startedAt: reportedAt,
+          lastAskedAt: reportedAt,
+        })
+        .onConflictDoNothing();
+      await tx
+        .insert(s.aiConversationTurns)
+        .values({
+          id: r.turnId,
+          tenantId: TENANTS.acme,
+          conversationId: r.conversationId,
+          actorSubject: reporter.subject,
+          askedAt: reportedAt,
+          question: r.question,
+          answer: r.answer,
+          outcome: r.reason === 'not_my_scope' ? 'refused_out_of_scope' : 'answered',
+        })
+        .onConflictDoNothing();
+      await tx
+        .insert(s.aiReportedAnswers)
+        .values({
+          id: r.id,
+          tenantId: TENANTS.acme,
+          reportedAt,
+          reporterPersonId: reporter.personId,
+          reporterSubject: reporter.subject,
+          turnId: r.turnId,
+          feature: 'ask',
+          channel: 'web',
+          reason: r.reason,
+          note: r.note,
+          includesText: r.includesText,
+          question: r.includesText ? r.question : null,
+          answer: r.includesText ? r.answer : null,
+          textExpiresAt: new Date(reportedAt.getTime() + 90 * 24 * 60 * 60 * 1000),
+          status: r.status,
+          reviewNote: r.reviewNote,
+          reviewedByPersonId: r.reviewer ? userById(r.reviewer).personId : null,
+          reviewedAt: r.reviewedAt ? new Date(r.reviewedAt) : null,
+        })
+        .onConflictDoNothing();
+    }
   });
 }

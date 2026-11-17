@@ -85,3 +85,43 @@ export const AI_SEED_DOCUMENTS = [
     status: 'available',
   },
 ] as const;
+
+/**
+ * Gap B9: two answers reported from Ask BudgetFlow, so 113a's Reported answers tab has a new
+ * report with its text and a reviewed one without, the moment the stack comes up. Fictional.
+ */
+export const AI_SEED_REPORTED_ANSWERS = [
+  {
+    id: seedId('91b90000', 1),
+    conversationId: seedId('91b90000', 2),
+    turnId: seedId('91b90000', 3),
+    reporter: 'budget-owner',
+    question: 'How much is left in the United States budget for team events?',
+    answer:
+      'The United States budget has USD 18,400.00 available after open commitments. Two requests are waiting for approval.',
+    reason: 'wrong_figure',
+    note: 'The available figure looks lower than the budget screen.',
+    includesText: true,
+    reportedAt: '2026-11-14T10:42:00Z',
+    status: 'new',
+    reviewer: null,
+    reviewNote: null,
+    reviewedAt: null,
+  },
+  {
+    id: seedId('91b90000', 4),
+    conversationId: seedId('91b90000', 5),
+    turnId: seedId('91b90000', 6),
+    reporter: 'employee',
+    question: 'What did the Europe team spend on the offsite?',
+    answer: 'I can only answer about records you can see, and I found nothing in your scope.',
+    reason: 'not_my_scope',
+    note: null,
+    includesText: false,
+    reportedAt: '2026-11-13T15:05:00Z',
+    status: 'reviewed',
+    reviewer: 'org-admin',
+    reviewNote: 'Correct refusal: the Europe budget is outside this person’s scope.',
+    reviewedAt: '2026-11-15T09:10:00Z',
+  },
+] as const;

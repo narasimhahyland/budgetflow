@@ -17,6 +17,8 @@ import { AiProvider } from './provider/ai-provider';
 import { BedrockAiProvider } from './provider/bedrock-provider';
 import { RecordedAiProvider } from './provider/recorded-provider';
 import { AiQueryLogService } from './query-log.service';
+import { AiReportedAnswersService } from './reported-answers.service';
+import { AiScanRunsService } from './scan-runs.service';
 import { AiRetrieval } from './retrieval.service';
 import { AiSettingsService } from './settings.service';
 import { AiSuggestionsService } from './suggestions.service';
@@ -49,6 +51,8 @@ const SERVICES = [
   AiMatchingService,
   AiAnomalyService,
   AiExtractionService,
+  AiScanRunsService,
+  AiReportedAnswersService,
 ];
 
 /** AI services (also used by the seed). */

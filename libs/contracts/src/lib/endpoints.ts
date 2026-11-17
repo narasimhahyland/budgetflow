@@ -1,6 +1,7 @@
 import { ProblemDetails } from './common';
 import { actualsEndpoints } from './domains/actuals';
 import { aiEndpoints } from './domains/ai';
+import { aiJobsEndpoints } from './domains/ai-jobs';
 import { analyticsEndpoints } from './domains/analytics';
 import { approvalEndpoints } from './domains/approvals';
 import { auditEndpoints } from './domains/audit';
@@ -59,6 +60,7 @@ export const endpoints = {
   ...closeEndpoints,
   ...adminEndpoints,
   ...aiEndpoints,
+  ...aiJobsEndpoints,
   ...extendedEndpoints,
   ...ecosystemEndpoints,
   ...taxEndpoints,
