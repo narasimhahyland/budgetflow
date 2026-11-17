@@ -8,6 +8,7 @@ import {
   todayUtc,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   budgets,
@@ -926,7 +927,7 @@ export class ReclaimService {
             checked.error.params,
           );
         const outcome = unwrap(checked);
-        const now = new Date();
+        const now = stampUtc();
         const [updated] = await tx
           .update(reclaimNotices)
           .set({
@@ -1018,7 +1019,7 @@ export class ReclaimService {
             status: 'parent_review',
             parentOwnerPersonId: decider,
             escalatedBy: actor.personId,
-            escalatedAt: new Date(),
+            escalatedAt: stampUtc(),
           })
           .where(eq(reclaimNotices.id, n.id))
           .returning();
@@ -1446,7 +1447,7 @@ export class ReclaimService {
         if (nextStatus !== c.status)
           await tx
             .update(reclaimCampaigns)
-            .set({ status: nextStatus, updatedAt: new Date() })
+            .set({ status: nextStatus, updatedAt: stampUtc() })
             .where(eq(reclaimCampaigns.id, campaignId));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,

@@ -26,6 +26,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { TaxService } from '@bf/api/finance';
 import { LedgerReads } from '@bf/api/ledger';
@@ -326,7 +327,7 @@ export class ImportsService {
         };
         await tx
           .update(importBatches)
-          .set({ status: 'posted', postedAt: new Date(), postedBy: actor.personId, summary })
+          .set({ status: 'posted', postedAt: stampUtc(), postedBy: actor.personId, summary })
           .where(eq(importBatches.id, batchId));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
@@ -521,7 +522,7 @@ export class ImportsService {
         matchRule: 'original_reference',
         matchNote: null,
         excludedReason: null,
-        matchedAt: new Date(),
+        matchedAt: stampUtc(),
         matchedBy: actor.personId,
       })
       .where(eq(actuals.id, r.id));

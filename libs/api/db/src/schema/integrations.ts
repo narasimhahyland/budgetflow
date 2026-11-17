@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -338,4 +339,103 @@ export const scimOperations = pgTable(
     tokenId: uuid('token_id').references(() => apiKeys.id),
   },
   (t) => [index('scim_operations_tenant_at').on(t.tenantId, t.at)],
+);
+
+/**
+ * Finance and payroll export batches (094b, gap B5). A batch describes journals already posted; it
+ * never changes a balance. Totals are in the reporting currency (payroll: reportable in the entity's
+ * threshold currency). Status moves sent → acknowledged → posted, or failed.
+ */
+export const financeExportBatches = pgTable(
+  'finance_export_batches',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    number: varchar('number', { length: 20 }).notNull(),
+    type: varchar('type', { length: 30 }).notNull(),
+    period: varchar('period', { length: 7 }).notNull(),
+    legalEntityId: uuid('legal_entity_id'),
+    entityLabel: text('entity_label').notNull(),
+    target: varchar('target', { length: 20 }).notNull().default('file'),
+    status: varchar('status', { length: 20 }).notNull().default('sent'),
+    lineCount: integer('line_count').notNull(),
+    personCount: integer('person_count'),
+    currency: ccy('currency').notNull(),
+    debitTotalMinor: minor('debit_total_minor').notNull(),
+    creditTotalMinor: minor('credit_total_minor').notNull(),
+    reportableCurrency: ccy('reportable_currency'),
+    reportableTotalMinor: minor('reportable_total_minor'),
+    duplicate: boolean('duplicate').notNull().default(false),
+    duplicateReason: text('duplicate_reason'),
+    csvSizeBytes: integer('csv_size_bytes').notNull(),
+    xlsxSizeBytes: integer('xlsx_size_bytes').notNull(),
+    acknowledgementRef: varchar('acknowledgement_ref', { length: 200 }),
+    acknowledgedAt: ts('acknowledged_at'),
+    failureMessage: text('failure_message'),
+    erpDocumentNumber: varchar('erp_document_number', { length: 100 }),
+    postedAt: ts('posted_at'),
+    postedByPersonId: uuid('posted_by_person_id'),
+    createdByPersonId: uuid('created_by_person_id'),
+    sentAt: ts('sent_at'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex('finance_export_batches_number').on(t.tenantId, t.number),
+    index('finance_export_batches_period').on(t.tenantId, t.period, t.type),
+  ],
+);
+
+/**
+ * The lines of an export, append-only. `source_ref` names the source item (a ledger line id, or a
+ * person's reportable benefit for one threshold and tax year at a cumulative amount); a first send of
+ * a ledger line is unique, so an item is exported once. A re-export carries `duplicate = true`.
+ */
+export const financeExportLines = pgTable(
+  'finance_export_lines',
+  {
+    id: pk(),
+    tenantId: tenantRef().references(() => tenants.id),
+    batchId: uuid('batch_id')
+      .notNull()
+      .references(() => financeExportBatches.id),
+    lineNo: integer('line_no').notNull(),
+    sourceType: varchar('source_type', { length: 20 }).notNull(),
+    sourceRef: varchar('source_ref', { length: 200 }).notNull(),
+    duplicate: boolean('duplicate').notNull().default(false),
+    journalId: uuid('journal_id'),
+    ledgerLineId: uuid('ledger_line_id'),
+    journalLineNo: integer('journal_line_no'),
+    accountingDate: day('accounting_date'),
+    periodLabel: varchar('period_label', { length: 30 }),
+    legalEntityId: uuid('legal_entity_id').notNull(),
+    legalEntityCode: varchar('legal_entity_code', { length: 30 }).notNull(),
+    account: varchar('account', { length: 30 }),
+    accountName: text('account_name'),
+    costCenter: varchar('cost_center', { length: 50 }),
+    eventCode: varchar('event_code', { length: 50 }),
+    description: text('description').notNull(),
+    currency: ccy('currency').notNull(),
+    debitMinor: minor('debit_minor').notNull(),
+    creditMinor: minor('credit_minor').notNull(),
+    transactionCurrency: ccy('transaction_currency').notNull(),
+    transactionAmountMinor: minor('transaction_amount_minor').notNull(),
+    rate: varchar('rate', { length: 40 }),
+    personId: uuid('person_id'),
+    personName: text('person_name'),
+    benefit: text('benefit'),
+    taxYearFrom: day('tax_year_from'),
+    taxYearTo: day('tax_year_to'),
+    reportableCurrency: ccy('reportable_currency'),
+    reportableMinor: minor('reportable_minor'),
+    reportableCumulativeMinor: minor('reportable_cumulative_minor'),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index('finance_export_lines_batch').on(t.batchId, t.lineNo),
+    index('finance_export_lines_source').on(t.tenantId, t.sourceType, t.sourceRef),
+    uniqueIndex('finance_export_lines_once')
+      .on(t.tenantId, t.sourceType, t.sourceRef)
+      .where(sql`${t.duplicate} = false`),
+  ],
 );

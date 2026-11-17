@@ -1,4 +1,4 @@
-import { ApiProblem, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, PolicyService, type RequestActor, stampUtc } from '@bf/api/core';
 import { budgets, budgetVersions, outboxMessages, type Tx } from '@bf/api/db';
 import {
   LedgerReads,
@@ -321,7 +321,7 @@ export class BudgetViews {
   async snapshot(tx: Tx, actor: RequestActor, budgetId: string, reason: string): Promise<number> {
     const [row] = await tx
       .update(budgets)
-      .set({ version: sql`${budgets.version} + 1`, updatedAt: new Date() })
+      .set({ version: sql`${budgets.version} + 1`, updatedAt: stampUtc() })
       .where(eq(budgets.id, budgetId))
       .returning();
     const bal = (await this.reads.balances(tx, [budgetId])).get(budgetId)!.budget;

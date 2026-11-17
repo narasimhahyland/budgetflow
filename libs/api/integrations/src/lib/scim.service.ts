@@ -7,6 +7,7 @@ import {
   type CommandResult,
   type RequestActor,
   todayUtc,
+  stampUtc,
 } from '@bf/api/core';
 import {
   apiKeys,
@@ -157,7 +158,7 @@ export class ScimService {
           .from(apiKeys)
           .where(and(eq(apiKeys.id, tokenId), eq(apiKeys.kind, 'scim')));
         if (!row) throw ApiProblem.notFound('token');
-        await tx.update(apiKeys).set({ revokedAt: new Date() }).where(eq(apiKeys.id, tokenId));
+        await tx.update(apiKeys).set({ revokedAt: stampUtc() }).where(eq(apiKeys.id, tokenId));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
@@ -343,7 +344,7 @@ export class ScimService {
       userName: row.email,
       displayName: row.displayName,
       active: !row.endDate,
-      meta: { resourceType: 'User', lastModified: new Date().toISOString() },
+      meta: { resourceType: 'User', lastModified: stampUtc().toISOString() },
       budgetflow,
     };
   }

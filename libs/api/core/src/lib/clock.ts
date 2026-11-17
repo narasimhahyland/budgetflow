@@ -22,32 +22,29 @@
  * disagree the browser and the server are back to disagreeing about "now", which is the whole bug.
  */
 
-const FIXED_NOW = 'FIXED_NOW';
+import { pinnedInstant, pinnedNow } from '@bf/api/db';
 
-/** Resolved on first use, not at import, so the environment is read after the process has set it up. */
-let resolved: { value: Date | null } | null = null;
-
-function resolveFixedNow(env: NodeJS.ProcessEnv): Date | null {
-  const raw = env[FIXED_NOW]?.trim();
-  if (!raw) return null;
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) {
-    throw new Error(
-      `Invalid ${FIXED_NOW}: ${raw}. Expected an ISO 8601 instant, for example 2026-11-16T09:00:00Z.`,
-    );
-  }
-  return parsed;
-}
-
-function override(env: NodeJS.ProcessEnv): Date | null {
-  resolved ??= { value: resolveFixedNow(env) };
-  return resolved.value;
-}
-
-/** The instant the API should treat as now. Real time unless the clock has been pinned for a test run. */
+/**
+ * The instant the API (and the worker) treats as now: today, ages, countdowns, deadlines. Real time
+ * unless the clock has been pinned for a test run; then exactly the pinned instant, on every call, so
+ * two requests agree on "now" to the millisecond.
+ */
 export function nowUtc(env: NodeJS.ProcessEnv = process.env): Date {
-  const pinned = override(env);
+  const pinned = pinnedInstant(env);
   return pinned === null ? new Date() : new Date(pinned);
+}
+
+/**
+ * The instant to stamp a stored record with (decided, submitted, updated, audited at), or to measure a
+ * window over such stamps. Real time unless the clock is pinned; then the pinned day as the database
+ * clock has moved it on (`@bf/api/db` `pinned-clock.ts`), so a stamp written here is never older than
+ * a row the database stamped before it, and stamps keep their order.
+ *
+ * Not for anything that must follow real time: credential and link expiry, signed URLs, retry
+ * schedules, break-glass windows (`actor.ts`), durations. Those keep `new Date()` / `Date.now()`.
+ */
+export function stampUtc(env: NodeJS.ProcessEnv = process.env): Date {
+  return pinnedNow(env) ?? new Date();
 }
 
 /**
@@ -60,5 +57,5 @@ export function todayUtc(env: NodeJS.ProcessEnv = process.env): string {
 
 /** Whether the clock is pinned, so a run can state in its own evidence what "now" it used. */
 export function clockIsPinned(env: NodeJS.ProcessEnv = process.env): boolean {
-  return override(env) !== null;
+  return pinnedInstant(env) !== null;
 }

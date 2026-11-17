@@ -6,6 +6,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   integrationConnections,
@@ -132,7 +133,7 @@ export class ConnectionsService {
   }
 
   async summary(tx: Tx, row: ConnectionRow): Promise<ConnectionSummary> {
-    const since = new Date(Date.now() - DAY_MS);
+    const since = new Date(stampUtc().getTime() - DAY_MS);
     const [agg] = await tx
       .select({
         records: sql<number>`coalesce(sum(${syncRuns.recordsApplied}), 0)::int`,
@@ -163,7 +164,7 @@ export class ConnectionsService {
       .from(integrationMappings)
       .where(eq(integrationMappings.connectionId, row.id))
       .orderBy(integrationMappings.kind, integrationMappings.externalValue);
-    const since = new Date(Date.now() - DAY_MS);
+    const since = new Date(stampUtc().getTime() - DAY_MS);
     const runs = await tx
       .select({
         direction: syncRuns.direction,
@@ -322,7 +323,7 @@ export class ConnectionsService {
           accountRef: req.accountRef ?? null,
           clientId: req.clientId ?? null,
           secretRef: secretId,
-          secretSetAt: new Date(),
+          secretSetAt: stampUtc(),
           secretSetBy: actor.personId,
           settings,
           schedules: [],
@@ -331,7 +332,7 @@ export class ConnectionsService {
           pausedBy: null,
           disconnectedAt: null,
           createdBy: actor.personId,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
         const id = existing
           ? (
@@ -409,10 +410,10 @@ export class ConnectionsService {
             mode: req.mode ?? row.mode,
             settings,
             schedules,
-            pausedAt: paused ? (row.pausedAt ?? new Date()) : null,
+            pausedAt: paused ? (row.pausedAt ?? stampUtc()) : null,
             pausedBy: paused ? (row.pausedBy ?? actor.personId) : null,
             status: paused ? 'paused' : row.status === 'paused' ? 'connected' : row.status,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(integrationConnections.id, connectionId));
         await this.audit.append(tx, {
@@ -462,11 +463,11 @@ export class ConnectionsService {
           .update(integrationConnections)
           .set({
             secretRef: secretId,
-            secretSetAt: new Date(),
+            secretSetAt: stampUtc(),
             secretSetBy: actor.personId,
             status: 'connected',
             attention: null,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(integrationConnections.id, connectionId));
         await this.audit.append(tx, {
@@ -523,7 +524,7 @@ export class ConnectionsService {
         .set({
           status: res.ok ? 'connected' : 'needs_attention',
           attention: res.ok ? null : result.message,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         })
         .where(eq(integrationConnections.id, connectionId)),
     );
@@ -604,7 +605,7 @@ export class ConnectionsService {
         .set({
           status: result.ok ? 'connected' : 'needs_attention',
           attention: result.ok ? null : result.message,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         })
         .where(eq(integrationConnections.id, row.id)),
     );
@@ -630,11 +631,11 @@ export class ConnectionsService {
         await tx
           .update(integrationConnections)
           .set({
-            disconnectedAt: new Date(),
+            disconnectedAt: stampUtc(),
             status: 'not_connected',
             schedules: [],
             secretRef: null,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(integrationConnections.id, connectionId));
         if (row.secretRef)
@@ -749,7 +750,7 @@ export class ConnectionsService {
       .set({
         status: message ? 'needs_attention' : 'connected',
         attention: message,
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(eq(integrationConnections.id, connectionId));
   }

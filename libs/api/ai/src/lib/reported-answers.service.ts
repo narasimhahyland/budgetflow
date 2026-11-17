@@ -3,7 +3,7 @@ import {
   ApiProblem,
   CommandRunner,
   DB,
-  nowUtc,
+  stampUtc,
   PolicyService,
   type RequestActor,
 } from '@bf/api/core';
@@ -90,7 +90,7 @@ export class AiReportedAnswersService {
         )
       : new Map<string, typeof aiQueryLog.$inferSelect>();
     // Text past its 90 days is never shown, even before the nightly removal has run.
-    const now = nowUtc();
+    const now = stampUtc();
     return rows.map((r) => {
       const log = r.queryLogId ? logs.get(r.queryLogId) : undefined;
       const expired = r.textExpiresAt <= now;
@@ -165,7 +165,7 @@ export class AiReportedAnswersService {
         const [log] = turn.turn.queryLogId
           ? await tx.select().from(aiQueryLog).where(eq(aiQueryLog.id, turn.turn.queryLogId))
           : [];
-        const now = nowUtc();
+        const now = stampUtc();
         const inserted = await tx
           .insert(aiReportedAnswers)
           .values({
@@ -244,7 +244,7 @@ export class AiReportedAnswersService {
             status: 'reviewed',
             reviewNote: req.note,
             reviewedByPersonId: actor.personId,
-            reviewedAt: nowUtc(),
+            reviewedAt: stampUtc(),
           })
           .where(eq(aiReportedAnswers.id, reportId))
           .returning();
@@ -276,7 +276,7 @@ export class AiReportedAnswersService {
   /** Nightly (worker): removes question, answer and note text past its 90 days; the report stays. */
   async removeExpiredText(tenantId: string): Promise<number> {
     return withTenant(this.db, { tenantId, subject: 'system:ai-scan' }, async (tx) => {
-      const now = nowUtc();
+      const now = stampUtc();
       const rows = await tx
         .update(aiReportedAnswers)
         .set({ question: null, answer: null, note: null, textRemovedAt: now })

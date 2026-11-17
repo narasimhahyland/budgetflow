@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   actuals,
@@ -133,7 +134,7 @@ export class AiSuggestionsService {
           provider: input.provider,
           modelId: input.modelId,
           modelVersion: input.modelVersion,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         },
       })
       .returning();
@@ -201,7 +202,7 @@ export class AiSuggestionsService {
           appliedType = applied.type;
           appliedId = applied.id;
         }
-        const now = new Date();
+        const now = stampUtc();
         await tx
           .update(aiSuggestions)
           .set({

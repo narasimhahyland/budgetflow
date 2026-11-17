@@ -1,5 +1,5 @@
 import { commitmentFundingLines, commitments, prepaids, type Tx } from '@bf/api/db';
-import { unwrap, type RequestActor } from '@bf/api/core';
+import { unwrap, type RequestActor, stampUtc } from '@bf/api/core';
 import { LedgerReads, LedgerService, toPostingBudget, type PostingBudget } from '@bf/api/ledger';
 import {
   CommitmentsService as SpendCommitments,
@@ -245,7 +245,7 @@ export class CommitmentRelief {
     const ids = await this.post(tx, actor, drafts, opts);
     await tx
       .update(commitments)
-      .set({ releasedMinor: c.releasedMinor + released, updatedAt: new Date() })
+      .set({ releasedMinor: c.releasedMinor + released, updatedAt: stampUtc() })
       .where(eq(commitments.id, c.id));
     return ids;
   }

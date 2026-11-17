@@ -14,6 +14,7 @@ import { SEED, userById } from '@bf/seed';
 import { randomUUID } from 'node:crypto';
 import { as, mutate } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
+import { nowUtc } from '../support/clock';
 import { asAppRole } from '../support/db';
 import { postChatWebhook, webhookOk } from '../support/p8';
 import { applyControl, budget, directorTree } from '../support/p5';
@@ -210,6 +211,9 @@ test.describe('chat commands, workspace setup and account linking', () => {
   }) => {
     // The console labels the figures "Last 24h", so deliveries that fell out of that window must not
     // be counted. Two slack deliveries land 48 hours back (one sent, one failed) and one an hour ago.
+    // Ages are measured from the API's clock, which a test stack pins (support/clock): deliveries the
+    // worker writes are stamped on that clock, and so is the window the console counts.
+    const NOW = nowUtc().toISOString();
     const oldSent = randomUUID();
     const oldFailed = randomUUID();
     const recent = randomUUID();
@@ -234,8 +238,9 @@ test.describe('chat commands, workspace setup and account linking', () => {
                     count(*) filter (where status = 'failed')                         as all_failed,
                     count(*) filter (where status in ('sent','updated') and fresh)     as win_sent,
                     count(*) filter (where status = 'failed' and fresh)                as win_failed
-               from (select status, created_at >= now() - interval '24 hours' as fresh
+               from (select status, created_at >= $1::timestamptz - interval '24 hours' as fresh
                        from channel_deliveries where channel = 'slack') d`,
+            [NOW],
           )
         ).rows;
         return {
@@ -257,8 +262,8 @@ test.describe('chat commands, workspace setup and account linking', () => {
           ] as const) {
             await c.query(
               `insert into channel_deliveries (id, tenant_id, channel, kind, status, attempts, created_at, updated_at)
-               values ($1, $2, 'slack', 'approval.assigned', $3, 1, now() - $4::interval, now() - $4::interval)`,
-              [id, TENANT, status, age],
+               values ($1, $2, 'slack', 'approval.assigned', $3, 1, $5::timestamptz - $4::interval, $5::timestamptz - $4::interval)`,
+              [id, TENANT, status, age, NOW],
             );
           }
         },
@@ -268,9 +273,9 @@ test.describe('chat commands, workspace setup and account linking', () => {
       // The three rows really sit where this scenario claims: two outside the window, one inside.
       const ages = await asAppRole(TENANT, async (c) =>
         c.query<{ older: boolean }>(
-          `select created_at < now() - interval '24 hours' as older
+          `select created_at < $2::timestamptz - interval '24 hours' as older
              from channel_deliveries where id = any($1::uuid[]) order by created_at`,
-          [ids],
+          [ids, NOW],
         ),
       );
       expect(ages.rows.map((r) => r.older)).toEqual([true, true, false]);

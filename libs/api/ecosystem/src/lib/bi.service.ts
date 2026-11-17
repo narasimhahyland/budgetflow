@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { ledgerBalances, withTenant, type Db } from '@bf/api/db';
 import type {
@@ -209,7 +210,9 @@ export class BiConnectorService {
       rows: pageRows,
       rowCount: pageRows.length,
       nextCursor: rows.length > limit ? String(pageRows.at(-1)?.['cursor'] ?? '') || null : null,
-      generatedAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
+      generatedAt: stampUtc()
+        .toISOString()
+        .replace(/\.\d+Z$/, 'Z'),
       refreshesRemainingToday: remaining,
       currency: actor.reportingCurrency,
     };
@@ -341,7 +344,7 @@ export class BiConnectorService {
     const { enabled, config } = await this.surfaces.bi(tx, actor.tenantId);
     const [active, refreshes] = await Promise.all([
       this.connections.activeCount(tx, 'bi'),
-      this.connections.callsSince(tx, 'bi', new Date(Date.now() - DAY_MS)),
+      this.connections.callsSince(tx, 'bi', new Date(stampUtc().getTime() - DAY_MS)),
     ]);
     return {
       enabled,

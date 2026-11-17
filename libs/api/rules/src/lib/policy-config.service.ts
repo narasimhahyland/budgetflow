@@ -7,6 +7,7 @@ import {
   type CommandResult,
   type RequestActor,
   todayUtc,
+  stampUtc,
 } from '@bf/api/core';
 import {
   orgUnits,
@@ -274,7 +275,7 @@ export class PolicyConfigService {
             status: publish ? 'active' : 'draft',
             steps: body.steps,
             validFrom,
-            publishedAt: publish ? new Date() : null,
+            publishedAt: publish ? stampUtc() : null,
             publishedBy: publish ? actor.personId : null,
           })
           .returning();
@@ -482,7 +483,7 @@ export class PolicyConfigService {
       const version = existing.version + 1;
       await tx
         .update(policyConfigs)
-        .set({ payload, version, updatedBy: actor.personId, updatedAt: new Date() })
+        .set({ payload, version, updatedBy: actor.personId, updatedAt: stampUtc() })
         .where(eq(policyConfigs.id, existing.id));
       return version;
     }

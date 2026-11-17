@@ -8,6 +8,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   apiKeyRateWindows,
@@ -271,7 +272,7 @@ export class ApiKeysService {
         }
         const [updated] = await tx
           .update(apiKeys)
-          .set({ revokedAt: new Date() })
+          .set({ revokedAt: stampUtc() })
           .where(eq(apiKeys.id, keyId))
           .returning();
         await this.audit.append(tx, {
@@ -359,7 +360,7 @@ export class ApiKeysService {
         );
       }
       const remaining = await this.consumeRateBudget(tx, row);
-      await tx.update(apiKeys).set({ lastUsedAt: new Date() }).where(eq(apiKeys.id, row.id));
+      await tx.update(apiKeys).set({ lastUsedAt: stampUtc() }).where(eq(apiKeys.id, row.id));
 
       const [tenant] = await tx
         .select({ name: tenants.name, currency: tenants.reportingCurrency })

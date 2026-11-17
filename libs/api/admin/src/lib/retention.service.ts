@@ -1,5 +1,12 @@
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, CommandRunner, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import {
+  ApiProblem,
+  CommandRunner,
+  DB,
+  PolicyService,
+  type RequestActor,
+  stampUtc,
+} from '@bf/api/core';
 import {
   adminChangeRequests,
   legalHolds,
@@ -237,7 +244,7 @@ export class RetentionService {
             requestedBySubject: actor.subject,
             status: needsConfirmation ? 'pending' : 'applied',
             needsConfirmation,
-            decidedAt: needsConfirmation ? null : new Date(),
+            decidedAt: needsConfirmation ? null : stampUtc(),
           })
           .returning();
         if (!needsConfirmation) await this.persistPolicy(tx, actor, definition, req.periodDays);
@@ -281,11 +288,11 @@ export class RetentionService {
         minimumDays: definition.minimumDays,
         locked: definition.locked,
         updatedByPersonId: actor.personId,
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .onConflictDoUpdate({
         target: [retentionPolicies.tenantId, retentionPolicies.category],
-        set: { periodDays, updatedByPersonId: actor.personId, updatedAt: new Date() },
+        set: { periodDays, updatedByPersonId: actor.personId, updatedAt: stampUtc() },
       });
   }
 
@@ -354,7 +361,7 @@ export class RetentionService {
           .set({
             status,
             confirmedByPersonId: req.decision === 'cancel' ? null : actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionReason: req.reason,
           })
           .where(eq(adminChangeRequests.id, change.id));
@@ -539,7 +546,7 @@ export class RetentionService {
             .set({
               status: 'released',
               releasedByPersonId: actor.personId,
-              releasedAt: new Date(),
+              releasedAt: stampUtc(),
               releaseReason: req.reason,
             })
             .where(eq(legalHolds.id, hold.id));
@@ -562,7 +569,7 @@ export class RetentionService {
             .set({
               status: req.decision === 'confirm' ? 'active' : 'declined',
               confirmedByPersonId: actor.personId,
-              confirmedAt: new Date(),
+              confirmedAt: stampUtc(),
               releaseReason: req.decision === 'decline' ? req.reason : null,
             })
             .where(eq(legalHolds.id, hold.id));
@@ -739,7 +746,7 @@ export class RetentionService {
       confirmedByPersonId: string | null;
     },
   ): Promise<{ run: RunRow; items: RunItemRow[] }> {
-    const startedAt = new Date();
+    const startedAt = stampUtc();
     const periods = await this.effectivePeriods(tx, input.categories);
     const holds = await this.activeHolds(tx);
     const scopeKey = retentionScopeKey(
@@ -759,7 +766,7 @@ export class RetentionService {
         requestedByPersonId: input.requestedByPersonId,
         confirmedByPersonId: input.confirmedByPersonId,
         startedAt,
-        finishedAt: new Date(),
+        finishedAt: stampUtc(),
       })
       .returning();
 
@@ -861,7 +868,7 @@ export class RetentionService {
             .from(retentionRuns)
             .where(eq(retentionRuns.id, req.dryRunId));
           if (!dry || dry.mode !== 'dry_run') throw ApiProblem.notFound('retention preview');
-          if (Date.now() - dry.startedAt.getTime() > DRY_RUN_MAX_AGE_MS)
+          if (stampUtc().getTime() - dry.startedAt.getTime() > DRY_RUN_MAX_AGE_MS)
             throw new ApiProblem(
               409,
               'RETENTION_DRY_RUN_REQUIRED',

@@ -71,7 +71,7 @@ and anomaly (017c) scans, and 113a's Reported answers tab. Built and checked on 
 Scenarios: [`apps/api-e2e/src/worker/ai-scans.spec.ts`](../../apps/api-e2e/src/worker/ai-scans.spec.ts),
 [`apps/api-e2e/src/ai/reported-answers.spec.ts`](../../apps/api-e2e/src/ai/reported-answers.spec.ts);
 journey [`apps/web-e2e/src/ai/reported-answers.spec.ts`](../../apps/web-e2e/src/ai/reported-answers.spec.ts).
-Invariants 142-147 in [`invariant-scenarios.md`](../../docs/testing/invariant-scenarios.md). Roles:
+Invariants 143-148 in [`invariant-scenarios.md`](../../docs/testing/invariant-scenarios.md). Roles:
 org-admin, finance-admin, auditor, employee, budget-owner, department-head, location-manager,
 globex-admin.
 

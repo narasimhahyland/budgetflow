@@ -3,7 +3,7 @@ import {
   ApiProblem,
   CommandRunner,
   DB,
-  nowUtc,
+  stampUtc,
   PolicyService,
   todayUtc,
   type RequestActor,
@@ -343,7 +343,7 @@ export class AiScanRunsService {
         .for('update');
       if (!run || !['queued', 'retrying'].includes(run.status)) return 'noop' as const;
       const feature = run.feature as AiScanFeature;
-      const now = nowUtc();
+      const now = stampUtc();
       const skipReason = !this.gateway.configured
         ? 'provider_not_configured'
         : !(await this.settings.isEnabled(tx, tenantId, feature))
@@ -416,7 +416,7 @@ export class AiScanRunsService {
         .set({
           status: 'failed',
           error: 'Every retry failed. The previous results stay on the screens.',
-          completedAt: nowUtc(),
+          completedAt: stampUtc(),
         })
         .where(and(eq(aiScanRuns.id, runId), inArray(aiScanRuns.status, ['queued', 'retrying']))),
     );

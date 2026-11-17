@@ -1,5 +1,5 @@
 import { AuditService } from '@bf/api/audit';
-import { DB } from '@bf/api/core';
+import { DB, stampUtc } from '@bf/api/core';
 import {
   exchangeRates,
   integrityCheckRuns,
@@ -66,13 +66,15 @@ export class RebuildService {
   ) {}
 
   async run(tenantId: string, checkRunId: string): Promise<'clean' | 'drift_detected' | 'skipped'> {
-    const claimed = await withTenant(this.db, { tenantId, subject: SYSTEM }, (tx) =>
-      tx.execute(
-        sql`update ${integrityCheckRuns} set status = 'running', started_at = now()
-            where id = ${checkRunId} and (status = 'queued' or (status = 'running' and started_at < now() - interval '10 minutes'))
+    const claimed = await withTenant(this.db, { tenantId, subject: SYSTEM }, (tx) => {
+      // Stamped on the API's clock, like requested_at and finished_at (a test stack pins it).
+      const at = stampUtc().toISOString();
+      return tx.execute(
+        sql`update ${integrityCheckRuns} set status = 'running', started_at = ${at}::timestamptz
+            where id = ${checkRunId} and (status = 'queued' or (status = 'running' and started_at < ${at}::timestamptz - interval '10 minutes'))
             returning id`,
-      ),
-    );
+      );
+    });
     if (claimed.rows.length === 0) return 'skipped';
     try {
       const summary = await withTenant(
@@ -87,7 +89,7 @@ export class RebuildService {
         if (flags.length) await tx.insert(integrityFlags).values(flags);
         await tx
           .update(integrityCheckRuns)
-          .set({ status, finishedAt: new Date(), summary, flagsRaised: flags.length })
+          .set({ status, finishedAt: stampUtc(), summary, flagsRaised: flags.length })
           .where(
             and(eq(integrityCheckRuns.id, checkRunId), eq(integrityCheckRuns.tenantId, tenantId)),
           );
@@ -110,7 +112,7 @@ export class RebuildService {
       await withTenant(this.db, { tenantId, subject: SYSTEM }, (tx) =>
         tx
           .update(integrityCheckRuns)
-          .set({ status: 'failed', finishedAt: new Date() })
+          .set({ status: 'failed', finishedAt: stampUtc() })
           .where(eq(integrityCheckRuns.id, checkRunId)),
       );
       throw e;

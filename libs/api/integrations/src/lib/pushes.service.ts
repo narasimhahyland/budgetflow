@@ -1,5 +1,5 @@
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, type RequestActor, todayUtc, stampUtc } from '@bf/api/core';
 import {
   commitments,
   events,
@@ -211,7 +211,7 @@ export class PushesService {
           status: res.ok ? 'pushed' : 'failed',
           externalId,
           lastError: res.ok ? null : providerMessage(res.statusCode || null, res.body),
-          pushedAt: res.ok ? new Date() : null,
+          pushedAt: res.ok ? stampUtc() : null,
         })
         .where(eq(integrationPushes.id, prepared.existing.id))
         .returning();

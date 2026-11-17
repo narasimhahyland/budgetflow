@@ -1,4 +1,11 @@
-import { ApiProblem, CommandRunner, DB, type CommandResult, type RequestActor } from '@bf/api/core';
+import {
+  ApiProblem,
+  CommandRunner,
+  DB,
+  type CommandResult,
+  type RequestActor,
+  stampUtc,
+} from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import { documents, people, withTenant, type Db, type Tx } from '@bf/api/db';
 import {
@@ -243,7 +250,7 @@ export class DocumentsService {
           .update(documents)
           .set({
             status: 'available',
-            verifiedAt: new Date(),
+            verifiedAt: stampUtc(),
             sha256: createHash('sha256').update(body).digest('hex'),
           })
           .where(eq(documents.id, doc.id))
@@ -318,7 +325,7 @@ export class DocumentsService {
           sha256: createHash('sha256').update(input.body).digest('hex'),
           storageKey: key,
           status: 'available',
-          verifiedAt: new Date(),
+          verifiedAt: stampUtc(),
           uploadedByPersonId: null,
         })
         .onConflictDoNothing()

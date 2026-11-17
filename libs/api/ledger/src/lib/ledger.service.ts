@@ -1,5 +1,5 @@
 import { fiscalPeriods, ledgerBalances, ledgerJournals, ledgerLines, type Tx } from '@bf/api/db';
-import { unwrap, type RequestActor } from '@bf/api/core';
+import { stampUtc, unwrap, type RequestActor } from '@bf/api/core';
 import type { Journal } from '@bf/contracts';
 import { buildJournal, checkAccountingDate, journalTotals, type JournalDraft } from '@bf/domain';
 import { Injectable } from '@nestjs/common';
@@ -121,7 +121,7 @@ export class LedgerService {
             budgetAmountMinor: sql`${ledgerBalances.budgetAmountMinor} + excluded.budget_amount_minor`,
             reportingAmountMinor: sql`${ledgerBalances.reportingAmountMinor} + excluded.reporting_amount_minor`,
             lineCount: sql`${ledgerBalances.lineCount} + 1`,
-            updatedAt: sql`now()`,
+            updatedAt: stampUtc(),
           },
         });
     }

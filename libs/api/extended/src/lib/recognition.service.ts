@@ -7,6 +7,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   budgets,
@@ -188,7 +189,7 @@ export class RecognitionService {
           needsApproval: req.needsApproval ?? false,
           fundingBudgetId: budget?.id ?? null,
           active: req.active ?? true,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
         const [row] = existing
           ? await tx
@@ -254,7 +255,7 @@ export class RecognitionService {
           currency: budget.currency,
           grantedByPersonId: actor.personId,
           reason: req.reason,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
         const [row] = await tx
           .insert(recognitionAllowances)
@@ -266,7 +267,7 @@ export class RecognitionService {
               recognitionAllowances.fundingBudgetId,
               recognitionAllowances.periodKey,
             ],
-            set: { grantedMinor: req.amountMinor, reason: req.reason, updatedAt: new Date() },
+            set: { grantedMinor: req.amountMinor, reason: req.reason, updatedAt: stampUtc() },
           })
           .returning();
         await this.audit.append(tx, {
@@ -424,7 +425,7 @@ export class RecognitionService {
           );
           await tx
             .update(commitments)
-            .set({ status: 'encumbered', updatedAt: new Date() })
+            .set({ status: 'encumbered', updatedAt: stampUtc() })
             .where(eq(commitments.id, commitment.id));
         }
         const [row] = await tx
@@ -527,7 +528,7 @@ export class RecognitionService {
             .set({
               status: req.decision === 'approve' ? 'encumbered' : 'released',
               releasedMinor: req.decision === 'approve' ? 0 : amountMinor,
-              updatedAt: new Date(),
+              updatedAt: stampUtc(),
             })
             .where(eq(commitments.id, row.commitmentId));
         }
@@ -536,10 +537,10 @@ export class RecognitionService {
           .set({
             status: req.decision === 'approve' ? 'awarded' : 'cancelled',
             approverPersonId: actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionReason: req.reason,
             journalIds: [...row.journalIds, ...journalIds],
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(recognitionAwards.id, id));
         await this.audit.append(tx, {
@@ -598,7 +599,7 @@ export class RecognitionService {
           );
           await tx
             .update(commitments)
-            .set({ status: 'consumed', consumedMinor: amountMinor, updatedAt: new Date() })
+            .set({ status: 'consumed', consumedMinor: amountMinor, updatedAt: stampUtc() })
             .where(eq(commitments.id, row.commitmentId));
         }
         await tx
@@ -606,9 +607,9 @@ export class RecognitionService {
           .set({
             status: 'redeemed',
             rewardChoice: req.rewardChoice,
-            redeemedAt: new Date(),
+            redeemedAt: stampUtc(),
             journalIds: [...row.journalIds, ...journalIds],
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(recognitionAwards.id, id));
         await this.audit.append(tx, {

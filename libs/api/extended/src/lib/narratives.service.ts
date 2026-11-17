@@ -1,7 +1,14 @@
 import { AiGateway, AiSettingsService, type Fact } from '@bf/api/ai';
 import { AuditService } from '@bf/api/audit';
 import { BudgetViews, budgetResource } from '@bf/api/budgets';
-import { ApiProblem, CommandRunner, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import {
+  ApiProblem,
+  CommandRunner,
+  DB,
+  PolicyService,
+  type RequestActor,
+  stampUtc,
+} from '@bf/api/core';
 import {
   budgets,
   commitments,
@@ -186,7 +193,7 @@ export class NarrativesService {
             tenantId: actor.tenantId,
             periodId: period.id,
             periodState: closed ? 'closed' : 'open',
-            snapshotTakenAt: closed ? (period.closedAt ?? new Date()) : null,
+            snapshotTakenAt: closed ? (period.closedAt ?? stampUtc()) : null,
             status: 'ai_draft',
             sections: sections as unknown as object,
             authorPersonId: actor.personId,
@@ -250,7 +257,7 @@ export class NarrativesService {
           .set({
             sections: sections as unknown as object,
             status: 'edited',
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(leadershipSummaries.id, id));
         await this.audit.append(tx, {
@@ -321,7 +328,7 @@ export class NarrativesService {
           .set({
             sections: sections as unknown as object,
             queryLogId: result.queryLogId,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(leadershipSummaries.id, id));
         await this.audit.append(tx, {
@@ -382,9 +389,9 @@ export class NarrativesService {
           .set({
             status: 'approved',
             approvedByPersonId: actor.personId,
-            approvedAt: new Date(),
+            approvedAt: stampUtc(),
             approvalNote: req.note ?? null,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(leadershipSummaries.id, id));
         await this.audit.append(tx, {
@@ -568,8 +575,8 @@ export class NarrativesService {
             text: req.text,
             status: 'submitted',
             attested: req.attested,
-            submittedAt: new Date(),
-            updatedAt: new Date(),
+            submittedAt: stampUtc(),
+            updatedAt: stampUtc(),
           })
           .where(eq(varianceCommentaries.id, id));
         await this.audit.append(tx, {
@@ -891,7 +898,7 @@ export class NarrativesService {
     written: readonly { key: string; text: string }[],
     facts: { figures: Map<string, SummaryFigure>; sources: AiSourceRef[] },
   ): StoredSection[] {
-    const now = iso(new Date());
+    const now = iso(stampUtc());
     return SECTION_KEYS.map((key) => {
       const text = written.find((w) => w.key === key)?.text ?? '';
       const tokens = [...text.matchAll(FIGURE_TOKEN)].map((m) => m[1]);

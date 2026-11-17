@@ -8,6 +8,7 @@ import {
   type CommandResult,
   type RequestActor,
   nowUtc,
+  stampUtc,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import {
@@ -316,11 +317,11 @@ export class ApprovalsService {
     const ids = open.map((o) => o.id);
     await tx
       .update(approvalInstances)
-      .set({ status: 'cancelled', completedAt: new Date() })
+      .set({ status: 'cancelled', completedAt: stampUtc() })
       .where(inArray(approvalInstances.id, ids));
     await tx
       .update(approvalTasks)
-      .set({ status: 'cancelled', decidedAt: new Date() })
+      .set({ status: 'cancelled', decidedAt: stampUtc() })
       .where(and(inArray(approvalTasks.instanceId, ids), eq(approvalTasks.status, 'pending')));
   }
 
@@ -557,7 +558,7 @@ export class ApprovalsService {
           .update(approvalInstances)
           .set({
             status: approvedMinor < subject.amount.amountMinor ? 'partially_approved' : 'approved',
-            completedAt: new Date(),
+            completedAt: stampUtc(),
           })
           .where(eq(approvalInstances.id, instance.id));
       }
@@ -585,7 +586,7 @@ export class ApprovalsService {
           : await handler.requestChanges(tx, subject, ctx, req.counterOfferAmount ?? null);
       await tx
         .update(approvalInstances)
-        .set({ status: taskStatus, completedAt: new Date() })
+        .set({ status: taskStatus, completedAt: stampUtc() })
         .where(eq(approvalInstances.id, instance.id));
     } else {
       // escalate: hand the step to the next authority above the current approver
@@ -622,7 +623,7 @@ export class ApprovalsService {
 
     await tx
       .update(approvalTasks)
-      .set({ status: taskStatus, decidedAt: new Date() })
+      .set({ status: taskStatus, decidedAt: stampUtc() })
       .where(eq(approvalTasks.id, task.id));
     await tx.insert(approvalActions).values({
       tenantId: actor.tenantId,
@@ -890,7 +891,7 @@ export class ApprovalsService {
       }
       await tx
         .update(approvalActionTokens)
-        .set({ usedAt: new Date() })
+        .set({ usedAt: stampUtc() })
         .where(eq(approvalActionTokens.id, c.token.id));
       const actor = await this.actorForPerson(tx, v.tenantId, c.token.approverPersonId);
       return this.decideTx(
@@ -1619,7 +1620,7 @@ export class ApprovalsService {
         }
         const [updated] = await tx
           .update(approvalDelegations)
-          .set({ revokedAt: new Date(), revokedBy: actor.personId })
+          .set({ revokedAt: stampUtc(), revokedBy: actor.personId })
           .where(eq(approvalDelegations.id, delegationId))
           .returning();
         await this.audit.append(tx, {
@@ -1691,7 +1692,7 @@ export class ApprovalsService {
         if (!subject) throw ApiProblem.notFound('approval');
         await tx
           .update(approvalTasks)
-          .set({ status: 'cancelled', decidedAt: new Date() })
+          .set({ status: 'cancelled', decidedAt: stampUtc() })
           .where(eq(approvalTasks.id, task.id));
         const returnedStep: RouteStep = {
           stepNo: task.stepNo,
@@ -1747,7 +1748,7 @@ export class ApprovalsService {
     ctx?: { idempotencyKey: string; requestId: string | null },
   ): Promise<CommandResult<SlaSweepResponse>> {
     const key =
-      ctx?.idempotencyKey ?? `sla-sweep:${asOfIso ?? new Date().toISOString().slice(0, 16)}`;
+      ctx?.idempotencyKey ?? `sla-sweep:${asOfIso ?? stampUtc().toISOString().slice(0, 16)}`;
     return this.commands.run(
       actor,
       {
@@ -1760,7 +1761,7 @@ export class ApprovalsService {
         this.runSlaSweepInTx(
           tx,
           actor,
-          asOfIso ? new Date(asOfIso) : new Date(),
+          asOfIso ? new Date(asOfIso) : stampUtc(),
           ctx?.requestId ?? null,
         ),
     );

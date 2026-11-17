@@ -5,6 +5,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { featureFlags, people, tenantSettings, withTenant, type Db, type Tx } from '@bf/api/db';
 import { DB } from '@bf/api/core';
@@ -206,7 +207,9 @@ export class AiSettingsService {
         const before = await this.enabledFeatures(tx, actor.tenantId);
         const stored = await this.stored(tx, actor.tenantId);
         const pending = { ...(stored.pending ?? {}) };
-        const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+        const now = stampUtc()
+          .toISOString()
+          .replace(/\.\d+Z$/, 'Z');
         let effective = req.enabled;
         if (req.enabled && def.needsFinanceConfirmation) {
           effective = false;
@@ -268,7 +271,9 @@ export class AiSettingsService {
           );
         const pending = { ...stored.pending };
         delete pending[feature];
-        const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+        const now = stampUtc()
+          .toISOString()
+          .replace(/\.\d+Z$/, 'Z');
         await this.setFlag(tx, actor.tenantId, feature, true);
         await this.writeStored(tx, actor.tenantId, {
           ...stored,
@@ -333,7 +338,7 @@ export class AiSettingsService {
       .values({ tenantId, key: aiFeatureFlagKey(feature), enabled })
       .onConflictDoUpdate({
         target: [featureFlags.tenantId, featureFlags.key],
-        set: { enabled, updatedAt: new Date() },
+        set: { enabled, updatedAt: stampUtc() },
       });
   }
 }

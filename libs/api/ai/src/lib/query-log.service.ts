@@ -1,4 +1,4 @@
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, stampUtc, type RequestActor } from '@bf/api/core';
 import { aiQueryLog, people, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   AiChannel,
@@ -159,7 +159,7 @@ export class AiQueryLogService {
       select count(*)::text as n from ${aiQueryLog}
       where ${aiQueryLog.tenantId} = ${tenantId} and ${aiQueryLog.actorSubject} = ${actorSubject}
         and ${aiQueryLog.feature} in ('ask', 'ask_chat')
-        and ${aiQueryLog.occurredAt} > now() - interval '1 hour'`);
+        and ${aiQueryLog.occurredAt} > ${stampUtc().toISOString()}::timestamptz - interval '1 hour'`);
     return Number(res.rows[0]?.n ?? 0);
   }
 
@@ -174,7 +174,7 @@ export class AiQueryLogService {
              count(*) filter (where outcome = 'accepted')::text as accepted
       from ${aiQueryLog}
       where ${aiQueryLog.tenantId} = ${tenantId} and ${aiQueryLog.feature} = ${feature}
-        and ${aiQueryLog.occurredAt} > now() - interval '30 days'`);
+        and ${aiQueryLog.occurredAt} > ${stampUtc().toISOString()}::timestamptz - interval '30 days'`);
     const row = res.rows[0];
     return { shown: Number(row?.shown ?? 0), accepted: Number(row?.accepted ?? 0) };
   }

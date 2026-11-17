@@ -1,4 +1,4 @@
-import { ApiProblem, PolicyService, unwrap, type RequestActor } from '@bf/api/core';
+import { ApiProblem, PolicyService, unwrap, type RequestActor, stampUtc } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import {
   contributionRequests,
@@ -184,7 +184,7 @@ export class IntercompanyService {
     const status = unwrap(rechargeMachine.next(row.status, 'approve'));
     await tx
       .update(rechargeSchedules)
-      .set({ status, taxApprovedAt: new Date() })
+      .set({ status, taxApprovedAt: stampUtc() })
       .where(eq(rechargeSchedules.id, row.id));
     const posted = await this.postRecharge(tx, c, { ...row, status });
     await this.audit.append(tx, {
