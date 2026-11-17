@@ -1,5 +1,9 @@
 import { ActualsModule } from '@bf/api/actuals';
+import { ApprovalsModule } from '@bf/api/approvals';
 import { AuditModule } from '@bf/api/audit';
+import { BudgetsModule } from '@bf/api/budgets';
+import { EventsModule } from '@bf/api/events';
+import { FinanceModule } from '@bf/api/finance';
 import { DocumentsModule } from '@bf/api/documents';
 import { RulesModule } from '@bf/api/rules';
 import { CoreModule } from '@bf/api/core';
@@ -21,6 +25,8 @@ import { PushesService } from './pushes.service';
 import { ScimService } from './scim.service';
 import { SyncService } from './sync.service';
 import { WebhooksService } from './webhooks.service';
+import { BudgetCheckService } from './budget-check.service';
+import { ExpenseHandoffService } from './expense-handoff.service';
 
 const SERVICES = [
   OutboundHttp,
@@ -36,6 +42,8 @@ const SERVICES = [
   ScimService,
   NavanSyncService,
   ActualDocuments,
+  BudgetCheckService,
+  ExpenseHandoffService,
 ];
 
 /** Services only: imported by the worker for webhook delivery and by the API through IntegrationsApiModule. */
@@ -48,6 +56,10 @@ const SERVICES = [
     OrgModule,
     RulesModule,
     DocumentsModule,
+    BudgetsModule,
+    FinanceModule,
+    EventsModule,
+    ApprovalsModule,
   ],
   providers: SERVICES,
   exports: SERVICES,

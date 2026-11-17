@@ -121,6 +121,13 @@ export const ACTIONS = [
    */
   'finance_export.read',
   'finance_export.manage',
+  /**
+   * Applied connector imports (B7). The connector identity holds these, never a person's role grant
+   * beyond Finance: ERP suppliers enter the vendor master for review (never approved by the import),
+   * and calendar responses become RSVPs through the same transition rules as an answer in the app.
+   */
+  'vendor.import',
+  'event.rsvp_sync',
 ] as const;
 export type Action = (typeof ACTIONS)[number];
 
@@ -244,6 +251,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'burn_rate.run': 'tenant',
     'finance_export.read': 'tenant',
     'finance_export.manage': 'tenant',
+    'vendor.import': 'tenant',
   },
   'finance-controller': {
     'tenant.read': 'tenant',

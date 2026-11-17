@@ -12,6 +12,7 @@ import {
 } from '@bf/api/core';
 import {
   AdaptivePlanImportRequest,
+  CreateExpenseHandoffRequest,
   ConnectRequest,
   CreateApiKeyRequest,
   CreatePushRequest,
@@ -33,7 +34,10 @@ import {
   UpdateConnectionRequest,
   UpdateWebhookEndpointRequest,
   WebhookDeliveriesQuery,
+  type AdaptivePlanImportResult,
   type AdaptivePlanPreview,
+  type ExpenseHandoffView,
+  type ExternalBudgetCheckList,
   type ApiKeyCreated,
   type ApiKeyList,
   type ApiKeyUsage,
@@ -80,6 +84,8 @@ import { ConnectionsService } from './connections.service';
 import { DuplicatesService } from './duplicates.service';
 import { MessagesService } from './messages.service';
 import { PlanImportService } from './plan-import.service';
+import { BudgetCheckService } from './budget-check.service';
+import { ExpenseHandoffService } from './expense-handoff.service';
 import { PushesService } from './pushes.service';
 import { ScimService } from './scim.service';
 import { SyncService } from './sync.service';
@@ -108,6 +114,8 @@ export class IntegrationsController {
     private readonly keys: ApiKeysService,
     private readonly webhooks: WebhooksService,
     private readonly scim: ScimService,
+    private readonly budgetChecks: BudgetCheckService,
+    private readonly handoffs: ExpenseHandoffService,
   ) {}
 
   // Connector hub and detail frame (092, 093-098, 094a) -----------------------------------------
@@ -370,6 +378,63 @@ export class IntegrationsController {
       parseWith(UuidParam, raw),
       parseWith(AdaptivePlanImportRequest, body),
     );
+  }
+
+  @Post('api/integrations/connections/:connectionId/plan-import')
+  @HttpCode(201)
+  async importPlan(
+    @CurrentActor() actor: RequestActor,
+    @Param('connectionId') raw: string,
+    @IdempotencyKey() idempotencyKey: string,
+    @RequestId() requestId: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ): Promise<AdaptivePlanImportResult> {
+    const r = await this.planImport.importPlan(
+      actor,
+      parseWith(UuidParam, raw),
+      parseWith(AdaptivePlanImportRequest, body),
+      { idempotencyKey, requestId },
+    );
+    if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
+    return r.body;
+  }
+
+  // ERP budget check (094) and expense hand-off (117a) -----------------------------------------
+
+  @Get('api/approvals/tasks/:taskId/budget-checks')
+  listBudgetChecks(
+    @CurrentActor() actor: RequestActor,
+    @Param('taskId') raw: string,
+  ): Promise<ExternalBudgetCheckList> {
+    return this.budgetChecks.list(actor, parseWith(UuidParam, raw));
+  }
+
+  @Get('api/requests/:requestId/expense-handoff')
+  getExpenseHandoff(
+    @CurrentActor() actor: RequestActor,
+    @Param('requestId') raw: string,
+  ): Promise<ExpenseHandoffView> {
+    return this.handoffs.get(actor, parseWith(UuidParam, raw));
+  }
+
+  @Post('api/requests/:requestId/expense-handoff')
+  @HttpCode(201)
+  async createExpenseHandoff(
+    @CurrentActor() actor: RequestActor,
+    @Param('requestId') raw: string,
+    @IdempotencyKey() idempotencyKey: string,
+    @RequestId() requestId: string | null,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: ResponseLike,
+  ): Promise<ExpenseHandoffView> {
+    parseWith(CreateExpenseHandoffRequest, body ?? {});
+    const r = await this.handoffs.create(actor, parseWith(UuidParam, raw), {
+      idempotencyKey,
+      requestId,
+    });
+    if (r.replayed) res.setHeader('Idempotent-Replayed', 'true');
+    return r.body;
   }
 
   // Identity, single sign-on and SCIM (098) ------------------------------------------------------

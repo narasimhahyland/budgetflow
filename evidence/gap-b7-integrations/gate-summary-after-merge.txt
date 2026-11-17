@@ -1,0 +1,20 @@
+After merging main (B4, B8) — commit 135b6021
+
+scripts/gate.sh static (run 20261116-101803; its stack step failed on a pre-merge volume, so functional was re-run on fresh volumes):
+PASS|secrets
+PASS|lint
+PASS|styles
+PASS|satori
+PASS|typecheck
+PASS|build
+PASS|openapi
+PASS|db
+
+scripts/gate.sh functional (run 20261116-102127):
+scripts/gate.sh functional-api functional-e2e — 2026-11-16T05:07:28Z — commit 135b6021
+PASS|secrets|4s
+PASS|stack|83s
+PASS|functional-api|378s
+PASS|reseed-e2e|58s
+PASS|functional-e2e|436s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report

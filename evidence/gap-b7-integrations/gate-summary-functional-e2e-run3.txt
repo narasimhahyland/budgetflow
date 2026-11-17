@@ -1,0 +1,5 @@
+scripts/gate.sh functional-e2e — 2026-11-12T17:07:26Z — commit 50ddd3f3
+PASS|secrets|8s
+PASS|stack|161s
+FAIL|functional-e2e|475s
+Reports: dist/.playwright/apps/api-e2e/report, dist/.playwright/apps/web-e2e/report

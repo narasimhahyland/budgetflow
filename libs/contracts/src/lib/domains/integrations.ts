@@ -69,6 +69,7 @@ export const SYNC_OBJECTS = [
   'event_codes',
   'card_limits',
   'actuals_export',
+  'expense_reports',
 ] as const;
 export const SyncObject = z
   .enum(SYNC_OBJECTS)
@@ -675,6 +676,26 @@ export const AdaptivePlanLine = named(
     .strict(),
 );
 
+export const AdaptivePlanRefusedRow = named(
+  'AdaptivePlanRefusedRow',
+  z.object({ level: z.string(), reason: z.string() }).strict(),
+);
+
+export const PlanImportPeriod = named(
+  'PlanImportPeriod',
+  z
+    .object({
+      effectiveDate: IsoDate.describe('The date the planning system says the plan takes effect.'),
+      periodLabel: z.string(),
+      periodStatus: z.enum(['open', 'soft_closed', 'closed', 'locked']),
+      postsInPeriodLabel: z
+        .string()
+        .describe('Nothing posts to a closed period: a late plan posts in the next open period.'),
+      late: z.boolean(),
+    })
+    .strict(),
+);
+
 export const AdaptivePlanPreview = named(
   'AdaptivePlanPreview',
   z
@@ -685,6 +706,11 @@ export const AdaptivePlanPreview = named(
       currency: CurrencyCode,
       lines: z.array(AdaptivePlanLine),
       unmappedLevels: z.array(z.string()),
+      refusedRows: z
+        .array(AdaptivePlanRefusedRow)
+        .describe('Rows the import refuses, each with its reason; any refusal blocks the import.'),
+      fiscalYearId: Id.nullable().describe('The BudgetFlow fiscal year the label resolves to.'),
+      period: PlanImportPeriod.nullable(),
       totalDifferenceMinor: z.int(),
       requiresCeoApproval: z.boolean(),
       blocked: z.boolean(),
@@ -702,6 +728,127 @@ export const AdaptivePlanImportRequest = named(
     })
     .strict(),
 );
+
+export const AdaptivePlanImportResult = named(
+  'AdaptivePlanImportResult',
+  z
+    .object({
+      preview: AdaptivePlanPreview,
+      planVersionId: Id.describe(
+        'The draft plan version the import created; it posts nothing until approved and applied.',
+      ),
+      planVersionLabel: z.string(),
+      planVersionStatus: z.enum(['draft', 'approved', 'superseded']),
+      syncRunId: Id,
+    })
+    .strict(),
+);
+export type AdaptivePlanImportResult = z.infer<typeof AdaptivePlanImportResult>;
+
+// ERP budget check before approval (094, Workday Financials) ---------------------------------------
+
+export const EXTERNAL_BUDGET_CHECK_STATUSES = ['passed', 'failed', 'unavailable'] as const;
+export const ExternalBudgetCheck = named(
+  'ExternalBudgetCheck',
+  z
+    .object({
+      provider: IntegrationProvider,
+      providerName: z.string(),
+      status: z.enum(EXTERNAL_BUDGET_CHECK_STATUSES),
+      mode: z.enum(['warn', 'block']),
+      blocksApproval: z
+        .boolean()
+        .describe(
+          'Block mode with a failed or unreachable check disables Approve, with the reason.',
+        ),
+      message: z.string().describe('Plain English, shown on the approval card.'),
+      remaining: Money.nullable().describe(
+        'What the ERP reports as left on the ledger, if it says.',
+      ),
+      checkedAt: IsoDateTime,
+    })
+    .strict(),
+);
+export type ExternalBudgetCheck = z.infer<typeof ExternalBudgetCheck>;
+
+export const ExternalBudgetCheckList = named(
+  'ExternalBudgetCheckList',
+  z
+    .object({ items: z.array(ExternalBudgetCheck) })
+    .strict()
+    .describe('Empty when no connected ERP has the budget check switched on.'),
+);
+export type ExternalBudgetCheckList = z.infer<typeof ExternalBudgetCheckList>;
+
+// Hand-off of approved spend to a prefilled expense (117a) -----------------------------------------
+
+export const EXPENSE_HANDOFF_STATUSES = ['draft_created', 'submitted', 'approved', 'paid'] as const;
+export const ExpenseHandoffStatus = z.enum(EXPENSE_HANDOFF_STATUSES);
+
+export const ExpenseHandoffFields = named(
+  'ExpenseHandoffFields',
+  z
+    .object({
+      requestRef: z.string(),
+      title: z.string(),
+      expenseType: z.string().nullable().describe("From the connection's category mapping."),
+      amount: Money,
+      date: IsoDate,
+      costCenterCode: z.string().nullable(),
+      eventCode: z.string().nullable(),
+      merchant: z.string().nullable(),
+    })
+    .strict(),
+);
+export type ExpenseHandoffFields = z.infer<typeof ExpenseHandoffFields>;
+
+export const ExpenseHandoffView = named(
+  'ExpenseHandoffView',
+  z
+    .object({
+      requestId: Id,
+      availability: z
+        .enum(['ready', 'created', 'not_connected', 'not_approved', 'not_allowed'])
+        .describe(
+          'What the request page offers: create, show the status, copy details, or nothing.',
+        ),
+      tool: z
+        .object({ provider: IntegrationProvider, displayName: z.string() })
+        .strict()
+        .nullable(),
+      fields: ExpenseHandoffFields,
+      handoff: z
+        .object({
+          id: Id,
+          status: ExpenseHandoffStatus,
+          externalId: z.string(),
+          createdAt: IsoDateTime,
+          createdByName: z.string().nullable(),
+          statusChangedAt: IsoDateTime,
+          history: z.array(z.object({ status: ExpenseHandoffStatus, at: IsoDateTime }).strict()),
+          claimedAmount: Money.nullable(),
+          differenceMinor: z
+            .int()
+            .nullable()
+            .describe(
+              'Claimed minus approved, in the request currency; positive is above approved.',
+            ),
+        })
+        .strict()
+        .nullable(),
+    })
+    .strict(),
+);
+export type ExpenseHandoffView = z.infer<typeof ExpenseHandoffView>;
+
+export const CreateExpenseHandoffRequest = named(
+  'CreateExpenseHandoffRequest',
+  z
+    .object({})
+    .strict()
+    .describe('The fields come from the approved request; nothing is typed again.'),
+);
+export type CreateExpenseHandoffRequest = z.infer<typeof CreateExpenseHandoffRequest>;
 
 // Identity: SSO and SCIM (098) ----------------------------------------------------------------------
 
@@ -1228,6 +1375,8 @@ const DeliveryParams = z.object({ deliveryId: Id }).strict();
 const FlagParams = z.object({ flagId: Id }).strict();
 const TokenParams = z.object({ tokenId: Id }).strict();
 const InboundWebhookParams = z.object({ tenantId: Id, connectionId: Id }).strict();
+const HandoffRequestParams = z.object({ requestId: Id }).strict();
+const BudgetCheckTaskParams = z.object({ taskId: Id }).strict();
 
 export const integrationEndpoints = {
   getIntegrationsHub: {
@@ -1466,6 +1615,56 @@ export const integrationEndpoints = {
     body: AdaptivePlanImportRequest,
     response: { status: 200, schema: AdaptivePlanPreview },
     errors: [400, 401, 403, 404, 422],
+  },
+  importAdaptivePlan: {
+    operationId: 'importAdaptivePlan',
+    method: 'post',
+    path: '/api/integrations/connections/{connectionId}/plan-import',
+    summary:
+      "Import the planning system's plan as a draft plan version for the root budgets (094a); it posts once approved and applied",
+    tags: ['integrations'],
+    auth: true,
+    idempotent: true,
+    params: ConnectionParams,
+    body: AdaptivePlanImportRequest,
+    response: { status: 201, schema: AdaptivePlanImportResult },
+    errors: [400, 401, 403, 404, 409, 422],
+  },
+  listExternalBudgetChecks: {
+    operationId: 'listExternalBudgetChecks',
+    method: 'get',
+    path: '/api/approvals/tasks/{taskId}/budget-checks',
+    summary: 'The ERP budget check for an approval, run now (094, Workday Financials)',
+    tags: ['integrations'],
+    auth: true,
+    params: BudgetCheckTaskParams,
+    response: { status: 200, schema: ExternalBudgetCheckList },
+    errors: [401, 403, 404],
+  },
+  getExpenseHandoff: {
+    operationId: 'getExpenseHandoff',
+    method: 'get',
+    path: '/api/requests/{requestId}/expense-handoff',
+    summary: 'What the request page offers for the expense: create, status, or copy details (117a)',
+    tags: ['integrations'],
+    auth: true,
+    params: HandoffRequestParams,
+    response: { status: 200, schema: ExpenseHandoffView },
+    errors: [401, 403, 404],
+  },
+  createExpenseHandoff: {
+    operationId: 'createExpenseHandoff',
+    method: 'post',
+    path: '/api/requests/{requestId}/expense-handoff',
+    summary:
+      'Create a prefilled draft expense in the expense tool, once per approved request (117a)',
+    tags: ['integrations'],
+    auth: true,
+    idempotent: true,
+    params: HandoffRequestParams,
+    body: CreateExpenseHandoffRequest,
+    response: { status: 201, schema: ExpenseHandoffView },
+    errors: [400, 401, 403, 404, 409, 422],
   },
   getIdentityIntegration: {
     operationId: 'getIdentityIntegration',

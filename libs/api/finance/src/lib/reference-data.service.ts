@@ -298,4 +298,119 @@ export class ReferenceDataService {
       },
     );
   }
+
+  /**
+   * Suppliers from a connected ERP (094, 106c), applied by the connector identity. A new supplier
+   * enters the vendor master as Unknown, never approved by the import: Finance reviews it in 106c.
+   * One audit event per vendor created or linked; a supplier already known by its ERP id is a
+   * duplicate and changes nothing, so a repeated run applies nothing. Bad rows are refused with a
+   * reason and the rest still apply.
+   */
+  importVendors(
+    actor: RequestActor,
+    suppliers: { externalId: string; name: string; category?: string; country?: string }[],
+    ctx: CommandContext & { source: string },
+  ): Promise<VendorImportOutcome> {
+    return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
+      assertTenant(this.policy, actor, 'vendor.import');
+      const outcome: VendorImportOutcome = { created: [], linked: [], duplicates: 0, refused: [] };
+      const seen = new Set<string>();
+      // Stable order, so two runs lock and write in the same sequence.
+      const ordered = [...suppliers].sort((a, b) => a.externalId.localeCompare(b.externalId));
+      for (const s of ordered) {
+        const name = s.name.trim();
+        const country = s.country?.trim().toUpperCase() || null;
+        const refuse = (reason: string) =>
+          outcome.refused.push({ externalId: s.externalId || '(no id)', name, reason });
+        if (!s.externalId) {
+          refuse('The supplier has no ERP id, so a repeat could not be recognised.');
+          continue;
+        }
+        if (seen.has(s.externalId)) {
+          refuse(`ERP id ${s.externalId} appears twice in one run.`);
+          continue;
+        }
+        seen.add(s.externalId);
+        if (name.length < 2) {
+          refuse('The supplier has no name.');
+          continue;
+        }
+        if (country && !/^[A-Z]{2}$/.test(country)) {
+          refuse(`Country "${s.country}" is not a two-letter ISO 3166 code.`);
+          continue;
+        }
+        const [known] = await tx
+          .select({ id: vendors.id })
+          .from(vendors)
+          .where(eq(vendors.erpVendorId, s.externalId));
+        if (known) {
+          outcome.duplicates += 1;
+          continue;
+        }
+        const [byName] = await tx
+          .select()
+          .from(vendors)
+          .where(sql`lower(${vendors.name}) = lower(${name})`)
+          .for('update');
+        if (byName && byName.erpVendorId) {
+          refuse(`${name} is already linked to ERP id ${byName.erpVendorId}.`);
+          continue;
+        }
+        if (byName) {
+          await tx
+            .update(vendors)
+            .set({ erpVendorId: s.externalId })
+            .where(eq(vendors.id, byName.id));
+          await this.audit.append(tx, {
+            tenantId: actor.tenantId,
+            actorPersonId: actor.personId,
+            actorSubject: actor.subject,
+            action: 'vendor.linked',
+            resourceType: 'vendor',
+            resourceId: byName.id,
+            requestId: ctx.requestId,
+            reason: `Matched by name to ${ctx.source}`,
+            changes: { erpVendorId: { from: null, to: s.externalId } },
+          });
+          outcome.linked.push(byName.id);
+          continue;
+        }
+        const [row] = await tx
+          .insert(vendors)
+          .values({
+            tenantId: actor.tenantId,
+            name,
+            status: 'unknown',
+            category: s.category?.trim() || null,
+            country,
+            erpVendorId: s.externalId,
+          })
+          .returning();
+        await this.audit.append(tx, {
+          tenantId: actor.tenantId,
+          actorPersonId: actor.personId,
+          actorSubject: actor.subject,
+          action: 'vendor.imported',
+          resourceType: 'vendor',
+          resourceId: row.id,
+          requestId: ctx.requestId,
+          reason: `Imported from ${ctx.source}; waiting for review`,
+          changes: {
+            name: { from: null, to: row.name },
+            status: { from: null, to: row.status },
+            erpVendorId: { from: null, to: s.externalId },
+          },
+        });
+        outcome.created.push(row.id);
+      }
+      return outcome;
+    });
+  }
+}
+
+export interface VendorImportOutcome {
+  created: string[];
+  linked: string[];
+  duplicates: number;
+  refused: { externalId: string; name: string; reason: string }[];
 }

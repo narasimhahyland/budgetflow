@@ -15,7 +15,7 @@
 // `missing` (404) and `down` (503 every time). Each message is recorded with its encrypted body and
 // whether its VAPID header (RFC 8292) verifies, so a scenario can decrypt and check what was sent.
 // Push records survive /_control/reset: scenarios own their subscription ids.
-import { createHmac, createPublicKey, timingSafeEqual, verify } from 'node:crypto';
+import { createHmac, createPublicKey, randomUUID, timingSafeEqual, verify } from 'node:crypto';
 import { createServer } from 'node:http';
 import { handleNavan, resetNavan } from './navan.mjs';
 
@@ -25,6 +25,18 @@ const PORT = Number(process.env.PORT ?? 4010);
 const armed = new Map();
 /** Webhook deliveries this server received, newest last. */
 const received = [];
+/** Plan the Adaptive mock returns instead of the fixture, set through the control plane. */
+let adaptivePlan = null;
+/**
+ * Lets a journey read its plan through the seeded connection, whose credential stays "expired" so
+ * the connector-hub journeys running alongside still see it in "Needs attention".
+ */
+let adaptivePlanIgnoresCredential = false;
+/** Calendar responses per provider, set through the control plane; the fixture otherwise. */
+let calendarResponses = {};
+/** Draft expenses created through the Concur mock (117a), by id; idempotency key -> id. */
+const concurDrafts = new Map();
+const concurDraftKeys = new Map();
 /** Web Push messages received, newest last (capped so a long run cannot grow it without bound). */
 const pushReceived = [];
 const PUSH_STATUS = { ok: 201, gone: 410, missing: 404, down: 503 };
@@ -356,6 +368,50 @@ const CALENDAR_RESPONSES = [
   { id: 'CAL-7003', attendee: 'tom.reilly@example.test', response: 'tentative', at: '2026-11-06' },
 ];
 
+/**
+ * ERPNext suppliers (094, 106c): one already known by its ERP id, one known by name only, one new,
+ * and three a careful import refuses (no name, a country that is not an ISO code, and a name already
+ * linked to another ERP id). Fictional companies.
+ */
+const ERP_SUPPLIERS = [
+  {
+    name: 'V-20015',
+    supplier_name: 'Deccan Event Studio',
+    supplier_group: 'venue',
+    country_code: 'IN',
+  },
+  {
+    name: 'V-10155',
+    supplier_name: 'Harbor View Hotel Group',
+    supplier_group: 'venue',
+    country_code: 'US',
+  },
+  {
+    name: 'V-20088',
+    supplier_name: 'Lotus Lane Florists',
+    supplier_group: 'decor',
+    country_code: 'IN',
+  },
+  { name: 'V-20090', supplier_name: '', supplier_group: 'catering', country_code: 'IN' },
+  {
+    name: 'V-30011',
+    supplier_name: 'Rhine Sound and Light',
+    supplier_group: 'equipment',
+    country_code: 'Germany',
+  },
+  {
+    name: 'V-29999',
+    supplier_name: 'Spice Route Caterers',
+    supplier_group: 'catering',
+    country_code: 'IN',
+  },
+];
+
+/** Workday budgets the mock budget check answers from: what is left per ERP company (HYL-US is 1000). */
+const WORKDAY_REMAINING = {
+  1000: { amount: '2500.00', currency: 'USD' },
+};
+
 const ADAPTIVE_PLAN = {
   version: 'FY2027 Budget, Approved',
   fiscalYear: 'FY2027',
@@ -451,9 +507,7 @@ const FETCH_ROUTES = {
   '/erpnext/api/resource/GL Entry': (url) => ({
     data: since(url, 'posting_date', ERP_GL_LINES),
   }),
-  '/erpnext/api/resource/Supplier': () => ({
-    data: [{ name: 'Deccan Event Studio', tax_id: 'IN-FICTIONAL-01' }],
-  }),
+  '/erpnext/api/resource/Supplier': () => ({ data: ERP_SUPPLIERS }),
   '/odoo/jsonrpc/account.move.line': (url) => ({
     result: since(url, 'date', ODOO_MOVE_LINES),
   }),
@@ -475,9 +529,14 @@ const FETCH_ROUTES = {
   '/coupa/api/purchase_orders': (url) => since(url, 'created-at', COUPA_PURCHASE_ORDERS),
   '/hr/api/workers': () => ({ workers: HR_WORKERS }),
   '/workday-hcm/ccx/api/v1/workers': () => ({ data: HR_WORKERS }),
-  '/graph/v1.0/shared-calendar/events/responses': () => ({ value: CALENDAR_RESPONSES }),
-  '/gcal/calendar/v3/calendars/budgetflow/events/responses': () => ({ items: CALENDAR_RESPONSES }),
-  '/adaptive/api/v2/plan': () => ADAPTIVE_PLAN,
+  '/graph/v1.0/shared-calendar/events/responses': () => ({
+    value: calendarResponses.outlook ?? CALENDAR_RESPONSES,
+  }),
+  '/gcal/calendar/v3/calendars/budgetflow/events/responses': () => ({
+    items: calendarResponses.google_calendar ?? CALENDAR_RESPONSES,
+  }),
+  '/adaptive/api/v2/plan': () => adaptivePlan ?? ADAPTIVE_PLAN,
+  '/concur/api/v4/expense/drafts': () => ({ Items: [...concurDrafts.values()] }),
 };
 
 /** path -> handler for POST pushes. Each answers with the external id it created. */
@@ -514,7 +573,38 @@ const server = createServer(async (req, res) => {
     received.length = 0;
     partnerAnswers.clear();
     resetNavan();
+    adaptivePlan = null;
+    adaptivePlanIgnoresCredential = false;
+    calendarResponses = {};
+    concurDrafts.clear();
+    concurDraftKeys.clear();
     return json(res, 200, { reset: true });
+  }
+  // What the planning system returns next (094a): a scenario sets its own version and levels.
+  if (path === '/_control/adaptive-plan' && req.method === 'POST') {
+    const body = JSON.parse((await readBody(req)) || 'null');
+    adaptivePlanIgnoresCredential = Boolean(body?.ignoreCredential);
+    if (body) delete body.ignoreCredential;
+    adaptivePlan = body;
+    return json(res, 200, { set: true });
+  }
+  // Attendee responses a calendar provider reports (097), per provider.
+  if (path === '/_control/calendar-responses' && req.method === 'POST') {
+    const body = JSON.parse((await readBody(req)) || '{}');
+    calendarResponses[body.provider ?? 'outlook'] = body.items ?? [];
+    return json(res, 200, { set: (body.items ?? []).length });
+  }
+  // The employee's progress on a draft expense in Concur (117a): Submitted, Approved, Paid.
+  if (path === '/_control/concur-draft' && req.method === 'POST') {
+    const body = JSON.parse((await readBody(req)) || '{}');
+    const draft = concurDrafts.get(body.id);
+    if (!draft) return json(res, 404, { error: `no draft ${body.id}` });
+    Object.assign(draft, {
+      Status: body.status ?? draft.Status,
+      ClaimedAmount: body.claimedAmount ?? draft.ClaimedAmount,
+      LastModified: new Date().toISOString(),
+    });
+    return json(res, 200, draft);
   }
   // Decides what a marketplace partner will answer for one booking (Phase 16, 092d).
   if (path === '/_control/partner-answer' && req.method === 'POST') {
@@ -632,11 +722,51 @@ const server = createServer(async (req, res) => {
   // bearer check.
   if (await handleNavan(req, res, url, path, readBody)) return;
 
+  if (adaptivePlanIgnoresCredential && req.method === 'GET' && path === '/adaptive/api/v2/plan')
+    return json(res, 200, adaptivePlan ?? ADAPTIVE_PLAN);
+
   if (!authorized(req, res)) return;
 
   if (req.method === 'GET') {
     const handler = FETCH_ROUTES[path];
     if (handler) return json(res, 200, handler(url));
+  }
+  // Workday Financials budget check (094): passes unless the ledger has less left than asked.
+  if (req.method === 'POST' && path === '/workday-financials/ccx/api/v1/budgetChecks') {
+    const body = JSON.parse((await readBody(req)) || '{}');
+    const left = WORKDAY_REMAINING[body.company];
+    if (!left) return json(res, 200, { result: 'passed' });
+    const passed = Number(body.amount) <= Number(left.amount);
+    return json(res, 200, {
+      result: passed ? 'passed' : 'failed',
+      reason: passed
+        ? undefined
+        : `company ${body.company} has ${left.currency} ${left.amount} left on its Workday budget`,
+      remaining: left,
+    });
+  }
+  // Concur draft expenses (117a): one draft per idempotency key, never submitted by BudgetFlow.
+  if (req.method === 'POST' && path === '/concur/api/v4/expense/drafts') {
+    const body = JSON.parse((await readBody(req)) || '{}');
+    const key = String(req.headers['idempotency-key'] ?? '');
+    if (key && concurDraftKeys.has(key))
+      return json(res, 200, concurDrafts.get(concurDraftKeys.get(key)));
+    if (!body.ExpenseTypeName) return json(res, 422, { error: 'expense type is required' });
+    if (/inactive/i.test(body.ExpenseTypeName))
+      return json(res, 422, { error: 'expense type is inactive' });
+    // Unique across resets, as a real tool's ids are: BudgetFlow keeps every draft id it was given.
+    const id = `CNR-DRAFT-${randomUUID().slice(0, 8).toUpperCase()}`;
+    const draft = {
+      ID: id,
+      Status: 'Draft',
+      ClaimedAmount: '',
+      CurrencyCode: body.TransactionCurrencyCode,
+      RequestRef: body.BudgetFlowRequestRef,
+      LastModified: new Date().toISOString(),
+    };
+    concurDrafts.set(id, draft);
+    if (key) concurDraftKeys.set(key, id);
+    return json(res, 201, draft);
   }
   if (req.method === 'POST') {
     const handler = PUSH_ROUTES[path];

@@ -33,6 +33,7 @@ import type {
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, gte, ne, sql } from 'drizzle-orm';
+import { assertBudgetCheckSetting, budgetCheckSetting } from './budget-check-setting';
 import { integrationsConfig } from './config';
 import { CONNECTORS, connectorFor, type ConnectorDefinition } from './connectors';
 import { decryptSecret, encryptSecret, type EncryptedSecret } from './crypto';
@@ -399,6 +400,9 @@ export class ConnectionsService {
         let settings: unknown = req.settings
           ? { ...(row.settings as object), ...req.settings }
           : row.settings;
+        if (req.settings) assertBudgetCheckSetting(row.provider, req.settings);
+        const checkBefore = budgetCheckSetting(row.settings);
+        const checkAfter = budgetCheckSetting(settings);
         if (row.provider === 'navan') {
           if (req.mode) assertNavanModeAllowed(req.mode);
           if (req.settings) settings = validNavanSettings(settings as Record<string, unknown>);
@@ -428,6 +432,14 @@ export class ConnectionsService {
             mode: { from: row.mode, to: req.mode ?? row.mode },
             paused: { from: Boolean(row.pausedAt), to: paused },
             schedules: { from: (row.schedules as unknown[]).length, to: schedules.length },
+            ...(checkBefore.enabled !== checkAfter.enabled || checkBefore.mode !== checkAfter.mode
+              ? {
+                  budgetCheck: {
+                    from: checkBefore.enabled ? checkBefore.mode : 'off',
+                    to: checkAfter.enabled ? checkAfter.mode : 'off',
+                  },
+                }
+              : {}),
           },
         });
         return this.detailTx(tx, await this.rowOrFail(tx, connectionId));

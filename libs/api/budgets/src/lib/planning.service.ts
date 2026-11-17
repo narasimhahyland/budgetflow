@@ -147,6 +147,25 @@ export class PlanningService {
     );
   }
 
+  /** The controlling version of a year and its lines, for imports that carry unchanged roots over. */
+  async controllingVersion(
+    tx: Tx,
+    fiscalYearId: string,
+  ): Promise<{
+    id: string;
+    label: string;
+    lines: (typeof planVersionLines.$inferSelect)[];
+  } | null> {
+    const pv = await this.controlling(tx, fiscalYearId);
+    if (!pv) return null;
+    const lines = await tx
+      .select()
+      .from(planVersionLines)
+      .where(eq(planVersionLines.planVersionId, pv.id))
+      .orderBy(asc(planVersionLines.lineNo));
+    return { id: pv.id, label: pv.label, lines };
+  }
+
   /**
    * Root authorized (from plan funding, before cross-root contingency releases, which net to zero across
    * roots of the year) and savings returned out of each root.
@@ -538,7 +557,31 @@ export class PlanningService {
     req: PlanImportRequest,
     ctx: CommandContext,
   ): Promise<PlanImportResult> {
-    const run = async (tx: Tx): Promise<PlanImportResult> => {
+    const run = (tx: Tx) => this.importPlanInTx(tx, actor, req, ctx);
+    if (req.dryRun) return this.tx(actor, run);
+    return (
+      await this.commands.run(
+        actor,
+        { idempotencyKey: ctx.idempotencyKey, operation: 'plan.import', request: req, status: 200 },
+        run,
+      )
+    ).body;
+  }
+
+  /**
+   * The plan import inside the caller's transaction, so a connector import (094a) creates its plan
+   * version with the same validation, audit and draft status as a spreadsheet upload.
+   */
+  async importPlanInTx(
+    tx: Tx,
+    actor: RequestActor,
+    req: PlanImportRequest,
+    ctx: Pick<CommandContext, 'requestId'> & {
+      /** Where the plan came from, recorded in the same single audit entry (094a). */
+      source?: { reason: string; changes: Record<string, { from: unknown; to: unknown }> };
+    },
+  ): Promise<PlanImportResult> {
+    {
       this.assertPlanManage(actor);
       const sheet = parseSheet(req.csv);
       const header = (name: string | undefined) =>
@@ -652,22 +695,16 @@ export class PlanningService {
         resourceType: 'plan_version',
         resourceId: pv.id,
         requestId: ctx.requestId,
+        reason: ctx.source?.reason ?? null,
         changes: {
           label: { from: null, to: req.label },
           rows: { from: null, to: rows.length },
           totalMinor: { from: null, to: result.totalMinor },
+          ...(ctx.source?.changes ?? {}),
         },
       });
       return { ...result, planVersion: await this.detail(tx, actor, pv) };
-    };
-    if (req.dryRun) return this.tx(actor, run);
-    return (
-      await this.commands.run(
-        actor,
-        { idempotencyKey: ctx.idempotencyKey, operation: 'plan.import', request: req, status: 200 },
-        run,
-      )
-    ).body;
+    }
   }
 
   approveVersion(actor: RequestActor, id: string, ctx: CommandContext) {

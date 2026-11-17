@@ -1170,6 +1170,45 @@
         ],
         "additionalProperties": false
       },
+      "AdaptivePlanImportResult": {
+        "type": "object",
+        "properties": {
+          "preview": {
+            "$ref": "#/components/schemas/AdaptivePlanPreview"
+          },
+          "planVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The draft plan version the import created; it posts nothing until approved and applied."
+          },
+          "planVersionLabel": {
+            "type": "string"
+          },
+          "planVersionStatus": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "approved",
+              "superseded"
+            ]
+          },
+          "syncRunId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          }
+        },
+        "required": [
+          "preview",
+          "planVersionId",
+          "planVersionLabel",
+          "planVersionStatus",
+          "syncRunId"
+        ],
+        "additionalProperties": false
+      },
       "AdaptivePlanLine": {
         "type": "object",
         "properties": {
@@ -1278,6 +1317,37 @@
               "type": "string"
             }
           },
+          "refusedRows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdaptivePlanRefusedRow"
+            },
+            "description": "Rows the import refuses, each with its reason; any refusal blocks the import."
+          },
+          "fiscalYearId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "description": "Opaque identifier (UUID)."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The BudgetFlow fiscal year the label resolves to."
+          },
+          "period": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanImportPeriod"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "totalDifferenceMinor": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -1297,9 +1367,28 @@
           "currency",
           "lines",
           "unmappedLevels",
+          "refusedRows",
+          "fiscalYearId",
+          "period",
           "totalDifferenceMinor",
           "requiresCeoApproval",
           "blocked"
+        ],
+        "additionalProperties": false
+      },
+      "AdaptivePlanRefusedRow": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "level",
+          "reason"
         ],
         "additionalProperties": false
       },
@@ -12928,7 +13017,8 @@
                     "plan",
                     "event_codes",
                     "card_limits",
-                    "actuals_export"
+                    "actuals_export",
+                    "expense_reports"
                   ],
                   "description": "What a sync run moves, in one direction, for one connector."
                 },
@@ -15526,6 +15616,12 @@
           "source"
         ],
         "additionalProperties": false
+      },
+      "CreateExpenseHandoffRequest": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "description": "The fields come from the approved request; nothing is typed again."
       },
       "CreateExportRequest": {
         "type": "object",
@@ -24617,6 +24713,247 @@
         ],
         "additionalProperties": false
       },
+      "ExpenseHandoffFields": {
+        "type": "object",
+        "properties": {
+          "requestRef": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "expenseType": {
+            "description": "From the connection's category mapping.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Calendar date, ISO 8601 (YYYY-MM-DD)."
+          },
+          "costCenterCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "eventCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "merchant": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "requestRef",
+          "title",
+          "expenseType",
+          "amount",
+          "date",
+          "costCenterCode",
+          "eventCode",
+          "merchant"
+        ],
+        "additionalProperties": false
+      },
+      "ExpenseHandoffView": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Opaque identifier (UUID)."
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "created",
+              "not_connected",
+              "not_approved",
+              "not_allowed"
+            ],
+            "description": "What the request page offers: create, show the status, copy details, or nothing."
+          },
+          "tool": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "erpnext",
+                      "odoo",
+                      "workday_financials",
+                      "netsuite",
+                      "adaptive_planning",
+                      "ramp",
+                      "brex",
+                      "concur",
+                      "navan",
+                      "coupa",
+                      "hr_file",
+                      "workday_hcm",
+                      "outlook",
+                      "google_calendar",
+                      "scim"
+                    ],
+                    "description": "External system BudgetFlow exchanges data with."
+                  },
+                  "displayName": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "provider",
+                  "displayName"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fields": {
+            "$ref": "#/components/schemas/ExpenseHandoffFields"
+          },
+          "handoff": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                    "description": "Opaque identifier (UUID)."
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft_created",
+                      "submitted",
+                      "approved",
+                      "paid"
+                    ]
+                  },
+                  "externalId": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "description": "Timestamp, ISO 8601 in UTC."
+                  },
+                  "createdByName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "statusChangedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "description": "Timestamp, ISO 8601 in UTC."
+                  },
+                  "history": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "draft_created",
+                            "submitted",
+                            "approved",
+                            "paid"
+                          ]
+                        },
+                        "at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                          "description": "Timestamp, ISO 8601 in UTC."
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "at"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "claimedAmount": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/Money"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "differenceMinor": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "Claimed minus approved, in the request currency; positive is above approved."
+                  }
+                },
+                "required": [
+                  "id",
+                  "status",
+                  "externalId",
+                  "createdAt",
+                  "createdByName",
+                  "statusChangedAt",
+                  "history",
+                  "claimedAmount",
+                  "differenceMinor"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "requestId",
+          "availability",
+          "tool",
+          "fields",
+          "handoff"
+        ],
+        "additionalProperties": false
+      },
       "ExplainTieOutLineRequest": {
         "type": "object",
         "properties": {
@@ -24689,6 +25026,102 @@
           "audited"
         ],
         "additionalProperties": false
+      },
+      "ExternalBudgetCheck": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "erpnext",
+              "odoo",
+              "workday_financials",
+              "netsuite",
+              "adaptive_planning",
+              "ramp",
+              "brex",
+              "concur",
+              "navan",
+              "coupa",
+              "hr_file",
+              "workday_hcm",
+              "outlook",
+              "google_calendar",
+              "scim"
+            ],
+            "description": "External system BudgetFlow exchanges data with."
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed",
+              "unavailable"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "warn",
+              "block"
+            ]
+          },
+          "blocksApproval": {
+            "type": "boolean",
+            "description": "Block mode with a failed or unreachable check disables Approve, with the reason."
+          },
+          "message": {
+            "type": "string",
+            "description": "Plain English, shown on the approval card."
+          },
+          "remaining": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What the ERP reports as left on the ledger, if it says."
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Timestamp, ISO 8601 in UTC."
+          }
+        },
+        "required": [
+          "provider",
+          "providerName",
+          "status",
+          "mode",
+          "blocksApproval",
+          "message",
+          "remaining",
+          "checkedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ExternalBudgetCheckList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalBudgetCheck"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "Empty when no connected ERP has the budget check switched on."
       },
       "ExtractedField": {
         "type": "object",
@@ -37133,6 +37566,44 @@
         "additionalProperties": false,
         "description": "Which spreadsheet column holds each field (by header name)."
       },
+      "PlanImportPeriod": {
+        "type": "object",
+        "properties": {
+          "effectiveDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "The date the planning system says the plan takes effect."
+          },
+          "periodLabel": {
+            "type": "string"
+          },
+          "periodStatus": {
+            "type": "string",
+            "enum": [
+              "open",
+              "soft_closed",
+              "closed",
+              "locked"
+            ]
+          },
+          "postsInPeriodLabel": {
+            "type": "string",
+            "description": "Nothing posts to a closed period: a late plan posts in the next open period."
+          },
+          "late": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "effectiveDate",
+          "periodLabel",
+          "periodStatus",
+          "postsInPeriodLabel",
+          "late"
+        ],
+        "additionalProperties": false
+      },
       "PlanImportRequest": {
         "type": "object",
         "properties": {
@@ -38987,6 +39458,10 @@
               "NAVAN_LIVE_DISABLED",
               "NAVAN_WRITE_SCOPE_MISSING",
               "NAVAN_FIELD_NOT_MAPPED",
+              "EXTERNAL_BUDGET_CHECK_FAILED",
+              "EXPENSE_HANDOFF_EXISTS",
+              "EXPENSE_HANDOFF_NOT_AVAILABLE",
+              "EXPENSE_TOOL_REJECTED",
               "PERIOD_CLOSE_BLOCKED",
               "CHECK_NOT_ACKNOWLEDGEABLE",
               "CONFIRMATION_MISMATCH",
@@ -47174,7 +47649,8 @@
               "plan",
               "event_codes",
               "card_limits",
-              "actuals_export"
+              "actuals_export",
+              "expense_reports"
             ],
             "description": "What a sync run moves, in one direction, for one connector."
           },
@@ -50363,7 +50839,8 @@
               "plan",
               "event_codes",
               "card_limits",
-              "actuals_export"
+              "actuals_export",
+              "expense_reports"
             ],
             "description": "What a sync run moves, in one direction, for one connector."
           },
@@ -50523,7 +51000,8 @@
               "plan",
               "event_codes",
               "card_limits",
-              "actuals_export"
+              "actuals_export",
+              "expense_reports"
             ],
             "description": "What a sync run moves, in one direction, for one connector."
           },
@@ -52551,7 +53029,8 @@
                     "plan",
                     "event_codes",
                     "card_limits",
-                    "actuals_export"
+                    "actuals_export",
+                    "expense_reports"
                   ],
                   "description": "What a sync run moves, in one direction, for one connector."
                 },
@@ -88437,7 +88916,8 @@
                 "plan",
                 "event_codes",
                 "card_limits",
-                "actuals_export"
+                "actuals_export",
+                "expense_reports"
               ],
               "description": "What a sync run moves, in one direction, for one connector."
             }
@@ -89556,6 +90036,422 @@
             }
           },
           "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/integrations/connections/{connectionId}/plan-import": {
+      "post": {
+        "operationId": "importAdaptivePlan",
+        "summary": "Import the planning system's plan as a draft plan version for the root budgets (094a); it posts once approved and applied",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdaptivePlanImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdaptivePlanImportResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/approvals/tasks/{taskId}/budget-checks": {
+      "get": {
+        "operationId": "listExternalBudgetChecks",
+        "summary": "The ERP budget check for an approval, run now (094, Workday Financials)",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalBudgetCheckList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requests/{requestId}/expense-handoff": {
+      "get": {
+        "operationId": "getExpenseHandoff",
+        "summary": "What the request page offers for the expense: create, status, or copy details (117a)",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseHandoffView"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createExpenseHandoff",
+        "summary": "Create a prefilled draft expense in the expense tool, once per approved request (117a)",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Opaque identifier (UUID)."
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": false,
+            "description": "Tenant to act in; required when the user belongs to more than one tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Unique per user action; a replay returns the first response without posting again.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExpenseHandoffRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseHandoffView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Problem details",
             "content": {
               "application/problem+json": {

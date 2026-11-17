@@ -44,7 +44,9 @@ import { SatImportantButton } from '@hylandsoftware/satori-ui/important-button';
 import { SAT_NAVIGATION_TABS_IMPORTS } from '@hylandsoftware/satori-ui/navigation-tabs';
 import { SatCategoryTag, SatStatusTag } from '@hylandsoftware/satori-ui/tag';
 import { data, errorMessage, injectApi, valueOf } from './api';
+import { BudgetCheckLine } from './budget-check-line';
 import { DocumentsPanel } from './documents-panel';
+import { ExpenseHandoffPanel } from './expense-handoff-panel';
 import { toMajor, toMinor } from './money-input';
 
 const KIND: Record<string, string> = {
@@ -86,6 +88,8 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
     SatAvatar,
     SatCategoryTag,
     SatImportantButton,
+    BudgetCheckLine,
+    ExpenseHandoffPanel,
     SatStatusTag,
     SpendStatus,
   ],
@@ -174,6 +178,7 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
             <h2 class="bf-card__title" id="decide-title">Your decision</h2>
           </div>
           <div class="bf-section">
+            <bf-budget-check-line [taskId]="r.myTaskId" />
             <bf-decision-form [task]="task.value()!" [busy]="busy()" (decide)="decide($event)" />
           </div>
         </section>
@@ -448,6 +453,9 @@ const asTab = (t: string | null): Tab => (t === 'history' || t === 'documents' ?
         @default {
           <div class="bf-layout">
             <div class="bf-layout__main">
+              @if (['approved', 'partially_approved'].includes(r.status) && r.kind === 'spending') {
+                <bf-expense-handoff-panel [requestId]="r.id" />
+              }
               <section class="bf-card" aria-labelledby="details-title">
                 <div class="bf-card__header">
                   <h2 class="bf-card__title" id="details-title">Request details</h2>

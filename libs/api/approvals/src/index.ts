@@ -5,3 +5,4 @@ export * from './lib/budget-impact';
 export * from './lib/routing.service';
 export * from './lib/sla-sweep.service';
 export * from './lib/approvals.module';
+export * from './lib/external-checks';

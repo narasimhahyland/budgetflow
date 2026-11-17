@@ -22,6 +22,7 @@ import {
   memberships,
   outboxMessages,
   people,
+  idempotencyKeys,
   withTenant,
   type Db,
   type Tx,
@@ -67,6 +68,7 @@ import {
 } from '@bf/domain';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lte, ne, or } from 'drizzle-orm';
+import { ExternalBudgetChecks } from './external-checks';
 import { ApprovalLinks } from './approval-links';
 import {
   ApprovalHandlers,
@@ -156,6 +158,7 @@ export class ApprovalsService {
     private readonly links: ApprovalLinks,
     private readonly notifications: NotificationsService,
     private readonly analytics: AnalyticsService,
+    private readonly externalChecks: ExternalBudgetChecks,
   ) {}
 
   /** Starts the route planned for a submitted subject: the instance, the first task and its email. */
@@ -325,7 +328,7 @@ export class ApprovalsService {
       .where(and(inArray(approvalTasks.instanceId, ids), eq(approvalTasks.status, 'pending')));
   }
 
-  decide(
+  async decide(
     actor: RequestActor,
     taskId: string,
     req: DecisionRequest,
@@ -335,6 +338,24 @@ export class ApprovalsService {
       channel?: 'web' | 'email' | 'slack' | 'teams' | 'mobile' | 'api';
     },
   ): Promise<CommandResult<DecisionResponse>> {
+    // 094: an ERP budget check (Workday Financials) runs before approving, outside the transaction.
+    // In Block mode a failed or unreachable check refuses the approval with the ERP's reason; in
+    // Warn mode the result is recorded with the decision.
+    const approving = req.decision === 'approve' || req.decision === 'approve_partial';
+    const checks =
+      approving && !(await this.finished(actor, ctx.idempotencyKey, `approvals.decide:${taskId}`))
+        ? await this.externalChecks.run(
+            actor,
+            taskId,
+            req.decision === 'approve_partial' ? (req.approvedAmount?.amountMinor ?? null) : null,
+          )
+        : [];
+    const blocking = checks.find((c) => c.blocksApproval);
+    if (blocking)
+      throw new ApiProblem(409, 'EXTERNAL_BUDGET_CHECK_FAILED', blocking.message, {
+        provider: blocking.providerName,
+        status: blocking.status,
+      });
     return this.commands.run(
       actor,
       {
@@ -348,8 +369,20 @@ export class ApprovalsService {
           channel: ctx.channel ?? 'web',
           requestId: ctx.requestId,
           idempotencyKey: ctx.idempotencyKey,
+          externalChecks: checks.map((c) => `${c.providerName}: ${c.status}`),
         }),
     );
+  }
+
+  /** Whether a command with this key already finished: a replay is answered without new checks. */
+  private async finished(actor: RequestActor, key: string, operation: string): Promise<boolean> {
+    return withTenant(this.db, { tenantId: actor.tenantId, subject: actor.subject }, async (tx) => {
+      const [prior] = await tx
+        .select({ status: idempotencyKeys.responseStatus })
+        .from(idempotencyKeys)
+        .where(and(eq(idempotencyKeys.key, key), eq(idempotencyKeys.operation, operation)));
+      return prior?.status != null;
+    });
   }
 
   /** The active delegation from `delegatorId` to `delegateId` on a date, for a spend type. */
@@ -397,6 +430,7 @@ export class ApprovalsService {
       channel: 'web' | 'email' | 'slack' | 'teams' | 'mobile' | 'api';
       requestId: string | null;
       idempotencyKey: string | null;
+      externalChecks?: string[];
     },
   ): Promise<DecisionResponse> {
     const [task] = await tx
@@ -659,6 +693,9 @@ export class ApprovalsService {
         decision: { from: null, to: req.decision },
         stepNo: { from: null, to: task.stepNo },
         channel: { from: null, to: opts.channel },
+        ...(opts.externalChecks?.length
+          ? { externalBudgetChecks: { from: null, to: opts.externalChecks } }
+          : {}),
         ...(approvedMinor !== null
           ? {
               approvedAmount: {

@@ -18,6 +18,8 @@ import {
   type Db,
   type Tx,
 } from '@bf/api/db';
+import { EventInvitationsService } from '@bf/api/events';
+import { ReferenceDataService } from '@bf/api/finance';
 import { HeadcountService } from '@bf/api/org';
 import type {
   IntegrationProvider,
@@ -48,6 +50,7 @@ import {
   type ConnectorContext,
 } from './connections.service';
 import { redact } from './crypto';
+import { ExpenseHandoffService } from './expense-handoff.service';
 import { classifyError, isRetryable, OutboundHttp, providerMessage } from './http';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -83,6 +86,8 @@ export const CONNECTOR_SCOPES: Action[] = [
   'actuals.manage',
   'headcount.import',
   'org.read',
+  'vendor.import',
+  'event.rsvp_sync',
 ];
 
 export const connectorActor = (actor: RequestActor, provider: string): RequestActor => ({
@@ -119,6 +124,9 @@ export class SyncService {
     private readonly imports: ImportsService,
     private readonly headcount: HeadcountService,
     private readonly audit: AuditService,
+    private readonly vendors: ReferenceDataService,
+    private readonly invitations: EventInvitationsService,
+    private readonly handoffs: ExpenseHandoffService,
   ) {}
 
   // Reads ---------------------------------------------------------------------------------------
@@ -505,14 +513,148 @@ export class SyncService {
       return this.applyWorkers(actor, usable, held.length, runId, ctx);
     }
 
-    // Suppliers, purchase orders, calendar responses and plan rows are read and reported; they feed
-    // review screens rather than changing data on their own.
+    if (spec.object === 'suppliers') {
+      return this.applySuppliers(actor, context, usable, held.length, runId, ctx);
+    }
+    if (spec.object === 'expense_reports') {
+      const res = await this.handoffs.applyStatuses(
+        actor,
+        context.connection.id,
+        usable.map((r) => ({
+          externalId: r.externalId,
+          status: r.data?.['status'] ?? '',
+          claimedAmount: r.data?.['claimedAmount'] ?? '',
+          currency: r.data?.['currency'] ?? '',
+        })),
+      );
+      for (const f of res.refused)
+        await this.recordFailure(actor, {
+          connectionId: context.connection.id,
+          syncRunId: runId,
+          direction: 'inbound',
+          item: `draft expense ${f.externalId}`,
+          error: f.reason,
+          statusCode: null,
+          payload: { externalId: f.externalId },
+          idempotencyKey: `handoff:${context.connection.id}:${f.externalId}`,
+          errorClass: 'validation',
+        });
+      return {
+        applied: res.applied,
+        duplicates: res.unchanged,
+        failed: res.refused.length + held.length,
+        importBatchId: null,
+        note: `${res.applied} hand-off status change(s) from ${context.connection.displayName}; ${res.unchanged} already up to date.`,
+      };
+    }
+    if (spec.object === 'calendar_responses') {
+      return this.applyCalendarResponses(actor, context, usable, held.length, runId, ctx);
+    }
+
+    // Purchase orders are read and reported; they feed the commitments review rather than changing
+    // data on their own.
     return {
       applied: usable.length,
       duplicates: 0,
       failed: held.length,
       importBatchId: null,
-      note: this.describe(spec.object, usable),
+      note: null,
+    };
+  }
+
+  /**
+   * ERP suppliers enter the vendor master (106c) through the finance service, as Unknown for review:
+   * the import never approves a vendor. Known ERP ids are duplicates; bad rows are refused with the
+   * reason and listed in the retry queue.
+   */
+  private async applySuppliers(
+    actor: RequestActor,
+    context: ConnectorContext,
+    records: InboundRecord[],
+    heldBack: number,
+    runId: string,
+    ctx: CommandContext,
+  ): Promise<ApplyOutcome> {
+    const res = await this.vendors.importVendors(
+      actor,
+      records.map((r) => ({
+        externalId: r.externalId,
+        name: r.data?.['name'] ?? '',
+        category: r.data?.['category'] || undefined,
+        country: r.data?.['country'] || undefined,
+      })),
+      {
+        idempotencyKey: `sync-vendors:${runId}`,
+        requestId: ctx.requestId,
+        source: context.connection.displayName,
+      },
+    );
+    for (const f of res.refused) {
+      await this.recordFailure(actor, {
+        connectionId: context.connection.id,
+        syncRunId: runId,
+        direction: 'inbound',
+        item: `supplier ${f.externalId}`,
+        error: f.reason,
+        statusCode: null,
+        payload: { externalId: f.externalId, name: f.name },
+        idempotencyKey: `vendor:${context.connection.id}:${f.externalId}`,
+        errorClass: 'validation',
+      });
+    }
+    const applied = res.created.length + res.linked.length;
+    return {
+      applied,
+      duplicates: res.duplicates,
+      failed: res.refused.length + heldBack,
+      importBatchId: null,
+      note: `${res.created.length} new vendor(s) waiting for review, ${res.linked.length} linked by name, ${res.duplicates} already known.`,
+    };
+  }
+
+  /**
+   * 097: Accepted becomes Going, Declined becomes Can't go, Tentative stays No response; the last
+   * answer wins across channels, so a response already recorded is not applied twice.
+   */
+  private async applyCalendarResponses(
+    actor: RequestActor,
+    context: ConnectorContext,
+    records: InboundRecord[],
+    heldBack: number,
+    runId: string,
+    ctx: CommandContext,
+  ): Promise<ApplyOutcome> {
+    const res = await this.invitations.applyCalendarResponses(
+      actor,
+      records.map((r) => ({
+        externalId: r.externalId,
+        eventCode: r.data?.['eventCode'] ?? '',
+        attendeeEmail: r.data?.['attendee'] ?? '',
+        response: (r.data?.['response'] ?? '').toLowerCase(),
+        at: r.data?.['at'] ?? '',
+      })),
+      { requestId: ctx.requestId, channel: context.connection.provider },
+    );
+    for (const f of res.refused) {
+      await this.recordFailure(actor, {
+        connectionId: context.connection.id,
+        syncRunId: runId,
+        direction: 'inbound',
+        item: `calendar response ${f.externalId}`,
+        error: f.reason,
+        statusCode: null,
+        payload: { externalId: f.externalId, attendee: f.attendee },
+        idempotencyKey: `rsvp:${context.connection.id}:${f.externalId}`,
+        errorClass: 'validation',
+      });
+    }
+    const by = (x: string) => records.filter((r) => r.data?.['response'] === x).length;
+    return {
+      applied: res.applied,
+      duplicates: res.unchanged,
+      failed: res.refused.length + heldBack,
+      importBatchId: null,
+      note: `Accepted ${by('accepted')}, Declined ${by('declined')}, Tentative ${by('tentative')} (Tentative counts as no response); ${res.applied} RSVP(s) changed, ${res.unchanged} already up to date, ${res.refused.length} refused.`,
     };
   }
 
@@ -547,13 +689,6 @@ export class SyncService {
       importBatchId: null,
       note: `Headcount snapshot created from ${active.length} worker(s); ${leavers} leaver(s) recorded. Snapshot ${res.body.snapshotId ?? ''}`.trim(),
     };
-  }
-
-  private describe(object: SyncObject, records: InboundRecord[]): string | null {
-    if (object !== 'calendar_responses') return null;
-    // 097: Accepted becomes Going, Declined becomes Can't go, Tentative stays No response.
-    const by = (r: string) => records.filter((x) => x.data?.['response'] === r).length;
-    return `Accepted ${by('accepted')}, Declined ${by('declined')}, Tentative ${by('tentative')} (Tentative counts as no response and gets one reminder).`;
   }
 
   private cursorFrom(rows: Record<string, unknown>[], spec: ObjectSpec): string | null {

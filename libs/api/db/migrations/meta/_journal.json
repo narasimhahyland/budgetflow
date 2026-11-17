@@ -204,6 +204,13 @@
       "when": 1794805818009,
       "tag": "0025_b5_finance_exports",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1794885781396,
+      "tag": "0030_b7_expense_handoffs",
+      "breakpoints": true
     }
   ]
 }

@@ -318,6 +318,11 @@ export const PROBLEM_CODES = [
   'NAVAN_LIVE_DISABLED',
   'NAVAN_WRITE_SCOPE_MISSING',
   'NAVAN_FIELD_NOT_MAPPED',
+  // Integration completeness (B7): applied imports, the ERP budget check, expense hand-off (117a)
+  'EXTERNAL_BUDGET_CHECK_FAILED',
+  'EXPENSE_HANDOFF_EXISTS',
+  'EXPENSE_HANDOFF_NOT_AVAILABLE',
+  'EXPENSE_TOOL_REJECTED',
   // Period close, year end and roll-forward (P11)
   'PERIOD_CLOSE_BLOCKED',
   'CHECK_NOT_ACKNOWLEDGEABLE',
