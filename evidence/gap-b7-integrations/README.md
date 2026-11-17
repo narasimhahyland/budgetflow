@@ -100,6 +100,9 @@ check; the hand-off sends no receipt.
 
 ## Gates
 
+After the second merge of `main` (#135 clock pin, #136 B5, #140): static **pass** and the API scenarios
+B7 touches **pass** ([`gate-summary-after-merge-2.txt`](gate-summary-after-merge-2.txt)).
+
 After merging `main` (B4, B8), on the final tree: static, `functional-api` and `functional-e2e`
 **pass** ([`gate-summary-after-merge.txt`](gate-summary-after-merge.txt)). The runs below are from
 before the merge.
