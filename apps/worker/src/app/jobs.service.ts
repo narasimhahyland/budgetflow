@@ -17,7 +17,7 @@ import {
   type ChannelDeliverJob,
   type PushSendJob,
 } from '@bf/api/channels';
-import { DB } from '@bf/api/core';
+import { DB, stampUtc } from '@bf/api/core';
 import {
   NAVAN_RUN_TOPIC,
   NavanSyncService,
@@ -429,7 +429,7 @@ export class JobsService implements OnApplicationBootstrap, OnApplicationShutdow
               );
               await tx
                 .update(outboxMessages)
-                .set({ publishedAt: new Date(), attempts: sql`${outboxMessages.attempts} + 1` })
+                .set({ publishedAt: stampUtc(), attempts: sql`${outboxMessages.attempts} + 1` })
                 .where(eq(outboxMessages.id, m.id));
             } catch (e) {
               await tx

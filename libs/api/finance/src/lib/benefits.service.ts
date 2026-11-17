@@ -8,6 +8,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   benefitThresholds,
@@ -882,7 +883,7 @@ export class BenefitsService {
         await this.checkInput(tx, body);
         const [row] = await tx
           .update(benefitThresholds)
-          .set({ ...this.values(body), updatedAt: new Date() })
+          .set({ ...this.values(body), updatedAt: stampUtc() })
           .where(eq(benefitThresholds.id, id))
           .returning();
         await this.audit.append(tx, {
@@ -945,15 +946,15 @@ export class BenefitsService {
           );
         const patch: Partial<typeof benefitThresholds.$inferInsert> = {
           status: next,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
         if (event === 'submit') {
           patch.submittedByPersonId = actor.personId;
-          patch.submittedAt = new Date();
+          patch.submittedAt = stampUtc();
           patch.comment = null;
         } else {
           patch.decidedByPersonId = actor.personId;
-          patch.decidedAt = new Date();
+          patch.decidedAt = stampUtc();
           if (event === 'publish') patch.effectiveFrom = body.effectiveFrom!;
           if (event === 'return') patch.comment = body.comment!;
         }

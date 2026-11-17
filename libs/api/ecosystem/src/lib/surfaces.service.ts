@@ -1,4 +1,4 @@
-import { ApiProblem, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, PolicyService, type RequestActor, stampUtc } from '@bf/api/core';
 import { ecosystemSurfaces, type Tx } from '@bf/api/db';
 import type { AssistantTool, BiDataset, EcosystemSurface, NoCodePlatform } from '@bf/contracts';
 import { Injectable } from '@nestjs/common';
@@ -82,7 +82,7 @@ export class EcosystemSurfacesService {
           enabled: next.enabled,
           config: next.config,
           updatedBy,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         },
       });
   }

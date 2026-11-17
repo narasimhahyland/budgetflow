@@ -5,6 +5,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { AuditService } from '@bf/api/audit';
 import {
@@ -771,12 +772,12 @@ export class PlanningService {
             [next] = await tx
               .update(planVersions)
               .set({
-                newMoneyFinanceApprovedAt: new Date(),
+                newMoneyFinanceApprovedAt: stampUtc(),
                 newMoneyFinanceApprovedBy: actor.personId,
                 ...(both
                   ? {
                       status: 'approved' as const,
-                      approvedAt: new Date(),
+                      approvedAt: stampUtc(),
                       approvedBy: actor.personId,
                     }
                   : {}),
@@ -792,12 +793,12 @@ export class PlanningService {
             [next] = await tx
               .update(planVersions)
               .set({
-                newMoneyCeoApprovedAt: new Date(),
+                newMoneyCeoApprovedAt: stampUtc(),
                 newMoneyCeoApprovedBy: actor.personId,
                 ...(both
                   ? {
                       status: 'approved' as const,
-                      approvedAt: new Date(),
+                      approvedAt: stampUtc(),
                       approvedBy: actor.personId,
                     }
                   : {}),
@@ -838,7 +839,7 @@ export class PlanningService {
             .update(planVersions)
             .set({
               status: 'approved',
-              approvedAt: new Date(),
+              approvedAt: stampUtc(),
               approvedBy: actor.personId,
               newMoneyFinanceApprovedAt: null,
               newMoneyFinanceApprovedBy: null,
@@ -1023,7 +1024,7 @@ export class PlanningService {
             .where(eq(planVersions.id, previous.id));
         const [updated] = await tx
           .update(planVersions)
-          .set({ appliedAt: new Date() })
+          .set({ appliedAt: stampUtc() })
           .where(eq(planVersions.id, id))
           .returning();
         await this.audit.append(tx, {

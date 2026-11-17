@@ -20,6 +20,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { AnalyticsService } from '@bf/api/tenancy';
 import type { TieOut, TieOutLineDetail, TieOutList } from '@bf/contracts';
@@ -342,7 +343,7 @@ export class TieOutService {
           .set({
             explanation: req.explanation,
             explainedBy: actor.personId,
-            explainedAt: new Date(),
+            explainedAt: stampUtc(),
           })
           .where(eq(glTieoutLines.id, lineId));
         await this.audit.append(tx, {
@@ -396,7 +397,7 @@ export class TieOutService {
           .set({
             status: 'signed_off',
             signedOffBy: actor.personId,
-            signedOffAt: new Date(),
+            signedOffAt: stampUtc(),
             signOffComment: req.comment ?? null,
           })
           .where(eq(glTieoutRuns.id, id))

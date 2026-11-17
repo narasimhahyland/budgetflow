@@ -115,6 +115,13 @@ export const ACTIONS = [
   'reclaim.redistribute',
   'burn_rate.run',
   /**
+   * Gap B5 (094b): finance and payroll exports. `finance_export.read` lists exports and their delivery
+   * status; their lines also need `actuals.read` (journals) or `benefits.read` (payroll, personal data).
+   * `finance_export.manage` creates, re-sends and marks exports posted.
+   */
+  'finance_export.read',
+  'finance_export.manage',
+  /**
    * Applied connector imports (B7). The connector identity holds these, never a person's role grant
    * beyond Finance: ERP suppliers enter the vendor master for review (never approved by the import),
    * and calendar responses become RSVPs through the same transition rules as an answer in the app.
@@ -242,6 +249,8 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'reclaim.manage': 'tenant',
     'reclaim.redistribute': 'tenant',
     'burn_rate.run': 'tenant',
+    'finance_export.read': 'tenant',
+    'finance_export.manage': 'tenant',
     'vendor.import': 'tenant',
   },
   'finance-controller': {
@@ -280,6 +289,7 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'benefits.manage': 'tenant',
     'reclaim.read': 'tenant',
     'burn_rate.run': 'tenant',
+    'finance_export.read': 'tenant',
   },
   'budget-owner': OWNER,
   'department-head': OWNER,
@@ -321,11 +331,13 @@ export const ROLE_GRANTS: Record<RoleId, Grants> = {
     'tax.read': 'tenant',
     'benefits.read': 'tenant',
     'reclaim.read': 'tenant',
+    'finance_export.read': 'tenant',
   },
   'integration-admin': {
     'tenant.read': 'tenant',
     'integration.manage': 'tenant',
     'integration.read': 'tenant',
+    'finance_export.read': 'tenant',
   },
   analyst: {
     'tenant.read': 'tenant',

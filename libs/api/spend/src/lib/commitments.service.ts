@@ -1,4 +1,4 @@
-import { ApiProblem, unwrap } from '@bf/api/core';
+import { ApiProblem, unwrap, stampUtc } from '@bf/api/core';
 import { budgets, commitmentFundingLines, commitments, vendors, type Tx } from '@bf/api/db';
 import type { EventCommitment } from '@bf/contracts';
 import {
@@ -287,7 +287,7 @@ export class CommitmentsService {
         status,
         amountMinor: approvedMinor,
         releasedMinor: commitment.releasedMinor + (commitment.amountMinor - approvedMinor),
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(eq(commitments.id, commitmentId));
     return { journalIds: [...enc.journalIds, ...rel.journalIds], status };
@@ -314,7 +314,7 @@ export class CommitmentsService {
       .set({
         status: this.transition(commitment, 'reject'),
         releasedMinor: commitment.releasedMinor + commitment.amountMinor,
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(eq(commitments.id, commitmentId));
     return { journalIds: rel.journalIds };
@@ -596,7 +596,7 @@ export class CommitmentsService {
       .set({
         status: this.transition(commitment, 'release'),
         releasedMinor: commitment.releasedMinor + releasedTx,
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(eq(commitments.id, commitmentId));
     return {
@@ -640,7 +640,7 @@ export class CommitmentsService {
     const status = this.transition(commitment, full ? 'match_full' : 'match_partial');
     await tx
       .update(commitments)
-      .set({ status, consumedMinor: consumed, updatedAt: new Date() })
+      .set({ status, consumedMinor: consumed, updatedAt: stampUtc() })
       .where(eq(commitments.id, commitment.id));
     return {
       journalIds: r.journalIds,

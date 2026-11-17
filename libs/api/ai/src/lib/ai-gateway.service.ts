@@ -7,6 +7,7 @@ import { allowedNumbers, figuresTraceable } from './figure-guard';
 import { minimize, minimizePrompt } from './minimization';
 import { AiProvider, type AiAttachment, type Fact } from './provider/ai-provider';
 import { AiQueryLogService, type ScopeSummary } from './query-log.service';
+import { stampUtc } from '@bf/api/core';
 
 export interface GatewayCall<T> {
   tx: Tx;
@@ -179,7 +180,9 @@ export class AiGateway {
       provider: this.provider.id,
       modelId: this.provider.modelId,
       modelVersion: this.provider.modelVersion,
-      generatedAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
+      generatedAt: stampUtc()
+        .toISOString()
+        .replace(/\.\d+Z$/, 'Z'),
       latencyMs,
     };
   }

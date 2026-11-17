@@ -1,4 +1,4 @@
-import { ApiProblem, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, PolicyService, type RequestActor, stampUtc } from '@bf/api/core';
 import { people, tenantSettings, type Tx } from '@bf/api/db';
 import {
   BRANDING_DEFAULTS,
@@ -122,7 +122,7 @@ export async function writeAdminSection<K extends keyof StoredAdminSettings>(
   if (row) {
     await tx
       .update(tenantSettings)
-      .set({ settings: next, updatedAt: new Date() })
+      .set({ settings: next, updatedAt: stampUtc() })
       .where(eq(tenantSettings.tenantId, tenantId));
     return;
   }

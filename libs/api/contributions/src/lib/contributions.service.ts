@@ -20,6 +20,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { DocumentsService } from '@bf/api/documents';
 import {
@@ -407,14 +408,14 @@ export class ContributionsService implements ApprovalSubjectHandler, OnModuleIni
         approvedMinor,
         mode,
         decidedByPersonId: ctx.actor.personId,
-        decidedAt: new Date(),
+        decidedAt: stampUtc(),
         reasonCode: ctx.reasonCode,
         message: ctx.reason,
         decisionReason: ctx.reason,
         fundingSourceId: source.id,
         rechargeScheduleId: rechargeId,
         intercompanyMode: cross ? c.intercompanyMode : null,
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(eq(contributionRequests.id, c.id));
     await this.hooks.fundingDecided(tx, ctx.actor, e.id, 'approved', 'additional_fund');
@@ -437,11 +438,11 @@ export class ContributionsService implements ApprovalSubjectHandler, OnModuleIni
       .set({
         status,
         decidedByPersonId: ctx.actor.personId,
-        decidedAt: new Date(),
+        decidedAt: stampUtc(),
         reasonCode: ctx.reasonCode,
         message: ctx.reason,
         decisionReason: ctx.reason,
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(eq(contributionRequests.id, c.id));
     return { status, changes: {} };
@@ -553,7 +554,7 @@ export class ContributionsService implements ApprovalSubjectHandler, OnModuleIni
             purpose: body.purpose,
             neededBy: body.neededBy ?? null,
             intercompanyMode,
-            submittedAt: new Date(),
+            submittedAt: stampUtc(),
           })
           .returning();
         const subject = (await this.load(tx, c.id))!;
@@ -655,7 +656,7 @@ export class ContributionsService implements ApprovalSubjectHandler, OnModuleIni
         await this.approvals.cancelFor(tx, 'contribution', c.id);
         await tx
           .update(contributionRequests)
-          .set({ status, updatedAt: new Date() })
+          .set({ status, updatedAt: stampUtc() })
           .where(eq(contributionRequests.id, c.id));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
@@ -700,7 +701,7 @@ export class ContributionsService implements ApprovalSubjectHandler, OnModuleIni
           cancelReason: reason,
           heldAt: null,
           holdReason: null,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         })
         .where(eq(contributionRequests.id, c.id));
       await this.audit.append(tx, {
@@ -760,7 +761,7 @@ export class ContributionsService implements ApprovalSubjectHandler, OnModuleIni
     for (const c of rows) {
       await tx
         .update(contributionRequests)
-        .set(hold ? { heldAt: new Date(), holdReason: reason } : { heldAt: null, holdReason: null })
+        .set(hold ? { heldAt: stampUtc(), holdReason: reason } : { heldAt: null, holdReason: null })
         .where(eq(contributionRequests.id, c.id));
       await this.audit.append(tx, {
         tenantId: actor.tenantId,

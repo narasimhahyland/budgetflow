@@ -8,6 +8,7 @@ import {
   type CommandResult,
   type RequestActor,
   nowUtc,
+  stampUtc,
 } from '@bf/api/core';
 import {
   actualMatches,
@@ -420,7 +421,7 @@ export class ExceptionsService {
             reclassifiedToGlCode: body.reclassifyGlCode ?? null,
             reversalJournalId,
             resolvedBy: actor.personId,
-            resolvedAt: new Date(),
+            resolvedAt: stampUtc(),
           })
           .where(eq(postSpendExceptions.id, row.id));
 

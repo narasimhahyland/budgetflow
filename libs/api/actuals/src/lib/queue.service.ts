@@ -23,6 +23,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { LedgerReads, toPostingBudget } from '@bf/api/ledger';
 import { AnalyticsService } from '@bf/api/tenancy';
@@ -636,7 +637,7 @@ export class QueueService {
           .set({
             status,
             approvedMinor: req.decision === 'approve' ? r.amountMinor : null,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(requests.id, r.id))
           .returning();

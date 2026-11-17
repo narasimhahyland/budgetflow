@@ -77,3 +77,19 @@ Desktop and tablet; mobile read-only list. Debit and credit columns are right-al
 - Each source item is exported once; resending needs a reason and is flagged as a duplicate send.
 - Exports must balance before sending; payroll exports total per person instead.
 - Delivery is by ERP connector when one is connected, otherwise by CSV or XLSX file.
+
+## As built (gap B5)
+
+- Types: intercompany recharges, chargeback and reclass, payroll benefits. Accruals keep their export on
+  080d; accruals, reversals and prepaid releases as types here are planned.
+- Chargeback and reclass are the manual journals and reversals that touch posted actual spend
+  (BudgetFlow moves cost between budgets through payables clearing, and corrects by reversal).
+- ERP accounts: actual spend uses the line's GL account, else the entity's mapping for the budget
+  category (employee attendees), else its "other" mapping; due from 1300, due to 2300, payables
+  clearing 2000, FX variance 7900, accrued 2100. Budget-control buckets never reach the GL, so a
+  journal that offsets actual spend only against them does not balance.
+- The period is a calendar month of accounting dates; each line also shows its entity's fiscal period.
+- Target is a file (CSV and XLSX produced together); an export is Sent when created. ERP connector
+  delivery, Acknowledged and Failed are planned.
+- Payroll exports need a legal entity and carry what became reportable since the last export.
+- The dialog works on every viewport; the list is not read-only on mobile.

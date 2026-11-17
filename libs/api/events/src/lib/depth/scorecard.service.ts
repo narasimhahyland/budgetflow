@@ -1,4 +1,4 @@
-import { ApiProblem, type CommandResult, type RequestActor } from '@bf/api/core';
+import { ApiProblem, type CommandResult, type RequestActor, stampUtc } from '@bf/api/core';
 import {
   budgets,
   commitments,
@@ -323,7 +323,7 @@ export class EventScorecardService {
           );
         await tx
           .update(events)
-          .set({ organizerNotes: body.notes, updatedAt: new Date() })
+          .set({ organizerNotes: body.notes, updatedAt: stampUtc() })
           .where(eq(events.id, e.id));
         await this.support.log(tx, actor, e, 'event.scorecard_notes_updated', ctx, {
           organizerNotes: { from: e.organizerNotes, to: body.notes },
@@ -344,7 +344,7 @@ export class EventScorecardService {
         query.onlyMine === 'true' ? e.organizerPersonId === actor.personId : true,
       );
       const summaries = await this.support.events.summariesOf(tx, rows);
-      const now = Date.now();
+      const now = stampUtc().getTime();
       const horizon = now + 30 * 86_400_000;
       const upcomingRows = rows.filter(
         (e) =>
@@ -497,7 +497,7 @@ export class EventScorecardService {
         });
       const closedCount = Math.max(closedRows.length, 1);
       return {
-        generatedAt: new Date().toISOString(),
+        generatedAt: stampUtc().toISOString(),
         kpis: {
           upcomingCount: upcomingRows.length,
           upcomingFunded: m(upcomingFunded),

@@ -1,4 +1,4 @@
-import { ApiProblem, type CommandResult, type RequestActor } from '@bf/api/core';
+import { ApiProblem, type CommandResult, type RequestActor, stampUtc } from '@bf/api/core';
 import {
   budgets,
   commitments,
@@ -355,7 +355,7 @@ export class EventAttendanceService {
             );
           await tx
             .update(events)
-            .set({ attendanceFinal: true, attendanceFinalAt: new Date(), updatedAt: new Date() })
+            .set({ attendanceFinal: true, attendanceFinalAt: stampUtc(), updatedAt: stampUtc() })
             .where(eq(events.id, e.id));
           await this.plan.completeSystemTask(tx, e.id, 'attendance', {
             id: e.id,
@@ -399,7 +399,7 @@ export class EventAttendanceService {
         if (body.action === 'keep_planned') {
           await tx
             .update(events)
-            .set({ splitKeepReason: body.reason, updatedAt: new Date() })
+            .set({ splitKeepReason: body.reason, updatedAt: stampUtc() })
             .where(eq(events.id, e.id));
           await this.support.log(
             tx,
@@ -461,10 +461,10 @@ export class EventAttendanceService {
         await tx
           .update(events)
           .set({
-            splitAppliedAt: new Date(),
+            splitAppliedAt: stampUtc(),
             splitAppliedByPersonId: actor.personId,
             splitKeepReason: null,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(events.id, e.id));
         const after = await this.view(tx, actor, (await this.support.events.row(tx, e.id))!);

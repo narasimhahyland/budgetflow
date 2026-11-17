@@ -22,6 +22,7 @@ import {
   type CommandResult,
   type RequestActor,
   todayUtc,
+  stampUtc,
 } from '@bf/api/core';
 import { LedgerReads, LedgerService, toPostingBudget } from '@bf/api/ledger';
 import type { Accrual, AccrualList } from '@bf/contracts';
@@ -202,7 +203,7 @@ export class AccrualsService {
         });
         const [after] = await tx
           .update(accruals)
-          .set({ status: 'posted', journalId, decidedBy: actor.personId, decidedAt: new Date() })
+          .set({ status: 'posted', journalId, decidedBy: actor.personId, decidedAt: stampUtc() })
           .where(eq(accruals.id, id))
           .returning();
         await this.audit.append(tx, {
@@ -248,7 +249,7 @@ export class AccrualsService {
           .set({
             status: 'rejected',
             decidedBy: actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionReason: req.reason,
           })
           .where(eq(accruals.id, id))
@@ -387,7 +388,7 @@ export class AccrualsService {
         if (rows.length)
           await tx
             .update(accruals)
-            .set({ exportedAt: new Date() })
+            .set({ exportedAt: stampUtc() })
             .where(
               inArray(
                 accruals.id,
@@ -512,7 +513,7 @@ export class AccrualsService {
             .set({
               consumedMinor: c.consumedMinor + drafts.reduce((s, d) => s + d.transactionMinor, 0),
               ...(next.ok ? { status: next.value } : {}),
-              updatedAt: new Date(),
+              updatedAt: stampUtc(),
             })
             .where(eq(commitments.id, c.id));
           total += delta;

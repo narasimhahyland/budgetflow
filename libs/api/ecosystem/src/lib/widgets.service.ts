@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   ecosystemCalls,
@@ -165,7 +166,7 @@ export class WidgetsService {
             showAmounts: req.showAmounts ?? before.showAmounts,
             eventCount: req.eventCount ?? before.eventCount,
             status: req.status ?? before.status,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(embeddedWidgets.id, widgetId))
           .returning();
@@ -210,7 +211,7 @@ export class WidgetsService {
         const before = await this.rowOrFail(tx, widgetId);
         const [row] = await tx
           .update(embeddedWidgets)
-          .set({ deletedAt: new Date(), status: 'paused', updatedAt: new Date() })
+          .set({ deletedAt: stampUtc(), status: 'paused', updatedAt: stampUtc() })
           .where(eq(embeddedWidgets.id, widgetId))
           .returning();
         await this.audit.append(tx, {
@@ -358,7 +359,7 @@ export class WidgetsService {
           ).map((r) => [r.eventId, r.rsvp] as const),
         )
       : new Map<string, string | null>();
-    const now = Date.now();
+    const now = stampUtc().getTime();
     return scoped
       .filter((e) => !e.startsAt || e.startsAt.getTime() >= now)
       .sort(
@@ -391,7 +392,7 @@ export class WidgetsService {
   }
 
   private async view(tx: Tx, row: typeof embeddedWidgets.$inferSelect): Promise<WidgetView> {
-    const since = new Date(Date.now() - MONTH_MS);
+    const since = new Date(stampUtc().getTime() - MONTH_MS);
     const [views] = await tx
       .select({ n: sql<number>`count(*)::int` })
       .from(ecosystemCalls)

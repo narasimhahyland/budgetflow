@@ -65,6 +65,8 @@ const NEEDS: Record<string, string> = {
   // Gap B3 (080g, 080h).
   'Tax recoverability': 'tax.read',
   'Employee benefits': 'benefits.read',
+  // Gap B5 (094b).
+  'Finance exports': 'finance_export.read',
   Reports: 'report.read',
   Utilization: 'report.read',
   'Forecast and variance': 'report.read',
@@ -213,6 +215,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Delegation of authority',
     'Tax recoverability',
     'Employee benefits',
+    'Finance exports',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
     ...INSIGHTS_DRAFTED,
@@ -240,6 +243,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Delegation of authority',
     'Tax recoverability',
     'Employee benefits',
+    'Finance exports',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
     ...INSIGHTS_DRAFTED,
@@ -276,6 +280,7 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Delegation of authority',
     'Tax recoverability',
     'Employee benefits',
+    'Finance exports',
     ...INSIGHTS_READ,
     'Board and FP&A pack',
     ...INSIGHTS_DRAFTED,
@@ -285,7 +290,14 @@ const EXPECTED: Record<RoleId, string[]> = {
     'Rules and policies',
     'AI accuracy',
   ],
-  'integration-admin': [...HOME, 'Events', 'Participation', ...PERSONAL, 'Integrations'],
+  'integration-admin': [
+    ...HOME,
+    'Events',
+    'Participation',
+    ...PERSONAL,
+    'Finance exports',
+    'Integrations',
+  ],
   // The analyst holds report.board_pack, so 016a is in their navigation; the audit entries are not.
   analyst: [
     ...HOME,

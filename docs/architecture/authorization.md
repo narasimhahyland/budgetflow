@@ -78,6 +78,8 @@ Generated from `ROLE_GRANTS` (regenerate this table when the rule table changes)
 | `reclaim.manage`         |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `reclaim.redistribute`   |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `burn_rate.run`          |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
+| `finance_export.read`    |  –  |  –  |  –  |  T  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  T  |  T  |  –  |
+| `finance_export.manage`  |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `vendor.import`          |  –  |  –  |  –  |  T  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 | `event.rsvp_sync`        |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |  –  |
 
@@ -95,6 +97,13 @@ Admin, Finance Admin, Finance Controller, Auditor). Retention policies stay read
 Phase 18 found and closed two operator reads (event templates and headcount); a sweep scenario keeps
 every parameter-free GET endpoint closed to a platform operator without a grant
 (`apps/api-e2e/src/scope/operator-isolation.spec.ts`).
+
+Gap B5 adds two actions for finance and payroll exports (094b). `finance_export.read` lists exports and
+their delivery status (Finance Admin, Finance Controller, Auditor, Integration Admin); opening an
+export's lines or files also needs `actuals.read` for journal exports or `benefits.read` for payroll
+exports, which carry personal data, so the Integration Admin sees the list and statuses but no lines.
+`finance_export.manage` (Finance Admin only) creates, re-sends and marks exports posted
+(`finance/finance-exports.spec.ts`).
 
 ## Ownership is not authority
 

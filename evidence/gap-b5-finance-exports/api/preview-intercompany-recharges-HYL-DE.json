@@ -1,0 +1,105 @@
+{
+  "request": "GET /api/finance/exports/preview?type=intercompany_recharges&period=2026-11&legalEntityId=20000000-0000-4000-8000-000000000003 (as finance-admin; token redacted)",
+  "status": 200,
+  "body": {
+    "type": "intercompany_recharges",
+    "period": "2026-11",
+    "periodLabel": "November 2026",
+    "legalEntityId": "20000000-0000-4000-8000-000000000003",
+    "legalEntityCode": "HYL-DE",
+    "includeExported": false,
+    "lines": [
+      {
+        "lineNo": 1,
+        "sourceType": "ledger_line",
+        "sourceRef": "1a5bb50e-dea5-4c33-83cd-f1c0279d9283",
+        "journalId": "e6793ab2-b03d-4d41-9775-d30cee2d068c",
+        "journalLineNo": 1,
+        "accountingDate": "2026-11-16",
+        "periodLabel": "Nov 2026",
+        "legalEntityId": "20000000-0000-4000-8000-000000000003",
+        "legalEntityCode": "HYL-DE",
+        "account": "1300",
+        "accountName": "Intercompany receivable",
+        "costCenter": null,
+        "eventCode": null,
+        "description": "Intercompany recharge HYL-DE to HYL-IN with markup USD 12.00",
+        "debit": {
+          "amountMinor": 25200,
+          "currency": "USD"
+        },
+        "credit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "transaction": {
+          "amountMinor": 25200,
+          "currency": "USD"
+        },
+        "rate": "1.000000000000",
+        "personId": null,
+        "personName": null,
+        "benefit": null,
+        "taxYear": null,
+        "reportable": null,
+        "alreadyExported": false,
+        "exportedIn": null
+      },
+      {
+        "lineNo": 2,
+        "sourceType": "ledger_line",
+        "sourceRef": "74c9d6b6-6d21-4f0c-a5e5-cb59d227bb90",
+        "journalId": "e6793ab2-b03d-4d41-9775-d30cee2d068c",
+        "journalLineNo": 2,
+        "accountingDate": "2026-11-16",
+        "periodLabel": "Nov 2026",
+        "legalEntityId": "20000000-0000-4000-8000-000000000002",
+        "legalEntityCode": "HYL-IN",
+        "account": "2300",
+        "accountName": "Intercompany payable",
+        "costCenter": null,
+        "eventCode": null,
+        "description": "Intercompany recharge HYL-DE to HYL-IN with markup USD 12.00",
+        "debit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "credit": {
+          "amountMinor": 25200,
+          "currency": "USD"
+        },
+        "transaction": {
+          "amountMinor": -25200,
+          "currency": "USD"
+        },
+        "rate": "1.000000000000",
+        "personId": null,
+        "personName": null,
+        "benefit": null,
+        "taxYear": null,
+        "reportable": null,
+        "alreadyExported": false,
+        "exportedIn": null
+      }
+    ],
+    "lineCount": 2,
+    "debitTotal": {
+      "amountMinor": 25200,
+      "currency": "USD"
+    },
+    "creditTotal": {
+      "amountMinor": 25200,
+      "currency": "USD"
+    },
+    "reportableTotal": null,
+    "personTotals": [],
+    "balanced": true,
+    "unmappedLines": 0,
+    "problem": null,
+    "nothingToExport": false,
+    "message": null,
+    "duplicates": 0,
+    "previousExports": [],
+    "canCreate": true
+  }
+}

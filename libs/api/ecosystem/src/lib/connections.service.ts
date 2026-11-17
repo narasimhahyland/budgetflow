@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   ecosystemCalls,
@@ -220,7 +221,7 @@ export class EcosystemConnectionsService {
         const [updated] = await tx
           .update(ecosystemConnections)
           .set({
-            revokedAt: new Date(),
+            revokedAt: stampUtc(),
             revokedBy: actor.personId,
             revokeReason: reason ?? null,
           })
@@ -293,7 +294,7 @@ export class EcosystemConnectionsService {
     await withTenant(this.db, { tenantId, subject: actor.subject }, (tx) =>
       tx
         .update(ecosystemConnections)
-        .set({ lastUsedAt: new Date() })
+        .set({ lastUsedAt: stampUtc() })
         .where(eq(ecosystemConnections.id, row.id)),
     );
     return {
@@ -333,7 +334,7 @@ export class EcosystemConnectionsService {
       detail: string;
     },
   ): Promise<number> {
-    const since = new Date(Date.now() - opts.windowMs);
+    const since = new Date(stampUtc().getTime() - opts.windowMs);
     const used = await withTenant(
       this.db,
       { tenantId: identity.actor.tenantId, subject: identity.actor.subject },
@@ -404,7 +405,7 @@ export class EcosystemConnectionsService {
 
   private async callCounts(tx: Tx, ids: readonly string[]): Promise<Map<string, number>> {
     if (ids.length === 0) return new Map();
-    const since = new Date(Date.now() - 7 * DAY_MS);
+    const since = new Date(stampUtc().getTime() - 7 * DAY_MS);
     const rows = await tx
       .select({
         connectionId: ecosystemCalls.connectionId,

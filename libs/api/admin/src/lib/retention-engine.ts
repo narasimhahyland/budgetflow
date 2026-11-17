@@ -8,6 +8,7 @@ import {
 } from '@bf/api/db';
 import type { RetentionCandidate } from '@bf/domain';
 import { and, eq, inArray, isNotNull, isNull, lt, sql } from 'drizzle-orm';
+import { stampUtc } from '@bf/api/core';
 
 /**
  * What a retention category actually does to the data. `collect` finds the records that are past
@@ -109,7 +110,7 @@ const leaverHandler: RetentionHandler = {
   },
   async apply(tx, ids) {
     if (!ids.length) return 0;
-    const now = new Date();
+    const now = stampUtc();
     for (const id of ids) {
       await tx
         .update(people)

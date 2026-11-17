@@ -1,5 +1,12 @@
 import { auditEvents, people, withTenant, type Db } from '@bf/api/db';
-import { CurrentActor, DB, parseWith, PolicyService, type RequestActor } from '@bf/api/core';
+import {
+  CurrentActor,
+  DB,
+  parseWith,
+  PolicyService,
+  type RequestActor,
+  stampUtc,
+} from '@bf/api/core';
 import { AuditEventQuery, type AuditEventList, type AuditVerification } from '@bf/contracts';
 import { Controller, Get, Inject, Query } from '@nestjs/common';
 import { and, asc, desc, eq, gt, inArray, lt, type SQL } from 'drizzle-orm';
@@ -93,6 +100,6 @@ export class AuditController {
       { tenantId: actor.tenantId, subject: actor.subject },
       (tx) => this.audit.verify(tx),
     );
-    return { ...v, verifiedAt: new Date().toISOString() };
+    return { ...v, verifiedAt: stampUtc().toISOString() };
   }
 }

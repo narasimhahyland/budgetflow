@@ -1,5 +1,5 @@
 import { AuditService } from '@bf/api/audit';
-import { CommandRunner, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { CommandRunner, DB, PolicyService, type RequestActor, stampUtc } from '@bf/api/core';
 import { budgets, rolloverPolicies, withTenant, type Db } from '@bf/api/db';
 import { BudgetViews } from '@bf/api/budgets';
 import type { AssignRolloverPolicyRequest, RolloverPolicy } from '@bf/contracts';
@@ -69,7 +69,7 @@ export class RolloverPoliciesService {
         }
         await tx
           .update(budgets)
-          .set({ rolloverPolicyId: req.rolloverPolicyId, updatedAt: new Date() })
+          .set({ rolloverPolicyId: req.rolloverPolicyId, updatedAt: stampUtc() })
           .where(eq(budgets.id, budget.id));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,

@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { clockIsPinned, nowUtc } from '@bf/api/core';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { chatConfig } from '@bf/api/channels';
@@ -17,6 +18,13 @@ async function bootstrap() {
   const port = Number(process.env.HEALTH_PORT ?? 3100);
   await app.listen(port, '0.0.0.0');
   Logger.log(`BudgetFlow worker running (health on port ${port})`, 'Bootstrap');
+  // Same warning as the API: a worker on a frozen clock says so in its own logs (FIXED_NOW).
+  if (clockIsPinned()) {
+    Logger.warn(
+      `Clock pinned: now is ${nowUtc().toISOString()}. Development and test only.`,
+      'Bootstrap',
+    );
+  }
 }
 
 void bootstrap();

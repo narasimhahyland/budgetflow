@@ -1,5 +1,5 @@
 import { AuditService } from '@bf/api/audit';
-import { ApiProblem, DB, nowUtc, todayUtc, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, nowUtc, todayUtc, type RequestActor, stampUtc } from '@bf/api/core';
 import {
   actuals,
   budgets,
@@ -742,7 +742,7 @@ export class NavanSyncService {
               status: after,
               externalId: ok ? `${fieldId}:${o.op.value}` : null,
               lastError: ok ? null : (r?.error ?? 'Navan did not report a result for this option.'),
-              pushedAt: ok ? new Date() : null,
+              pushedAt: ok ? stampUtc() : null,
             })
             .where(eq(integrationPushes.id, o.pushId));
           if (ok) {

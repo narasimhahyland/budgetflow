@@ -2,6 +2,7 @@ import { eventFundingSources, type Tx } from '@bf/api/db';
 import type { FundingSource } from '@bf/domain';
 import { Injectable } from '@nestjs/common';
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
+import { stampUtc } from '@bf/api/core';
 
 export type SourceRow = typeof eventFundingSources.$inferSelect;
 
@@ -86,7 +87,7 @@ export class FundingSourcesService {
         consumedMinor: sql`${eventFundingSources.consumedMinor} + ${delta.consumedMinor ?? 0}`,
         returnedMinor: sql`${eventFundingSources.returnedMinor} + ${delta.returnedMinor ?? 0}`,
         ...(delta.status ? { status: delta.status } : {}),
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(and(eq(eventFundingSources.id, id)));
   }

@@ -7,6 +7,7 @@ import {
   type CommandResult,
   type RequestActor,
   todayUtc,
+  stampUtc,
 } from '@bf/api/core';
 import {
   boardPackGenerations,
@@ -330,7 +331,7 @@ export class BoardPackService {
         rowCount: outcome.rowCount,
         failedPage: outcome.failedPage,
         error: outcome.error,
-        completedAt: new Date(),
+        completedAt: stampUtc(),
       })
       .where(eq(boardPackGenerations.id, row.id));
     await this.audit.append(tx, {
@@ -486,7 +487,7 @@ export class BoardPackService {
     const notes = [source.statement, FX_BRIDGE_NOTE];
     if (source.draft) notes.push('Every page of this pack is marked Draft.');
     return {
-      generatedAt: new Date().toISOString(),
+      generatedAt: stampUtc().toISOString(),
       currency: dataset.currency,
       title: `${actor.tenantName} \u2014 budget pack \u2014 ${period.label}`,
       source,

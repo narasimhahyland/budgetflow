@@ -1,0 +1,87 @@
+{
+  "request": "GET /api/finance/exports/preview?type=payroll_benefits&period=2026-11&legalEntityId=20000000-0000-4000-8000-000000000006 (as finance-admin; token redacted)",
+  "status": 200,
+  "body": {
+    "type": "payroll_benefits",
+    "period": "2026-11",
+    "periodLabel": "November 2026",
+    "legalEntityId": "20000000-0000-4000-8000-000000000006",
+    "legalEntityCode": "HYL-UK",
+    "includeExported": false,
+    "lines": [
+      {
+        "lineNo": 1,
+        "sourceType": "benefit",
+        "sourceRef": "benefit:40000000-0000-4000-8000-000000000151:95000000-0000-4000-8000-000000000001:2026-04-06:16800",
+        "journalId": null,
+        "journalLineNo": null,
+        "accountingDate": "2026-11-30",
+        "periodLabel": "November 2026",
+        "legalEntityId": "20000000-0000-4000-8000-000000000006",
+        "legalEntityCode": "HYL-UK",
+        "account": null,
+        "accountName": null,
+        "costCenter": null,
+        "eventCode": null,
+        "description": "UK annual staff functions: reportable benefit-in-kind",
+        "debit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "credit": {
+          "amountMinor": 0,
+          "currency": "USD"
+        },
+        "transaction": {
+          "amountMinor": 16800,
+          "currency": "GBP"
+        },
+        "rate": null,
+        "personId": "40000000-0000-4000-8000-000000000151",
+        "personName": "Oliver Hayes",
+        "benefit": "UK annual staff functions",
+        "taxYear": {
+          "fromDate": "2026-04-06",
+          "toDate": "2027-04-05"
+        },
+        "reportable": {
+          "amountMinor": 16800,
+          "currency": "GBP"
+        },
+        "alreadyExported": false,
+        "exportedIn": null
+      }
+    ],
+    "lineCount": 1,
+    "debitTotal": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "creditTotal": {
+      "amountMinor": 0,
+      "currency": "USD"
+    },
+    "reportableTotal": {
+      "amountMinor": 16800,
+      "currency": "GBP"
+    },
+    "personTotals": [
+      {
+        "personId": "40000000-0000-4000-8000-000000000151",
+        "personName": "Oliver Hayes",
+        "reportable": {
+          "amountMinor": 16800,
+          "currency": "GBP"
+        }
+      }
+    ],
+    "balanced": true,
+    "unmappedLines": 0,
+    "problem": null,
+    "nothingToExport": false,
+    "message": null,
+    "duplicates": 0,
+    "previousExports": [],
+    "canCreate": true
+  }
+}

@@ -12,3 +12,4 @@ export * from './lib/board-pack.service';
 export * from './lib/reports.controller';
 export * from './lib/reports.module';
 export * from './lib/evidence-packs.service';
+export * from './lib/finance-exports.service';

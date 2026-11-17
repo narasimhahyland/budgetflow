@@ -9,7 +9,7 @@ import {
   requests,
   type Tx,
 } from '@bf/api/db';
-import { ApiProblem, unwrap, type RequestActor } from '@bf/api/core';
+import { ApiProblem, unwrap, type RequestActor, stampUtc } from '@bf/api/core';
 import { BudgetViews } from '@bf/api/budgets';
 import { LedgerReads, LedgerService, toPostingBudget, type PostingBudget } from '@bf/api/ledger';
 import {
@@ -535,7 +535,7 @@ export class MatchEngine {
             .set({
               status: finalStatus,
               consumedMinor: after.consumedMinor + pre.transactionMinor,
-              updatedAt: new Date(),
+              updatedAt: stampUtc(),
             })
             .where(eq(commitments.id, c.id));
           Object.assign(c, after, {
@@ -608,7 +608,7 @@ export class MatchEngine {
         budgetCurrency: a.budgetCurrency ?? firstBudget?.currency ?? null,
         budgetAmountMinor: budgetSum,
         matchNote: null,
-        matchedAt: new Date(),
+        matchedAt: stampUtc(),
         matchedBy: actor.personId,
       })
       .where(eq(actuals.id, a.id));
@@ -670,7 +670,7 @@ export class MatchEngine {
     const status = unwrap(commitmentMachine.next(c.status, full ? 'match_full' : 'match_partial'));
     await tx
       .update(commitments)
-      .set({ consumedMinor: consumed, status, updatedAt: new Date() })
+      .set({ consumedMinor: consumed, status, updatedAt: stampUtc() })
       .where(eq(commitments.id, c.id));
     c.consumedMinor = consumed;
     c.status = status;
@@ -874,14 +874,14 @@ export class MatchEngine {
             releasedMinor: released,
             // A correction restores the encumbrance the reversed match relieved (ledger and row stay in step).
             status: consumed > 0 ? 'partially_consumed' : 'encumbered',
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(commitments.id, c.id));
       }
       await tx
         .update(actualMatches)
         .set({
-          reversedAt: new Date(),
+          reversedAt: stampUtc(),
           reversalJournalIds: reversals,
           reversalReason: `${o.reasonCode}: ${o.reason}`,
         })

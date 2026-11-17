@@ -1,0 +1,12 @@
+{
+  "request": "GET /api/finance/exports/preview?type=payroll_benefits... (as integration-admin; token redacted)",
+  "status": 403,
+  "body": {
+    "type": "urn:budgetflow:problem:forbidden",
+    "title": "Forbidden",
+    "status": 403,
+    "code": "FORBIDDEN",
+    "detail": "Payroll exports name employees; opening them needs access to employee benefits.",
+    "instance": "/api/finance/exports/preview"
+  }
+}

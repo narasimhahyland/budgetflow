@@ -48,7 +48,7 @@ named generically in fixtures; all data is fictional.
 
 Permissions: two new actions held by the connector's service identity, `vendor.import` (also
 Finance Admin) and `event.rsvp_sync` (no role) — [authorization matrix](../../docs/architecture/authorization.md).
-Migration `0030_b7_expense_handoffs` (RLS forced), regenerated on `main` after B4 (`0026`, `0028`) and B8 (`0029`); `0025` stays with B5. The snapshot is `meta/0028_snapshot.json`, by journal index.
+Migration `0030_b7_expense_handoffs` (RLS forced), regenerated on `main` after B4 (`0026`, `0028`), B8 (`0029`) and B5 (`0025`). The snapshot is `meta/0029_snapshot.json`, by journal index.
 
 Outbound calls: the plan read, the budget check and the draft creation run synchronously in the API
 with timeouts and retries (`OutboundHttp`), like the existing preview, test-connection and push

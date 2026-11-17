@@ -1,0 +1,28 @@
+Visual re-runs after the first full gate (12-13 November), on a machine running seven local stacks.
+
+1. scripts/gate.sh functional-e2e visual (16 November, logs tmp/gate/20261116-084733):
+   PASS secrets, stack, functional-e2e, reseed-visual
+   FAIL visual: 905 passed, 99 failed (1.0 h)
+     87 failed waiting for the Keycloak sign-in redirect late in the run (saved sessions expired), on
+        015c, 062, 080h, 092b, 092c, 092d, 094b (forbidden), 120a, 120b and AI screens.
+     12 screenshot differences:
+        092-integrations-hub read-only tablet  - the auditor's nav rail gains "Finance exports" (this package)
+        101-api-keys default and create-form desktop - pre-existing (seeded key expiry on the real clock; PR #123)
+        113a-ai-settings-query-log (9) - AI evaluation data differs (see 3)
+
+2. Targeted re-run with fresh sign-ins of every screen that failed in 1 except 101 and 113a (pinned image):
+   95 passed, 45 failed (25.2 min). All non-AI screens pass, including 094b (9/9) and 080h.
+   The 45 failures are the AI screens 011a, 016b, 017c, 022d, 061f, 069a, 080f and 121a.
+
+3. Cause of the AI differences: this worktree's stack has no Amazon Bedrock credentials (the root .env
+   is gitignored and the harness guard blocks creating one in .claude/worktrees/*), so the seed's AI
+   steps skip and those screens render their empty or not-configured states. Not related to this package;
+   CI with credentials, or a checkout with .env, renders the seeded AI data.
+
+4. Intentional baseline update: 092-integrations-hub--read-only--tablet.png, recreated with
+   `--update-snapshots -g "092-integrations-hub read-only"` in the pinned image (desktop and mobile
+   unchanged). Reason: the Finance exports navigation item for roles with finance_export.read.
+
+5. After merging origin/main (B2 part 2, B4, B8), 16 November: tablet visual run in the pinned image,
+   363 passed, 1 failed (113a query-log, AI data as in 3). 094b and 092 read-only tablet pass against
+   their baselines, so the interim 092 update in 4 is superseded by main's baseline.
