@@ -7,6 +7,7 @@ import { RecordAnalyticsResponse } from '@bf/contracts';
 import { SEED, userById } from '@bf/seed';
 import { as } from '../support/auth';
 import { expectContract, expectProblem } from '../support/contract';
+import { nowUtc } from '../support/clock';
 import { asAppRole } from '../support/db';
 
 const { acme: hyland, globex } = SEED.tenants;
@@ -108,7 +109,7 @@ test.describe('product analytics events', () => {
   }) => {
     for (const occurredAt of [
       '2020-01-01T00:00:00.000Z',
-      new Date(Date.now() + 2 * 60 * 60_000).toISOString(),
+      new Date(nowUtc().getTime() + 2 * 60 * 60_000).toISOString(),
     ]) {
       const route = markerRoute();
       await expectContract(
@@ -122,7 +123,8 @@ test.describe('product analytics events', () => {
         RecordAnalyticsResponse,
       );
       const at = await occurredAtFor(route);
-      expect(Math.abs(at.getTime() - Date.now())).toBeLessThan(5 * 60_000);
+      // Server time is the API's clock, which a test stack pins (support/clock).
+      expect(Math.abs(at.getTime() - nowUtc().getTime())).toBeLessThan(5 * 60_000);
     }
   });
 

@@ -1,4 +1,4 @@
-import { ApiProblem, DB, nowUtc, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, nowUtc, type RequestActor, stampUtc } from '@bf/api/core';
 import { aiConversations, aiConversationTurns, withTenant, type Db, type Tx } from '@bf/api/db';
 import type {
   AiChannel,
@@ -341,13 +341,15 @@ export class AiAskService {
       .returning({ id: aiConversationTurns.id });
     await tx
       .update(aiConversations)
-      .set({ lastAskedAt: new Date() })
+      .set({ lastAskedAt: stampUtc() })
       .where(eq(aiConversations.id, conversationId));
     return {
       ...answer,
       conversationId,
       turnId: turn.id,
-      asOf: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
+      asOf: stampUtc()
+        .toISOString()
+        .replace(/\.\d+Z$/, 'Z'),
     };
   }
 

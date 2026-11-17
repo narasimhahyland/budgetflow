@@ -6,6 +6,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   budgets,
@@ -252,7 +253,7 @@ export class ForecastCyclesService {
             threshold: thresholdOf(cycle),
           }),
         );
-        const now = new Date();
+        const now = stampUtc();
         const values = {
           tenantId: actor.tenantId,
           cycleId: cycle.id,
@@ -350,7 +351,7 @@ export class ForecastCyclesService {
         const next = unwrap(
           checkForecastDecision(cycle.status, snapshot.status as ForecastStatus, req.decision),
         );
-        const now = new Date();
+        const now = stampUtc();
         const [row] = await tx
           .update(forecastSnapshots)
           .set({
@@ -414,7 +415,7 @@ export class ForecastCyclesService {
           );
         unwrap(requireConfirmation(req.confirmation, forecastCloseConfirmationFor(cycle.name)));
         const lines = await this.lines(tx, cycle);
-        const now = new Date();
+        const now = stampUtc();
         const threshold = thresholdOf(cycle);
         let accepted = 0;
         let systemWritten = 0;
@@ -953,7 +954,7 @@ export class ForecastCyclesService {
       acceptedByName: line.snapshot?.acceptedBy
         ? (names.get(line.snapshot.acceptedBy) ?? null)
         : null,
-      updatedAt: (line.snapshot?.updatedAt ?? line.snapshot?.createdAt ?? new Date()).toISOString(),
+      updatedAt: (line.snapshot?.updatedAt ?? line.snapshot?.createdAt ?? stampUtc()).toISOString(),
     };
   }
 }

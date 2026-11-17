@@ -8,6 +8,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   budgetCategories,
@@ -536,7 +537,7 @@ export class TaxService {
               notes: r.notes ?? null,
             })),
           );
-        await tx.update(taxRuleSets).set({ updatedAt: new Date() }).where(eq(taxRuleSets.id, s.id));
+        await tx.update(taxRuleSets).set({ updatedAt: stampUtc() }).where(eq(taxRuleSets.id, s.id));
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
           actorPersonId: actor.personId,
@@ -613,15 +614,15 @@ export class TaxService {
           );
         const patch: Partial<typeof taxRuleSets.$inferInsert> = {
           status: next,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
         if (event === 'submit') {
           patch.submittedByPersonId = actor.personId;
-          patch.submittedAt = new Date();
+          patch.submittedAt = stampUtc();
           patch.comment = null;
         } else {
           patch.decidedByPersonId = actor.personId;
-          patch.decidedAt = new Date();
+          patch.decidedAt = stampUtc();
           if (event === 'publish') patch.effectiveFrom = body.effectiveFrom!;
           if (event === 'return') patch.comment = body.comment!;
         }

@@ -1,4 +1,10 @@
-import { ApiProblem, type CommandResult, type RequestActor, todayUtc } from '@bf/api/core';
+import {
+  ApiProblem,
+  type CommandResult,
+  type RequestActor,
+  todayUtc,
+  stampUtc,
+} from '@bf/api/core';
 import { eventAgendaItems, eventChecklists, eventTemplates, type Tx } from '@bf/api/db';
 import type {
   EventAgendaItem,
@@ -248,11 +254,11 @@ export class EventPlanService {
             'This task completes on its own when the work it links to is done.',
           );
         // An assignee who does not organize the event may complete and comment, nothing else.
-        const patch: Partial<typeof eventChecklists.$inferInsert> = { updatedAt: new Date() };
+        const patch: Partial<typeof eventChecklists.$inferInsert> = { updatedAt: stampUtc() };
         const changes: Record<string, { from: unknown; to: unknown }> = {};
         if (body.status !== undefined) {
           patch.status = body.status;
-          patch.completedAt = body.status === 'done' ? new Date() : null;
+          patch.completedAt = body.status === 'done' ? stampUtc() : null;
           changes['status'] = { from: task.status, to: body.status };
         }
         if (canManage) {
@@ -282,7 +288,7 @@ export class EventPlanService {
             id: randomUUID(),
             authorName: (actor.personId && names.get(actor.personId)) || 'Someone',
             text: body.comment,
-            createdAt: new Date().toISOString(),
+            createdAt: stampUtc().toISOString(),
           };
           patch.comments = [...((task.comments ?? []) as Comment[]), comment];
           changes['comments'] = { from: null, to: comment.text };
@@ -379,7 +385,7 @@ export class EventPlanService {
               ? { visibleToInvitees: body.visibleToInvitees }
               : {}),
             ...(body.sortOrder !== undefined ? { sortOrder: body.sortOrder } : {}),
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(eventAgendaItems.id, item.id));
         await this.support.log(tx, actor, e, 'event.agenda_item_updated', ctx, {
@@ -409,10 +415,10 @@ export class EventPlanService {
       .update(eventChecklists)
       .set({
         status: 'done',
-        completedAt: new Date(),
+        completedAt: stampUtc(),
         linkedItemId: linked.id,
         linkedLabel: linked.label,
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(
         and(

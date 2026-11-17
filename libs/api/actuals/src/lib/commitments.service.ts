@@ -19,6 +19,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { BenefitsService } from '@bf/api/finance';
 import { LedgerReads } from '@bf/api/ledger';
@@ -299,7 +300,7 @@ export class CommitmentsService {
     const consumed = c.consumedMinor + deposit.transactionMinor + feeTx;
     await tx
       .update(commitments)
-      .set({ consumedMinor: consumed, feesMinor: c.feesMinor + feeTx, updatedAt: new Date() })
+      .set({ consumedMinor: consumed, feesMinor: c.feesMinor + feeTx, updatedAt: stampUtc() })
       .where(eq(commitments.id, c.id));
     Object.assign(c, { consumedMinor: consumed, feesMinor: c.feesMinor + feeTx });
     journals.push(...(await this.relief.releaseRest(tx, actor, c, accountingDate, opts)));
@@ -318,7 +319,7 @@ export class CommitmentsService {
       .set({
         status: nextStatus,
         releasedMinor: Math.max(c.amountMinor - consumed, 0),
-        updatedAt: new Date(),
+        updatedAt: stampUtc(),
       })
       .where(eq(commitments.id, c.id));
     // Gap B3 (080h): a request released before anything was spent gave nobody a benefit, so its

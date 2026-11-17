@@ -1,4 +1,4 @@
-import { DB, PolicyService, type RequestActor, todayUtc } from '@bf/api/core';
+import { DB, PolicyService, type RequestActor, todayUtc, stampUtc } from '@bf/api/core';
 import {
   auditEvents,
   budgets,
@@ -196,7 +196,7 @@ export class ExperienceService {
       const to = query.to ?? todayUtc();
       const from =
         query.from ??
-        new Date(Date.now() - DEFAULT_ACTIVITY_DAYS * 24 * 60 * 60 * 1000)
+        new Date(stampUtc().getTime() - DEFAULT_ACTIVITY_DAYS * 24 * 60 * 60 * 1000)
           .toISOString()
           .slice(0, 10);
       const limit = query.limit ?? DEFAULT_ACTIVITY_LIMIT;

@@ -1,5 +1,5 @@
 import { auditChainHeads, auditEvents, type Tx } from '@bf/api/db';
-import { sha256Hex } from '@bf/api/core';
+import { sha256Hex, stampUtc } from '@bf/api/core';
 import {
   AUDIT_GENESIS_HASH,
   auditHash,
@@ -63,7 +63,7 @@ export class AuditService {
       .from(auditChainHeads)
       .where(eq(auditChainHeads.tenantId, entry.tenantId))
       .for('update');
-    const occurredAt = new Date(new Date().toISOString());
+    const occurredAt = new Date(stampUtc().toISOString());
     const row: AuditRow = {
       id: randomUUID(),
       tenantId: entry.tenantId,

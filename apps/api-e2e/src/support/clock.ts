@@ -14,13 +14,22 @@ import { join } from 'node:path';
 
 const SCREENS = join(__dirname, '../../../web-e2e/visual/screens.json');
 
+/** Whether the stack runs on a pinned clock (anything but BF_FIXED_NOW=real with a freezeTime to read). */
+let pinned = false;
+
 function resolveNow(): Date {
   const override = process.env.BF_FIXED_NOW?.trim();
-  if (override && override !== 'real') return new Date(override);
+  if (override && override !== 'real') {
+    pinned = true;
+    return new Date(override);
+  }
   if (override === 'real') return new Date();
   try {
     const { freezeTime } = JSON.parse(readFileSync(SCREENS, 'utf8')) as { freezeTime?: string };
-    if (typeof freezeTime === 'string' && freezeTime) return new Date(freezeTime);
+    if (typeof freezeTime === 'string' && freezeTime) {
+      pinned = true;
+      return new Date(freezeTime);
+    }
   } catch {
     // No screens.json (or unreadable): the stack is on the real clock, so the scenario is too.
   }
@@ -31,6 +40,9 @@ const now = resolveNow();
 
 /** The instant the API treats as now. Resolved once, so a long run cannot straddle midnight. */
 export const nowUtc = (): Date => new Date(now);
+
+/** True when the stack's clock is pinned (`FIXED_NOW`), false on the real clock. */
+export const clockIsPinned = (): boolean => pinned;
 
 /** Today as `YYYY-MM-DD` in UTC, matching the API's `todayUtc`. */
 export const todayUtc = (): string => nowUtc().toISOString().slice(0, 10);

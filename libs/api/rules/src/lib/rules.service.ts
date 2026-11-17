@@ -9,6 +9,7 @@ import {
   type RequestActor,
   todayUtc,
   nowUtc,
+  stampUtc,
 } from '@bf/api/core';
 import {
   postSpendExceptions,
@@ -830,7 +831,7 @@ export class RulesService {
           .set({
             name: body.name ?? rule.name,
             draftVersion,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(rules.id, ruleId));
 
@@ -905,7 +906,7 @@ export class RulesService {
         }
 
         const validFrom = body.validFrom ?? draft.validFrom;
-        const now = new Date();
+        const now = stampUtc();
         const priorActive = rule.activeVersion;
         if (priorActive !== null) {
           await tx
@@ -992,7 +993,7 @@ export class RulesService {
         if (rule.status === 'retired') {
           throw new ApiProblem(409, 'INVALID_TRANSITION', 'This rule is already retired.');
         }
-        const now = new Date();
+        const now = stampUtc();
         await tx
           .update(rules)
           .set({ status: 'retired', retiredReason: body.reason, retiredAt: now, updatedAt: now })
@@ -1099,7 +1100,7 @@ export class RulesService {
         });
         await tx
           .update(rules)
-          .set({ draftVersion: nextVersion, updatedAt: new Date() })
+          .set({ draftVersion: nextVersion, updatedAt: stampUtc() })
           .where(eq(rules.id, ruleId));
 
         await this.audit.append(tx, {
@@ -1192,13 +1193,13 @@ export class RulesService {
               explanation: version.explanation,
               validFrom: todayUtc(),
               validTo: version.validTo,
-              publishedAt: new Date(),
+              publishedAt: stampUtc(),
               publishedBy: actor.personId,
               createdBy: actor.personId,
             });
             await tx
               .update(rules)
-              .set({ activeVersion: nextVersion, updatedAt: new Date() })
+              .set({ activeVersion: nextVersion, updatedAt: stampUtc() })
               .where(eq(rules.id, rule.id));
           }
           changed[rule.code] = { from: version.priority, to: item.priority };

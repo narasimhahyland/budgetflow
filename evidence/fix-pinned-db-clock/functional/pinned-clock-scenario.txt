@@ -1,0 +1,3 @@
+  ✓  1 apps/api-e2e/src/quality/pinned-clock.spec.ts:46:7 › the API and the worker write on the pinned clock › a budget, its audit entry and the worker publication carry the API day, in order (1.1s)
+  ✓  2 apps/api-e2e/src/quality/pinned-clock.spec.ts:107:7 › the API and the worker write on the pinned clock › a ledger rebuild check requested through the API and run by the worker is stamped on the API day, in order (2.8s)
+  2 passed (4.9s)

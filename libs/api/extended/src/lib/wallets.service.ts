@@ -7,6 +7,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   budgets,
@@ -142,7 +143,7 @@ export class WalletsService {
           carryUnused: req.carryUnused ?? false,
           reviewerPersonId: req.reviewerPersonId ?? null,
           active: req.active ?? true,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
         const [row] = existing
           ? await tx
@@ -403,7 +404,7 @@ export class WalletsService {
           .set({
             status: req.decision === 'approve' ? 'encumbered' : 'released',
             releasedMinor: req.decision === 'approve' ? 0 : amount,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(commitments.id, claim.commitmentId!));
         await tx
@@ -411,10 +412,10 @@ export class WalletsService {
           .set({
             status: req.decision === 'approve' ? 'approved' : 'returned',
             reviewerPersonId: actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionReason: req.reason,
             journalIds: [...claim.journalIds, ...journalIds],
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(walletClaims.id, id));
         await this.audit.append(tx, {
@@ -478,16 +479,16 @@ export class WalletsService {
         );
         await tx
           .update(commitments)
-          .set({ status: 'consumed', consumedMinor: amount, updatedAt: new Date() })
+          .set({ status: 'consumed', consumedMinor: amount, updatedAt: stampUtc() })
           .where(eq(commitments.id, claim.commitmentId!));
         await tx
           .update(walletClaims)
           .set({
             status: 'paid',
             paidVia: req.via,
-            paidAt: new Date(),
+            paidAt: stampUtc(),
             journalIds: [...claim.journalIds, ...journalIds],
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(walletClaims.id, id));
         await this.audit.append(tx, {
@@ -689,9 +690,9 @@ export class WalletsService {
         allowanceMinor: allowance,
         proratedAllowanceMinor: prorated,
         currency: program.currency,
-        closedAt: person.endDate && person.endDate < todayUtc() ? new Date() : null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        closedAt: person.endDate && person.endDate < todayUtc() ? stampUtc() : null,
+        createdAt: stampUtc(),
+        updatedAt: stampUtc(),
       } as WalletRow;
     }
     const [created] = await tx
@@ -704,7 +705,7 @@ export class WalletsService {
         allowanceMinor: allowance,
         proratedAllowanceMinor: prorated,
         currency: program.currency,
-        closedAt: person.endDate && person.endDate < todayUtc() ? new Date() : null,
+        closedAt: person.endDate && person.endDate < todayUtc() ? stampUtc() : null,
       })
       .onConflictDoNothing()
       .returning();

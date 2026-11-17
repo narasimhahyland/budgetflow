@@ -7,6 +7,7 @@ import {
   type RequestActor,
   todayUtc,
   nowUtc,
+  stampUtc,
 } from '@bf/api/core';
 import {
   adminChangeRequests,
@@ -346,7 +347,7 @@ export class UserAdminService {
             requestedBySubject: actor.subject,
             status: needsConfirmation ? 'pending' : 'applied',
             needsConfirmation,
-            decidedAt: needsConfirmation ? null : new Date(),
+            decidedAt: needsConfirmation ? null : stampUtc(),
           })
           .returning();
 
@@ -469,7 +470,7 @@ export class UserAdminService {
           .set({
             status,
             confirmedByPersonId: req.decision === 'cancel' ? null : actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionReason: req.reason,
           })
           .where(eq(adminChangeRequests.id, change.id));
@@ -679,7 +680,7 @@ export class UserAdminService {
                 displayName: r.displayName,
                 proposedRole: r.proposedRole,
                 expiresAt: r.expiresAt.toISOString(),
-                occurredAt: new Date().toISOString(),
+                occurredAt: stampUtc().toISOString(),
               },
             })),
           );

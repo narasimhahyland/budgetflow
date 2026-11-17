@@ -1,5 +1,5 @@
 import { productAnalyticsEvents, withTenant, type Db, type Tx } from '@bf/api/db';
-import { DB, type RequestActor } from '@bf/api/core';
+import { DB, type RequestActor, stampUtc } from '@bf/api/core';
 import type {
   AnalyticsEventName,
   RecordAnalyticsRequest,
@@ -34,7 +34,7 @@ export class AnalyticsService {
   async record(
     actor: RequestActor,
     input: RecordAnalyticsRequest,
-    now = new Date(),
+    now = stampUtc(),
   ): Promise<RecordAnalyticsResponse> {
     const rows = input.events.map((e) => {
       const client = e.occurredAt ? new Date(e.occurredAt) : null;

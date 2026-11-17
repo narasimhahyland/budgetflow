@@ -9,6 +9,7 @@ import {
   unwrap,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import { DocumentsService } from '@bf/api/documents';
 import {
@@ -234,7 +235,7 @@ export class EventsService implements OnModuleInit {
   ) {
     await tx
       .update(events)
-      .set({ status, updatedAt: new Date(), ...extra })
+      .set({ status, updatedAt: stampUtc(), ...extra })
       .where(eq(events.id, e.id));
   }
 
@@ -421,7 +422,7 @@ export class EventsService implements OnModuleInit {
       );
     const code =
       body.eventCode ??
-      `EV-${new Date().getUTCFullYear()}-${randomBytes(3).toString('hex').toUpperCase()}`;
+      `EV-${stampUtc().getUTCFullYear()}-${randomBytes(3).toString('hex').toUpperCase()}`;
     const [dup] = await tx.select({ id: events.id }).from(events).where(eq(events.eventCode, code));
     if (dup)
       throw new ApiProblem(409, 'DUPLICATE_CODE', 'Another event uses this event code.', {
@@ -518,7 +519,7 @@ export class EventsService implements OnModuleInit {
         const changes: Record<string, { from: unknown; to: unknown }> = {};
         const patch: Partial<typeof events.$inferInsert> = {
           version: e.version + 1,
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         };
         for (const k of [
           'name',
@@ -597,7 +598,7 @@ export class EventsService implements OnModuleInit {
         const e = (await this.visible(tx, actor, id, true)) as EventRow;
         const next = unwrap(eventMachine.next(e.status, 'submit'));
         const home = (await this.home(tx, e))!;
-        await this.setStatus(tx, e, next, { submittedAt: new Date() });
+        await this.setStatus(tx, e, next, { submittedAt: stampUtc() });
         let requestId: string | null = null;
         if (e.ownFundsMinor > 0) {
           requestId = await this.requests.createEventBudgetRequest(
@@ -792,7 +793,7 @@ export class EventsService implements OnModuleInit {
         .update(contributionRequests)
         .set({
           status: unwrap(contributionMachine.next(c.status, 'settle')),
-          updatedAt: new Date(),
+          updatedAt: stampUtc(),
         })
         .where(eq(contributionRequests.id, c.id));
     }
@@ -826,7 +827,7 @@ export class EventsService implements OnModuleInit {
           e,
           this.pc(actor, 'events.close', ctx),
         );
-        await this.setStatus(tx, e, closed, { closedAt: new Date() });
+        await this.setStatus(tx, e, closed, { closedAt: stampUtc() });
         const benefitEntryIds = await this.recordAttendeeBenefits(tx, actor, e);
         await this.audit.append(tx, {
           tenantId: actor.tenantId,
@@ -906,7 +907,7 @@ export class EventsService implements OnModuleInit {
           await this.approvals.cancelFor(tx, 'contribution', c.id);
           await tx
             .update(contributionRequests)
-            .set({ status: 'cancelled', cancelReason: 'Event cancelled', updatedAt: new Date() })
+            .set({ status: 'cancelled', cancelReason: 'Event cancelled', updatedAt: stampUtc() })
             .where(eq(contributionRequests.id, c.id));
         }
         const { journalIds, returns } = await this.returnFunding(tx, actor, e, pc);
@@ -1200,7 +1201,7 @@ export class EventsService implements OnModuleInit {
     if (!attended.length) return [];
     // Final cost in the event currency: consumed amounts in another currency convert at the
     // locked plan rate of the event date (integer minor units, half-even once per commitment).
-    const day = (e.endsAt ?? e.startsAt ?? new Date()).toISOString().slice(0, 10);
+    const day = (e.endsAt ?? e.startsAt ?? stampUtc()).toISOString().slice(0, 10);
     let actualMinor = 0;
     try {
       for (const c of await this.commitmentsService.listForEvent(tx, e.id)) {

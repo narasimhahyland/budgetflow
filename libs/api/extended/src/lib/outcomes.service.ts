@@ -1,4 +1,4 @@
-import { ApiProblem, DB, PolicyService, type RequestActor } from '@bf/api/core';
+import { ApiProblem, DB, PolicyService, type RequestActor, stampUtc } from '@bf/api/core';
 import {
   budgetCategories,
   budgets,
@@ -97,7 +97,7 @@ export class OutcomesService {
       const enoughData =
         pulse.groupSize >= MIN_SURVEY_RESPONSES || categories.some((c) => c.eventCount > 0);
       return {
-        asOf: iso(new Date()),
+        asOf: iso(stampUtc()),
         fiscalYearId: year.id,
         associationNote: ASSOCIATION_NOTE,
         thresholds: {
@@ -142,7 +142,7 @@ export class OutcomesService {
             eq(eventParticipants.tenantId, actor.tenantId),
             inArray(eventParticipants.attendanceStatus, [...ATTENDED]),
             gte(events.startsAt, new Date(`${from}T00:00:00Z`)),
-            lte(events.startsAt, new Date()),
+            lte(events.startsAt, stampUtc()),
           ),
         );
       const locations = await tx
@@ -194,7 +194,7 @@ export class OutcomesService {
         return rows;
       };
       return {
-        asOf: iso(new Date()),
+        asOf: iso(stampUtc()),
         period,
         note: 'Ranked by turnout: the share of eligible people who took part. Spending never counts.',
         minimumGroupSize: MIN_RANKED_GROUP,
@@ -503,7 +503,7 @@ export class OutcomesService {
 
   /** Relative window start, so the figures move with real time instead of a hard-coded date. */
   private periodStart(period: 'month' | 'quarter' | 'year'): string {
-    const now = new Date();
+    const now = stampUtc();
     const months = period === 'month' ? 1 : period === 'quarter' ? 3 : 12;
     const from = new Date(
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - months, now.getUTCDate()),

@@ -1,4 +1,4 @@
-import { ApiProblem, type CommandResult, type RequestActor } from '@bf/api/core';
+import { ApiProblem, type CommandResult, type RequestActor, stampUtc } from '@bf/api/core';
 import { eventInvitations, eventParticipants, orgUnits, type Tx } from '@bf/api/db';
 import type {
   EmployeeInvitationView,
@@ -63,7 +63,7 @@ export class EventInvitationsService {
 
   private rsvpClosed(inv: InvitationRow): boolean {
     if (inv.status !== 'open') return true;
-    return inv.deadline !== null && inv.deadline.getTime() < Date.now();
+    return inv.deadline !== null && inv.deadline.getTime() < stampUtc().getTime();
   }
 
   async view(tx: Tx, actor: RequestActor, e: EventRow): Promise<EventInvitationView> {
@@ -161,9 +161,9 @@ export class EventInvitationsService {
             collectTravelNeeds: body.collectTravelNeeds,
             status: 'open',
             sentByPersonId: actor.personId,
-            sentAt: inv.sentAt ?? new Date(),
+            sentAt: inv.sentAt ?? stampUtc(),
             closedAt: null,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(eventInvitations.id, inv.id));
         await this.plan.completeSystemTask(tx, e.id, 'invitations', {
@@ -213,7 +213,7 @@ export class EventInvitationsService {
           .returning({ id: eventParticipants.id });
         await tx
           .update(eventInvitations)
-          .set({ remindersSentCount: inv.remindersSentCount + 1, updatedAt: new Date() })
+          .set({ remindersSentCount: inv.remindersSentCount + 1, updatedAt: stampUtc() })
           .where(eq(eventInvitations.id, inv.id));
         await this.support.log(tx, actor, e, 'event.invitation_reminders_sent', ctx, {
           reminded: { from: null, to: reminded.length },
@@ -252,8 +252,8 @@ export class EventInvitationsService {
           .set({
             status: body.status,
             ...(body.deadline ? { deadline: new Date(body.deadline) } : {}),
-            closedAt: body.status === 'closed' ? new Date() : null,
-            updatedAt: new Date(),
+            closedAt: body.status === 'closed' ? stampUtc() : null,
+            updatedAt: stampUtc(),
           })
           .where(eq(eventInvitations.id, inv.id));
         await this.support.log(tx, actor, e, 'event.rsvp_state_changed', ctx, {
@@ -353,7 +353,7 @@ export class EventInvitationsService {
           .set({
             rsvpStatus: decision.value.nextStatus,
             waitlistPosition: decision.value.waitlistPosition,
-            rsvpRespondedAt: new Date(),
+            rsvpRespondedAt: stampUtc(),
           })
           .where(eq(eventParticipants.id, participant.id));
         const promoted =
@@ -430,7 +430,7 @@ export class EventInvitationsService {
         };
         await tx
           .update(eventParticipants)
-          .set({ needs, needsSubmittedAt: new Date(), needsDeletedAt: null })
+          .set({ needs, needsSubmittedAt: stampUtc(), needsDeletedAt: null })
           .where(eq(eventParticipants.id, participant.id));
         // Only the answers kept as "counts" are logged: the answers themselves are personal data.
         await this.support.log(tx, actor, event, 'event.attendee_needs_submitted', ctx, {

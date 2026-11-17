@@ -7,6 +7,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   budgets,
@@ -325,7 +326,7 @@ export class SchedulesService {
             message: body.message ?? null,
             ownerPersonId: actor.personId,
             active: true,
-            nextRunAt: nextRunAt(cadence, new Date()),
+            nextRunAt: nextRunAt(cadence, stampUtc()),
           })
           .returning();
         await this.audit.append(tx, {
@@ -402,8 +403,8 @@ export class SchedulesService {
             message: body.message === undefined ? row.message : body.message,
             active,
             pausedReason: active ? null : row.pausedReason,
-            nextRunAt: active ? nextRunAt(cadence, new Date()) : null,
-            updatedAt: new Date(),
+            nextRunAt: active ? nextRunAt(cadence, stampUtc()) : null,
+            updatedAt: stampUtc(),
           })
           .where(eq(reportSchedules.id, scheduleId))
           .returning();

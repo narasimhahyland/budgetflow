@@ -6,6 +6,7 @@ import {
   PolicyService,
   type CommandResult,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   marketplaceBookings,
@@ -119,7 +120,7 @@ export class MarketplaceService {
           );
         const [row] = await tx
           .update(marketplacePartners)
-          .set({ status, mode: req.mode ?? before.mode, vendorId, updatedAt: new Date() })
+          .set({ status, mode: req.mode ?? before.mode, vendorId, updatedAt: stampUtc() })
           .where(eq(marketplacePartners.id, partnerId))
           .returning();
         await this.audit.append(tx, {
@@ -198,7 +199,7 @@ export class MarketplaceService {
             cancellationTerms: offer.cancellationTerms ?? '',
             deliveryCountries: offer.deliveryCountries ?? [],
             status: offer.withdrawn ? 'withdrawn' : 'available',
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           };
           if (existing) {
             await tx
@@ -236,13 +237,13 @@ export class MarketplaceService {
               quotedCurrency: answer.available ? (answer.currency ?? null) : null,
               declineReason: answer.available ? null : (answer.reason ?? 'Not available'),
               alternatives: answer.alternatives ?? [],
-              respondedAt: new Date(),
-              updatedAt: new Date(),
+              respondedAt: stampUtc(),
+              updatedAt: stampUtc(),
             })
             .where(eq(marketplaceBookings.id, booking.id));
           responses += 1;
         }
-        const syncedAt = new Date();
+        const syncedAt = stampUtc();
         await tx
           .update(marketplacePartners)
           .set({ lastSyncedAt: syncedAt, updatedAt: syncedAt })

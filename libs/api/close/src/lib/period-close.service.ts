@@ -6,6 +6,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   fiscalPeriods,
@@ -392,7 +393,7 @@ export class PeriodCloseService {
         }
         const [updated] = await tx
           .update(fiscalPeriods)
-          .set({ status: next, statusChangedAt: new Date(), statusChangedBy: actor.personId })
+          .set({ status: next, statusChangedAt: stampUtc(), statusChangedBy: actor.personId })
           .where(eq(fiscalPeriods.id, period.id))
           .returning();
         await this.audit.append(tx, {
@@ -530,7 +531,7 @@ export class PeriodCloseService {
           status = unwrap(changePeriodStatus(all, period.id, row.action, row.reason));
           await tx
             .update(fiscalPeriods)
-            .set({ status, statusChangedAt: new Date(), statusChangedBy: actor.personId })
+            .set({ status, statusChangedAt: stampUtc(), statusChangedBy: actor.personId })
             .where(eq(fiscalPeriods.id, period.id));
         }
         const [decided] = await tx
@@ -538,7 +539,7 @@ export class PeriodCloseService {
           .set({
             status: req.decision === 'approve' ? 'approved' : 'declined',
             decidedBy: actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionReason: req.reason,
           })
           .where(eq(periodReopenRequests.id, row.id))
@@ -589,7 +590,7 @@ export class PeriodCloseService {
         const next = unwrap(changePeriodStatus(all, period.id, event, req.reason ?? null));
         const [updated] = await tx
           .update(fiscalPeriods)
-          .set({ status: next, statusChangedAt: new Date(), statusChangedBy: actor.personId })
+          .set({ status: next, statusChangedAt: stampUtc(), statusChangedBy: actor.personId })
           .where(eq(fiscalPeriods.id, period.id))
           .returning();
         await this.audit.append(tx, {

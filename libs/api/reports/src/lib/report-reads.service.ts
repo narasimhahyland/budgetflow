@@ -1,4 +1,4 @@
-import { PolicyService, type RequestActor } from '@bf/api/core';
+import { PolicyService, type RequestActor, stampUtc } from '@bf/api/core';
 import { budgets, fiscalYears, type Tx } from '@bf/api/db';
 import type { ReportFilters } from '@bf/contracts';
 import {
@@ -284,7 +284,7 @@ export class ReportReads {
   ): Promise<ReportDataset> {
     const tenantWide = this.tenantWide(actor);
     const paths = this.scopePaths(actor);
-    const asOf = new Date().toISOString();
+    const asOf = stampUtc().toISOString();
     const fy = await this.fiscalYearWindow(tx, filters.fiscalYearId, today);
     const empty: ReportDataset = {
       budgets: [],

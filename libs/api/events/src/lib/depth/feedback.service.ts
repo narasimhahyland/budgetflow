@@ -1,4 +1,4 @@
-import { ApiProblem, type CommandResult, type RequestActor } from '@bf/api/core';
+import { ApiProblem, type CommandResult, type RequestActor, stampUtc } from '@bf/api/core';
 import {
   eventGalleryPhotos,
   eventSurveyResponses,
@@ -228,12 +228,12 @@ export class EventFeedbackService {
             ...(body.status ? { status: body.status } : {}),
             ...(opening
               ? {
-                  sentAt: survey.sentAt ?? new Date(),
-                  closesAt: new Date(Date.now() + 7 * 86_400_000),
+                  sentAt: survey.sentAt ?? stampUtc(),
+                  closesAt: new Date(stampUtc().getTime() + 7 * 86_400_000),
                 }
               : {}),
-            ...(body.status === 'closed' ? { closedAt: new Date() } : {}),
-            updatedAt: new Date(),
+            ...(body.status === 'closed' ? { closedAt: stampUtc() } : {}),
+            updatedAt: stampUtc(),
           })
           .where(eq(eventSurveys.id, survey.id));
         if (opening)
@@ -454,7 +454,7 @@ export class EventFeedbackService {
             removalReason: body.action === 'restore' ? null : (body.reason ?? null),
             removalRequestedByPersonId:
               body.action === 'remove_me' ? actor.personId : photo.removalRequestedByPersonId,
-            updatedAt: new Date(),
+            updatedAt: stampUtc(),
           })
           .where(eq(eventGalleryPhotos.id, photo.id));
         await this.support.log(

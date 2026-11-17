@@ -7,6 +7,7 @@ import {
   PolicyService,
   unwrap,
   type RequestActor,
+  stampUtc,
 } from '@bf/api/core';
 import {
   budgets,
@@ -298,7 +299,7 @@ export class YearEndService {
             lapseMinor: outcome.lapseMinor,
             approvedCarryMinor: outcome.carryMinor,
             decidedBy: actor.personId,
-            decidedAt: new Date(),
+            decidedAt: stampUtc(),
             decisionReason: req.reason,
           })
           .where(eq(yearEndRunLines.id, line.id))
@@ -401,7 +402,7 @@ export class YearEndService {
             .set({
               status: 'executed',
               journalIds: journals.journalIds,
-              executedAt: new Date(),
+              executedAt: stampUtc(),
             })
             .where(eq(yearEndRunLines.id, line.id));
         }
@@ -410,7 +411,7 @@ export class YearEndService {
           .set({
             status: 'completed',
             dryRun: false,
-            executedAt: new Date(),
+            executedAt: stampUtc(),
             executedBy: actor.personId,
             error: null,
           })
@@ -747,7 +748,7 @@ export class YearEndService {
       );
       await tx
         .update(commitments)
-        .set({ status: 'carried_forward', updatedAt: new Date() })
+        .set({ status: 'carried_forward', updatedAt: stampUtc() })
         .where(eq(commitments.id, c.id));
       const [twin] = await tx
         .insert(commitments)
