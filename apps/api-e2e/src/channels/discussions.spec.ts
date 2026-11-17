@@ -133,9 +133,10 @@ test.describe('discussion, mentions and follow', () => {
       'FORBIDDEN',
     );
 
-    // Age the comment past the window.
+    // Age the comment past the window, from its own stamp: the API measures the window on the
+    // stack's clock (pinned under FIXED_NOW), which the database's real now() is not.
     await asOwner((c) =>
-      c.query(`update comments set created_at = now() - interval '16 minutes' where id = $1`, [
+      c.query(`update comments set created_at = created_at - interval '16 minutes' where id = $1`, [
         posted.id,
       ]),
     );
