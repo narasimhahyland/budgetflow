@@ -397,18 +397,22 @@ test.describe('nightly AI scans', () => {
       'every attempt is in the query log',
     ).toBe(4);
 
-    // Retries backed off: the attempts span at least 2 + 4 + 8 seconds.
-    const [span] = await asOwner(
+    // Retries backed off: one execution job ran every attempt, and it took at least the minimum
+    // backoff of 2 + 4 + 8 s. Measured on pg-boss's own timestamps, which stay on the real clock
+    // (application stamps follow the pinned test clock).
+    const jobs = await asOwner(
       async (c) =>
         (
-          await c.query<{ seconds: number }>(
-            `select extract(epoch from max(occurred_at) - min(occurred_at))::float as seconds
-               from ai_query_log where fact_refs @> $1::jsonb`,
-            [JSON.stringify([{ id: probe.id }])],
+          await c.query<{ state: string; seconds: number }>(
+            `select state, extract(epoch from coalesce(completed_on, now()) - created_on)::float as seconds
+               from pgboss.job where name = 'ai.scan.execute' and singleton_key = $1`,
+            [queued.id],
           )
         ).rows,
     );
-    expect(span.seconds).toBeGreaterThanOrEqual(12);
+    expect(jobs, 'one execution job for the run, despite the redeliveries').toHaveLength(1);
+    expect(jobs[0].state).toBe('failed');
+    expect(jobs[0].seconds).toBeGreaterThanOrEqual(12);
 
     // The job itself sits in the worker's dead-letter queue.
     await expect
